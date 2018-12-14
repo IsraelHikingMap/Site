@@ -117,6 +117,7 @@ import { ClusterOverlayComponent } from "./components/overlays/cluster-overlay.c
 import { GpsLocationOverlayComponent } from "./components/overlays/gps-location-overlay.component";
 import { ClearableOverlayComponent } from "./components/overlays/clearable-overlay.component";
 import { MissingPartOverlayComponent } from "./components/overlays/missing-part-overlay.component";
+import { PublicPoiHoverOverlayComponent } from "./components/overlays/public-poi-hover-overlay.component";
 import { SearchComponent } from "./components/search.component";
 import { InfoComponent } from "./components/info.component";
 import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.component";
@@ -257,6 +258,7 @@ export function getWindow() { return window; }
         GpsLocationOverlayComponent,
         ClearableOverlayComponent,
         MissingPartOverlayComponent,
+        PublicPoiHoverOverlayComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,
@@ -349,6 +351,7 @@ export function getWindow() { return window; }
         GpsLocationOverlayComponent,
         ClearableOverlayComponent,
         MissingPartOverlayComponent,
+        PublicPoiHoverOverlayComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,

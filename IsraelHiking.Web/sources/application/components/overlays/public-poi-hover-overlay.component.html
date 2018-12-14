@@ -1,0 +1,11 @@
+﻿<aol-overlay *ngIf="isOpen">
+    <aol-coordinate [x]="latlng.lng"
+                    [y]="latlng.lat"
+                    [srid]="'EPSG:4326'">
+    </aol-coordinate>
+    <aol-content>
+        <div class="marker-popup" [dir]="resources.direction">
+            <div [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</div>
+        </div>
+    </aol-content>
+</aol-overlay>

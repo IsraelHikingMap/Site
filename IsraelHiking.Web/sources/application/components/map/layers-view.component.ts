@@ -37,6 +37,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     public clusterLatlng: LatLngAlt;
     public clusterPoints: PointOfInterest[];
 
+    public isHoverOpen: boolean;
+    public hoverLatlng: LatLngAlt;
+    public hoverTitle: string;
+
     @select((state: ApplicationState) => state.layersState.overlays)
     public overlays: Observable<Overlay[]>;
 
@@ -112,91 +116,103 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
 
     public ngAfterViewInit() {
         this.poiLayers.forEach(l => (l.instance as layer.Vector).setStyle((feature) => this.createClusterIcon(feature)));
-        this.selectedPoi$.subscribe((poi) => {
-            if (this.selectedPoiGeoJsonLayer == null) {
-                return;
-            }
-            let vectorSource = new source.Vector({
-                features: []
-            });
-            if (poi == null) {
-                this.selectedPoiGeoJsonLayer.instance.setSource(vectorSource);
-                return;
-            }
-            if (this.selectedPoiFeature != null) {
-                this.selectedPoiFeature.instance.setStyle(this.getPoiIconStyle(poi.icon, poi.iconColor, poi.hasExtraData));
-            }
-            vectorSource = new source.Vector({
-                features: new format.GeoJSON().readFeatures(poi.featureCollection,
-                    { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" })
-            });
-            this.selectedPoiGeoJsonLayer.instance.setSource(vectorSource);
-        });
-        this.host.instance.on("pointermove",
-            (event: MapBrowserEvent) => {
-                let featuresAtPixel = (this.host.instance.getFeaturesAtPixel(event.pixel) || []) as Feature[];
-                let hit = featuresAtPixel.length !== 0;
-                (event.map.getViewport() as HTMLElement).style.cursor = hit ? "pointer" : "";
-                if (!hit) {
-                    return;
-                }
-                if (featuresAtPixel[0].get("features") && featuresAtPixel[0].get("features").length === 1) {
-                    // HM TODO: hover on single feature - show title
-                }
-            });
-        this.host.instance.on("singleclick",
-            (event: MapBrowserEvent) => {
-                let featuresAtPixel = event.map.getFeaturesAtPixel(event.pixel) || [];
-                if (featuresAtPixel.length === 0) {
-                    this.isClusterOpen = false;
-                    return;
-                }
-                if ((featuresAtPixel[0] as Feature).getId() != null &&
-                    (featuresAtPixel[0] as Feature).getId().toString().startsWith("selected_")) {
-                    // HM TODO: toggle public poi?
-                    let sourceAndId = this.getSourceAndId((featuresAtPixel[0] as Feature).getId().toString().replace("selected_", ""));
-                    this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
-                        { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
-                    return;
-                }
 
-                let features = (featuresAtPixel[0].get("features") || []);
-                if (features.length === 0) {
-                    this.isClusterOpen = false;
-                    return;
-                }
-                if (features.length === 1) {
-                    this.isClusterOpen = false;
-                    let sourceAndId = this.getSourceAndId(features[0].getId().toString());
-                    this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
-                        { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
-                    return;
-                }
-                let coordinates = (featuresAtPixel[0].getGeometry() as geom.Point).getCoordinates();
-                let latlng = SpatialService.fromViewCoordinate(coordinates);
-                if (this.isClusterOpen &&
-                    latlng.lat === this.clusterLatlng.lat &&
-                    this.clusterLatlng.lng === latlng.lng) {
-                    this.isClusterOpen = false;
-                    this.clusterLatlng = null;
-                    this.clusterPoints = [];
-                    return;
-                }
-                this.clusterLatlng = latlng;
-                this.clusterPoints = features.filter((_, index) => (index < LayersViewComponent.MAX_MENU_POINTS_IN_CLUSTER))
-                    .map(f => {
-                        let properties = f.getProperties();
-                        let sourceAndId = this.getSourceAndId(f.getId().toString());
-                        return {
-                            icon: properties.icon,
-                            iconColor: properties.iconColor,
-                            title: properties.name,
-                            id: sourceAndId.id,
-                            source: sourceAndId.source
-                        };
-                    });
-                this.isClusterOpen = true;
+        this.selectedPoi$.subscribe((poi) => this.onSelectedPoiChanged(poi));
+
+        this.host.instance.on("pointermove", (event: MapBrowserEvent) => this.onPointerMove(event));
+
+        this.host.instance.on("singleclick", (event: MapBrowserEvent) => this.onSingleClick(event));
+    }
+
+    private onSelectedPoiChanged = (poi: PointOfInterestExtended) => {
+        if (this.selectedPoiGeoJsonLayer == null) {
+            return;
+        }
+        let vectorSource = new source.Vector({
+            features: []
+        });
+        if (poi == null) {
+            this.selectedPoiGeoJsonLayer.instance.setSource(vectorSource);
+            return;
+        }
+        if (this.selectedPoiFeature != null) {
+            this.selectedPoiFeature.instance.setStyle(this.getPoiIconStyle(poi.icon, poi.iconColor, poi.hasExtraData));
+        }
+        vectorSource = new source.Vector({
+            features: new format.GeoJSON().readFeatures(poi.featureCollection,
+                { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" })
+        });
+        this.selectedPoiGeoJsonLayer.instance.setSource(vectorSource);
+    }
+
+    private onPointerMove = (event: MapBrowserEvent) => {
+        let featuresAtPixel = (this.host.instance.getFeaturesAtPixel(event.pixel) || []) as Feature[];
+        let hit = featuresAtPixel.length !== 0;
+        (event.map.getViewport() as HTMLElement).style.cursor = hit ? "pointer" : "";
+        if (!hit) {
+            this.isHoverOpen = false;
+            return;
+        }
+        if (featuresAtPixel[0].get("features") && featuresAtPixel[0].get("features").length === 1) {
+            let feature = featuresAtPixel[0].get("features")[0] as Feature;
+            this.hoverLatlng = SpatialService.fromViewCoordinate((feature.getGeometry() as geom.Point).getCoordinates());
+            this.isHoverOpen = true;
+            console.log(feature.getProperties());
+            this.hoverTitle = feature.getProperties().name;
+        }
+    }
+
+    private onSingleClick = (event: MapBrowserEvent) => {
+        let featuresAtPixel = event.map.getFeaturesAtPixel(event.pixel) || [];
+        if (featuresAtPixel.length === 0) {
+            this.isClusterOpen = false;
+            return;
+        }
+        if ((featuresAtPixel[0] as Feature).getId() != null &&
+            (featuresAtPixel[0] as Feature).getId().toString().startsWith("selected_")) {
+            // HM TODO: toggle public poi?
+            let sourceAndId = this.getSourceAndId((featuresAtPixel[0] as Feature).getId().toString().replace("selected_", ""));
+            this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
+                { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+            return;
+        }
+
+        let features = (featuresAtPixel[0].get("features") || []);
+        if (features.length === 0) {
+            this.isClusterOpen = false;
+            return;
+        }
+        if (features.length === 1) {
+            this.isClusterOpen = false;
+            let sourceAndId = this.getSourceAndId(features[0].getId().toString());
+            this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
+                { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+            return;
+        }
+        let coordinates = (featuresAtPixel[0].getGeometry() as geom.Point).getCoordinates();
+        let latlng = SpatialService.fromViewCoordinate(coordinates);
+        if (this.isClusterOpen &&
+            latlng.lat === this.clusterLatlng.lat &&
+            this.clusterLatlng.lng === latlng.lng) {
+            this.isClusterOpen = false;
+            this.clusterLatlng = null;
+            this.clusterPoints = [];
+            return;
+        }
+        this.clusterLatlng = latlng;
+        this.clusterPoints = features.filter((_, index) => (index < LayersViewComponent.MAX_MENU_POINTS_IN_CLUSTER))
+            .map(f => {
+                let properties = f.getProperties();
+                let sourceAndId = this.getSourceAndId(f.getId().toString());
+                return {
+                    icon: properties.icon,
+                    iconColor: properties.iconColor,
+                    title: properties.name,
+                    id: sourceAndId.id,
+                    source: sourceAndId.source
+                };
             });
+        this.isClusterOpen = true;
     }
 
     public getSelectedPoiId(poi: PointOfInterest) {
