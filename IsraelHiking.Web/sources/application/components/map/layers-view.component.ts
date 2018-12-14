@@ -21,6 +21,7 @@ import { LatLngAlt, ApplicationState, Overlay, PointOfInterest, PointOfInterestE
 })
 export class LayersViewComponent extends BaseMapComponent implements OnInit, AfterViewInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 7;
+    private static readonly SELECTED = "selected_";
 
     @ViewChildren("cluster")
     public poiLayers: QueryList<LayerVectorComponent>;
@@ -103,7 +104,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                 let features = this.categoriesLayerFactory.get(categoriesType).pointsOfInterest.map(p => {
                     let feature = new Feature(new geom.Point(SpatialService.toViewCoordinate(p.location)));
                     feature.setId(p.source + "__" + p.id);
-                    feature.setProperties({ icon: p.icon, iconColor: p.iconColor, name: p.title, hasExtraData: p.hasExtraData });
+                    feature.setProperties({ icon: p.icon, iconColor: p.iconColor, title: p.title, hasExtraData: p.hasExtraData });
                     return feature;
                 });
                 if (index < this.poiLayers.toArray().length) {
@@ -137,6 +138,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         }
         if (this.selectedPoiFeature != null) {
             this.selectedPoiFeature.instance.setStyle(this.getPoiIconStyle(poi.icon, poi.iconColor, poi.hasExtraData));
+            this.selectedPoiFeature.instance.setProperties({title: poi.title });
         }
         vectorSource = new source.Vector({
             features: new format.GeoJSON().readFeatures(poi.featureCollection,
@@ -153,13 +155,22 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
             this.isHoverOpen = false;
             return;
         }
-        if (featuresAtPixel[0].get("features") && featuresAtPixel[0].get("features").length === 1) {
-            let feature = featuresAtPixel[0].get("features")[0] as Feature;
+        let feature = featuresAtPixel[0];
+        if (feature.get("features") && feature.get("features").length === 1) {
+            feature = feature.get("features")[0] as Feature;
             this.hoverLatlng = SpatialService.fromViewCoordinate((feature.getGeometry() as geom.Point).getCoordinates());
             this.isHoverOpen = true;
-            console.log(feature.getProperties());
-            this.hoverTitle = feature.getProperties().name;
+            this.hoverTitle = feature.getProperties().title;
+            return;
         }
+        
+        if (feature.getId() && feature.getId().toString().startsWith(LayersViewComponent.SELECTED)) {
+            this.hoverLatlng = SpatialService.fromViewCoordinate((feature.getGeometry() as geom.Point).getCoordinates());
+            this.isHoverOpen = true;
+            this.hoverTitle = feature.getProperties().title;
+            return;
+        }
+        this.isHoverOpen = false;
     }
 
     private onSingleClick = (event: MapBrowserEvent) => {
@@ -169,9 +180,9 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
             return;
         }
         if ((featuresAtPixel[0] as Feature).getId() != null &&
-            (featuresAtPixel[0] as Feature).getId().toString().startsWith("selected_")) {
+            (featuresAtPixel[0] as Feature).getId().toString().startsWith(LayersViewComponent.SELECTED)) {
             // HM TODO: toggle public poi?
-            let sourceAndId = this.getSourceAndId((featuresAtPixel[0] as Feature).getId().toString().replace("selected_", ""));
+            let sourceAndId = this.getSourceAndId((featuresAtPixel[0] as Feature).getId().toString().replace(LayersViewComponent.SELECTED, ""));
             this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
                 { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
             return;
@@ -207,7 +218,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                 return {
                     icon: properties.icon,
                     iconColor: properties.iconColor,
-                    title: properties.name,
+                    title: properties.title,
                     id: sourceAndId.id,
                     source: sourceAndId.source
                 };
@@ -219,7 +230,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         if (poi == null) {
             return "invalid";
         }
-        return `selected_${poi.source}__${poi.id}`;
+        return `${LayersViewComponent.SELECTED}${poi.source}__${poi.id}`;
     }
 
     public getSelectedPoiX(poi: PointOfInterest) {
