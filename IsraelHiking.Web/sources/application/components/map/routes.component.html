@@ -34,13 +34,24 @@
                         <aol-coordinate [x]="segment.routePoint.lng" [y]="segment.routePoint.lat" [srid]="'EPSG:4326'"></aol-coordinate>
                     </aol-geometry-point>
                     <aol-style>
-                        <aol-style-icon [anchor]="[0.75, 0.5]"
+                        <aol-style-icon *ngIf="idx !== 0 && !isLast(idx, route)"
+                                        [anchor]="[0.75, 0.5]"
                                         [rotateWithView]="true"
                                         [rotation]="getSegmentRotation(segment)"
                                         [src]="'content/arrow.png'"
                                         [color]="route.color"
                                         [opacity]="route.opacity">
                         </aol-style-icon>
+                        <aol-style-circle *ngIf="idx === 0 || isLast(idx, route)" [radius]="7">
+                            <aol-style-fill [color]="getRouteMarkerColor(idx, route, false)"></aol-style-fill>
+                            <aol-style-stroke [color]="getRouteMarkerColor(idx, route, true)" [width]="3"></aol-style-stroke>
+                        </aol-style-circle>
+                        <aol-style-text *ngIf="idx === 0" [text]="resources.getCharacterForIcon('icon-play')" font="normal 8px IsraelHikingMap">
+                            <aol-style-fill [color]="'white'"></aol-style-fill>
+                        </aol-style-text>
+                        <aol-style-text *ngIf="idx !== 0 && isLast(idx, route)" [text]="resources.getCharacterForIcon('icon-stop')" font="normal 8px IsraelHikingMap">
+                            <aol-style-fill [color]="'white'"></aol-style-fill>
+                        </aol-style-text>
                     </aol-style>
                 </aol-feature>
             </div>
