@@ -25,6 +25,6 @@ export class GetTextCatalogService {
 
     public async loadRemote(url: string): Promise<any> {
         let response = await this.httpClient.get(url).toPromise();
-        this.strings = response[this.getCurrentLanguage().replace("-", "_")];
+        this.strings = response;
     }
 }
