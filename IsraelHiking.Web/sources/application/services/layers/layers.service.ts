@@ -83,6 +83,19 @@ export class LayersService {
         return this.baseLayers.find(bl => this.compareKeys(bl.key, this.selectedBaseLayerKey)) || this.baseLayers[0];
     }
 
+    public getSelectedBaseLayerAddress() {
+        let selectedBaseLayer = this.getSelectedBaseLayer();
+        let address = selectedBaseLayer.address;
+        if (selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP || selectedBaseLayer.key === LayersService.ISRAEL_MTB_MAP) {
+            address = this.getTileAddressForCurrentLanguage(address);
+        }
+        return address;
+    }
+
+    private getTileAddressForCurrentLanguage(addressPostfix: string): string {
+        return Urls.baseTilesAddress + this.resourcesService.currentLanguage.tilesFolder + addressPostfix;
+    }
+
     private getUserLayers = async (): Promise<any> => {
         if (!this.authorizationService.isLoggedIn()) {
             return;

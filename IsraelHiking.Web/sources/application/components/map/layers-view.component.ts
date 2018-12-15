@@ -68,12 +68,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     }
 
     public getBaseLayerUrl() {
-        let selectedBaseLayer = this.layersService.getSelectedBaseLayer();
-        let address = this.getFullAddress(selectedBaseLayer.address);
-        if (selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP || selectedBaseLayer.key === LayersService.ISRAEL_MTB_MAP) {
-            address = this.getTileAddressForCurrentLanguage(address);
-        }
-        return address;
+        let address = this.layersService.getSelectedBaseLayerAddress();
+        return this.getFullAddress(address);
     }
 
     public getFullAddress(address: string) {
@@ -86,10 +82,6 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
 
     public getBaseLayerMaxZoom() {
         return this.layersService.getSelectedBaseLayer().maxZoom;
-    }
-
-    private getTileAddressForCurrentLanguage(addressPostfix: string): string {
-        return Urls.baseTilesAddress + this.resources.currentLanguage.tilesFolder + addressPostfix;
     }
 
     public isVisible(categoriesType: CategoriesType) {
