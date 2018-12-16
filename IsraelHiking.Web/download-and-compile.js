@@ -15,7 +15,7 @@ https.get("https://translate.zanata.org/rest/file/translation/IsraelHiking/Main/
             po2json.parseFile(englishFilePath,
                 { pretty: true, format: "mf" },
                 (_, json) => {
-                    fs.writeFile(englishFilePath.replace(".po", ".json"), JSON.stringify(json, null, 4));
+                    fs.writeFileSync(englishFilePath.replace(".po", ".json"), JSON.stringify(json, null, 4));
                     console.log("Finished English translation compilation to JSON");
                 });
         });
@@ -26,7 +26,7 @@ https.get("https://translate.zanata.org/rest/file/translation/IsraelHiking/Main/
                 po2json.parseFile(hebrewFilePath,
                     { pretty: true, format: "mf" },
                     (_, json) => {
-                        fs.writeFile(hebrewFilePath.replace(".po", ".json"), JSON.stringify(json, null, 4));
+                        fs.writeFileSync(hebrewFilePath.replace(".po", ".json"), JSON.stringify(json, null, 4));
                         console.log("Finished Hebrew translation compilation to JSON");
                     });
             });
