@@ -31,7 +31,7 @@ describe("GetTextCatalogService", () => {
             expect(service.getString("word")).toBe("word's translation");
         });
 
-        mockBackend.match(() => true)[0].flush({ he: { "word": "word's translation" } });
+        mockBackend.match(() => true)[0].flush({ "word": "word's translation" });
         return promise;
     })));
 
@@ -44,7 +44,7 @@ describe("GetTextCatalogService", () => {
             expect(service.getString("word")).toBe("word");
         });
 
-        mockBackend.match(() => true)[0].flush({ he: {} });
+        mockBackend.match(() => true)[0].flush({});
         return promise;
     })));
 });
