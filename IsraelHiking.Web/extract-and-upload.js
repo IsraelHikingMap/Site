@@ -51,5 +51,6 @@ request({
         return console.error("Upload failed: ", err);
     }
     console.log("Upload successful! opening browser so you can start translating :-)");
-    opn("https://translate.zanata.org/iteration/view/IsraelHiking/Main/languages/he");
+    opn("https://translate.zanata.org/webtrans/translate?project=IsraelHiking&iteration=Main&localeId=en-US&locale=en-US#view:doc;doc:IsraelHiking;untranslated:show;fuzzy:show;rejected:show");
+    opn("https://translate.zanata.org/webtrans/translate?project=IsraelHiking&iteration=Main&localeId=he&locale=he#view:doc;doc:IsraelHiking;untranslated:show;fuzzy:show;rejected:show");
 });
