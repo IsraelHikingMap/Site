@@ -342,6 +342,7 @@ export class ResourcesService {
     public legendWaterWell: string;
     public legendCistern: string;
     public legendWaterfall: string;
+    public legendWaterTank: string;
     public legendWaterTower: string;
     public legendRoads: string;
     public legendMotorway: string;
@@ -386,7 +387,6 @@ export class ResourcesService {
     public legendMosque: string;
     public legendHolyPlace: string;
     public legendMemorial: string;
-    public legendMonument: string;
     public legendObservationTower: string;
     public legendAntenna: string;
     public legendPowerLine: string;
@@ -394,9 +394,7 @@ export class ResourcesService {
     public legendBarriers: string;
     public legendGate: string;
     public legendClosedGate: string;
-    public legendStile: string;
     public legendBlock: string;
-    public legendLiftGate: string;
     public legendCattleGrid: string;
     public legendFence: string;
     public legendWall: string;
@@ -405,6 +403,7 @@ export class ResourcesService {
     public legendBikePark: string;
     public legendNatureReserveNationalPark: string;
     public legendMilitaryArea: string;
+    public legendMilitaryTraining: string;
     public legendAreaA: string;
     public legendAreaB: string;
     public legendInternationalBorder: string;
@@ -837,6 +836,7 @@ export class ResourcesService {
         this.legendWaterWell = this.gettextCatalog.getString("Water Well");
         this.legendCistern = this.gettextCatalog.getString("Cistern");
         this.legendWaterfall = this.gettextCatalog.getString("Waterfall");
+        this.legendWaterTank = this.gettextCatalog.getString("Water Tank");
         this.legendWaterTower = this.gettextCatalog.getString("Water Tower");
         this.legendRoads = this.gettextCatalog.getString("Roads");
         this.legendMotorway = this.gettextCatalog.getString("Motorway");
@@ -880,7 +880,6 @@ export class ResourcesService {
         this.legendMosque = this.gettextCatalog.getString("Mosque");
         this.legendHolyPlace = this.gettextCatalog.getString("Holy Place");
         this.legendMemorial = this.gettextCatalog.getString("Memorial");
-        this.legendMonument = this.gettextCatalog.getString("Monument");
         this.legendObservationTower = this.gettextCatalog.getString("Observation Tower");
         this.legendAntenna = this.gettextCatalog.getString("Antenna");
         this.legendPowerLine = this.gettextCatalog.getString("Power Line");
@@ -888,9 +887,7 @@ export class ResourcesService {
         this.legendBarriers = this.gettextCatalog.getString("Barriers");
         this.legendGate = this.gettextCatalog.getString("Gate");
         this.legendClosedGate = this.gettextCatalog.getString("Closed Gate");
-        this.legendStile = this.gettextCatalog.getString("Stile");
         this.legendBlock = this.gettextCatalog.getString("Block");
-        this.legendLiftGate = this.gettextCatalog.getString("Lift Gate");
         this.legendCattleGrid = this.gettextCatalog.getString("Cattle Grid");
         this.legendFence = this.gettextCatalog.getString("Fence");
         this.legendWall = this.gettextCatalog.getString("Wall");
@@ -899,6 +896,7 @@ export class ResourcesService {
         this.legendBikePark = this.gettextCatalog.getString("Bike Park");
         this.legendNatureReserveNationalPark = this.gettextCatalog.getString("Nature Reserve, National Park");
         this.legendMilitaryArea = this.gettextCatalog.getString("Military Area");
+        this.legendMilitaryTraining = this.gettextCatalog.getString("Military Training");
         this.legendAreaA = this.gettextCatalog.getString("Area A");
         this.legendAreaB = this.gettextCatalog.getString("Area B");
         this.legendInternationalBorder = this.gettextCatalog.getString("International Border");

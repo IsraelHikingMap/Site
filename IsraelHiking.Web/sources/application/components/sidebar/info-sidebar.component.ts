@@ -76,7 +76,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                 items: [
                     {
                         title: this.resources.legendRedMarkedTrail,
-                        latlng: { lat: 32.858, lng: 35.150 },
+                        latlng: { lat: 33.288602, lng: 35.74152914 },
                         zoom: 15,
                         type: "Way",
                         osmTags: ["colour=red"],
@@ -227,7 +227,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: { lat: 32.5967000, lng: 35.135100 },
                         zoom: 16,
                         type: "Way",
-                        osmTags: ["mtb:scale=2, mtb:scale=3"],
+                        osmTags: ["mtb:scale=2", "mtb:scale=3"],
                         link: LegendItemComponent.OSM_KEY_LINK
                     },
                     {
@@ -235,7 +235,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: { lat: 33.198423, lng: 35.5491829 },
                         zoom: 16,
                         type: "Way",
-                        osmTags: ["mtb:scale=4, mtb:scale=5"],
+                        osmTags: ["mtb:scale=4", "mtb:scale=5"],
                         link: LegendItemComponent.OSM_KEY_LINK
                     }
                 ]
@@ -249,7 +249,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: { lat: 30.6234487, lng: 34.906955 },
                         zoom: 16,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["network=lcn", "(relation tag)"],
                         link: ""
                     },
                     {
@@ -257,7 +257,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: { lat: 32.099950, lng: 34.8055512 },
                         zoom: 16,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["network=rcn", "(relation tag)"],
                         link: ""
                     },
                     {
@@ -265,7 +265,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: { lat: 29.982344, lng: 35.0060463 },
                         zoom: 16,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["network=ncn", "(relation tag)"],
                         link: ""
                     }
                 ]
@@ -308,7 +308,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendPath,
-                        latlng: { lat: 31.145890, lng: 34.5702167 },
+                        latlng: { lat: 29.790, lng: 34.954 },
                         zoom: 16,
                         type: "Way",
                         osmTags: ["highway=path"],
@@ -319,7 +319,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: { lat: 30.5360, lng: 34.781 },
                         zoom: 16,
                         type: "Way",
-                        osmTags: ["highway=footway", "bicycle=no"],
+                        osmTags: ["highway=footway", " highway=path with bicycle=no"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
@@ -327,7 +327,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: { lat: 31.3422, lng: 34.6253 },
                         zoom: 16,
                         type: "Way",
-                        osmTags: ["highway=cycleway", "bicycle=designated"],
+                        osmTags: ["highway=cycleway", "or highway=path with bicycle=designated"],
                         link: "https://wiki.openstreetmap.org/wiki/Bicycle"
                     },
                     {
@@ -357,7 +357,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: { lat: 30.463327, lng: 34.8630524 },
                         zoom: 16,
                         type: "Way",
-                        osmTags: ["waterway=stream", "intermittent=yes"],
+                        osmTags: ["intermittent=yes", "waterway=stream"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
@@ -381,7 +381,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: { lat: 31.7849, lng: 34.8694 },
                         zoom: 13,
                         type: "POI",
-                        osmTags: ["water=reservoir", "natural=water", "intermittent=yes"],
+                        osmTags: ["intermittent=yes", "water=reservoir", "natural=water"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
@@ -394,10 +394,10 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendDryRiverbed,
-                        latlng: { lat: 30.3726, lng: 34.8351 },
+                        latlng: { lat: 31.24348, lng: 34.833312 },
                         zoom: 15,
                         type: "POI",
-                        osmTags: ["waterway=riverbank", "intermittent=yes"],
+                        osmTags: ["intermittent=yes", "waterway=riverbank"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
@@ -441,8 +441,16 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
-                        title: this.resources.legendWaterTower,
+                        title: this.resources.legendWaterTank,
                         latlng: { lat: 33.0754925, lng: 35.1646104 },
+                        zoom: 16,
+                        type: "POI",
+                        osmTags: ["man_made=storage_tank", "content=water"],
+                        link: LegendItemComponent.OSM_TAG_LINK
+                    },
+                    {
+                        title: this.resources.legendWaterTower,
+                        latlng: { lat: 31.8507664, lng: 34.8740250 },
                         zoom: 16,
                         type: "POI",
                         osmTags: ["man_made=water_tower"],
@@ -473,23 +481,23 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     {
                         title: this.resources.legendPrimary,
                         latlng: { lat: 31.7449610, lng: 34.861808 },
-                        zoom: 13,
+                        zoom: 14,
                         type: "Way",
                         osmTags: ["hihgway=primary"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
                         title: this.resources.legendSecondary,
-                        latlng: { lat: 31.7421349, lng: 34.720887 },
-                        zoom: 13,
+                        latlng: { lat: 31.7422, lng: 34.7209 },
+                        zoom: 14,
                         type: "Way",
                         osmTags: ["hihgway=secondary"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
                         title: this.resources.legendTertiary,
-                        latlng: { lat: 31.557, lng: 34.626 },
-                        zoom: 15,
+                        latlng: { lat: 29.786839, lng: 35.002484 },
+                        zoom: 16,
                         type: "Way",
                         osmTags: ["hihgway=tertiary"],
                         link: LegendItemComponent.OSM_TAG_LINK
@@ -628,7 +636,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendAttraction,
-                        latlng: { lat: 32.8644745, lng: 35.7402285 },
+                        latlng: { lat: 31.83382, lng: 34.865947 },
                         zoom: 16,
                         type: "POI",
                         osmTags: ["tourism=attraction"],
@@ -644,7 +652,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendSynagogue,
-                        latlng: { lat: 31.7766, lng: 35.2343 },
+                        latlng: { lat: 31.765309, lng: 35.211828 },
                         zoom: 16,
                         type: "POI",
                         osmTags: ["amenity=place_of_worship", "religion=jewish"],
@@ -668,10 +676,10 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendHolyPlace,
-                        latlng: { lat: 32.814602, lng: 34.9871233 },
+                        latlng: { lat: 32.697452, lng: 35.016088 },
                         zoom: 16,
                         type: "POI",
-                        osmTags: ["amenity=place_of_worship", "religion=bahai"],
+                        osmTags: ["amenity=place_of_worship", "religion=..."],
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
@@ -680,14 +688,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         type: "POI",
                         osmTags: ["historic=memorial"],
-                        link: LegendItemComponent.OSM_TAG_LINK
-                    },
-                    {
-                        title: this.resources.legendMonument,
-                        latlng: { lat: 31.4608616, lng: 34.5003406 },
-                        zoom: 16,
-                        type: "POI",
-                        osmTags: ["historic=monument"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
@@ -713,14 +713,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         type: "Way",
                         osmTags: ["power=line"],
                         link: LegendItemComponent.OSM_TAG_LINK
-                    },
-                    {
-                        title: this.resources.legendPlayground,
-                        latlng: { lat: 31.9028, lng: 34.8233 },
-                        zoom: 16,
-                        type: "POI",
-                        osmTags: ["leisure=playground"],
-                        link: LegendItemComponent.OSM_TAG_LINK
                     }
                 ]
             },
@@ -745,27 +737,11 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
-                        title: this.resources.legendStile,
-                        latlng: { lat: 33.015421, lng: 35.2032667 },
-                        zoom: 16,
-                        type: "POI",
-                        osmTags: ["barrier=stile"],
-                        link: LegendItemComponent.OSM_TAG_LINK
-                    },
-                    {
                         title: this.resources.legendBlock,
                         latlng: { lat: 30.5730456, lng: 35.0763874 },
                         zoom: 16,
                         type: "POI",
                         osmTags: ["barrier=block"],
-                        link: LegendItemComponent.OSM_TAG_LINK
-                    },
-                    {
-                        title: this.resources.legendLiftGate,
-                        latlng: { lat: 31.1628851, lng: 35.3668841 },
-                        zoom: 16,
-                        type: "POI",
-                        osmTags: ["barrier=lift_gate"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
@@ -816,7 +792,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendNatureReserveNationalPark,
-                        latlng: { lat: 30.918757, lng: 34.7706127 },
+                        latlng: { lat: 31.582219, lng: 34.590261 },
                         zoom: 15,
                         type: "Way",
                         osmTags: ["boundary=protected_area"],
@@ -824,10 +800,18 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendMilitaryArea,
-                        latlng: { lat: 31.212850, lng: 34.6078000 },
+                        latlng: { lat: 31.214912, lng: 34.65281 },
                         zoom: 16,
                         type: "Way",
                         osmTags: ["landuse=military"],
+                        link: LegendItemComponent.OSM_TAG_LINK
+                    },
+                    {
+                        title: this.resources.legendMilitaryTraining,
+                        latlng: { lat: 31.203661, lng: 34.650015 },
+                        zoom: 16,
+                        type: "Way",
+                        osmTags: ["landuse=military", "military=training_area"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
@@ -878,16 +862,16 @@ export class InfoSidebarComponent extends BaseMapComponent {
                 items: [
                     {
                         title: this.resources.legendBikeShop,
-                        latlng: { lat: 32.103655, lng: 34.8643425 },
-                        zoom: 14,
+                        latlng: { lat: 31.869133, lng: 34.821149 },
+                        zoom: 16,
                         type: "POI",
                         osmTags: ["shop=bicycle"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
                         title: this.resources.legendFirstAid,
-                        latlng: { lat: 32.087698, lng: 34.9044684 },
-                        zoom: 13,
+                        latlng: { lat: 32.08311, lng: 34.890392 },
+                        zoom: 15,
                         type: "POI",
                         osmTags: ["amenity=clinic"],
                         link: LegendItemComponent.OSM_TAG_LINK
@@ -950,7 +934,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendConvenienceStore,
-                        latlng: { lat: 32.4341, lng: 34.9222 },
+                        latlng: { lat: 32.4326800, lng: 34.9219280 },
                         zoom: 16,
                         type: "POI",
                         osmTags: ["shop=supermarket"],
@@ -966,7 +950,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendToilettes,
-                        latlng: { lat: 31.0162, lng: 34.7607 },
+                        latlng: { lat: 31.0162196, lng: 34.7610432 },
                         zoom: 16,
                         type: "POI",
                         osmTags: ["amenity=toilets"],
@@ -986,6 +970,14 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         type: "POI",
                         osmTags: ["information=guidepost", "tourism=information"],
+                        link: LegendItemComponent.OSM_TAG_LINK
+                    },
+                    {
+                        title: this.resources.legendPlayground,
+                        latlng: { lat: 31.9028, lng: 34.8233 },
+                        zoom: 16,
+                        type: "POI",
+                        osmTags: ["leisure=playground"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     }
                 ]
@@ -1028,7 +1020,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendGrass,
-                        latlng: { lat: 32.112612, lng: 34.91582358 },
+                        latlng: { lat: 32.112186, lng: 34.916375 },
                         zoom: 16,
                         type: "POI",
                         osmTags: ["leisure=park"],
@@ -1044,7 +1036,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendSand,
-                        latlng: { lat: 31.161293, lng: 34.7459793 },
+                        latlng: { lat: 31.746489, lng: 34.602857 },
                         zoom: 16,
                         type: "POI",
                         osmTags: ["natural=sand"],
@@ -1060,7 +1052,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendQuarry,
-                        latlng: { lat: 31.232942, lng: 35.2049447 },
+                        latlng: { lat: 31.232381, lng: 35.204895 },
                         zoom: 16,
                         type: "POI",
                         osmTags: ["landuse=quarry"],
@@ -1068,7 +1060,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendConstructionSite,
-                        latlng: { lat: 30.9796, lng: 34.9221 },
+                        latlng: { lat: 30.980369, lng: 34.922879 },
                         zoom: 15,
                         type: "POI",
                         osmTags: ["landuse=construction"],
@@ -1098,14 +1090,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
         this.removeItemInSection(this.resources.legendWater, this.resources.legendSeasonalLake);
 
-        this.removeItemInSection(this.resources.legendRoads, this.resources.legendBridge);
         this.removeItemInSection(this.resources.legendRoads, this.resources.legendTunnel);
-
-        this.removeItemInSection(this.resources.legendPoi, this.resources.legendMonument);
-
-        this.removeItemInSection(this.resources.legendBarriers, this.resources.legendStile);
-        this.removeItemInSection(this.resources.legendBarriers, this.resources.legendBlock);
-        this.removeItemInSection(this.resources.legendBarriers, this.resources.legendLiftGate);
 
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendTheGreenLine);
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendThePurpleLine);
@@ -1125,8 +1110,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendObservationTower);
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendAntenna);
 
-        this.removeItemInSection(this.resources.legendBarriers, this.resources.legendStile);
-        this.removeItemInSection(this.resources.legendBarriers, this.resources.legendLiftGate);
 
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendBikePark);
 
@@ -1140,6 +1123,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendLodging);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendToilettes);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendInformationCenter);
+        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendPlayground);
 
         this.removeItemInSection(this.resources.legendAreas, this.resources.legendWetland);
         this.removeItemInSection(this.resources.legendAreas, this.resources.legendCemetery);
