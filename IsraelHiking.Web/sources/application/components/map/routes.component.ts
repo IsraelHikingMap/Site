@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ViewChildren, QueryList, ChangeDetectorRef, OnChanges, SimpleChanges } from "@angular/core";
+import { Component, AfterViewInit, ViewChildren, QueryList } from "@angular/core";
 import { MapComponent, FeatureComponent } from "ngx-openlayers";
 import { Coordinate, style } from "openlayers";
 import { select } from "@angular-redux/store";
@@ -33,6 +33,9 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     public hoverViewCoordinates: Coordinate;
     public routePointPopupData: RoutePointViewData;
 
+    // in order to improve performance
+    private coordinatesPerRoute: Object;
+
     constructor(resources: ResourcesService,
         private readonly selectedRouteService: SelectedRouteService,
         private readonly host: MapComponent,
@@ -41,6 +44,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         private readonly snappingService: SnappingService) {
         super(resources);
         this.hoverViewCoordinates = null;
+        this.coordinatesPerRoute = {};
 
         this.routeEditRouteInteraction.onRoutePointClick.subscribe((pointIndex: number) => {
             if (pointIndex == null || (this.routePointPopupData != null && this.routePointPopupData.segmentIndex === pointIndex)) {
@@ -63,7 +67,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             this.hoverViewCoordinates = SpatialService.toViewCoordinate(latLng);
         });
 
-        this.routes$.subscribe(() => {
+        this.routes$.subscribe((routes) => {
             this.routeEditPoiInteraction.setActive(false);
             this.routeEditRouteInteraction.setActive(false);
             this.snappingService.enable(this.isEditMode());
@@ -71,6 +75,11 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 this.hoverViewCoordinates = null;
             }
             this.setInteractionAccordingToState();
+            this.coordinatesPerRoute = {};
+            for (let route of routes) {
+                let coordinatesArray = route.segments.map(s => s.latlngs.map(l => SpatialService.toCoordinate(l)));
+                this.coordinatesPerRoute[route.id] = coordinatesArray;
+            }
         });
     }
 
@@ -143,8 +152,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         return selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route");
     }
 
-    public getSegmentCoordinates(segment: RouteSegmentData) {
-        return segment.latlngs.map(l => SpatialService.toCoordinate(l));
+    public getSegmentCoordinates(routeId: string, segmentIndex: number) {
+        return this.coordinatesPerRoute[routeId][segmentIndex];
     }
 
     public getIdForMarker(route: RouteData, index: number) {

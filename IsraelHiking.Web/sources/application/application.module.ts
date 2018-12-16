@@ -87,6 +87,7 @@ import { RouteEditRouteInteraction } from "./components/intercations/route-edit-
 // directives
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 import { ImageCaptureDirective } from "./directives/image-capture.directive";
+import { AntPathDirective } from "./directives/ant-path.directive";
 // components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { MainMapComponent } from "./components/map/main-map.component";
@@ -358,7 +359,6 @@ export function getWindow() { return window; }
         DownloadDialogComponent,
         ShareComponent,
         ShareDialogComponent,
-        NameInUseValidatorDirective,
         TermsOfServiceDialogComponent,
         IhmLinkComponent,
         ConfirmDialogComponent,
@@ -371,7 +371,9 @@ export function getWindow() { return window; }
         LayersViewComponent,
         RoutesComponent,
         TracesComponent,
-        ImageCaptureDirective
+        NameInUseValidatorDirective,
+        ImageCaptureDirective,
+        AntPathDirective
     ],
     bootstrap: [MainMapComponent]
 })

@@ -3,10 +3,10 @@
         <aol-source-vector>
             <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegment(route, idx)">
                 <aol-geometry-linestring>
-                    <aol-collection-coordinates [coordinates]="getSegmentCoordinates(segment)" [srid]="'EPSG:4326'"></aol-collection-coordinates>
+                    <aol-collection-coordinates [coordinates]="getSegmentCoordinates(route.id, idx)" [srid]="'EPSG:4326'"></aol-collection-coordinates>
                 </aol-geometry-linestring>
                 <aol-style>
-                    <aol-style-stroke [color]="getColor(route)" [width]="route.weight"></aol-style-stroke>
+                    <aol-style-stroke [color]="getColor(route)" [width]="route.weight" [lineDash]="[30,10]" antPath></aol-style-stroke>
                 </aol-style>
             </aol-feature>
             <div *ngIf="route.state == 'Route'">
@@ -34,14 +34,6 @@
                         <aol-coordinate [x]="segment.routePoint.lng" [y]="segment.routePoint.lat" [srid]="'EPSG:4326'"></aol-coordinate>
                     </aol-geometry-point>
                     <aol-style>
-                        <aol-style-icon *ngIf="idx !== 0 && !isLast(idx, route)"
-                                        [anchor]="[0.75, 0.5]"
-                                        [rotateWithView]="true"
-                                        [rotation]="getSegmentRotation(segment)"
-                                        [src]="'content/arrow.png'"
-                                        [color]="route.color"
-                                        [opacity]="route.opacity">
-                        </aol-style-icon>
                         <aol-style-circle *ngIf="idx === 0 || isLast(idx, route)" [radius]="7">
                             <aol-style-fill [color]="getRouteMarkerColor(idx, route, false)"></aol-style-fill>
                             <aol-style-stroke [color]="getRouteMarkerColor(idx, route, true)" [width]="3"></aol-style-stroke>
