@@ -19,7 +19,7 @@
             <button mat-button fxFill class="no-padding" (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-up" [style.color]="canVote('up') ? 'green' : 'grey'"></i></button>
         </div>
         <div fxFlex *ngIf="!isEditMode()">
-            <h3 fxFill class="flex-center"><span dir="ltr">{{rating || 0}}</span></h3>
+            <span fxFill class="flex-center" dir="ltr">{{rating || 0}}</span>
         </div>
         <div fxFlex *ngIf="!isEditMode()">
             <button mat-button fxFill class="no-padding" (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-down" [style.color]="canVote('down') ? 'red' : 'grey'"></i></button>
