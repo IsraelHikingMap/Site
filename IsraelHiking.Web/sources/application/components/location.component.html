@@ -13,7 +13,7 @@
     </button>
 </div>
 
-<aol-layer-vector *ngIf="locationCoordinate" [visible]="locationCoordinate != null"> <!--HM TODO: [updateWhileAnimating]="true"-->
+<aol-layer-vector *ngIf="locationCoordinate" [visible]="locationCoordinate != null" [updateWhileAnimating]="true">
     <aol-source-vector>
         <aol-feature [id]="'location'">
             <aol-geometry-point>
