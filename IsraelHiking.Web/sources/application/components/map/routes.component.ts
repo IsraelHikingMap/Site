@@ -34,7 +34,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     public routePointPopupData: RoutePointViewData;
 
     // in order to improve performance
-    private coordinatesPerRoute: Object;
+    private coordinatesPerRoutePerSegment: Map<string, Coordinate[][]>;
+    private coordinatesPerRoute: Map<string, Coordinate[]>;
 
     constructor(resources: ResourcesService,
         private readonly selectedRouteService: SelectedRouteService,
@@ -44,8 +45,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         private readonly snappingService: SnappingService) {
         super(resources);
         this.hoverViewCoordinates = null;
-        this.coordinatesPerRoute = {};
-
+        this.coordinatesPerRoutePerSegment = new Map();
+        this.coordinatesPerRoute = new Map();
         this.routeEditRouteInteraction.onRoutePointClick.subscribe((pointIndex: number) => {
             if (pointIndex == null || (this.routePointPopupData != null && this.routePointPopupData.segmentIndex === pointIndex)) {
                 this.routePointPopupData = null;
@@ -75,10 +76,13 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 this.hoverViewCoordinates = null;
             }
             this.setInteractionAccordingToState();
-            this.coordinatesPerRoute = {};
+            this.coordinatesPerRoutePerSegment = new Map();
+            this.coordinatesPerRoute = new Map();
             for (let route of routes) {
                 let coordinatesArray = route.segments.map(s => s.latlngs.map(l => SpatialService.toCoordinate(l)));
-                this.coordinatesPerRoute[route.id] = coordinatesArray;
+                this.coordinatesPerRoutePerSegment.set(route.id, coordinatesArray);
+                let routeCoordinates = [].concat.apply(coordinatesArray); // flatten
+                this.coordinatesPerRoute.set(route.id, routeCoordinates);
             }
         });
     }
@@ -153,7 +157,11 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public getSegmentCoordinates(routeId: string, segmentIndex: number) {
-        return this.coordinatesPerRoute[routeId][segmentIndex];
+        return this.coordinatesPerRoutePerSegment.get(routeId)[segmentIndex];
+    }
+
+    public getRouteCoordinates(routeId: string) {
+        return this.coordinatesPerRoute.get(routeId);
     }
 
     public getIdForMarker(route: RouteData, index: number) {

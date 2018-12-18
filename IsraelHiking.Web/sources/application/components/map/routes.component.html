@@ -1,14 +1,16 @@
 ﻿<div *ngFor="let route of (routes$ | async)">
     <aol-layer-vector *ngIf="route.state != 'Hidden'" [updateWhileAnimating]="true">
         <aol-source-vector>
-            <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegment(route, idx)">
-                <aol-geometry-linestring>
-                    <aol-collection-coordinates [coordinates]="getSegmentCoordinates(route.id, idx)" [srid]="'EPSG:4326'"></aol-collection-coordinates>
-                </aol-geometry-linestring>
-                <aol-style>
-                    <aol-style-stroke [color]="getColor(route)" [width]="route.weight" [lineDash]="[30,10]" antPath></aol-style-stroke>
-                </aol-style>
-            </aol-feature>
+            <div *ngIf="route.state == 'Route'">
+                <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegment(route, idx)">
+                    <aol-geometry-linestring>
+                        <aol-collection-coordinates [coordinates]="getSegmentCoordinates(route.id, idx)" [srid]="'EPSG:4326'"></aol-collection-coordinates>
+                    </aol-geometry-linestring>
+                    <aol-style>
+                        <aol-style-stroke [color]="getColor(route)" [width]="route.weight"></aol-style-stroke>
+                    </aol-style>
+                </aol-feature>
+            </div>
             <div *ngIf="route.state == 'Route'">
                 <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegmentPoint(route, idx)">
                     <aol-geometry-point>
@@ -25,6 +27,16 @@
                         <aol-style-text *ngIf="idx !== 0 && isLast(idx, route)" [text]="resources.getCharacterForIcon('icon-stop')" font="normal 8px IsraelHikingMap">
                             <aol-style-fill [color]="'white'"></aol-style-fill>
                         </aol-style-text>
+                    </aol-style>
+                </aol-feature>
+            </div>
+            <div *ngIf="route.state == 'ReadOnly' || route.state == 'Poi'">
+                <aol-feature>
+                    <aol-geometry-linestring>
+                        <aol-collection-coordinates [coordinates]="getRouteCoordinates(route.id)" [srid]="'EPSG:4326'"></aol-collection-coordinates>
+                    </aol-geometry-linestring>
+                    <aol-style>
+                        <aol-style-stroke [color]="getColor(route)" [width]="route.weight" [lineDash]="[30,10]" antPath></aol-style-stroke>
                     </aol-style>
                 </aol-feature>
             </div>
