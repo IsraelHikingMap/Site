@@ -172,7 +172,6 @@ export function initializeApplication(injector: Injector) {
             }
             ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
             ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state) => {
-                console.log(state);
                 let dbState = await database.get("state") as any;
                 dbState.state = state;
                 (database as any).put(dbState);
