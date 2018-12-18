@@ -115,6 +115,27 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         this.host.instance.on("pointermove", (event: MapBrowserEvent) => this.onPointerMove(event));
 
         this.host.instance.on("singleclick", (event: MapBrowserEvent) => this.onSingleClick(event));
+
+        this.setGeoJsonLayerStyle();
+    }
+
+    private setGeoJsonLayerStyle() {
+        let lineStyle = this.selectedPoiGeoJsonLayer.instance.getStyle();
+        this.selectedPoiGeoJsonLayer.instance.setStyle((feature: Feature) => {
+            if (feature.getGeometry().getType() === "Point" &&
+                (this.selectedPoiGeoJsonLayer.instance as layer.Vector).getSource().getFeatures().length > 1) {
+                let styleArray = this.getPoiIconStyle("icon-star", "blue", false);
+                styleArray.push(new style.Style({
+                    text: new style.Text({
+                        text: feature.getProperties().name,
+                        fill: new style.Fill({ color: "white" }),
+                        stroke: new style.Stroke({ color: "blue", width: 2 })
+                    })
+                }));
+                return styleArray;
+            }
+            return lineStyle;
+        });
     }
 
     private onSelectedPoiChanged = (poi: PointOfInterestExtended) => {
