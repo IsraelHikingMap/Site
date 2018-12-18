@@ -81,7 +81,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             for (let route of routes) {
                 let coordinatesArray = route.segments.map(s => s.latlngs.map(l => SpatialService.toCoordinate(l)));
                 this.coordinatesPerRoutePerSegment.set(route.id, coordinatesArray);
-                let routeCoordinates = [].concat.apply([],coordinatesArray); // flatten
+                let routeCoordinates = [].concat.apply([], coordinatesArray); // flatten
                 this.coordinatesPerRoute.set(route.id, routeCoordinates);
             }
         });
