@@ -39,6 +39,7 @@ export class LocationComponent extends BaseMapComponent {
     private showBatteryConfirmation = true;
 
     private recordingRouteId: string;
+    private isResettingNorthUp: boolean;
 
     public locationCoordinate: ILocationInfo;
     public isFollowing: boolean;
@@ -60,6 +61,7 @@ export class LocationComponent extends BaseMapComponent {
         this.recordingRouteId = null;
         this.isFollowing = true;
         this.isKeepNorthUp = false;
+        this.isResettingNorthUp = false;
         this.isLocationOverlayOpen = false;
 
         this.host.instance.addInteraction(new DragInteraction(() => {
@@ -90,7 +92,9 @@ export class LocationComponent extends BaseMapComponent {
 
         this.host.instance.getView().on("change:rotation",
             (event) => {
-                this.isKeepNorthUp = false;
+                if (this.isResettingNorthUp === false) {
+                    this.isKeepNorthUp = false;
+                }
             });
 
         this.geoLocationService.positionChanged.subscribe(
@@ -134,12 +138,13 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public toggleKeepNorthUp() {
-
+        this.isResettingNorthUp = true;
+        this.isKeepNorthUp = !this.isKeepNorthUp;
         this.host.instance.getView().animate({
             rotation: 0
+        }, () => {
+            this.isResettingNorthUp = false;
         });
-        // wait for rotation to finish
-        setTimeout(() => this.isKeepNorthUp = !this.isKeepNorthUp, 1000);
     }
 
     public getRotationAngle() {
