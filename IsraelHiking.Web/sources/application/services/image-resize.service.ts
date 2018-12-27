@@ -1,5 +1,34 @@
 import { Injectable } from "@angular/core";
-import { load, dump, insert, TagValues, helper } from "piexifjs";
+import piexif from "piexifjs";
+
+export interface IPiexifGPSHelper {
+    dmsRationalToDeg(dmsArray: number[], ref: string): number;
+}
+
+export interface IPiexifGPSIFD {
+    GPSLatitude: string;
+    GPSLatitudeRef: string;
+    GPSLongitude: string;
+    GPSLongitudeRef: string;
+}
+
+export interface IPiexifObject {
+    GPS: any[];
+}
+
+export interface IPiexifImageIFD {
+    Orientation: number;
+}
+
+export interface IPiexif {
+    GPSHelper: IPiexifGPSHelper;
+    GPSIFD: IPiexifGPSIFD;
+    ImageIFD: IPiexifImageIFD;
+    load(binaryStringData: string): IPiexifObject;
+    dump(exifObject: IPiexifObject): any[];
+    insert(exifBytes: any[], binaryStringData: string): string;
+}
+
 
 import { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models/models";
 
@@ -23,7 +52,7 @@ export class ImageResizeService {
             reader.onload = (event: any) => {
                 let exifData = null;
                 if (file.type === ImageResizeService.JPEG) {
-                    exifData = load(event.target.result);
+                    exifData = piexif.load(event.target.result);
                 }
                 let latLng = this.getGeoLocation(exifData);
                 if (latLng == null && throwIfNoLocation) {
@@ -42,16 +71,16 @@ export class ImageResizeService {
     }
 
     private getGeoLocation(exifData: any): LatLngAlt {
-        if (exifData == null ||
+        if (exifData == null || exifData.GPS == null ||
             Object.keys(exifData.GPS).length === 0 ||
-            !exifData.GPS.hasOwnProperty(TagValues.GPSIFD.GPSLatitude) ||
-            !exifData.GPS.hasOwnProperty(TagValues.GPSIFD.GPSLongitude)) {
+            !exifData.GPS.hasOwnProperty(piexif.GPSIFD.GPSLatitude) ||
+            !exifData.GPS.hasOwnProperty(piexif.GPSIFD.GPSLongitude)) {
             return null;
         }
-        let lat = helper.GPSHelper.dmsRationalToDeg(exifData.GPS[TagValues.GPSIFD.GPSLatitude],
-            exifData.GPS[TagValues.GPSIFD.GPSLatitudeRef]);
-        let lng = helper.GPSHelper.dmsRationalToDeg(exifData.GPS[TagValues.GPSIFD.GPSLongitude],
-            exifData.GPS[TagValues.GPSIFD.GPSLongitudeRef]);
+        let lat = piexif.GPSHelper.dmsRationalToDeg(exifData.GPS[piexif.GPSIFD.GPSLatitude],
+            exifData.GPS[piexif.GPSIFD.GPSLatitudeRef]);
+        let lng = piexif.GPSHelper.dmsRationalToDeg(exifData.GPS[piexif.GPSIFD.GPSLongitude],
+            exifData.GPS[piexif.GPSIFD.GPSLongitudeRef]);
         return { lat: lat, lng: lng };
     }
 
@@ -59,8 +88,8 @@ export class ImageResizeService {
         if (exifData == null) {
             return 1;
         }
-        let orientation = exifData["0th"][TagValues.ImageIFD.Orientation];
-        exifData["0th"][TagValues.ImageIFD.Orientation] = 1;
+        let orientation = exifData["0th"][piexif.ImageIFD.Orientation];
+        exifData["0th"][piexif.ImageIFD.Orientation] = 1;
         return orientation;
     }
 
@@ -132,8 +161,8 @@ export class ImageResizeService {
 
         let dataUrl = canvas.toDataURL(ImageResizeService.JPEG, 0.92);
         if (exifData != null) {
-            let exifbytes = dump(exifData);
-            dataUrl = insert(exifbytes, dataUrl);
+            let exifbytes = piexif.dump(exifData);
+            dataUrl = piexif.insert(exifbytes, dataUrl);
         }
         return dataUrl;
     }
