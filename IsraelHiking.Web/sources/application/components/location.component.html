@@ -20,9 +20,11 @@
                 <aol-coordinate [x]="locationCoordinate.lng" [y]="locationCoordinate.lat" [srid]="'EPSG:4326'"></aol-coordinate>
             </aol-geometry-point>
             <aol-style>
-                <aol-style-text [text]="resources.getCharacterForIcon('icon-crosshairs')" font="normal 30px IsraelHikingMap">
-                    <aol-style-fill [color]="'blue'"></aol-style-fill>
-                </aol-style-text>
+                <aol-style-icon [src]="'/content/gps-direction.png'"
+                                [rotation]="getMarkerRotation(locationCoordinate.heading)"
+                                [rotateWithView]="true"
+                                [scale]="0.4">
+                </aol-style-icon>
             </aol-style>
         </aol-feature>
         <aol-feature>

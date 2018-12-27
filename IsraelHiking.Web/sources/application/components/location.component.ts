@@ -20,6 +20,7 @@ import { FitBoundsService } from "../services/fit-bounds.service";
 
 interface ILocationInfo extends LatLngAlt {
     radius: number;
+    heading: number;
 }
 
 @Component({
@@ -234,6 +235,13 @@ export class LocationComponent extends BaseMapComponent {
         return this.geoLocationService.getState() === "searching";
     }
 
+    public getMarkerRotation(heading: number) {
+        if (heading == null) {
+            return 0;
+        }
+        return heading * Math.PI / 180.0;
+    }
+
     private updateMarkerPosition(position: Position) {
         if (this.locationCoordinate == null) {
             this.locationCoordinate = {} as ILocationInfo;
@@ -243,6 +251,7 @@ export class LocationComponent extends BaseMapComponent {
         this.locationCoordinate.lat = position.coords.latitude;
         this.locationCoordinate.alt = position.coords.altitude;
         this.locationCoordinate.radius = position.coords.accuracy;
+        this.locationCoordinate.heading = position.coords.heading;
         if (this.isFollowing) {
             this.setLocation();
         }
