@@ -101,7 +101,7 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         let index = +splitStr[1];
         if (!this.dragging) {
             // click on exiting poi
-            this.openEditMarkerDialog(routeData.markers[index], routeData.id, index);
+            PrivatePoiEditDialogComponent.openDialog(this.matDialog, routeData.markers[index], routeData.id, index);
             return true;
         }
         // drag exiting poi
@@ -124,11 +124,6 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         return true;
     }
 
-    private openEditMarkerDialog(marker: MarkerData, routeId: string, index: number) {
-        let dialogRef = this.matDialog.open(PrivatePoiEditDialogComponent);
-        dialogRef.componentInstance.setMarkerAndRoute(marker, routeId, index);
-    }
-
     private addPrivatePoi(latlng: LatLngAlt) {
         let snapping = this.getSnappingForPoint(latlng);
         let markerData = (snapping.markerData != null)
@@ -146,7 +141,7 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         }));
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         let index = selectedRoute.markers.length - 1;
-        this.openEditMarkerDialog(selectedRoute.markers[index], selectedRoute.id, index);
+        PrivatePoiEditDialogComponent.openDialog(this.matDialog, selectedRoute.markers[index], selectedRoute.id, index);
     }
 
     public getSnappingForPoint(latlng: LatLngAlt): ISnappingPointResponse {

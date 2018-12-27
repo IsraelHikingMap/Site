@@ -1,6 +1,6 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, HostListener } from "@angular/core";
+import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, Inject } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
-import { MatDialogRef } from "@angular/material";
+import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from "@angular/material";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -36,12 +36,23 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     @ViewChild("titleInput")
     public titleInput: ElementRef;
 
+    public static openDialog(matDialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
+        matDialog.open(PrivatePoiEditDialogComponent, {
+            maxWidth: "378px", data: {
+                marker: marker,
+                routeId: routeId,
+                index: index
+            }
+        });
+    }
+
     constructor(resources: ResourcesService,
         private readonly fileService: FileService,
         private readonly imageResizeService: ImageResizeService,
         private readonly privatePoiUploaderService: PrivatePoiUploaderService,
         private readonly dialogRef: MatDialogRef<PrivatePoiEditDialogComponent>,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+        private readonly ngRedux: NgRedux<ApplicationState>,
+        @Inject(MAT_DIALOG_DATA) data) {
         super(resources);
         this.showIcons = false;
         this.showCoordinates = false;
@@ -60,6 +71,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                 icons: icons.splice(0, PrivatePoiEditDialogComponent.NUMBER_OF_ICONS_PER_ROW)
             });
         }
+        this.setMarkerAndRoute(data.marker, data.routeId, data.index);
     }
 
     public ngAfterViewInit(): void {
@@ -79,7 +91,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         }
     }
 
-    public setMarkerAndRoute(marker: MarkerData, routeId: string, index: number) {
+    private setMarkerAndRoute(marker: MarkerData, routeId: string, index: number) {
         this.marker = marker;
         this.routeId = routeId;
         this.markerIndex = index;

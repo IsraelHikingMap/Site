@@ -40,8 +40,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
     public overlayClick() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute && selectedRoute.id === this.routeId && selectedRoute.state === "Poi") {
-            let dialogRef = this.matDialog.open(PrivatePoiEditDialogComponent);
-            dialogRef.componentInstance.setMarkerAndRoute(this.marker, this.routeId, this.index);
+            PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker, this.routeId, this.index);
         } else if (this.imageLink && this.imageLink.url) {
             this.imageGalleryService.setImages([this.imageLink.url]);
         }
