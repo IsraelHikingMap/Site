@@ -1,13 +1,15 @@
 import { Component, ViewEncapsulation, ViewChild } from "@angular/core";
 import { MatSelect } from "@angular/material";
 import { every } from "lodash";
+import { select } from "@angular-redux/store";
+import { Observable } from "rxjs";
 
 import { DataContainerService } from "../services/data-container.service";
 import { ResourcesService } from "../services/resources.service";
 import { FileService, IFormatViewModel } from "../services/file.service";
 import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
-import { DataContainer } from "../models/models";
+import { DataContainer, ApplicationState } from "../models/models";
 
 @Component({
     selector: "file-save-as",
@@ -20,6 +22,9 @@ export class FileSaveAsComponent extends BaseMapComponent {
     public isOpen: boolean;
     public formats: IFormatViewModel[];
     public selectedFormat: IFormatViewModel;
+
+    @select((state: ApplicationState) => state.configuration.isAdvanced)
+    public isAdvanced: Observable<boolean>;
 
     @ViewChild("dropdown")
     public dropdown: MatSelect;

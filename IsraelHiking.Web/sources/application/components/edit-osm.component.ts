@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
+import { NgRedux, select } from "@angular-redux/store";
+import { Observable } from "rxjs";
 
 import { ResourcesService } from "../services/resources.service";
 import { LayersService } from "../services/layers/layers.service";
@@ -8,11 +9,15 @@ import { BaseMapComponent } from "./base-map.component";
 import { HashService } from "../services/hash.service";
 import { ApplicationState } from "../models/models";
 
+
 @Component({
     selector: "edit-osm",
     templateUrl: "./edit-osm.component.html"
 })
 export class EditOSMComponent extends BaseMapComponent {
+
+    @select((state: ApplicationState) => state.configuration.isAdvanced)
+    public isAdvanced: Observable<boolean>;
 
     constructor(resources: ResourcesService,
         private readonly layersService: LayersService,

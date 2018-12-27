@@ -3,6 +3,7 @@ import { MatDialog, MatDialogConfig } from "@angular/material";
 import { select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
 import { Observable } from "rxjs";
+import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
@@ -11,6 +12,7 @@ import { BaseMapComponent } from "./base-map.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
+import { ConfigurationActions } from "../reducres/configuration.reducer";
 import { UserInfo, ApplicationState } from "../models/models";
 
 interface IRank {
@@ -30,13 +32,17 @@ export class OsmUserComponent extends BaseMapComponent {
     @select((state: ApplicationState) => state.userState.userInfo)
     public userInfo: Observable<UserInfo>;
 
+    @select((state: ApplicationState) => state.configuration.isAdvanced)
+    public isAdvanced: Observable<boolean>;
+
     @LocalStorage()
     public agreedToTheTermsOfService = false;
 
     constructor(resources: ResourcesService,
         private readonly authorizationService: AuthorizationService,
         private readonly dialog: MatDialog,
-        private readonly toastService: ToastService) {
+        private readonly toastService: ToastService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.initializeRanks();
         resources.languageChanged.subscribe(() => this.initializeRanks());
@@ -118,5 +124,9 @@ export class OsmUserComponent extends BaseMapComponent {
             return "Accent";
         }
         return "Primary";
+    }
+
+    public toggleIsAdvanced() {
+        this.ngRedux.dispatch(ConfigurationActions.toggleIsAdvanceAction);
     }
 }

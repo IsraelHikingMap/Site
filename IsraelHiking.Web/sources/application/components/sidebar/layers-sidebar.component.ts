@@ -206,8 +206,4 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && selectedRoute.id === routeData.id;
     }
-
-    public toggleIsAdvanced() {
-        this.ngRedux.dispatch(ConfigurationActions.toggleIsAdvanceAction);
-    }
 }
