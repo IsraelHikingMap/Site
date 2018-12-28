@@ -96,6 +96,7 @@ namespace IsraelHiking.API.Services
             {
                 var betaSite = _environment.WebRootFileProvider.GetFileInfo("/beta/index.html");
                 await SendFile(context, betaSite);
+                return;
             }
 
             var defaultFile = _environment.WebRootFileProvider.GetFileInfo("/index.html");
