@@ -91,6 +91,13 @@ namespace IsraelHiking.API.Services
                 await Write(context, GetPage(point.Title, thumbnailUrl, point.Description));
                 return;
             }
+
+            if (context.Request.Path.StartsWithSegments("/beta"))
+            {
+                var betaSite = _environment.WebRootFileProvider.GetFileInfo("/beta/index.html");
+                await SendFile(context, betaSite);
+            }
+
             var defaultFile = _environment.WebRootFileProvider.GetFileInfo("/index.html");
             await SendFile(context, defaultFile);
         }
