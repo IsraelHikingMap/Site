@@ -59,6 +59,10 @@ export class SelectedRouteService {
         return this.routes.find((r) => r.id === id);
     }
 
+    public getRecordingRoute(): RouteData {
+        return this.routes.find(r => r.isRecording);
+    }
+
     public getOrCreateSelectedRoute(): RouteData {
         if (this.selectedRouteId === null && this.routes.length > 0) {
             this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: this.routes[0].id }));

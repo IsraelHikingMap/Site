@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
-import { Subject } from "rxjs";
+import { ReplaySubject } from "rxjs";
 import { LocalStorage } from "ngx-store";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 import { Urls } from "../urls";
@@ -18,7 +18,7 @@ export class ResourcesService {
     @LocalStorage()
     public currentLanguage: ILanguage = null;
     public availableLanguages: ILanguage[];
-    public languageChanged: Subject<any>;
+    public languageChanged: ReplaySubject<any>;
 
     public direction: Direction;
     public start: string;
@@ -459,7 +459,7 @@ export class ResourcesService {
                 tilesFolder: "/English"
             }
         ];
-        this.languageChanged = new Subject<{}>();
+        this.languageChanged = new ReplaySubject<{}>();
         if (!this.currentLanguage) {
             this.currentLanguage = this.availableLanguages[0];
         }

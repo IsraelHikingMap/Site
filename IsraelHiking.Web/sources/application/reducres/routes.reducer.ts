@@ -456,5 +456,6 @@ export const routesReducer = undoable(createReducerFromClass(RoutesReducer, init
             MERGE_ROUTES,
             CLEAR_POIS,
             CLEAR_POIS_AND_ROUTE
-        ])
+        ]),
+        limit: 20
     } as UndoableOptions);

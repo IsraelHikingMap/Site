@@ -33,12 +33,8 @@ export class LocationComponent extends BaseMapComponent {
     private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
 
     @LocalStorage()
-    private lastRecordedRoute: RouteData = null;
-
-    @LocalStorage()
     private showBatteryConfirmation = true;
 
-    private recordingRouteId: string;
     private isResettingNorthUp: boolean;
 
     public locationCoordinate: ILocationInfo;
@@ -58,7 +54,6 @@ export class LocationComponent extends BaseMapComponent {
         super(resources);
 
         this.locationCoordinate = null;
-        this.recordingRouteId = null;
         this.isFollowing = true;
         this.isKeepNorthUp = false;
         this.isResettingNorthUp = false;
@@ -103,17 +98,18 @@ export class LocationComponent extends BaseMapComponent {
                     this.toastService.warning(this.resources.unableToFindYourLocation);
                 } else {
                     this.updateMarkerPosition(position);
-                    let recordingRoute = this.selectedRouteService.getRouteById(this.recordingRouteId);
+                    let recordingRoute = this.selectedRouteService.getRecordingRoute();
                     if (recordingRoute != null && recordingRoute.isRecording) {
                         this.ngRedux.dispatch(new AddRecordingPointAction({
                             routeId: recordingRoute.id,
                             latlng: this.geoLocationService.currentLocation
                         }));
-                        this.lastRecordedRoute = this.selectedRouteService.getRouteById(this.recordingRouteId);
                     }
                 }
             });
-        if (this.lastRecordedRoute != null) {
+
+        let lastRecordedRoute = this.selectedRouteService.getRecordingRoute();
+        if (lastRecordedRoute != null) {
             this.resources.languageChanged.pipe(first()).toPromise().then(() => {
                 // let resources service get the strings
                 this.toastService.confirm({
@@ -121,16 +117,10 @@ export class LocationComponent extends BaseMapComponent {
                     type: "YesNo",
                     confirmAction: () => {
                         this.toggleTracking();
-                        this.ngRedux.dispatch(new AddRouteAction({
-                            routeData: this.lastRecordedRoute
-                        }));
-                        this.selectedRouteService.setSelectedRoute(this.lastRecordedRoute.id);
-                        this.recordingRouteId = this.lastRecordedRoute.id;
+                        this.selectedRouteService.setSelectedRoute(lastRecordedRoute.id);
                     },
                     declineAction: () => {
-                        this.lastRecordedRoute.isRecording = false;
-                        this.addRecordingToTraces(this.lastRecordedRoute);
-                        this.lastRecordedRoute = null;
+                        this.stopRecording();
                     },
                 });
             });
@@ -171,12 +161,13 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public isRecording() {
-        let recordingRoute = this.selectedRouteService.getRouteById(this.recordingRouteId);
-        return recordingRoute != null && recordingRoute.isRecording;
+        return this.selectedRouteService.getRecordingRoute() != null;
     }
 
     public toggleRecording() {
-        if (!this.isRecording()) {
+        if (this.isRecording()) {
+            this.stopRecording();
+        } else {
             if (this.showBatteryConfirmation) {
                 this.toastService.confirm({
                     message: this.resources.makeSureBatteryOptimizationIsOff,
@@ -189,14 +180,15 @@ export class LocationComponent extends BaseMapComponent {
                 });
             }
             this.createRecordingRoute();
-        } else {
-            this.ngRedux.dispatch(new StopRecordingAction({
-                routeId: this.recordingRouteId
-            }));
-            this.addRecordingToTraces(this.selectedRouteService.getRouteById(this.recordingRouteId));
-            this.lastRecordedRoute = null;
-            this.recordingRouteId = null;
         }
+    }
+
+    private stopRecording() {
+        let recordingRoute = this.selectedRouteService.getRecordingRoute();
+        this.ngRedux.dispatch(new StopRecordingAction({
+            routeId: recordingRoute.id
+        }));
+        this.addRecordingToTraces(recordingRoute);
     }
 
     private createRecordingRoute() {
@@ -225,7 +217,6 @@ export class LocationComponent extends BaseMapComponent {
             routeData: route
         }));
         this.selectedRouteService.setSelectedRoute(route.id);
-        this.recordingRouteId = route.id;
     }
 
     public isDisabled() {
