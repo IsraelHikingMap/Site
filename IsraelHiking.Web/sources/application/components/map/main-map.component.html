@@ -31,7 +31,7 @@
     <div class="pane bottom-pane right-pane">
         <route-statistics></route-statistics>
     </div>
-    <div class="pane bottom-pane left-pane">
+    <div class="pane bottom-pane left-pane" *ngIf="!isApp()">
         <ihm-link></ihm-link>
     </div>
     <aol-control-scaleline [units]="'metric'"></aol-control-scaleline>

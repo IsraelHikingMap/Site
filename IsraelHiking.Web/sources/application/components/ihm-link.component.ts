@@ -1,9 +1,9 @@
 ﻿import { Component } from "@angular/core";
 import { HashService } from "../services/hash.service";
 import { ResourcesService } from "../services/resources.service";
+import { RunningContextService } from "../services/running-context.service";
 import { BaseMapComponent } from "./base-map.component";
 import { Urls } from "../urls";
-
 
 @Component({
     selector: "ihm-link",
@@ -15,29 +15,30 @@ export class IhmLinkComponent extends BaseMapComponent {
     public target: string;
 
     constructor(resources: ResourcesService,
-        private readonly hashService: HashService) {
+        private readonly hashService: HashService,
+        private readonly runningContextService: RunningContextService) {
         super(resources);
 
-        if (window.self === window.top) {
-            this.target = "";
-        } else {
+        if (this.runningContextService.isIFrame) {
             this.target = "_blank";
+        } else {
+            this.target = "";
         }
     }
 
     public getHref() {
-        if (window.self === window.top) {
-            return Urls.baseAddress;
-        } else {
+        if (this.runningContextService.isIFrame) {
             return this.hashService.getHref();
+        } else {
+            return Urls.baseAddress;
         }
     }
 
     public getTooltipText() {
-        if (window.self === window.top) {
-            return "";
-        } else {
+        if (this.runningContextService.isIFrame) {
             return this.resources.openInANewWindow;
+        } else {
+            return "";
         }
     }
 }

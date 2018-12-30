@@ -15,6 +15,7 @@ import { SelectedRouteService } from "./layers/routelayers/selected-route.servic
 import { MapService } from "./map.service";
 import { RouteLayerFactory } from "./layers/routelayers/route-layer.factory";
 import { ShareUrl, DataContainer, ApplicationState } from "../models/models";
+import { RunningContextService } from "./running-context.service";
 
 @Injectable()
 export class DataContainerService {
@@ -34,6 +35,7 @@ export class DataContainerService {
         private readonly selectedRouteService: SelectedRouteService,
         private readonly routeLayerFactory: RouteLayerFactory,
         private readonly mapService: MapService,
+        private readonly runningContextService: RunningContextService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.shareUrl = null;
@@ -107,7 +109,7 @@ export class DataContainerService {
             let shareUrl = await this.shareUrlsService.getShareUrl(shareId);
             this.setData(shareUrl.dataContainer);
             this.shareUrl = shareUrl;
-            if (window.self === window.top) {
+            if (!this.runningContextService.isIFrame) {
                 this.toastService.info(shareUrl.description, shareUrl.title);
             }
         } catch (ex) {

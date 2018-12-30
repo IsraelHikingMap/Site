@@ -12,7 +12,6 @@ import { SetLocationAction } from "../../reducres/location.reducer";
 import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { DataContainerService } from "../../services/data-container.service";
 import { SnappingService } from "../../services/snapping.service";
 
 @Component({
@@ -34,7 +33,6 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
     constructor(resources: ResourcesService,
         public readonly imageGalleryService: ImageGalleryService,
         private readonly mapService: MapService,
-        private readonly dataContainerService: DataContainerService,
         private readonly snappingService: SnappingService,
         private readonly hashService: HashService,
         private readonly runningContextService: RunningContextService,
@@ -74,5 +72,9 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
 
     public isIFrame() {
         return this.runningContextService.isIFrame;
+    }
+
+    public isApp() {
+        return this.runningContextService.isCordova;
     }
 }
