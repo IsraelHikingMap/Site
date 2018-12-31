@@ -303,15 +303,15 @@ export class LayersService {
     }
 
     public toggleOverlay = (overlay: Overlay) => {
-        let overlayFromArray = this.overlays.find((overlayToFind) => overlayToFind.key === overlay.key);
+        let newVisibility = !overlay.visible;
         this.ngRedux.dispatch(new UpdateOverlayAction({
             key: overlay.key,
             layerData: {
                 ...overlay,
-                visible: !overlay.visible
+                visible: newVisibility
             }
         }));
-        if (overlayFromArray.visible) {
+        if (newVisibility) {
             if ((overlay.key === LayersService.HIKING_TRAILS &&
                 this.selectedBaseLayerKey === LayersService.ISRAEL_HIKING_MAP) ||
                 (overlay.key === LayersService.BICYCLE_TRAILS &&
