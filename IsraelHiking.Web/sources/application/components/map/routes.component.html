@@ -36,12 +36,12 @@
                         <aol-collection-coordinates [coordinates]="getRouteCoordinates(route.id)" [srid]="'EPSG:4326'"></aol-collection-coordinates>
                     </aol-geometry-linestring>
                     <aol-style>
-                        <aol-style-stroke *ngIf="!route.isRecording" [color]="getColor(route)" [width]="route.weight" [lineDash]="[30,10]" antPath></aol-style-stroke>
-                        <aol-style-stroke *ngIf="route.isRecording" [color]="'#FF6600'" [width]="3"></aol-style-stroke>
+                        <aol-style-stroke *ngIf="!isRouteRecording(route)" [color]="getColor(route)" [width]="route.weight" [lineDash]="[30,10]" antPath></aol-style-stroke>
+                        <aol-style-stroke *ngIf="isRouteRecording(route)" [color]="'#FF6600'" [width]="3"></aol-style-stroke>
                     </aol-style>
                 </aol-feature>
             </div>
-            <div *ngIf="route.state == 'ReadOnly' && !route.isRecording">
+            <div *ngIf="route.state == 'ReadOnly' && !isRouteRecording(route)">
                 <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="'arrow-head' + idx">
                     <aol-geometry-point>
                         <aol-coordinate [x]="segment.routePoint.lng" [y]="segment.routePoint.lat" [srid]="'EPSG:4326'"></aol-coordinate>

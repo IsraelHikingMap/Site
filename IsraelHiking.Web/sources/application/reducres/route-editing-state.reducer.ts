@@ -4,13 +4,15 @@ import { initialState } from "./initial-state";
 
 const SET_ROUTING_TYPE = "SET_ROUTING_TYPE";
 const SET_SELECTED_ROUTE = "SET_SELECTED_ROUTE";
+const START_RECORDING = "START_RECORDING";
+const STOP_RECORDING = "STOP_RECORDING";
+
+export interface RoutePayload {
+    routeId: string;
+}
 
 export interface SetRouteEditingStatePayload {
     routingType: RoutingType;
-}
-
-export interface SetSelectedRoutePayload {
-    routeId: string;
 }
 
 export class SetRouteEditingStateAction extends BaseAction<SetRouteEditingStatePayload> {
@@ -19,9 +21,21 @@ export class SetRouteEditingStateAction extends BaseAction<SetRouteEditingStateP
     }
 }
 
-export class SetSelectedRouteAction extends BaseAction<SetSelectedRoutePayload> {
-    constructor(payload: SetSelectedRoutePayload) {
+export class SetSelectedRouteAction extends BaseAction<RoutePayload> {
+    constructor(payload: RoutePayload) {
         super(SET_SELECTED_ROUTE, payload);
+    }
+}
+
+export class StartRecordingAction extends BaseAction<RoutePayload> {
+    constructor(payload: RoutePayload) {
+        super(START_RECORDING, payload);
+    }
+}
+
+export class StopRecordingAction extends BaseAction<{}> {
+    constructor(payload: {}) {
+        super(STOP_RECORDING, payload);
     }
 }
 
@@ -40,6 +54,22 @@ class RouteEditingStateReducer {
             ...lastState,
             selectedRouteId: action.payload.routeId
         };
+    }
+
+    @ReduxAction(START_RECORDING)
+    public startRecording(lastState: RouteEditingState, action: StartRecordingAction): RouteEditingState {
+        return {
+            ...lastState,
+            recordingRouteId: action.payload.routeId
+        }
+    }
+
+    @ReduxAction(STOP_RECORDING)
+    public stopRecording(lastState: RouteEditingState, action: StopRecordingAction): RouteEditingState {
+        return {
+            ...lastState,
+            recordingRouteId: null
+        }
     }
 }
 

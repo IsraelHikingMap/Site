@@ -9,14 +9,15 @@ import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToastService } from "../services/toast.service";
+import { FitBoundsService } from "../services/fit-bounds.service";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { DragInteraction } from "./intercations/drag.interaction";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
-import { AddRouteAction, StopRecordingAction, AddRecordingPointAction } from "../reducres/routes.reducer";
-import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility } from "../models/models";
+import { AddRouteAction, AddRecordingPointAction, ChangeRoutePropertiesAction } from "../reducres/routes.reducer";
 import { AddTraceAction } from "../reducres/traces.reducer";
-import { FitBoundsService } from "../services/fit-bounds.service";
+import { StopRecordingAction, StartRecordingAction } from "../reducres/route-editing-state.reducer";
+import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility } from "../models/models";
 
 interface ILocationInfo extends LatLngAlt {
     radius: number;
@@ -99,7 +100,7 @@ export class LocationComponent extends BaseMapComponent {
                 } else {
                     this.updateMarkerPosition(position);
                     let recordingRoute = this.selectedRouteService.getRecordingRoute();
-                    if (recordingRoute != null && recordingRoute.isRecording) {
+                    if (recordingRoute != null) {
                         this.ngRedux.dispatch(new AddRecordingPointAction({
                             routeId: recordingRoute.id,
                             latlng: this.geoLocationService.currentLocation
@@ -200,7 +201,6 @@ export class LocationComponent extends BaseMapComponent {
             name = this.resources.route + " " + dateString;
         }
         let route = this.routeLayerFactory.createRouteData(name);
-        route.isRecording = true;
         let currentLocation = this.geoLocationService.currentLocation;
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
         route.segments.push({
@@ -217,6 +217,9 @@ export class LocationComponent extends BaseMapComponent {
             routeData: route
         }));
         this.selectedRouteService.setSelectedRoute(route.id);
+        this.ngRedux.dispatch(new StartRecordingAction({
+            routeId: route.id
+        }));
     }
 
     public isDisabled() {

@@ -37,7 +37,6 @@ export class RouteLayerFactory {
             name: name,
             description: "",
             state: "ReadOnly",
-            isRecording: false,
             color: this.colors[this.nextColorIndex],
             opacity: 0.5,
             weight: 4,
@@ -63,7 +62,6 @@ export class RouteLayerFactory {
         if (!route.id) {
             route.id = Math.random().toString(36).substr(2, 9);
         }
-        route.isRecording = false;
         route.state = "ReadOnly";
         return route;
     }

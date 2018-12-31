@@ -35,6 +35,7 @@ export const initialState =
         routeEditingState: {
             routingType: "Hike",
             selectedRouteId: null,
+            recordingRouteId: null,
         } as RouteEditingState,
         tracesState: {
             visibleTraceId: null,

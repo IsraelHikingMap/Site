@@ -27,12 +27,16 @@ export class SelectedRouteService {
 
     private routes: RouteData[];
     private selectedRouteId: string;
+    private recordingRouteId: string;
 
     @select((state: ApplicationState) => state.routes.present)
     private routes$: Observable<RouteData[]>;
 
     @select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     private selectedRouteId$: Observable<string>;
+
+    @select((state: ApplicationState) => state.routeEditingState.recordingRouteId)
+    private recordingRouteId$: Observable<string>;
 
     constructor(private readonly resourcesService: ResourcesService,
         private readonly routeLayerFactory: RouteLayerFactory,
@@ -44,6 +48,9 @@ export class SelectedRouteService {
         });
         this.selectedRouteId$.subscribe((id) => {
             this.selectedRouteId = id;
+        });
+        this.recordingRouteId$.subscribe((id) => {
+            this.recordingRouteId = id;
         });
     }
 
@@ -60,7 +67,7 @@ export class SelectedRouteService {
     }
 
     public getRecordingRoute(): RouteData {
-        return this.routes.find(r => r.isRecording);
+        return this.getRouteById(this.recordingRouteId);
     }
 
     public getOrCreateSelectedRoute(): RouteData {

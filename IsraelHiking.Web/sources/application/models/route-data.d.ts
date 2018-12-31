@@ -10,7 +10,6 @@ export interface RouteData {
     opacity?: number;
     weight?: number;
     state: RouteStateName;
-    isRecording?: boolean;
     markers: MarkerData[];
     segments: RouteSegmentData[];
 }

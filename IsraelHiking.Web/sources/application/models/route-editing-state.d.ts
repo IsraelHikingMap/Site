@@ -3,4 +3,5 @@
 export interface RouteEditingState {
     routingType: RoutingType;
     selectedRouteId: string;
+    recordingRouteId: string;
 }

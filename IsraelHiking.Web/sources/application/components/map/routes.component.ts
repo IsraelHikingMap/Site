@@ -182,6 +182,11 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         return colorArray;
     }
 
+    public isRouteRecording(route: RouteData) {
+        let recordingRoute = this.selectedRouteService.getRecordingRoute();
+        return recordingRoute != null && recordingRoute.id === route.id;
+    }
+
     public getHoverColor() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         return this.getColor(selectedRoute);

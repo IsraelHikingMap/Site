@@ -79,9 +79,10 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public isRouteEditDisabled() {
+        let recordingRoute = this.selectedRouteService.getRecordingRoute();
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        return selectedRoute != null &&
-            selectedRoute.isRecording;
+        return recordingRoute != null && selectedRoute != null &&
+            recordingRoute.id === selectedRoute.id;
     }
 
     public toggleEditRoute() {
@@ -99,12 +100,12 @@ export class DrawingComponent extends BaseMapComponent {
     public toggleEditPoi() {
         let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         switch (selectedRoute.state) {
-        case "Poi":
-            this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "ReadOnly" }));
-            break;
-        default:
-            this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "Poi" }));
-            break;
+            case "Poi":
+                this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "ReadOnly" }));
+                break;
+            default:
+                this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "Poi" }));
+                break;
         }
     }
 

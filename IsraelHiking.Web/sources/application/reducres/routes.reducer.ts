@@ -1,4 +1,4 @@
-import undoable, { UndoableOptions, includeAction } from "redux-undo";
+import undoable, { UndoableOptions, includeAction, groupByActionTypes } from "redux-undo";
 
 import { RouteData, MarkerData, RouteSegmentData, RouteStateName, ILatLngTime } from "../models/models";
 import { initialState } from "./initial-state";
@@ -21,8 +21,6 @@ const REVERSE_ROUTE = "REVERSE_ROUTE";
 const SPLIT_ROUTE = "SPLIT_ROUTE";
 const MERGE_ROUTES = "MERGE_ROUTES";
 const ADD_RECORDING_POINT = "ADD_RECORDING_POINT";
-const START_RECORDING = "START_RECORDING";
-const STOP_RECORDING = "STOP_RECORDING";
 const CLEAR_POIS = "CLEAR_POIS";
 const CLEAR_POIS_AND_ROUTE = "CLEAR_POIS_AND_ROUTE";
 const DELETE_ALL_ROUTES = "DELETE_ALL_ROUTES";
@@ -188,18 +186,6 @@ export class MergeRoutesAction extends BaseAction<MergeRoutesPayload> {
 export class AddRecordingPointAction extends BaseAction<AddRecordingPointPayload> {
     constructor(payload: AddRecordingPointPayload) {
         super(ADD_RECORDING_POINT, payload);
-    }
-}
-
-export class StartRecordingAction extends BaseAction<RoutePayload> {
-    constructor(payload: RoutePayload) {
-        super(START_RECORDING, payload);
-    }
-}
-
-export class StopRecordingAction extends BaseAction<RoutePayload> {
-    constructor(payload: RoutePayload) {
-        super(STOP_RECORDING, payload);
     }
 }
 
@@ -419,26 +405,6 @@ class RoutesReducer {
             });
     }
 
-    @ReduxAction(START_RECORDING)
-    public startRecording(lastState: RouteData[], action: StartRecordingAction): RouteData[] {
-        return this.doForRoute(lastState,
-            action.payload.routeId,
-            (route) => ({
-                ...route,
-                isRecording: true
-            }));
-    }
-
-    @ReduxAction(STOP_RECORDING)
-    public stopRecording(lastState: RouteData[], action: StopRecordingAction): RouteData[] {
-        return this.doForRoute(lastState,
-            action.payload.routeId,
-            (route) => ({
-                ...route,
-                isRecording: false
-            }));
-    }
-
     @ReduxAction(CLEAR_POIS)
     public clearPois(lastState: RouteData[], action: ClearPoisAction): RouteData[] {
         return this.doForRoute(lastState,
@@ -485,7 +451,9 @@ export const routesReducer = undoable(createReducerFromClass(RoutesReducer, init
             MERGE_ROUTES,
             CLEAR_POIS,
             CLEAR_POIS_AND_ROUTE,
-            DELETE_ALL_ROUTES
+            DELETE_ALL_ROUTES,
+            ADD_RECORDING_POINT
         ]),
+        groupBy: groupByActionTypes(ADD_RECORDING_POINT),
         limit: 20
     } as UndoableOptions);
