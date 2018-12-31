@@ -61,7 +61,7 @@ class RouteEditingStateReducer {
         return {
             ...lastState,
             recordingRouteId: action.payload.routeId
-        }
+        };
     }
 
     @ReduxAction(STOP_RECORDING)
@@ -69,7 +69,7 @@ class RouteEditingStateReducer {
         return {
             ...lastState,
             recordingRouteId: null
-        }
+        };
     }
 }
 
