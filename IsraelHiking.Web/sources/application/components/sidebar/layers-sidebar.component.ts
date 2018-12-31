@@ -18,10 +18,10 @@ import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.co
 import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
 import { PoiService, CategoriesType, ICategory } from "../../services/poi.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
-import { ConfigurationActions } from "../../reducres/configuration.reducer";
 import { SetSelectedRouteAction } from "../../reducres/route-editing-state.reducer";
 import { ApplicationState, RouteData, EditableLayer, Overlay } from "../../models/models";
-import { ChangeRoutePropertiesAction } from "../../reducres/routes.reducer";
+import { ChangeRoutePropertiesAction, DeleteAllRoutesAction } from "../../reducres/routes.reducer";
+import { ToastService } from "../../services/toast.service";
 
 interface IExpandableItem {
     name: string;
@@ -64,6 +64,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         private readonly categoriesLayerFactory: CategoriesLayerFactory,
         private readonly sidebarService: SidebarService,
         private readonly poiService: PoiService,
+        private readonly toastService: ToastService,
         private ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
@@ -205,5 +206,15 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     public isRouteSelected(routeData: RouteData) {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && selectedRoute.id === routeData.id;
+    }
+
+    public deleteAllRoutes() {
+        this.toastService.confirm({
+            message: this.resources.areYouSure,
+            type: "YesNo",
+            confirmAction: () => {
+                this.ngRedux.dispatch(new DeleteAllRoutesAction({}));
+            }
+        });
     }
 }
