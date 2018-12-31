@@ -23,6 +23,10 @@ export class TracesService {
             let response = await this.httpClient.get(Urls.osmTrace).toPromise() as Trace[];
             let traces = ([] as Trace[]).concat(response || []);
             let existingTraces = this.ngRedux.getState().tracesState.traces;
+            for (let trace of existingTraces) {
+                // traces' date in the database are saved with strings - converting to object
+                trace.timeStamp = new Date(trace.timeStamp);
+            }
             for (let traceJson of traces) {
                 let url = `https://www.openstreetmap.org/user/${traceJson.user}/traces/${traceJson.id}`;
                 let dataUrl = `https://www.openstreetmap.org/api/0.6/gpx/${traceJson.id}/data`;

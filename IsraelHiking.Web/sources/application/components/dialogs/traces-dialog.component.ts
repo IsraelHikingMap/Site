@@ -221,10 +221,12 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public async uploadRecordingToOsm() {
+        let trace = this.selectedTrace;
         let route = this.selectedTrace.dataContainer.routes[0];
         this.selectedTrace = null;
         try {
             await this.fileService.uploadRouteAsTrace(route);
+            await this.tracesService.deleteTrace(trace);
             await this.tracesService.syncTraces();
             this.toastService.info(this.resources.fileUploadedSuccessfullyItWillTakeTime);
         } catch (ex) {
