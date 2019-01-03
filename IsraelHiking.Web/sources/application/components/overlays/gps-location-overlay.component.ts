@@ -27,7 +27,7 @@ export class GpsLocationOverlayComponent extends ClosableOverlayComponent {
         this.ngRedux.dispatch(new AddPrivatePoiAction({
             routeId: selectedRoute.id,
             markerData: {
-                latlng: this.latlng,
+                latlng: { ...this.latlng },
                 title: "",
                 description: "",
                 type: "star",
