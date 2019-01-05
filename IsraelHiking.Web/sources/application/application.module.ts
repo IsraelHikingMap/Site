@@ -46,6 +46,7 @@ import { AngularOpenlayersModule } from "ngx-openlayers";
 import PouchDB from "pouchdb";
 import WorkerPouch from "worker-pouch";
 import FontFaceObserver from "fontfaceobserver";
+import deepmerge from "deepmerge";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -162,7 +163,7 @@ export function initializeApplication(injector: Injector) {
         } else {
             try {
                 let dbState = await database.get("state") as any;
-                storedState = dbState.state;
+                storedState = deepmerge(initialState, dbState.state, { arrayMerge: (destinationArray, sourceArray) => destinationArray });
             } catch (ex) {
                 // not state.
                 (database as any).put({

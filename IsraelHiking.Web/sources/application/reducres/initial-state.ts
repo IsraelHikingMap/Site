@@ -84,7 +84,8 @@ export const initialState =
                     isEditable: false
                 }
             ],
-            selectedBaseLayerKey: ISRAEL_HIKING_MAP
+            selectedBaseLayerKey: ISRAEL_HIKING_MAP,
+            expanded: ["Base Layers", "Overlays", "Private Routes"]
         } as LayersState,
         userState: {
             userInfo: null,

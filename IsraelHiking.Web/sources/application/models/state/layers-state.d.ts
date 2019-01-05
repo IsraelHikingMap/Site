@@ -4,4 +4,5 @@ export interface LayersState {
     baseLayers: EditableLayer[];
     overlays: Overlay[];
     selectedBaseLayerKey: string;
+    expanded: string[];
 }

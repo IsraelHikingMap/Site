@@ -1,6 +1,5 @@
-﻿import { Component, ViewEncapsulation, OnDestroy } from "@angular/core";
+﻿import { Component, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material";
-import { LocalStorage, WebstorableArray } from "ngx-store";
 import { select, NgRedux } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { every, some } from "lodash";
@@ -22,11 +21,7 @@ import { SetSelectedRouteAction } from "../../reducres/route-editing-state.reduc
 import { ApplicationState, RouteData, EditableLayer, Overlay } from "../../models/models";
 import { ChangeRoutePropertiesAction, DeleteAllRoutesAction } from "../../reducres/routes.reducer";
 import { ToastService } from "../../services/toast.service";
-
-interface IExpandableItem {
-    name: string;
-    isExpanded: boolean;
-}
+import { ExpandGroupAction, CollapseGroupAction } from "../../reducres/layers.reducer";
 
 @Component({
     selector: "layers-sidebar",
@@ -34,7 +29,7 @@ interface IExpandableItem {
     styleUrls: ["./layers-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class LayersSidebarComponent extends BaseMapComponent implements OnDestroy {
+export class LayersSidebarComponent extends BaseMapComponent {
 
     public categoriesTypes: CategoriesType[];
 
@@ -50,12 +45,6 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     @select((state: ApplicationState) => state.configuration.isAdvanced)
     public isAdvanced: Observable<boolean>;
 
-    @LocalStorage()
-    public layersExpandedState: WebstorableArray<IExpandableItem> = [
-        { name: "Base Layers", isExpanded: true },
-        { name: "Overlays", isExpanded: true },
-        { name: "Private Routes", isExpanded: true }
-    ] as any;
 
     constructor(resources: ResourcesService,
         private readonly dialog: MatDialog,
@@ -68,10 +57,6 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         private ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
-    }
-
-    public ngOnDestroy() {
-        // this is required in order for local storage to work properly.
     }
 
     public closeSidebar() {
@@ -107,28 +92,15 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     }
 
     public expand(group: string) {
-        let state = this.layersExpandedState.find(l => l.name === group);
-        if (state) {
-            state.isExpanded = true;
-        } else {
-            this.layersExpandedState.push({ name: group, isExpanded: true });
-        }
-        this.layersExpandedState.save();
+        this.ngRedux.dispatch(new ExpandGroupAction({ name: group }));
     }
 
     public collapse(group: string) {
-        let state = this.layersExpandedState.find(l => l.name === group);
-        if (state) {
-            state.isExpanded = false;
-        } else {
-            this.layersExpandedState.push({ name: group, isExpanded: false });
-        }
-        this.layersExpandedState.save();
+        this.ngRedux.dispatch(new CollapseGroupAction({ name: group }));
     }
 
     public getExpandState(group: string): boolean {
-        let state = this.layersExpandedState.find(l => l.name === group);
-        return state ? state.isExpanded : false;
+        return this.ngRedux.getState().layersState.expanded.find(l => l === group) != null;
     }
 
     public toggleCategory(categoriesType: CategoriesType, category: ICategory) {

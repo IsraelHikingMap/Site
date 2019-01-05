@@ -9,6 +9,8 @@ const REMOVE_OVERLAY = "REMOVE_OVERLAY";
 const UPDATE_BASE_LAYER = "UPDATE_BASE_LAYER";
 const UPDATE_OVERLAY = "UPDATE_OVERLAY";
 const SELECT_BASE_LAYER = "SELECT_BASE_LAYER";
+const EXPAND_GROUP = "EXPAND_GROUP";
+const COLLAPSE_GROUP = "COLLAPSE_GROUP";
 
 export interface AddBaseLayerPayload {
     layerData: EditableLayer;
@@ -34,6 +36,10 @@ export interface UpdateOverlayPayload {
 
 export interface SelectBaseLayerPayload {
     key: string;
+}
+
+export interface ToggleGroupPayload {
+    name: string;
 }
 
 export class AddBaseLayerAction extends BaseAction<AddBaseLayerPayload> {
@@ -78,9 +84,21 @@ export class SelectBaseLayerAction extends BaseAction<SelectBaseLayerPayload> {
     }
 }
 
+export class ExpandGroupAction extends BaseAction<ToggleGroupPayload> {
+    constructor(payload: ToggleGroupPayload) {
+        super(EXPAND_GROUP, payload);
+    }
+}
+
+export class CollapseGroupAction extends BaseAction<ToggleGroupPayload> {
+    constructor(payload: ToggleGroupPayload) {
+        super(COLLAPSE_GROUP, payload);
+    }
+}
+
 class LayersReducer {
     @ReduxAction(ADD_BASE_LAYER)
-    public addBaseLayer(lastState: LayersState, action: AddBaseLayerAction) {
+    public addBaseLayer(lastState: LayersState, action: AddBaseLayerAction): LayersState {
         return {
             ...lastState,
             baseLayers: [...lastState.baseLayers, action.payload.layerData]
@@ -88,7 +106,7 @@ class LayersReducer {
     }
 
     @ReduxAction(ADD_OVERLAY)
-    public addOverlay(lastState: LayersState, action: AddOverlayAction) {
+    public addOverlay(lastState: LayersState, action: AddOverlayAction): LayersState {
         return {
             ...lastState,
             overlays: [...lastState.overlays, action.payload.layerData]
@@ -96,7 +114,7 @@ class LayersReducer {
     }
 
     @ReduxAction(REMOVE_BASE_LAYER)
-    public removeBaseLayer(lastState: LayersState, action: RemoveBaseLayerAction) {
+    public removeBaseLayer(lastState: LayersState, action: RemoveBaseLayerAction): LayersState {
         let baseLayers = [...lastState.baseLayers];
         baseLayers.splice(baseLayers.indexOf(baseLayers.find(b => b.key === action.payload.key)), 1);
         return {
@@ -106,7 +124,7 @@ class LayersReducer {
     }
 
     @ReduxAction(REMOVE_OVERLAY)
-    public removeOverlay(lastState: LayersState, action: RemoveOverlayAction) {
+    public removeOverlay(lastState: LayersState, action: RemoveOverlayAction): LayersState {
         let overlays = [...lastState.overlays];
         overlays.splice(overlays.indexOf(overlays.find(o => o.key === action.payload.key)), 1);
         return {
@@ -116,7 +134,7 @@ class LayersReducer {
     }
 
     @ReduxAction(UPDATE_BASE_LAYER)
-    public updateBaseLayer(lastState: LayersState, action: UpdateBaseLayerAction) {
+    public updateBaseLayer(lastState: LayersState, action: UpdateBaseLayerAction): LayersState {
         let baseLayers = [...lastState.baseLayers];
         baseLayers.splice(baseLayers.indexOf(baseLayers.find(b => b.key === action.payload.key)), 1, action.payload.layerData);
         return {
@@ -126,7 +144,7 @@ class LayersReducer {
     }
 
     @ReduxAction(UPDATE_OVERLAY)
-    public updateOverlay(lastState: LayersState, action: UpdateOverlayAction) {
+    public updateOverlay(lastState: LayersState, action: UpdateOverlayAction): LayersState {
         let overlays = [...lastState.overlays];
         overlays.splice(overlays.indexOf(overlays.find(o => o.key === action.payload.key)), 1, action.payload.layerData);
         return {
@@ -136,10 +154,36 @@ class LayersReducer {
     }
 
     @ReduxAction(SELECT_BASE_LAYER)
-    public selectBaseLayer(lastState: LayersState, action: SelectBaseLayerAction) {
+    public selectBaseLayer(lastState: LayersState, action: SelectBaseLayerAction): LayersState {
         return {
             ...lastState,
             selectedBaseLayerKey: action.payload.key
+        };
+    }
+
+    @ReduxAction(EXPAND_GROUP)
+    public expandGroupAction(lastState: LayersState, action: ExpandGroupAction): LayersState {
+        let expanded = [...lastState.expanded];
+        if (expanded.find(n => n === action.payload.name) != null) {
+            return lastState;
+        }
+        expanded.push(action.payload.name);
+        return {
+            ...lastState,
+            expanded: expanded
+        };
+    }
+
+    @ReduxAction(COLLAPSE_GROUP)
+    public collapseGroupAction(lastState: LayersState, action: CollapseGroupAction): LayersState {
+        let expanded = [...lastState.expanded];
+        if (expanded.find(n => n === action.payload.name) == null) {
+            return lastState;
+        }
+        expanded.splice(expanded.indexOf(action.payload.name));
+        return {
+            ...lastState,
+            expanded: expanded
         };
     }
 }
