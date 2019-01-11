@@ -11,6 +11,7 @@ const UPDATE_OVERLAY = "UPDATE_OVERLAY";
 const SELECT_BASE_LAYER = "SELECT_BASE_LAYER";
 const EXPAND_GROUP = "EXPAND_GROUP";
 const COLLAPSE_GROUP = "COLLAPSE_GROUP";
+const SET_ITEM_VISIBILITY = "SET_ITEM_VISIBILITY";
 
 export interface AddBaseLayerPayload {
     layerData: EditableLayer;
@@ -40,6 +41,11 @@ export interface SelectBaseLayerPayload {
 
 export interface ToggleGroupPayload {
     name: string;
+}
+
+export interface SetItemVisibilityPayload {
+    name: string;
+    visible: boolean;
 }
 
 export class AddBaseLayerAction extends BaseAction<AddBaseLayerPayload> {
@@ -93,6 +99,12 @@ export class ExpandGroupAction extends BaseAction<ToggleGroupPayload> {
 export class CollapseGroupAction extends BaseAction<ToggleGroupPayload> {
     constructor(payload: ToggleGroupPayload) {
         super(COLLAPSE_GROUP, payload);
+    }
+}
+
+export class SetItemVisibilityAction extends BaseAction<SetItemVisibilityPayload> {
+    constructor(payload: SetItemVisibilityPayload) {
+        super(SET_ITEM_VISIBILITY, payload);
     }
 }
 
@@ -162,7 +174,7 @@ class LayersReducer {
     }
 
     @ReduxAction(EXPAND_GROUP)
-    public expandGroupAction(lastState: LayersState, action: ExpandGroupAction): LayersState {
+    public expandGroup(lastState: LayersState, action: ExpandGroupAction): LayersState {
         let expanded = [...lastState.expanded];
         if (expanded.find(n => n === action.payload.name) != null) {
             return lastState;
@@ -175,7 +187,7 @@ class LayersReducer {
     }
 
     @ReduxAction(COLLAPSE_GROUP)
-    public collapseGroupAction(lastState: LayersState, action: CollapseGroupAction): LayersState {
+    public collapseGroup(lastState: LayersState, action: CollapseGroupAction): LayersState {
         let expanded = [...lastState.expanded];
         if (expanded.find(n => n === action.payload.name) == null) {
             return lastState;
@@ -184,6 +196,25 @@ class LayersReducer {
         return {
             ...lastState,
             expanded: expanded
+        };
+    }
+
+    @ReduxAction(SET_ITEM_VISIBILITY)
+    public setItemVisibility(lastState: LayersState, action: SetItemVisibilityAction): LayersState {
+        let visible = [...lastState.visible];
+        let item = visible.find(n => n.name === action.payload.name);
+        if (item == null) {
+            item = { name: action.payload.name, visible: action.payload.visible };
+            visible.push(item);
+            return {
+                ...lastState,
+                visible: visible
+            };
+        }
+        visible.splice(visible.indexOf(item), 1, { ...item, visible: action.payload.visible });
+        return {
+            ...lastState,
+            visible: visible
         };
     }
 }

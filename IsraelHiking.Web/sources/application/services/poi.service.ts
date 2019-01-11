@@ -19,7 +19,7 @@ export interface ICategory {
     name: string;
     icon: string;
     color: string;
-    isSelected: boolean;
+    visible: boolean;
     items: { iconColorCategory: IIconColorLabel, tags: any[] }[];
 }
 
@@ -30,6 +30,7 @@ export interface IPoiSocialLinks {
 }
 
 export interface ISelectableCategory extends ICategory {
+    isSelected: boolean;
     selectedIcon: IIconColorLabel;
     icons: IIconColorLabel[];
     label: string;

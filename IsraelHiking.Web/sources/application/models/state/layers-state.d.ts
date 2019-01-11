@@ -5,4 +5,5 @@ export interface LayersState {
     overlays: Overlay[];
     selectedBaseLayerKey: string;
     expanded: string[];
+    visible: {name: string, visible: boolean}[];
 }

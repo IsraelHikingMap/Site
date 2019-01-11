@@ -98,7 +98,7 @@ describe("HashService", () => {
 
                 windowMock.location.hash = "#!/";
                 MockNgRedux.getInstance().getState = () => ({
-                    configuration: {}
+                    inMemoryState: {}
                 });
                 hashService = new HashService(router, windowMock, MockNgRedux.getInstance());
 
@@ -114,7 +114,7 @@ describe("HashService", () => {
                 windowMock.location.hash = "/";
                 (router as any).createUrlTree = () => "share-address";
                 MockNgRedux.getInstance().getState = () => ({
-                    configuration: {
+                    inMemoryState: {
                         shareUrl: { id: "1" }
                     }
                 });
@@ -132,7 +132,7 @@ describe("HashService", () => {
                 windowMock.location.hash = "/";
                 (router as any).createUrlTree = () => "file-address";
                 MockNgRedux.getInstance().getState = () => ({
-                    configuration: {
+                    inMemoryState: {
                         fileUrl: "fileUrl"
                     }
                 });

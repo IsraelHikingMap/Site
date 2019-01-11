@@ -1,10 +1,12 @@
 import { Injectable } from "@angular/core";
-import { LocalStorageService } from "ngx-store";
+import { NgRedux } from "@angular-redux/store";
 
 import { CategoriesLayer } from "./categories.layer";
 import { MapService } from "../map.service";
 import { ResourcesService } from "../resources.service";
+import { RunningContextService } from "../running-context.service";
 import { PoiService, CategoriesType } from "../poi.service";
+import { ApplicationState } from "../../models/models";
 
 @Injectable()
 export class CategoriesLayerFactory {
@@ -12,15 +14,17 @@ export class CategoriesLayerFactory {
 
     constructor(private readonly mapService: MapService,
         private readonly resources: ResourcesService,
-        private readonly localStorageService: LocalStorageService,
-        private readonly poiService: PoiService) {
+        private readonly poiService: PoiService,
+        private readonly runningContextService: RunningContextService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         this.categoryLayers = new Map<CategoriesType, CategoriesLayer>();
         for (let category of this.poiService.getCategoriesTypes()) {
             let layer = new CategoriesLayer(
                 this.resources,
                 this.mapService,
-                this.localStorageService,
                 this.poiService,
+                this.runningContextService,
+                this.ngRedux,
                 category);
             this.categoryLayers.set(category, layer);
         }

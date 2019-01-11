@@ -106,11 +106,11 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public toggleCategory(categoriesType: CategoriesType, category: ICategory) {
         let layer = this.categoriesLayerFactory.get(categoriesType);
         layer.toggleCategory(category);
-        if (layer.isVisible() && every(layer.categories, c => c.isSelected === false)) {
+        if (layer.isVisible() && every(layer.categories, c => c.visible === false)) {
             layer.hide();
             return;
         }
-        if (layer.isVisible() === false && some(layer.categories, c => c.isSelected)) {
+        if (layer.isVisible() === false && some(layer.categories, c => c.visible)) {
             layer.show();
         }
     }

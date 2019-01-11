@@ -1,6 +1,6 @@
-import { LocalStorageService } from "ngx-store";
 import { MapBrowserEvent } from "openlayers";
 import { Subject } from "rxjs";
+import { NgRedux } from "@angular-redux/store";
 import { every } from "lodash";
 
 import { ResourcesService } from "../resources.service";
@@ -8,12 +8,13 @@ import { PoiService, CategoriesType, ICategory } from "../poi.service";
 import { BaseMapComponent } from "../../components/base-map.component";
 import { SpatialService } from "../spatial.service";
 import { MapService } from "../map.service";
-import { PointOfInterest } from "../../models/models";
+import { RunningContextService } from "../running-context.service";
+import { SetItemVisibilityAction } from "../../reducres/layers.reducer";
+import { PointOfInterest, ApplicationState } from "../../models/models";
 
 export class CategoriesLayer extends BaseMapComponent {
 
     private static readonly VISIBILITY_POSTFIX = "_visibility";
-    private static readonly SELECTED_POSTFIX = "_selected";
 
     private visible: boolean;
     private requestsNumber: number;
@@ -24,22 +25,19 @@ export class CategoriesLayer extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         private readonly mapService: MapService,
-        private readonly localStorageService: LocalStorageService,
         private readonly poiService: PoiService,
+        private readonly runningContextService: RunningContextService,
+        private readonly ngRedux: NgRedux<ApplicationState>,
         private readonly categoriesType: CategoriesType) {
         super(resources);
         this.categories = [];
         this.pointsOfInterest = [];
         this.markersLoaded = new Subject<void>();
         this.requestsNumber = 0;
-        // HM TODO: move this to state and make sure it is on by default expect for iframe
-        this.visible = this.localStorageService.get(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX) || false;
+        this.visible = this.getVisibility(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX, !this.runningContextService.isIFrame);
         this.poiService.getCategories(this.categoriesType).then((categories) => {
             for (let category of categories) {
-                let selected = this.localStorageService.get(category.name + CategoriesLayer.SELECTED_POSTFIX) == null
-                    ? this.visible
-                    : this.localStorageService.get(category.name + CategoriesLayer.SELECTED_POSTFIX);
-                category.isSelected = selected;
+                category.visible = this.getVisibility(category.name + CategoriesLayer.VISIBILITY_POSTFIX, this.visible);
                 this.categories.push(category);
             }
             this.updateMarkers();
@@ -57,29 +55,43 @@ export class CategoriesLayer extends BaseMapComponent {
         return this.visible;
     }
 
+    private getVisibility(name: string, defaultVisibility: boolean) {
+        let initialState = this.ngRedux.getState().layersState.visible.find(i => i.name === name);
+        return (defaultVisibility && initialState == null) || (defaultVisibility && initialState != null && initialState.visible);
+    }
+
     public show() {
-        if (every(this.categories, c => c.isSelected === false)) {
-            this.categories.forEach(c => this.changeCategorySelectedState(c, true));
+        if (every(this.categories, c => c.visible === false)) {
+            this.categories.forEach(c => this.changeCategoryVisibilityState(c, true));
         }
         this.visible = true;
         this.updateMarkers();
-        this.localStorageService.set(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX, this.visible);
+        this.ngRedux.dispatch(new SetItemVisibilityAction({
+            name: this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX,
+            visible: true
+        }));
     }
 
     public hide() {
-        this.categories.forEach(c => this.changeCategorySelectedState(c, false));
+        this.categories.forEach(c => this.changeCategoryVisibilityState(c, false));
         this.visible = false;
-        this.localStorageService.set(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX, this.visible);
+        this.ngRedux.dispatch(new SetItemVisibilityAction({
+            name: this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX,
+            visible: false
+        }));
     }
 
     public toggleCategory(category: ICategory) {
-        this.changeCategorySelectedState(category, !category.isSelected);
+        this.changeCategoryVisibilityState(category, !category.visible);
         this.updateMarkers();
     }
 
-    private changeCategorySelectedState(category: ICategory, newState: boolean) {
-        this.localStorageService.set(category.name + CategoriesLayer.SELECTED_POSTFIX, newState);
-        category.isSelected = newState;
+    private changeCategoryVisibilityState(category: ICategory, newState: boolean) {
+        this.ngRedux.dispatch(new SetItemVisibilityAction({
+            name: category.name + CategoriesLayer.VISIBILITY_POSTFIX,
+            visible: newState
+        }));
+        category.visible = newState;
     }
 
     protected updateMarkers(): void {
@@ -97,7 +109,7 @@ export class CategoriesLayer extends BaseMapComponent {
         this.requestsNumber++;
         this.poiService
             .getPoints(bounds.northEast, bounds.southWest,
-                this.categories.filter(f => f.isSelected).map(f => f.name))
+                this.categories.filter(f => f.visible).map(f => f.name))
             .then((pointsOfInterest) => {
                 this.requestArrived();
                 if (this.requestsNumber !== 0) {

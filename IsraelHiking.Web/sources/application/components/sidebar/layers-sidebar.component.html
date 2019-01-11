@@ -65,7 +65,7 @@
                     <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleCategory(categoriesType, category)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle category visibility {{category.name}}">
                         <div fxFlex="10"></div>
                         <div fxFlex="15">
-                            <i class="fa" [ngClass]="{'icon-eye': category.isSelected, 'icon-eye-slash': !category.isSelected}"></i>
+                            <i class="fa" [ngClass]="{'icon-eye': category.visible, 'icon-eye-slash': !category.visible}"></i>
                         </div>
                         <div fxFlex="15">
                             <i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i>
