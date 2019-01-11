@@ -4,6 +4,7 @@ import { PointsOfInterestState, PointOfInterestExtended, MarkerData } from "../m
 
 const SET_SELECTED_POI = "SET_SELECTED_POI";
 const SET_UPLOAD_MARKER_DATA = "SET_UPLOAD_MARKER_DATA";
+const SET_SIDEBAR = "SET_SIDEBAR";
 
 export interface SetSelectedPoiPayload {
     poi: PointOfInterestExtended;
@@ -11,6 +12,10 @@ export interface SetSelectedPoiPayload {
 
 export interface SetUploadMarkerDataPayload {
     markerData: MarkerData;
+}
+
+export interface SetSidebarPayload {
+    isOpen: boolean;
 }
 
 export class SetSelectedPoiAction extends BaseAction<SetSelectedPoiPayload> {
@@ -25,9 +30,15 @@ export class SetUploadMarkerDataAction extends BaseAction<SetUploadMarkerDataPay
     }
 }
 
+export class SetSidebarAction extends BaseAction<SetSidebarPayload> {
+    constructor(payload: SetSidebarPayload) {
+        super(SET_SIDEBAR, payload);
+    }
+}
+
 export class PointsOfInterestReducer {
     @ReduxAction(SET_SELECTED_POI)
-    public setSelectedPoi(lastState: PointsOfInterestState, action: SetSelectedPoiAction) {
+    public setSelectedPoi(lastState: PointsOfInterestState, action: SetSelectedPoiAction): PointsOfInterestState {
         return {
             ...lastState,
             selectedPointOfInterest: action.payload.poi
@@ -35,10 +46,18 @@ export class PointsOfInterestReducer {
     }
 
     @ReduxAction(SET_UPLOAD_MARKER_DATA)
-    public setUploadMarkerData(lastState: PointsOfInterestState, action: SetUploadMarkerDataAction) {
+    public setUploadMarkerData(lastState: PointsOfInterestState, action: SetUploadMarkerDataAction): PointsOfInterestState {
         return {
             ...lastState,
             uploadMarkerData: action.payload.markerData
+        };
+    }
+
+    @ReduxAction(SET_SIDEBAR)
+    public setSidebar(lastState: PointsOfInterestState, action: SetSidebarAction): PointsOfInterestState {
+        return {
+            ...lastState,
+            isSidebarOpen: action.payload.isOpen
         };
     }
 }

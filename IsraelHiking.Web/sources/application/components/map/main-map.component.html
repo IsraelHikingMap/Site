@@ -1,8 +1,7 @@
-﻿<sidebar></sidebar>
-<ngx-image-gallery [images]="imageGalleryService.images"
+﻿<ngx-image-gallery [images]="imageGalleryService.images"
                    [conf]="imageGalleryService.config">
 </ngx-image-gallery>
-<router-outlet></router-outlet>
+<sidebar></sidebar>
 <aol-map [width]="'100%'" [height]="'100%'" (onMoveEnd)="moveEnd($event)">
     <aol-interaction-default></aol-interaction-default>
     <aol-interaction-dragrotateandzoom></aol-interaction-dragrotateandzoom>

@@ -32,6 +32,7 @@ export class CategoriesLayer extends BaseMapComponent {
         this.pointsOfInterest = [];
         this.markersLoaded = new Subject<void>();
         this.requestsNumber = 0;
+        // HM TODO: move this to state and make sure it is on by default expect for iframe
         this.visible = this.localStorageService.get(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX) || false;
         this.poiService.getCategories(this.categoriesType).then((categories) => {
             for (let category of categories) {

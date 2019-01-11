@@ -24,6 +24,7 @@ const ADD_RECORDING_POINT = "ADD_RECORDING_POINT";
 const CLEAR_POIS = "CLEAR_POIS";
 const CLEAR_POIS_AND_ROUTE = "CLEAR_POIS_AND_ROUTE";
 const DELETE_ALL_ROUTES = "DELETE_ALL_ROUTES";
+const BULK_REPLACE_ROUTES = "BULK_REPLACE_ROUTES";
 
 export interface RoutePayload {
     routeId: string;
@@ -91,6 +92,10 @@ export interface MergeRoutesPayload extends RoutePayload {
 
 export interface AddRecordingPointPayload extends RoutePayload {
     latlng: ILatLngTime;
+}
+
+export interface BulkReplaceRoutesPayload {
+    routesData: RouteData[];
 }
 
 export class AddRouteAction extends BaseAction<AddRoutePayload> {
@@ -204,6 +209,12 @@ export class ClearPoisAndRouteAction extends BaseAction<RoutePayload> {
 export class DeleteAllRoutesAction extends BaseAction<{}> {
     constructor(payload: {}) {
         super(DELETE_ALL_ROUTES, payload);
+    }
+}
+
+export class BulkReplaceRoutesAction extends BaseAction<BulkReplaceRoutesPayload> {
+    constructor(payload: BulkReplaceRoutesPayload) {
+        super(BULK_REPLACE_ROUTES, payload);
     }
 }
 
@@ -430,6 +441,11 @@ class RoutesReducer {
     public deleteAllRoutes(lastState: RouteData[], action: DeleteAllRoutesAction): RouteData[] {
         return [];
     }
+
+    @ReduxAction(BULK_REPLACE_ROUTES)
+    public replaceRoutes(lastState: RouteData[], action: BulkReplaceRoutesAction): RouteData[] {
+        return action.payload.routesData;
+    }
 }
 
 export const routesReducer = undoable(createReducerFromClass(RoutesReducer, initialState.routes.present),
@@ -452,7 +468,8 @@ export const routesReducer = undoable(createReducerFromClass(RoutesReducer, init
             CLEAR_POIS,
             CLEAR_POIS_AND_ROUTE,
             DELETE_ALL_ROUTES,
-            ADD_RECORDING_POINT
+            ADD_RECORDING_POINT,
+            BULK_REPLACE_ROUTES
         ]),
         groupBy: groupByActionTypes(ADD_RECORDING_POINT),
         limit: 20

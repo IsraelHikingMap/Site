@@ -1,80 +1,82 @@
-﻿<div [dir]="resources.direction">
-    <div fxLayout="row">
-        <div fxFlex *ngIf="!isHideEditMode()">
-            <button mat-button fxFill class="no-padding" (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
-        </div>
-        <div fxFlex *ngIf="isEditMode()">
-            <button mat-button fxFill class="no-padding" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
-        </div>
-        <div fxFlex *ngIf="isRoute() && !isEditMode()">
-            <button mat-button fxFill class="no-padding" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
-        </div>
-        <div fxFlex *ngIf="!isRoute() && !isEditMode()">
-            <button mat-button fxFill class="no-padding" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
-        </div>
-        <div fxFlex *ngIf="!isEditMode()">
-            <button mat-button fxFill class="no-padding" (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
-        </div>
-        <div fxFlex *ngIf="!isEditMode()">
-            <button mat-button fxFill class="no-padding" (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-up" [style.color]="canVote('up') ? 'green' : 'grey'"></i></button>
-        </div>
-        <div fxFlex *ngIf="!isEditMode()">
-            <span fxFill class="flex-center" dir="ltr">{{rating || 0}}</span>
-        </div>
-        <div fxFlex *ngIf="!isEditMode()">
-            <button mat-button fxFill class="no-padding" (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-down" [style.color]="canVote('down') ? 'red' : 'grey'"></i></button>
-        </div>
-        <div fxFlex *ngIf="shareLinks.poiLink && !isEditMode()">
-            <mat-menu #appMenu="matMenu" [dir]="resources.direction">
-                <div mat-menu-item disableRipple="true">
-                    <div fxLayout="row">
-                        <div fxFlex><a [href]="shareLinks.facebook" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook poi"><i class="fa icon-facebook"></i></a></div>
-                        <div fxFlex><a [href]="shareLinks.whatsapp" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp poi"><i class="fa icon-whatsapp"></i></a></div>
-                        <div fxFlex><button fxFill mat-button ngxClipboard [cbContent]="shareLinks.poiLink" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard poi"><i class="fa icon-clipboard"></i></button></div>
+﻿<div class="sidebar-wrapper" *ngIf="isOpen | async" [@animateSidebar]>
+    <div [dir]="resources.direction">
+        <div fxLayout="row">
+            <div fxFlex *ngIf="!isHideEditMode()">
+                <button mat-button fxFill class="no-padding" (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
+            </div>
+            <div fxFlex *ngIf="isEditMode()">
+                <button mat-button fxFill class="no-padding" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
+            </div>
+            <div fxFlex *ngIf="isRoute() && !isEditMode()">
+                <button mat-button fxFill class="no-padding" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
+            </div>
+            <div fxFlex *ngIf="!isRoute() && !isEditMode()">
+                <button mat-button fxFill class="no-padding" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
+            </div>
+            <div fxFlex *ngIf="!isEditMode()">
+                <button mat-button fxFill class="no-padding" (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
+            </div>
+            <div fxFlex *ngIf="!isEditMode()">
+                <button mat-button fxFill class="no-padding" (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-up" [style.color]="canVote('up') ? 'green' : 'grey'"></i></button>
+            </div>
+            <div fxFlex *ngIf="!isEditMode()">
+                <span fxFill class="flex-center" dir="ltr">{{rating || 0}}</span>
+            </div>
+            <div fxFlex *ngIf="!isEditMode()">
+                <button mat-button fxFill class="no-padding" (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-down" [style.color]="canVote('down') ? 'red' : 'grey'"></i></button>
+            </div>
+            <div fxFlex *ngIf="shareLinks.poiLink && !isEditMode()">
+                <mat-menu #appMenu="matMenu" [dir]="resources.direction">
+                    <div mat-menu-item disableRipple="true">
+                        <div fxLayout="row">
+                            <div fxFlex><a [href]="shareLinks.facebook" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook poi"><i class="fa icon-facebook"></i></a></div>
+                            <div fxFlex><a [href]="shareLinks.whatsapp" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp poi"><i class="fa icon-whatsapp"></i></a></div>
+                            <div fxFlex><button fxFill mat-button ngxClipboard [cbContent]="shareLinks.poiLink" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard poi"><i class="fa icon-clipboard"></i></button></div>
+                        </div>
                     </div>
-                </div>
-            </mat-menu>
-            <button mat-button fxFill class="no-padding" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
+                </mat-menu>
+                <button mat-button fxFill class="no-padding" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
+            </div>
+            <div fxFlex>
+                <button mat-button fxFill class="no-padding" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>
+            </div>
         </div>
-        <div fxFlex>
-            <button mat-button fxFill class="no-padding" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>
+        <mat-spinner *ngIf="isLoading"></mat-spinner>
+        <div *ngIf="isEditMode()">
+            <public-poi-edit [info]="info"></public-poi-edit>
         </div>
-    </div>
-    <mat-spinner *ngIf="isLoading"></mat-spinner>
-    <div *ngIf="isEditMode()">
-        <public-poi-edit [info]="info"></public-poi-edit>
-    </div>
-    <div *ngIf="!isEditMode()">
-        <mat-card class="mat-elevation-z0">
-            <mat-card-header>
-                <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
-                    <a *ngIf="info.references.length > 0 && info.references[0].url" [href]="info.references[0].url" [target]="'_blank'" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site from title">
-                        <span class="text-large">{{info.title}}</span>
-                    </a>
-                    <span *ngIf="info.references.length === 0 || !info.references[0].url" class="text-large">{{info.title}}</span>
-                </mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <image-scroller [images]="info.imagesUrls" [canEdit]="false"></image-scroller>
-                <p class="text-center" *ngIf="info.lengthInKm">{{resources.length}}: {{info.lengthInKm | number : '1.2-2'}} {{resources.kmUnit}}</p>
-                <div fxLayout="row">
-                    <p fxFill [ngClass]="resources.getTextAlignment(getDescrition())" [dir]="resources.getDirection(getDescrition())">
-                        {{getDescrition()}}
-                    </p>
-                </div>
-                <div fxLayout="row" *ngIf="contribution.userName" class="text-small">
-                    <span><a [href]="contribution.userAddress" [target]="'_blank'">{{contribution.userName}}</a> - {{contribution.lastModifiedDate | date:'dd/MM/yyyy' }}</span>
-                </div>
-                <coordinates *ngIf="!isLoading" [latlng]="latlng"></coordinates>
-                <div fxLayout="row">
-                    <a *ngFor="let reference of info.references;" [href]="reference.url" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site">
-                        <img *ngIf="reference.sourceImageUrl" [src]="reference.sourceImageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />
-                    </a>
-                    <a *ngIf="getElementOsmAddress()" [href]="getElementOsmAddress()" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View element in OSM">
-                        <img [src]="resources.getResizedImageUrl('https://upload.wikimedia.org/wikipedia/commons/b/b0/Openstreetmap_logo.svg', 32)" height="32" width="32" />
-                    </a>
-                </div>
-            </mat-card-content>
-        </mat-card>
+        <div *ngIf="!isEditMode()">
+            <mat-card class="mat-elevation-z0">
+                <mat-card-header>
+                    <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
+                        <a *ngIf="info.references.length > 0 && info.references[0].url" [href]="info.references[0].url" [target]="'_blank'" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site from title">
+                            <span class="text-large">{{info.title}}</span>
+                        </a>
+                        <span *ngIf="info.references.length === 0 || !info.references[0].url" class="text-large">{{info.title}}</span>
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <image-scroller [images]="info.imagesUrls" [canEdit]="false"></image-scroller>
+                    <p class="text-center" *ngIf="info.lengthInKm">{{resources.length}}: {{info.lengthInKm | number : '1.2-2'}} {{resources.kmUnit}}</p>
+                    <div fxLayout="row">
+                        <p fxFill [ngClass]="resources.getTextAlignment(getDescription())" [dir]="resources.getDirection(getDescription())">
+                            {{getDescription()}}
+                        </p>
+                    </div>
+                    <div fxLayout="row" *ngIf="contribution.userName" class="text-small">
+                        <span><a [href]="contribution.userAddress" [target]="'_blank'">{{contribution.userName}}</a> - {{contribution.lastModifiedDate | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                    <coordinates *ngIf="!isLoading" [latlng]="latlng"></coordinates>
+                    <div fxLayout="row">
+                        <a *ngFor="let reference of info.references;" [href]="reference.url" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site">
+                            <img *ngIf="reference.sourceImageUrl" [src]="reference.sourceImageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />
+                        </a>
+                        <a *ngIf="getElementOsmAddress()" [href]="getElementOsmAddress()" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View element in OSM">
+                            <img [src]="resources.getResizedImageUrl('https://upload.wikimedia.org/wikipedia/commons/b/b0/Openstreetmap_logo.svg', 32)" height="32" width="32" />
+                        </a>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
     </div>
 </div>

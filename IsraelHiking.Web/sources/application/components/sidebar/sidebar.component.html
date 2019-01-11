@@ -1,13 +1,11 @@
-﻿<div id="sidebar-wrapper" *ngIf="isSidebarVisible()" [@animateSidebar]>
+﻿<router-outlet></router-outlet>
+<div class="sidebar-wrapper" *ngIf="isSidebarVisible()" [@animateSidebar]>
     <div [ngSwitch]="getViewName()">
         <div *ngSwitchCase="'layers'">
             <layers-sidebar></layers-sidebar>
         </div>
         <div *ngSwitchCase="'info'">
             <info-sidebar></info-sidebar>
-        </div>
-        <div *ngSwitchCase="'public-poi'">
-            <public-poi-sidebar></public-poi-sidebar>
         </div>
     </div>
 </div>

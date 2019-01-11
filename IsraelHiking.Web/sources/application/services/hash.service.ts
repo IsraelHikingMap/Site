@@ -1,18 +1,10 @@
 ﻿import { Injectable, Inject } from "@angular/core";
 import { HttpParams } from "@angular/common/http";
 import { Router } from "@angular/router";
-import { Subject } from "rxjs";
 import { NgRedux } from "@angular-redux/store";
 
 import { Urls } from "../urls";
 import { LayerData, LatLngAlt, ApplicationState } from "../models/models";
-
-export type ApplicationStateType = "download" | "search" | "share" | "url" | "baseLayer" | "poi";
-
-export interface IApplicationStateChangedEventArgs {
-    type: ApplicationStateType;
-    value: any;
-}
 
 export interface IPoiRouterData {
     source: string;
@@ -26,21 +18,18 @@ export class RouteStrings {
     public static readonly URL = "url";
     public static readonly POI = "poi";
     public static readonly DOWNLOAD = "download";
-    public static readonly SEARCH = "search";
     public static readonly ROUTE_ROOT = "/";
     public static readonly ROUTE_MAP = `/${RouteStrings.MAP}`;
     public static readonly ROUTE_SHARE = `/${RouteStrings.SHARE}`;
     public static readonly ROUTE_URL = `/${RouteStrings.URL}`;
     public static readonly ROUTE_POI = `/${RouteStrings.POI}`;
     public static readonly ROUTE_DOWNLOAD = `/${RouteStrings.DOWNLOAD}`;
-    public static readonly ROUTE_SEARCH = `/${RouteStrings.SEARCH}`;
 
     public static readonly LAT = "lat";
     public static readonly LON = "lon";
     public static readonly ZOOM = "zoom";
     public static readonly ID = "id";
     public static readonly SOURCE = "source";
-    public static readonly TERM = "term";
     public static readonly BASE_LAYER = "baselayer";
     public static readonly LANGUAGE = "language";
     public static readonly EDIT = "edit";
@@ -54,37 +43,35 @@ export class HashService {
     private static readonly URL = "url";
     private static readonly DOWNLOAD = "download";
     private static readonly SITE_SHARE = "s";
-    private static readonly SEARCH_QUERY = "q";
     private static readonly HASH = "#!/";
     private static readonly LOCATION_REGEXP = /\/(\d+)\/([-+]?[0-9]*\.?[0-9]+)\/([-+]?[0-9]*\.?[0-9]+)/;
 
     private readonly window: Window;
-    private readonly stateMap: Map<ApplicationStateType, any>;
-
-    public applicationStateChanged: Subject<IApplicationStateChangedEventArgs>;
 
     constructor(private readonly router: Router,
         @Inject("Window") window: any, // bug in angular aot
         private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.window = window;
-        this.applicationStateChanged = new Subject();
-        this.stateMap = new Map();
         this.backwardCompatibilitySupport();
     }
 
     public resetAddressbar(): void {
-        if (this.getShareUrlId()) {
-            this.router.navigate([RouteStrings.ROUTE_SHARE, this.getShareUrlId()], { replaceUrl: true });
+        let state = this.ngRedux.getState();
+        if (state.poiState.isSidebarOpen) {
             return;
         }
-        if (this.getUrl()) {
+        let inMemoryState = state.inMemoryState;
+        if (inMemoryState.shareUrl) {
+            this.router.navigate([RouteStrings.ROUTE_SHARE, inMemoryState.shareUrl.id], { replaceUrl: true });
+            return;
+        }
+        if (inMemoryState.fileUrl) {
             let queryParams = {} as any;
-            let baseLayer = this.baseLayerToString(this.getBaselayer());
-            if (baseLayer) {
-                queryParams.baselayer = baseLayer;
+            if (inMemoryState.baseLayer) {
+                queryParams.baselayer = inMemoryState.baseLayer;
             }
-            this.router.navigate([RouteStrings.ROUTE_URL, this.getUrl()],
+            this.router.navigate([RouteStrings.ROUTE_URL, inMemoryState.fileUrl],
                 { queryParams: queryParams, replaceUrl: true });
             return;
         }
@@ -105,11 +92,6 @@ export class HashService {
         let simplifiedHash = this.window.location.hash.replace(HashService.LOCATION_REGEXP, "").replace(`${HashService.HASH}?`, "");
         let searchParams = new HttpParams({ fromString: simplifiedHash });
         let baseLayer = searchParams.get(HashService.BASE_LAYER);
-        let searchTerm = searchParams.get(HashService.SEARCH_QUERY);
-        if (searchTerm) {
-            this.router.navigate([RouteStrings.ROUTE_SEARCH, searchTerm], { queryParams: { baselayer: baseLayer }, replaceUrl: true });
-            return;
-        }
         let externalUrl = searchParams.get(HashService.URL);
         if (externalUrl) {
             this.router.navigate([RouteStrings.ROUTE_URL, externalUrl], { queryParams: { baselayer: baseLayer }, replaceUrl: true });
@@ -148,30 +130,15 @@ export class HashService {
     }
 
     public getHref(): string {
-        if (this.getUrl() != null) {
-            let urlTree = this.router.createUrlTree([RouteStrings.URL, this.stateMap.get("url")]);
+        let inMemoryState = this.ngRedux.getState().inMemoryState;
+        if (inMemoryState.fileUrl != null) {
+            let urlTree = this.router.createUrlTree([RouteStrings.URL, inMemoryState.fileUrl]);
             return Urls.baseAddress + urlTree.toString();
         }
-        if (this.getShareUrlId() != null) {
-            return this.getFullUrlFromShareId(this.stateMap.get("share"));
+        if (inMemoryState.shareUrl != null) {
+            return this.getFullUrlFromShareId(inMemoryState.shareUrl.id);
         }
         return Urls.baseAddress;
-    }
-
-    public getShareUrlId(): string {
-        return this.stateMap.get("share");
-    }
-
-    public getUrl(): string {
-        return this.stateMap.get("url");
-    }
-
-    public getBaselayer(): LayerData {
-        return this.stateMap.get("baseLayer");
-    }
-
-    public getPoiRouterData(): IPoiRouterData {
-        return this.stateMap.get("poi");
     }
 
     public getFullUrlFromPoiId(poiSourceAndId: IPoiRouterData) {
@@ -183,11 +150,6 @@ export class HashService {
     public getFullUrlFromShareId(id: string) {
         let urlTree = this.router.createUrlTree([RouteStrings.SHARE, id]);
         return Urls.baseAddress + urlTree.toString();
-    }
-
-    public setApplicationState(type: ApplicationStateType, value: any) {
-        this.stateMap.set(type, value);
-        this.applicationStateChanged.next({ type: type, value: value });
     }
 
     public stringToBaseLayer(addressOrKey: string): LayerData {

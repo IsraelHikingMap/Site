@@ -6,9 +6,9 @@ import { ActionCreators } from "redux-undo";
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
-import { RoutingType, ApplicationState } from "../models/models";
 import { ChangeEditStateAction, ReplaceSegmentsAction, ClearPoisAction, ClearPoisAndRouteAction } from "../reducres/routes.reducer";
 import { SetRouteEditingStateAction } from "../reducres/route-editing-state.reducer";
+import { RoutingType, ApplicationState } from "../models/models";
 
 @Component({
     selector: "drawing",

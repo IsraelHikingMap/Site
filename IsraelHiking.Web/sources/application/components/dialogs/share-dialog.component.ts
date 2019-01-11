@@ -84,7 +84,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.facebookShareAddress = "";
         this.nakebCreateHikeAddress = "";
         this.lastShareUrl = null;
-        let shareUrl = this.dataContainerService.getShareUrl();
+        let shareUrl = this.shareUrlsService.getSelectedShareUrl();
         this.canUpdate = shareUrl != null &&
             this.shareUrlsService.shareUrls.find(s => s.id === shareUrl.id) != null &&
             this.authorizationService.isLoggedIn();
@@ -137,7 +137,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 : await this.shareUrlsService.createShareUrl(shareUrlToSend);
 
             this.lastShareUrl = shareUrl;
-            this.dataContainerService.setShareUrl(shareUrl);
+            this.shareUrlsService.setShareUrl(shareUrl);
             this.imageUrl = this.shareUrlsService.getImageFromShareId(shareUrl);
             let links = this.shareUrlsService.getShareSocialLinks(shareUrl);
             this.shareAddress = links.ihm;
@@ -163,7 +163,8 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     }
 
     private createShareUrlObject = (): ShareUrl => {
-        let id = this.dataContainerService.getShareUrl() ? this.dataContainerService.getShareUrl().id : "";
+        let selectedShare = this.shareUrlsService.getSelectedShareUrl();
+        let id = selectedShare ? selectedShare.id : "";
         let shareUrl = {
             id: id,
             title: this.title,

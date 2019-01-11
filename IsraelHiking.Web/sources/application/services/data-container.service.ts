@@ -1,31 +1,28 @@
 import { Injectable } from "@angular/core";
-import { Router } from "@angular/router";
 import { NgRedux } from "@angular-redux/store";
 
 import { LayersService } from "./layers/layers.service";
 import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
-import { HashService, RouteStrings } from "./hash.service";
+import { HashService } from "./hash.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { SpatialService } from "./spatial.service";
 import { FitBoundsService } from "./fit-bounds.service";
-import { AddRouteAction } from "../reducres/routes.reducer";
+import { BulkReplaceRoutesAction } from "../reducres/routes.reducer";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { MapService } from "./map.service";
 import { RouteLayerFactory } from "./layers/routelayers/route-layer.factory";
-import { ShareUrl, DataContainer, ApplicationState } from "../models/models";
 import { RunningContextService } from "./running-context.service";
+import { SetFileUrlAndBaseLayerAction } from "../reducres/in-memory.reducer";
+import { DataContainer, ApplicationState } from "../models/models";
 
 @Injectable()
 export class DataContainerService {
 
-    private shareUrl: ShareUrl;
     // private layersInitializationPromise: Promise<any>;
 
-    constructor(
-        private readonly router: Router,
-        private readonly shareUrlsService: ShareUrlsService,
+    constructor(private readonly shareUrlsService: ShareUrlsService,
         private readonly layersService: LayersService,
         private readonly hashService: HashService,
         private readonly fileService: FileService,
@@ -37,17 +34,17 @@ export class DataContainerService {
         private readonly mapService: MapService,
         private readonly runningContextService: RunningContextService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
-
-        this.shareUrl = null;
     }
 
     private setData(dataContainer: DataContainer) {
+        let routesData = [];
         for (let route of dataContainer.routes) {
             let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(route);
-            this.ngRedux.dispatch(new AddRouteAction({
-                routeData: routeToAdd
-            }));
+            routesData.push(routeToAdd);
         }
+        this.ngRedux.dispatch(new BulkReplaceRoutesAction({
+            routesData: routesData
+        }));
         this.layersService.addExternalOverlays(dataContainer.overlays);
         this.layersService.addExternalBaseLayer(dataContainer.baseLayer);
 
@@ -81,49 +78,33 @@ export class DataContainerService {
         } as DataContainer;
     }
 
-    public initialize = async () => {
-        // HM TODO: make sure this is working properly
-        // this.layersInitializationPromise = this.layersService.initialize();
-        // await this.layersInitializationPromise;
-        // This assumes hashservice has already finished initialization, this assumption can cause bugs...
-        // HM TODO: get base layer from store
-        this.layersService.addExternalBaseLayer(this.hashService.getBaselayer());
-    }
-
     public setFileUrlAfterNavigation = async (url: string, baseLayer: string) => {
         // await this.layersInitializationPromise;
-        this.hashService.setApplicationState("baseLayer", baseLayer);
-        this.hashService.setApplicationState("url", url);
+        this.ngRedux.dispatch(new SetFileUrlAndBaseLayerAction({
+            fileUrl: url,
+            baseLayer: baseLayer
+        }));
         let data = await this.fileService.openFromUrl(url);
         data.baseLayer = this.hashService.stringToBaseLayer(baseLayer);
         this.setData(data);
     }
 
     public setShareUrlAfterNavigation = async (shareId) => {
-        if (this.shareUrl && this.shareUrl.id === shareId) {
+        let shareUrl = this.shareUrlsService.getSelectedShareUrl();
+        if (shareUrl && shareUrl.id === shareId) {
             return;
         }
+        // HM TODO: do we need this promise?
         // await this.layersInitializationPromise;
         try {
-            this.hashService.setApplicationState("share", shareId);
-            let shareUrl = await this.shareUrlsService.getShareUrl(shareId);
+            shareUrl = await this.shareUrlsService.setShareUrlById(shareId);
             this.setData(shareUrl.dataContainer);
-            this.shareUrl = shareUrl;
             if (!this.runningContextService.isIFrame) {
                 this.toastService.info(shareUrl.description, shareUrl.title);
             }
         } catch (ex) {
-            this.hashService.setApplicationState("share", "");
+            this.shareUrlsService.setShareUrl(null);
             this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
         }
-    }
-
-    public getShareUrl(): ShareUrl {
-        return this.shareUrl;
-    }
-
-    public setShareUrl(shareUrl: ShareUrl) {
-        this.shareUrl = shareUrl;
-        this.router.navigate([RouteStrings.ROUTE_SHARE, this.shareUrl.id]);
     }
 }

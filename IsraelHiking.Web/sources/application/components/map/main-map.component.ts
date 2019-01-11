@@ -1,7 +1,6 @@
 ﻿import { Component, ViewChild, AfterViewInit, ViewEncapsulation } from "@angular/core";
 import { NgxImageGalleryComponent } from "ngx-image-gallery";
 import { NgRedux } from "@angular-redux/store";
-import { proj } from "openlayers";
 import { MapComponent } from "ngx-openlayers";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -13,6 +12,7 @@ import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SnappingService } from "../../services/snapping.service";
+import { SpatialService } from "../../services/spatial.service";
 
 @Component({
     selector: "main-map",
@@ -47,17 +47,17 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         if (!e) {
             return;
         }
-        let centerLatLon = proj.toLonLat(e.map.getView().getCenter());
-        let action = new SetLocationAction({
-            longitude: centerLatLon[0],
-            latitude: centerLatLon[1],
-            zoom: e.map.getView().getZoom()
-        });
-        this.ngRedux.dispatch(action);
-
-        if (!this.hashService.getShareUrlId() && !this.hashService.getUrl() && !this.hashService.getPoiRouterData()) {
-            this.hashService.resetAddressbar();
+        let centerLatLon = SpatialService.fromViewCoordinate(e.map.getView().getCenter());
+        let currentLocation = { lat: this.location.latitude, lng: this.location.longitude };
+        if (SpatialService.getDistanceInMeters(centerLatLon, currentLocation) < 1) {
+            return;
         }
+        this.ngRedux.dispatch(new SetLocationAction({
+            longitude: centerLatLon.lng,
+            latitude: centerLatLon.lat,
+            zoom: e.map.getView().getZoom()
+        }));
+        this.hashService.resetAddressbar();
     }
 
     public ngAfterViewInit(): void {

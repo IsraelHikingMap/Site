@@ -163,7 +163,12 @@ export function initializeApplication(injector: Injector) {
         } else {
             try {
                 let dbState = await database.get("state") as any;
-                storedState = deepmerge(initialState, dbState.state, { arrayMerge: (destinationArray, sourceArray) => destinationArray });
+                storedState = deepmerge(initialState, dbState.state, {
+                    arrayMerge: (destinationArray, sourceArray) => {
+                        return sourceArray == null ? destinationArray : sourceArray;
+                    }
+                });
+                storedState.inMemoryState = initialState.inMemoryState;
             } catch (ex) {
                 // not state.
                 (database as any).put({
@@ -179,7 +184,6 @@ export function initializeApplication(injector: Injector) {
             });
         }
         try {
-            await injector.get<DataContainerService>(DataContainerService).initialize();
             injector.get<DeepLinksService>(DeepLinksService).initialize();
             console.log("Finished IHM Application Initialization");
         } catch (error) {

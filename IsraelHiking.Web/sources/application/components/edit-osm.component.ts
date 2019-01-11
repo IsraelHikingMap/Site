@@ -6,7 +6,6 @@ import { ResourcesService } from "../services/resources.service";
 import { LayersService } from "../services/layers/layers.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { BaseMapComponent } from "./base-map.component";
-import { HashService } from "../services/hash.service";
 import { ApplicationState } from "../models/models";
 
 
@@ -22,17 +21,17 @@ export class EditOSMComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
         private readonly layersService: LayersService,
         private readonly authorizationService: AuthorizationService,
-        private readonly hashService: HashService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
     }
 
     public getOsmAddress() {
-        let poiRouterData = this.hashService.getPoiRouterData();
+        let poiState = this.ngRedux.getState().poiState;
         let baseLayerAddress = this.layersService.getSelectedBaseLayer().address;
-        if (poiRouterData != null && poiRouterData.source.toLocaleLowerCase() === "osm") {
-
-            return this.authorizationService.getEditElementOsmAddress(baseLayerAddress, poiRouterData.id);
+        if (poiState.isSidebarOpen &&
+            poiState.selectedPointOfInterest != null &&
+            poiState.selectedPointOfInterest.source.toLocaleLowerCase() === "osm") {
+            return this.authorizationService.getEditElementOsmAddress(baseLayerAddress, poiState.selectedPointOfInterest.id);
         }
         let currentLocation = this.ngRedux.getState().location;
         return this.authorizationService.getEditOsmLocationAddress(baseLayerAddress,

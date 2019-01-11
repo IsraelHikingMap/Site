@@ -9,6 +9,7 @@ import { tracesReducer } from "./traces.reducer";
 import { layersReducer } from "./layers.reducer";
 import { userReducer } from "./user.reducer";
 import { pointsOfInterestReducer } from "./poi.reducer";
+import { inMemoryReducer } from "./in-memory.reducer";
 
 export const rootReducer = combineReducers<ApplicationState>({
     configuration: configurationReducer,
@@ -18,5 +19,6 @@ export const rootReducer = combineReducers<ApplicationState>({
     tracesState: tracesReducer,
     layersState: layersReducer,
     userState: userReducer,
-    poiState: pointsOfInterestReducer
+    poiState: pointsOfInterestReducer,
+    inMemoryState: inMemoryReducer
 } as ReducersMapObject<ApplicationState>);

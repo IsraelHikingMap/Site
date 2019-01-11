@@ -1,8 +1,7 @@
-import { Component, OnInit, OnDestroy, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Router } from "@angular/router";
 import { SharedStorage } from "ngx-store";
-import { Subscription } from "rxjs";
 import { take } from "lodash";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -18,7 +17,7 @@ import { ShareUrlsService } from "../../services/share-urls.service";
     styleUrls: ["shares-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class SharesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
+export class SharesDialogComponent extends BaseMapComponent implements OnInit {
 
     public filteredShareUrls: ShareUrl[];
     public shareUrlInEditMode: ShareUrl;
@@ -30,7 +29,6 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     private sessionSearchTerm = "";
 
     private page: number;
-    private shareUrlChangedSubscription: Subscription;
 
     constructor(resources: ResourcesService,
         private readonly router: Router,
@@ -53,10 +51,6 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         await this.shareUrlsService.getShareUrls();
         this.updateFilteredLists(this.searchTerm.value);
         this.loadingShareUrls = false;
-    }
-
-    public ngOnDestroy() {
-        this.shareUrlChangedSubscription.unsubscribe();
     }
 
     private updateFilteredLists(searchTerm: string) {

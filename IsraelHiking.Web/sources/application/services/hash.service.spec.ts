@@ -1,5 +1,6 @@
 import { Router } from "@angular/router";
 import { NgRedux } from "@angular-redux/store";
+import { MockNgRedux, NgReduxTestingModule } from "@angular-redux/store/testing";
 import { TestBed, inject } from "@angular/core/testing";
 import { RouterTestingModule } from "@angular/router/testing";
 import { Subject } from "rxjs";
@@ -25,13 +26,14 @@ describe("HashService", () => {
             open: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [RouterTestingModule],
+            imports: [RouterTestingModule, NgReduxTestingModule],
             providers: [
-                NgRedux,
                 { provide: Router, useValue: routerMock },
                 { provide: Window, useValue: windowMock }
             ]
         });
+
+        MockNgRedux.reset();
     });
 
     it("Should initialize location data from hash",
@@ -53,7 +55,6 @@ describe("HashService", () => {
 
                 hashService = new HashService(router, windowMock, ngRedux);
 
-                expect(hashService.getBaselayer()).toEqual(undefined);
                 expect(router.navigate).toHaveBeenCalledWith(["/"], { replaceUrl: true });
             }));
 
@@ -92,12 +93,15 @@ describe("HashService", () => {
             }));
 
     it("Should return base url",
-        inject([Router, Window, NgRedux],
-            (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
+        inject([Router, Window],
+            (router: Router, windowMock: Window) => {
 
                 windowMock.location.hash = "#!/";
+                MockNgRedux.getInstance().getState = () => ({
+                    configuration: {}
+                });
+                hashService = new HashService(router, windowMock, MockNgRedux.getInstance());
 
-                hashService = new HashService(router, windowMock, ngRedux);
                 let href = hashService.getHref();
 
                 expect(href).toBe(Urls.baseAddress);
@@ -105,27 +109,36 @@ describe("HashService", () => {
 
     it("Should return share url",
         inject([Router, Window, NgRedux],
-            (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
+            (router: Router, windowMock: Window) => {
 
                 windowMock.location.hash = "/";
-                (router as any).createUrlTree = () => "address";
-                hashService = new HashService(router, windowMock, ngRedux);
-                hashService.setApplicationState("share", "share");
+                (router as any).createUrlTree = () => "share-address";
+                MockNgRedux.getInstance().getState = () => ({
+                    configuration: {
+                        shareUrl: { id: "1" }
+                    }
+                });
+                hashService = new HashService(router, windowMock, MockNgRedux.getInstance());
+
                 let href = hashService.getHref();
 
-                expect(href).toBe(Urls.baseAddress + "address");
+                expect(href).toBe(Urls.baseAddress + "share-address");
             }));
 
     it("Should return external url",
-        inject([Router, Window, NgRedux],
-            (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
+        inject([Router, Window],
+            (router: Router, windowMock: Window) => {
 
                 windowMock.location.hash = "/";
-                (router as any).createUrlTree = () => "address";
-                hashService = new HashService(router, windowMock, ngRedux);
-                hashService.setApplicationState("url", "url");
+                (router as any).createUrlTree = () => "file-address";
+                MockNgRedux.getInstance().getState = () => ({
+                    configuration: {
+                        fileUrl: "fileUrl"
+                    }
+                });
+                hashService = new HashService(router, windowMock, MockNgRedux.getInstance());
                 let href = hashService.getHref();
 
-                expect(href).toBe(Urls.baseAddress + "address");
+                expect(href).toBe(Urls.baseAddress + "file-address");
             }));
 });

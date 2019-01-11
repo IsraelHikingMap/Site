@@ -1,5 +1,6 @@
 ﻿import { RouteStrings } from "./services/hash.service";
 import { ApplicationStateComponent } from "./components/application-state.component";
+import { PublicPoiSidebarComponent } from "./components/sidebar/publicpoi/public-poi-sidebar.component";
 
 export const routes = [
     {
@@ -16,14 +17,10 @@ export const routes = [
     },
     {
         path: `${RouteStrings.POI}/:${RouteStrings.SOURCE}/:${RouteStrings.ID}`,
-        component: ApplicationStateComponent
+        component: PublicPoiSidebarComponent
     },
     {
         path: `${RouteStrings.DOWNLOAD}`,
-        component: ApplicationStateComponent
-    },
-    {
-        path: `${RouteStrings.SEARCH}/:${RouteStrings.TERM}`,
         component: ApplicationStateComponent
     },
     {

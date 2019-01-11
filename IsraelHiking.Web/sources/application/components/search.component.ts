@@ -18,7 +18,7 @@ import { MapComponent } from "ngx-openlayers";
 import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../services/resources.service";
-import { HashService, RouteStrings, IApplicationStateChangedEventArgs } from "../services/hash.service";
+import { RouteStrings } from "../services/hash.service";
 import { RouterService } from "../services/routers/router.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { ToastService } from "../services/toast.service";
@@ -77,7 +77,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     public matAutocompleteTriggers: QueryList<MatAutocompleteTrigger>;
 
     constructor(resources: ResourcesService,
-        private readonly hashService: HashService,
         private readonly searchResultsProvider: SearchResultsProvider,
         private readonly routerService: RouterService,
         private readonly fitBoundsService: FitBoundsService,
@@ -116,16 +115,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.searchTo = new FormControl();
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
-
-        this.hashService.applicationStateChanged
-            .pipe(filter((f: IApplicationStateChangedEventArgs) => f.type === "search"))
-            .subscribe(args => {
-                this.fromContext.searchTerm = args.value;
-                this.searchFrom =
-                    new FormControl({ displayName: this.fromContext.searchTerm } as ISearchResultsPointOfInterest);
-                this.selectFirstSearchResults = true;
-                this.search(this.fromContext);
-            });
     }
 
     private configureInputFormControl(input: FormControl, context: ISearchContext) {

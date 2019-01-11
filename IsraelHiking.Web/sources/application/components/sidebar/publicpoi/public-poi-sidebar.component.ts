@@ -1,22 +1,25 @@
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
-import { NgRedux } from "@angular-redux/store";
+import { NgRedux, select } from "@angular-redux/store";
 import { format } from "openlayers";
 import { sum } from "lodash";
+import { Observable } from "rxjs";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
-import { SidebarService } from "../../../services/sidebar.service";
 import { PoiService, IPoiSocialLinks } from "../../../services/poi.service";
 import { AuthorizationService } from "../../../services/authorization.service";
 import { ToastService } from "../../../services/toast.service";
-import { HashService, IPoiRouterData, RouteStrings } from "../../../services/hash.service";
+import { HashService, RouteStrings, IPoiRouterData } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducres/routes.reducer";
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
-import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../../../reducres/poi.reducer";
+import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducres/poi.reducer";
+import { SpatialService } from "../../../services/spatial.service";
+import { SidebarService } from "../../../services/sidebar.service";
+import { sibebarAnimate } from "../sidebar.component";
 import {
     RouteData,
     LinkData,
@@ -27,13 +30,14 @@ import {
     Rating,
     Rater
 } from "../../../models/models";
-import { SpatialService } from "../../../services/spatial.service";
 
 @Component({
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
-    styleUrls: ["./public-poi-sidebar.component.scss"],
-    encapsulation: ViewEncapsulation.None
+    encapsulation: ViewEncapsulation.None,
+    animations: [
+        sibebarAnimate
+    ]
 })
 export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDestroy {
     public info: PointOfInterestExtended;
@@ -44,14 +48,16 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public shareLinks: IPoiSocialLinks;
     public contribution: Contribution;
 
+    @select((state: ApplicationState) => state.poiState.isSidebarOpen)
+    public isOpen: Observable<boolean>;
+
     private editMode: boolean;
     private poiExtended: PointOfInterestExtended;
-    private subscription: Subscription;
+    private subscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
-        private readonly route: ActivatedRoute,
         private readonly router: Router,
-        private readonly sidebarService: SidebarService,
+        private readonly route: ActivatedRoute,
         private readonly poiService: PoiService,
         private readonly authorizationService: AuthorizationService,
         private readonly selectedRouteService: SelectedRouteService,
@@ -59,24 +65,57 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         private readonly toastService: ToastService,
         private readonly hashService: HashService,
         private readonly fitBoundsService: FitBoundsService,
+        private readonly sidebarService: SidebarService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
-        let poiRouterData = this.hashService.getPoiRouterData();
+        this.sidebarService.hideWithoutChangingAddressbar();
         this.isLoading = true;
         this.shareLinks = {} as IPoiSocialLinks;
         this.contribution = {} as Contribution;
         this.info = { imagesUrls: [], references: [] } as PointOfInterestExtended;
-        this.getExtendedData(poiRouterData);
+        this.subscriptions = [];
+        this.subscriptions.push(this.route.paramMap.subscribe(async (_) => {
+            if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
+                return;
+            }
+            let snapshot = this.route.snapshot;
+            let poiSourceAndId = this.getDataFromRoute(snapshot.paramMap, snapshot.queryParamMap);
+            if (snapshot.queryParamMap.get(RouteStrings.EDIT) !== "true" || poiSourceAndId.source === "new") {
+                await this.getExtendedData(poiSourceAndId);
+            }
+        }));
+        this.subscriptions.push(this.route.queryParams.subscribe(async (params) => {
+            if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
+                return;
+            }
+            this.editMode = params[RouteStrings.EDIT] === "true";
+            let snapshot = this.route.snapshot;
+            let poiSourceAndId = this.getDataFromRoute(snapshot.paramMap, snapshot.queryParamMap);
+            if (this.editMode && poiSourceAndId.source !== "new") {
+                await this.getExtendedData(poiSourceAndId);
+            }
+        }));
+    }
+
+    private getDataFromRoute(params, queryParams) {
+        return {
+            id: params.get(RouteStrings.ID),
+            source: params.get(RouteStrings.SOURCE),
+            language: queryParams.get(RouteStrings.LANGUAGE)
+        } as IPoiRouterData;
     }
 
     public ngOnDestroy() {
-        if (this.subscription) {
-            this.subscription.unsubscribe();
+        for (let subscription of this.subscriptions) {
+            subscription.unsubscribe();
         }
     }
 
     private async getExtendedData(data: IPoiRouterData) {
         try {
+            this.ngRedux.dispatch(new SetSidebarAction({
+                isOpen: true
+            }));
             if (data.source === "new") {
                 let newPoi = {
                     imagesUrls: [],
@@ -102,15 +141,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                     poi: this.poiExtended
                 }));
             }
-            // Change edit mode only after this.info is initialized.
-            this.subscription = this.route.queryParams.subscribe(async (params) => {
-                this.editMode = params[RouteStrings.EDIT] && params[RouteStrings.EDIT] === "true";
-                if (this.editMode && data.source !== "new") {
-                    let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
-                    this.mergeDataIfNeededData(poiExtended);
-                }
-            });
-
         } finally {
             this.isLoading = false;
         }
@@ -149,7 +179,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             this.editMode;
     }
 
-    public getDescrition(): string {
+    public getDescription(): string {
         if (!this.poiExtended) {
             return "";
         }
@@ -243,12 +273,11 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public convertToRoute() {
-        // HM TODO: add can convert and allow conversion of routes only... remove isArea?
         let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes)) as RouteData[];
-        routesCopy[0].description = this.info.description;
         for (let routeData of routesCopy) {
             let name = this.selectedRouteService.createRouteName(routeData.name);
             let newRoute = this.routeLayerFactory.createRouteData(name);
+            newRoute.description = this.info.description;
             newRoute.segments = routeData.segments;
             newRoute.markers = routeData.markers;
             this.ngRedux.dispatch(new AddRouteAction({
@@ -314,9 +343,11 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public close() {
-        this.sidebarService.hide();
-        this.hashService.setApplicationState("poi", null);
-        this.hashService.resetAddressbar();
+        this.ngRedux.dispatch(new SetSidebarAction({
+            isOpen: false
+        }));
+        // reset address bar only after animation ends.
+        setTimeout(() => this.hashService.resetAddressbar(), 500);
     }
 
     public getElementOsmAddress(): string {

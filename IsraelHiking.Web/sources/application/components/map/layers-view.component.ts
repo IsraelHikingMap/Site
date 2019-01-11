@@ -25,7 +25,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
 
     @ViewChildren("cluster")
     public poiLayers: QueryList<LayerVectorComponent>;
-    public distance = 60;
+    public distance = 100;
     public categoriesTypes: CategoriesType[];
 
     @ViewChild("selectedPoiFeature")
@@ -108,8 +108,6 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     }
 
     public ngAfterViewInit() {
-        this.poiLayers.forEach(l => (l.instance as layer.Vector).setStyle((feature) => this.createClusterIcon(feature)));
-
         this.selectedPoi$.subscribe((poi) => this.onSelectedPoiChanged(poi));
 
         this.host.instance.on("pointermove", (event: MapBrowserEvent) => this.onPointerMove(event));
@@ -261,7 +259,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         return poi.location.lat;
     }
 
-    private createClusterIcon(feature): (style.Style | style.Style[]) {
+    public clusterStyleFunction = (feature): (style.Style | style.Style[]) => {
         let size = feature.get("features").length;
         if (size === 0) {
             return [];

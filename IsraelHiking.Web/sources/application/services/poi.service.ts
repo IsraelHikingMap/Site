@@ -102,13 +102,13 @@ export class PoiService {
     public async getPoint(id: string, source: string, language?: string): Promise<PointOfInterestExtended> {
         let itemInCache = this.poiCache.find(p => p.id === id && p.source === source);
         if (itemInCache) {
-            return itemInCache;
+            return { ...itemInCache };
         }
         let params = new HttpParams()
             .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
         let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as PointOfInterestExtended;
         this.poiCache.splice(0, 0, poi);
-        return poi;
+        return { ...poi };
     }
 
     public async uploadPoint(poiExtended: PointOfInterestExtended): Promise<PointOfInterestExtended> {

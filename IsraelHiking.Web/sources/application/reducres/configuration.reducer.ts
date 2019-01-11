@@ -1,4 +1,5 @@
 import { Action } from "redux";
+
 import { Configuration } from "../models/models";
 import { initialState } from "./initial-state";
 import { ReduxAction, createReducerFromClass } from "./reducer-action-decorator";
@@ -11,7 +12,7 @@ export class ConfigurationActions {
 
 class ConfigurationReducer {
     @ReduxAction(IS_ADVANCED_TOGGLE)
-    public zoomIn(lastState: Configuration, action: Action) {
+    public toggleAdvance(lastState: Configuration, action: Action): Configuration {
         return {
             ...lastState,
             isAdvanced: !lastState.isAdvanced

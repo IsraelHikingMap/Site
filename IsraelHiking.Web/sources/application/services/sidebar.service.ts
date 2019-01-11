@@ -1,6 +1,9 @@
 import { Injectable } from "@angular/core";
+import { NgRedux } from "@angular-redux/store";
 
 import { HashService } from "./hash.service";
+import { SetSidebarAction } from "../reducres/poi.reducer";
+import { ApplicationState } from "../models/models";
 
 export type SidebarView = "info" | "layers" | "public-poi" | "";
 
@@ -10,25 +13,31 @@ export class SidebarService {
     public viewName: SidebarView;
     public isVisible: boolean;
 
-    constructor(private readonly hashService: HashService) {
+    constructor(private readonly hashService: HashService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         this.hideWithoutChangingAddressbar();
     }
 
     public toggle = (viewName: SidebarView) => {
         if (this.viewName === viewName) {
             this.hide();
-            return;
+        } else {
+            this.show(viewName);
         }
-        if (viewName !== "public-poi") {
-            this.hide();
-        }
+    }
+
+    public show(viewName: SidebarView) {
         this.isVisible = true;
         this.viewName = viewName;
+        this.ngRedux.dispatch(new SetSidebarAction({
+            isOpen: false
+        }));
+        this.hashService.resetAddressbar();
+
     }
 
     public hide = () => {
         this.hideWithoutChangingAddressbar();
-        this.hashService.setApplicationState("poi", null);
         this.hashService.resetAddressbar();
     }
 

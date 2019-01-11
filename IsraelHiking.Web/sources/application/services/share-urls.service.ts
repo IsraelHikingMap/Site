@@ -1,11 +1,13 @@
-import { Injectable, EventEmitter } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { remove } from "lodash";
+import { NgRedux } from "@angular-redux/store";
 
 import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { Urls } from "../urls";
-import { ShareUrl, DataContainer } from "../models/models";
+import { SetShareUrlAction } from "../reducres/in-memory.reducer";
+import { ShareUrl, DataContainer, ApplicationState } from "../models/models";
 
 interface IShareUrlSocialLinks {
     facebook: string;
@@ -20,7 +22,8 @@ export class ShareUrlsService {
 
     constructor(private readonly httpClient: HttpClient,
         private readonly whatsAppService: WhatsAppService,
-        private readonly hashService: HashService) {
+        private readonly hashService: HashService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.shareUrls = [];
     }
@@ -98,5 +101,21 @@ export class ShareUrlsService {
     public async getImagePreview(dataContainer: DataContainer) {
         let image = await this.httpClient.post(Urls.images, dataContainer, { responseType: "blob" }).toPromise();
         return window.URL.createObjectURL(image);
+    }
+
+    public setShareUrl(shareUrl: ShareUrl) {
+        this.ngRedux.dispatch(new SetShareUrlAction({
+            shareUrl: shareUrl
+        }));
+    }
+
+    public async setShareUrlById(shareId: string): Promise<ShareUrl> {
+        let shareUrl = await this.getShareUrl(shareId);
+        this.setShareUrl(shareUrl);
+        return shareUrl;
+    }
+
+    public getSelectedShareUrl() {
+        return this.ngRedux.getState().inMemoryState.shareUrl;
     }
 }

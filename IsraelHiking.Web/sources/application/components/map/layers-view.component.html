@@ -14,7 +14,7 @@
 </aol-layer-tile>
 
 <div *ngFor="let categoriesType of categoriesTypes">
-    <aol-layer-vector [visible]="isVisible(categoriesType)" [zIndex]="1000" #cluster>
+    <aol-layer-vector [visible]="isVisible(categoriesType)" [zIndex]="1000" #cluster [style]="clusterStyleFunction">
         <aol-source-cluster [distance]="distance">
             <aol-source-vector></aol-source-vector>
         </aol-source-cluster>

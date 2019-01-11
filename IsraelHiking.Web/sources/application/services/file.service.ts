@@ -160,47 +160,6 @@ export class FileService {
                 this.nonAngularObjectsFactory.saveAs(blob, fileName);
                 resolve(false);
             }
-            // HM TODO: remove this?
-            // } else if (L.Browser.mobile) {
-            //    let reader = new FileReader();
-            //    reader.onload = () => {
-            //        if (L.Browser.chrome) {
-            //            // If chrome android
-            //            let save = document.createElement("a");
-            //
-            //            save.href = reader.result;
-            //            save.download = fileName;
-            //
-            //            document.body.appendChild(save);
-            //            save.click();
-            //            document.body.removeChild(save);
-            //            window.URL.revokeObjectURL(save.href);
-            //            resolve(false);
-            //        } else if (navigator.platform && navigator.platform.match(/iPhone|iPod|iPad/)) {
-            //            // If iPhone etc
-            //            let url = window.URL.createObjectURL(blob);
-            //            window.location.href = url;
-            //            resolve(false);
-            //        } else {
-            //            // Any other browser
-            //            this.nonAngularObjectsFactory.saveAs(blob, fileName);
-            //            resolve(false);
-            //        }
-            //    };
-            //
-            //    reader.readAsDataURL(blob);
-            // } else {
-            //    // Desktop if safari
-            //    if (L.Browser.safari) {
-            //        let url = window.URL.createObjectURL(blob);
-            //        window.location.href = url;
-            //        resolve(false);
-            //    } else {
-            //        // If normal browser use package Filesaver.js
-            //        this.nonAngularObjectsFactory.saveAs(blob, fileName);
-            //        resolve(false);
-            //    }
-            // }
         });
     }
 }

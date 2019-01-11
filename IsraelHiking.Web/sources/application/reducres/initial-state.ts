@@ -20,7 +20,8 @@ export const BICYCLE_TRAILS = "Bicycle Trails";
 export const initialState =
     {
         configuration: {
-            isAdvanced: false
+            isAdvanced: false,
+            version: "8.0"
         } as Configuration,
         location: {
             longitude: 35.12,
@@ -93,6 +94,13 @@ export const initialState =
         },
         poiState: {
             selectedPointOfInterest: null,
-            uploadMarkerData: null
+            uploadMarkerData: null,
+            isSidebarOpen: false
+        },
+        inMemoryState: {
+            download: false,
+            shareUrl: null,
+            fileUrl: null,
+            baseLayer: null
         }
     } as ApplicationState;

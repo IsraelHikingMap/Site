@@ -20,21 +20,19 @@
                     <img [src]="getImageFromShareId(shareUrl, 128, 128)" fxFill />
                 </div>
                 <div class="margin-10">
-                    <div class="item-content">
-                        <div *ngIf="!isShareUrlInEditMode(shareUrl)">
-                            {{shareUrl.title}}<br />
-                            {{shareUrl.description}}<br />
-                            {{shareUrl.creationDate | date:'dd/MM/yyyy'}}
-                        </div>
-                        <div *ngIf="isShareUrlInEditMode(shareUrl)">
-                            <mat-form-field>
-                                <input matInput type="text" [(ngModel)]="shareUrl.title" placeholder="{{resources.titlePlaceHolder}}" />
-                            </mat-form-field>
-                            <br />
-                            <mat-form-field>
-                                <input matInput type="text" [(ngModel)]="shareUrl.description" placeholder="{{resources.descriptionPlaceHolder}}" />
-                            </mat-form-field>
-                        </div>
+                    <div *ngIf="!isShareUrlInEditMode(shareUrl)">
+                        {{shareUrl.title}}<br />
+                        {{shareUrl.description}}<br />
+                        {{shareUrl.creationDate | date:'dd/MM/yyyy'}}
+                    </div>
+                    <div *ngIf="isShareUrlInEditMode(shareUrl)">
+                        <mat-form-field>
+                            <input matInput type="text" [(ngModel)]="shareUrl.title" placeholder="{{resources.titlePlaceHolder}}" />
+                        </mat-form-field>
+                        <br />
+                        <mat-form-field>
+                            <input matInput type="text" [(ngModel)]="shareUrl.description" placeholder="{{resources.descriptionPlaceHolder}}" />
+                        </mat-form-field>
                     </div>
                 </div>
             </div>
@@ -63,7 +61,7 @@
                 <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" class="no-padding" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share open menu for share"><i class="fa icon-share-alt"></i></button>
             </div>
             <div fxFlex>
-                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" matDialogClose (click)="convertShareUrlToRoute(selectedShareUrl)" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above"><i class="fa icon-plus"></i></button>
+                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" matDialogClose (click)="convertShareUrlToRoute(selectedShareUrl)" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above"><i class="fa icon-eye"></i></button>
             </div>
             <div fxFlex>
                 <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" (click)="deleteShareUrl(selectedShareUrl)" matTooltip="{{resources.delete}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
