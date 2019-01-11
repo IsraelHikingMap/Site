@@ -73,7 +73,7 @@ export class GeoLocationService {
     }
 
     public canRecord(): boolean {
-        return this.state === "tracking" && this.currentLocation != null; // && this.runningContextService.isCordova;
+        return this.state === "tracking" && this.currentLocation != null && this.runningContextService.isCordova;
     }
 
     private startWatching() {
