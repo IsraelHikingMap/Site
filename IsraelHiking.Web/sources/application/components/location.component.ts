@@ -250,11 +250,16 @@ export class LocationComponent extends BaseMapComponent {
         this.locationCoordinate.lat = position.coords.latitude;
         this.locationCoordinate.alt = position.coords.altitude;
         this.locationCoordinate.radius = position.coords.accuracy;
-        this.locationCoordinate.heading = position.coords.heading;
+        let needToUpdateHeading = position.coords.heading != null &&
+            position.coords.heading !== NaN &&
+            position.coords.speed !== 0;
+        if (needToUpdateHeading) {
+            this.locationCoordinate.heading = position.coords.heading;
+        }
         if (this.isFollowing) {
             this.setLocation();
         }
-        if (position.coords.heading != null && position.coords.heading !== NaN && this.isKeepNorthUp === false) {
+        if (needToUpdateHeading && this.isKeepNorthUp === false) {
             this.host.instance.getView().animate({
                 rotation: - position.coords.heading * Math.PI / 180.0
             });
