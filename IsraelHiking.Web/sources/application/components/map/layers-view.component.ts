@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, QueryList } from "@angular/core";
+import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, QueryList, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 import { MapComponent, LayerVectorComponent, FeatureComponent } from "ngx-openlayers";
 import { style, layer, MapBrowserEvent, Feature, geom, format, source } from "openlayers";
@@ -12,7 +12,6 @@ import { SpatialService } from "../../services/spatial.service";
 import { RouteStrings } from "../../services/hash.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { Urls } from "../../urls";
 import { LatLngAlt, ApplicationState, Overlay, PointOfInterest, PointOfInterestExtended } from "../../models/models";
 
 @Component({
@@ -56,6 +55,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         private readonly layersService: LayersService,
         private readonly categoriesLayerFactory: CategoriesLayerFactory,
         private readonly poiService: PoiService,
+        private readonly ngZone: NgZone,
         private readonly host: MapComponent) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
@@ -112,7 +112,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
 
         this.host.instance.on("pointermove", (event: MapBrowserEvent) => this.onPointerMove(event));
 
-        this.host.instance.on("singleclick", (event: MapBrowserEvent) => this.onSingleClick(event));
+        this.host.instance.on("singleclick", (event: MapBrowserEvent) => this.ngZone.run(() => this.onSingleClick(event)));
 
         this.setGeoJsonLayerStyle();
     }
