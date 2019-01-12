@@ -87,9 +87,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     @select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     private selectedRouteId$: Observable<string>;
 
+    @select((state: ApplicationState) => state.location.zoom)
+    private zoom$: Observable<number>;
+
     private statistics: IRouteStatistics;
     private chartElements: IChartElements;
     private componentSubscriptions: Subscription[];
+    private zoom: number;
 
     constructor(resources: ResourcesService,
         private readonly changeDetectorRef: ChangeDetectorRef,
@@ -116,6 +120,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             isHovering: false,
             color: "black"
         };
+        this.zoom = 7;
+        this.zoom$.subscribe((zoom) => {
+            this.zoom = zoom;
+            this.updateKmMarkers();
+        });
     }
 
     private initializeStatistics(statistics: IRouteStatistics): void {
@@ -514,13 +523,14 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
         let points = this.getKmPoints(selectedRoute);
         for (let i = 0; i < points.length; i++) {
-            this.kmMarkersCoordinates.push({ x: points[i].lng, y: points[i].lat, text: i.toString() });
+            this.kmMarkersCoordinates.push({ x: points[i].lng, y: points[i].lat, text: (i * this.getMarkerDistance()).toString() });
         }
     }
 
     private getKmPoints(routeData: RouteData): LatLngAlt[] {
 
         let length = 0;
+        let markersDistance = this.getMarkerDistance() * 1000;
         let start = routeData.segments[0].routePoint;
         let results = [start];
         let previousPoint = start;
@@ -528,25 +538,41 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             for (let latlng of segment.latlngs) {
                 let currentDistance = SpatialService.getDistanceInMeters(previousPoint, latlng);
                 length += currentDistance;
-                if (length < 1000) {
+                if (length < markersDistance) {
                     previousPoint = latlng;
                     continue;
                 }
                 let markersToAdd = -1;
-                while (length > 1000) {
-                    length -= 1000;
+                while (length > markersDistance) {
+                    length -= markersDistance;
                     markersToAdd++;
                 }
-                let ratio = (currentDistance - length - 1000 * markersToAdd) / currentDistance;
+                let ratio = (currentDistance - length - markersDistance * markersToAdd) / currentDistance;
                 results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, ratio));
                 for (let i = 1; i <= markersToAdd; i++) {
-                    let currentRatio = (i * 1000) / currentDistance + ratio;
+                    let currentRatio = (i * markersDistance) / currentDistance + ratio;
                     results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, currentRatio));
                 }
                 previousPoint = latlng;
             }
         }
         return results;
+    }
+
+    private getMarkerDistance(): number {
+        if (this.zoom < 7) {
+            return 100;
+        }
+        if (this.zoom < 9) {
+            return 50;
+        }
+        if (this.zoom < 11) {
+            return 10;
+        }
+        if (this.zoom < 13) {
+            return 5;
+        }
+        return 1;
     }
 
     public toggleExpand() {
