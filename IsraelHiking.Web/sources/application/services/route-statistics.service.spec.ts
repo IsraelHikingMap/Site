@@ -83,29 +83,25 @@ describe("RouteStatisticsService", () => {
         let interpolated = service.interpolateStatistics({
             points: [
                 {
-                    x: 0,
-                    y: 0,
+                    coordinate: [0, 0],
                     latlng: { lat: 0, lng: 0 }
                 } as IRouteStatisticsPoint,
                 {
-                    x: 1,
-                    y: 1,
+                    coordinate: [1, 1],
                     latlng: { lat: 1, lng: 1 }
                 } as IRouteStatisticsPoint,
                 {
-                    x: 2,
-                    y: 2,
+                    coordinate: [2, 2],
                     latlng: { lat: 2, lng: 2 }
                 } as IRouteStatisticsPoint,
                 {
-                    x: 3,
-                    y: 3,
+                    coordinate: [3, 3],
                     latlng: { lat: 3, lng: 3 }
                 } as IRouteStatisticsPoint
             ]
         } as IRouteStatistics, 2.5);
 
-        expect(interpolated.y).toBe(2.5);
+        expect(interpolated.coordinate[1]).toBe(2.5);
         expect(interpolated.latlng.lat).toBe(2.5);
         expect(interpolated.latlng.lng).toBe(2.5);
     });
@@ -120,19 +116,19 @@ describe("RouteStatisticsService", () => {
         let distance = service.findDistanceForLatLng({
             points: [
                 {
-                    x: 0,
+                    coordinate: [0, 0],
                     latlng: { lat: 0, lng: 0 }
                 },
                 {
-                    x: 1,
+                    coordinate: [1, 1],
                     latlng: { lat: 1, lng: 1 }
                 },
                 {
-                    x: 2,
+                    coordinate: [2, 2],
                     latlng: { lat: 2, lng: 2 }
                 },
                 {
-                    x: 3,
+                    coordinate: [3, 3],
                     latlng: { lat: 3, lng: 3 }
                 }
             ]
@@ -145,19 +141,19 @@ describe("RouteStatisticsService", () => {
         let distance = service.findDistanceForLatLng({
             points: [
                 {
-                    x: 0,
+                    coordinate: [0, 0],
                     latlng: { lat: 0, lng: 0 }
                 },
                 {
-                    x: 1,
+                    coordinate: [1, 1],
                     latlng: { lat: 0.0001, lng: 0.0001 }
                 },
                 {
-                    x: 2,
+                    coordinate: [2, 2],
                     latlng: { lat: 0.0002, lng: 0.0002 }
                 },
                 {
-                    x: 3,
+                    coordinate: [3, 3],
                     latlng: { lat: 0.0003, lng: 0.0003 }
                 }
             ]
