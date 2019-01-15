@@ -49,10 +49,10 @@
                     <button mat-button fxFill ngxClipboard [cbContent]="shareAddress" matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard"><i class="fa icon-clipboard fa-lg"></i></button>
                 </div>
                 <div fxFlex>
-                    <a mat-button fxFill [href]="nakebCreateHikeAddress" [target]="'_blank'" matTooltip="{{resources.createNakebHike}}" matTooltipPosition="above" angularticsCategory="Share" angularticsAction="Share nakeb"><i class="fa icon-nakeb fa-lg"></i></a>
+                    <a mat-button fxFill [href]="nakebCreateHikeAddress" [target]="'_blank'" matTooltip="{{resources.createNakebHike}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share nakeb"><i class="fa icon-nakeb fa-lg"></i></a>
                 </div>
                 <div fxFlex>
-                    <button mat-button fxFill (click)="showOffroadForm = true" [ngClass]="{active: showOffroadForm}" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above"><i class="fa icon-off-road fa-lg"></i></button>
+                    <button mat-button fxFill (click)="showOffroadForm = true" [ngClass]="{active: showOffroadForm}" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Toggle off-road form"><i class="fa icon-off-road fa-lg"></i></button>
                 </div>
             </div>
             <div *ngIf="showOffroadForm">
@@ -99,7 +99,7 @@
                         <mat-checkbox [(ngModel)]="offroadPublicTrack">{{resources.suggestAsPublicTrack}}</mat-checkbox>
                     </div>
                     <div fxFlex="50">
-                        <a mat-button (click)="sendToOffroad()" fxFill color="primary" mat-raised-button angularticsCategory="Share" angularticsAction="Share send off-road"><i class="fa icon-paper-plane fa-lg"></i> {{resources.send}}</a>
+                        <a mat-button (click)="sendToOffroad()" fxFill color="primary" mat-raised-button angulartics2On="click" angularticsCategory="Share" angularticsAction="Share send off-road"><i class="fa icon-paper-plane fa-lg"></i> {{resources.send}}</a>
                     </div>
                 </div>
                 <br/>
