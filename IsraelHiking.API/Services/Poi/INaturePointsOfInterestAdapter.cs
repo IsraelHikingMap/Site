@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Executors;
+using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
@@ -69,6 +71,8 @@ namespace IsraelHiking.API.Services.Poi
             {
                 var share = await _repository.GetUrlById(mainFeature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
                 poiItem.DataContainer = share.DataContainer;
+                var featureBytes = await _dataContainerConverterService.ToAnyFormat(share.DataContainer, FlowFormats.GEOJSON);
+                poiItem.FeatureCollection = featureBytes.ToFeatureCollection();
                 poiItem.IsRoute = true;
             }
             else
