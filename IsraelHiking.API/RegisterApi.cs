@@ -45,7 +45,7 @@ namespace IsraelHiking.API
             // registration here is what determines the order of which to merge points:
             services.AddTransient<IPointsOfInterestAdapter, OsmPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, NakebPointsOfInterestAdapter>();
-            services.AddTransient<IPointsOfInterestAdapter, OffRoadPointsOfInterestAdapter>();
+            //services.AddTransient<IPointsOfInterestAdapter, OffRoadPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, INaturePointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, WikipediaPointsOfInterestAdapter>();
             services.AddTransient<CsvPointsOfInterestAdapter>();
