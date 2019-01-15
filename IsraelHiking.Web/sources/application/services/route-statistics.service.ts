@@ -1,9 +1,11 @@
 import { Subject } from "rxjs";
+import { Coordinate } from "openlayers";
 
 import { SpatialService } from "./spatial.service";
-import { ICoordinate, LatLngAlt, RouteData } from "../models/models";
+import { LatLngAlt, RouteData } from "../models/models";
 
-export interface IRouteStatisticsPoint extends ICoordinate {
+export interface IRouteStatisticsPoint {
+    coordinate: Coordinate;
     latlng: LatLngAlt;
     slope: number;
 }
@@ -45,7 +47,7 @@ export class RouteStatisticsService {
         }
 
         let previousPoint = route.segments[0].latlngs[0];
-        let point = { x: 0, y: previousPoint.alt } as IRouteStatisticsPoint;
+        let point = { coordinate: [0, previousPoint.alt] } as IRouteStatisticsPoint;
         point.latlng = previousPoint;
         point.slope = 0;
         routeStatistics.points.push(start || point);
@@ -58,12 +60,11 @@ export class RouteStatisticsService {
                 }
                 routeStatistics.length += distance;
                 point = {
-                    x: (routeStatistics.length / 1000),
-                    y: latlng.alt
+                    coordinate: [(routeStatistics.length / 1000), latlng.alt]
                 } as IRouteStatisticsPoint;
                 point.latlng = latlng;
                 point.slope = distance === 0 ? 0 : (latlng.alt - previousPoint.alt) * 100 / distance;
-                if (start == null || (point.x > start.x && point.x < end.x)) {
+                if (start == null || (point.coordinate[0] > start.coordinate[0] && point.coordinate[0] < end.coordinate[0])) {
                     routeStatistics.points.push(point);
                 }
                 previousPoint = latlng;
@@ -71,17 +72,20 @@ export class RouteStatisticsService {
         }
         if (start != null && end != null) {
             routeStatistics.points.push(end);
-            routeStatistics.length = (end.x - start.x) * 1000;
+            routeStatistics.length = (end.coordinate[0] - start.coordinate[0]) * 1000;
         }
-        let previousSimplifiedPoint = routeStatistics.points[0];
-        for (let simplifiedPoint of routeStatistics.points) {
-            routeStatistics.gain += ((simplifiedPoint.y - previousSimplifiedPoint.y) > 0 && simplifiedPoint.y !== 0
-                    && previousSimplifiedPoint.y !== 0)
-                ? (simplifiedPoint.y - previousSimplifiedPoint.y)
+        let simplifiedCoordinates = SpatialService.simplify(routeStatistics.points.map(p => p.coordinate));
+        let previousSimplifiedPoint = simplifiedCoordinates[0];
+        for (let simplifiedPoint of simplifiedCoordinates) {
+            routeStatistics.gain += ((simplifiedPoint[1] - previousSimplifiedPoint[1]) > 0 &&
+                    simplifiedPoint[1] !== 0 &&
+                    previousSimplifiedPoint[1] !== 0)
+                ? (simplifiedPoint[1] - previousSimplifiedPoint[1])
                 : 0;
-            routeStatistics.loss += ((simplifiedPoint.y - previousSimplifiedPoint.y) < 0 && simplifiedPoint.y !== 0
-                    && previousSimplifiedPoint.y !== 0)
-                ? (simplifiedPoint.y - previousSimplifiedPoint.y)
+            routeStatistics.loss += ((simplifiedPoint[1] - previousSimplifiedPoint[1]) < 0 &&
+                    simplifiedPoint[1] !== 0 &&
+                    previousSimplifiedPoint[1] !== 0)
+                ? (simplifiedPoint[1] - previousSimplifiedPoint[1])
                 : 0;
             previousSimplifiedPoint = simplifiedPoint;
         }
@@ -101,19 +105,19 @@ export class RouteStatisticsService {
             return previousPoint;
         }
         for (let currentPoint of statistics.points) {
-            if (currentPoint.x < x) {
+            if (currentPoint.coordinate[0] < x) {
                 previousPoint = currentPoint;
                 continue;
             }
-            if (currentPoint.x - previousPoint.x === 0) {
+            if (currentPoint.coordinate[0] - previousPoint.coordinate[0] === 0) {
                 previousPoint = currentPoint;
                 continue;
             }
-            let ratio = (x - previousPoint.x) / (currentPoint.x - previousPoint.x);
-            let point = { x: x } as IRouteStatisticsPoint;
-            point.y = this.getInterpolatedValue(previousPoint.y, currentPoint.y, ratio);
+            let ratio = (x - previousPoint.coordinate[0]) / (currentPoint.coordinate[0] - previousPoint.coordinate[0]);
+            let point = { coordinate: [x, 0] } as IRouteStatisticsPoint;
+            point.coordinate[1] = this.getInterpolatedValue(previousPoint.coordinate[1], currentPoint.coordinate[1], ratio);
             point.slope = this.getInterpolatedValue(previousPoint.slope, currentPoint.slope, ratio);
-            point.latlng = SpatialService.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio, point.y);
+            point.latlng = SpatialService.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio, point.coordinate[1]);
             return point;
         }
         return previousPoint;
@@ -172,7 +176,7 @@ export class RouteStatisticsService {
                 previousPoint = currentPoint;
                 continue;
             }
-            return previousPoint.x + SpatialService.getDistanceInMeters(previousPoint.latlng, latLng) / 1000;
+            return previousPoint.coordinate[0] + SpatialService.getDistanceInMeters(previousPoint.latlng, latLng) / 1000;
         }
         return 0;
     }

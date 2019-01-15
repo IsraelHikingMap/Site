@@ -1,5 +1,6 @@
 import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, AfterViewChecked } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
+import { Coordinate } from "openlayers";
 import { Subscription, Observable } from "rxjs";
 import { D3Service, Selection, BaseType, ScaleContinuousNumeric } from "d3-ng2-service";
 import { select } from "@angular-redux/store";
@@ -12,7 +13,7 @@ import { CancelableTimeoutService } from "../services/cancelable-timeout.service
 import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { RunningContextService } from "../services/running-context.service";
-import { ICoordinate, LatLngAlt, RouteData, ApplicationState } from "../models/models";
+import { LatLngAlt, RouteData, ApplicationState } from "../models/models";
 
 interface IMargin {
     top: number;
@@ -21,11 +22,11 @@ interface IMargin {
     right: number;
 }
 
-interface ICoordinateAndText extends ICoordinate {
+interface ICoordinateAndText extends LatLngAlt {
     text: string;
 }
 
-interface IChartHover extends ICoordinate {
+interface IChartHover extends LatLngAlt {
     isHovering: boolean;
     color: string;
 }
@@ -68,7 +69,7 @@ interface IChartElements {
     ],
 })
 export class RouteStatisticsComponent extends BaseMapComponent implements OnInit, OnDestroy, AfterViewChecked {
-    private static readonly HOVER_BOX_WIDTH = 140;
+    private static readonly HOVER_BOX_WIDTH = 160;
 
     public length: number;
     public gain: number;
@@ -115,8 +116,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             margin: { top: 20, right: this.runningContextService.isMobile ? 10 : 50, bottom: 40, left: 70 },
         } as IChartElements;
         this.hover = {
-            x: 0,
-            y: 0,
+            lat: 0,
+            lng: 0,
             isHovering: false,
             color: "black"
         };
@@ -219,7 +220,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (this.isVisible()) {
             this.hideSubRouteSelection();
             this.setRouteColorToChart(selectedRoute.color);
-            this.setDataToChart(this.statistics.points.map(p => [p.x, p.y] as [number, number]));
+            this.setDataToChart(this.statistics.points.map(p => p.coordinate));
         }
         this.updateKmMarkers();
     }
@@ -234,7 +235,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let data = [];
         let routeColor = "black";
         if (this.statistics != null) {
-            data = this.statistics.points.map(p => [p.x, p.y]);
+            data = this.statistics.points.map(p => p.coordinate);
             routeColor = this.selectedRouteService.getSelectedRoute().color;
         }
 
@@ -259,8 +260,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.hideChartHover();
             return;
         }
-        let chartXCoordinate = this.chartElements.xScale(point.x);
-        let chartYCoordinate = this.chartElements.yScale(point.y);
+        let chartXCoordinate = this.chartElements.xScale(point.coordinate[0]);
+        let chartYCoordinate = this.chartElements.yScale(point.coordinate[1]);
         this.chartElements.hoverGroup.style("display", null);
         this.chartElements.hoverGroup.attr("transform", `translate(${chartXCoordinate}, 0)`);
         this.chartElements.hoverGroup.selectAll("circle").attr("cy", chartYCoordinate);
@@ -271,8 +272,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         this.chartElements.hoverGroup.select("g").attr("transform", `translate(${boxPosition}, 0)`);
         this.buildAllTextInHoverBox(point);
-        this.hover.x = point.latlng.lng;
-        this.hover.y = point.latlng.lat;
+        this.hover.lng = point.latlng.lng;
+        this.hover.lat = point.latlng.lat;
         this.hover.isHovering = true;
     }
 
@@ -445,13 +446,18 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private buildAllTextInHoverBox(point: IRouteStatisticsPoint) {
         this.chartElements.hoverGroup.selectAll("text").remove();
-        this.createHoverBoxText(this.resources.distance, point.x.toFixed(2), " " + this.resources.kmUnit, 20);
-        this.createHoverBoxText(this.resources.height, point.y.toFixed(0), " " + this.resources.meterUnit, 40);
-        // the following is a hack due to cross browser issues...
-        this.createHoverBoxText(this.resources.slope, Math.abs(point.slope).toFixed(0) + "%", point.slope < 0 ? "-" : "", 60);
+        this.createHoverBoxText(this.resources.distance, point.coordinate[0].toFixed(2), " " + this.resources.kmUnit, 20);
+        this.createHoverBoxText(this.resources.height, point.coordinate[1].toFixed(0), " " + this.resources.meterUnit, 40, true);
+        if (this.resources.direction === "rtl") {
+            // the following is a hack due to bad svg presentation...
+            this.createHoverBoxText(this.resources.slope, Math.abs(point.slope).toFixed(0) + "%", point.slope < 0 ? "-" : "", 60);
+        } else {
+            this.createHoverBoxText(this.resources.slope, point.slope.toFixed(0) + "%", "", 60);
+        }
+
     }
 
-    private createHoverBoxText(title: string, value: string, units: string, y: number) {
+    private createHoverBoxText(title: string, value: string, units: string, y: number, useBidi = false) {
         let x = 10;
         if (this.resources.direction === "rtl") {
             x = RouteStatisticsComponent.HOVER_BOX_WIDTH - x;
@@ -468,8 +474,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .style("pointer-events", "none");
         text.append("tspan")
             .text(`${title}: `);
-        text.append("tspan")
-            .text(value);
+        let valueSpan = text.append("tspan");
+        if (useBidi) {
+            valueSpan.attr("unicode-bidi", "embed").attr("direction", "ltr");
+        }
+        valueSpan.text(value);
         text.append("tspan")
             .text(units);
     }
@@ -481,7 +490,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.chartElements.hoverGroup.select(".circle-point-aura").attr("stroke", routeColor);
     }
 
-    private setDataToChart(data: [number, number][]) {
+    private setDataToChart(data: Coordinate[]) {
         if (!this.isVisible()) {
             return;
         }
@@ -523,7 +532,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
         let points = this.getKmPoints(selectedRoute);
         for (let i = 0; i < points.length; i++) {
-            this.kmMarkersCoordinates.push({ x: points[i].lng, y: points[i].lat, text: (i * this.getMarkerDistance()).toString() });
+            this.kmMarkersCoordinates.push({ lng: points[i].lng, lat: points[i].lat, text: (i * this.getMarkerDistance()).toString() });
         }
     }
 
@@ -582,7 +591,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private showSubRouteSelection = (point: IRouteStatisticsPoint) => {
-        let dragEndXCoordinate = this.chartElements.xScale(point.x);
+        let dragEndXCoordinate = this.chartElements.xScale(point.coordinate[0]);
         let xStart = Math.min(this.chartElements.dragStartXCoordinate, dragEndXCoordinate);
         let xEnd = Math.max(this.chartElements.dragStartXCoordinate, dragEndXCoordinate);
         this.chartElements.dragRect.style("display", null)

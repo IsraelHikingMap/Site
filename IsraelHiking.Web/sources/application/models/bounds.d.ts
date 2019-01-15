@@ -1,6 +1,6 @@
 ﻿import { LatLngAlt } from "./lat-lng";
 
-export interface IBounds {
+export interface Bounds {
     northEast: LatLngAlt;
     southWest: LatLngAlt;
 }

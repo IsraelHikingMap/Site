@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 
 import { SidebarService } from "./sidebar.service";
-import { IBounds, LatLngAlt } from "../models/models";
+import { Bounds, LatLngAlt } from "../models/models";
 import { MapService } from "./map.service";
 import { SpatialService } from "./spatial.service";
 
@@ -15,7 +15,7 @@ export class FitBoundsService {
         this.isFlying = false;
     }
 
-    public fitBounds(bounds: IBounds) {
+    public fitBounds(bounds: Bounds) {
         let padding = [50, 50, 50, 50];
         if (this.sidebarService.isVisible && window.innerWidth >= 768) {
             padding = [50, -400, 50, 50];

@@ -1,5 +1,4 @@
-﻿export { IBounds } from "./bounds";
-export { ICoordinate } from "./coordinate";
+﻿export { Bounds } from "./bounds";
 export { DataContainer } from "./data-container";
 export { LatLngAlt, ILatLngTime } from "./lat-lng";
 export { LayerData, EditableLayer, Overlay } from "./layer-data";

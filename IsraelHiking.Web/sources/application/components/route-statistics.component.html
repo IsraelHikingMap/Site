@@ -38,7 +38,7 @@
     <aol-source-vector>
         <aol-feature *ngFor="let marker of kmMarkersCoordinates">
             <aol-geometry-point>
-                <aol-coordinate [x]="marker.x" [y]="marker.y" [srid]="'EPSG:4326'"></aol-coordinate>
+                <aol-coordinate [x]="marker.lng" [y]="marker.lat" [srid]="'EPSG:4326'"></aol-coordinate>
             </aol-geometry-point>
             <aol-style>
                 <aol-style-circle [radius]="10">
@@ -57,7 +57,7 @@
     <aol-source-vector>
         <aol-feature>
             <aol-geometry-point>
-                <aol-coordinate [x]="hover.x" [y]="hover.y" [srid]="'EPSG:4326'"></aol-coordinate>
+                <aol-coordinate [x]="hover.lng" [y]="hover.lat" [srid]="'EPSG:4326'"></aol-coordinate>
             </aol-geometry-point>
             <aol-style>
                 <aol-style-circle [radius]="6">

@@ -1,15 +1,22 @@
 import { Injectable } from "@angular/core";
-import { geom, Coordinate, extent, Map, Extent, proj } from "openlayers";
+import { geom, Coordinate, extent, Map, Extent, proj, Sphere } from "openlayers";
 
-import { LatLngAlt, IBounds } from "../models/models";
+import { LatLngAlt, Bounds } from "../models/models";
 
 @Injectable()
 export class SpatialService {
 
+    private static readonly wgs84Shpere = new Sphere(6371008.8);
+
     public static getDistanceInMeters(latlng1: LatLngAlt, latlng2: LatLngAlt) {
-        let coordinate1 = proj.transform(SpatialService.toCoordinate(latlng1), "EPSG:4326", "EPSG:3857");
-        let coordinate2 = proj.transform(SpatialService.toCoordinate(latlng2), "EPSG:4326", "EPSG:3857");
-        return new geom.LineString([coordinate1, coordinate2]).getLength();
+        return SpatialService.wgs84Shpere.haversineDistance(SpatialService.toCoordinate(latlng1),
+            SpatialService.toCoordinate(latlng2));
+    }
+
+    public static simplify(coordinates: Coordinate[]): Coordinate[] {
+        let line = new geom.LineString(coordinates);
+        line = line.simplify(1) as geom.LineString;
+        return line.getCoordinates();
     }
 
     public static getDistance(latlng1: LatLngAlt, latlng2: LatLngAlt) {
@@ -43,7 +50,7 @@ export class SpatialService {
         return returnValue;
     }
 
-    public static getBounds(latlngs: LatLngAlt[]): IBounds {
+    public static getBounds(latlngs: LatLngAlt[]): Bounds {
         if (latlngs.length === 1) {
             return {
                 northEast: latlngs[0],
@@ -55,7 +62,7 @@ export class SpatialService {
         return SpatialService.extentToBounds(lineExtent);
     }
 
-    public static getGeoJsonBounds(geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>): IBounds {
+    public static getGeoJsonBounds(geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>): Bounds {
         let coordinates = [];
         for (let feature of geoJson.features) {
             for (let coordinate of feature.geometry.coordinates) {
@@ -99,7 +106,7 @@ export class SpatialService {
         };
     }
 
-    public static extentToBounds(ext: Extent): IBounds {
+    public static extentToBounds(ext: Extent): Bounds {
         return {
             northEast: {
                 lng: ext[2],
@@ -112,7 +119,7 @@ export class SpatialService {
         };
     }
 
-    public static boundsToViewExtent(bounds: IBounds): Extent {
+    public static boundsToViewExtent(bounds: Bounds): Extent {
         return [
             ...SpatialService.toViewCoordinate(bounds.southWest), ...SpatialService.toViewCoordinate(bounds.northEast)
         ] as Extent;
@@ -123,7 +130,7 @@ export class SpatialService {
         return new geom.LineString(olCoordinates);
     }
 
-    public static getMapBounds(map: Map): IBounds {
+    public static getMapBounds(map: Map): Bounds {
         let viewExtent = map.getView().calculateExtent(map.getSize());
         viewExtent = proj.transformExtent(viewExtent, "EPSG:3857", "EPSG:4326");
         return SpatialService.extentToBounds(viewExtent);
