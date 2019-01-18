@@ -200,7 +200,7 @@ export class LocationComponent extends BaseMapComponent {
                 `${date.toISOString().split("T")[0]} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
             name = this.resources.route + " " + dateString;
         }
-        let route = this.routeLayerFactory.createRouteData(name);
+        let route = this.routeLayerFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
         let currentLocation = this.geoLocationService.currentLocation;
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
         route.segments.push({

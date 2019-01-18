@@ -276,7 +276,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes)) as RouteData[];
         for (let routeData of routesCopy) {
             let name = this.selectedRouteService.createRouteName(routeData.name);
-            let newRoute = this.routeLayerFactory.createRouteData(name);
+            let newRoute = this.routeLayerFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
             newRoute.description = this.info.description;
             newRoute.segments = routeData.segments;
             newRoute.markers = routeData.markers;

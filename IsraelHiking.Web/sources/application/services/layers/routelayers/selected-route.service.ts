@@ -75,7 +75,7 @@ export class SelectedRouteService {
             this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: this.routes[0].id }));
         }
         if (this.routes.length === 0) {
-            let data = this.routeLayerFactory.createRouteData(this.createRouteName());
+            let data = this.routeLayerFactory.createRouteData(this.createRouteName(), this.getLeastUsedColor());
             this.ngRedux.dispatch(new AddRouteAction({ routeData: data }));
             this.setSelectedRoute(data.id);
         }
@@ -103,6 +103,19 @@ export class SelectedRouteService {
             availableRouteName = `${routeName} ${index}`;
         }
         return availableRouteName;
+    }
+
+    public getLeastUsedColor() {
+        let colorCount = Number.POSITIVE_INFINITY;
+        let selectedColor = this.routeLayerFactory.colors[0];
+        for (let color of this.routeLayerFactory.colors) {
+            let currentColorCount = this.routes.filter(r => r.color === color).length;
+            if (currentColorCount < colorCount) {
+                selectedColor = color;
+                colorCount = currentColorCount;
+            }
+        }
+        return selectedColor;
     }
 
     public isNameAvailable = (name: string) => {
@@ -155,7 +168,8 @@ export class SelectedRouteService {
             } as RouteSegmentData);
         let splitRouteData =
             this.routeLayerFactory.createRouteData(
-                this.createRouteName(selectedRoute.name + " " + this.resourcesService.split));
+                this.createRouteName(selectedRoute.name + " " + this.resourcesService.split),
+                this.getLeastUsedColor());
         splitRouteData.segments = postfixSegments;
         let routeData = {
             ...selectedRoute,
@@ -315,7 +329,7 @@ export class SelectedRouteService {
             if (this.isNameAvailable(routeData.name) === false) {
                 routeData.name = this.createRouteName(routeData.name);
             }
-            let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(routeData);
+            let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(routeData, this.getLeastUsedColor());
             this.ngRedux.dispatch(new AddRouteAction({
                 routeData: routeToAdd
             }));

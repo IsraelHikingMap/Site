@@ -23,7 +23,8 @@ export class RouteAddDialogComponent extends RouteBaseDialogComponent {
         ngRedux: NgRedux<ApplicationState>,
     ) {
         super(resources, selectedRouteService, routeLayerFactory, toastService, ngRedux);
-        this.routeData = routeLayerFactory.createRouteData(selectedRouteService.createRouteName());
+        this.routeData = routeLayerFactory.createRouteData(selectedRouteService.createRouteName(),
+            selectedRouteService.getLeastUsedColor());
         this.isNew = true;
         this.title = this.resources.addRoute;
     }

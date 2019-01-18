@@ -7,6 +7,10 @@ import { RouteData } from "../../../models/models";
 
 @Injectable()
 export class RouteLayerFactory {
+
+    private static readonly DEFAULT_OPACITY = 0.5;
+    private static readonly DEFAULT_WEIGHT = 4;
+
     // default values - in case the response from server takes too long.
     public colors: string[] = [
         "#0000FF",
@@ -31,15 +35,15 @@ export class RouteLayerFactory {
         });
     }
 
-    public createRouteData(name: string): RouteData {
+    public createRouteData(name: string, color?: string): RouteData {
         let route: RouteData = {
-            id: Math.random().toString(36).substr(2, 9),
+            id: this.generateRandomId(),
             name: name,
             description: "",
             state: "ReadOnly",
-            color: this.colors[this.nextColorIndex],
-            opacity: 0.5,
-            weight: 4,
+            color: color || this.colors[this.nextColorIndex],
+            opacity: RouteLayerFactory.DEFAULT_OPACITY,
+            weight: RouteLayerFactory.DEFAULT_WEIGHT,
             markers: [],
             segments: []
         };
@@ -47,22 +51,17 @@ export class RouteLayerFactory {
         return route;
     }
 
-    public createRouteDataAddMissingFields(routeData: RouteData): RouteData {
+    public createRouteDataAddMissingFields(routeData: RouteData, color: string): RouteData {
         let route = { ...routeData };
-        if (!route.color) {
-            route.color = this.colors[this.nextColorIndex];
-            this.nextColorIndex = (this.nextColorIndex + 1) % this.colors.length;
-        }
-        if (!route.opacity) {
-            route.opacity = 0.5;
-        }
-        if (!route.weight) {
-            route.weight = 4;
-        }
-        if (!route.id) {
-            route.id = Math.random().toString(36).substr(2, 9);
-        }
+        route.color = route.color || color;
+        route.opacity = route.opacity || RouteLayerFactory.DEFAULT_OPACITY;
+        route.weight = route.weight || RouteLayerFactory.DEFAULT_WEIGHT;
+        route.id = route.id || this.generateRandomId();
         route.state = "ReadOnly";
         return route;
+    }
+
+    private generateRandomId() {
+        return Math.random().toString(36).substr(2, 9);
     }
 }

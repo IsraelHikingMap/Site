@@ -39,7 +39,7 @@ export class DataContainerService {
     private setData(dataContainer: DataContainer) {
         let routesData = [];
         for (let route of dataContainer.routes) {
-            let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(route);
+            let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
             routesData.push(routeToAdd);
         }
         this.ngRedux.dispatch(new BulkReplaceRoutesAction({
