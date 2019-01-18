@@ -239,6 +239,8 @@ export class ResourcesService {
     public local: string;
     public northUp: string;
     public deleteAllRoutes: string;
+    public presentShare: string;
+    public addToRoutes: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -701,13 +703,15 @@ export class ResourcesService {
         this.runningInBackground = this.gettextCatalog.getString("Running in the background");
         this.camera = this.gettextCatalog.getString("Camera");
         this.gallery = this.gettextCatalog.getString("Gallery");
-        this.clearRoute = this.gettextCatalog.getString("Clear route");
-        this.clearPois = this.gettextCatalog.getString("Clear points");
-        this.clearBoth = this.gettextCatalog.getString("Clear both");
+        this.clearRoute = this.gettextCatalog.getString("Clear Route");
+        this.clearPois = this.gettextCatalog.getString("Clear Points");
+        this.clearBoth = this.gettextCatalog.getString("Clear Both");
         this.collapse = this.gettextCatalog.getString("Collapse");
         this.local = this.gettextCatalog.getString("Local");
         this.northUp = this.gettextCatalog.getString("North-Up");
         this.deleteAllRoutes = this.gettextCatalog.getString("Delete All Routes");
+        this.presentShare = this.gettextCatalog.getString("Present share");
+        this.addToRoutes = this.gettextCatalog.getString("Add to routes");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

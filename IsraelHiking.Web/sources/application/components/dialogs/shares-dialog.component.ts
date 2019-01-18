@@ -10,6 +10,7 @@ import { ToastService } from "../../services/toast.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ShareUrl } from "../../models/share-url";
 import { ShareUrlsService } from "../../services/share-urls.service";
+import { DataContainerService } from "../../services/data-container.service";
 
 @Component({
     selector: "shares-dialog",
@@ -33,7 +34,8 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
     constructor(resources: ResourcesService,
         private readonly router: Router,
         private readonly toastService: ToastService,
-        private readonly shareUrlsService: ShareUrlsService) {
+        private readonly shareUrlsService: ShareUrlsService,
+        private readonly dataContainerService: DataContainerService) {
         super(resources);
         this.loadingShareUrls = false;
         this.shareUrlInEditMode = null;
@@ -100,8 +102,13 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
         this.toastService.success(this.resources.dataUpdatedSuccessfully);
     }
 
-    public async convertShareUrlToRoute(shareUrl: ShareUrl) {
+    public showShareUrl(shareUrl: ShareUrl) {
         this.router.navigate([RouteStrings.ROUTE_SHARE, shareUrl.id]);
+    }
+
+    public async addShareUrlToRoutes(shareUrl: ShareUrl) {
+        let share = await this.shareUrlsService.getShareUrl(shareUrl.id);
+        this.dataContainerService.setData(share.dataContainer, true);
     }
 
     public toggleSelectedShareUrl(shareUrl) {

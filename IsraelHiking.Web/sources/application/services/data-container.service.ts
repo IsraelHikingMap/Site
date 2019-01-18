@@ -36,11 +36,14 @@ export class DataContainerService {
         private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
-    private setData(dataContainer: DataContainer) {
+    public setData(dataContainer: DataContainer, keepCurrentRoutes: boolean) {
         let routesData = [];
         for (let route of dataContainer.routes) {
             let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
             routesData.push(routeToAdd);
+        }
+        if (keepCurrentRoutes) {
+            routesData = [...this.ngRedux.getState().routes.present, ...routesData];
         }
         this.ngRedux.dispatch(new BulkReplaceRoutesAction({
             routesData: routesData
@@ -86,7 +89,7 @@ export class DataContainerService {
         }));
         let data = await this.fileService.openFromUrl(url);
         data.baseLayer = this.hashService.stringToBaseLayer(baseLayer);
-        this.setData(data);
+        this.setData(data, false);
     }
 
     public setShareUrlAfterNavigation = async (shareId) => {
@@ -98,7 +101,7 @@ export class DataContainerService {
         // await this.layersInitializationPromise;
         try {
             shareUrl = await this.shareUrlsService.setShareUrlById(shareId);
-            this.setData(shareUrl.dataContainer);
+            this.setData(shareUrl.dataContainer, false);
             if (!this.runningContextService.isIFrame) {
                 this.toastService.info(shareUrl.description, shareUrl.title);
             }
