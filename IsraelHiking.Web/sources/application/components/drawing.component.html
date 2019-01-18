@@ -7,9 +7,9 @@
     <button mat-button *ngIf="isRouteEditActive()" (click)="setRouting('None')" [ngClass]="{active : getRoutingType() == 'None' }" matTooltip="{{resources.straightLines}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Routing None"><i class="fa icon-none fa-lg"></i></button>
     <button mat-button (click)="undo()" [disabled]="(undoQueueLength | async) === 0" matTooltip="{{resources.undo}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw undo"><i class="fa icon-rotate-left fa-lg"></i></button>
     <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
-        <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="clearRoute()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Clear route">{{resources.clearRoute}}</button>
-        <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="clearPois()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Clear pois">{{resources.clearPois}}</button>
-        <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="clearBoth()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Clear both">{{resources.clearBoth}}</button>
+        <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="clearRoute()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Clear route"><i class="fa icon-recordings"></i> {{resources.clearRoute}}</button>
+        <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="clearPois()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Clear pois"><i class="fa icon-map-marker"></i> {{resources.clearPois}}</button>
+        <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="clearBoth()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Clear both"><i class="fa icon-close"></i> {{resources.clearBoth}}</button>
     </mat-menu>
     <button mat-button *ngIf="isEditActive()" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.clear}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw clear"><i class="fa icon-close fa-lg"></i></button>
 </div>
