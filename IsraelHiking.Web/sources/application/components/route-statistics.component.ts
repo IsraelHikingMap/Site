@@ -14,6 +14,7 @@ import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { RunningContextService } from "../services/running-context.service";
 import { LatLngAlt, RouteData, ApplicationState } from "../models/models";
+import { GeoLocationService } from "../services/geo-location.service";
 
 interface IMargin {
     top: number;
@@ -74,6 +75,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public length: number;
     public gain: number;
     public loss: number;
+    public duration: string;
+    public averageSpeed: number;
+    public currentSpeed: number;
     public isKmMarkersOn: boolean;
     public isExpanded: boolean;
     public kmMarkersCoordinates: ICoordinateAndText[];
@@ -103,7 +107,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         private readonly routeStatisticsService: RouteStatisticsService,
         private readonly cancelableTimeoutService: CancelableTimeoutService,
         private readonly sidebarService: SidebarService,
-        private readonly runningContextService: RunningContextService
+        private readonly runningContextService: RunningContextService,
+        private readonly geoLocationService: GeoLocationService
     ) {
         super(resources);
         this.kmMarkersCoordinates = [];
@@ -133,10 +138,27 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.length = 0;
             this.gain = 0;
             this.loss = 0;
+            this.duration = "--:--";
+            this.currentSpeed = null;
+            this.averageSpeed = null;
         } else {
             this.length = statistics.length;
             this.gain = statistics.gain;
             this.loss = statistics.loss;
+            this.averageSpeed = statistics.averageSpeed;
+            if (!statistics.duration) {
+                this.duration = "--:--";
+            } else {
+                if (statistics.duration > 60 * 60) {
+                    let hours = Math.floor(statistics.duration / (60 * 60));
+                    let minutes = (statistics.duration % (60 * 60)) / 60;
+                    this.duration = hours + ":" + minutes + " " + this.resources.hourUnit;
+                } else {
+                    let minutes = Math.floor(statistics.duration / 60);
+                    let seconds = statistics.duration % 60;
+                    this.duration = minutes + ":" + seconds + " " + this.resources.minuteUnit;
+                }
+            }
         }
     }
 
@@ -149,6 +171,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }));
         this.componentSubscriptions.push(this.resources.languageChanged.subscribe(() => {
             this.redrawChart();
+        }));
+        this.componentSubscriptions.push(this.geoLocationService.positionChanged.subscribe(p => {
+            this.currentSpeed = p.coords.speed;
         }));
         this.routeChanged();
     }
@@ -290,7 +315,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let point = this.routeStatisticsService.interpolateStatistics(this.statistics, xPosition);
         this.showChartHover(point);
         if (this.chartElements.dragStartXCoordinate != null) {
-            // selecting subroute state
+            // selecting sub-route state
             this.chartElements.isDragging = true;
             this.showSubRouteSelection(point);
         }
@@ -302,7 +327,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.chartElements.dragStartXCoordinate = null;
             return;
         }
-        // no draggging - as in click
+        // no dragging - as in click
         this.hideSubRouteSelection();
         this.onMouseMove();
         const timeoutGroupName = "clickOnChart";

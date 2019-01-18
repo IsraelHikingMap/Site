@@ -241,6 +241,8 @@ export class ResourcesService {
     public deleteAllRoutes: string;
     public presentShare: string;
     public addToRoutes: string;
+    public hourUnit: string;
+    public minuteUnit: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -712,6 +714,8 @@ export class ResourcesService {
         this.deleteAllRoutes = this.gettextCatalog.getString("Delete All Routes");
         this.presentShare = this.gettextCatalog.getString("Present share");
         this.addToRoutes = this.gettextCatalog.getString("Add to routes");
+        this.hourUnit = this.gettextCatalog.getString("hr");
+        this.minuteUnit = this.gettextCatalog.getString("min");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

@@ -1,5 +1,6 @@
 import { Subject } from "rxjs";
 import { Coordinate } from "openlayers";
+import { last } from "lodash";
 
 import { SpatialService } from "./spatial.service";
 import { LatLngAlt, RouteData } from "../models/models";
@@ -12,9 +13,26 @@ export interface IRouteStatisticsPoint {
 
 export interface IRouteStatistics {
     points: IRouteStatisticsPoint[];
-    length: number; // [meters]
-    gain: number; // [meters] - adding only when going up hill.
-    loss: number; // [meters] - adding only when going downhill - should be negative number.
+    /**
+     * Route length in meters
+     */
+    length: number;
+    /**
+     * gain (adding only when going up hill) in meters
+     */
+    gain: number;
+    /**
+     * loss (adding only when going downhill - should be negative number) in meters
+     */
+    loss: number;
+    /**
+     * The time in seconds it took to do this route - only if there is time information
+     */
+    duration: number;
+    /**
+     * The average speed in km/hour for this route
+     */
+    averageSpeed: number;
 }
 
 export class RouteStatisticsService {
@@ -40,7 +58,9 @@ export class RouteStatisticsService {
             points: [] as IRouteStatisticsPoint[],
             length: 0,
             gain: 0,
-            loss: 0
+            loss: 0,
+            duration: null,
+            averageSpeed: null
         } as IRouteStatistics;
         if (route.segments.length <= 0) {
             return routeStatistics;
@@ -93,7 +113,21 @@ export class RouteStatisticsService {
     }
 
     public getStatistics = (route: RouteData): IRouteStatistics => {
-        return this.getStatisticsByRange(route, null, null);
+        let fullStatistics = this.getStatisticsByRange(route, null, null);
+        if (route.segments.length === 0) {
+            return fullStatistics;
+        }
+        let start = route.segments[0].latlngs[0];
+        if (start.timestamp === null) {
+            return fullStatistics;
+        }
+        let end = last(last(route.segments).latlngs);
+        if (end.timestamp === null) {
+            return fullStatistics;
+        }
+        fullStatistics.duration = (new Date(end.timestamp).getTime() - new Date(start.timestamp).getTime()) / 1000;
+        fullStatistics.averageSpeed = fullStatistics.length / fullStatistics.duration * 3.6; // convert m/sec to km/hr
+        return fullStatistics;
     }
 
     public interpolateStatistics(statistics: IRouteStatistics, x: number) {
