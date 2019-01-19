@@ -82,6 +82,7 @@ import { PrivatePoiUploaderService } from "./services/private-poi-uploader.servi
 import { SelectedRouteService } from "./services/layers/routelayers/selected-route.service";
 import { RunningContextService } from "./services/running-context.service";
 import { TracesService } from "./services/traces.service";
+import { AssociatedFilesService } from "./services/associated-files.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -185,6 +186,7 @@ export function initializeApplication(injector: Injector) {
         }
         try {
             injector.get<DeepLinksService>(DeepLinksService).initialize();
+            injector.get<AssociatedFilesService>(AssociatedFilesService).initialize();
             console.log("Finished IHM Application Initialization");
         } catch (error) {
             console.error("Failed IHM Application Initialization", error);
@@ -320,6 +322,7 @@ export function getWindow() { return window; }
         ImageResizeService,
         NonAngularObjectsFactory,
         DeepLinksService,
+        AssociatedFilesService,
         PrivatePoiUploaderService,
         SelectedRouteService,
         RunningContextService,

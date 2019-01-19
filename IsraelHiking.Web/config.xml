@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="il.org.osm.israelhiking" version="8.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="il.org.osm.israelhiking" version="8.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Israel Hiking Map</name>
     <description>An application for outdoor navigation.</description>
     <author email="IsraelHikingMap@gmail.com" href="http://israelhiking.osm.org.il">Israel Hiking Map</author>
@@ -22,6 +22,43 @@
         <icon density="xhdpi" src="www/content/favicons/android-chrome-96x96.png" />
         <icon density="xxhdpi" src="www/content/favicons/android-chrome-144x144.png" />
         <icon density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
+        <config-file parent="/manifest/application/activity" target="AndroidManifest.xml">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:mimeType="text/xml" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="application/gpx" />
+                <data android:mimeType="application/gpx+xml" />
+                <data android:mimeType="application/kml" />
+                <data android:mimeType="application/kml+xml" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/vnd.google-earth.kml+xml" />
+                <data android:mimeType="application/xml" />
+                <data android:host="*" android:scheme="http" />
+                <data android:host="*" android:scheme="https" />
+                <data android:host="*" android:scheme="content" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:mimeType="*/*" />
+                <data android:host="*" android:pathPattern=".*\.gpx" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\.gpx" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\.gpx" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.gpx" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\.kml" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\.kml" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\.kml" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.kml" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\.twl" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\.twl" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\.twl" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.twl" android:scheme="file" />
+            </intent-filter>
+        </config-file>
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />
@@ -56,6 +93,11 @@
     <plugin name="cordova-plugin-x-toast" spec="2.7.2" />
     <plugin name="cordova-android-play-services-gradle-release" spec="2.0.0">
         <variable name="PLAY_SERVICES_VERSION" value="11.6.2" />
+    </plugin>
+    <plugin name="cc.fovea.cordova.openwith" spec="^1.2.0">
+        <variable name="ANDROID_MIME_TYPE" value="application/gpx" />
+        <variable name="IOS_URL_SCHEME" value="israelhiking" />
+        <variable name="IOS_UNIFORM_TYPE_IDENTIFIER" value="public.data" />
     </plugin>
     <engine name="android" spec="^7.1.4" />
 </widget>

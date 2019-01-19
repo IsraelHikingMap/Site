@@ -2,17 +2,18 @@
 import { Router } from "@angular/router";
 
 import { RouteStrings } from "../services/hash.service";
-import { environment } from "../../environments/environment";
+import { RunningContextService } from "./running-context.service";
 
 declare var universalLinks: any;
 
 @Injectable()
 export class DeepLinksService {
     constructor(private readonly router: Router,
+        private readonly runningContextService: RunningContextService,
         private readonly ngZone: NgZone) { }
 
     public initialize() {
-        if (!environment.isCordova) {
+        if (!this.runningContextService.isCordova) {
             return;
         }
         universalLinks.subscribe("share", (event) => {
