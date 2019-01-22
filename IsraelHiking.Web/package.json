@@ -104,7 +104,7 @@
     "version": "node -v && npm -v && ng -v",
     "update": "ng update",
     "prepare": "patch-package",
-    "add-android": "cordova platform add android",
+    "add-android": "cordova -v && cordova platform add android",
     "build-apk": "cordova build android --release --no-telemetry",
     "1-upload": "node extract-and-upload.js",
     "2-download": "node download-and-compile.js"
