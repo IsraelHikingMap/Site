@@ -19,6 +19,9 @@ if ($lastexitcode)
 	throw $lastexitcode
 }
 
+Write-Host "npm ls npm"
+npm ls npm
+
 Write-Host "npm run add-android"
 npm run add-android
 

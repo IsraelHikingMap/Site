@@ -99,5 +99,5 @@
         <variable name="IOS_URL_SCHEME" value="israelhiking" />
         <variable name="IOS_UNIFORM_TYPE_IDENTIFIER" value="public.data" />
     </plugin>
-    <engine name="android" spec="^7.1.4" />
+    <engine name="android" spec="~7.1.4" />
 </widget>
