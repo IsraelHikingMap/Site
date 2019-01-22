@@ -98,14 +98,7 @@ export class LocationComponent extends BaseMapComponent {
                 if (position == null) {
                     this.toastService.warning(this.resources.unableToFindYourLocation);
                 } else {
-                    this.updateMarkerPosition(position);
-                    let recordingRoute = this.selectedRouteService.getRecordingRoute();
-                    if (recordingRoute != null) {
-                        this.ngRedux.dispatch(new AddRecordingPointAction({
-                            routeId: recordingRoute.id,
-                            latlng: this.geoLocationService.currentLocation
-                        }));
-                    }
+                    this.handlePositionChange(position);
                 }
             });
 
@@ -241,7 +234,7 @@ export class LocationComponent extends BaseMapComponent {
         return heading * Math.PI / 180.0;
     }
 
-    private updateMarkerPosition(position: Position) {
+    private handlePositionChange(position: Position) {
         if (this.locationCoordinate == null) {
             this.locationCoordinate = {} as ILocationInfo;
             this.isFollowing = true;
@@ -259,10 +252,17 @@ export class LocationComponent extends BaseMapComponent {
         if (this.isFollowing) {
             this.setLocation();
         }
-        if (needToUpdateHeading && this.isKeepNorthUp === false) {
+        if (needToUpdateHeading && this.isKeepNorthUp === false && this.isFollowing) {
             this.host.instance.getView().animate({
                 rotation: - position.coords.heading * Math.PI / 180.0
             });
+        }
+        let recordingRoute = this.selectedRouteService.getRecordingRoute();
+        if (recordingRoute != null) {
+            this.ngRedux.dispatch(new AddRecordingPointAction({
+                routeId: recordingRoute.id,
+                latlng: this.geoLocationService.currentLocation
+            }));
         }
     }
 
