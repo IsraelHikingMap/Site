@@ -85,6 +85,10 @@ export class DrawingComponent extends BaseMapComponent {
             recordingRoute.id === selectedRoute.id;
     }
 
+    public isRecording() {
+        return this.selectedRouteService.getRecordingRoute() != null;
+    }
+
     public toggleEditRoute() {
         let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         switch (selectedRoute.state) {
