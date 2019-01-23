@@ -64,7 +64,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
 
     public removeLayer(e: Event) { } // should be derived if needed.
 
-    private getTilesAddress() {
+    public getTilesAddress() {
         return decodeURI(this.address).replace("{zoom}", "{z}").trim();
     }
 
