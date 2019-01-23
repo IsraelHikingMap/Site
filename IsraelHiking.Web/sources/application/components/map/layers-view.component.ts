@@ -49,6 +49,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
 
     private whiteFill: style.Fill;
     private blackFill: style.Fill;
+    //private baseLayerData: EditableLayer;
 
     constructor(resources: ResourcesService,
         private readonly router: Router,
@@ -65,23 +66,15 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         this.blackFill = new style.Fill({
             color: "black"
         });
+        //this.baseLayerData = null;
     }
 
-    public getBaseLayerUrl() {
-        let address = this.layersService.getSelectedBaseLayerAddress();
-        return this.getFullAddress(address);
+    public getBaseLayer() {
+        return this.layersService.getSelectedBaseLayer();
     }
 
-    public getFullAddress(address: string) {
-        return address.toLowerCase().endsWith("/mapserver") ? `${address}/tile/{z}/{y}/{x}` : address;
-    }
-
-    public getBaseLayerMinZoom() {
-        return this.layersService.getSelectedBaseLayer().minZoom;
-    }
-
-    public getBaseLayerMaxZoom() {
-        return this.layersService.getSelectedBaseLayer().maxZoom;
+    public getBaseLayerAddress() {
+        return this.layersService.getSelectedBaseLayerAddress();
     }
 
     public isVisible(categoriesType: CategoriesType) {

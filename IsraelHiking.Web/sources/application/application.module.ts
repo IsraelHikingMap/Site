@@ -139,6 +139,7 @@ import { PrivatePoiEditDialogComponent } from "./components/dialogs/private-poi-
 import { LayersViewComponent } from "./components/map/layers-view.component";
 import { RoutesComponent } from "./components/map/routes.component";
 import { TracesComponent } from "./components/map/traces.component";
+import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
 // variables and functions
 import { routes } from "./routes";
 import { ApplicationState } from "./models/models";
@@ -283,7 +284,8 @@ export function getWindow() { return window; }
         PrivatePoiEditDialogComponent,
         LayersViewComponent,
         RoutesComponent,
-        TracesComponent
+        TracesComponent,
+        AutomaticLayerPresentationComponent
     ],
     providers: [
         GestureConfig,
@@ -378,6 +380,7 @@ export function getWindow() { return window; }
         LayersViewComponent,
         RoutesComponent,
         TracesComponent,
+        AutomaticLayerPresentationComponent,
         NameInUseValidatorDirective,
         ImageCaptureDirective,
         AntPathDirective
