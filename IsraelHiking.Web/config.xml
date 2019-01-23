@@ -95,4 +95,10 @@
         <variable name="PLAY_SERVICES_VERSION" value="11.6.2" />
     </plugin>
     <engine name="android" spec="~7.1.4" />
+    <plugin name="cc.fovea.cordova.openwith" spec="^1.2.0">
+        <variable name="ANDROID_MIME_TYPE" value="application/gpx" />
+        <variable name="IOS_URL_SCHEME" value="israelhikingmap" />
+        <variable name="IOS_UNIFORM_TYPE_IDENTIFIER" value="public.data" />
+        <variable name="ANDROID_EXTRA_ACTIONS" value=" " />
+    </plugin>
 </widget>

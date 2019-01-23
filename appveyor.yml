@@ -26,7 +26,7 @@ install:
     {
         choco install gradle --version 4.9 --no-progress
 
-        $env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin;$env:ANDROID_HOME\tools\bin\"
+        $env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin;$env:ANDROID_HOME\tools\bin\;C:\Program Files\Git\mingw64\libexec\git-core"
 
         gradle --version
 
