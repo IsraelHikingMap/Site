@@ -37,7 +37,7 @@
                     </aol-geometry-linestring>
                     <aol-style>
                         <aol-style-stroke *ngIf="!isRouteRecording(route)" [color]="getColor(route)" [width]="route.weight" [lineDash]="[30,10]" antPath></aol-style-stroke>
-                        <aol-style-stroke *ngIf="isRouteRecording(route)" [color]="'#FF6600'" [width]="3"></aol-style-stroke>
+                        <aol-style-stroke *ngIf="isRouteRecording(route)" [color]="'#FF6600'" [width]="6"></aol-style-stroke>
                     </aol-style>
                 </aol-feature>
             </div>
