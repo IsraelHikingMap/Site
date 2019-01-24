@@ -48,7 +48,6 @@ export class AutomaticLayerPresentationComponent implements AfterViewInit, OnCha
             });
         }
         if (this.tileLayer && this.tileLayer.instance) {
-            console.log(this.zIndex);
             this.tileLayer.instance.setSource(tileSource);
         }
     }

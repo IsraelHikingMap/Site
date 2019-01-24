@@ -25,7 +25,7 @@
                     </div>
                     <div *ngIf="(isAdvanced | async) && baseLayer.isEditable" fxFlex="10">
                         <div fxLayout="column" fxFill>
-                            <span fxFill fxLayoutAlign="end start" (click)="editBaseLayer(baseLayer)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-ellipsis-v"></i></span>
+                            <span fxFill fxLayoutAlign="end start" (click)="editBaseLayer($event, baseLayer)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-ellipsis-v"></i></span>
                         </div>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                     </div>
                     <div *ngIf="(isAdvanced | async) && overlay.isEditable" fxFlex="10">
                         <div fxLayout="column" fxFill>
-                            <span fxFill fxLayoutAlign="end start" (click)="editOverlay(overlay)" matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-ellipsis-v"></i></span>
+                            <span fxFill fxLayoutAlign="end start" (click)="editOverlay($event, overlay)" matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-ellipsis-v"></i></span>
                         </div>
                     </div>
                 </div>

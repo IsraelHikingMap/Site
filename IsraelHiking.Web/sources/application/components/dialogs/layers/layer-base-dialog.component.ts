@@ -22,9 +22,6 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     @select((state: ApplicationState) => state.location)
     public location;
 
-    @select((state: ApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;
-
     protected constructor(resources: ResourcesService,
         protected readonly mapService: MapService,
         protected readonly layersService: LayersService,

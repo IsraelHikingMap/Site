@@ -9,7 +9,7 @@ import { RouteData } from "../../../models/models";
 export class RouteLayerFactory {
 
     private static readonly DEFAULT_OPACITY = 0.5;
-    private static readonly DEFAULT_WEIGHT = 4;
+    private static readonly DEFAULT_WEIGHT = 7;
 
     // default values - in case the response from server takes too long.
     public colors: string[] = [
