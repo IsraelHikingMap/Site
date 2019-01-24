@@ -31,7 +31,9 @@ export class AssociatedFilesService {
                     let blob = this.nonAngularObjectsFactory.b64ToBlob(data, item.type) as any;
                     blob.name = "file.twl";
                     let lowerCase = stringValue.toLocaleLowerCase();
-                    if (lowerCase.indexOf("gpx") !== -1) {
+                    if (lowerCase.startsWith("PK")) {
+                        blob.name = "file.kmz";
+                    } else if (lowerCase.indexOf("gpx") !== -1) {
                         blob.name = "file.gpx";
                     } else if (lowerCase.indexOf("kml") !== -1) {
                         blob.name = "file.kml";
