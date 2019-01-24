@@ -269,8 +269,7 @@ export class LayersService {
     }
 
     public updateOverlay = (oldLayer: Overlay, newLayer: Overlay): void => {
-
-        this.ngRedux.dispatch(new UpdateBaseLayerAction({
+        this.ngRedux.dispatch(new UpdateOverlayAction({
             key: oldLayer.key,
             layerData: newLayer
         }));

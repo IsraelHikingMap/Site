@@ -68,7 +68,8 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.dialog.open(BaseLayerAddDialogComponent);
     }
 
-    public editBaseLayer(layer: EditableLayer) {
+    public editBaseLayer(e: Event, layer: EditableLayer) {
+        e.stopPropagation();
         let dialogRef = this.dialog.open(BaseLayerEditDialogComponent);
         dialogRef.componentInstance.setBaseLayer(layer);
     }
@@ -120,7 +121,8 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.dialog.open(OverlayAddDialogComponent);
     }
 
-    public editOverlay(layer: Overlay) {
+    public editOverlay(e: Event, layer: Overlay) {
+        e.stopPropagation();
         let dialogRef = this.dialog.open(OverlayEditDialogComponent);
         dialogRef.componentInstance.setOverlay(layer);
     }
