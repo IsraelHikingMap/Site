@@ -27,18 +27,32 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:mimeType="text/xml" />
-                <data android:mimeType="text/plain" />
-                <data android:mimeType="application/gpx" />
-                <data android:mimeType="application/gpx+xml" />
-                <data android:mimeType="application/kml" />
-                <data android:mimeType="application/kml+xml" />
-                <data android:mimeType="application/octet-stream" />
-                <data android:mimeType="application/vnd.google-earth.kml+xml" />
-                <data android:mimeType="application/xml" />
                 <data android:host="*" android:scheme="http" />
                 <data android:host="*" android:scheme="https" />
                 <data android:host="*" android:scheme="content" />
+                <!-- Valid mime types -->
+                <data android:mimeType="application/gpx" />
+                <data android:mimeType="application/vnd.google-earth.kml+xml" />
+                <data android:mimeType="application/vnd.google-earth.kmz" />
+                <!-- Invalid mime types used by some bad software -->
+                <data android:mimeType="text/xml" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/gpx" />
+                <data android:mimeType="text/kml" />
+                <data android:mimeType="text/kmz" />
+                <data android:mimeType="text/kml+xml" />
+                <data android:mimeType="text/kmz+xml" />
+                <data android:mimeType="text/gpx+xml" />
+                <data android:mimeType="text/xml+kml" />
+                <data android:mimeType="text/xml+kmz" />
+                <data android:mimeType="text/xml+gpx" />
+                <data android:mimeType="application/gpx+xml" />
+                <data android:mimeType="application/kml" />
+                <data android:mimeType="application/kml+xml" />
+                <data android:mimeType="application/kmz" />
+                <data android:mimeType="application/kmz+xml" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/xml" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -53,6 +67,10 @@
                 <data android:host="*" android:pathPattern=".*\..*\.kml" android:scheme="file" />
                 <data android:host="*" android:pathPattern=".*\..*\..*\.kml" android:scheme="file" />
                 <data android:host="*" android:pathPattern=".*\..*\..*\..*\.kml" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\.kmz" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\.kmz" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\.kmz" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.kmz" android:scheme="file" />
                 <data android:host="*" android:pathPattern=".*\.twl" android:scheme="file" />
                 <data android:host="*" android:pathPattern=".*\..*\.twl" android:scheme="file" />
                 <data android:host="*" android:pathPattern=".*\..*\..*\.twl" android:scheme="file" />
