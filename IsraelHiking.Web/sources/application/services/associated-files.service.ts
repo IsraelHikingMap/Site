@@ -30,10 +30,11 @@ export class AssociatedFilesService {
                     let stringValue = atob(data);
                     let blob = this.nonAngularObjectsFactory.b64ToBlob(data, item.type) as any;
                     blob.name = "file.twl";
-                    let lowerCase = stringValue.toLocaleLowerCase();
-                    if (lowerCase.indexOf("gpx") !== -1) {
+                    if (stringValue.startsWith("PK")) {
+                        blob.name = "file.kmz";
+                    } else if (stringValue.indexOf("<gpx") !== -1) {
                         blob.name = "file.gpx";
-                    } else if (lowerCase.indexOf("kml") !== -1) {
+                    } else if (stringValue.indexOf("<kml") !== -1) {
                         blob.name = "file.kml";
                     }
                     try {
