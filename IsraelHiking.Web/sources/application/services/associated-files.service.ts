@@ -26,7 +26,7 @@ export class AssociatedFilesService {
                 return;
             }
             cordova.openwith.load(intent.items[0],
-                (data, item) => {
+                async (data, item) => {
                     let stringValue = atob(data);
                     let blob = this.nonAngularObjectsFactory.b64ToBlob(data, item.type) as any;
                     blob.name = "file.twl";
@@ -38,7 +38,7 @@ export class AssociatedFilesService {
                         blob.name = "file.kml";
                     }
                     try {
-                        this.fileService.addRoutesFromFile(blob);
+                        await this.fileService.addRoutesFromFile(blob);
                     } catch (ex) {
                         this.toastService.error(this.resources.unableToLoadFromFile);
                     }

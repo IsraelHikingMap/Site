@@ -30,11 +30,9 @@
                 <data android:host="*" android:scheme="http" />
                 <data android:host="*" android:scheme="https" />
                 <data android:host="*" android:scheme="content" />
-                <!-- Valid mime types -->
                 <data android:mimeType="application/gpx" />
                 <data android:mimeType="application/vnd.google-earth.kml+xml" />
                 <data android:mimeType="application/vnd.google-earth.kmz" />
-                <!-- Invalid mime types used by some bad software -->
                 <data android:mimeType="text/xml" />
                 <data android:mimeType="text/plain" />
                 <data android:mimeType="text/gpx" />
@@ -58,23 +56,26 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:mimeType="*/*" />
-                <data android:host="*" android:pathPattern=".*\.gpx" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\.gpx" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\.gpx" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.gpx" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\.kml" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\.kml" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\.kml" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.kml" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\.kmz" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\.kmz" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\.kmz" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.kmz" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\.twl" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\.twl" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\.twl" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.twl" android:scheme="file" />
+                <data android:host="*" android:scheme="http" />
+                <data android:host="*" android:scheme="https" />
+                <data android:host="*" android:scheme="content" />
+                <data android:host="*" android:scheme="file" />
+                <data android:host="*" android:pathPattern=".*\.gpx" />
+                <data android:host="*" android:pathPattern=".*\..*\.gpx" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\.gpx" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.gpx" />
+                <data android:host="*" android:pathPattern=".*\.kml" />
+                <data android:host="*" android:pathPattern=".*\..*\.kml" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\.kml" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.kml" />
+                <data android:host="*" android:pathPattern=".*\.kmz" />
+                <data android:host="*" android:pathPattern=".*\..*\.kmz" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\.kmz" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.kmz" />
+                <data android:host="*" android:pathPattern=".*\.twl" />
+                <data android:host="*" android:pathPattern=".*\..*\.twl" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\.twl" />
+                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.twl" />
             </intent-filter>
         </config-file>
     </platform>
@@ -112,11 +113,11 @@
     <plugin name="cordova-android-play-services-gradle-release" spec="2.0.0">
         <variable name="PLAY_SERVICES_VERSION" value="11.6.2" />
     </plugin>
-    <engine name="android" spec="~7.1.4" />
     <plugin name="cc.fovea.cordova.openwith" spec="^1.2.0">
         <variable name="ANDROID_MIME_TYPE" value="application/gpx" />
         <variable name="IOS_URL_SCHEME" value="israelhikingmap" />
         <variable name="IOS_UNIFORM_TYPE_IDENTIFIER" value="public.data" />
         <variable name="ANDROID_EXTRA_ACTIONS" value=" " />
     </plugin>
+    <engine name="android" spec="^7.1.4" />
 </widget>
