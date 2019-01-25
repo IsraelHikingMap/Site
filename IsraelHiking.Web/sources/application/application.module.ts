@@ -77,12 +77,11 @@ import { CancelableTimeoutService } from "./services/cancelable-timeout.service"
 import { WhatsAppService } from "./services/whatsapp.service";
 import { ImageResizeService } from "./services/image-resize.service";
 import { NonAngularObjectsFactory } from "./services/non-angular-objects.factory";
-import { DeepLinksService } from "./services/deep-links.service";
 import { PrivatePoiUploaderService } from "./services/private-poi-uploader.service";
 import { SelectedRouteService } from "./services/layers/routelayers/selected-route.service";
 import { RunningContextService } from "./services/running-context.service";
 import { TracesService } from "./services/traces.service";
-import { AssociatedFilesService } from "./services/associated-files.service";
+import { OpenWithService } from "./services/open-with.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -186,8 +185,7 @@ export function initializeApplication(injector: Injector) {
             });
         }
         try {
-            injector.get<DeepLinksService>(DeepLinksService).initialize();
-            injector.get<AssociatedFilesService>(AssociatedFilesService).initialize();
+            injector.get<OpenWithService>(OpenWithService).initialize();
             console.log("Finished IHM Application Initialization");
         } catch (error) {
             console.error("Failed IHM Application Initialization", error);
@@ -323,8 +321,7 @@ export function getWindow() { return window; }
         WhatsAppService,
         ImageResizeService,
         NonAngularObjectsFactory,
-        DeepLinksService,
-        AssociatedFilesService,
+        OpenWithService,
         PrivatePoiUploaderService,
         SelectedRouteService,
         RunningContextService,

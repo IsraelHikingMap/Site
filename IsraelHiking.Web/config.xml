@@ -77,6 +77,14 @@
                 <data android:host="*" android:pathPattern=".*\..*\..*\.twl" />
                 <data android:host="*" android:pathPattern=".*\..*\..*\..*\.twl" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="israelhiking.osm.org.il" android:pathPattern="/share/.*" android:scheme="https" />
+                <data android:host="israelhiking.osm.org.il" android:pathPattern="/poi/.*" android:scheme="https" />
+                <data android:host="israelhiking.osm.org.il" android:pathPattern="/url/.*" android:scheme="https" />
+            </intent-filter>
         </config-file>
     </platform>
     <platform name="ios">
@@ -94,14 +102,6 @@
     <plugin name="cordova-plugin-inappbrowser" spec="^3.0.0" />
     <plugin name="cordova-plugin-file" spec="^6.0.1" />
     <plugin name="cordova-plugin-camera" spec="~4.0.3" />
-    <universal-links>
-        <host name="israelhiking.osm.org.il" scheme="https">
-            <path event="share" url="/share/*" />
-            <path event="poi" url="/poi/*" />
-            <path event="url" url="/url/*" />
-        </host>
-    </universal-links>
-    <plugin name="cordova-plugin-deeplinks" spec="^1.1.0" />
     <plugin name="cordova-plugin-insomnia" spec="^4.3.0" />
     <plugin name="cordova-plugin-mauron85-background-geolocation" spec="3.0.0-alpha.50">
         <variable name="GOOGLE_PLAY_SERVICES_VERSION" value="11+" />
