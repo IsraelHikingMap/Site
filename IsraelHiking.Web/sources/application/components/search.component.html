@@ -41,7 +41,7 @@
     </div>
 </div>
 <div *ngIf="directional.showResults && directional.routeCoordinates.length > 0">
-    <aol-layer-vector>
+    <aol-layer-vector [zIndex]="600">
         <aol-source-vector>
             <aol-feature>
                 <aol-geometry-linestring>

@@ -1,4 +1,4 @@
-﻿<aol-layer-vector *ngIf="visibleTrace && visibleTrace.dataContainer">
+﻿<aol-layer-vector *ngIf="visibleTrace && visibleTrace.dataContainer" [zIndex]="500">
     <aol-source-vector>
         <aol-feature>
             <aol-geometry-linestring>
@@ -30,7 +30,7 @@
                    (cleared)="clearTrace()"
                    (convertToRoute)="convertToRoute()"></clearable-overlay>
 <div *ngIf="missingParts">
-    <aol-layer-vector>
+    <aol-layer-vector [zIndex]="501">
         <aol-source-vector>
             <aol-feature *ngFor="let feature of missingParts.features">
                 <aol-geometry-linestring>
