@@ -152,14 +152,19 @@ export function initializeApplication(injector: Injector) {
         console.log("Starting IHM Application Initialization");
         let font = new FontFaceObserver("IsraelHikingMap");
         await font.load();
-        (PouchDB as any).adapter("worker", WorkerPouch);
-        let database = new PouchDB("IHM", {adapter: "worker"});
-        let storedState = initialState;
         let runningContext = injector.get<RunningContextService>(RunningContextService);
+        let useWorkerPouch = (await WorkerPouch.isSupportedBrowser()) && !runningContext.isIos;
+        var database;
+        if (useWorkerPouch) {
+            (PouchDB as any).adapter("worker", WorkerPouch);
+            database = new PouchDB("IHM", { adapter: "worker" });
+        } else {
+            database = new PouchDB("IHM");
+        }
+        let storedState = initialState;
         // tslint:disable-next-line
         let ngRedux = injector.get(NgRedux) as NgRedux<ApplicationState>;
         if (runningContext.isIFrame) {
-            console.log("Running IHM inside IFrame");
             ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
         } else {
             try {
@@ -178,7 +183,7 @@ export function initializeApplication(injector: Injector) {
                 });
             }
             ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
-            ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state) => {
+            ngRedux.select().pipe(debounceTime(useWorkerPouch ? 2000 : 30000)).subscribe(async (state) => {
                 let dbState = await database.get("state") as any;
                 dbState.state = state;
                 (database as any).put(dbState);

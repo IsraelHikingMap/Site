@@ -7,10 +7,12 @@ export class RunningContextService {
     public readonly isMobile: boolean;
     public readonly isIFrame: boolean;
     public readonly isCordova: boolean;
+    public readonly isIos: boolean;
     constructor() {
         this.isIFrame = window.self !== window.top;
         this.isMobile = false;
         this.isCordova = environment.isCordova;
+        this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform);
         let agent = navigator.userAgent || navigator.vendor || (window as any).opera;
         /* tslint:disable */
         if (
