@@ -23,35 +23,37 @@
             </div>
         </div>
         <mat-menu #appMenu="matMenu" xPosition="before">
-            <div [dir]="resources.direction">
-                <div fxLayout="row" class="margin-sides">
-                    <div class="table">
-                        <img *ngIf="(userInfo | async).imageUrl" class="pull-right space-after" [src]="(userInfo | async).imageUrl" alt="" width="64" height="64" />
-                        <div class="table-cell">
-                            <span class="text-large">{{(userInfo | async).displayName}}</span><br />
-                            {{getRank().name}}
+            <ng-template matMenuContent>
+                <div [dir]="resources.direction">
+                    <div fxLayout="row" class="margin-sides">
+                        <div class="table">
+                            <img *ngIf="(userInfo | async).imageUrl" class="pull-right space-after" [src]="(userInfo | async).imageUrl" alt="" width="64" height="64" />
+                            <div class="table-cell">
+                                <span class="text-large">{{(userInfo | async).displayName}}</span><br />
+                                {{getRank().name}}
+                            </div>
                         </div>
                     </div>
+                    <div fxLayout="row" class="margin-top margin-sides">
+                        <mat-progress-bar [color]="getProgressbarType()" [mode]="'determinate'" [value]="getRankPercentage()"></mat-progress-bar>
+                    </div>
+                    <div fxLayout="row" class="margin-sides">
+                        <span class="text-small">{{(userInfo | async).changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</span>
+                    </div>
+                    <button mat-menu-item (click)="openTraces()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user traces open">
+                        <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
+                    </button>
+                    <button mat-menu-item (click)="openShares()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user shares open">
+                        <span><i class="fa fa-lg icon-share-alt"></i> {{resources.myShares}}</span>
+                    </button>
+                    <div mat-menu-item>
+                        <mat-checkbox [checked]="isAdvanced | async" (change)="toggleIsAdvanced()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle advanced button">{{resources.toggleAdvancedSettings}}</mat-checkbox>
+                    </div>
+                    <button mat-menu-item (click)="logout()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM logout">
+                        <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
+                    </button>
                 </div>
-                <div fxLayout="row" class="margin-top margin-sides">
-                    <mat-progress-bar [color]="getProgressbarType()" [mode]="'determinate'" [value]="getRankPercentage()"></mat-progress-bar>
-                </div>
-                <div fxLayout="row" class="margin-sides">
-                    <span class="text-small">{{(userInfo | async).changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</span>
-                </div>
-                <button mat-menu-item (click)="openTraces()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user traces open">
-                    <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
-                </button>
-                <button mat-menu-item (click)="openShares()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user shares open">
-                    <span><i class="fa fa-lg icon-share-alt"></i> {{resources.myShares}}</span>
-                </button>
-                <div mat-menu-item>
-                    <mat-checkbox [checked]="isAdvanced | async" (change)="toggleIsAdvanced()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle advanced button">{{resources.toggleAdvancedSettings}}</mat-checkbox>
-                </div>
-                <button mat-menu-item (click)="logout()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM logout">
-                    <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
-                </button>
-            </div>
+            </ng-template>
         </mat-menu>
     </div>
 </div>
