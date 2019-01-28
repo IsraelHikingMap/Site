@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, ViewChildren, QueryList } from "@angular/core";
 import { MapComponent, FeatureComponent } from "ngx-openlayers";
-import { Coordinate, style } from "openlayers";
+import { Coordinate, style, interaction } from "openlayers";
 import { select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import parse from "color-parse";
@@ -142,8 +142,13 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     public ngAfterViewInit(): void {
         this.routeEditPoiInteraction.setActive(false);
         this.routeEditRouteInteraction.setActive(false);
+        this.host.instance.addInteraction(new interaction.DragPan());
         this.host.instance.addInteraction(this.routeEditPoiInteraction);
         this.host.instance.addInteraction(this.routeEditRouteInteraction);
+        this.host.instance.addInteraction(new interaction.PinchRotate());
+        this.host.instance.addInteraction(new interaction.PinchZoom({ constrainResolution: true }));
+        this.host.instance.addInteraction(new interaction.DragRotateAndZoom());
+        this.host.instance.addInteraction(new interaction.MouseWheelZoom());
         this.setInteractionAccordingToState();
         this.routeMarkers.forEach(m => m.instance.setStyle(this.getMarkerIconStyle(m)));
         this.routeMarkers.changes.subscribe(() => {

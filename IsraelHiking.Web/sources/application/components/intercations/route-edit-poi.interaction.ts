@@ -1,5 +1,5 @@
 ﻿import { Injectable, EventEmitter } from "@angular/core";
-import { MapBrowserEvent, interaction, Feature, geom } from "openlayers";
+import { MapBrowserEvent, interaction, Feature, geom, MapBrowserPointerEvent } from "openlayers";
 import { MatDialog } from "@angular/material";
 import { NgRedux } from "@angular-redux/store";
 
@@ -9,6 +9,7 @@ import { SpatialService } from "../../services/spatial.service";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { SnappingService, ISnappingPointResponse } from "../../services/snapping.service";
+import { PointerCounterHelper } from "./pointer-counter.helper";
 import { ApplicationState, RouteData, MarkerData, LatLngAlt } from "../../models/models";
 
 const MARKER = "_marker_";
@@ -20,6 +21,7 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
 
     private dragging: boolean;
     private selectedMarker: Feature;
+    private pointerCounterHelper: PointerCounterHelper;
 
     constructor(private readonly matDialog: MatDialog,
         private readonly selectedRouteService: SelectedRouteService,
@@ -27,7 +29,8 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         private readonly snappingService: SnappingService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         super({
-            handleEvent: (e) => {
+            handleEvent: (e: MapBrowserPointerEvent) => {
+                this.pointerCounterHelper.updatePointers(e);
                 switch (e.type) {
                     case "pointerdown":
                         return this.handleDown(e);
@@ -43,6 +46,7 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
             }
         });
         this.dragging = false;
+        this.pointerCounterHelper = new PointerCounterHelper();
         this.onPointerMove = new EventEmitter();
     }
 
@@ -57,13 +61,17 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         };
     }
 
-    private handleDown(event): boolean {
+    private handleDown(event: MapBrowserPointerEvent): boolean {
+        if (this.pointerCounterHelper.getPointersCount() > 1) {
+            this.selectedMarker = null;
+            return true;
+        }
         this.dragging = false;
         let snapping = this.getSnappingForPoint(SpatialService.fromViewCoordinate(event.coordinate));
         let pixel = event.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(snapping.latlng));
-        let features = (event.map.getFeaturesAtPixel(pixel) || []).filter(f =>
+        let features = (event.map.getFeaturesAtPixel(pixel) as Feature[] || []).filter(f =>
             f.getId() &&
-            ((f as Feature).getId() as string).indexOf(MARKER) !== -1 &&
+            f.getId().toString().indexOf(MARKER) !== -1 &&
             f.getGeometry() instanceof geom.Point);
         this.selectedMarker = features.length > 0 ? features[0] : null;
         return this.selectedMarker == null;
@@ -85,7 +93,7 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         return false;
     }
 
-    private handleUp(event: MapBrowserEvent): boolean {
+    private handleUp(event: MapBrowserPointerEvent): boolean {
         if (this.selectedMarker == null && this.dragging) {
             // regular map pan
             return true;

@@ -1,6 +1,5 @@
 import { Injectable, EventEmitter } from "@angular/core";
-
-import { MapBrowserEvent, interaction, Feature, geom } from "openlayers";
+import { MapBrowserPointerEvent, interaction, Feature, geom } from "openlayers";
 import { NgRedux } from "@angular-redux/store";
 
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducres/routes.reducer";
@@ -10,6 +9,7 @@ import { RouterService } from "../../services/routers/router.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { SnappingService } from "../../services/snapping.service";
 import { GeoLocationService } from "../../services/geo-location.service";
+import { PointerCounterHelper } from "./pointer-counter.helper";
 import {
     ApplicationState,
     RouteData,
@@ -31,6 +31,7 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
     private dragging: boolean;
     private selectedRoutePoint: Feature;
     private selectedRouteSegments: Feature[];
+    private pointerCounterHelper: PointerCounterHelper;
 
     constructor(private readonly selectedRouteService: SelectedRouteService,
         private readonly routerService: RouterService,
@@ -39,7 +40,8 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         private readonly snappingService: SnappingService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         super({
-            handleEvent: (e) => {
+            handleEvent: (e: MapBrowserPointerEvent) => {
+                this.pointerCounterHelper.updatePointers(e);
                 switch (e.type) {
                     case "pointerdown":
                         return this.handleDown(e);
@@ -55,6 +57,7 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
             }
         });
         this.dragging = false;
+        this.pointerCounterHelper = new PointerCounterHelper();
         this.selectedRouteSegments = [];
         this.selectedRoutePoint = null;
         this.onPointerMove = new EventEmitter();
@@ -69,7 +72,12 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         return route.id + SEGMENT_POINT + index;
     }
 
-    private handleDown(event: MapBrowserEvent) {
+    private handleDown(event: MapBrowserPointerEvent) {
+        if (this.pointerCounterHelper.getPointersCount() > 1) {
+            this.selectedRoutePoint = null;
+            this.selectedRouteSegments = [];
+            return true;
+        }
         this.dragging = false;
         let latLng = this.getSnappingForRoute(SpatialService.fromViewCoordinate(event.coordinate));
         let pixel = event.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(latLng));
@@ -102,7 +110,7 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         return this.selectedRoutePoint == null && this.selectedRouteSegments.length === 0;
     }
 
-    private handleDrag(event) {
+    private handleDrag(event: MapBrowserPointerEvent) {
         this.dragging = true;
         this.onRoutePointClick.emit(null);
         this.onPointerMove.emit(null);
@@ -115,7 +123,7 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         return true;
     }
 
-    private handleRoutePointDrag(event): boolean {
+    private handleRoutePointDrag(event: MapBrowserPointerEvent): boolean {
         let snappingLatLng = this.getSnappingForRoute(SpatialService.fromViewCoordinate(event.coordinate));
         let coordinate = SpatialService.toViewCoordinate(snappingLatLng);
         let point = (this.selectedRoutePoint.getGeometry() as geom.Point);
@@ -139,7 +147,7 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         return false;
     }
 
-    private handleRouteMiddleSegmentDrag(event): boolean {
+    private handleRouteMiddleSegmentDrag(event: MapBrowserPointerEvent): boolean {
         let snapping = this.getSnappingForRoute(SpatialService.fromViewCoordinate(event.coordinate));
         let coordinate = SpatialService.toViewCoordinate(snapping);
         let segment = this.selectedRouteSegments[0];
@@ -148,7 +156,7 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         return false;
     }
 
-    private handleUp(event: MapBrowserEvent) {
+    private handleUp(event: MapBrowserPointerEvent) {
         let updating = this.selectedRoutePoint != null || this.selectedRouteSegments.length !== 0;
         if (!updating && this.dragging) {
             // regular map pan
@@ -181,7 +189,7 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         return true;
     }
 
-    private handleMove(event: MapBrowserEvent) {
+    private handleMove(event: MapBrowserPointerEvent) {
         if (event.dragging) {
             return false;
         }
