@@ -1018,7 +1018,7 @@ export class ResourcesService {
         i.classList.add(`${icon}`);
         document.body.appendChild(i);
         let style = getComputedStyle(i, ":before");
-        character = String.fromCharCode(style.content.toString().charCodeAt(1));
+        character = String.fromCharCode(style.content.toString().replace(/"/g, "").charCodeAt(0));
         document.body.removeChild(i);
         this.iconsCache.set(icon, character);
         return character;
