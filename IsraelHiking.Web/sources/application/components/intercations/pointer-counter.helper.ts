@@ -8,7 +8,10 @@ export class PointerCounterHelper {
     }
 
     public updatePointers(event: MapBrowserPointerEvent) {
-        const id = (event.pointerEvent as any).pointerId.toString();
+        if (!event.pointerEvent || !(event.pointerEvent as any).pointerId) {
+            return;
+        }
+        let id = (event.pointerEvent as any).pointerId.toString();
         if (event.type === "pointerdown") {
             if (this.pointers.indexOf(id) === -1) {
                 this.pointers.push(id);
