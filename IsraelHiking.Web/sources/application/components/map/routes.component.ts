@@ -154,6 +154,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routeMarkers.changes.subscribe(() => {
             this.routeMarkers.forEach(m => m.instance.setStyle(this.getMarkerIconStyle(m)));
         });
+        // HM TODO: single click to open readonly poi extended info
     }
 
     private isEditMode(): boolean {

@@ -4,7 +4,7 @@
                     [srid]="'EPSG:4326'">
     </aol-coordinate>
     <aol-content>
-        <div class="marker-popup" [dir]="resources.direction" (click)="overlayClick()">
+        <div class="marker-popup cursor-pointer" [dir]="resources.direction" (click)="overlayClick()">
             <div class="title-no-margin" [dir]="resources.getDirection(marker.title)">
                 <img *ngIf="imageLink" [src]="resources.getResizedImageUrl(imageLink.url, 200)" class="img-placeholder" alt="{{marker.title}}"/>
                 <div [ngClass]="resources.getTextAlignment(marker.title)">{{marker.title}}<span *ngIf="marker.description">...</span></div>

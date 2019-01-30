@@ -5,8 +5,8 @@ import { MarkerData, LinkData } from "../../models/models";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { BaseMapComponent } from "../base-map.component";
-import { ImageGalleryService } from "../../services/image-gallery.service";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
+import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialog.component";
 
 @Component({
     selector: "private-poi-overlay",
@@ -28,8 +28,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
 
     constructor(resources: ResourcesService,
         private readonly matDialog: MatDialog,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly imageGalleryService: ImageGalleryService) {
+        private readonly selectedRouteService: SelectedRouteService) {
         super(resources);
     }
 
@@ -39,10 +38,13 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
 
     public overlayClick() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        if (selectedRoute && selectedRoute.id === this.routeId && selectedRoute.state === "Poi") {
+        if (selectedRoute == null || selectedRoute.id !== this.routeId) {
+            return;
+        }
+        if (selectedRoute.state === "Poi") {
             PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker, this.routeId, this.index);
-        } else if (this.imageLink && this.imageLink.url) {
-            this.imageGalleryService.setImages([this.imageLink.url]);
+        } else if (selectedRoute.state === "ReadOnly") {
+            PrivatePoiShowDialogComponent.openDialog(this.matDialog, this.marker, this.routeId, this.index);
         }
     }
 }

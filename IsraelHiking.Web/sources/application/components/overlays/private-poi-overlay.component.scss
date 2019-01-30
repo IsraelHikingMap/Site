@@ -2,3 +2,13 @@
     bottom: 34px !important;
     padding-top: 5px !important;
 }
+
+.img-placeholder {
+    height: 64px;
+}
+
+@media (max-width: 550px) {
+    .img-placeholder {
+        display: none;
+    }
+}

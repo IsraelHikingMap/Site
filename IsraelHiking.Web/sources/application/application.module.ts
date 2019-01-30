@@ -135,6 +135,7 @@ import { PublicPointOfInterestEditComponent } from "./components/sidebar/publicp
 import { ImageScrollerComponent } from "./components/sidebar/publicpoi/image-scroller.component";
 import { ApplicationStateComponent } from "./components/application-state.component";
 import { PrivatePoiEditDialogComponent } from "./components/dialogs/private-poi-edit-dialog.component";
+import { PrivatePoiShowDialogComponent } from "./components/dialogs/private-poi-show-dialog.component";
 import { LayersViewComponent } from "./components/map/layers-view.component";
 import { RoutesComponent } from "./components/map/routes.component";
 import { TracesComponent } from "./components/map/traces.component";
@@ -285,6 +286,7 @@ export function getWindow() { return window; }
         ImageScrollerComponent,
         ApplicationStateComponent,
         PrivatePoiEditDialogComponent,
+        PrivatePoiShowDialogComponent,
         LayersViewComponent,
         RoutesComponent,
         TracesComponent,
@@ -379,6 +381,7 @@ export function getWindow() { return window; }
         ImageScrollerComponent,
         ApplicationStateComponent,
         PrivatePoiEditDialogComponent,
+        PrivatePoiShowDialogComponent,
         LayersViewComponent,
         RoutesComponent,
         TracesComponent,
