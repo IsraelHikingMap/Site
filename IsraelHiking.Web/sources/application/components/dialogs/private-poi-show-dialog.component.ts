@@ -4,8 +4,9 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
-import { MarkerData, LinkData } from "../../models/models";
 import { PrivatePoiEditDialogComponent } from "./private-poi-edit-dialog.component";
+import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
+import { MarkerData, LinkData } from "../../models/models";
 
 @Component({
     selector: "private-poi-show-dialog",
@@ -35,6 +36,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
         private readonly matDialog: MatDialog,
         private readonly imageGalleryService: ImageGalleryService,
+        private readonly privatePoiUploaderService: PrivatePoiUploaderService,
         private readonly dialogRef: MatDialogRef<PrivatePoiShowDialogComponent>,
         @Inject(MAT_DIALOG_DATA) data) {
         super(resources);
@@ -58,5 +60,15 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     public edit() {
         this.dialogRef.close();
         PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker, this.routeId, this.index);
+    }
+
+    public async uploadPoint() {
+        await this.privatePoiUploaderService.uploadPoint(
+            this.marker.latlng,
+            this.imageLink,
+            this.title,
+            this.description,
+            this.marker.type);
+        this.dialogRef.close();
     }
 }
