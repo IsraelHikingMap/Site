@@ -1,4 +1,4 @@
-﻿import { Injectable, NgZone } from "@angular/core";
+import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { RunningContextService } from "./running-context.service";
@@ -59,8 +59,8 @@ export class OpenWithService {
         if (item.uri.indexOf(OpenWithService.SHARE) !== -1 ||
             item.uri.indexOf(OpenWithService.POI) !== -1 ||
             item.uri.indexOf(OpenWithService.URL) !== -1) {
-            var escapedString = Urls.baseAddress.toLocaleLowerCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-            var regexpToUse = new RegExp(escapedString, "ig");
+            let escapedString = Urls.baseAddress.toLocaleLowerCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+            let regexpToUse = new RegExp(escapedString, "ig");
             console.log(item.uri.replace(regexpToUse, ""));
             this.router.navigateByUrl(item.uri.replace(regexpToUse, ""));
             return;

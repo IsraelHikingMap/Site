@@ -49,7 +49,6 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
 
     private whiteFill: style.Fill;
     private blackFill: style.Fill;
-    //private baseLayerData: EditableLayer;
 
     constructor(resources: ResourcesService,
         private readonly router: Router,
@@ -66,7 +65,6 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         this.blackFill = new style.Fill({
             color: "black"
         });
-        //this.baseLayerData = null;
     }
 
     public getBaseLayer() {

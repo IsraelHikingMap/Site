@@ -155,7 +155,7 @@ export function initializeApplication(injector: Injector) {
         await font.load();
         let runningContext = injector.get<RunningContextService>(RunningContextService);
         let useWorkerPouch = (await WorkerPouch.isSupportedBrowser()) && !runningContext.isIos;
-        var database;
+        let database;
         if (useWorkerPouch) {
             (PouchDB as any).adapter("worker", WorkerPouch);
             database = new PouchDB("IHM", { adapter: "worker" });
