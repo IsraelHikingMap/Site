@@ -1,6 +1,7 @@
 import { Component, AfterViewInit, ViewChildren, QueryList } from "@angular/core";
+import { MatDialog } from "@angular/material";
 import { MapComponent, FeatureComponent } from "ngx-openlayers";
-import { Coordinate, style, interaction } from "openlayers";
+import { Coordinate, style, interaction, MapBrowserEvent, Feature } from "openlayers";
 import { select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import parse from "color-parse";
@@ -13,6 +14,7 @@ import { SnappingService } from "../../services/snapping.service";
 import { LatLngAlt, ApplicationState, RouteData, RouteSegmentData } from "../../models/models";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
+import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialog.component";
 
 interface RoutePointViewData {
     latlng: LatLngAlt;
@@ -38,11 +40,12 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     private coordinatesPerRoute: Map<string, Coordinate[]>;
 
     constructor(resources: ResourcesService,
+        private readonly matDialog: MatDialog,
         private readonly selectedRouteService: SelectedRouteService,
-        private readonly host: MapComponent,
         private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
         private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
-        private readonly snappingService: SnappingService) {
+        private readonly snappingService: SnappingService,
+        private readonly host: MapComponent) {
         super(resources);
         this.hoverViewCoordinates = null;
         this.coordinatesPerRoutePerSegment = new Map();
@@ -154,7 +157,18 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routeMarkers.changes.subscribe(() => {
             this.routeMarkers.forEach(m => m.instance.setStyle(this.getMarkerIconStyle(m)));
         });
-        // HM TODO: single click to open readonly poi extended info
+        this.host.instance.on("singleclick", (event: MapBrowserEvent) => {
+            if (this.routeEditRouteInteraction.getActive() || this.routeEditPoiInteraction.getActive()) {
+                return;
+            }
+            let features = RouteEditPoiInteraction.getMarkerFeatures(event, event.pixel);
+            if (features.length === 0) {
+                return;
+            }
+            let routeAndMarker = RouteEditPoiInteraction.getRouteAndMarkerIndex(features[0].getId().toString());
+            let route = this.selectedRouteService.getRouteById(routeAndMarker.routeId);
+            PrivatePoiShowDialogComponent.openDialog(this.matDialog, route.markers[routeAndMarker.index], route.id, routeAndMarker.index);
+        });
     }
 
     private isEditMode(): boolean {

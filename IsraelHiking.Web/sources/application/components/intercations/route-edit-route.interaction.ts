@@ -83,22 +83,23 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         let pixel = event.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(latLng));
         let features = (event.map.getFeaturesAtPixel(pixel, { hitTolerance: 10 }) || []) as Feature[];
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        let idPrefix = selectedRoute.id + SEGMENT_POINT;
         this.selectedRoutePoint = features.find(f =>
             f.getId() &&
-            f.getId().toString().indexOf(selectedRoute.id + SEGMENT_POINT) !== -1 &&
+            f.getId().toString().startsWith(idPrefix) &&
             f.getGeometry() instanceof geom.Point);
         if (this.selectedRoutePoint != null) {
             let pointIndex = this.getPointIndex();
             let segments = (event.map.getFeaturesAtPixel(pixel, { hitTolerance: 100 }) || []) as Feature[];
             this.selectedRouteSegments = segments.filter(f =>
                 f.getId() &&
-                f.getId().toString().indexOf(selectedRoute.id + SEGMENT) !== -1 &&
+                f.getId().toString().startsWith(idPrefix) &&
                 f.getGeometry() instanceof geom.LineString &&
                 (this.getSegmentIndex(f) === pointIndex || this.getSegmentIndex(f) === pointIndex + 1));
         } else {
             this.selectedRouteSegments = features.filter(f =>
                 f.getId() &&
-                f.getId().toString().indexOf(selectedRoute.id + SEGMENT) !== -1 &&
+                f.getId().toString().startsWith(idPrefix) &&
                 f.getGeometry() instanceof geom.LineString);
         }
 
@@ -272,8 +273,7 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
     }
 
     private async updateRouteSegment(latlng: LatLngAlt) {
-        let splitStr = (this.selectedRouteSegments[0].getId() as string).split(SEGMENT);
-        let index = +splitStr[1];
+        let index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         let routeData = this.selectedRouteService.getSelectedRoute();
         let segment = { ... routeData.segments[index] };
         let latlngStart = await this.runRouting(segment.latlngs[0], latlng);

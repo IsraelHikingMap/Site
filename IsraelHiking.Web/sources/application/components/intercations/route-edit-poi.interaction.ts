@@ -61,6 +61,13 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         };
     }
 
+    public static getMarkerFeatures(event: MapBrowserEvent, pixel: [number, number]) {
+        return (event.map.getFeaturesAtPixel(pixel) as Feature[] || []).filter(f =>
+            f.getId() &&
+            f.getId().toString().indexOf(MARKER) !== -1 &&
+            f.getGeometry() instanceof geom.Point);
+    }
+
     private handleDown(event: MapBrowserPointerEvent): boolean {
         if (this.pointerCounterHelper.getPointersCount() > 1) {
             this.selectedMarker = null;
@@ -69,11 +76,17 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         this.dragging = false;
         let snapping = this.getSnappingForPoint(SpatialService.fromViewCoordinate(event.coordinate));
         let pixel = event.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(snapping.latlng));
-        let features = (event.map.getFeaturesAtPixel(pixel) as Feature[] || []).filter(f =>
-            f.getId() &&
-            f.getId().toString().indexOf(MARKER) !== -1 &&
-            f.getGeometry() instanceof geom.Point);
-        this.selectedMarker = features.length > 0 ? features[0] : null;
+        let features = RouteEditPoiInteraction.getMarkerFeatures(event, pixel);
+        this.selectedMarker = null;
+        if (features.length === 0) {
+            return true;
+        }
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute != null &&
+            RouteEditPoiInteraction.getRouteAndMarkerIndex(features[0].getId().toString()).routeId !== selectedRoute.id) {
+            return true;
+        }
+        this.selectedMarker = features[0];
         return this.selectedMarker == null;
     }
 
@@ -104,20 +117,22 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
             this.addPrivatePoi(latlng);
             return true;
         }
-        let splitStr = (this.selectedMarker.getId() as string).split(MARKER);
+        let routeAndMarker = RouteEditPoiInteraction.getRouteAndMarkerIndex(this.selectedMarker.getId().toString());
         let routeData = this.selectedRouteService.getSelectedRoute();
-        let index = +splitStr[1];
         if (!this.dragging) {
             // click on exiting poi
-            PrivatePoiEditDialogComponent.openDialog(this.matDialog, routeData.markers[index], routeData.id, index);
+            PrivatePoiEditDialogComponent.openDialog(this.matDialog,
+                routeData.markers[routeAndMarker.index],
+                routeData.id,
+                routeAndMarker.index);
             return true;
         }
         // drag exiting poi
-        let markerData = { ...routeData.markers[index] } as MarkerData;
+        let markerData = { ...routeData.markers[routeAndMarker.index] } as MarkerData;
         markerData.latlng = latlng;
         this.ngRedux.dispatch(new UpdatePrivatePoiAction({
-            routeId: splitStr[0],
-            index: index,
+            routeId: routeAndMarker.routeId,
+            index: routeAndMarker.index,
             markerData: markerData
         }));
         return true;
