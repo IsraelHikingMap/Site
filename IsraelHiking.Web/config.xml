@@ -120,4 +120,5 @@
         <variable name="ANDROID_EXTRA_ACTIONS" value=" " />
     </plugin>
     <engine name="android" spec="^7.1.4" />
+    <plugin name="cordova-plugin-device" spec="~2.0.2" />
 </widget>

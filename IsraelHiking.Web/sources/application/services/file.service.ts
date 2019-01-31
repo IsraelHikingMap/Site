@@ -1,3 +1,4 @@
+/// <reference types="cordova-plugin-device"/>
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 
@@ -134,8 +135,10 @@ export class FileService {
     private saveAsWorkAround(blob: Blob, fileName: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             if (this.runningContextService.isCordova) {
-                // HM TODO: this is only for android, make it for iOS?
-                (window as any).resolveLocalFileSystemURL(cordova.file.externalRootDirectory,
+                let folder = device.platform.toUpperCase().indexOf("OS") !== -1
+                    ? cordova.file.documentsDirectory
+                    : cordova.file.externalRootDirectory;
+                (window as any).resolveLocalFileSystemURL(folder,
                     (directoryEntry) => {
                         directoryEntry.getDirectory("IsraelHikingMap",
                             { create: true },
