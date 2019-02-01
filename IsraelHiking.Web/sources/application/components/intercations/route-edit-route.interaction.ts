@@ -83,10 +83,10 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         let pixel = event.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(latLng));
         let features = (event.map.getFeaturesAtPixel(pixel, { hitTolerance: 10 }) || []) as Feature[];
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        let idPrefix = selectedRoute.id + SEGMENT_POINT;
+        let idPrefix = selectedRoute.id + SEGMENT;
         this.selectedRoutePoint = features.find(f =>
             f.getId() &&
-            f.getId().toString().startsWith(idPrefix) &&
+            f.getId().toString().startsWith(selectedRoute.id + SEGMENT_POINT) &&
             f.getGeometry() instanceof geom.Point);
         if (this.selectedRoutePoint != null) {
             let pointIndex = this.getPointIndex();
@@ -102,7 +102,6 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
                 f.getId().toString().startsWith(idPrefix) &&
                 f.getGeometry() instanceof geom.LineString);
         }
-
         if (this.selectedRoutePoint == null) {
             this.onRoutePointClick.emit(null);
         } else {
