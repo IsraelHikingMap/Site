@@ -13,16 +13,16 @@
         </div>
         <h5 class="text-center">{{resources.application}}</h5>
         <div fxLayout="row">
-            <div fxFlex="33">
+            <div fxFlex>
                 <a mat-button (click)="app = 'Locus'" [ngClass]="{active: app == 'Locus'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsAction="Download Locus">Locus</a>
             </div>
-            <div fxFlex="33">
+            <div fxFlex>
                 <a mat-button (click)="app = 'OruxMaps'" [ngClass]="{active: app == 'OruxMaps'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsAction="Download OruxMaps">OruxMaps</a>
             </div>
         </div>
         <h5 class="text-center">{{resources.map}}</h5>
         <div fxLayout="row">
-            <div fxFlex="50">
+            <div fxFlex>
                 <a mat-button (click)="mapType = 'IHM'" [ngClass]="{active: mapType == 'IHM'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsAction="Download IHM">{{resources.israelHikingMap}}</a>
             </div>
             <div fxFlex>
@@ -31,7 +31,7 @@
         </div>
         <h5 class="text-center">{{resources.detailsLevel}} ({{resources.upToZoom}})</h5>
         <div fxLayout="row">
-            <div fxFlex="50">
+            <div fxFlex>
                 <a mat-button (click)="zoom = 15" [ngClass]="{active: zoom === 15}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsAction="Download zoom 15">15 [750Mb]</a>
             </div>
             <div fxFlex>
