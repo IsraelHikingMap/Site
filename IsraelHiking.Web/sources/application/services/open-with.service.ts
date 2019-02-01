@@ -37,7 +37,7 @@ export class OpenWithService {
         if (!this.runningContextService.isCordova) {
             return;
         }
-        cordova.openwith.init(() => { }, (error) => console.log(`init failed with error: ${error}`));
+        cordova.openwith.init(() => { }, (error) => console.error(`init failed with error: ${error}`));
         cordova.openwith.addHandler((intent) => {
             if (intent.items.length <= 0) {
                 return;
@@ -61,7 +61,6 @@ export class OpenWithService {
             item.uri.indexOf(OpenWithService.URL) !== -1) {
             let escapedString = Urls.baseAddress.toLocaleLowerCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
             let regexpToUse = new RegExp(escapedString, "ig");
-            console.log(item.uri.replace(regexpToUse, ""));
             this.router.navigateByUrl(item.uri.replace(regexpToUse, ""));
             return;
         }

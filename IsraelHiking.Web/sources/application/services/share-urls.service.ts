@@ -18,6 +18,7 @@ interface IShareUrlSocialLinks {
 
 @Injectable()
 export class ShareUrlsService {
+    // HM TODO: move to state?
     public shareUrls: ShareUrl[];
 
     constructor(private readonly httpClient: HttpClient,

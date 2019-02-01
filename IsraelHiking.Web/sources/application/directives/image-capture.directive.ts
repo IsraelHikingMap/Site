@@ -56,7 +56,7 @@ export class ImageCaptureDirective implements OnDestroy {
                 this.ngZone.run(() => this.change.next(changeEvent));
             },
             (err) => {
-                console.log(err);
+                console.error(err);
             },
             {
                 destinationType: Camera.DestinationType.DATA_URL,
