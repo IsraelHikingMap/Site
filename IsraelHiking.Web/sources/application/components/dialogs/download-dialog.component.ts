@@ -4,7 +4,7 @@ import { DomSanitizer } from "@angular/platform-browser";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 
-type ApplicationType = "Locus" | "OruxMaps" | "Offroad";
+type ApplicationType = "Locus" | "OruxMaps";
 type MapType = "IHM" | "MTB";
 
 @Component({
@@ -40,9 +40,6 @@ export class DownloadDialogComponent extends BaseMapComponent {
                 case "OruxMaps":
                     protocol = "orux-map://";
                     break;
-                case "Offroad":
-                    protocol = "offroad://";
-                    break;
             }
         }
 
@@ -64,20 +61,14 @@ export class DownloadDialogComponent extends BaseMapComponent {
         if (app === "Locus") {
             return this.resources.installationInstructionsMobileLocus;
         }
-        if (app === "OruxMaps") {
-            return this.resources.installationInstructionsMobileOruxMaps;
-        }
-        return this.resources.installationInstructionsMobileOffroad;
+        return this.resources.installationInstructionsMobileOruxMaps;
     }
 
     public getDesktopInstallationInstructions = (app: ApplicationType) => {
         if (app === "Locus") {
             return this.resources.installationInstructionsDesktopLocus;
         }
-        if (app === "OruxMaps") {
-            return this.resources.installationInstructionsDesktopOruxMaps;
-        }
-        return this.resources.installationInstructionsDesktopOffroad;
+        return this.resources.installationInstructionsDesktopOruxMaps;
     }
 
     public getGooglePlayStoreAddress = (app: ApplicationType): string => {
@@ -86,9 +77,6 @@ export class DownloadDialogComponent extends BaseMapComponent {
         }
         if (app === "OruxMaps") {
             return "https://play.google.com/store/apps/details?id=com.orux.oruxmaps";
-        }
-        if (app === "Offroad") {
-            return "https://play.google.com/store/apps/details?id=com.myadventure.myadventure";
         }
         return "";
     }

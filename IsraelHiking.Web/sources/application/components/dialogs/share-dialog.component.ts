@@ -1,5 +1,4 @@
 ﻿import { Component, AfterViewInit } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 
 import { LocalStorage } from "ngx-store";
@@ -11,33 +10,6 @@ import { SelectedRouteService } from "../../services/layers/routelayers/selected
 import { AuthorizationService } from "../../services/authorization.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainer, ShareUrl } from "../../models/models";
-
-export interface IIOffroadCoordinates {
-    latitude: number;
-    longitude: number;
-    altitude: number;
-}
-
-export interface IOffroadPostRequest {
-    userMail: string;
-    title: string;
-    description: string;
-    activityType: string;
-    difficultyLevel: string;
-    sharingCode: number;
-    backgroundServeUrl: string;
-    path: IIOffroadCoordinates[];
-    mapItems: IIOffroadMarker[];
-    externalUrl: string;
-}
-
-export interface IIOffroadMarker {
-    title: string;
-    description: string;
-    visibilityLevel: string;
-    mapItemType: string;
-    point: IIOffroadCoordinates;
-}
 
 @Component({
     selector: "share-dialog",
@@ -54,9 +26,6 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     public nakebCreateHikeAddress: string;
     public isLoading: boolean;
     public lastShareUrl: ShareUrl;
-    public offroadRequest: IOffroadPostRequest;
-    public showOffroadForm: boolean;
-    public offroadPublicTrack: boolean;
     public canUpdate: boolean;
     public updateCurrentShare: boolean;
 
@@ -64,7 +33,6 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     public storedUserEmail = "";
 
     constructor(resources: ResourcesService,
-        private readonly httpClient: HttpClient,
         private readonly sanitizer: DomSanitizer,
         private readonly selectedRouteService: SelectedRouteService,
         private readonly dataContainerService: DataContainerService,
@@ -78,22 +46,13 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.description = "";
         this.imageUrl = "";
         this.isLoading = false;
-        this.showOffroadForm = false;
         this.shareAddress = "";
         this.whatsappShareAddress = null;
         this.facebookShareAddress = "";
         this.nakebCreateHikeAddress = "";
         this.lastShareUrl = null;
         let shareUrl = this.shareUrlsService.getSelectedShareUrl();
-        this.canUpdate = shareUrl != null &&
-            this.shareUrlsService.shareUrls.find(s => s.id === shareUrl.id) != null &&
-            this.authorizationService.isLoggedIn();
         this.updateCurrentShare = false;
-        this.offroadPublicTrack = false;
-        this.offroadRequest = {} as IOffroadPostRequest;
-        this.offroadRequest.userMail = this.storedUserEmail;
-        this.offroadRequest.activityType = "OffRoading";
-        this.offroadRequest.difficultyLevel = "3";
         if (shareUrl != null) {
             this.title = shareUrl.title;
             this.description = shareUrl.description;
@@ -104,17 +63,13 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 this.title = selectedRoute.name;
                 this.description = selectedRoute.description;
             }
-            if (selectedRoute.segments.length > 0) {
-                switch (selectedRoute.segments[selectedRoute.segments.length - 1].routingType) {
-                    case "Hike":
-                        this.offroadRequest.activityType = "Walking";
-                        break;
-                    case "Bike":
-                        this.offroadRequest.activityType = "Cycling";
-                        break;
-                }
-            }
         }
+
+        this.shareUrlsService.getShareUrls().then((shareUrls) => {
+            this.canUpdate = shareUrl != null &&
+                this.authorizationService.isLoggedIn() &&
+                shareUrls.find(s => s.id === shareUrl.id) != null;
+        });
     }
 
     public async ngAfterViewInit(): Promise<any> {
@@ -173,48 +128,5 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
             osmUserId: this.authorizationService.isLoggedIn() ? this.authorizationService.getUserInfo().id : ""
         } as ShareUrl;
         return shareUrl;
-    }
-
-    public sendToOffroad = () => {
-        this.offroadRequest.title = this.title;
-        this.offroadRequest.description = this.description;
-        this.storedUserEmail = this.offroadRequest.userMail;
-        if (this.selectedRouteService.getSelectedRoute() == null) {
-            this.toastService.warning(this.resources.pleaseSelectARoute);
-            return;
-        }
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        if (selectedRoute.segments.length === 0) {
-            this.toastService.warning(this.resources.pleaseAddPointsToRoute);
-            return;
-        }
-        this.offroadRequest.sharingCode = this.offroadPublicTrack ? 1 : 3;
-        this.offroadRequest.path = [];
-        this.offroadRequest.mapItems = [];
-        this.offroadRequest.externalUrl = this.shareAddress;
-        this.offroadRequest.backgroundServeUrl = this.shareUrlsService.getImageFromShareId(this.lastShareUrl);
-
-        for (let segment of selectedRoute.segments) {
-            for (let latlng of segment.latlngs) {
-                this.offroadRequest.path.push({ altitude: latlng.alt, latitude: latlng.lat, longitude: latlng.lng });
-            }
-        }
-        let index = 0;
-        for (let marker of selectedRoute.markers) {
-            this.offroadRequest.mapItems.push({
-                title: `Point ${index++}`,
-                mapItemType: "POI",
-                visibilityLevel: "Track",
-                description: marker.title,
-                point: { latitude: marker.latlng.lat, longitude: marker.latlng.lng, altitude: marker.latlng.alt || 0 }
-            });
-        }
-        let address = "https://brilliant-will-93906.appspot.com/_ah/api/myAdventureApi/v1/tracks/external";
-        this.httpClient.post(address, this.offroadRequest).toPromise().then(() => {
-            this.toastService.success(this.resources.routeSentSuccessfully);
-        }, (err) => {
-            this.toastService.error(this.resources.unableToSendRoute);
-            console.error(err);
-        });
     }
 }

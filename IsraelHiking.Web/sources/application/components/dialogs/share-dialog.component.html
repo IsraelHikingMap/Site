@@ -51,58 +51,6 @@
                 <div fxFlex>
                     <a mat-button fxFill [href]="nakebCreateHikeAddress" [target]="'_blank'" matTooltip="{{resources.createNakebHike}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share nakeb"><i class="fa icon-nakeb fa-lg"></i></a>
                 </div>
-                <div fxFlex>
-                    <button mat-button fxFill (click)="showOffroadForm = true" [ngClass]="{active: showOffroadForm}" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Toggle off-road form"><i class="fa icon-off-road fa-lg"></i></button>
-                </div>
-            </div>
-            <div *ngIf="showOffroadForm">
-                <div fxLayout="row">
-                    <mat-form-field fxFill hintLabel="{{resources.userEmailMutedOffroad}}">
-                        <input matInput type="text" [(ngModel)]="offroadRequest.userMail" placeholder="{{resources.userEmail}}"/>
-                    </mat-form-field>
-                </div>
-                <div class="input-wrapper-spacer"></div>
-                <div fxLayout="row">
-                    <div fxFlex="66">
-                        <div fxLayout="row">
-                            <div fxFlex="25">
-                                <label>{{resources.activity}}</label>
-                            </div>
-                            <div fxFlex>
-                                <div fxLayout="row">
-                                    <div fxFlex="20">
-                                        <a mat-button (click)="offroadRequest.activityType = 'Walking'" [ngClass]="{active: offroadRequest.activityType == 'Walking'}" fxFill><i class="fa icon-hike fa-lg"></i></a>
-                                    </div>
-                                    <div fxFlex="20">
-                                        <a mat-button (click)="offroadRequest.activityType = 'Cycling'" [ngClass]="{active: offroadRequest.activityType == 'Cycling'}" fxFill><i class="fa icon-bike fa-lg"></i></a>
-                                    </div>
-                                    <div fxFlex="20">
-                                        <a mat-button (click)="offroadRequest.activityType = 'OffRoading'" [ngClass]="{active: offroadRequest.activityType == 'OffRoading'}" fxFill><i class="fa icon-four-by-four fa-lg"></i></a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div fxFlex>
-                        <mat-form-field fxFill>
-                            <mat-select placeholder="{{resources.difficulty}}" fxFill [(ngModel)]="offroadRequest.difficultyLevel">
-                                <mat-option value="1">{{resources.easy}}</mat-option>
-                                <mat-option value="3">{{resources.moderate}}</mat-option>
-                                <mat-option value="5">{{resources.hard}}</mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-                </div>
-                <div class="input-wrapper-spacer"></div>
-                <div fxLayout="row">
-                    <div fxFlex="50">
-                        <mat-checkbox [(ngModel)]="offroadPublicTrack">{{resources.suggestAsPublicTrack}}</mat-checkbox>
-                    </div>
-                    <div fxFlex="50">
-                        <a mat-button (click)="sendToOffroad()" fxFill color="primary" mat-raised-button angulartics2On="click" angularticsCategory="Share" angularticsAction="Share send off-road"><i class="fa icon-paper-plane fa-lg"></i> {{resources.send}}</a>
-                    </div>
-                </div>
-                <br/>
             </div>
         </div>
     </div>
