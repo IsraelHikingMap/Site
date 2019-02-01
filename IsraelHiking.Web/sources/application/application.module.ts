@@ -45,7 +45,7 @@ import { NgReduxModule, NgRedux } from "@angular-redux/store";
 import { AngularOpenlayersModule } from "ngx-openlayers";
 import PouchDB from "pouchdb";
 import WorkerPouch from "worker-pouch";
-import FontFaceObserver from "fontfaceobserver";
+import WebFont from "webfontloader";
 import deepmerge from "deepmerge";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
@@ -151,10 +151,18 @@ import { classToActionMiddleware } from "./reducres/reducer-action-decorator";
 export function initializeApplication(injector: Injector) {
     return async () => {
         console.log("Starting IHM Application Initialization");
-        let font = new FontFaceObserver("IsraelHikingMap");
-        await font.load();
+        await new Promise((resolve, reject) => {
+            WebFont.load({
+                custom: {
+                    families: ["IsraelHikingMap"]
+                },
+                active: () => resolve(),
+                inactive: () => resolve(),
+                timeout: 5000
+            });
+        });
         let runningContext = injector.get<RunningContextService>(RunningContextService);
-        let useWorkerPouch = (await WorkerPouch.isSupportedBrowser()) && !runningContext.isIos;
+        let useWorkerPouch = (await WorkerPouch.isSupportedBrowser()) && !runningContext.isIos && !runningContext.isEdge;
         let database;
         if (useWorkerPouch) {
             (PouchDB as any).adapter("worker", WorkerPouch);

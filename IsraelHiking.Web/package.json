@@ -37,7 +37,6 @@
     "deepmerge": "3.0.0",
     "file-saver": "2.0.0",
     "font-awesome": "4.7.0",
-    "fontfaceobserver": "^2.0.13",
     "hammerjs": "2.0.8",
     "intl": "1.2.5",
     "lodash": "4.17.11",
@@ -55,6 +54,7 @@
     "redux-undo": "1.0.0-beta9-9-7",
     "rxjs": "6.3.3",
     "rxjs-compat": "6.3.3",
+    "webfontloader": "^1.6.28",
     "worker-pouch": "^2.1.0",
     "zone.js": "0.8.26"
   },
