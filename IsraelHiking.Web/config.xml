@@ -90,27 +90,25 @@
     <platform name="ios">
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
-        <icon height="57" src="www/content/favicons/icon.png" width="57" />
-        <icon height="114" src="www/content/favicons/icon@2x.png" width="114" />
-        <icon height="20" src="www/content/favicons/icon-20.png" width="20" />
-        <icon height="40" src="www/content/favicons/icon-20@2x.png" width="40" />
-        <icon height="40" src="www/content/favicons/icon-40.png" width="40" />
-        <icon height="80" src="www/content/favicons/icon-40@2x.png" width="80" />
-        <icon height="50" src="www/content/favicons/icon-50.png" width="50" />
-        <icon height="100" src="www/content/favicons/icon-50@2x.png" width="100" />
-        <icon height="60" src="www/content/favicons/icon-60.png" width="60" />
-        <icon height="120" src="www/content/favicons/icon-60@2x.png" width="120" />
-        <icon height="180" src="www/content/favicons/icon-60@3x.png" width="180" />
-        <icon height="72" src="www/content/favicons/icon-72.png" width="72" />
-        <icon height="144" src="www/content/favicons/icon-72@2x.png" width="144" />
-        <icon height="76" src="www/content/favicons/icon-76.png" width="76" />
-        <icon height="152" src="www/content/favicons/icon-76@2x.png" width="152" />
-        <icon height="167" src="www/content/favicons/icon-83.5@2x.png" width="167" />
-        <icon height="29" src="www/content/favicons/icon-small.png" width="29" />
-        <icon height="58" src="www/content/favicons/icon-small@2x.png" width="58" />
-        <icon height="87" src="www/content/favicons/icon-small@3x.png" width="87" />
-        <icon height="512" src="www/content/favicons/iTunesArtwork" width="512" />
-        <icon height="1024" src="www/content/favicons/iTunesArtwork@2x" width="1024" />
+        <icon height="57" src="www/content/favicons/icon.jpg" width="57" />
+        <icon height="114" src="www/content/favicons/icon@2x.jpg" width="114" />
+        <icon height="20" src="www/content/favicons/icon-20.jpg" width="20" />
+        <icon height="40" src="www/content/favicons/icon-20@2x.jpg" width="40" />
+        <icon height="40" src="www/content/favicons/icon-40.jpg" width="40" />
+        <icon height="80" src="www/content/favicons/icon-40@2x.jpg" width="80" />
+        <icon height="50" src="www/content/favicons/icon-50.jpg" width="50" />
+        <icon height="100" src="www/content/favicons/icon-50@2x.jpg" width="100" />
+        <icon height="60" src="www/content/favicons/icon-60.jpg" width="60" />
+        <icon height="120" src="www/content/favicons/icon-60@2x.jpg" width="120" />
+        <icon height="180" src="www/content/favicons/icon-60@3x.jpg" width="180" />
+        <icon height="72" src="www/content/favicons/icon-72.jpg" width="72" />
+        <icon height="144" src="www/content/favicons/icon-72@2x.jpg" width="144" />
+        <icon height="76" src="www/content/favicons/icon-76.jpg" width="76" />
+        <icon height="152" src="www/content/favicons/icon-76@2x.jpg" width="152" />
+        <icon height="167" src="www/content/favicons/icon-83.5@2x.jpg" width="167" />
+        <icon height="29" src="www/content/favicons/icon-small.jpg" width="29" />
+        <icon height="58" src="www/content/favicons/icon-small@2x.jpg" width="58" />
+        <icon height="87" src="www/content/favicons/icon-small@3x.jpg" width="87" />
     </platform>
     <plugin name="cordova-plugin-inappbrowser" spec="^3.0.0" />
     <plugin name="cordova-plugin-file" spec="^6.0.1" />
