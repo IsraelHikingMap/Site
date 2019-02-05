@@ -259,6 +259,18 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
+        public void ConvertGpxToDataContainer_NonSiteFileWithType_ShouldRemoveType()
+        {
+            var gpx = new GpxFile();
+            gpx.Routes.Add(new GpxRoute());
+            gpx.Waypoints.Add(new GpxWaypoint(new Coordinate(0,0)).WithClassification("Generic"));
+
+            var dataContainer = _converterService.ToDataContainer(gpx.ToBytes(), FlowFormats.GPX).Result;
+
+            Assert.AreEqual(string.Empty, dataContainer.Routes[0].Markers[0].Type);
+        }
+
+        [TestMethod]
         public void ConvertGpxVersion1ToDataContainer_NonSiteFileNoPointsInTrack_ShouldManipulateRouteData()
         {
             string gpxVersion1 = "<?xml version='1.0' encoding='UTF-8'?><gpx version='1.0' creator='GPSBabel - http://www.gpsbabel.org' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://www.topografix.com/GPX/1/0' xsi:schemaLocation='http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd'><rte><rtept lat='33.1187173918366' lon='35.6488631636844'><ele>0.000000</ele><name>A001</name><cmt>60963[1] דרך עפר היוצאת מעיקול בכביש 959 - נקודת ההתחלה</cmt><desc>60963[1] דרך עפר היוצאת מעיקול בכביש 959 - נקודת ההתחלה</desc></rtept></rte></gpx>";

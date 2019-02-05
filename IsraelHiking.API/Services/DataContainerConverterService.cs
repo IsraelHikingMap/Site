@@ -82,6 +82,10 @@ namespace IsraelHiking.API.Services
             {
                 route.Name = fileName;
             }
+            foreach (var marker in container.Routes.SelectMany(r => r.Markers).Where(m => !string.IsNullOrEmpty(m.Type)))
+            {
+                marker.Type = string.Empty;
+            }
             return container;
         }
 
