@@ -241,7 +241,7 @@ export function getWindow() { return window; }
         ClipboardModule,
         RouterModule.forRoot(routes),
         Angulartics2Module.forRoot(),
-        NgProgressModule.forRoot(),
+        NgProgressModule,
         NgProgressHttpModule,
         NgxPaginationModule,
         ScrollToModule.forRoot(),
