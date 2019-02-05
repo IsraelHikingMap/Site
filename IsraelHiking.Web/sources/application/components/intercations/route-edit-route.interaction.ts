@@ -236,7 +236,7 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
         let segment = { ...routeData.segments[index] };
         if (index === 0) {
-            segment.latlngs = [latlng, latlng] as ILatLngTime[];
+            segment.latlngs = await this.elevationProvider.updateHeights([latlng, latlng]) as ILatLngTime[];
             segment.routePoint = latlng;
             segment.routingType = routingType;
             let nextSegment = routeData.segments[index + 1];

@@ -15,6 +15,7 @@ import { MapService } from "./map.service";
 import { RouteLayerFactory } from "./layers/routelayers/route-layer.factory";
 import { RunningContextService } from "./running-context.service";
 import { SetFileUrlAndBaseLayerAction } from "../reducres/in-memory.reducer";
+import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
 import { DataContainer, ApplicationState } from "../models/models";
 
 @Injectable()
@@ -47,6 +48,9 @@ export class DataContainerService {
         }
         this.ngRedux.dispatch(new BulkReplaceRoutesAction({
             routesData: routesData
+        }));
+        this.ngRedux.dispatch(new SetSelectedRouteAction({
+            routeId: routesData[0].id
         }));
         this.layersService.addExternalOverlays(dataContainer.overlays);
         this.layersService.addExternalBaseLayer(dataContainer.baseLayer);
