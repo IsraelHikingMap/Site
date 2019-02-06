@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 import { NgRedux } from "@angular-redux/store";
 
 import { Urls } from "../urls";
-import { LayerData, LatLngAlt, ApplicationState } from "../models/models";
+import { LatLngAlt, ApplicationState } from "../models/models";
 
 export interface IPoiRouterData {
     source: string;
