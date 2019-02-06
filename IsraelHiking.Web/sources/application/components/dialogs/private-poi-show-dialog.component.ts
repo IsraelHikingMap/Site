@@ -24,13 +24,19 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     public showCoordinates: boolean;
 
     public static openDialog(matDialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
-        matDialog.open(PrivatePoiShowDialogComponent, {
-            maxWidth: "378px", data: {
-                marker: marker,
-                routeId: routeId,
-                index: index
-            }
-        });
+        setTimeout(() => {
+                // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
+                matDialog.open(PrivatePoiShowDialogComponent,
+                    {
+                        maxWidth: "378px",
+                        data: {
+                            marker: marker,
+                            routeId: routeId,
+                            index: index
+                        }
+                    });
+            },
+            100);
     }
 
     constructor(resources: ResourcesService,

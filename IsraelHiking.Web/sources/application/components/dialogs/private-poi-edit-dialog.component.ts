@@ -37,13 +37,19 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     public titleInput: ElementRef;
 
     public static openDialog(matDialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
-        matDialog.open(PrivatePoiEditDialogComponent, {
-            maxWidth: "378px", data: {
-                marker: marker,
-                routeId: routeId,
-                index: index
-            }
-        });
+        setTimeout(() => {
+                // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
+                matDialog.open(PrivatePoiEditDialogComponent,
+                    {
+                        maxWidth: "378px",
+                        data: {
+                            marker: marker,
+                            routeId: routeId,
+                            index: index
+                        }
+                    });
+            },
+            100);
     }
 
     constructor(resources: ResourcesService,
