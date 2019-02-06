@@ -151,30 +151,4 @@ export class HashService {
         let urlTree = this.router.createUrlTree([RouteStrings.SHARE, id]);
         return Urls.baseAddress + urlTree.toString();
     }
-
-    public stringToBaseLayer(addressOrKey: string): LayerData {
-        if (!addressOrKey) {
-            return null;
-        }
-        if (addressOrKey.includes("www") || addressOrKey.includes("http")) {
-            return {
-                key: "",
-                address: addressOrKey
-            } as LayerData;
-        }
-        return {
-            key: addressOrKey.split("_").join(" "),
-            address: ""
-        } as LayerData;
-    }
-
-    private baseLayerToString(baeLayer: LayerData): string {
-        if (baeLayer == null) {
-            return null;
-        }
-        if (baeLayer.address) {
-            return baeLayer.address;
-        }
-        return baeLayer.key.split(" ").join("_");
-    }
 }

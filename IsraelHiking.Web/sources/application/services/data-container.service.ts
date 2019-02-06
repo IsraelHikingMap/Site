@@ -4,7 +4,6 @@ import { NgRedux } from "@angular-redux/store";
 import { LayersService } from "./layers/layers.service";
 import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
-import { HashService } from "./hash.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { SpatialService } from "./spatial.service";
@@ -16,7 +15,7 @@ import { RouteLayerFactory } from "./layers/routelayers/route-layer.factory";
 import { RunningContextService } from "./running-context.service";
 import { SetFileUrlAndBaseLayerAction } from "../reducres/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
-import { DataContainer, ApplicationState } from "../models/models";
+import { DataContainer, ApplicationState, LayerData } from "../models/models";
 
 @Injectable()
 export class DataContainerService {
@@ -25,7 +24,6 @@ export class DataContainerService {
 
     constructor(private readonly shareUrlsService: ShareUrlsService,
         private readonly layersService: LayersService,
-        private readonly hashService: HashService,
         private readonly fileService: FileService,
         private readonly resourcesService: ResourcesService,
         private readonly toastService: ToastService,
@@ -49,9 +47,11 @@ export class DataContainerService {
         this.ngRedux.dispatch(new BulkReplaceRoutesAction({
             routesData: routesData
         }));
-        this.ngRedux.dispatch(new SetSelectedRouteAction({
-            routeId: routesData[0].id
-        }));
+        if (routesData.length > 0) {
+            this.ngRedux.dispatch(new SetSelectedRouteAction({
+                routeId: routesData[0].id
+            }));
+        }
         this.layersService.addExternalOverlays(dataContainer.overlays);
         this.layersService.addExternalBaseLayer(dataContainer.baseLayer);
 
@@ -87,13 +87,17 @@ export class DataContainerService {
 
     public setFileUrlAfterNavigation = async (url: string, baseLayer: string) => {
         // await this.layersInitializationPromise;
-        this.ngRedux.dispatch(new SetFileUrlAndBaseLayerAction({
-            fileUrl: url,
-            baseLayer: baseLayer
-        }));
-        let data = await this.fileService.openFromUrl(url);
-        data.baseLayer = this.hashService.stringToBaseLayer(baseLayer);
-        this.setData(data, false);
+        try {
+            let data = await this.fileService.openFromUrl(url);
+            this.ngRedux.dispatch(new SetFileUrlAndBaseLayerAction({
+                fileUrl: url,
+                baseLayer: baseLayer
+            }));
+            data.baseLayer = this.stringToBaseLayer(baseLayer);
+            this.setData(data, false);
+        } catch (ex) {
+            this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
+        }
     }
 
     public setShareUrlAfterNavigation = async (shareId) => {
@@ -113,5 +117,21 @@ export class DataContainerService {
             this.shareUrlsService.setShareUrl(null);
             this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
         }
+    }
+
+    private stringToBaseLayer(addressOrKey: string): LayerData {
+        if (!addressOrKey) {
+            return null;
+        }
+        if (addressOrKey.includes("www") || addressOrKey.includes("http")) {
+            return {
+                key: "",
+                address: addressOrKey
+            } as LayerData;
+        }
+        return {
+            key: addressOrKey.split("_").join(" "),
+            address: ""
+        } as LayerData;
     }
 }
