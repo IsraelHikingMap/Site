@@ -206,13 +206,14 @@ export class LayersService {
         }
     }
 
-    public addOverlay = (layerData: LayerData) => {
+    public addOverlay = (layerData: LayerData): Overlay => {
         let overlay = this.overlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
         if (overlay != null) {
             return overlay; // overlay exists
         }
         overlay = this.addOverlayFromData(layerData, true);
         this.addOverlayToDatabase(overlay);
+        return overlay;
     }
 
     private addOverlayFromData = (layerData: LayerData, visible: boolean): Overlay => {
@@ -361,7 +362,10 @@ export class LayersService {
             return;
         }
         for (let overlay of overlays) {
-            this.addOverlay(overlay);
+            let addedOverlay = this.addOverlay(overlay);
+            if (!addedOverlay.visible) {
+                this.toggleOverlay(addedOverlay);
+            }
         }
         // hide overlays that are not part of the share:
         for (let overlay of this.overlays) {
