@@ -56,7 +56,7 @@ export class DataContainerService {
         this.layersService.addExternalBaseLayer(dataContainer.baseLayer);
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {
-            this.fitBoundsService.fitBounds({northEast: dataContainer.northEast, southWest: dataContainer.southWest});
+            this.fitBoundsService.fitBounds({northEast: dataContainer.northEast, southWest: dataContainer.southWest}, true);
         }
     }
 

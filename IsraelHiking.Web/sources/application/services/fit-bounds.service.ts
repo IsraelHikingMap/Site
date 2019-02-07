@@ -15,8 +15,11 @@ export class FitBoundsService {
         this.isFlying = false;
     }
 
-    public fitBounds(bounds: Bounds) {
+    public fitBounds(bounds: Bounds, noPadding: boolean = false) {
         let padding = [50, 50, 50, 50];
+        if (noPadding) {
+            padding = [-5, -5, -5, -5];
+        }
         if (this.sidebarService.isVisible && window.innerWidth >= 768) {
             padding = [50, -400, 50, 50];
         }
