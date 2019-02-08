@@ -1,15 +1,13 @@
 import { Component, ViewEncapsulation, ViewChild } from "@angular/core";
 import { MatSelect } from "@angular/material";
 import { every } from "lodash";
-import { select } from "@angular-redux/store";
-import { Observable } from "rxjs";
 
 import { DataContainerService } from "../services/data-container.service";
 import { ResourcesService } from "../services/resources.service";
 import { FileService, IFormatViewModel } from "../services/file.service";
 import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
-import { DataContainer, ApplicationState } from "../models/models";
+import { DataContainer } from "../models/models";
 
 @Component({
     selector: "file-save-as",
