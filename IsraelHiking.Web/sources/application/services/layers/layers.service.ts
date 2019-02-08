@@ -369,8 +369,7 @@ export class LayersService {
         }
         // hide overlays that are not part of the share:
         for (let overlay of this.overlays) {
-            let externalOverlay = (overlays || []).find(
-                o => o.key === overlay.key || o.address === overlay.address);
+            let externalOverlay = overlays.find(o => o.key === overlay.key || o.address === overlay.address);
             if (externalOverlay == null && overlay.visible) {
                 this.toggleOverlay(overlay);
             }
