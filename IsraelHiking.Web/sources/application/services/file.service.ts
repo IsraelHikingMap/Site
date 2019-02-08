@@ -145,7 +145,7 @@ export class FileService {
                             dir => {
                                 let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
                                     .replace("Z", "_") +
-                                    fileName.split(" ").join("_");
+                                    fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
                                 dir.getFile(fullFileName,
                                     { create: true },
                                     fileEntry => {
