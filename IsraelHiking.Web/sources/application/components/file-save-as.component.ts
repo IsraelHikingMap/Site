@@ -23,9 +23,6 @@ export class FileSaveAsComponent extends BaseMapComponent {
     public formats: IFormatViewModel[];
     public selectedFormat: IFormatViewModel;
 
-    @select((state: ApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;
-
     @ViewChild("dropdown")
     public dropdown: MatSelect;
 
