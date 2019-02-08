@@ -11,3 +11,7 @@ $background: map-get($app-theme, background);
     color: black;
     background: mat-color($app-background, hover, 0.12);
 }
+
+.short-button {
+    line-height: unset !important;
+}
