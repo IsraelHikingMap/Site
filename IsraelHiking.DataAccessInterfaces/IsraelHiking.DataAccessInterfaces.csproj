@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="GeoAPI" Version="1.7.5" />
-    <PackageReference Include="NetTopologySuite" Version="1.15.0" />
+    <PackageReference Include="NetTopologySuite" Version="1.15.1" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="1.15.0" />
     <PackageReference Include="OsmSharp" Version="6.1.0" />
     <PackageReference Include="ProjNET4GeoAPI" Version="1.4.1" />

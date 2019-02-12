@@ -78,7 +78,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.6.0-intX7a" />
+    <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.6.5" />
     <PackageReference Include="GeoAPI" Version="1.7.5" />
     <PackageReference Include="IsraelHiking.Elasticsearch" Version="5.6.3.1" />
     <PackageReference Include="IsraelHiking.GPSBabel" Version="1.5.5-beta.3" />
@@ -89,9 +89,9 @@
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="2.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.1" />
     <PackageReference Include="NEST" Version="5.5.0" />
-    <PackageReference Include="NetTopologySuite" Version="1.15.0" />
+    <PackageReference Include="NetTopologySuite" Version="1.15.1" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="1.15.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="OAuth.DotNetCore" Version="2.0.0" />
     <PackageReference Include="OsmSharp" Version="6.1.0" />
     <PackageReference Include="ProjNET4GeoAPI" Version="1.4.1" />
