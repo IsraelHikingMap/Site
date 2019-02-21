@@ -39,7 +39,7 @@ import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { DndModule } from "@beyerleinf/ngx-dnd";
 import { NgxImageGalleryModule } from "ngx-image-gallery";
-import { D3Service } from "d3-ng2-service";
+import { NgxD3Service } from "ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule, NgRedux } from "@angular-redux/store";
 import { AngularOpenlayersModule } from "ngx-openlayers";
@@ -308,7 +308,7 @@ export function getWindow() { return window; }
         { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
         { provide: "Window", useFactory: getWindow },
         { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [Injector], multi: true },
-        D3Service,
+        NgxD3Service,
         GetTextCatalogService,
         MapService,
         ResourcesService,

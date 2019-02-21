@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef,
 import { trigger, style, transition, animate } from "@angular/animations";
 import { Coordinate } from "openlayers";
 import { Subscription, Observable } from "rxjs";
-import { D3Service, Selection, BaseType, ScaleContinuousNumeric } from "d3-ng2-service";
+import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "ngx-d3";
 import { select } from "@angular-redux/store";
 
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
@@ -102,7 +102,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     constructor(resources: ResourcesService,
         private readonly changeDetectorRef: ChangeDetectorRef,
-        private readonly d3Service: D3Service,
+        private readonly d3Service: NgxD3Service,
         private readonly selectedRouteService: SelectedRouteService,
         private readonly routeStatisticsService: RouteStatisticsService,
         private readonly cancelableTimeoutService: CancelableTimeoutService,
