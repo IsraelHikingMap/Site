@@ -274,7 +274,7 @@ export class AuthorizationService {
                 baseLayerAddress = Urls.baseTilesAddress + baseLayerAddress;
             }
             let address = baseLayerAddress.replace("{s}", "s");
-            background = `background=custom:${address}`;
+            background = `background=custom:${encodeURIComponent(address)}`;
         }
         return background;
     }
