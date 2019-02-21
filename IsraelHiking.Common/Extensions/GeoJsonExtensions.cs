@@ -93,6 +93,10 @@ namespace IsraelHiking.Common.Extensions
             {
                 return false;
             }
+            if (feature.Geometry is GeometryCollection)
+            {
+                return false;
+            }
             var isFeatureADecentCity = feature.Attributes.Has("boundary", "administrative") &&
                                        feature.Attributes.Exists("admin_level") &&
                                        int.TryParse(feature.Attributes["admin_level"].ToString(), out int adminLevel) &&

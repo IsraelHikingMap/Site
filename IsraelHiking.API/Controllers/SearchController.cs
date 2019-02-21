@@ -11,6 +11,7 @@ using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
+using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -96,7 +97,7 @@ namespace IsraelHiking.API.Controllers
             {
                 Id = feature.Attributes[FeatureAttributes.ID].ToString(),
                 Title = title,
-                DisplayName = await GetDisplaName(feature, language, title),
+                DisplayName = await GetDisplayName(feature, language, title),
                 Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString(),
                 Icon = icon,
                 IconColor = feature.Attributes[FeatureAttributes.ICON_COLOR].ToString(),
@@ -108,14 +109,17 @@ namespace IsraelHiking.API.Controllers
             };
         }
 
-        private async Task<string> GetDisplaName(IFeature feature, string language, string title)
+        private async Task<string> GetDisplayName(IFeature feature, string language, string title)
         {
             var displayName = title;
             var containers = await _elasticSearchGateway.GetContainers(feature.Geometry.Coordinate);
+            var featureGeometry = feature.Geometry is GeometryCollection collection
+                ? collection.Geometries.FirstOrDefault()
+                : feature.Geometry;
             var container = containers.Where(c =>
                     c.Attributes[FeatureAttributes.ID] != feature.Attributes[FeatureAttributes.ID] &&
-                    c.Geometry.Contains(feature.Geometry) &&
-                    c.Geometry.EqualsTopologically(feature.Geometry) == false)
+                    c.Geometry.Contains(featureGeometry) &&
+                    c.Geometry.EqualsTopologically(featureGeometry) == false)
                 .OrderBy(c => c.Geometry.Area)
                 .FirstOrDefault();
             if (container == null)
