@@ -347,8 +347,7 @@ export class ResourcesService {
     public legendWaterWell: string;
     public legendCistern: string;
     public legendWaterfall: string;
-    public legendWaterTank: string;
-    public legendWaterTower: string;
+    public legendWaterTowerOrTank: string;
     public legendRoads: string;
     public legendMotorway: string;
     public legendTrunk: string;
@@ -486,7 +485,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1549400723645");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1550857254391");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -846,8 +845,7 @@ export class ResourcesService {
         this.legendWaterWell = this.gettextCatalog.getString("Water Well");
         this.legendCistern = this.gettextCatalog.getString("Cistern");
         this.legendWaterfall = this.gettextCatalog.getString("Waterfall");
-        this.legendWaterTank = this.gettextCatalog.getString("Water Tank");
-        this.legendWaterTower = this.gettextCatalog.getString("Water Tower");
+        this.legendWaterTowerOrTank = this.gettextCatalog.getString("Water Tower or Water Tank");
         this.legendRoads = this.gettextCatalog.getString("Roads");
         this.legendMotorway = this.gettextCatalog.getString("Motorway");
         this.legendTrunk = this.gettextCatalog.getString("Trunk");

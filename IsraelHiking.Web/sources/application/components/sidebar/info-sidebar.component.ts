@@ -441,19 +441,11 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
-                        title: this.resources.legendWaterTank,
-                        latlng: { lat: 33.0754925, lng: 35.1646104 },
-                        zoom: 16,
-                        type: "POI",
-                        osmTags: ["man_made=storage_tank", "content=water"],
-                        link: LegendItemComponent.OSM_TAG_LINK
-                    },
-                    {
-                        title: this.resources.legendWaterTower,
+                        title: this.resources.legendWaterTowerOrTank,
                         latlng: { lat: 31.8507664, lng: 34.8740250 },
                         zoom: 16,
                         type: "POI",
-                        osmTags: ["man_made=water_tower"],
+                        osmTags: ["man_made=water_tower", "man_made=storage_tank", "content=water"],
                         link: LegendItemComponent.OSM_TAG_LINK
                     }
                 ]
