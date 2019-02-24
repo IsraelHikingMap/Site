@@ -53,9 +53,12 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.lastShareUrl = null;
         let shareUrl = this.shareUrlsService.getSelectedShareUrl();
         this.updateCurrentShare = false;
+        this.canUpdate = false;
         if (shareUrl != null) {
             this.title = shareUrl.title;
             this.description = shareUrl.description;
+            this.canUpdate = this.authorizationService.isLoggedIn() &&
+                shareUrl.osmUserId.toString() === this.authorizationService.getUserInfo().id.toString();
         }
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null) {
@@ -63,13 +66,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 this.title = selectedRoute.name;
                 this.description = selectedRoute.description;
             }
-        }
-
-        this.shareUrlsService.getShareUrls().then((shareUrls) => {
-            this.canUpdate = shareUrl != null &&
-                this.authorizationService.isLoggedIn() &&
-                shareUrls.find(s => s.id === shareUrl.id) != null;
-        });
+        }   
     }
 
     public async ngAfterViewInit(): Promise<any> {

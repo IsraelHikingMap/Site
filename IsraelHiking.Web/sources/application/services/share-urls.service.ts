@@ -116,7 +116,7 @@ export class ShareUrlsService {
         return shareUrl;
     }
 
-    public getSelectedShareUrl() {
+    public getSelectedShareUrl(): ShareUrl {
         return this.ngRedux.getState().inMemoryState.shareUrl;
     }
 }

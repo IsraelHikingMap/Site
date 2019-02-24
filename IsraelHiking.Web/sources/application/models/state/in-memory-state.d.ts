@@ -1,4 +1,4 @@
-﻿import { ShareUrl } from "./models";
+﻿import { ShareUrl } from "../models";
 
 /**
  * this state should be clean every time the app starts
