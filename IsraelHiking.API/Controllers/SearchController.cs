@@ -11,7 +11,6 @@ using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
-using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -113,12 +112,10 @@ namespace IsraelHiking.API.Controllers
         {
             var displayName = title;
             var containers = await _elasticSearchGateway.GetContainers(feature.Geometry.Coordinate);
-            var featureGeometry = feature.Geometry is GeometryCollection collection
-                ? collection.Geometries.FirstOrDefault()
-                : feature.Geometry;
+            var featureGeometry = feature.Geometry.GetGeometryN(0);
             var container = containers.Where(c =>
                     c.Attributes[FeatureAttributes.ID] != feature.Attributes[FeatureAttributes.ID] &&
-                    c.Geometry.Contains(featureGeometry) &&
+                    c.Geometry.Covers(featureGeometry) &&
                     c.Geometry.EqualsTopologically(featureGeometry) == false)
                 .OrderBy(c => c.Geometry.Area)
                 .FirstOrDefault();

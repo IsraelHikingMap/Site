@@ -43,20 +43,24 @@ namespace IsraelHiking.API.Executors
         private readonly ConfigurationData _options;
         private readonly ILogger<FeaturesMergeExecutor> _reportLogger;
         private readonly ILogger _logger;
+        private readonly GeometryFactory _geometryFactory;
 
         /// <summary>
         /// Class's constructor
         /// </summary>
         /// <param name="options"></param>
+        /// <param name="geometryFactory"></param>
         /// <param name="reportLogger"></param>
         /// <param name="logger"></param>
         public FeaturesMergeExecutor(IOptions<ConfigurationData> options,
+            GeometryFactory geometryFactory,
             ILogger<FeaturesMergeExecutor> reportLogger, 
             ILogger logger)
         {
             _options = options.Value;
             _reportLogger = reportLogger;
             _logger = logger;
+            _geometryFactory = geometryFactory;
         }
 
         /// <inheritdoc />
@@ -159,6 +163,17 @@ namespace IsraelHiking.API.Executors
                     feature.Geometry = new MultiLineString(lines);
                     continue;
                 }
+                if (geometryCollection.Geometries.All(g => g is Point || g is MultiPoint))
+                {
+                    var points = geometryCollection.Geometries
+                        .OfType<MultiPoint>()
+                        .SelectMany(mls => mls.Geometries.OfType<Point>())
+                        .Concat(geometryCollection.Geometries.OfType<Point>())
+                        .Cast<IPoint>()
+                        .ToArray();
+                    feature.Geometry = new MultiPoint(points);
+                    continue;
+                }
                 var nonPointGeometry = geometryCollection.Geometries.FirstOrDefault(g => !(g is Point));
                 feature.Geometry = nonPointGeometry ?? geometryCollection.First();
             }
@@ -219,16 +234,16 @@ namespace IsraelHiking.API.Executors
             {
                 if (feature.Geometry is GeometryCollection geometryCollectionSource)
                 {
-                    featureToMergeTo.Geometry = new GeometryCollection(geometryCollection.Geometries.Concat(geometryCollectionSource.Geometries).ToArray());
+                    featureToMergeTo.Geometry = _geometryFactory.CreateGeometryCollection(geometryCollection.Geometries.Concat(geometryCollectionSource.Geometries).ToArray());
                 }
                 else
                 {
-                    featureToMergeTo.Geometry = new GeometryCollection(geometryCollection.Geometries.Concat(new[] { feature.Geometry }).ToArray());
+                    featureToMergeTo.Geometry = _geometryFactory.CreateGeometryCollection(geometryCollection.Geometries.Concat(new[] { feature.Geometry }).ToArray());
                 }
             }
             else
             {
-                featureToMergeTo.Geometry = new GeometryCollection(new[] { featureToMergeTo.Geometry, feature.Geometry });
+                featureToMergeTo.Geometry = _geometryFactory.CreateGeometryCollection(new[] { featureToMergeTo.Geometry, feature.Geometry });
             }
 
             if (featureToMergeTo.Attributes[FeatureAttributes.POI_CATEGORY].Equals(Categories.NONE))

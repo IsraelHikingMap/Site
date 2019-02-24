@@ -36,10 +36,10 @@ namespace IsraelHiking.API.Tests.Executors
         public void TestInitialize()
         {
             var logger = Substitute.For<ILogger>();
-            var reportLogget = Substitute.For<ILogger<FeaturesMergeExecutor>>();
+            var reportLogger = Substitute.For<ILogger<FeaturesMergeExecutor>>();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
-            _executor = new FeaturesMergeExecutor(options, reportLogget, logger);
+            _executor = new FeaturesMergeExecutor(options, new GeometryFactory(), reportLogger, logger);
         }
 
         [TestMethod]
@@ -410,10 +410,10 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.Merge(new List<Feature> { node1, node2, node3, node4 });
 
             Assert.AreEqual(1, results.Count);
-            var geometryCollection = results.First().Geometry as GeometryCollection;
-            Assert.IsNotNull(geometryCollection);
-            Assert.AreEqual(0, geometryCollection.Geometries.OfType<GeometryCollection>().Count());
-            Assert.AreEqual(4, geometryCollection.Geometries.Length);
+            var multiPoint = results.First().Geometry as MultiPoint;
+            Assert.IsNotNull(multiPoint);
+            Assert.AreEqual(0, multiPoint.Geometries.OfType<GeometryCollection>().Count());
+            Assert.AreEqual(4, multiPoint.Geometries.Length);
         }
     }
 }
