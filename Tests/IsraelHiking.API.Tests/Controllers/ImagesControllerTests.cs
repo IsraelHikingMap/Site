@@ -38,15 +38,23 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetImage_NoUrl_ShouldNotFound()
+        public void GetImage_ShouldCreateOne()
         {
-            var results = _controller.GetImage("42").Result as NotFoundResult;
+            var results = _controller.GetImage(32, 35, 100, 100).Result as FileContentResult;
 
             Assert.IsNotNull(results);
         }
 
         [TestMethod]
-        public void GetImage_UrlInDatabase_ShouldCreateIt()
+        public void GetImageForShare_NoUrl_ShouldNotFound()
+        {
+            var results = _controller.GetImageForShare("42").Result as NotFoundResult;
+
+            Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void GetImageForShare_UrlInDatabase_ShouldCreateIt()
         {
             var siteUrl = new ShareUrl
             {
@@ -55,7 +63,7 @@ namespace IsraelHiking.API.Tests.Controllers
             };
             _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
 
-            var results = _controller.GetImage(siteUrl.Id).Result as FileContentResult;
+            var results = _controller.GetImageForShare(siteUrl.Id).Result as FileContentResult;
 
             Assert.IsNotNull(results);
         }

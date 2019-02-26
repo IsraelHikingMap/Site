@@ -41,6 +41,45 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
+        /// Given a location this method will create an image around it
+        /// </summary>
+        /// <param name="lat">latitude</param>
+        /// <param name="lon">longitude</param>
+        /// <param name="width">Image width in pixels</param>
+        /// <param name="height">Image height in pixels</param>
+        /// <returns>An image</returns>
+        [HttpGet]
+        [Route("")]
+        public async Task<IActionResult> GetImage([FromQuery] double lat, [FromQuery] double lon, [FromQuery] int? width = null, [FromQuery] int? height = null)
+        {
+            var center = new LatLng(lat, lon);
+            var distance = 0.002;
+            var container = new DataContainer
+            {
+                NorthEast = new LatLng(center.Lat + distance, center.Lng + distance),
+                SouthWest = new LatLng(center.Lat - distance, center.Lng - distance),
+                Overlays = new List<LayerData>(),
+                BaseLayer = new LayerData(),
+                Routes = new List<RouteData>
+                {
+                    new RouteData
+                    {
+                        Markers = new List<MarkerData>
+                        {
+                            new MarkerData
+                            {
+                                Latlng = center
+                            }
+                        }
+                    }
+                }
+            };
+            var imageData = await _imageCreationService.Create(container, width ?? 512, height ?? 512);
+            return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
+        }
+
+
+        /// <summary>
         /// Creates an image for the relevant shared route in the database
         /// </summary>
         /// <param name="id">The share route ID</param>
@@ -49,7 +88,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>An image</returns>
         [HttpGet]
         [Route("{id}")]
-        public async Task<IActionResult> GetImage(string id, [FromQuery] int? width = null, [FromQuery] int? height = null)
+        public async Task<IActionResult> GetImageForShare(string id, [FromQuery] int? width = null, [FromQuery] int? height = null)
         {
             var url = await _repository.GetUrlById(id);
             if (url == null)
