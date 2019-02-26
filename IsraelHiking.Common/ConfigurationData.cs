@@ -83,11 +83,16 @@ namespace IsraelHiking.Common
         /// <summary>
         /// An object that describe how to connect to OSM
         /// </summary>
-        public OsmConfiguraionData OsmConfiguraion { get; set; }
+        public OsmConfiguraionData OsmConfiguration { get; set; }
         /// <summary>
         /// A list of directories that are visible to the user for folder navigation
         /// </summary>
         public Dictionary<string, string> ListingDictionary { get; set; }
+
+        /// <summary>
+        /// A list of reverse-proxies that the site will redirect
+        /// </summary>
+        public Dictionary<string, string> ProxiesDictionary { get; set; }
         /// <summary>
         /// A list of colors to select the route color from
         /// </summary>
@@ -113,13 +118,14 @@ namespace IsraelHiking.Common
             SearchFactor = 0.5;
             MergePointsOfInterestThreshold = 0.0015;
             BinariesFolder = string.Empty;
-            OsmConfiguraion = new OsmConfiguraionData
+            OsmConfiguration = new OsmConfiguraionData
             {
                 ConsumerKey = "E8p0RX0rnQPxDaj3IijgpMNeK8lRTyy6rlKxQ8IF",
                 ConsumerSecret = "Hro40NSObALdx8Dm7Xv1mKvxjwlGITqetXUBYUwv",
                 BaseAddress = "https://www.openstreetmap.org"
             };
             ListingDictionary = new Dictionary<string, string>();
+            ProxiesDictionary = new Dictionary<string, string>();
             Colors = new List<string>
             {
                 "#0000FF", // blue

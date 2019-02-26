@@ -112,7 +112,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetConfiguration_ShouldReturnIt()
         {
             var osmConfiguration = new OsmConfiguraionData {BaseAddress = "baseAddress"};
-            _options.OsmConfiguraion = osmConfiguration;
+            _options.OsmConfiguration = osmConfiguration;
 
             var results = _controller.GetConfigurations();
 

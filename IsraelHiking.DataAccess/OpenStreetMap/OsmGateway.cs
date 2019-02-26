@@ -46,8 +46,8 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             _tokenAndSecret = tokenAndSecret;
             _options = options.Value;
 
-            var osmApiBaseAddress = _options.OsmConfiguraion.BaseAddress + "/api/0.6/";
-            _baseAddressWithoutProtocol = _options.OsmConfiguraion.BaseAddress.Replace("http://", "").Replace("https://", "");
+            var osmApiBaseAddress = _options.OsmConfiguration.BaseAddress + "/api/0.6/";
+            _baseAddressWithoutProtocol = _options.OsmConfiguration.BaseAddress.Replace("http://", "").Replace("https://", "");
             _userDetailsAddress = osmApiBaseAddress + "user/details";
             _createChangesetAddress = osmApiBaseAddress + "changeset/create";
             _uploadChangesetAddress = osmApiBaseAddress + "changeset/:id/upload";
@@ -70,8 +70,8 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
 
             var request = new OAuthRequest
             {
-                ConsumerKey = _options.OsmConfiguraion.ConsumerKey,
-                ConsumerSecret = _options.OsmConfiguraion.ConsumerSecret,
+                ConsumerKey = _options.OsmConfiguration.ConsumerKey,
+                ConsumerSecret = _options.OsmConfiguration.ConsumerSecret,
                 Token = _tokenAndSecret.Token,
                 TokenSecret = _tokenAndSecret.TokenSecret,
                 Type = OAuthRequestType.ProtectedResource,

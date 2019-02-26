@@ -21,7 +21,7 @@ namespace IsraelHiking.DataAccess.Tests.OpenStreetMap
         {
             var options = new ConfigurationData()
             {
-                OsmConfiguraion = new OsmConfiguraionData
+                OsmConfiguration = new OsmConfiguraionData
                 {
                     BaseAddress = "http://api06.dev.openstreetmap.org",
                     ConsumerKey = "uR7K7PcxOyFG2FnTdTuEqAmlq6hTWPDmF4xknWxQ",

@@ -1,15 +1,20 @@
-﻿using GeoAPI.Geometries;
+﻿using AspNetCore.Proxy;
+using GeoAPI.Geometries;
 using IsraelHiking.API;
 using IsraelHiking.API.Controllers;
+using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Rewrite;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -24,10 +29,6 @@ using NLog.Web;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
-using IsraelHiking.API.Services;
-using IsraelHiking.Common.Poi;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.StaticFiles;
 
 namespace IsraelHiking.Web
 {
@@ -131,7 +132,7 @@ namespace IsraelHiking.Web
             });
             app.UseAuthentication();
             app.UseMvc();
-            SetupStaticFiles(app);
+            SetupStaticFilesAndProxies(app);
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -143,12 +144,26 @@ namespace IsraelHiking.Web
             InitializeServices(app.ApplicationServices);
         }
 
-        private static void SetupStaticFiles(IApplicationBuilder app)
+        private static void SetupStaticFilesAndProxies(IApplicationBuilder app)
         {
             app.UseDefaultFiles();
             var configurationData = app.ApplicationServices.GetRequiredService<IOptions<ConfigurationData>>().Value;
             var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
             fileExtensionContentTypeProvider.Mappings.Add(".db", "application/octet-stream");
+
+            foreach (var proxy in configurationData.ProxiesDictionary)
+            {
+                app.UseProxy(proxy.Key, (_, args) =>
+                {
+                    var targetAddress = proxy.Value;
+                    foreach (var argValuePair in args)
+                    {
+                        targetAddress = targetAddress.Replace("{" + argValuePair.Key + "}", argValuePair.Value.ToString());
+                    }
+                    return targetAddress;
+                });
+            }
+
             foreach (var directory in configurationData.ListingDictionary)
             {
                 var fileServerOptions = new FileServerOptions

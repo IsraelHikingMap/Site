@@ -122,7 +122,7 @@ namespace IsraelHiking.API.Controllers
         [Route("configuration")]
         public OsmConfiguraionData GetConfigurations()
         {
-            return _options.OsmConfiguraion;
+            return _options.OsmConfiguration;
         }
 
         /// <summary>
