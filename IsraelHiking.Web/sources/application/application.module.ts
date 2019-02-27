@@ -166,9 +166,9 @@ export function initializeApplication(injector: Injector) {
         let database;
         if (useWorkerPouch) {
             (PouchDB as any).adapter("worker", WorkerPouch);
-            database = new PouchDB("IHM", { adapter: "worker" });
+            database = new PouchDB("IHM", { adapter: "worker", auto_compaction: true });
         } else {
-            database = new PouchDB("IHM");
+            database = new PouchDB("IHM", { auto_compaction: true });
         }
         let storedState = initialState;
         // tslint:disable-next-line
