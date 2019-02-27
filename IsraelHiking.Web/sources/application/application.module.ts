@@ -184,8 +184,11 @@ export function initializeApplication(injector: Injector) {
                     }
                 });
                 storedState.inMemoryState = initialState.inMemoryState;
+                if (!runningContext.isCordova) {
+                    storedState.routes = initialState.routes;
+                }
             } catch (ex) {
-                // not state.
+                // no initial state.
                 (database as any).put({
                     _id: "state",
                     state: initialState

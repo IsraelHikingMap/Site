@@ -10,6 +10,7 @@
         <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="clearRoute()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Clear route"><i class="fa icon-recordings"></i> {{resources.clearRoute}}</button>
         <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="clearPois()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Clear pois"><i class="fa icon-map-marker"></i> {{resources.clearPois}}</button>
         <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="clearBoth()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Clear both"><i class="fa icon-close"></i> {{resources.clearBoth}}</button>
+        <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="deleteAllRoutes()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Delete all routes"><i class="fa icon-trash"></i> {{resources.deleteAllRoutes}}</button>
     </mat-menu>
     <button mat-button *ngIf="isEditActive()" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.clear}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw clear"><i class="fa icon-close fa-lg"></i></button>
 </div>

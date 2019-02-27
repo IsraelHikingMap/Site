@@ -53,7 +53,6 @@ export class LayersSidebarComponent extends BaseMapComponent {
         private readonly categoriesLayerFactory: CategoriesLayerFactory,
         private readonly sidebarService: SidebarService,
         private readonly poiService: PoiService,
-        private readonly toastService: ToastService,
         private ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
@@ -180,15 +179,5 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public isRouteSelected(routeData: RouteData) {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && selectedRoute.id === routeData.id;
-    }
-
-    public deleteAllRoutes() {
-        this.toastService.confirm({
-            message: this.resources.areYouSure,
-            type: "YesNo",
-            confirmAction: () => {
-                this.ngRedux.dispatch(new DeleteAllRoutesAction({}));
-            }
-        });
     }
 }

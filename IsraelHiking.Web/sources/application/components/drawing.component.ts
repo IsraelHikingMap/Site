@@ -6,7 +6,8 @@ import { ActionCreators } from "redux-undo";
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
-import { ChangeEditStateAction, ReplaceSegmentsAction, ClearPoisAction, ClearPoisAndRouteAction } from "../reducres/routes.reducer";
+import { ToastService } from "../services/toast.service";
+import { ChangeEditStateAction, ReplaceSegmentsAction, ClearPoisAction, ClearPoisAndRouteAction, DeleteAllRoutesAction } from "../reducres/routes.reducer";
 import { SetRouteEditingStateAction } from "../reducres/route-editing-state.reducer";
 import { RoutingType, ApplicationState } from "../models/models";
 
@@ -21,6 +22,7 @@ export class DrawingComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         private readonly selectedRouteService: SelectedRouteService,
+        private readonly toastService: ToastService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
     }
@@ -139,5 +141,15 @@ export class DrawingComponent extends BaseMapComponent {
             return "black";
         }
         return selectedRoute.color;
+    }
+
+    public deleteAllRoutes() {
+        this.toastService.confirm({
+            message: this.resources.areYouSure,
+            type: "YesNo",
+            confirmAction: () => {
+                this.ngRedux.dispatch(new DeleteAllRoutesAction({}));
+            }
+        });
     }
 }
