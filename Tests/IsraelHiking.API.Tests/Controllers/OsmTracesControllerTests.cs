@@ -77,7 +77,7 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void DeleteGpsTrace_ShouldDeteleIt()
+        public void DeleteGpsTrace_ShouldDeleteIt()
         {
             var id = "id";
             _controller.SetupIdentity();
