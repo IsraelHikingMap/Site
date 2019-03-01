@@ -308,7 +308,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendPath,
-                        latlng: { lat: 29.790, lng: 34.954 },
+                        latlng: { lat: 29.795576, lng: 34.944984 },
                         zoom: 16,
                         type: "Way",
                         osmTags: ["highway=path"],
