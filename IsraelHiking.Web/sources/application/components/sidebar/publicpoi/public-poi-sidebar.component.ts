@@ -17,6 +17,7 @@ import { AddRouteAction, AddPrivatePoiAction } from "../../../reducres/routes.re
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducres/poi.reducer";
+import { SetSelectedRouteAction } from "../../../reducres/route-editing-state.reducer";
 import { SpatialService } from "../../../services/spatial.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { sibebarAnimate } from "../sidebar.component";
@@ -282,6 +283,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             newRoute.markers = routeData.markers;
             this.ngRedux.dispatch(new AddRouteAction({
                 routeData: newRoute
+            }));
+            this.ngRedux.dispatch(new SetSelectedRouteAction({
+                routeId: newRoute.id
             }));
         }
         this.clear();
