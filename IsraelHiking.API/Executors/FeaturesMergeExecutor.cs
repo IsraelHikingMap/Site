@@ -43,7 +43,7 @@ namespace IsraelHiking.API.Executors
         private readonly ConfigurationData _options;
         private readonly ILogger<FeaturesMergeExecutor> _reportLogger;
         private readonly ILogger _logger;
-        private readonly GeometryFactory _geometryFactory;
+        private readonly IGeometryFactory _geometryFactory;
 
         /// <summary>
         /// Class's constructor
@@ -53,7 +53,7 @@ namespace IsraelHiking.API.Executors
         /// <param name="reportLogger"></param>
         /// <param name="logger"></param>
         public FeaturesMergeExecutor(IOptions<ConfigurationData> options,
-            GeometryFactory geometryFactory,
+            IGeometryFactory geometryFactory,
             ILogger<FeaturesMergeExecutor> reportLogger, 
             ILogger logger)
         {
