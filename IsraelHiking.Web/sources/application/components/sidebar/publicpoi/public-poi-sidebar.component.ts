@@ -284,9 +284,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             this.ngRedux.dispatch(new AddRouteAction({
                 routeData: newRoute
             }));
-            this.ngRedux.dispatch(new SetSelectedRouteAction({
-                routeId: newRoute.id
-            }));
+            this.selectedRouteService.setSelectedRoute(newRoute.id);
         }
         this.clear();
     }
