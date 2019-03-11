@@ -1,6 +1,7 @@
 import { Component, AfterViewInit } from "@angular/core";
-import { MapBrowserEvent, Feature, geom, Coordinate } from "openlayers";
-import { MapComponent } from "ngx-openlayers";
+import { MapBrowserEvent, Feature, Coordinate } from "ol";
+import { Point } from "ol/geom";
+import { MapComponent } from "ngx-ol";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 
@@ -74,7 +75,7 @@ export class TracesComponent extends BaseMapComponent implements AfterViewInit {
             }
             let index = +(missingFeature.getId().toString().replace(this.MISSING_PART, ""));
             this.selectedFeature = this.missingParts.features[index];
-            this.missingCoordinates = SpatialService.fromViewCoordinate((missingFeature.getGeometry() as geom.Point).getCoordinates());
+            this.missingCoordinates = SpatialService.fromViewCoordinate((missingFeature.getGeometry() as Point).getCoordinates());
         });
     }
 

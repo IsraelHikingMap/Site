@@ -1,7 +1,10 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, QueryList, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
-import { MapComponent, LayerVectorComponent, FeatureComponent } from "ngx-openlayers";
-import { style, layer, MapBrowserEvent, Feature, geom, format, source } from "openlayers";
+import { MapComponent, LayerVectorComponent, FeatureComponent, SourceVectorComponent } from "ngx-ol";
+import { MapBrowserEvent, Feature } from "ol";
+import { Fill, Style, Text, Stroke, Circle } from "ol/style";
+import { Point } from "ol/geom";
+import { GeoJSON } from "ol/format";
 import { Observable } from "rxjs";
 import { select } from "@angular-redux/store";
 
@@ -30,8 +33,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     @ViewChild("selectedPoiFeature")
     public selectedPoiFeature: FeatureComponent;
 
-    @ViewChild("selectedPoiGeoJsonLayer")
-    public selectedPoiGeoJsonLayer: LayerVectorComponent;
+    @ViewChild("selectedPoiGeoJsonSource")
+    public selectedPoiGeoJsonSource: SourceVectorComponent;
 
     public isClusterOpen: boolean;
     public clusterLatlng: LatLngAlt;
@@ -47,8 +50,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     @select((state: ApplicationState) => state.poiState.selectedPointOfInterest)
     public selectedPoi$: Observable<PointOfInterestExtended>;
 
-    private whiteFill: style.Fill;
-    private blackFill: style.Fill;
+    private whiteFill: Fill;
+    private blackFill: Fill;
 
     constructor(resources: ResourcesService,
         private readonly router: Router,
@@ -59,10 +62,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         private readonly host: MapComponent) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
-        this.whiteFill = new style.Fill({
+        this.whiteFill = new Fill({
             color: "white"
         });
-        this.blackFill = new style.Fill({
+        this.blackFill = new Fill({
             color: "black"
         });
     }
@@ -85,7 +88,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
             let index = categoriesTypeIndex; // closure
             this.categoriesLayerFactory.get(categoriesType).markersLoaded.subscribe(() => {
                 let features = this.categoriesLayerFactory.get(categoriesType).pointsOfInterest.map(p => {
-                    let feature = new Feature(new geom.Point(SpatialService.toViewCoordinate(p.location)));
+                    let feature = new Feature(new Point(SpatialService.toViewCoordinate(p.location)));
                     feature.setId(p.source + "__" + p.id);
                     feature.setProperties({ icon: p.icon, iconColor: p.iconColor, title: p.title, hasExtraData: p.hasExtraData });
                     return feature;
@@ -104,49 +107,41 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         this.host.instance.on("pointermove", (event: MapBrowserEvent) => this.onPointerMove(event));
 
         this.host.instance.on("singleclick", (event: MapBrowserEvent) => this.ngZone.run(() => this.onSingleClick(event)));
-
-        this.setGeoJsonLayerStyle();
     }
 
-    private setGeoJsonLayerStyle() {
-        let lineStyle = this.selectedPoiGeoJsonLayer.instance.getStyle();
-        this.selectedPoiGeoJsonLayer.instance.setStyle((feature: Feature) => {
-            if (feature.getGeometry().getType() === "Point" &&
-                (this.selectedPoiGeoJsonLayer.instance as layer.Vector).getSource().getFeatures().length > 1) {
-                let styleArray = this.getPoiIconStyle("icon-star", "blue", false);
-                styleArray.push(new style.Style({
-                    text: new style.Text({
-                        text: feature.getProperties().name,
-                        fill: new style.Fill({ color: "white" }),
-                        stroke: new style.Stroke({ color: "blue", width: 2 })
-                    })
-                }));
-                return styleArray;
-            }
-            return lineStyle;
+    public geoJsonLayerStyleFunction = (feature: Feature): (Style | Style[]) => {
+        if (feature.getGeometry() instanceof Point &&
+            this.selectedPoiGeoJsonSource != null &&
+            this.selectedPoiGeoJsonSource.instance.getFeatures().length > 1) {
+            let styleArray = this.getPoiIconStyle("icon-star", "blue", false);
+            styleArray.push(new Style({
+                text: new Text({
+                    text: feature.getProperties().name,
+                    fill: new Fill({ color: "white" }),
+                    stroke: new Stroke({ color: "blue", width: 2 })
+                })
+            }));
+            return styleArray;
+        }
+        return new Style({
+            fill: new Fill({ color: "rgba(19, 106, 224, 0.2)" }),
+            stroke: new Stroke({ color: "blue", width: 3 })
         });
     }
 
     private onSelectedPoiChanged = (poi: PointOfInterestExtended) => {
-        if (this.selectedPoiGeoJsonLayer == null) {
+        if (this.selectedPoiGeoJsonSource == null) {
             return;
         }
-        let vectorSource = new source.Vector({
-            features: []
-        });
-        if (poi == null) {
-            this.selectedPoiGeoJsonLayer.instance.setSource(vectorSource);
-            return;
-        }
-        if (this.selectedPoiFeature != null) {
+        let selectedPoiFeatures = poi != null
+            ? new GeoJSON().readFeatures(poi.featureCollection, { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" })
+            : [];
+        if (this.selectedPoiFeature != null && poi != null) {
             this.selectedPoiFeature.instance.setStyle(this.getPoiIconStyle(poi.icon, poi.iconColor, poi.hasExtraData));
-            this.selectedPoiFeature.instance.setProperties({title: poi.title });
+            this.selectedPoiFeature.instance.setProperties({ title: poi.title });
         }
-        vectorSource = new source.Vector({
-            features: new format.GeoJSON().readFeatures(poi.featureCollection,
-                { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" })
-        });
-        this.selectedPoiGeoJsonLayer.instance.setSource(vectorSource);
+        this.selectedPoiGeoJsonSource.instance.clear();
+        this.selectedPoiGeoJsonSource.instance.addFeatures(selectedPoiFeatures);
     }
 
     private onPointerMove = (event: MapBrowserEvent) => {
@@ -160,14 +155,14 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         let feature = featuresAtPixel[0];
         if (feature.get("features") && feature.get("features").length === 1) {
             feature = feature.get("features")[0] as Feature;
-            this.hoverLatlng = SpatialService.fromViewCoordinate((feature.getGeometry() as geom.Point).getCoordinates());
+            this.hoverLatlng = SpatialService.fromViewCoordinate((feature.getGeometry() as Point).getCoordinates());
             this.isHoverOpen = true;
             this.hoverTitle = feature.getProperties().title;
             return;
         }
 
         if (feature.getId() && feature.getId().toString().startsWith(LayersViewComponent.SELECTED)) {
-            this.hoverLatlng = SpatialService.fromViewCoordinate((feature.getGeometry() as geom.Point).getCoordinates());
+            this.hoverLatlng = SpatialService.fromViewCoordinate((feature.getGeometry() as Point).getCoordinates());
             this.isHoverOpen = true;
             this.hoverTitle = feature.getProperties().title;
             return;
@@ -203,7 +198,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                 { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
             return;
         }
-        let coordinates = (featuresAtPixel[0].getGeometry() as geom.Point).getCoordinates();
+        let coordinates = (featuresAtPixel[0].getGeometry() as Point).getCoordinates();
         let latlng = SpatialService.fromViewCoordinate(coordinates);
         if (this.isClusterOpen &&
             latlng.lat === this.clusterLatlng.lat &&
@@ -250,7 +245,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         return poi.location.lat;
     }
 
-    public clusterStyleFunction = (feature): (style.Style | style.Style[]) => {
+    public clusterStyleFunction = (feature: Feature): (Style | Style[]) => {
         let size = feature.get("features").length;
         if (size === 0) {
             return [];
@@ -276,22 +271,22 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
             };
         }
         return [
-            new style.Style({
-                image: new style.Circle({
+            new Style({
+                image: new Circle({
                     radius: 20,
-                    fill: new style.Fill({
+                    fill: new Fill({
                         color: color.outer
                     })
                 })
             }),
-            new style.Style({
-                image: new style.Circle({
+            new Style({
+                image: new Circle({
                     radius: 15,
-                    fill: new style.Fill({
+                    fill: new Fill({
                         color: color.inner
                     })
                 }),
-                text: new style.Text({
+                text: new Text({
                     font: "12px \"Helvetica Neue\", Arial, Helvetica, sans-serif",
                     text: `${size}`,
                     fill: this.blackFill
@@ -301,31 +296,31 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     }
 
     private getPoiIconStyle(icon: string, iconColor: string, hasExtraData: boolean) {
-        let iconFill = new style.Fill({
+        let iconFill = new Fill({
             color: iconColor
         });
         let styleArray = [
-            new style.Style({
-                text: new style.Text({
+            new Style({
+                text: new Text({
                     font: "normal 32px IsraelHikingMap",
                     text: this.resources.getCharacterForIcon("icon-map-marker-rect"),
-                    fill: new style.Fill({
+                    fill: new Fill({
                         color: "rgba(0,0,0,0.5)"
                     }),
                     offsetY: -12,
                     offsetX: 2
                 }),
             }),
-            new style.Style({
-                text: new style.Text({
+            new Style({
+                text: new Text({
                     font: "normal 32px IsraelHikingMap",
                     text: this.resources.getCharacterForIcon("icon-map-marker-rect"),
                     fill: this.whiteFill,
                     offsetY: -14
                 }),
             }),
-            new style.Style({
-                text: new style.Text({
+            new Style({
+                text: new Text({
                     font: "normal 20px IsraelHikingMap",
                     text: this.resources.getCharacterForIcon(icon),
                     offsetY: -16,
@@ -335,8 +330,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         ];
         if (hasExtraData) {
             styleArray.push(
-                new style.Style({
-                    text: new style.Text({
+                new Style({
+                    text: new Text({
                         font: "normal 6px IsraelHikingMap",
                         text: this.resources.getCharacterForIcon("icon-circle"),
                         offsetY: -24,

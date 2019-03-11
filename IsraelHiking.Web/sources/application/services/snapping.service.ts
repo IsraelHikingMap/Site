@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { Map } from "openlayers";
+import { Map } from "ol";
 
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";

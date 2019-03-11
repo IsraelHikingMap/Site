@@ -1,5 +1,7 @@
 ﻿import { Injectable, EventEmitter } from "@angular/core";
-import { MapBrowserEvent, interaction, Feature, geom, MapBrowserPointerEvent } from "openlayers";
+import { MapBrowserEvent, MapBrowserPointerEvent, Feature } from "ol";
+import { Point } from "ol/geom";
+import Interaction from "ol/interaction/Interaction";
 import { MatDialog } from "@angular/material";
 import { NgRedux } from "@angular-redux/store";
 
@@ -15,7 +17,7 @@ import { ApplicationState, RouteData, MarkerData, LatLngAlt } from "../../models
 const MARKER = "_marker_";
 
 @Injectable()
-export class RouteEditPoiInteraction extends interaction.Interaction {
+export class RouteEditPoiInteraction extends Interaction {
 
     public onPointerMove: EventEmitter<LatLngAlt>;
 
@@ -65,7 +67,7 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         return (event.map.getFeaturesAtPixel(pixel) as Feature[] || []).filter(f =>
             f.getId() &&
             f.getId().toString().indexOf(MARKER) !== -1 &&
-            f.getGeometry() instanceof geom.Point);
+            f.getGeometry() instanceof Point);
     }
 
     private handleDown(event: MapBrowserPointerEvent): boolean {
@@ -100,7 +102,7 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         if (!(this.selectedMarker.getId() as string).startsWith(selectedRoute.id)) {
             return true;
         }
-        let point = (this.selectedMarker.getGeometry() as geom.Point);
+        let point = (this.selectedMarker.getGeometry() as Point);
         point.setCoordinates(event.coordinate);
         this.selectedMarker.setGeometry(point);
         return false;

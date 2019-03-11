@@ -1,21 +1,22 @@
 import { Injectable } from "@angular/core";
-import { geom, Coordinate, extent, Map, Extent, proj, Sphere } from "openlayers";
-
+import { Coordinate, Map, Extent } from "ol";
+import { getCenter } from "ol/extent";
+import { getDistance } from "ol/sphere";
+import { LineString } from "ol/geom";
+import { transform, toLonLat, transformExtent } from "ol/proj";
 import { LatLngAlt, Bounds } from "../models/models";
 
 @Injectable()
 export class SpatialService {
 
-    private static readonly wgs84Shpere = new Sphere(6371008.8);
-
     public static getDistanceInMeters(latlng1: LatLngAlt, latlng2: LatLngAlt) {
-        return SpatialService.wgs84Shpere.haversineDistance(SpatialService.toCoordinate(latlng1),
+        return getDistance(SpatialService.toCoordinate(latlng1),
             SpatialService.toCoordinate(latlng2));
     }
 
     public static simplify(coordinates: Coordinate[]): Coordinate[] {
-        let line = new geom.LineString(coordinates);
-        line = line.simplify(1) as geom.LineString;
+        let line = new LineString(coordinates);
+        line = line.simplify(1) as LineString;
         return line.getCoordinates();
     }
 
@@ -25,18 +26,18 @@ export class SpatialService {
     }
 
     public static getDistanceForCoordinates(coordinate1: Coordinate, coordinate2: Coordinate) {
-        let line = new geom.LineString([coordinate1, coordinate2]);
+        let line = new LineString([coordinate1, coordinate2]);
         return line.getLength();
     }
 
     public static getDistanceFromPointToLine(coordinate: Coordinate, coordinates: Coordinate[]) {
-        let lineString = new geom.LineString(coordinates);
+        let lineString = new LineString(coordinates);
         let closestPoint = lineString.getClosestPoint(coordinate);
         return SpatialService.getDistanceForCoordinates(closestPoint, coordinate);
     }
 
     public static getClosestPoint(latlng: LatLngAlt, line: LatLngAlt[]): LatLngAlt {
-        let lineString = new geom.LineString(line.map(l => SpatialService.toViewCoordinate(l)));
+        let lineString = new LineString(line.map(l => SpatialService.toViewCoordinate(l)));
         let closestPoint = lineString.getClosestPoint(SpatialService.toViewCoordinate(latlng));
         return SpatialService.fromViewCoordinate(closestPoint);
     }
@@ -69,7 +70,7 @@ export class SpatialService {
                 coordinates.push(coordinate);
             }
         }
-        let line = new geom.LineString(coordinates);
+        let line = new LineString(coordinates);
         return SpatialService.extentToBounds(line.getExtent());
     }
 
@@ -78,7 +79,7 @@ export class SpatialService {
             return latlngs[0];
         }
         let line = SpatialService.getLineString(latlngs);
-        let center = extent.getCenter(line.getExtent());
+        let center = getCenter(line.getExtent());
         return SpatialService.toLatLng(center);
 
     }
@@ -87,11 +88,11 @@ export class SpatialService {
         if (latlng == null) {
             return null;
         }
-        return proj.transform(SpatialService.toCoordinate(latlng), "EPSG:4326", "EPSG:3857");
+        return transform(SpatialService.toCoordinate(latlng), "EPSG:4326", "EPSG:3857");
     }
 
     public static fromViewCoordinate(coordinate: Coordinate): LatLngAlt {
-        let coordinateLatlng = proj.toLonLat(coordinate);
+        let coordinateLatlng = toLonLat(coordinate);
         return SpatialService.toLatLng(coordinateLatlng);
     }
 
@@ -125,14 +126,14 @@ export class SpatialService {
         ] as Extent;
     }
 
-    private static getLineString(latlngs: LatLngAlt[]): geom.LineString {
+    private static getLineString(latlngs: LatLngAlt[]): LineString {
         let olCoordinates = latlngs.map(l => SpatialService.toCoordinate(l));
-        return new geom.LineString(olCoordinates);
+        return new LineString(olCoordinates);
     }
 
     public static getMapBounds(map: Map): Bounds {
         let viewExtent = map.getView().calculateExtent(map.getSize());
-        viewExtent = proj.transformExtent(viewExtent, "EPSG:3857", "EPSG:4326");
+        viewExtent = transformExtent(viewExtent, "EPSG:3857", "EPSG:4326");
         return SpatialService.extentToBounds(viewExtent);
     }
 }

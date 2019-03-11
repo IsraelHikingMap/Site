@@ -1,8 +1,8 @@
-﻿<auto-layer [address]="getBaseLayerAddress()" 
-            [minZoom]="getBaseLayer().minZoom" 
-            [maxZoom]="getBaseLayer().maxZoom" 
-            [opacity]="1.0" 
-            [visible]="true" 
+﻿<auto-layer [address]="getBaseLayerAddress()"
+            [minZoom]="getBaseLayer().minZoom"
+            [maxZoom]="getBaseLayer().maxZoom"
+            [opacity]="1.0"
+            [visible]="true"
             [zIndex]="1">
 </auto-layer>
 <div *ngFor="let overlay of (overlays | async); let zIdx = index">
@@ -21,13 +21,8 @@
         </aol-source-cluster>
     </aol-layer-vector>
 </div>
-
-<aol-layer-vector [zIndex]="1001" #selectedPoiGeoJsonLayer>
-    <aol-source-vector>
-        <aol-style>
-            <aol-style-stroke [width]="3" [color]="'blue'"></aol-style-stroke>
-            <aol-style-fill [color]="'rgba(19, 106, 224, 0.2)'"></aol-style-fill>
-        </aol-style>
+<aol-layer-vector [zIndex]="1001" [style]="geoJsonLayerStyleFunction">
+    <aol-source-vector #selectedPoiGeoJsonSource>
     </aol-source-vector>
 </aol-layer-vector>
 <aol-layer-vector [visible]="(selectedPoi$ | async) != null" [zIndex]="1001">

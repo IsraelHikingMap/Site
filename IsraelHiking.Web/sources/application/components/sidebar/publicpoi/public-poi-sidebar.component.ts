@@ -2,7 +2,7 @@ import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
 import { NgRedux, select } from "@angular-redux/store";
-import { format } from "openlayers";
+import { GeoJSON } from "ol/format";
 import { sum } from "lodash";
 import { Observable } from "rxjs";
 
@@ -131,7 +131,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             } else {
                 let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
                 this.mergeDataIfNeededData(poiExtended);
-                let features = new format.GeoJSON().readFeatures(this.poiExtended.featureCollection,
+                let features = new GeoJSON().readFeatures(this.poiExtended.featureCollection,
                     { dataProjection: "EPSG:4326", featureProjection: "EPSG:4326" });
                 if (features.length > 0) {
                     let geometry = features.map(f => f.getGeometry()).find(g => g.getType() !== "Point") || features[0].getGeometry();

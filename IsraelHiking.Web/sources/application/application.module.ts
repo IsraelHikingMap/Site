@@ -42,7 +42,7 @@ import { NgxImageGalleryModule } from "ngx-image-gallery";
 import { NgxD3Service } from "ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule, NgRedux } from "@angular-redux/store";
-import { AngularOpenlayersModule } from "ngx-openlayers";
+import { AngularOpenlayersModule } from "ngx-ol";
 import PouchDB from "pouchdb";
 import WorkerPouch from "worker-pouch";
 import WebFont from "webfontloader";
@@ -82,6 +82,7 @@ import { SelectedRouteService } from "./services/layers/routelayers/selected-rou
 import { RunningContextService } from "./services/running-context.service";
 import { TracesService } from "./services/traces.service";
 import { OpenWithService } from "./services/open-with.service";
+import { LoggingService } from "./services/logging.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -150,62 +151,65 @@ import { classToActionMiddleware } from "./reducres/reducer-action-decorator";
 
 export function initializeApplication(injector: Injector) {
     return async () => {
-        console.log("Starting IHM Application Initialization");
-        await new Promise((resolve, reject) => {
-            WebFont.load({
-                custom: {
-                    families: ["IsraelHikingMap"]
-                },
-                active: () => resolve(),
-                inactive: () => resolve(),
-                timeout: 5000
-            });
-        });
-        let runningContext = injector.get<RunningContextService>(RunningContextService);
-        let useWorkerPouch = (await WorkerPouch.isSupportedBrowser()) && !runningContext.isIos && !runningContext.isEdge;
-        let database;
-        if (useWorkerPouch) {
-            (PouchDB as any).adapter("worker", WorkerPouch);
-            database = new PouchDB("IHM", { adapter: "worker", auto_compaction: true });
-        } else {
-            database = new PouchDB("IHM", { auto_compaction: true });
-        }
-        let storedState = initialState;
-        // tslint:disable-next-line
-        let ngRedux = injector.get(NgRedux) as NgRedux<ApplicationState>;
-        if (runningContext.isIFrame) {
-            ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
-        } else {
-            try {
-                let dbState = await database.get("state") as any;
-                storedState = deepmerge(initialState, dbState.state, {
-                    arrayMerge: (destinationArray, sourceArray) => {
-                        return sourceArray == null ? destinationArray : sourceArray;
-                    }
+        let loggingService = injector.get<LoggingService>(LoggingService);
+        try {
+            await loggingService.debug("Starting IHM Application Initialization");
+            await new Promise((resolve, _) => {
+                WebFont.load({
+                    custom: {
+                        families: ["IsraelHikingMap"]
+                    },
+                    active: () => resolve(),
+                    inactive: () => resolve(),
+                    timeout: 5000
                 });
-                storedState.inMemoryState = initialState.inMemoryState;
-                if (!runningContext.isCordova) {
-                    storedState.routes = initialState.routes;
+            });
+            let runningContext = injector.get<RunningContextService>(RunningContextService);
+            let useWorkerPouch = (await WorkerPouch.isSupportedBrowser()) && !runningContext.isIos && !runningContext.isEdge;
+            let database;
+            await loggingService.debug(`useWorkerPouch: ${useWorkerPouch}`);
+            if (useWorkerPouch) {
+                (PouchDB as any).adapter("worker", WorkerPouch);
+                database = new PouchDB("IHM", { adapter: "worker", auto_compaction: true });
+            } else {
+                database = new PouchDB("IHM", { auto_compaction: true });
+            }
+            let storedState = initialState;
+            // tslint:disable-next-line
+            let ngRedux = injector.get(NgRedux) as NgRedux<ApplicationState>;
+            if (runningContext.isIFrame) {
+                ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
+            } else {
+                try {
+                    let dbState = await database.get("state") as any;
+                    storedState = deepmerge(initialState, dbState.state, {
+                        arrayMerge: (destinationArray, sourceArray) => {
+                            return sourceArray == null ? destinationArray : sourceArray;
+                        }
+                    });
+                    storedState.inMemoryState = initialState.inMemoryState;
+                    if (!runningContext.isCordova) {
+                        storedState.routes = initialState.routes;
+                    }
+                } catch (ex) {
+                    // no initial state.
+                    (database as any).put({
+                        _id: "state",
+                        state: initialState
+                    });
                 }
-            } catch (ex) {
-                // no initial state.
-                (database as any).put({
-                    _id: "state",
-                    state: initialState
+                await loggingService.debug(JSON.stringify(storedState));
+                ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
+                ngRedux.select().pipe(debounceTime(useWorkerPouch ? 2000 : 30000)).subscribe(async (state) => {
+                    let dbState = await database.get("state") as any;
+                    dbState.state = state;
+                    (database as any).put(dbState);
                 });
             }
-            ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
-            ngRedux.select().pipe(debounceTime(useWorkerPouch ? 2000 : 30000)).subscribe(async (state) => {
-                let dbState = await database.get("state") as any;
-                dbState.state = state;
-                (database as any).put(dbState);
-            });
-        }
-        try {
             injector.get<OpenWithService>(OpenWithService).initialize();
-            console.log("Finished IHM Application Initialization");
+            await loggingService.debug("Finished IHM Application Initialization");
         } catch (error) {
-            console.error("Failed IHM Application Initialization", error);
+            loggingService.debug(`Failed IHM Application Initialization: ${error.toString()}`);
         }
     };
 }
@@ -344,6 +348,7 @@ export function getWindow() { return window; }
         SelectedRouteService,
         RunningContextService,
         TracesService,
+        LoggingService,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction
     ],

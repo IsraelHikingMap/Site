@@ -2,8 +2,8 @@ import { Component } from "@angular/core";
 import { LocalStorage } from "ngx-store";
 import { first } from "rxjs/operators";
 import { NgRedux } from "@angular-redux/store";
-import { MapBrowserEvent, Feature } from "openlayers";
-import { MapComponent } from "ngx-openlayers";
+import { MapBrowserEvent, Feature } from "ol";
+import { MapComponent } from "ngx-ol";
 
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -14,7 +14,7 @@ import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.fa
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { DragInteraction } from "./intercations/drag.interaction";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
-import { AddRouteAction, AddRecordingPointAction, ChangeRoutePropertiesAction } from "../reducres/routes.reducer";
+import { AddRouteAction, AddRecordingPointAction } from "../reducres/routes.reducer";
 import { AddTraceAction } from "../reducres/traces.reducer";
 import { StopRecordingAction, StartRecordingAction } from "../reducres/route-editing-state.reducer";
 import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility } from "../models/models";

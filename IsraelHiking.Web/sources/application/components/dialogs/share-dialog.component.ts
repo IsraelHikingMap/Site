@@ -1,4 +1,4 @@
-﻿import { Component, AfterViewInit } from "@angular/core";
+import { Component, AfterViewInit } from "@angular/core";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 
 import { LocalStorage } from "ngx-store";
@@ -66,7 +66,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 this.title = selectedRoute.name;
                 this.description = selectedRoute.description;
             }
-        }   
+        }
     }
 
     public async ngAfterViewInit(): Promise<any> {

@@ -67,7 +67,26 @@
                   "with": "sources/environments/environment.android.ts"
                 }
               ]
-            } 
+            },
+            "cordova-debug": {
+              "optimization": false,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": false,
+              "outputPath": "www",
+              "baseHref": "./",
+              "fileReplacements": [
+                {
+                  "replace": "sources/environments/environment.ts",
+                  "with": "sources/environments/environment.cordova-debug.ts"
+                }
+              ]
+            }
           }
         },
         "serve": {

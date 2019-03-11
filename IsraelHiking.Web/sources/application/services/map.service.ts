@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Map } from "openlayers";
+import { Map } from "ol";
 
 @Injectable()
 export class MapService {

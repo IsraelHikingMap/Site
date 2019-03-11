@@ -13,8 +13,9 @@ import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
 import { remove } from "lodash";
-import { Coordinate, MapBrowserEvent, Feature, geom } from "openlayers";
-import { MapComponent } from "ngx-openlayers";
+import { Coordinate, MapBrowserEvent, Feature } from "ol";
+import { Point } from "ol/geom";
+import { MapComponent } from "ngx-ol";
 import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../services/resources.service";
@@ -147,7 +148,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 let features = (this.host.instance.getFeaturesAtPixel(event.pixel) || []) as Feature[];
                 let startOrEnd = features.find(f => f.getId() && f.getId().toString().indexOf("directional") !== -1);
                 if (startOrEnd != null) {
-                    let location = SpatialService.fromViewCoordinate((startOrEnd.getGeometry() as geom.Point).getCoordinates());
+                    let location = SpatialService.fromViewCoordinate((startOrEnd.getGeometry() as Point).getCoordinates());
                     if (SpatialService.getDistanceInMeters(location, this.directional.overlayLocation) < 10) {
                         this.directional.isOverlayOpen = !this.directional.isOverlayOpen;
                     } else {

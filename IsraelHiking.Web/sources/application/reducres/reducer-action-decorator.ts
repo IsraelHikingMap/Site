@@ -12,7 +12,7 @@ export function ReduxAction(type: string): Function {
     };
 }
 
-export function createReducerFromClass<State>(reducer: { new(): any }, initialState: State) {
+export function createReducerFromClass<State>(reducer: new() => any, initialState: State) {
     const instance = Object.create(reducer.prototype);
     return (lastState: State = initialState, action: Action): State => {
         for (let fn in instance) {

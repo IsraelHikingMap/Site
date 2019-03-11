@@ -1,4 +1,4 @@
-import { MapBrowserEvent } from "openlayers";
+import { MapBrowserEvent } from "ol";
 import { Subject } from "rxjs";
 import { NgRedux } from "@angular-redux/store";
 import { every } from "lodash";

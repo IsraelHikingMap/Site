@@ -1,5 +1,5 @@
 import { Subject } from "rxjs";
-import { Coordinate } from "openlayers";
+import { Coordinate } from "ol";
 import { last } from "lodash";
 
 import { SpatialService } from "./spatial.service";

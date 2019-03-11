@@ -1,7 +1,7 @@
 import { TestBed, inject, flushMicrotasks, fakeAsync, tick } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { View } from "openlayers";
+import { View } from "ol";
 
 import { SnappingService, ISnappingRouteOptions } from "./snapping.service";
 import { ResourcesService } from "./resources.service";

@@ -1,8 +1,6 @@
-﻿import { Component, Input, ViewChild, AfterViewInit, OnChanges, SimpleChanges } from "@angular/core";
-import { MapComponent, LayerTileComponent } from "ngx-openlayers";
-import { source } from "openlayers";
-
-import { LayerData } from "../../models/models";
+import { Component, Input, ViewChild, AfterViewInit, OnChanges, SimpleChanges } from "@angular/core";
+import { LayerTileComponent } from "ngx-ol";
+import { XYZ, TileArcGISRest } from "ol/source";
 
 @Component({
     selector: "auto-layer",
@@ -35,13 +33,13 @@ export class AutomaticLayerPresentationComponent implements AfterViewInit, OnCha
     }
 
     private setSource() {
-        let tileSource: ol.source.TileArcGISRest | ol.source.XYZ;
+        let tileSource: TileArcGISRest | XYZ;
         if (this.address.toLowerCase().endsWith("/mapserver")) {
-            tileSource = new source.TileArcGISRest({
+            tileSource = new TileArcGISRest({
                 url: this.address
             });
         } else {
-            tileSource = new source.XYZ({
+            tileSource = new XYZ({
                 url: this.address,
                 minZoom: this.minZoom,
                 maxZoom: this.maxZoom

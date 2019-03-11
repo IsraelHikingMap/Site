@@ -1,7 +1,8 @@
 ﻿import { Component, ViewChild, AfterViewInit, ViewEncapsulation } from "@angular/core";
 import { NgxImageGalleryComponent } from "ngx-image-gallery";
 import { NgRedux } from "@angular-redux/store";
-import { MapComponent } from "ngx-openlayers";
+import { MapEvent } from "ol";
+import { MapComponent } from "ngx-ol";
 
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
@@ -43,7 +44,7 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         this.location = this.ngRedux.getState().location;
     }
 
-    public moveEnd(e: ol.MapEvent) {
+    public moveEnd(e: MapEvent) {
         if (!e) {
             return;
         }

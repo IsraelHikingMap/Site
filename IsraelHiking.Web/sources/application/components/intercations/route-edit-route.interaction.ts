@@ -1,5 +1,7 @@
 import { Injectable, EventEmitter } from "@angular/core";
-import { MapBrowserPointerEvent, interaction, Feature, geom } from "openlayers";
+import { MapBrowserPointerEvent, Feature } from "ol";
+import Interaction from "ol/interaction/Interaction";
+import { Point, LineString } from "ol/geom";
 import { NgRedux } from "@angular-redux/store";
 
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducres/routes.reducer";
@@ -24,7 +26,7 @@ const SEGMENT = "_segment_";
 const SEGMENT_POINT = "_segmentpoint_";
 
 @Injectable()
-export class RouteEditRouteInteraction extends interaction.Interaction {
+export class RouteEditRouteInteraction extends Interaction {
 
     public onRoutePointClick: EventEmitter<number>;
     public onPointerMove: EventEmitter<LatLngAlt>;
@@ -88,20 +90,20 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         this.selectedRoutePoint = features.find(f =>
             f.getId() &&
             f.getId().toString().startsWith(selectedRoute.id + SEGMENT_POINT) &&
-            f.getGeometry() instanceof geom.Point);
+            f.getGeometry() instanceof Point);
         if (this.selectedRoutePoint != null) {
             let pointIndex = this.getPointIndex();
             let segments = (event.map.getFeaturesAtPixel(pixel, { hitTolerance: 100 }) || []) as Feature[];
             this.selectedRouteSegments = segments.filter(f =>
                 f.getId() &&
                 f.getId().toString().startsWith(idPrefix) &&
-                f.getGeometry() instanceof geom.LineString &&
+                f.getGeometry() instanceof LineString &&
                 (this.getSegmentIndex(f) === pointIndex || this.getSegmentIndex(f) === pointIndex + 1));
         } else {
             this.selectedRouteSegments = features.filter(f =>
                 f.getId() &&
                 f.getId().toString().startsWith(idPrefix) &&
-                f.getGeometry() instanceof geom.LineString);
+                f.getGeometry() instanceof LineString);
         }
         if (this.selectedRoutePoint == null) {
             this.onRoutePointClick.emit(null);
@@ -127,23 +129,23 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
     private handleRoutePointDrag(event: MapBrowserPointerEvent): boolean {
         let snappingLatLng = this.getSnappingForRoute(SpatialService.fromViewCoordinate(event.coordinate));
         let coordinate = SpatialService.toViewCoordinate(snappingLatLng);
-        let point = (this.selectedRoutePoint.getGeometry() as geom.Point);
+        let point = (this.selectedRoutePoint.getGeometry() as Point);
         point.setCoordinates(coordinate);
         this.selectedRoutePoint.setGeometry(point);
         let index = this.getPointIndex();
         if (this.selectedRouteSegments.length === 2) {
             let segmentEnd = this.selectedRouteSegments[0];
-            let coordinates = (segmentEnd.getGeometry() as geom.LineString).getCoordinates();
-            segmentEnd.setGeometry(new geom.LineString([coordinate, coordinates[coordinates.length - 1]]));
+            let coordinates = (segmentEnd.getGeometry() as LineString).getCoordinates();
+            segmentEnd.setGeometry(new LineString([coordinate, coordinates[coordinates.length - 1]]));
             if (index !== 0) {
                 let segmentStart = this.selectedRouteSegments[1];
-                let start = (segmentStart.getGeometry() as geom.LineString).getCoordinates()[0];
-                segmentStart.setGeometry(new geom.LineString([start, coordinate]));
+                let start = (segmentStart.getGeometry() as LineString).getCoordinates()[0];
+                segmentStart.setGeometry(new LineString([start, coordinate]));
             }
         } else if (this.selectedRouteSegments.length === 1) {
             let segmentStart = this.selectedRouteSegments[0];
-            let start = (segmentStart.getGeometry() as geom.LineString).getCoordinates()[0];
-            segmentStart.setGeometry(new geom.LineString([start, coordinate]));
+            let start = (segmentStart.getGeometry() as LineString).getCoordinates()[0];
+            segmentStart.setGeometry(new LineString([start, coordinate]));
         }
         return false;
     }
@@ -152,8 +154,8 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         let snapping = this.getSnappingForRoute(SpatialService.fromViewCoordinate(event.coordinate));
         let coordinate = SpatialService.toViewCoordinate(snapping);
         let segment = this.selectedRouteSegments[0];
-        let coordinates = (segment.getGeometry() as geom.LineString).getCoordinates();
-        segment.setGeometry(new geom.LineString([coordinates[0], coordinate, coordinates[coordinates.length - 1]]));
+        let coordinates = (segment.getGeometry() as LineString).getCoordinates();
+        segment.setGeometry(new LineString([coordinates[0], coordinate, coordinates[coordinates.length - 1]]));
         return false;
     }
 

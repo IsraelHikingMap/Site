@@ -1,7 +1,9 @@
 import { Component, AfterViewInit, ViewChildren, QueryList } from "@angular/core";
 import { MatDialog } from "@angular/material";
-import { MapComponent, FeatureComponent } from "ngx-openlayers";
-import { Coordinate, style, interaction, MapBrowserEvent, Feature } from "openlayers";
+import { MapComponent, FeatureComponent } from "ngx-ol";
+import { Coordinate, MapBrowserEvent } from "ol";
+import { DragPan, PinchRotate, PinchZoom, DragRotateAndZoom, MouseWheelZoom } from "ol/interaction";
+import { Style, Text, Fill } from "ol/style";
 import { select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import parse from "color-parse";
@@ -19,6 +21,11 @@ import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialo
 interface RoutePointViewData {
     latlng: LatLngAlt;
     segmentIndex: number;
+}
+
+export interface IInteraction {
+    getActive(): boolean;
+    setActive(isActive: boolean);
 }
 
 @Component({
@@ -72,8 +79,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         });
 
         this.routes$.subscribe((routes) => {
-            this.routeEditPoiInteraction.setActive(false);
-            this.routeEditRouteInteraction.setActive(false);
+            (this.routeEditPoiInteraction as any as IInteraction).setActive(false);
+            (this.routeEditRouteInteraction as any as IInteraction).setActive(false);
             this.snappingService.enable(this.isEditMode());
             if (!this.isEditMode()) {
                 this.hoverViewCoordinates = null;
@@ -96,9 +103,9 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             return;
         }
         if (selectedRoute.state === "Poi") {
-            this.routeEditPoiInteraction.setActive(true);
+            (this.routeEditPoiInteraction as any as IInteraction).setActive(true);
         } else if (selectedRoute.state === "Route") {
-            this.routeEditRouteInteraction.setActive(true);
+            (this.routeEditRouteInteraction as any as IInteraction).setActive(true);
         }
     }
 
@@ -108,33 +115,33 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         let marker = route.markers[routeIdAndMarkerIndex.index];
         let icon = "icon-" + (marker.type || "star");
         return [
-            new style.Style({
-                text: new style.Text({
+            new Style({
+                text: new Text({
                     font: "normal 32px IsraelHikingMap",
                     text: this.resources.getCharacterForIcon("icon-map-marker"),
-                    fill: new style.Fill({
+                    fill: new Fill({
                         color: "rgba(0,0,0,0.5)"
                     }),
                     offsetY: -12,
                     offsetX: 2
                 }),
             }),
-            new style.Style({
-                text: new style.Text({
+            new Style({
+                text: new Text({
                     font: "normal 32px IsraelHikingMap",
                     text: this.resources.getCharacterForIcon("icon-map-marker"),
-                    fill: new style.Fill({
+                    fill: new Fill({
                         color: route.color
                     }),
                     offsetY: -14
                 }),
             }),
-            new style.Style({
-                text: new style.Text({
+            new Style({
+                text: new Text({
                     font: "normal 18px IsraelHikingMap",
                     text: this.resources.getCharacterForIcon(icon),
                     offsetY: -16,
-                    fill: new style.Fill({
+                    fill: new Fill({
                         color: "white"
                     })
                 }),
@@ -143,22 +150,23 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public ngAfterViewInit(): void {
-        this.routeEditPoiInteraction.setActive(false);
-        this.routeEditRouteInteraction.setActive(false);
-        this.host.instance.addInteraction(new interaction.DragPan());
+        (this.routeEditPoiInteraction as any as IInteraction).setActive(false);
+        (this.routeEditRouteInteraction as any as IInteraction).setActive(false);
+        this.host.instance.addInteraction(new DragPan());
         this.host.instance.addInteraction(this.routeEditPoiInteraction);
         this.host.instance.addInteraction(this.routeEditRouteInteraction);
-        this.host.instance.addInteraction(new interaction.PinchRotate());
-        this.host.instance.addInteraction(new interaction.PinchZoom({ constrainResolution: true }));
-        this.host.instance.addInteraction(new interaction.DragRotateAndZoom());
-        this.host.instance.addInteraction(new interaction.MouseWheelZoom());
+        this.host.instance.addInteraction(new PinchRotate());
+        this.host.instance.addInteraction(new PinchZoom({ constrainResolution: true }));
+        this.host.instance.addInteraction(new DragRotateAndZoom());
+        this.host.instance.addInteraction(new MouseWheelZoom());
         this.setInteractionAccordingToState();
         this.routeMarkers.forEach(m => m.instance.setStyle(this.getMarkerIconStyle(m)));
         this.routeMarkers.changes.subscribe(() => {
             this.routeMarkers.forEach(m => m.instance.setStyle(this.getMarkerIconStyle(m)));
         });
         this.host.instance.on("singleclick", (event: MapBrowserEvent) => {
-            if (this.routeEditRouteInteraction.getActive() || this.routeEditPoiInteraction.getActive()) {
+            if ((this.routeEditRouteInteraction as any as IInteraction).getActive()
+                || (this.routeEditPoiInteraction as any as IInteraction).getActive()) {
                 return;
             }
             let features = RouteEditPoiInteraction.getMarkerFeatures(event, event.pixel);

@@ -1,6 +1,7 @@
-﻿import { MapBrowserEvent, interaction } from "openlayers";
+﻿import { Pointer } from "ol/interaction";
+import { MapBrowserEvent } from "ol";
 
-export class DragInteraction extends interaction.Pointer {
+export class DragInteraction extends Pointer {
 
     private dragging: boolean;
 

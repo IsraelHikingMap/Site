@@ -9,9 +9,11 @@ export class RunningContextService {
     public readonly isCordova: boolean;
     public readonly isIos: boolean;
     public readonly isEdge: boolean;
+    public readonly isProduction: boolean;
     constructor() {
         this.isIFrame = window.self !== window.top;
         this.isMobile = false;
+        this.isProduction = environment.production;
         this.isCordova = environment.isCordova;
         this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform);
         this.isEdge = /Edge/.test(navigator.userAgent);

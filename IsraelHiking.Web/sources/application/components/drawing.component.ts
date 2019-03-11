@@ -7,7 +7,13 @@ import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { ToastService } from "../services/toast.service";
-import { ChangeEditStateAction, ReplaceSegmentsAction, ClearPoisAction, ClearPoisAndRouteAction, DeleteAllRoutesAction } from "../reducres/routes.reducer";
+import {
+    ChangeEditStateAction,
+    ReplaceSegmentsAction,
+    ClearPoisAction,
+    ClearPoisAndRouteAction,
+    DeleteAllRoutesAction
+} from "../reducres/routes.reducer";
 import { SetRouteEditingStateAction } from "../reducres/route-editing-state.reducer";
 import { RoutingType, ApplicationState } from "../models/models";
 

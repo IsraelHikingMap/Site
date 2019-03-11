@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, AfterViewChecked } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
-import { Coordinate } from "openlayers";
+import { Coordinate } from "ol";
 import { Subscription, Observable } from "rxjs";
 import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "ngx-d3";
 import { select } from "@angular-redux/store";

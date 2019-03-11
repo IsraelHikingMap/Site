@@ -1,5 +1,5 @@
 ﻿import { Directive, AfterViewInit, OnDestroy, NgZone } from "@angular/core";
-import { SourceVectorComponent, StyleStrokeComponent } from "ngx-openlayers";
+import { SourceVectorComponent, StyleStrokeComponent } from "ngx-ol";
 
 @Directive({
     selector: "[antPath]",

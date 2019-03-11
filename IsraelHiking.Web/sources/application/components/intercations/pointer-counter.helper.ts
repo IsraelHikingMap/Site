@@ -1,4 +1,4 @@
-﻿import { MapBrowserPointerEvent } from "openlayers";
+﻿import { MapBrowserPointerEvent } from "ol";
 
 export class PointerCounterHelper {
     private pointers: string[];
