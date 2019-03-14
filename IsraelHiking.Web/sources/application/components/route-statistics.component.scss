@@ -1,32 +1,38 @@
 ﻿@import "~scss/_variables.scss";
 
 $control-border: 4px;
+$container-height-small-screen: 130px;
+$container-height: 200px;
+$container-height-expanded: 300px;
 
 .chart-control-container {
     width: 500px;
-    height: 200px;
+    height: $container-height;
 }
 
 .chart-control-container.expanded {
     width: calc(100vw - #{$app-left-buttons} - #{$control-border});
-    height: 300px;
+    height: $container-height-expanded;
 }
 
 .chart-control-container.sidebar.expanded {
     width: calc(100vw - #{$app-sidebar-width} - #{$app-left-buttons} - 10px - #{$control-border});
-    height: 300px;
 }
 
-
 .chart-container {
-    width: 100%;
-    height: 164px;
+    height: $container-height;
+    padding: 0 36px;
     background: white;
     position: relative;
 }
 
+.chart-container i, 
+.chart-container span {
+    font-size: x-large;
+}
+
 .chart-control-container.expanded .chart-container {
-    height: 264px;
+    height: $container-height-expanded;
 }
 
 .chart-close-button {
@@ -36,10 +42,31 @@ $control-border: 4px;
     min-width: unset !important;
 }
 
-.chart-expand-button {
+.chart-km-button {
     position: absolute !important;
     top: 41px;
     left: 5px;
+    min-width: unset !important;
+}
+
+.chart-expand-button {
+    position: absolute !important;
+    top: 76px;
+    left: 5px;
+    min-width: unset !important;
+}
+
+.chart-graph-button {
+    position: absolute !important;
+    bottom: 5px;
+    right: 5px;
+    min-width: unset !important;
+}
+
+.chart-table-button {
+    position: absolute !important;
+    bottom: 41px;
+    right: 5px;
     min-width: unset !important;
 }
 
@@ -55,14 +82,19 @@ $control-border: 4px;
 @media (max-width: 550px) {
     .chart-control-container {
         width: 100vw;
-        height: 130px;
+        height: $container-height-small-screen;
     }
 
     .chart-container {
-        height: 94px;
+        height: $container-height-small-screen;
     }
 
     .chart-buttons .mat-button {
         padding: 0 !important;
+    }
+
+    .chart-container i,
+    .chart-container span {
+        font-size: unset;
     }
 }

@@ -99,6 +99,8 @@
   "scripts": {
     "ng": "ng",
     "build": "ng build",
+    "build:watch": "ng build --watch",
+    "build:prod": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint --fix",
     "version": "node -v && npm -v && ng -v",

@@ -5,7 +5,7 @@ import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
 
-export const sibebarAnimate = trigger(
+export const sidebarAnimate = trigger(
     "animateSidebar",
     [
         transition(
@@ -30,7 +30,7 @@ export const sibebarAnimate = trigger(
     templateUrl: "./sidebar.component.html",
     styleUrls: ["./sidebar.component.scss"],
     animations: [
-        sibebarAnimate
+        sidebarAnimate
     ]
 })
 export class SidebarComponent extends BaseMapComponent {

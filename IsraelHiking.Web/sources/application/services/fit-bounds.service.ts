@@ -20,7 +20,7 @@ export class FitBoundsService {
         if (noPadding) {
             padding = [-5, -5, -5, -5];
         }
-        if (this.sidebarService.isVisible && window.innerWidth >= 768) {
+        if (this.sidebarService.isSidebarOpen() && window.innerWidth >= 768) {
             padding = [50, -400, 50, 50];
         }
         this.mapService.map.getView().fit(SpatialService.boundsToViewExtent(bounds),

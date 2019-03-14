@@ -36,23 +36,6 @@ export interface IRouteStatistics {
 }
 
 export class RouteStatisticsService {
-    private visible: boolean;
-    public visibilityChanged: Subject<any>;
-
-    constructor() {
-        this.visibilityChanged = new Subject<{}>();
-        this.visible = false;
-    }
-
-    public isVisible(): boolean {
-        return this.visible;
-    }
-
-    public toggle = () => {
-        this.visible = !this.visible;
-        this.visibilityChanged.next();
-    }
-
     public getStatisticsByRange = (route: RouteData, start: IRouteStatisticsPoint, end: IRouteStatisticsPoint) => {
         let routeStatistics = {
             points: [] as IRouteStatisticsPoint[],

@@ -26,7 +26,8 @@ import {
     MatMenuModule,
     MatExpansionModule,
     MatDividerModule,
-    MatCardModule
+    MatCardModule,
+    MatGridListModule
 } from "@angular/material";
 import { FlexLayoutModule } from "@angular/flex-layout";
 import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
@@ -242,6 +243,7 @@ export function getWindow() { return window; }
         MatExpansionModule,
         MatDividerModule,
         MatCardModule,
+        MatGridListModule,
         FormsModule,
         ReactiveFormsModule,
         FlexLayoutModule,

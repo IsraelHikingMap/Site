@@ -1,27 +1,58 @@
 ﻿<div class="control-container side-control" [dir]="resources.direction" (window:resize)="redrawChart()">
-    <div *ngIf="isVisible()" [@animateChart] class="chart-control-container" [ngClass]="{'expanded' : isExpanded, 'sidebar': isSidebarVisible() }">
-        <div class="chart-container" #lineChartContainer>
+    <div *ngIf="isVisible" [@animateChart] class="chart-control-container" [ngClass]="{'expanded' : isExpanded, 'sidebar': isSidebarVisible() }">
+        <div *ngIf="isTable" class="chart-container">
+            <mat-grid-list cols="3" rowHeight="fit" style="height: 100%">
+                <mat-grid-tile matTooltip="{{resources.length}}" matTooltipPosition="below">
+                    <div fxLayout="column" fxLayoutAlign=" center">
+                        <i class="fa icon-arrow-right"></i>
+                        <span>{{toShortNumber(length)}} {{getUnits(length)}}</span>
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile matTooltip="{{resources.gain}}" matTooltipPosition="below">
+                    <div fxLayout="column" fxLayoutAlign=" center">
+                        <i class="fa icon-arrow-up"></i>
+                        <span>{{toShortNumber(gain)}} {{getUnits(gain)}}</span>
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile matTooltip="{{resources.loss}}" matTooltipPosition="below">
+                    <div fxLayout="column" fxLayoutAlign=" center">
+                        <i class="fa icon-arrow-down"></i>
+                        <span><span dir="ltr"> {{toShortNumber(loss)}}</span> {{getUnits(loss)}}</span>
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile matTooltip="{{resources.duration}}" matTooltipPosition="above">
+                    <div fxLayout="column" fxLayoutAlign=" center">
+                        <i class="fa icon-clock-o"></i>
+                        <span>{{duration}}</span>
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile matTooltip="{{resources.averageSpeed}}" matTooltipPosition="above">
+                    <div fxLayout="column" fxLayoutAlign=" center">
+                        <i class="fa icon-avg-speed"></i>
+                        <span *ngIf="averageSpeed">{{averageSpeed | number: '1.0-2'}} {{resources.kmPerHourUnit}}</span>
+                        <span *ngIf="!averageSpeed">--</span>
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile matTooltip="{{resources.currentSpeed}}" matTooltipPosition="above">
+                    <div fxLayout="column" fxLayoutAlign=" center">
+                        <i class="fa icon-speed"></i>
+                        <span *ngIf="currentSpeed">{{currentSpeed | number: '1.0-2'}} {{resources.kmPerHourUnit}}</span>
+                        <span *ngIf="!currentSpeed">--</span>
+                    </div>
+                </mat-grid-tile>
+            </mat-grid-list>
+        </div>
+        <div *ngIf="!isTable" class="chart-container" #lineChartContainer>
             <svg direction="ltr"></svg>
         </div>
+        <button mat-button class="chart-table-button" *ngIf="!isExpanded" (click)="changeState('table')" [class.active]="isTable" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle table view"><i class="fa icon-table fa-lg"></i></button><br />
+        <button mat-button class="chart-graph-button" (click)="changeState('graph')" [class.active]="!isTable" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle graph view"><i class="fa icon-area-chart fa-lg"></i></button>
         <button mat-button class="chart-close-button" (click)="toggle()"><i class="fa icon-close"></i></button>
-        <button mat-button class="chart-expand-button hidden-xs" (click)="toggleExpand()"><i class="fa" [ngClass]="{ 'icon-chevron-right' : isExpanded, 'icon-chevron-left' : !isExpanded }"></i></button>
-        <div fxLayout="row" class="chart-buttons">
-            <div fxFlex matTooltip="{{resources.length}}" matTooltipPosition="above">
-                <span fxFill class="mat-button cursor-default"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} {{getUnits(length)}}</span>
-            </div>
-            <div fxFlex matTooltip="{{resources.gain}}" matTooltipPosition="above">
-                <span fxFill class="mat-button cursor-default"><span><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} {{getUnits(gain)}}</span></span>
-            </div>
-            <div fxFlex matTooltip="{{resources.loss}}" matTooltipPosition="above">
-                <span fxFill class="mat-button cursor-default"><span><i class="fa icon-arrow-down"></i><span dir="ltr"> {{toShortNumber(loss)}}</span> {{getUnits(loss)}}</span></span>
-            </div>
-            <div fxFlex>
-                <button mat-button fxFill (click)="toggleKmMarker()" [ngClass]="{active: isKmMarkersOn}" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle KM markers"><i class="fa icon-map-marker"></i> {{resources.kmPoi}}</button>
-            </div>
-        </div>
+        <button mat-button class="chart-km-button"    (click)="toggleKmMarker()" [class.active]="isKmMarkersOn" matTooltip="{{resources.kmPoi}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle KM markers"><i class="fa icon-map-marker"></i></button>
+        <button mat-button class="chart-expand-button hidden-xs" *ngIf="!isTable" (click)="toggleExpand()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle expand view"><i class="fa" [ngClass]="{ 'icon-chevron-right' : isExpanded, 'icon-chevron-left' : !isExpanded }"></i></button>
     </div>
-    <div *ngIf="!isVisible()">
-        <button mat-button class="pull-right" (click)="toggle()" [ngClass]="{active: isVisible()}" matTooltip="{{resources.routeStatistics}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Route statistics toggle"><i class="fa icon-area-chart fa-lg"></i></button>
+    <div *ngIf="!isVisible">
+        <button mat-button class="pull-right" (click)="toggle()" [class.active]="isVisible" matTooltip="{{resources.routeStatistics}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Route statistics toggle"><i class="fa {{isTable ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
         <div class="pull-right" matTooltip="{{resources.length}}" matTooltipPosition="above">
             <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} {{getUnits(length)}}</span>
         </div>

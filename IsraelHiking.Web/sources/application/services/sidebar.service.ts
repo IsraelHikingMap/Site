@@ -1,5 +1,6 @@
-import { Injectable } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
+import { Injectable, EventEmitter } from "@angular/core";
+import { NgRedux, select } from "@angular-redux/store";
+import { Observable } from "rxjs";
 
 import { HashService } from "./hash.service";
 import { SetSidebarAction } from "../reducres/poi.reducer";
@@ -12,10 +13,22 @@ export class SidebarService {
 
     public viewName: SidebarView;
     public isVisible: boolean;
+    public sideBarStateChanged: EventEmitter<void>;
+
+    @select((state: ApplicationState) => state.poiState.isSidebarOpen)
+    private isPoiSidebarOpen$: Observable<boolean>;
+
+    private isPoiSidebarOpen: boolean;
 
     constructor(private readonly hashService: HashService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
+        this.sideBarStateChanged = new EventEmitter();
+        this.isPoiSidebarOpen = false;
         this.hideWithoutChangingAddressbar();
+        this.isPoiSidebarOpen$.subscribe((isOpen) => {
+            this.isPoiSidebarOpen = isOpen;
+            this.sideBarStateChanged.next();
+        });
     }
 
     public toggle = (viewName: SidebarView) => {
@@ -33,7 +46,7 @@ export class SidebarService {
             isOpen: false
         }));
         this.hashService.resetAddressbar();
-
+        this.sideBarStateChanged.next();
     }
 
     public hide = () => {
@@ -44,5 +57,12 @@ export class SidebarService {
     public hideWithoutChangingAddressbar() {
         this.isVisible = false;
         this.viewName = "";
+        this.sideBarStateChanged.next();
     }
+
+    public isSidebarOpen(): boolean {
+        return this.isVisible || this.isPoiSidebarOpen;
+    }
+
+
 }

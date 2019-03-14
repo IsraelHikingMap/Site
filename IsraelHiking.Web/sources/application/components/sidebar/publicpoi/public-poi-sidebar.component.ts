@@ -17,10 +17,9 @@ import { AddRouteAction, AddPrivatePoiAction } from "../../../reducres/routes.re
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducres/poi.reducer";
-import { SetSelectedRouteAction } from "../../../reducres/route-editing-state.reducer";
 import { SpatialService } from "../../../services/spatial.service";
 import { SidebarService } from "../../../services/sidebar.service";
-import { sibebarAnimate } from "../sidebar.component";
+import { sidebarAnimate } from "../sidebar.component";
 import {
     RouteData,
     LinkData,
@@ -37,7 +36,7 @@ import {
     templateUrl: "./public-poi-sidebar.component.html",
     encapsulation: ViewEncapsulation.None,
     animations: [
-        sibebarAnimate
+        sidebarAnimate
     ]
 })
 export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDestroy {

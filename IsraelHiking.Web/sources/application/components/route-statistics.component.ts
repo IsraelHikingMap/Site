@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, AfterViewChecked } from "@angular/core";
+import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
 import { Coordinate } from "ol";
 import { Subscription, Observable } from "rxjs";
@@ -69,7 +69,7 @@ interface IChartElements {
         )
     ],
 })
-export class RouteStatisticsComponent extends BaseMapComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class RouteStatisticsComponent extends BaseMapComponent implements OnInit, OnDestroy {
     private static readonly HOVER_BOX_WIDTH = 160;
 
     public length: number;
@@ -80,6 +80,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public currentSpeed: number;
     public isKmMarkersOn: boolean;
     public isExpanded: boolean;
+    public isTable: boolean;
+    public isVisible: boolean;
     public kmMarkersCoordinates: ICoordinateAndText[];
     public hover: IChartHover;
 
@@ -114,11 +116,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.kmMarkersCoordinates = [];
         this.isKmMarkersOn = false;
         this.isExpanded = false;
+        this.isVisible = false;
+        this.isTable = false;
         this.statistics = null;
         this.initializeStatistics(null);
         this.componentSubscriptions = [];
         this.chartElements = {
-            margin: { top: 20, right: this.runningContextService.isMobile ? 10 : 50, bottom: 40, left: 70 },
+            margin: { top: 10, right: 10, bottom: 40, left: 40 },
         } as IChartElements;
         this.hover = {
             lat: 0,
@@ -131,6 +135,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.zoom = zoom;
             this.updateKmMarkers();
         });
+        this.componentSubscriptions.push(this.sidebarService.sideBarStateChanged.subscribe(() => {
+            this.redrawChart();
+        }));
     }
 
     private initializeStatistics(statistics: IRouteStatistics): void {
@@ -151,15 +158,23 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             } else {
                 if (statistics.duration > 60 * 60) {
                     let hours = Math.floor(statistics.duration / (60 * 60));
-                    let minutes = (statistics.duration % (60 * 60)) / 60;
-                    this.duration = hours + ":" + minutes + " " + this.resources.hourUnit;
+                    let minutes = Math.floor((statistics.duration % (60 * 60)) / 60);
+                    this.duration = this.toTwoDigits(hours) + ":" + this.toTwoDigits(minutes) + " " + this.resources.hourUnit;
                 } else {
                     let minutes = Math.floor(statistics.duration / 60);
-                    let seconds = statistics.duration % 60;
-                    this.duration = minutes + ":" + seconds + " " + this.resources.minuteUnit;
+                    let seconds = Math.floor(statistics.duration % 60);
+                    this.duration = this.toTwoDigits(minutes) + ":" + this.toTwoDigits(seconds) + " " + this.resources.minuteUnit;
                 }
             }
         }
+    }
+
+    private toTwoDigits(value: number): string {
+        let str = value.toString();
+        if (str.length === 1) {
+            str = `0${str}`;
+        }
+        return str;
     }
 
     public ngOnInit() {
@@ -173,26 +188,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.redrawChart();
         }));
         this.componentSubscriptions.push(this.geoLocationService.positionChanged.subscribe(p => {
-            this.currentSpeed = p.coords.speed;
+            this.currentSpeed = (p == null) ? null : p.coords.speed;
         }));
         this.routeChanged();
-    }
-
-    public ngAfterViewChecked(): void {
-        if (!this.isVisible()) {
-            return;
-        }
-        if (!this.isExpanded) {
-            return;
-        }
-        if (!this.lineChartContainer.nativeElement) {
-            return;
-        }
-        let chartContainerStyle = window.getComputedStyle(this.lineChartContainer.nativeElement.parentElement);
-        if (+this.chartElements.svg.attr("width") !== parseFloat(chartContainerStyle.width)) {
-            // Redraw when width changes due to class style changes (sidebar open)
-            this.redrawChart();
-        }
     }
 
     public ngOnDestroy() {
@@ -201,8 +199,27 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
     }
 
+    public changeState(state: string) {
+        switch (state) {
+            case "table":
+                if (this.isTable) {
+                    this.isVisible = false;
+                } else {
+                    this.isTable = true;
+                }
+                break;
+            case "graph":
+                if (!this.isTable) {
+                    this.isVisible = false;
+                } else {
+                    this.isTable = false;
+                    this.redrawChart();
+                }
+        }
+    }
+
     public isSidebarVisible() {
-        return this.sidebarService.isVisible;
+        return this.sidebarService.isSidebarOpen();
     }
 
     public getUnits = (number: number): string => {
@@ -217,15 +234,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public toggle(): void {
-        this.routeStatisticsService.toggle();
-        if (this.routeStatisticsService.isVisible()) {
-            this.changeDetectorRef.detectChanges();
+        this.isVisible = !this.isVisible;
+        if (this.isVisible) {
             this.redrawChart();
         }
-    }
-
-    public isVisible(): boolean {
-        return this.routeStatisticsService.isVisible();
     }
 
     private routeChanged() {
@@ -242,7 +254,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         this.statistics = this.routeStatisticsService.getStatistics(selectedRoute);
         this.initializeStatistics(this.statistics);
-        if (this.isVisible()) {
+        if (this.isVisible) {
             this.hideSubRouteSelection();
             this.setRouteColorToChart(selectedRoute.color);
             this.setDataToChart(this.statistics.points.map(p => p.coordinate));
@@ -251,17 +263,19 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public redrawChart = () => {
-        if (!this.isVisible()) {
+        this.changeDetectorRef.detectChanges();
+        if (!this.isVisible) {
             return;
         }
-        if (!this.lineChartContainer.nativeElement) {
+        if (!this.lineChartContainer || !this.lineChartContainer.nativeElement) {
             return;
         }
         let data = [];
         let routeColor = "black";
-        if (this.statistics != null) {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (this.statistics != null && selectedRoute) {
             data = this.statistics.points.map(p => p.coordinate);
-            routeColor = this.selectedRouteService.getSelectedRoute().color;
+            routeColor = selectedRoute.color;
         }
 
         this.initChart();
@@ -516,7 +530,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private setDataToChart(data: Coordinate[]) {
-        if (!this.isVisible()) {
+        if (!this.isVisible) {
             return;
         }
         let d3 = this.d3Service.getD3();
@@ -611,7 +625,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     public toggleExpand() {
         this.isExpanded = !this.isExpanded;
-        this.changeDetectorRef.detectChanges();
         this.redrawChart();
     }
 

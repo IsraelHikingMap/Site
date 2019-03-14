@@ -8,16 +8,6 @@ describe("RouteStatisticsService", () => {
         service = new RouteStatisticsService();
     });
 
-    it("Should be hidden when initialized", () => {
-        expect(service.isVisible()).toBeFalsy();
-    });
-
-    it("Should be visible when toggled", () => {
-        service.toggle();
-
-        expect(service.isVisible()).toBeTruthy();
-    });
-
     it("Should get empty statistics on empty route", () => {
         let routeData = {
             segments: []

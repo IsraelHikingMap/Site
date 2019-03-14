@@ -243,6 +243,10 @@ export class ResourcesService {
     public addToRoutes: string;
     public hourUnit: string;
     public minuteUnit: string;
+    public currentSpeed: string;
+    public averageSpeed: string;
+    public duration: string;
+    public kmPerHourUnit: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -485,7 +489,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1550857254391");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1552601690201");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -715,6 +719,10 @@ export class ResourcesService {
         this.addToRoutes = this.gettextCatalog.getString("Add to routes");
         this.hourUnit = this.gettextCatalog.getString("hr");
         this.minuteUnit = this.gettextCatalog.getString("min");
+        this.currentSpeed = this.gettextCatalog.getString("Current speed");
+        this.averageSpeed = this.gettextCatalog.getString("Average speed");
+        this.duration = this.gettextCatalog.getString("Duration");
+        this.kmPerHourUnit = this.gettextCatalog.getString("km per hour");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
