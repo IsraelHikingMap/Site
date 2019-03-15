@@ -188,7 +188,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.redrawChart();
         }));
         this.componentSubscriptions.push(this.geoLocationService.positionChanged.subscribe(p => {
-            this.currentSpeed = (p == null) ? null : p.coords.speed;
+            this.currentSpeed = (p == null) ? null : p.coords.speed * 3.6;
         }));
         this.routeChanged();
     }
