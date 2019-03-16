@@ -5,38 +5,38 @@
                 <mat-grid-tile matTooltip="{{resources.length}}" matTooltipPosition="below">
                     <div fxLayout="column" fxLayoutAlign=" center">
                         <i class="fa icon-arrow-right"></i>
-                        <span>{{toShortNumber(length)}} {{getUnits(length)}}</span>
+                        <span>{{toShortNumber(length)}} <span class="units">{{getUnits(length)}}</span></span>
                     </div>
                 </mat-grid-tile>
                 <mat-grid-tile matTooltip="{{resources.gain}}" matTooltipPosition="below">
                     <div fxLayout="column" fxLayoutAlign=" center">
                         <i class="fa icon-arrow-up"></i>
-                        <span>{{toShortNumber(gain)}} {{getUnits(gain)}}</span>
+                        <span>{{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span></span>
                     </div>
                 </mat-grid-tile>
                 <mat-grid-tile matTooltip="{{resources.loss}}" matTooltipPosition="below">
                     <div fxLayout="column" fxLayoutAlign=" center">
                         <i class="fa icon-arrow-down"></i>
-                        <span><span dir="ltr"> {{toShortNumber(loss)}}</span> {{getUnits(loss)}}</span>
+                        <span><span dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span class="units">{{getUnits(loss)}}</span></span>
                     </div>
                 </mat-grid-tile>
                 <mat-grid-tile matTooltip="{{resources.duration}}" matTooltipPosition="above">
                     <div fxLayout="column" fxLayoutAlign=" center">
                         <i class="fa icon-clock-o"></i>
-                        <span>{{duration}}</span>
+                        <span>{{duration}} <span class="units">{{durationUnits}}</span></span>
                     </div>
                 </mat-grid-tile>
                 <mat-grid-tile matTooltip="{{resources.averageSpeed}}" matTooltipPosition="above">
                     <div fxLayout="column" fxLayoutAlign=" center">
                         <i class="fa icon-avg-speed"></i>
-                        <span *ngIf="averageSpeed">{{averageSpeed | number: '1.0-2'}} {{resources.kmPerHourUnit}}</span>
+                        <span *ngIf="averageSpeed">{{averageSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
                         <span *ngIf="!averageSpeed">--</span>
                     </div>
                 </mat-grid-tile>
                 <mat-grid-tile matTooltip="{{resources.currentSpeed}}" matTooltipPosition="above">
                     <div fxLayout="column" fxLayoutAlign=" center">
                         <i class="fa icon-speed"></i>
-                        <span *ngIf="currentSpeed">{{currentSpeed | number: '1.0-2'}} {{resources.kmPerHourUnit}}</span>
+                        <span *ngIf="currentSpeed">{{currentSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
                         <span *ngIf="!currentSpeed">--</span>
                     </div>
                 </mat-grid-tile>

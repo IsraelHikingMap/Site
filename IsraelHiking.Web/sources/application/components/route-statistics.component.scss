@@ -31,6 +31,10 @@ $container-height-expanded: 300px;
     font-size: x-large;
 }
 
+.units {
+    font-size: small !important;
+}
+
 .chart-control-container.expanded .chart-container {
     height: $container-height-expanded;
 }
@@ -91,10 +95,5 @@ $container-height-expanded: 300px;
 
     .chart-buttons .mat-button {
         padding: 0 !important;
-    }
-
-    .chart-container i,
-    .chart-container span {
-        font-size: unset;
     }
 }

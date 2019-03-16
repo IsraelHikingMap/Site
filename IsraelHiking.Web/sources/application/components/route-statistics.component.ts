@@ -76,6 +76,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public gain: number;
     public loss: number;
     public duration: string;
+    public durationUnits: string;
     public averageSpeed: number;
     public currentSpeed: number;
     public isKmMarkersOn: boolean;
@@ -146,6 +147,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.gain = 0;
             this.loss = 0;
             this.duration = "--:--";
+            this.durationUnits = "";
             this.currentSpeed = null;
             this.averageSpeed = null;
         } else {
@@ -155,15 +157,18 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.averageSpeed = statistics.averageSpeed;
             if (!statistics.duration) {
                 this.duration = "--:--";
+                this.durationUnits = "";
             } else {
                 if (statistics.duration > 60 * 60) {
                     let hours = Math.floor(statistics.duration / (60 * 60));
                     let minutes = Math.floor((statistics.duration % (60 * 60)) / 60);
-                    this.duration = this.toTwoDigits(hours) + ":" + this.toTwoDigits(minutes) + " " + this.resources.hourUnit;
+                    this.duration = this.toTwoDigits(hours) + ":" + this.toTwoDigits(minutes);
+                    this.durationUnits = this.resources.hourUnit;
                 } else {
                     let minutes = Math.floor(statistics.duration / 60);
                     let seconds = Math.floor(statistics.duration % 60);
-                    this.duration = this.toTwoDigits(minutes) + ":" + this.toTwoDigits(seconds) + " " + this.resources.minuteUnit;
+                    this.duration = this.toTwoDigits(minutes) + ":" + this.toTwoDigits(seconds);
+                    this.durationUnits = this.resources.minuteUnit;
                 }
             }
         }
