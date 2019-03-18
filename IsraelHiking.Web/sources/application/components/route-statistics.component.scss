@@ -26,8 +26,12 @@ $container-height-expanded: 300px;
     position: relative;
 }
 
-.chart-container i, 
-.chart-container span {
+.chart-table {
+    height: 100%;
+}
+
+.chart-table i,
+.chart-table span {
     font-size: x-large;
 }
 
@@ -39,39 +43,49 @@ $container-height-expanded: 300px;
     height: $container-height-expanded;
 }
 
-.chart-close-button {
+.sub-route-statistics-container {
     position: absolute !important;
+    bottom: 0px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    border: 1px solid black;
+    background: white;
+    display: inline;
+}
+
+.label-margin {
+    margin: 0 12px;
+    white-space: nowrap;
+}
+
+.chart-button {
+    position: absolute !important;
+    min-width: unset !important;
+}
+
+.chart-close-button {
     top: 5px;
     left: 5px;
-    min-width: unset !important;
 }
 
 .chart-km-button {
-    position: absolute !important;
     top: 41px;
     left: 5px;
-    min-width: unset !important;
 }
 
 .chart-expand-button {
-    position: absolute !important;
     top: 76px;
     left: 5px;
-    min-width: unset !important;
 }
 
 .chart-graph-button {
-    position: absolute !important;
     bottom: 5px;
     right: 5px;
-    min-width: unset !important;
 }
 
 .chart-table-button {
-    position: absolute !important;
     bottom: 41px;
     right: 5px;
-    min-width: unset !important;
 }
 
 .chart-container-tooltip {
@@ -85,7 +99,7 @@ $container-height-expanded: 300px;
 
 @media (max-width: 550px) {
     .chart-control-container {
-        width: 100vw;
+        width: calc(100vw - 2 * #{$control-border});
         height: $container-height-small-screen;
     }
 
