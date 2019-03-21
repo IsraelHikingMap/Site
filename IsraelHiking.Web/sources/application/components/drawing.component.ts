@@ -151,7 +151,7 @@ export class DrawingComponent extends BaseMapComponent {
 
     public deleteAllRoutes() {
         this.toastService.confirm({
-            message: this.resources.areYouSure,
+            message: this.resources.areYouSureYouWantToDeleteAllRoutes,
             type: "YesNo",
             confirmAction: () => {
                 this.ngRedux.dispatch(new DeleteAllRoutesAction({}));

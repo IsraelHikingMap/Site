@@ -289,6 +289,7 @@ export class ResourcesService {
     public continueRecording: string;
     public makeSureBatteryOptimizationIsOff: string;
     public dontShowThisMessageAgain: string;
+    public areYouSureYouWantToDeleteAllRoutes: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -489,7 +490,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1552601690201");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1553185867458");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -775,6 +776,7 @@ export class ResourcesService {
             "Please make sure the battery optimization is turned off for this application. Go to application setting to do so."
         );
         this.dontShowThisMessageAgain = this.gettextCatalog.getString("Don't show this message again");
+        this.areYouSureYouWantToDeleteAllRoutes = this.gettextCatalog.getString("Are you sure you want to delete all routes?");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");
