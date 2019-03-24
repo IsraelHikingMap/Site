@@ -1,6 +1,7 @@
 import { Component, Input, ViewChild, AfterViewInit, OnChanges, SimpleChanges } from "@angular/core";
-import { LayerTileComponent } from "ngx-ol";
+import { LayerTileComponent, MapComponent } from "ngx-ol";
 import { XYZ, TileArcGISRest } from "ol/source";
+import olms from "ol-mapbox-style";
 
 @Component({
     selector: "auto-layer",
@@ -24,6 +25,14 @@ export class AutomaticLayerPresentationComponent implements AfterViewInit, OnCha
     @ViewChild("tileLayer")
     public tileLayer: LayerTileComponent;
 
+    private olmsAddressLoading = null;
+    private layers: any[];
+
+    constructor(private readonly host: MapComponent) {
+        this.olmsAddressLoading = null;
+        this.layers = [];
+    }
+
     public ngAfterViewInit(): void {
         this.setSource();
     }
@@ -32,9 +41,18 @@ export class AutomaticLayerPresentationComponent implements AfterViewInit, OnCha
         this.setSource();
     }
 
-    private setSource() {
+    private async setSource() {
         let tileSource: TileArcGISRest | XYZ;
-        if (this.address.toLowerCase().endsWith("/mapserver")) {
+        this.removeVectorLayers();
+        if (this.address.toLowerCase().endsWith("json") && this.host.instance) {
+            if (this.olmsAddressLoading !== this.address) {
+                this.olmsAddressLoading = this.address;
+                this.removeVectorLayers();
+                await olms(this.host.instance, this.address);
+                this.layers = this.host.instance.getLayers().getArray().filter(l => l.getProperties()["mapbox-source"] != null);
+                this.olmsAddressLoading = null;
+            }
+        } else if (this.address.toLowerCase().endsWith("/mapserver")) {
             tileSource = new TileArcGISRest({
                 url: this.address
             });
@@ -48,5 +66,13 @@ export class AutomaticLayerPresentationComponent implements AfterViewInit, OnCha
         if (this.tileLayer && this.tileLayer.instance) {
             this.tileLayer.instance.setSource(tileSource);
         }
+    }
+
+    private removeVectorLayers() {
+        for (let layer of this.layers) {
+            this.host.instance.removeLayer(layer);
+        }
+        this.host.instance.getTargetElement().style.backgroundColor = "";
+        this.layers = [];
     }
 }

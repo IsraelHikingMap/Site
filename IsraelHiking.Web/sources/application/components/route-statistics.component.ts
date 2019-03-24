@@ -360,7 +360,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.updateSubRouteSelectionOnChart();
             this.hideChartHover();
         }
-        
+
     }
 
     private onMouseUp() {

@@ -49,6 +49,7 @@
     "ngx-window-token": "1.0.2",
     "ohauth": "1.0.0",
     "ol": "5.3.1",
+    "ol-mapbox-style": "4.2.1",
     "piexifjs": "1.0.4",
     "pouchdb": "7.0.0",
     "redux": "4.0.1",
