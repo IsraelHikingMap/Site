@@ -82,7 +82,7 @@ export class RouteEditRouteInteraction {
 
     public setActive(active: boolean, map: Map) {
         this.map = map;
-        // HM TODO: touchmove?
+        // HM TODO: touchmove? remove console.log
         if (active) {
             map.on("mousedown", this.handleDown);
             // map.on("touchstart", this.handleDown);
@@ -94,6 +94,7 @@ export class RouteEditRouteInteraction {
             map.off("mousedown", this.handleDown);
             // map.off("touchstart", this.handleDown);
             map.off("mousemove", this.handleMove);
+            map.off("drag", this.handleMove);
             map.off("mouseup", this.handleUp);
             // map.off("touchend", this.handleUp);
         }
@@ -208,6 +209,8 @@ export class RouteEditRouteInteraction {
 
     private handleUp = (event: MapMouseEvent) => {
         console.log("up");
+        this.map.on("mousemove", this.handleMove);
+        this.map.off("drag", this.handleMove);
         let isDragging = this.state === "dragging";
         this.state = "none";
         let updating = this.selectedRoutePoint != null || this.selectedRouteSegments.length !== 0;
