@@ -2,7 +2,7 @@ import { Component, ViewChild, AfterViewInit, ViewEncapsulation, ViewChildren, Q
 import { NgxImageGalleryComponent } from "ngx-image-gallery";
 import { NgRedux } from "@angular-redux/store";
 import { MapComponent, CustomControl } from "ngx-mapbox-gl";
-import { Style } from "mapbox-gl";
+import { Style, setRTLTextPlugin } from "mapbox-gl";
 
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
@@ -120,6 +120,8 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         this.imageGalleryService.setGalleryComponent(this.ngxImageGallery);
     }
     public mapLoaded() {
+        setRTLTextPlugin("/mapbox-gl-rtl-text.js", () => {});
+
         this.mapService.setMap(this.mapComponent.mapInstance);
         this.snappingService.setMap(this.mapComponent.mapInstance);
 

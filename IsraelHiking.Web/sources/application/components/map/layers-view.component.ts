@@ -48,6 +48,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         this.categoriesTypes = this.poiService.getCategoriesTypes();
         this.selectedCluster = null;
         this.hoverFeature = null;
+        this.selectedPoiFeature = null;
         this.selectedPoiGeoJson = {
             type: "FeatureCollection",
             features: []

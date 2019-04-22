@@ -69,13 +69,19 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private isRaster(address: string) {
-        return !address.endsWith("json") && !address.endsWith("/mapserver");
+        return !address.endsWith("json");
     }
 
     private createRasterLayer() {
+        let address = this.address;
+        if (this.address.toLocaleLowerCase().endsWith("/mapserver")) {
+            //address += "/tile/{z}/{y}/{x}"
+            address += "/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&f=image";
+        }
+        console.log("adrs:", address);
         let source = {
             type: "raster",
-            tiles: [this.address],
+            tiles: [address],
             minzoom: this.minZoom,
             maxzoom: this.maxZoom,
             tileSize: 256
