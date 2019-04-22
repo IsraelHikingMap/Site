@@ -1,4 +1,4 @@
-﻿<div class="side-control">
+﻿<div class="side-control mapboxgl-ctrl">
     <button mat-button (click)="toggleEditPoi()" [ngClass]="{active : isPoiEditActive()}" [ngStyle]="{'color': getRouteColor()}" matTooltip="{{resources.editPoi}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw POI toggle"><i class="fa icon-map-marker fa-lg"></i></button>
     <button mat-button (click)="toggleEditRoute()" [disabled]="isRouteEditDisabled()" [ngClass]="{active : isRouteEditActive() }" [style.color]="isRouteEditDisabled() ? '' : getRouteColor()" matTooltip="{{resources.editRoute}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw route toggle"><i class="fa icon-pencil fa-lg"></i></button>
     <button mat-button *ngIf="isRouteEditActive()" (click)="setRouting('Hike')" [ngClass]="{active : getRoutingType() == 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Routing Hike"><i class="fa icon-hike fa-lg"></i></button>

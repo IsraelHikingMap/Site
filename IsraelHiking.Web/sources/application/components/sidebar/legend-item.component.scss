@@ -1,8 +1,12 @@
-﻿
-.legend-item {
+﻿.legend-item {
     border: 1px solid black;
     margin-bottom: 10px;
     width: 201px;
+}
+
+.legend-item-map mgl-map {
+    height: 100%;
+    width: 100%;
 }
 
 .legend-item-text-container {

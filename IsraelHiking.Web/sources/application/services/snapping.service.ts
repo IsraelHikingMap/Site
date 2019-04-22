@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { Map } from "ol";
+import { Map } from "mapbox-gl";
 
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
@@ -30,7 +30,7 @@ export interface ISnappingRouteResponse extends ISnappingBaseResponse {
 export interface ISnappingPointOptions {
     points: MarkerData[];
     /**
-     * The sensivitivity of snappings in pixels
+     * The sensitivity of snapping in pixels
      */
     sensitivity: number;
 }
@@ -77,7 +77,7 @@ export class SnappingService {
         if (!this.map) {
             return;
         }
-        if (this.map.getView().getZoom() <= 13 || this.enabled === false) {
+        if (this.map.getZoom() <= 13 || this.enabled === false) {
             this.highwaySnappings.splice(0);
             this.pointsSnappings.splice(0);
             return;
@@ -143,15 +143,14 @@ export class SnappingService {
             line: null
         } as ISnappingRouteResponse;
 
-        let pointInPixels = this.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(latlng));
-
+        let pointInPixels = this.map.project(latlng);
         for (let lineIndex = 0; lineIndex < options.lines.length; lineIndex++) {
             let line = options.lines[lineIndex];
             if (line.length <= 1) {
                 continue;
             }
-            let lineInPixels = line.map(l => this.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(l)));
-            let distance = SpatialService.getDistanceFromPointToLine(pointInPixels, lineInPixels);
+            let lineInPixels = line.map(l => this.map.project(l)).map(p => [p.x, p.y] as [number, number]);
+            let distance = SpatialService.getDistanceFromPointToLine([pointInPixels.x, pointInPixels.y], lineInPixels);
             if (distance <= options.sensitivity && distance < minDistance) {
                 minDistance = distance;
                 response.latlng = SpatialService.getClosestPoint(latlng, line);
@@ -177,10 +176,11 @@ export class SnappingService {
             markerData: null,
             id: null
         } as ISnappingPointResponse;
-        let pointOnScreen = this.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(latlng));
+        let pointOnScreen = this.map.project(latlng);
         for (let markerData of options.points) {
-            let markerPointOnScreen = this.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(markerData.latlng));
-            if (SpatialService.getDistanceForCoordinates(markerPointOnScreen, pointOnScreen) < options.sensitivity &&
+            let markerPointOnScreen = this.map.project(markerData.latlng);
+            if (SpatialService.getDistanceForCoordinates([markerPointOnScreen.x, markerPointOnScreen.y],
+                [pointOnScreen.x, pointOnScreen.y]) < options.sensitivity &&
                 response.markerData == null) {
                 response.latlng = markerData.latlng;
                 response.markerData = markerData;

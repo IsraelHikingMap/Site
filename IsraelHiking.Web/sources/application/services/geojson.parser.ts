@@ -127,9 +127,11 @@ export class GeoJsonParser {
                 latLngs.push(marker.latlng);
             }
         }
-        let bounds = SpatialService.getBounds(latLngs);
-        data.northEast = bounds.northEast;
-        data.southWest = bounds.southWest;
+        if (latLngs.length > 0) {
+            let bounds = SpatialService.getBounds(latLngs);
+            data.northEast = bounds.northEast;
+            data.southWest = bounds.southWest;
+        }
         return data;
     }
 

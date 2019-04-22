@@ -87,6 +87,9 @@ export class FileComponent extends BaseMapComponent {
         if ($event.ctrlKey === false) {
             return true;
         }
+        if ($event.key == null) {
+            return true;
+        }
         switch ($event.key.toLowerCase()) {
             case "o":
                 // this doesn't work on firefox due to security reasons. it does work in chrome and IE though.

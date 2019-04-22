@@ -1,7 +1,7 @@
 ﻿@import "../fonts/icons.css";
 @import "font-awesome/css/font-awesome.css";
-@import "ol/ol.css";
 @import "~@beyerleinf/ngx-dnd/styles.css";
+@import "~mapbox-gl/dist/mapbox-gl.css";
 @import "./dialogs.scss";
 @import "./sidebar.scss";
 @import "./_variables.scss";
@@ -29,30 +29,9 @@ body {
     padding: 2px;
     clear: both;
     background-color: $app-button-background;
-    margin-bottom: 5px;
+    margin: 0 0 5px 0 !important;
     border: 2px solid rgba(0,0,0,.2);
 }
-
-.right-pane {
-    pointer-events: none;
-}
-
-.right-pane * {
-    pointer-events: auto;
-}
-
-.left-pane .side-control {
-    float: left;
-}
-
-.right-pane .side-control {
-    float: right;
-}
-
-.bottom-pane .side-control {
-    margin-bottom: unset;
-}
-
 
 .side-control button, .side-control a {
     min-width: unset !important;
@@ -120,17 +99,6 @@ ngx-image-gallery .image {
 
 .text-large {
     font-size: large;
-}
-
-.has-extra-data {
-    width: 4px;
-    height: 4px;
-    display: block;
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    border-radius: 50%;
-    z-index: 1;
 }
 
 .no-padding {

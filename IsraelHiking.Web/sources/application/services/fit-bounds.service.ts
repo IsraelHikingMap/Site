@@ -15,27 +15,31 @@ export class FitBoundsService {
         this.isFlying = false;
     }
 
-    public fitBounds(bounds: Bounds, noPadding: boolean = false) {
-        let padding = [50, 50, 50, 50];
+    public async fitBounds(bounds: Bounds, noPadding: boolean = false) {
+        await this.mapService.initializationPromise;
+        let maxZoom = Math.max(this.mapService.map.getZoom(), 16);
+        let mbBounds = SpatialService.boundsToMBBounds(bounds);
+        let padding = 50;
         if (noPadding) {
-            padding = [-5, -5, -5, -5];
+            padding = 0;
         }
-        if (this.sidebarService.isSidebarOpen() && window.innerWidth >= 768) {
-            padding = [50, -400, 50, 50];
+        if (this.sidebarService.isSidebarOpen() && window.innerWidth < 768) {
+            this.mapService.map.fitBounds(mbBounds,
+                {
+                    maxZoom: maxZoom,
+                    padding: padding
+                });
+        } else {
+            this.mapService.map.fitBounds(mbBounds,
+                {
+                    maxZoom: maxZoom,
+                    padding: { top: 50, left: 400, bottom: 50, right: 50 }
+                });
         }
-        this.mapService.map.getView().fit(SpatialService.boundsToViewExtent(bounds),
-            {
-                duration: 1000,
-                maxZoom: Math.max(this.mapService.map.getView().getZoom(), 16),
-                padding: padding
-            });
-
     }
 
-    public flyTo(latLng: LatLngAlt, zoom?: number) {
-        this.mapService.map.getView().animate({
-            center: SpatialService.toViewCoordinate(latLng),
-            zoom: zoom
-        });
+    public async flyTo(latLng: LatLngAlt, zoom: number) {
+        await this.mapService.initializationPromise;
+        this.mapService.map.flyTo({ center: latLng, zoom: zoom });
     }
 }

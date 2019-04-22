@@ -1,7 +1,4 @@
-import { Component, AfterViewInit } from "@angular/core";
-import { MapBrowserEvent, Feature, Coordinate } from "ol";
-import { Point } from "ol/geom";
-import { MapComponent } from "ngx-ol";
+import { Component } from "@angular/core";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 
@@ -17,13 +14,14 @@ import { RouteLayerFactory } from "../../services/layers/routelayers/route-layer
     selector: "traces",
     templateUrl: "./traces.component.html"
 })
-export class TracesComponent extends BaseMapComponent implements AfterViewInit {
+export class TracesComponent extends BaseMapComponent {
 
     public readonly MISSING_PART = "missingPart";
     public readonly TRACE_CONFIG = "traceConfig";
 
     public visibleTrace: Trace;
-    public traceCoordinates: Coordinate[];
+    public selectedTrace: GeoJSON.FeatureCollection<GeoJSON.LineString>;
+    public selectedTraceStart: LatLngAlt;
     public selectedFeature: GeoJSON.Feature<GeoJSON.LineString>;
     public missingCoordinates: LatLngAlt;
     public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>;
@@ -37,46 +35,68 @@ export class TracesComponent extends BaseMapComponent implements AfterViewInit {
 
     constructor(resources: ResourcesService,
         private readonly routeLayerFactory: RouteLayerFactory,
-        private readonly host: MapComponent,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.isConfigOpen = false;
-        this.traceCoordinates = [];
+        this.selectedTrace = null;
+        this.selectedTraceStart = null;
+        this.clearSelection();
+        this.missingParts = {
+            type: "FeatureCollection",
+            features: []
+        };
         this.visibleTraceId$.subscribe((id) => {
             this.visibleTrace = this.ngRedux.getState().tracesState.traces.find(t => t.id === id);
-            this.traceCoordinates = [];
+            let traceCoordinates = [];
             if (this.visibleTrace == null) {
+                this.clearTraceSource();
                 return;
             }
             for (let route of this.visibleTrace.dataContainer.routes) {
                 for (let segment of route.segments) {
-                    this.traceCoordinates = this.traceCoordinates.concat(segment.latlngs.map(l => SpatialService.toCoordinate(l)));
+                    traceCoordinates = traceCoordinates.concat(segment.latlngs.map(l => SpatialService.toCoordinate(l)));
                 }
             }
+            if (traceCoordinates.length === 0) {
+                this.clearTraceSource();
+                return;
+            }
+            this.selectedTrace = {
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    id: id,
+                    properties: { id: id },
+                    geometry: {
+                        type: "LineString",
+                        coordinates: traceCoordinates
+                    }
+                }]
+            };
+
+            this.selectedTraceStart = { lat: traceCoordinates[0][1], lng: traceCoordinates[0][0] };
         });
-        this.missingParts$.subscribe(m => this.missingParts = m);
-        this.clearSelection();
+        this.missingParts$.subscribe(m => {
+            if (m != null) {
+                for (let missingIndex = 0; missingIndex < m.features.length; missingIndex++) {
+                    m.features[missingIndex].properties.index = missingIndex;
+                }
+                this.missingParts = m;
+            } else {
+                this.missingParts = {
+                    type: "FeatureCollection",
+                    features: []
+                };
+            }
+        });
     }
 
-    public ngAfterViewInit(): void {
-        this.host.instance.on("singleclick", (event: MapBrowserEvent) => {
-            let features = (event.map.getFeaturesAtPixel(event.pixel) || []) as Feature[];
-            this.missingCoordinates = null;
-            if (features.length === 0) {
-                return;
-            }
-            if (features.find(f => f.getId() && f.getId() === this.TRACE_CONFIG) != null) {
-                this.isConfigOpen = !this.isConfigOpen;
-                return;
-            }
-            let missingFeature = features.find(f => f.getId() && f.getId().toString().startsWith(this.MISSING_PART));
-            if (missingFeature == null) {
-                return;
-            }
-            let index = +(missingFeature.getId().toString().replace(this.MISSING_PART, ""));
-            this.selectedFeature = this.missingParts.features[index];
-            this.missingCoordinates = SpatialService.fromViewCoordinate((missingFeature.getGeometry() as Point).getCoordinates());
-        });
+    private clearTraceSource() {
+        this.selectedTrace = {
+            type: "FeatureCollection",
+            features: []
+        };
+        this.selectedTraceStart = null;
     }
 
     public removeMissingPart() {
@@ -101,7 +121,6 @@ export class TracesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public convertToRoute() {
-
         for (let route of this.visibleTrace.dataContainer.routes) {
             let routeToAdd = this.routeLayerFactory.createRouteData(route.name);
             routeToAdd.segments = route.segments;
@@ -111,5 +130,15 @@ export class TracesComponent extends BaseMapComponent implements AfterViewInit {
             }));
         }
         this.clearTrace();
+    }
+
+    public getLatLngForFeature(feautre: GeoJSON.Feature<GeoJSON.LineString>) {
+        return SpatialService.toLatLng(feautre.geometry.coordinates[0] as [number, number]);
+    }
+
+    public setSelectedFeature(feature, event: Event) {
+        this.selectedFeature = feature;
+        this.missingCoordinates = this.getLatLngForFeature(this.selectedFeature);
+        event.stopPropagation();
     }
 }

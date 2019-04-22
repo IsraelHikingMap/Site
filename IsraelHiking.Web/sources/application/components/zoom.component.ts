@@ -1,8 +1,8 @@
-import { Component } from "@angular/core";
+import { Component, ElementRef } from "@angular/core";
+import { MapComponent } from "ngx-mapbox-gl";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
-import { MapService } from "../services/map.service";
 
 @Component({
     selector: "zoom",
@@ -10,20 +10,15 @@ import { MapService } from "../services/map.service";
 })
 export class ZoomComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
-        private readonly mapService: MapService) {
+        private readonly host: MapComponent) {
         super(resources);
     }
+
     public zoomIn() {
-        this.mapService.map.getView().animate({
-            zoom: Math.round(this.mapService.map.getView().getZoom()) + 1,
-            duration: 250
-        });
+        this.host.mapInstance.zoomIn();
     }
 
     public zoomOut() {
-        this.mapService.map.getView().animate({
-            zoom: Math.round(this.mapService.map.getView().getZoom()) - 1,
-            duration: 250
-        });
+        this.host.mapInstance.zoomOut();
     }
 }

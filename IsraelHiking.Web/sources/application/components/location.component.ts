@@ -2,8 +2,8 @@ import { Component } from "@angular/core";
 import { LocalStorage } from "ngx-store";
 import { first } from "rxjs/operators";
 import { NgRedux } from "@angular-redux/store";
-import { MapBrowserEvent, Feature } from "ol";
-import { MapComponent } from "ngx-ol";
+import { MapComponent } from "ngx-mapbox-gl";
+import { MapMouseEvent } from "mapbox-gl";
 
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -12,12 +12,12 @@ import { ToastService } from "../services/toast.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
-import { DragInteraction } from "./intercations/drag.interaction";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { AddRouteAction, AddRecordingPointAction } from "../reducres/routes.reducer";
 import { AddTraceAction } from "../reducres/traces.reducer";
 import { StopRecordingAction, StartRecordingAction } from "../reducres/route-editing-state.reducer";
 import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility } from "../models/models";
+import { SpatialService } from "../services/spatial.service";
 
 interface ILocationInfo extends LatLngAlt {
     radius: number;
@@ -38,10 +38,10 @@ export class LocationComponent extends BaseMapComponent {
 
     private isResettingNorthUp: boolean;
 
-    public locationCoordinate: ILocationInfo;
+    public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public isFollowing: boolean;
     public isKeepNorthUp: boolean;
-    public isLocationOverlayOpen: boolean;
+    public locationLatLng: LatLngAlt;
 
     constructor(resources: ResourcesService,
         private readonly geoLocationService: GeoLocationService,
@@ -54,44 +54,39 @@ export class LocationComponent extends BaseMapComponent {
         private readonly host: MapComponent) {
         super(resources);
 
-        this.locationCoordinate = null;
         this.isFollowing = true;
         this.isKeepNorthUp = false;
         this.isResettingNorthUp = false;
-        this.isLocationOverlayOpen = false;
+        this.locationLatLng = null;
+        this.updateLocationFeatureCollection(null);
 
-        this.host.instance.addInteraction(new DragInteraction(() => {
-            if (!this.isActive()) {
-                return;
-            }
-            this.isFollowing = false;
-            this.cancelableTimeoutService.clearTimeoutByGroup("following");
-            this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                if (this.locationCoordinate != null) {
-                    this.setLocation();
-                }
-                this.isFollowing = true;
-            }, LocationComponent.NOT_FOLLOWING_TIMEOUT, "following");
-        }) as any);
-
-        this.host.instance.on("singleclick",
-            (event: MapBrowserEvent) => {
-                let selectedRoute = this.selectedRouteService.getSelectedRoute();
-                if (selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
-                    return;
-                }
-                let features = (event.map.getFeaturesAtPixel(event.pixel, { hitTolerance: 10 }) || []) as Feature[];
-                if (features.find(f => f.getId() as string === "location") != null) {
-                    this.isLocationOverlayOpen = !this.isLocationOverlayOpen;
-                }
+        this.host.load.subscribe(() => {
+            this.host.mapInstance.loadImage("content/gps-direction.png", (_, img) => {
+                this.host.mapInstance.addImage("location-image", img);
             });
-
-        this.host.instance.getView().on("change:rotation",
-            (event) => {
-                if (this.isResettingNorthUp === false) {
-                    this.isKeepNorthUp = false;
-                }
-            });
+            this.host.mapInstance.on("dragstart",
+                () => {
+                    if (!this.isActive()) {
+                        return;
+                    }
+                    this.isFollowing = false;
+                    this.cancelableTimeoutService.clearTimeoutByGroup("following");
+                    this.cancelableTimeoutService.setTimeoutByGroup(() => {
+                        if (this.locationFeatures.features.length > 0) {
+                            this.setLocation();
+                        }
+                        this.isFollowing = true;
+                    },
+                        LocationComponent.NOT_FOLLOWING_TIMEOUT,
+                        "following");
+                });
+            this.host.mapInstance.on("rotatestart",
+                (_) => {
+                    if (this.isResettingNorthUp === false) {
+                        this.isKeepNorthUp = false;
+                    }
+                });
+        });
 
         this.geoLocationService.positionChanged.subscribe(
             (position: Position) => {
@@ -121,18 +116,31 @@ export class LocationComponent extends BaseMapComponent {
         }
     }
 
+    public openLocationPopup() {
+        if (this.locationLatLng != null) {
+            this.locationLatLng = null;
+            return;
+        }
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
+            return;
+        }
+        let coordinates = (this.locationFeatures.features[0].geometry as GeoJSON.Point).coordinates as [number, number];
+        this.locationLatLng = SpatialService.toLatLng(coordinates);
+    }
+
     public toggleKeepNorthUp() {
         this.isResettingNorthUp = true;
         this.isKeepNorthUp = !this.isKeepNorthUp;
-        this.host.instance.getView().animate({
-            rotation: 0
-        }, () => {
-            this.isResettingNorthUp = false;
-        });
+        this.host.mapInstance.once("moveend", () => this.isResettingNorthUp = false);
+        this.host.mapInstance.rotateTo(0);
     }
 
     public getRotationAngle() {
-        return `rotate(${this.host.instance.getView().getRotation()}rad)`;
+        if (this.host.mapInstance == null) {
+            return 0;
+        }
+        return `rotate(${-this.host.mapInstance.getBearing()}deg)`;
     }
 
     public toggleTracking() {
@@ -227,35 +235,29 @@ export class LocationComponent extends BaseMapComponent {
         return this.geoLocationService.getState() === "searching";
     }
 
-    public getMarkerRotation(heading: number) {
-        if (heading == null) {
-            return 0;
-        }
-        return heading * Math.PI / 180.0;
-    }
-
     private handlePositionChange(position: Position) {
-        if (this.locationCoordinate == null) {
-            this.locationCoordinate = {} as ILocationInfo;
+        if (this.locationFeatures.features.length === 0) {
             this.isFollowing = true;
         }
-        this.locationCoordinate.lng = position.coords.longitude;
-        this.locationCoordinate.lat = position.coords.latitude;
-        this.locationCoordinate.alt = position.coords.altitude;
-        this.locationCoordinate.radius = position.coords.accuracy;
+        let heading = null;
         let needToUpdateHeading = position.coords.heading != null &&
             position.coords.heading !== NaN &&
             position.coords.speed !== 0;
         if (needToUpdateHeading) {
-            this.locationCoordinate.heading = position.coords.heading;
+            heading = position.coords.heading;
         }
+        this.updateLocationFeatureCollection({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            alt: position.coords.altitude
+        }, position.coords.accuracy, heading);
+
+
         if (this.isFollowing) {
             this.setLocation();
         }
         if (needToUpdateHeading && this.isKeepNorthUp === false && this.isFollowing) {
-            this.host.instance.getView().animate({
-                rotation: - position.coords.heading * Math.PI / 180.0
-            });
+            this.host.mapInstance.setBearing(position.coords.heading);
         }
         let recordingRoute = this.selectedRouteService.getRecordingRoute();
         if (recordingRoute != null) {
@@ -271,13 +273,17 @@ export class LocationComponent extends BaseMapComponent {
             this.toggleRecording();
         }
         this.geoLocationService.disable();
-        if (this.locationCoordinate != null) {
-            this.locationCoordinate = null;
+        if (this.locationFeatures.features.length > 0) {
+            this.updateLocationFeatureCollection(null);
         }
     }
 
     private setLocation() {
-        this.fitBoundsService.flyTo(this.locationCoordinate);
+        if (this.locationFeatures.features.length > 0) {
+            let pointGeometry = this.locationFeatures.features.map(f => f.geometry).find(g => g.type === "Point") as GeoJSON.Point;
+            let coordinates = pointGeometry.coordinates as [number, number];
+            this.fitBoundsService.flyTo(SpatialService.toLatLng(coordinates), this.host.mapInstance.getZoom());
+        }
     }
 
     private addRecordingToTraces(routeData: RouteData) {
@@ -306,5 +312,33 @@ export class LocationComponent extends BaseMapComponent {
             user: ""
         };
         this.ngRedux.dispatch(new AddTraceAction({ trace: trace }));
+    }
+
+    private updateLocationFeatureCollection(center: LatLngAlt, radius?: number, heading?: number) {
+        if (center == null) {
+            this.locationFeatures = {
+                type: "FeatureCollection",
+                features: []
+            };
+            return;
+        }
+        if (heading == null && this.locationFeatures.features.length > 0) {
+            heading = this.locationFeatures.features[0].properties.heading;
+        }
+        let features: GeoJSON.Feature<GeoJSON.Geometry>[] = [{
+            type: "Feature",
+            properties: { heading: heading },
+            geometry: {
+                type: "Point",
+                coordinates: SpatialService.toCoordinate(center)
+            }
+        }];
+        if (radius != null) {
+            features.push(SpatialService.getCirclePolygon(center, radius));
+        }
+        this.locationFeatures = {
+            type: "FeatureCollection",
+            features: features
+        };
     }
 }

@@ -24,7 +24,12 @@ export class ResourcesService {
     public start: string;
     public end: string;
     private iconsCache: Map<string, string> = new Map();
-
+    public endOfBaseLayer = "end-of-base-layer";
+    public endOfOverlays = "end-of-overlays";
+    public endOfClusters = "end-of-clusters";
+    public endOfRoutes = "end-of-routes";
+    public editRoutePoints = "editing-route-layer-points";
+    public editRouteLines = "editing-route-layer-lines";
     // All the text in the app //
     /////////////////////////////
     public about: string;

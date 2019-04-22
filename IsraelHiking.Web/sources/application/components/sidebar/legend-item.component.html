@@ -1,13 +1,10 @@
 ﻿<div class="legend-item" [ngClass]="{'legend-route': item.type === 'Way', 'legend-poi' : item.type === 'POI'}">
     <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer">
-        <aol-map [width]="'100%'" [height]="'100%'">
-            <aol-layer-tile>
-                <aol-source-xyz [url]="getUrl()"></aol-source-xyz>
-            </aol-layer-tile>
-            <aol-view [zoom]="item.zoom">
-                <aol-coordinate [x]="item.latlng.lng" [y]="item.latlng.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-            </aol-view>
-        </aol-map>
+        <mgl-map [zoom]="[item.zoom - 1]"
+                 [center]="[item.latlng.lng, item.latlng.lat]" [style]='{"version": 8, "sources": {}, "layers": []}' [interactive]="false">
+            <mgl-raster-source id="raster-tiles" [tiles]="[getUrl()]" [tileSize]="256" [minzoom]="7" [maxzoom]="17"></mgl-raster-source>
+            <mgl-layer id="simple-tiles" type="raster" source="raster-tiles"></mgl-layer>
+        </mgl-map>
     </div>
     <div class="legend-item-text-container" matTooltip="{{item.osmTags.join(', ')}}" matTooltipPosition="{{item.type === 'Way' ? 'above' : 'right'}}">
         <a *ngIf="item.link" [href]="item.link" [target]="'_blank'" class="legend-item-text">{{item.title}}</a>

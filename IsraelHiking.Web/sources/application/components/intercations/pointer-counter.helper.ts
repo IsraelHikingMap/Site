@@ -1,13 +1,11 @@
-﻿import { MapBrowserPointerEvent } from "ol";
-
-export class PointerCounterHelper {
+﻿export class PointerCounterHelper {
     private pointers: string[];
 
     constructor() {
         this.pointers = [];
     }
-
-    public updatePointers(event: MapBrowserPointerEvent) {
+    // HM TODO: finsih this
+    public updatePointers(event: any) {
         if (!event.pointerEvent || !(event.pointerEvent as any).pointerId) {
             return;
         }

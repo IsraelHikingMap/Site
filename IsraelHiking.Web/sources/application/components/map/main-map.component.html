@@ -3,34 +3,31 @@
                    [conf]="imageGalleryService.config">
 </ngx-image-gallery>
 <sidebar></sidebar>
-<aol-map [width]="'100%'" [height]="'100%'" (onMoveEnd)="moveEnd($event)" [loadTilesWhileAnimating]="true" [loadTilesWhileInteracting]="true">
-    <aol-view [zoom]="location.zoom">
-        <aol-coordinate [x]="location.longitude" [y]="location.latitude" [srid]="'EPSG:4326'"></aol-coordinate>
-    </aol-view>
-    <layers-view></layers-view>
-    <routes></routes>
-    <traces></traces>
-    <div class="pane top-pane left-pane">
-        <zoom></zoom>
-        <location *ngIf="isMobile() || !isIFrame()"></location>
-        <layers></layers>
-        <file></file>
-        <file-save-as *ngIf="!isIFrame()"></file-save-as>
-        <edit-osm *ngIf="!isMobile() && !isIFrame()"></edit-osm>
-        <info></info>
+<div fxLayout="row" style="height: 100%">
+    <div fxFlex>
+        <mgl-map [zoom]="[location.zoom - 1]"
+                 [center]="[location.longitude, location.latitude]"
+                 [style]="initialStyle"
+                 (moveEnd)="moveEnd($event)"
+                 (load)="mapLoaded()"
+                 [doubleClickZoom]="false">
+            <layers-view></layers-view>
+            <routes></routes>
+            <traces></traces>
+            <zoom #topLeftControl></zoom>
+            <location #topLeftControl *ngIf="isMobile() || !isIFrame()"></location>
+            <layers #topLeftControl></layers>
+            <file #topLeftControl></file>
+            <file-save-as #topLeftControl *ngIf="!isIFrame()"></file-save-as>
+            <edit-osm #topLeftControl *ngIf="!isMobile() && !isIFrame()"></edit-osm>
+            <info #topLeftControl *ngIf="!isMobile() && !isIFrame()"></info>
+            <osm-user #topRightControl *ngIf="!isIFrame()"></osm-user>
+            <search #topRightControl *ngIf="!isIFrame()"></search>
+            <drawing #topRightControl *ngIf="!isIFrame()"></drawing>
+            <share #topRightControl></share>
+            <language #topRightControl></language>
+            <route-statistics #bottomRightControl></route-statistics>
+            <ihm-link *ngIf="!isApp()" #bottomLeftControl></ihm-link>
+        </mgl-map>
     </div>
-    <div class="pane top-pane right-pane">
-        <osm-user *ngIf="!isIFrame()"></osm-user>
-        <search *ngIf="!isIFrame()"></search>
-        <drawing *ngIf="!isIFrame()"></drawing>
-        <share></share>
-        <language></language>
-    </div>
-    <div class="pane bottom-pane right-pane">
-        <route-statistics></route-statistics>
-    </div>
-    <div class="pane bottom-pane left-pane" *ngIf="!isApp()">
-        <ihm-link></ihm-link>
-    </div>
-    <aol-control-scaleline [units]="'metric'"></aol-control-scaleline>
-</aol-map>
+</div>

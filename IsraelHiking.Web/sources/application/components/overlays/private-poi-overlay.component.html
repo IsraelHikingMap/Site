@@ -1,14 +1,9 @@
-﻿<aol-overlay *ngIf="marker.title || imageLink">
-    <aol-coordinate [x]="marker.latlng.lng"
-                    [y]="marker.latlng.lat"
-                    [srid]="'EPSG:4326'">
-    </aol-coordinate>
-    <aol-content>
-        <div class="marker-popup cursor-pointer" [dir]="resources.direction" (click)="overlayClick()">
-            <div class="title-no-margin" [dir]="resources.getDirection(marker.title)">
-                <img *ngIf="imageLink" [src]="resources.getResizedImageUrl(imageLink.url, 200)" class="img-placeholder" alt="{{marker.title}}"/>
-                <div [ngClass]="resources.getTextAlignment(marker.title)">{{marker.title}}<span *ngIf="marker.description">...</span></div>
-            </div>
+﻿ <div class="mapboxgl-popup-anchor-bottom popup-like-marker" [dir]="resources.direction">
+    <div class="mapboxgl-popup-content cursor-pointer" (click)="overlayClick($event)">
+        <div class="title-no-margin" [dir]="resources.getDirection(marker.title)">
+            <img *ngIf="imageLink" [src]="resources.getResizedImageUrl(imageLink.url, 200)" class="img-placeholder" alt="{{marker.title}}" />
+            <div [ngClass]="resources.getTextAlignment(marker.title)"><i class="fa icon-{{marker.type}}" [style.color]="color"></i> {{marker.title}}<span *ngIf="marker.description">...</span></div>
         </div>
-    </aol-content>
-</aol-overlay>
+    </div>
+    <div class="mapboxgl-popup-tip"></div>
+</div>

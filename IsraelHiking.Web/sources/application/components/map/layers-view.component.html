@@ -3,39 +3,48 @@
             [maxZoom]="getBaseLayer().maxZoom"
             [opacity]="1.0"
             [visible]="true"
-            [zIndex]="1">
+            [before]="resources.endOfBaseLayer">
 </auto-layer>
-<div *ngFor="let overlay of (overlays | async); let zIdx = index">
+<div *ngFor="let overlay of (overlays | async)">
     <auto-layer [address]="overlay.address"
                 [minZoom]="overlay.minZoom"
                 [maxZoom]="overlay.maxZoom"
                 [opacity]="overlay.opacity"
                 [visible]="overlay.visible"
-                [zIndex]="zIdx + 10">
+                [before]="resources.endOfOverlays">
     </auto-layer>
 </div>
 <div *ngFor="let categoriesType of categoriesTypes">
-    <aol-layer-vector [visible]="isVisible(categoriesType)" [zIndex]="1000" #cluster [style]="clusterStyleFunction">
-        <aol-source-cluster [distance]="distance">
-            <aol-source-vector></aol-source-vector>
-        </aol-source-cluster>
-    </aol-layer-vector>
+    <mgl-marker-cluster [data]="poiGeoJsonData[categoriesType]"
+                        [radius]="100"
+                        (load)="superCluster[categoriesType] = $event">
+        <ng-template mglPoint let-feature>
+            <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="openPoi(feature.id)" (mouseover)="hoverFeature = feature" (mouseout)="hoverFeature = null">
+                <span *ngIf="feature.properties.hasExtraData" class="has-extra-data" [style.background]="feature.properties.iconColor"></span>
+                <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
+                <i class="fa {{feature.properties.icon}} fa-stack-1x stack-icon-top stack-icon-large" [style.color]="feature.properties.iconColor"></i>
+            </span>
+        </ng-template>
+        <ng-template mglClusterPoint let-feature>
+            <div class="marker-cluster" (click)="toggleClusterPopup($event, feature, categoriesType)">
+                {{ feature.properties?.point_count }}
+            </div>
+        </ng-template>
+    </mgl-marker-cluster>
 </div>
-<aol-layer-vector [zIndex]="1001" [style]="geoJsonLayerStyleFunction">
-    <aol-source-vector #selectedPoiGeoJsonSource>
-    </aol-source-vector>
-</aol-layer-vector>
-<aol-layer-vector [visible]="(selectedPoi$ | async) != null" [zIndex]="1001">
-    <aol-source-vector>
-        <aol-feature [id]="getSelectedPoiId(selectedPoi$ | async)" #selectedPoiFeature>
-            <aol-geometry-point>
-                <aol-coordinate [x]="getSelectedPoiX(selectedPoi$ | async)"
-                                [y]="getSelectedPoiY(selectedPoi$ | async)"
-                                [srid]="'EPSG:4326'">
-                </aol-coordinate>
-            </aol-geometry-point>
-        </aol-feature>
-    </aol-source-vector>
-</aol-layer-vector>
-<cluster-overlay [isOpen]="isClusterOpen" [latlng]="clusterLatlng" [points]="clusterPoints" (closed)="isClusterOpen = false"></cluster-overlay>
-<public-poi-hover-overlay [isOpen]="isHoverOpen" [latlng]="hoverLatlng" [title]="hoverTitle"></public-poi-hover-overlay>
+<mgl-popup *ngIf="selectedCluster" [lngLat]="selectedCluster.geometry.coordinates" (close)="clearSelectedClusterPopup()" [closeOnClick]="true">
+    <cluster-overlay [points]="clusterPoints" (close)="clearSelectedClusterPopup()"></cluster-overlay>
+</mgl-popup>
+<mgl-popup *ngIf="hoverFeature" [lngLat]="hoverFeature.geometry.coordinates" [closeButton]="false" [offset]="[0, -20]">
+    <span [dir]="resources.getDirection(hoverFeature.properties.title)">{{hoverFeature.properties.title}}</span>
+</mgl-popup>
+<mgl-marker *ngIf="selectedPoiFeature" [lngLat]="selectedPoiFeature.geometry.coordinates" anchor="bottom">
+    <span class="fa-stack fa-lg cursor-pointer" (click)="openPoi(selectedPoiFeature.id)" (mouseover)="hoverFeature = selectedPoiFeature" (mouseout)="hoverFeature = null">
+        <span *ngIf="selectedPoiFeature.properties.hasExtraData" class="has-extra-data" [style.background]="selectedPoiFeature.properties.iconColor"></span>
+        <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
+        <i class="fa {{selectedPoiFeature.properties.icon}} fa-stack-1x stack-icon-top stack-icon-large" [style.color]="selectedPoiFeature.properties.iconColor"></i>
+    </span>
+</mgl-marker>
+<mgl-geojson-source id="selected-poi" [data]="selectedPoiGeoJson"></mgl-geojson-source>
+<mgl-layer id="selected-poi-fill" source="selected-poi" type="fill" [paint]="{ 'fill-color': 'rgba(19, 106, 224, 0.2)'}"></mgl-layer>
+<mgl-layer id="selected-poi-line" source="selected-poi" type="line" [paint]="{ 'line-color': 'blue', 'line-width': 2 }"></mgl-layer>

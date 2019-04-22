@@ -43,7 +43,7 @@ import { NgxImageGalleryModule } from "ngx-image-gallery";
 import { NgxD3Service } from "ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule, NgRedux } from "@angular-redux/store";
-import { AngularOpenlayersModule } from "ngx-ol";
+import { NgxMapboxGLModule } from "ngx-mapbox-gl";
 import PouchDB from "pouchdb";
 import WorkerPouch from "worker-pouch";
 import WebFont from "webfontloader";
@@ -121,7 +121,6 @@ import { ClusterOverlayComponent } from "./components/overlays/cluster-overlay.c
 import { GpsLocationOverlayComponent } from "./components/overlays/gps-location-overlay.component";
 import { ClearableOverlayComponent } from "./components/overlays/clearable-overlay.component";
 import { MissingPartOverlayComponent } from "./components/overlays/missing-part-overlay.component";
-import { PublicPoiHoverOverlayComponent } from "./components/overlays/public-poi-hover-overlay.component";
 import { SearchComponent } from "./components/search.component";
 import { InfoComponent } from "./components/info.component";
 import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.component";
@@ -217,7 +216,8 @@ export function initializeApplication(injector: Injector) {
 
 export function getWindow() { return window; }
 
-@NgModule({
+@
+NgModule({
     imports: [
         CommonModule,
         BrowserModule,
@@ -258,7 +258,7 @@ export function getWindow() { return window; }
         NgxImageGalleryModule,
         InfiniteScrollModule,
         NgReduxModule,
-        AngularOpenlayersModule
+        NgxMapboxGLModule.withConfig({ accessToken: "no-token" })
     ],
     entryComponents: [ZoomComponent,
         LocationComponent,
@@ -287,7 +287,6 @@ export function getWindow() { return window; }
         GpsLocationOverlayComponent,
         ClearableOverlayComponent,
         MissingPartOverlayComponent,
-        PublicPoiHoverOverlayComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,
@@ -383,7 +382,6 @@ export function getWindow() { return window; }
         GpsLocationOverlayComponent,
         ClearableOverlayComponent,
         MissingPartOverlayComponent,
-        PublicPoiHoverOverlayComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,

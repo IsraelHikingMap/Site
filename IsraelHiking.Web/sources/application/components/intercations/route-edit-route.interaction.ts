@@ -1,8 +1,6 @@
-import { Injectable, EventEmitter } from "@angular/core";
-import { MapBrowserPointerEvent, Feature } from "ol";
-import Interaction from "ol/interaction/Interaction";
-import { Point, LineString } from "ol/geom";
+import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
+import { MapMouseEvent, Map, GeoJSONSource } from "mapbox-gl";
 
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducres/routes.reducer";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
@@ -12,6 +10,7 @@ import { ElevationProvider } from "../../services/elevation.provider";
 import { SnappingService } from "../../services/snapping.service";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { PointerCounterHelper } from "./pointer-counter.helper";
+import { ResourcesService } from "../../services/resources.service";
 import {
     ApplicationState,
     RouteData,
@@ -25,46 +24,37 @@ import {
 const SEGMENT = "_segment_";
 const SEGMENT_POINT = "_segmentpoint_";
 
+declare type EditMouseState = "none" | "down" | "dragging";
+
 @Injectable()
-export class RouteEditRouteInteraction extends Interaction {
+export class RouteEditRouteInteraction {
 
     public onRoutePointClick: EventEmitter<number>;
     public onPointerMove: EventEmitter<LatLngAlt>;
 
-    private dragging: boolean;
-    private selectedRoutePoint: Feature;
-    private selectedRouteSegments: Feature[];
-    private pointerCounterHelper: PointerCounterHelper;
+    private state: EditMouseState;
 
-    constructor(private readonly selectedRouteService: SelectedRouteService,
+    private selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point>;
+    private selectedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[];
+    private pointerCounterHelper: PointerCounterHelper;
+    private geoJsonData: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
+    private map: Map;
+
+    constructor(private readonly resources: ResourcesService,
+        private readonly selectedRouteService: SelectedRouteService,
         private readonly routerService: RouterService,
         private readonly elevationProvider: ElevationProvider,
         private readonly geoLocationService: GeoLocationService,
         private readonly snappingService: SnappingService,
+        private readonly ngZone: NgZone,
         private readonly ngRedux: NgRedux<ApplicationState>) {
-        super({
-            handleEvent: (e: MapBrowserPointerEvent) => {
-                this.pointerCounterHelper.updatePointers(e);
-                switch (e.type) {
-                    case "pointerdown":
-                        return this.handleDown(e);
-                    case "pointerdrag":
-                        return this.handleDrag(e);
-                    case "pointerup":
-                        return this.handleUp(e);
-                    case "pointermove":
-                        return this.handleMove(e);
-                    default:
-                        return true;
-                }
-            }
-        });
-        this.dragging = false;
+        this.geoJsonData = null;
         this.pointerCounterHelper = new PointerCounterHelper();
         this.selectedRouteSegments = [];
         this.selectedRoutePoint = null;
         this.onPointerMove = new EventEmitter();
         this.onRoutePointClick = new EventEmitter();
+        this.state = "none";
     }
 
     public static createSegmentId(route: RouteData, index: number) {
@@ -75,112 +65,171 @@ export class RouteEditRouteInteraction extends Interaction {
         return route.id + SEGMENT_POINT + index;
     }
 
-    private handleDown(event: MapBrowserPointerEvent) {
+    public setData(geojsonData: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>) {
+        this.geoJsonData = geojsonData;
+    }
+
+    private updateData(feature: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>) {
+        let features = this.geoJsonData.features.filter(f => f.id !== feature.id);
+        features.push(feature);
+        this.geoJsonData.features = features;
+        (this.map.getSource("editing-route-source") as GeoJSONSource).setData(this.geoJsonData);
+    }
+
+    private getFeatureById<TGeometry extends GeoJSON.Geometry>(id: string): GeoJSON.Feature<TGeometry> {
+        return this.geoJsonData.features.find(f => f.id === id) as any as GeoJSON.Feature<TGeometry>;
+    }
+
+    public setActive(active: boolean, map: Map) {
+        this.map = map;
+        // HM TODO: touchmove?
+        if (active) {
+            map.on("mousedown", this.handleDown);
+            // map.on("touchstart", this.handleDown);
+            map.on("mousemove", this.handleMove);
+            map.on("mouseup", this.handleUp);
+            // map.on("touchend", this.handleUp);
+            // map.on("touchmove", this.handleDrag);
+        } else {
+            map.off("mousedown", this.handleDown);
+            // map.off("touchstart", this.handleDown);
+            map.off("mousemove", this.handleMove);
+            map.off("mouseup", this.handleUp);
+            // map.off("touchend", this.handleUp);
+        }
+    }
+
+    private handleDown = (event: MapMouseEvent) => {
         if (this.pointerCounterHelper.getPointersCount() > 1) {
             this.selectedRoutePoint = null;
             this.selectedRouteSegments = [];
-            return true;
+            return;
         }
-        this.dragging = false;
-        let latLng = this.getSnappingForRoute(SpatialService.fromViewCoordinate(event.coordinate));
-        let pixel = event.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(latLng));
-        let features = (event.map.getFeaturesAtPixel(pixel, { hitTolerance: 10 }) || []) as Feature[];
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        let idPrefix = selectedRoute.id + SEGMENT;
-        this.selectedRoutePoint = features.find(f =>
-            f.getId() &&
-            f.getId().toString().startsWith(selectedRoute.id + SEGMENT_POINT) &&
-            f.getGeometry() instanceof Point);
+        this.state = "down";
+        console.log("down");
+        let latLng = this.getSnappingForRoute(event.lngLat);
+        let point = event.target.project(latLng);
+        let th = 10;
+        let routePoints = event.target.queryRenderedFeatures([[point.x - th, point.y - th], [point.x + th, point.y + th]],
+            {
+                layers: [this.resources.editRoutePoints],
+            });
+        this.selectedRoutePoint = routePoints.length > 0 ? this.getFeatureById(routePoints[0].properties.id) : null;
         if (this.selectedRoutePoint != null) {
             let pointIndex = this.getPointIndex();
-            let segments = (event.map.getFeaturesAtPixel(pixel, { hitTolerance: 100 }) || []) as Feature[];
-            this.selectedRouteSegments = segments.filter(f =>
-                f.getId() &&
-                f.getId().toString().startsWith(idPrefix) &&
-                f.getGeometry() instanceof LineString &&
-                (this.getSegmentIndex(f) === pointIndex || this.getSegmentIndex(f) === pointIndex + 1));
+            let selectedRoute = this.selectedRouteService.getSelectedRoute();
+            let segmentStart = this.getFeatureById<GeoJSON.LineString>(
+                RouteEditRouteInteraction.createSegmentId(selectedRoute, pointIndex)
+            );
+            let segmentEnd = this.getFeatureById<GeoJSON.LineString>(
+                RouteEditRouteInteraction.createSegmentId(selectedRoute, pointIndex + 1)
+            );
+            this.selectedRouteSegments = segmentEnd != null ? [segmentEnd, segmentStart] : [segmentStart];
         } else {
-            this.selectedRouteSegments = features.filter(f =>
-                f.getId() &&
-                f.getId().toString().startsWith(idPrefix) &&
-                f.getGeometry() instanceof LineString);
+            let queryFeatures = event.target.queryRenderedFeatures([[point.x - th, point.y - th], [point.x + th, point.y + th]],
+                {
+                    layers: [this.resources.editRouteLines]
+                });
+            if (queryFeatures.length > 0) {
+                this.selectedRouteSegments = [this.getFeatureById(queryFeatures[0].properties.id)];
+            } else {
+                this.selectedRouteSegments = [];
+            }
         }
         if (this.selectedRoutePoint == null) {
-            this.onRoutePointClick.emit(null);
+            this.raiseRoutePointClick(null);
         } else {
-            this.onPointerMove.emit(null);
+            this.raisePointerMove(null);
         }
-        return this.selectedRoutePoint == null && this.selectedRouteSegments.length === 0;
+        if (this.selectedRoutePoint != null || this.selectedRouteSegments.length > 0) {
+            event.preventDefault();
+        } else {
+            this.map.off("mousemove", this.handleMove);
+            this.map.on("drag", this.handleMove);
+        }
     }
 
-    private handleDrag(event: MapBrowserPointerEvent) {
-        this.dragging = true;
-        this.onRoutePointClick.emit(null);
-        this.onPointerMove.emit(null);
-        if (this.selectedRoutePoint != null) {
-            return this.handleRoutePointDrag(event);
+    private handleMove = (event: MapMouseEvent) => {
+        if (this.state === "down") {
+            this.state = "dragging";
         }
-        if (this.selectedRouteSegments.length > 0) {
-            return this.handleRouteMiddleSegmentDrag(event);
+        if (this.state === "dragging") {
+            console.log("drag");
+            this.raiseRoutePointClick(null);
+            this.raisePointerMove(null);
+            if (this.selectedRoutePoint != null) {
+                this.handleRoutePointDrag(event);
+            } else if (this.selectedRouteSegments.length > 0) {
+                this.handleRouteMiddleSegmentDrag(event);
+            }
+        } else {
+            console.log("move");
+            let latLng = this.getSnappingForRoute(event.lngLat);
+            this.raisePointerMove(latLng);
         }
-        return true;
     }
 
-    private handleRoutePointDrag(event: MapBrowserPointerEvent): boolean {
-        let snappingLatLng = this.getSnappingForRoute(SpatialService.fromViewCoordinate(event.coordinate));
-        let coordinate = SpatialService.toViewCoordinate(snappingLatLng);
-        let point = (this.selectedRoutePoint.getGeometry() as Point);
-        point.setCoordinates(coordinate);
-        this.selectedRoutePoint.setGeometry(point);
+    private handleRoutePointDrag(event: MapMouseEvent) {
+        // HM TODO: bring back snappings and make this faster...
+        // let snappingLatLng = this.getSnappingForRoute(event.lngLat);
+        // let coordinate = SpatialService.toCoordinate(snappingLatLng);
+        let coordinate = SpatialService.toCoordinate(event.lngLat);
+        this.selectedRoutePoint.geometry.coordinates = coordinate;
+        this.updateData(this.selectedRoutePoint);
         let index = this.getPointIndex();
         if (this.selectedRouteSegments.length === 2) {
             let segmentEnd = this.selectedRouteSegments[0];
-            let coordinates = (segmentEnd.getGeometry() as LineString).getCoordinates();
-            segmentEnd.setGeometry(new LineString([coordinate, coordinates[coordinates.length - 1]]));
+            let coordinates = segmentEnd.geometry.coordinates;
+            segmentEnd.geometry.coordinates = [coordinate, coordinates[coordinates.length - 1]];
+            this.updateData(segmentEnd);
             if (index !== 0) {
                 let segmentStart = this.selectedRouteSegments[1];
-                let start = (segmentStart.getGeometry() as LineString).getCoordinates()[0];
-                segmentStart.setGeometry(new LineString([start, coordinate]));
+                let start = segmentStart.geometry.coordinates[0];
+                segmentStart.geometry.coordinates = [start, coordinate];
+                this.updateData(segmentStart);
             }
         } else if (this.selectedRouteSegments.length === 1) {
             let segmentStart = this.selectedRouteSegments[0];
-            let start = (segmentStart.getGeometry() as LineString).getCoordinates()[0];
-            segmentStart.setGeometry(new LineString([start, coordinate]));
+            let start = segmentStart.geometry.coordinates[0];
+            segmentStart.geometry.coordinates = [start, coordinate];
+            this.updateData(segmentStart);
         }
-        return false;
     }
 
-    private handleRouteMiddleSegmentDrag(event: MapBrowserPointerEvent): boolean {
-        let snapping = this.getSnappingForRoute(SpatialService.fromViewCoordinate(event.coordinate));
-        let coordinate = SpatialService.toViewCoordinate(snapping);
+    private handleRouteMiddleSegmentDrag(event: MapMouseEvent) {
+        let snapping = this.getSnappingForRoute(event.lngLat);
+        let coordinate = SpatialService.toCoordinate(snapping);
         let segment = this.selectedRouteSegments[0];
-        let coordinates = (segment.getGeometry() as LineString).getCoordinates();
-        segment.setGeometry(new LineString([coordinates[0], coordinate, coordinates[coordinates.length - 1]]));
-        return false;
+        let coordinates = segment.geometry.coordinates;
+        segment.geometry.coordinates = [coordinates[0], coordinate, coordinates[coordinates.length - 1]];
+        this.updateData(segment);
+
     }
 
-    private handleUp(event: MapBrowserPointerEvent) {
+    private handleUp = (event: MapMouseEvent) => {
+        console.log("up");
+        let isDragging = this.state === "dragging";
+        this.state = "none";
         let updating = this.selectedRoutePoint != null || this.selectedRouteSegments.length !== 0;
-        if (!updating && this.dragging) {
+        if (!updating && isDragging) {
             // regular map pan
-            return true;
+            return;
         }
-        let latlng = SpatialService.fromViewCoordinate(event.coordinate);
-        latlng = this.getSnappingForRoute(latlng);
-        if (!updating && !this.dragging) {
+        let latlng = this.getSnappingForRoute(event.lngLat);
+        if (!updating && !isDragging) {
             // new point
             this.addPointToEndOfRoute(latlng);
-            return true;
+            return;
         }
-        if (!this.dragging) {
+        if (!isDragging) {
             if (this.selectedRoutePoint != null) {
                 // click on exiting point
-                this.onRoutePointClick.emit(this.getPointIndex());
+                this.raiseRoutePointClick(this.getPointIndex());
             } else {
                 // click on the middle of a segment
                 this.splitRouteSegment(latlng);
             }
-            return true;
+            return;
         }
         // drag exiting route point
         if (this.selectedRoutePoint != null) {
@@ -189,16 +238,7 @@ export class RouteEditRouteInteraction extends Interaction {
             this.updateRouteSegment(latlng);
         }
 
-        return true;
-    }
-
-    private handleMove(event: MapBrowserPointerEvent) {
-        if (event.dragging) {
-            return false;
-        }
-        let latLng = this.getSnappingForRoute(SpatialService.fromViewCoordinate(event.coordinate));
-        this.onPointerMove.emit(latLng);
-        return true;
+        return;
     }
 
     private addPointToEndOfRoute = async (latlng: LatLngAlt) => {
@@ -218,7 +258,7 @@ export class RouteEditRouteInteraction extends Interaction {
         }));
     }
 
-    protected createRouteSegment = (latlng: LatLngAlt, latlngs: LatLngAlt[]): RouteSegmentData => {
+    private createRouteSegment = (latlng: LatLngAlt, latlngs: LatLngAlt[]): RouteSegmentData => {
         let routeSegment = {
             routePoint: latlng,
             latlngs: latlngs as ILatLngTime[],
@@ -278,7 +318,7 @@ export class RouteEditRouteInteraction extends Interaction {
     private async updateRouteSegment(latlng: LatLngAlt) {
         let index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         let routeData = this.selectedRouteService.getSelectedRoute();
-        let segment = { ... routeData.segments[index] };
+        let segment = { ...routeData.segments[index] };
         let latlngStart = await this.runRouting(segment.latlngs[0], latlng, this.ngRedux.getState().routeEditingState.routingType);
         let latlngEnd = await this.runRouting(latlng, segment.routePoint, segment.routingType);
         segment.latlngs = latlngEnd;
@@ -314,12 +354,12 @@ export class RouteEditRouteInteraction extends Interaction {
     }
 
     private getPointIndex() {
-        let splitStr = this.selectedRoutePoint.getId().toString().split(SEGMENT_POINT);
+        let splitStr = this.selectedRoutePoint.properties.id.toString().split(SEGMENT_POINT);
         return +splitStr[1];
     }
 
-    private getSegmentIndex(segment: Feature) {
-        let splitStr = segment.getId().toString().split(SEGMENT);
+    private getSegmentIndex(segment: GeoJSON.Feature<GeoJSON.LineString>) {
+        let splitStr = segment.id.toString().split(SEGMENT);
         return +splitStr[1];
     }
 
@@ -355,5 +395,17 @@ export class RouteEditRouteInteraction extends Interaction {
             return snappingRouteResponse.latlng;
         }
         return latlng;
+    }
+
+    private raisePointerMove(latLng: LatLngAlt) {
+        // this.ngZone.run(() => {
+        //    this.onPointerMove.emit(latLng);
+        // });
+    }
+
+    private raiseRoutePointClick(index: number) {
+        this.ngZone.run(() => {
+            this.onRoutePointClick.emit(index);
+        });
     }
 }

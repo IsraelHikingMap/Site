@@ -1,12 +1,10 @@
-import { Subject } from "rxjs";
-import { Coordinate } from "ol";
 import { last } from "lodash";
 
 import { SpatialService } from "./spatial.service";
 import { LatLngAlt, RouteData } from "../models/models";
 
 export interface IRouteStatisticsPoint {
-    coordinate: Coordinate;
+    coordinate: [number, number];
     latlng: LatLngAlt;
     slope: number;
 }
