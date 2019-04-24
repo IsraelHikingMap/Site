@@ -13,7 +13,6 @@ import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SnappingService } from "../../services/snapping.service";
-import { SpatialService } from "../../services/spatial.service";
 import { ScaleControl } from "mapbox-gl";
 
 @Component({
@@ -94,8 +93,8 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
                     source: "dummy",
                     layout: { visibility: "none" }
                 }],
-            glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
-            sprite: "https://israelhikingmap.github.io/VectorMap/Icons/publish/"
+            glyphs: "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
+            sprite: "https://israelhikingmap.github.io/VectorMap/Icons/publish/sprite"
         };
     }
 
@@ -104,10 +103,6 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
             return;
         }
         let centerLatLon = this.mapComponent.mapInstance.getCenter();
-        let currentLocation = { lat: this.location.latitude, lng: this.location.longitude };
-        if (SpatialService.getDistanceInMeters(centerLatLon, currentLocation) < 1) {
-            return;
-        }
         this.ngRedux.dispatch(new SetLocationAction({
             longitude: centerLatLon.lng,
             latitude: centerLatLon.lat,

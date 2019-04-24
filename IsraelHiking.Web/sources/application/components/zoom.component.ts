@@ -1,4 +1,4 @@
-import { Component, ElementRef } from "@angular/core";
+import { Component } from "@angular/core";
 import { MapComponent } from "ngx-mapbox-gl";
 
 import { BaseMapComponent } from "./base-map.component";
@@ -15,10 +15,10 @@ export class ZoomComponent extends BaseMapComponent {
     }
 
     public zoomIn() {
-        this.host.mapInstance.zoomIn();
+        this.host.mapInstance.zoomTo(Math.round(this.host.mapInstance.getZoom() + 1));
     }
 
     public zoomOut() {
-        this.host.mapInstance.zoomOut();
+        this.host.mapInstance.zoomTo(Math.round(this.host.mapInstance.getZoom() - 1));
     }
 }

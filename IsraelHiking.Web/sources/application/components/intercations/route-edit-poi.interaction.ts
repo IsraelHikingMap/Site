@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { MapMouseEvent, Map } from "mapbox-gl";
 import { MatDialog } from "@angular/material";
 import { NgRedux } from "@angular-redux/store";
@@ -8,13 +8,10 @@ import { SelectedRouteService } from "../../services/layers/routelayers/selected
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { SnappingService, ISnappingPointResponse } from "../../services/snapping.service";
-import { PointerCounterHelper } from "./pointer-counter.helper";
 import { ApplicationState, MarkerData, LatLngAlt } from "../../models/models";
 
 @Injectable()
 export class RouteEditPoiInteraction {
-
-    // private pointerCounterHelper: PointerCounterHelper;
 
     constructor(private readonly matDialog: MatDialog,
         private readonly selectedRouteService: SelectedRouteService,

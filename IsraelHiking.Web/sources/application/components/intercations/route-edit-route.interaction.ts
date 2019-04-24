@@ -9,7 +9,6 @@ import { RouterService } from "../../services/routers/router.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { SnappingService } from "../../services/snapping.service";
 import { GeoLocationService } from "../../services/geo-location.service";
-import { PointerCounterHelper } from "./pointer-counter.helper";
 import { ResourcesService } from "../../services/resources.service";
 import {
     ApplicationState,
@@ -24,7 +23,7 @@ import {
 const SEGMENT = "_segment_";
 const SEGMENT_POINT = "_segmentpoint_";
 
-declare type EditMouseState = "none" | "down" | "dragging";
+declare type EditMouseState = "none" | "down" | "dragging" | "canceled";
 
 @Injectable()
 export class RouteEditRouteInteraction {
@@ -36,7 +35,6 @@ export class RouteEditRouteInteraction {
 
     private selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point>;
     private selectedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[];
-    private pointerCounterHelper: PointerCounterHelper;
     private geoJsonData: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
     private map: Map;
 
@@ -49,7 +47,6 @@ export class RouteEditRouteInteraction {
         private readonly ngZone: NgZone,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         this.geoJsonData = null;
-        this.pointerCounterHelper = new PointerCounterHelper();
         this.selectedRouteSegments = [];
         this.selectedRoutePoint = null;
         this.onPointerMove = new EventEmitter();
@@ -82,32 +79,32 @@ export class RouteEditRouteInteraction {
 
     public setActive(active: boolean, map: Map) {
         this.map = map;
-        // HM TODO: touchmove? remove console.log
         if (active) {
             map.on("mousedown", this.handleDown);
-            // map.on("touchstart", this.handleDown);
+            map.on("touchstart", this.handleDown);
             map.on("mousemove", this.handleMove);
+            map.on("touchmove", this.handleMove);
             map.on("mouseup", this.handleUp);
-            // map.on("touchend", this.handleUp);
-            // map.on("touchmove", this.handleDrag);
+            map.on("touchend", this.handleUp);
         } else {
             map.off("mousedown", this.handleDown);
-            // map.off("touchstart", this.handleDown);
+            map.off("touchstart", this.handleDown);
             map.off("mousemove", this.handleMove);
+            map.off("touchmove", this.handleMove);
             map.off("drag", this.handleMove);
             map.off("mouseup", this.handleUp);
-            // map.off("touchend", this.handleUp);
+            map.off("touchend", this.handleUp);
         }
     }
 
     private handleDown = (event: MapMouseEvent) => {
-        if (this.pointerCounterHelper.getPointersCount() > 1) {
+        if (this.isMultiTouchEvent(event.originalEvent)) {
             this.selectedRoutePoint = null;
             this.selectedRouteSegments = [];
+            this.state = "canceled";
             return;
         }
         this.state = "down";
-        console.log("down");
         let latLng = this.getSnappingForRoute(event.lngLat);
         let point = event.target.project(latLng);
         let th = 10;
@@ -142,7 +139,7 @@ export class RouteEditRouteInteraction {
         } else {
             this.raisePointerMove(null);
         }
-        if (this.selectedRoutePoint != null || this.selectedRouteSegments.length > 0) {
+        if (this.isUpdating()) {
             event.preventDefault();
         } else {
             this.map.off("mousemove", this.handleMove);
@@ -151,11 +148,13 @@ export class RouteEditRouteInteraction {
     }
 
     private handleMove = (event: MapMouseEvent) => {
+        if (this.isMultiTouchEvent(event.originalEvent)) {
+            return;
+        }
         if (this.state === "down") {
             this.state = "dragging";
         }
         if (this.state === "dragging") {
-            console.log("drag");
             this.raiseRoutePointClick(null);
             this.raisePointerMove(null);
             if (this.selectedRoutePoint != null) {
@@ -164,7 +163,6 @@ export class RouteEditRouteInteraction {
                 this.handleRouteMiddleSegmentDrag(event);
             }
         } else {
-            console.log("move");
             let latLng = this.getSnappingForRoute(event.lngLat);
             this.raisePointerMove(latLng);
         }
@@ -207,19 +205,35 @@ export class RouteEditRouteInteraction {
 
     }
 
+    private isUpdating() {
+        return this.selectedRoutePoint != null || this.selectedRouteSegments.length > 0;
+    }
+
     private handleUp = (event: MapMouseEvent) => {
-        console.log("up");
-        this.map.on("mousemove", this.handleMove);
-        this.map.off("drag", this.handleMove);
+        // this is used here to support touch screen and prevent additional mouse events
+        event.originalEvent.preventDefault();
+        if (event.originalEvent instanceof TouchEvent && event.originalEvent.touches.length > 0) {
+            // more than one touch - no need to do any thing.
+            return;
+        }
+        if (this.state === "canceled") {
+            this.state = "none";
+            return;
+        }
+        let isUpdating = this.isUpdating();
+        if (!isUpdating) {
+            this.map.on("mousemove", this.handleMove);
+            this.map.off("drag", this.handleMove);
+        }
         let isDragging = this.state === "dragging";
         this.state = "none";
-        let updating = this.selectedRoutePoint != null || this.selectedRouteSegments.length !== 0;
-        if (!updating && isDragging) {
+        
+        if (!isUpdating && isDragging) {
             // regular map pan
             return;
         }
         let latlng = this.getSnappingForRoute(event.lngLat);
-        if (!updating && !isDragging) {
+        if (!isUpdating && !isDragging) {
             // new point
             this.addPointToEndOfRoute(latlng);
             return;
@@ -410,5 +424,9 @@ export class RouteEditRouteInteraction {
         this.ngZone.run(() => {
             this.onRoutePointClick.emit(index);
         });
+    }
+
+    private isMultiTouchEvent(event: Event): boolean {
+        return event instanceof TouchEvent && event.touches.length > 1;
     }
 }
