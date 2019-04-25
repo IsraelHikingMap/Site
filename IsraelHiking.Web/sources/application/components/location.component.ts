@@ -61,7 +61,7 @@ export class LocationComponent extends BaseMapComponent {
         this.updateLocationFeatureCollection(null);
 
         this.host.load.subscribe(() => {
-            this.host.mapInstance.loadImage("content/gps-direction.png", (_, img) => {
+            this.host.mapInstance.loadImage("./content/gps-direction.png", (_, img) => {
                 this.host.mapInstance.addImage("location-image", img);
             });
             this.host.mapInstance.on("dragstart",
@@ -257,7 +257,7 @@ export class LocationComponent extends BaseMapComponent {
             this.setLocation();
         }
         if (needToUpdateHeading && this.isKeepNorthUp === false && this.isFollowing) {
-            this.host.mapInstance.setBearing(position.coords.heading);
+            this.host.mapInstance.rotateTo(position.coords.heading);
         }
         let recordingRoute = this.selectedRouteService.getRecordingRoute();
         if (recordingRoute != null) {

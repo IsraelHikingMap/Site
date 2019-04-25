@@ -115,7 +115,7 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         this.imageGalleryService.setGalleryComponent(this.ngxImageGallery);
     }
     public mapLoaded() {
-        setRTLTextPlugin("/mapbox-gl-rtl-text.js", () => {});
+        setRTLTextPlugin("./mapbox-gl-rtl-text.js", () => {});
 
         this.mapService.setMap(this.mapComponent.mapInstance);
         this.snappingService.setMap(this.mapComponent.mapInstance);
