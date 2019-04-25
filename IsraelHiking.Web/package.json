@@ -112,11 +112,13 @@
     "build:watch": "ng build --watch",
     "build:prod": "ng build --prod",
     "build:prod-beta": "ng build --prod --base-href=/beta/",
+    "build:cordova-watch": "ng build -c cordova-debug --watch",
     "test": "ng test",
     "lint": "ng lint --fix",
     "version": "node -v && npm -v && ng -v",
     "update": "ng update",
     "add-android": "cordova -v && cordova platform add android",
+    "run-android": "cordova run android",
     "build-apk": "cordova build android --release --no-telemetry",
     "1-upload": "node extract-and-upload.js",
     "2-download": "node download-and-compile.js"
