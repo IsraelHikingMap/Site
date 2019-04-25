@@ -61,7 +61,7 @@ export class LocationComponent extends BaseMapComponent {
         this.updateLocationFeatureCollection(null);
 
         this.host.load.subscribe(() => {
-            this.host.mapInstance.loadImage(Urls.baseAddress + "/content/gps-direction.png", (_, img) => {
+            this.host.mapInstance.loadImage(window.origin + "/content/gps-direction.png", (_, img) => {
                 this.host.mapInstance.addImage("gps-direction", img);
             });
             this.host.mapInstance.on("dragstart",
