@@ -3,7 +3,6 @@ import { LocalStorage } from "ngx-store";
 import { first } from "rxjs/operators";
 import { NgRedux } from "@angular-redux/store";
 import { MapComponent } from "ngx-mapbox-gl";
-import { MapMouseEvent } from "mapbox-gl";
 
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -18,6 +17,7 @@ import { AddTraceAction } from "../reducres/traces.reducer";
 import { StopRecordingAction, StartRecordingAction } from "../reducres/route-editing-state.reducer";
 import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility } from "../models/models";
 import { SpatialService } from "../services/spatial.service";
+import { Urls } from "../urls";
 
 interface ILocationInfo extends LatLngAlt {
     radius: number;
@@ -61,7 +61,7 @@ export class LocationComponent extends BaseMapComponent {
         this.updateLocationFeatureCollection(null);
 
         this.host.load.subscribe(() => {
-            this.host.mapInstance.loadImage(window.location.href + "content/gps-direction.png", (_, img) => {
+            this.host.mapInstance.loadImage(Urls.baseAddress + "/content/gps-direction.png", (_, img) => {
                 this.host.mapInstance.addImage("gps-direction", img);
             });
             this.host.mapInstance.on("dragstart",

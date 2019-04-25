@@ -152,7 +152,7 @@ export class RouteEditRouteInteraction {
     }
 
     private handleMove = (event: MapMouseEvent) => {
-        if (this.mouseDownPoint != null &&
+        if (this.mouseDownPoint != null && event.point &&
             Math.abs((this.mouseDownPoint.x - event.point.x) + (this.mouseDownPoint.y - event.point.y)) < DRAG_PIXEL_TOLERANCE) {
             return;
         }

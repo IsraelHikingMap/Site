@@ -40,6 +40,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     public editingRoute: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
 
+    private routes: RouteData[];
+
     constructor(resources: ResourcesService,
         private readonly selectedRouteService: SelectedRouteService,
         private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
@@ -56,25 +58,29 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             type: "FeatureCollection",
             features: []
         };
+        this.routes = [];
         this.setHoverFeature(null);
         this.routeEditRouteInteraction.onRoutePointClick.subscribe(this.handleRoutePointClick);
         this.routeEditRouteInteraction.onPointerMove.subscribe(this.setHoverFeature);
         this.routes$.subscribe(this.handleRoutesChanges);
-        // HM TODO: fix the color when recording finishes.
-        this.routeRecordingId$.subscribe(() => { });
+        this.routeRecordingId$.subscribe(this.buildFeatureCollections);
 
     }
 
     private handleRoutesChanges = (routes: RouteData[]) => {
+        this.routes = routes;
         this.snappingService.enable(this.isEditMode());
         if (!this.isEditMode()) {
             this.setHoverFeature(null);
         }
         this.setInteractionAccordingToState();
+        this.buildFeatureCollections();
+    }
+
+    private buildFeatureCollections = () => {
         let features = [];
         let editingFeatures = [];
-
-        for (let route of routes) {
+        for (let route of this.routes) {
             if (route.state === "Hidden") {
                 continue;
             }
