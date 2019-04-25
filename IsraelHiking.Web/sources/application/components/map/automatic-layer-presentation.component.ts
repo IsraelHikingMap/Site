@@ -75,7 +75,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private createRasterLayer() {
         let address = this.address;
         if (this.address.toLocaleLowerCase().endsWith("/mapserver")) {
-            //address += "/tile/{z}/{y}/{x}"
+            // address += "/tile/{z}/{y}/{x}"
             address += "/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&f=image";
         }
         let source = {

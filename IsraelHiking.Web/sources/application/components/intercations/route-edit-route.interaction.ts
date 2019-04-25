@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
-import { MapMouseEvent, Map, GeoJSONSource } from "mapbox-gl";
+import { MapMouseEvent, Map, GeoJSONSource, Point } from "mapbox-gl";
 
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducres/routes.reducer";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
@@ -22,6 +22,7 @@ import {
 
 const SEGMENT = "_segment_";
 const SEGMENT_POINT = "_segmentpoint_";
+const DRAG_PIXEL_TOLERANCE = 3;
 
 declare type EditMouseState = "none" | "down" | "dragging" | "canceled";
 
@@ -32,6 +33,7 @@ export class RouteEditRouteInteraction {
     public onPointerMove: EventEmitter<LatLngAlt>;
 
     private state: EditMouseState;
+    private mouseDownPoint: Point;
 
     private selectedRoutePoint: GeoJSON.Feature<GeoJSON.Point>;
     private selectedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[];
@@ -52,6 +54,7 @@ export class RouteEditRouteInteraction {
         this.onPointerMove = new EventEmitter();
         this.onRoutePointClick = new EventEmitter();
         this.state = "none";
+        this.mouseDownPoint = null;
     }
 
     public static createSegmentId(route: RouteData, index: number) {
@@ -98,6 +101,7 @@ export class RouteEditRouteInteraction {
     }
 
     private handleDown = (event: MapMouseEvent) => {
+        this.mouseDownPoint = event.point;
         if (this.isMultiTouchEvent(event.originalEvent)) {
             this.selectedRoutePoint = null;
             this.selectedRouteSegments = [];
@@ -148,6 +152,10 @@ export class RouteEditRouteInteraction {
     }
 
     private handleMove = (event: MapMouseEvent) => {
+        if (this.mouseDownPoint != null &&
+            Math.abs((this.mouseDownPoint.x - event.point.x) + (this.mouseDownPoint.y - event.point.y)) < DRAG_PIXEL_TOLERANCE) {
+            return;
+        }
         if (this.isMultiTouchEvent(event.originalEvent)) {
             return;
         }
@@ -210,6 +218,7 @@ export class RouteEditRouteInteraction {
     }
 
     private handleUp = (event: MapMouseEvent) => {
+        this.mouseDownPoint = null;
         // this is used here to support touch screen and prevent additional mouse events
         event.originalEvent.preventDefault();
         if (event.originalEvent instanceof TouchEvent && event.originalEvent.touches.length > 0) {
@@ -227,7 +236,7 @@ export class RouteEditRouteInteraction {
         }
         let isDragging = this.state === "dragging";
         this.state = "none";
-        
+
         if (!isUpdating && isDragging) {
             // regular map pan
             return;

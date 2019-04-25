@@ -103,13 +103,12 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         let segment = selectedRoute.segments[pointIndex];
         setTimeout(() => {
-                // allow angular to draw this as it seems not to od it without this timeout...
-                this.routePointPopupData = {
-                    latlng: segment.routePoint,
-                    segmentIndex: pointIndex,
-                };
-            },
-            0);
+            // allow angular to draw this as it seems not to do it without this timeout...
+            this.routePointPopupData = {
+                latlng: segment.routePoint,
+                segmentIndex: pointIndex,
+            };
+        }, 0);
     }
 
     public closeRoutePointPopup() {
