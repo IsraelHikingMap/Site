@@ -12,17 +12,12 @@ import { FitBoundsService } from "../services/fit-bounds.service";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
+import { SpatialService } from "../services/spatial.service";
+import { FileService } from "../services/file.service";
 import { AddRouteAction, AddRecordingPointAction } from "../reducres/routes.reducer";
 import { AddTraceAction } from "../reducres/traces.reducer";
 import { StopRecordingAction, StartRecordingAction } from "../reducres/route-editing-state.reducer";
 import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility } from "../models/models";
-import { SpatialService } from "../services/spatial.service";
-import { Urls } from "../urls";
-
-interface ILocationInfo extends LatLngAlt {
-    radius: number;
-    heading: number;
-}
 
 @Component({
     selector: "location",
@@ -50,6 +45,7 @@ export class LocationComponent extends BaseMapComponent {
         private readonly routeLayerFactory: RouteLayerFactory,
         private readonly cancelableTimeoutService: CancelableTimeoutService,
         private readonly fitBoundsService: FitBoundsService,
+        private readonly fileService: FileService,
         private readonly ngRedux: NgRedux<ApplicationState>,
         private readonly host: MapComponent) {
         super(resources);
@@ -61,7 +57,8 @@ export class LocationComponent extends BaseMapComponent {
         this.updateLocationFeatureCollection(null);
 
         this.host.load.subscribe(() => {
-            this.host.mapInstance.loadImage(window.origin + "/content/gps-direction.png", (_, img) => {
+            let fullFilePath = this.fileService.getFullFilePath("content/gps-direction.png");
+            this.host.mapInstance.loadImage(fullFilePath, (_, img) => {
                 this.host.mapInstance.addImage("gps-direction", img);
             });
             this.host.mapInstance.on("dragstart",
@@ -72,9 +69,7 @@ export class LocationComponent extends BaseMapComponent {
                     this.isFollowing = false;
                     this.cancelableTimeoutService.clearTimeoutByGroup("following");
                     this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                        if (this.locationFeatures.features.length > 0) {
-                            this.setLocation();
-                        }
+                        this.setLocation();
                         this.isFollowing = true;
                     },
                         LocationComponent.NOT_FOLLOWING_TIMEOUT,
@@ -252,13 +247,14 @@ export class LocationComponent extends BaseMapComponent {
             alt: position.coords.altitude
         }, position.coords.accuracy, heading);
 
-
         if (this.isFollowing) {
-            this.setLocation();
+            if (needToUpdateHeading && this.isKeepNorthUp === false) {
+                this.setLocation(position.coords.heading);
+            } else {
+                this.setLocation();
+            }
         }
-        if (needToUpdateHeading && this.isKeepNorthUp === false && this.isFollowing) {
-            this.host.mapInstance.rotateTo(position.coords.heading);
-        }
+
         let recordingRoute = this.selectedRouteService.getRecordingRoute();
         if (recordingRoute != null) {
             this.ngRedux.dispatch(new AddRecordingPointAction({
@@ -278,11 +274,17 @@ export class LocationComponent extends BaseMapComponent {
         }
     }
 
-    private setLocation() {
+    private setLocation(bearing?: number) {
         if (this.locationFeatures.features.length > 0) {
             let pointGeometry = this.locationFeatures.features.map(f => f.geometry).find(g => g.type === "Point") as GeoJSON.Point;
             let coordinates = pointGeometry.coordinates as [number, number];
-            this.fitBoundsService.flyTo(SpatialService.toLatLng(coordinates), this.host.mapInstance.getZoom());
+            let center = SpatialService.toLatLng(coordinates);
+            let zoom = this.host.mapInstance.getZoom();
+            if (bearing) {
+                this.host.mapInstance.easeTo({ bearing: bearing, center: center, zoom: zoom });
+            } else {
+                this.fitBoundsService.flyTo(center, this.host.mapInstance.getZoom());
+            }
         }
     }
 
