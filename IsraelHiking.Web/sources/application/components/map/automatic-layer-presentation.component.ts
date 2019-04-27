@@ -78,6 +78,9 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             // address += "/tile/{z}/{y}/{x}"
             address += "/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&f=image";
         }
+        if (address.startsWith("http://")) {
+            address = "https://cors-anywhere.herokuapp.com/" + address;
+        }
         let source = {
             type: "raster",
             tiles: [address],
