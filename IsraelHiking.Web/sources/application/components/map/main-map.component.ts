@@ -53,49 +53,45 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
     ) {
         super(resources);
         this.location = this.ngRedux.getState().location;
-        this.initialStyle = {
-            version: 8,
-            sources: {
-                dummy: {
-                    type: "geojson",
-                    data: {
-                        type: "Feature",
-                        properties: {},
-                        geometry: {
-                            type: "Point",
-                            coordinates: [0, 0]
-                        }
+        this.initialStyle = { ...this.resources.mapDefaultStyle };
+        this.initialStyle.sources = {
+            dummy: {
+                type: "geojson",
+                data: {
+                    type: "Feature",
+                    properties: {},
+                    geometry: {
+                        type: "Point",
+                        coordinates: [0, 0]
                     }
                 }
-            },
-            layers: [
-                {
-                    id: this.resources.endOfBaseLayer,
-                    type: "circle",
-                    source: "dummy",
-                    layout: { visibility: "none" }
-                },
-                {
-                    id: this.resources.endOfOverlays,
-                    type: "circle",
-                    source: "dummy",
-                    layout: { visibility: "none" }
-                },
-                {
-                    id: this.resources.endOfClusters,
-                    type: "circle",
-                    source: "dummy",
-                    layout: { visibility: "none" }
-                },
-                {
-                    id: this.resources.endOfRoutes,
-                    type: "circle",
-                    source: "dummy",
-                    layout: { visibility: "none" }
-                }],
-            glyphs: "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
-            sprite: "https://israelhikingmap.github.io/VectorMap/Icons/publish/sprite"
+            }
         };
+        this.initialStyle.layers = [
+            {
+                id: this.resources.endOfBaseLayer,
+                type: "circle",
+                source: "dummy",
+                layout: { visibility: "none" }
+            },
+            {
+                id: this.resources.endOfOverlays,
+                type: "circle",
+                source: "dummy",
+                layout: { visibility: "none" }
+            },
+            {
+                id: this.resources.endOfClusters,
+                type: "circle",
+                source: "dummy",
+                layout: { visibility: "none" }
+            },
+            {
+                id: this.resources.endOfRoutes,
+                type: "circle",
+                source: "dummy",
+                layout: { visibility: "none" }
+            }];
     }
 
     public moveEnd(e: DragEvent) {

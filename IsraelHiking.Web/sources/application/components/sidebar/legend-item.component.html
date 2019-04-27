@@ -1,9 +1,16 @@
 ﻿<div class="legend-item" [ngClass]="{'legend-route': item.type === 'Way', 'legend-poi' : item.type === 'POI'}">
     <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer">
         <mgl-map [zoom]="[item.zoom - 1]"
-                 [center]="[item.latlng.lng, item.latlng.lat]" [style]='{"version": 8, "sources": {}, "layers": []}' [interactive]="false">
-            <mgl-raster-source id="raster-tiles" [tiles]="[getUrl()]" [tileSize]="256" [minzoom]="7" [maxzoom]="17"></mgl-raster-source>
-            <mgl-layer id="simple-tiles" type="raster" source="raster-tiles"></mgl-layer>
+                 [center]="[item.latlng.lng, item.latlng.lat]" 
+                 [style]="resources.mapDefaultStyle" 
+                 [interactive]="false"
+                 [attributionControl]="false">
+            <auto-layer [address]="getUrl()"
+                        [minZoom]="item.zoom - 1"
+                        [maxZoom]="item.zoom + 1"
+                        [opacity]="1.0"
+                        [visible]="true">
+            </auto-layer>
         </mgl-map>
     </div>
     <div class="legend-item-text-container" matTooltip="{{item.osmTags.join(', ')}}" matTooltipPosition="{{item.type === 'Way' ? 'above' : 'right'}}">
