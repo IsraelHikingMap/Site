@@ -1,4 +1,3 @@
-import { MapBrowserEvent } from "ol";
 import { Subject } from "rxjs";
 import { NgRedux } from "@angular-redux/store";
 import { every } from "lodash";
@@ -35,13 +34,14 @@ export class CategoriesLayer extends BaseMapComponent {
         this.markersLoaded = new Subject<void>();
         this.requestsNumber = 0;
         this.visible = this.getVisibility(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX, !this.runningContextService.isIFrame);
-        this.poiService.getCategories(this.categoriesType).then((categories) => {
+        this.poiService.getCategories(this.categoriesType).then(async (categories) => {
             for (let category of categories) {
                 category.visible = this.getVisibility(category.name + CategoriesLayer.VISIBILITY_POSTFIX, this.visible);
                 this.categories.push(category);
             }
+            await this.mapService.initializationPromise;
             this.updateMarkers();
-            this.mapService.map.on("moveend", (event: MapBrowserEvent) => {
+            this.mapService.map.on("moveend", () => {
                 this.updateMarkers();
             });
         });
@@ -99,7 +99,7 @@ export class CategoriesLayer extends BaseMapComponent {
             // layer is not ready yet...
             return;
         }
-        if (this.mapService.map.getView().getZoom() <= 9 || !this.isVisible()) {
+        if (this.mapService.map.getZoom() <= 9 || !this.isVisible()) {
             this.pointsOfInterest.splice(0);
             this.markersLoaded.next();
             return;

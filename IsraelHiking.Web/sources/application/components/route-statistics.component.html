@@ -1,4 +1,4 @@
-﻿<div class="control-container side-control" [dir]="resources.direction" (window:resize)="redrawChart()">
+﻿<div class="control-container side-control mapboxgl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()">
     <div *ngIf="isVisible" [@animateChart] class="chart-control-container" [ngClass]="{'expanded' : isExpanded, 'sidebar': isSidebarVisible() }">
         <div *ngIf="isTable" class="chart-container">
             <mat-grid-list cols="3" rowHeight="fit" class="chart-table">
@@ -79,37 +79,35 @@
     </div>
 </div>
 
-<aol-layer-vector [zIndex]="1110">
-    <aol-source-vector>
-        <aol-feature *ngFor="let marker of kmMarkersCoordinates">
-            <aol-geometry-point>
-                <aol-coordinate [x]="marker.lng" [y]="marker.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-            </aol-geometry-point>
-            <aol-style>
-                <aol-style-circle [radius]="10">
-                    <aol-style-stroke [color]="'black'" [width]="1"></aol-style-stroke>
-                    <aol-style-fill [color]="'green'"></aol-style-fill>
-                </aol-style-circle>
-                <aol-style-text [text]="marker.text">
-                    <aol-style-fill [color]="'#fff'"></aol-style-fill>
-                </aol-style-text>
-            </aol-style>
-        </aol-feature>
-    </aol-source-vector>
-</aol-layer-vector>
+<mgl-geojson-source id="km-markers-source" [data]="kmMarkersSource"></mgl-geojson-source>
+<mgl-layer id="km-markers-cricles"
+           type="circle"
+           source="km-markers-source"
+           [paint]="{
+            'circle-color': 'brown',
+            'circle-radius': 13,
+            'circle-opacity': 0.7
+           }">
+</mgl-layer>
+<mgl-layer id="km-markers-cricles-text"
+           type="symbol"
+           source="km-markers-source"
+           [layout]="{
+            'text-field': ['get', 'label'],
+            'text-font': ['Open Sans Regular']
+           }"
+           [paint]="{
+            'text-color': 'white'
+           }">
+</mgl-layer>
 
-<aol-layer-vector [visible]="hover.isHovering" [zIndex]="1200">
-    <aol-source-vector>
-        <aol-feature>
-            <aol-geometry-point>
-                <aol-coordinate [x]="hover.lng" [y]="hover.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-            </aol-geometry-point>
-            <aol-style>
-                <aol-style-circle [radius]="6">
-                    <aol-style-stroke [color]="'white'" [width]="2"></aol-style-stroke>
-                    <aol-style-fill [color]="hover.color"></aol-style-fill>
-                </aol-style-circle>
-            </aol-style>
-        </aol-feature>
-    </aol-source-vector>
-</aol-layer-vector>
+<mgl-geojson-source id="chart-hover" [data]="chartHoverSource"></mgl-geojson-source>
+<mgl-layer id="chart-hover-layer"
+           type="circle"
+           source="chart-hover"
+           [paint]="{
+            'circle-color': ['get', 'color'],
+            'circle-radius': 7,
+            'circle-stroke-color': 'white',
+            'circle-stroke-width': 3
+           }"></mgl-layer>

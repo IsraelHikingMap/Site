@@ -1,6 +1,5 @@
 import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
-import { Coordinate } from "ol";
 import { Subscription, Observable } from "rxjs";
 import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "ngx-d3";
 import { select } from "@angular-redux/store";
@@ -23,15 +22,6 @@ interface IMargin {
     bottom: number;
     left: number;
     right: number;
-}
-
-interface ICoordinateAndText extends LatLngAlt {
-    text: string;
-}
-
-interface IChartHover extends LatLngAlt {
-    isHovering: boolean;
-    color: string;
 }
 
 interface IChartSubRouteRange {
@@ -89,8 +79,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public isExpanded: boolean;
     public isTable: boolean;
     public isVisible: boolean;
-    public kmMarkersCoordinates: ICoordinateAndText[];
-    public hover: IChartHover;
+    public kmMarkersSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
+    public chartHoverSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public subRouteRange: IChartSubRouteRange;
 
     @ViewChild("lineChartContainer")
@@ -109,6 +99,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     private chartElements: IChartElements;
     private componentSubscriptions: Subscription[];
     private zoom: number;
+    private routeColor: string;
 
     constructor(resources: ResourcesService,
         private readonly changeDetectorRef: ChangeDetectorRef,
@@ -121,7 +112,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         private readonly geoLocationService: GeoLocationService
     ) {
         super(resources);
-        this.kmMarkersCoordinates = [];
         this.isKmMarkersOn = false;
         this.isExpanded = false;
         this.isVisible = false;
@@ -130,15 +120,17 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.subRouteRange = null;
         this.initializeStatistics(null);
         this.componentSubscriptions = [];
+        this.kmMarkersSource = {
+            type: "FeatureCollection",
+            features: []
+        };
+        this.chartHoverSource = {
+            type: "FeatureCollection",
+            features: []
+        };
         this.chartElements = {
             margin: { top: 10, right: 10, bottom: 40, left: 40 },
         } as IChartElements;
-        this.hover = {
-            lat: 0,
-            lng: 0,
-            isHovering: false,
-            color: "black"
-        };
         this.zoom = 7;
         this.zoom$.subscribe((zoom) => {
             this.zoom = zoom;
@@ -307,7 +299,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private hideChartHover() {
         this.chartElements.hoverGroup.style("display", "none");
-        this.hover.isHovering = false;
+        this.chartHoverSource = {
+            type: "FeatureCollection",
+            features: []
+        };
     }
 
     private showChartHover(point: IRouteStatisticsPoint) {
@@ -327,9 +322,17 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         this.chartElements.hoverGroup.select("g").attr("transform", `translate(${boxPosition}, 0)`);
         this.buildAllTextInHoverBox(point);
-        this.hover.lng = point.latlng.lng;
-        this.hover.lat = point.latlng.lat;
-        this.hover.isHovering = true;
+        this.chartHoverSource = {
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: { color: this.routeColor },
+                geometry: {
+                    type: "Point",
+                    coordinates: [point.latlng.lng, point.latlng.lat]
+                }
+            }]
+        };
     }
 
     private onMouseDown = () => {
@@ -549,13 +552,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private setRouteColorToChart(routeColor: string) {
-        this.hover.color = routeColor;
+        this.routeColor = routeColor;
         this.chartElements.path.attr("stroke", routeColor);
         this.chartElements.hoverGroup.select(".circle-point").attr("fill", routeColor);
         this.chartElements.hoverGroup.select(".circle-point-aura").attr("stroke", routeColor);
     }
 
-    private setDataToChart(data: Coordinate[]) {
+    private setDataToChart(data: [number, number][]) {
         if (!this.isVisible) {
             return;
         }
@@ -583,7 +586,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private updateKmMarkers() {
-        this.kmMarkersCoordinates = [];
+        this.kmMarkersSource = {
+            type: "FeatureCollection",
+            features: []
+        };
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
             return;
@@ -596,9 +602,21 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
 
         let points = this.getKmPoints(selectedRoute);
+        let features = [];
         for (let i = 0; i < points.length; i++) {
-            this.kmMarkersCoordinates.push({ lng: points[i].lng, lat: points[i].lat, text: (i * this.getMarkerDistance()).toString() });
+            features.push({
+                type: "Feature",
+                properties: { label: (i * this.getMarkerDistance()).toString() },
+                geometry: {
+                    type: "Point",
+                    coordinates: [points[i].lng, points[i].lat]
+                }
+            });
         }
+        this.kmMarkersSource = {
+            type: "FeatureCollection",
+            features: features
+        };
     }
 
     private getKmPoints(routeData: RouteData): LatLngAlt[] {

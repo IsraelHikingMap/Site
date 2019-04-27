@@ -1,4 +1,4 @@
-﻿import { Component, Input, OnInit } from "@angular/core";
+﻿import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material";
 
 import { MarkerData, LinkData } from "../../models/models";
@@ -11,7 +11,8 @@ import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialo
 @Component({
     selector: "private-poi-overlay",
     templateUrl: "./private-poi-overlay.component.html",
-    styleUrls: ["./private-poi-overlay.component.scss"]
+    styleUrls: ["./private-poi-overlay.component.scss"],
+    encapsulation: ViewEncapsulation.None
 })
 export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnInit {
 
@@ -23,6 +24,9 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
 
     @Input()
     public index: number;
+
+    @Input()
+    public color: string;
 
     public imageLink: LinkData;
 
@@ -36,7 +40,8 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
         this.imageLink = this.marker.urls.find(u => u.mimeType.startsWith("image"));
     }
 
-    public overlayClick() {
+    public overlayClick(event: Event) {
+        event.stopPropagation();
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null || selectedRoute.id !== this.routeId) {
             return;

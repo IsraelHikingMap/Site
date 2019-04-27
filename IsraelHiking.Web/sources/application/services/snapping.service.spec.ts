@@ -1,30 +1,29 @@
 import { TestBed, inject, flushMicrotasks, fakeAsync, tick } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { View } from "ol";
 
 import { SnappingService, ISnappingRouteOptions } from "./snapping.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { GeoJsonParser } from "./geojson.parser";
+import { LngLatBounds } from "mapbox-gl";
 
 describe("SnappingService", () => {
 
     let mapMock: any;
     let moveEndAction: Function;
-    let view: View;
+    let centerAndZoom = { lat: 0.0, lng: 0.0, alt: 7 };
 
     beforeEach(() => {
         let toastMockCreator = new ToastServiceMockCreator();
-        view = new View();
-        view.setCenter([0, 0]);
-        view.setResolution(1);
         mapMock = {
             on: (event, method) => moveEndAction = method,
-            getView: () => view,
-            getPixelFromCoordinate: (x) => x,
-            getSize: () => [1000, 1000]
+            getCenter: () => centerAndZoom,
+            getZoom: () => centerAndZoom.alt,
+            project: (lngLat) => ({ x: lngLat.lng, y: lngLat.lat }),
+            getBounds: () => new LngLatBounds({ lng: centerAndZoom.lng + 1, lat: centerAndZoom.lat + 1 },
+                { lng: centerAndZoom.lng - 1, lat: centerAndZoom.lat - 1 })
         };
         TestBed.configureTestingModule({
             imports: [
@@ -57,8 +56,7 @@ describe("SnappingService", () => {
     it("Should add one snappings linestring when zoom is 14", inject([SnappingService, HttpTestingController],
         fakeAsync((snappingService: SnappingService, mockBackend: HttpTestingController) => {
 
-            view.setZoom(14);
-            view.setCenter([0, 0]);
+            centerAndZoom = { lat: 0, lng: 0, alt: 14 };
             snappingService.setMap(mapMock);
             snappingService.enable(true);
 
@@ -83,8 +81,7 @@ describe("SnappingService", () => {
     it("Should add one snappings polygon when zoom is 14", fakeAsync(inject([SnappingService, HttpTestingController],
         (snappingService: SnappingService, mockBackend: HttpTestingController) => {
 
-            view.setZoom(14);
-            view.setCenter([1, 1]);
+            centerAndZoom = { lat: 1, lng: 1, alt: 14 };
             snappingService.setMap(mapMock);
             snappingService.enable(true);
 
@@ -109,8 +106,7 @@ describe("SnappingService", () => {
     it("Should add one snappings point when zoom is 14", inject([SnappingService, HttpTestingController],
         fakeAsync((snappingService: SnappingService, mockBackend: HttpTestingController) => {
 
-            view.setZoom(14);
-            view.setCenter([0, 0]);
+            centerAndZoom = { lat: 0, lng: 0, alt: 14 };
             snappingService.setMap(mapMock);
             snappingService.enable(true);
 
@@ -136,8 +132,7 @@ describe("SnappingService", () => {
     it("Should clear layer upon http error", fakeAsync(inject([SnappingService, HttpTestingController],
         (snappingService: SnappingService, mockBackend: HttpTestingController) => {
 
-            view.setZoom(14);
-            view.setCenter([2, 2]);
+            centerAndZoom = { lat: 2, lng: 2, alt: 14 };
             snappingService.setMap(mapMock);
             snappingService.enable(true);
 

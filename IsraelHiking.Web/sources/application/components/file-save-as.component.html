@@ -1,7 +1,7 @@
-﻿<div class="side-control" *ngIf="!isOpen" [dir]="resources.direction">
+﻿<div class="side-control mapboxgl-ctrl" *ngIf="!isOpen" [dir]="resources.direction">
     <button mat-button (click)="toggleSaveAs()" matTooltip="{{resources.saveAs}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as open"><i class="fa icon-save-as fa-lg"></i></button>
 </div>
-<div class="side-control" *ngIf="isOpen" [dir]="resources.direction">
+<div class="side-control mapboxgl-ctrl" *ngIf="isOpen" [dir]="resources.direction">
     <div class="save-as-dropdown">
         <mat-form-field fxFill>
             <mat-select placeholder="{{resources.saveAs}}" fxFill #dropdown="matSelect">

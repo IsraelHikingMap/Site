@@ -1,39 +1,23 @@
 ﻿@import "~scss/_variables.scss";
 
-.pane {
-    position: absolute;
-}
-
-.top-pane {
-    top: 0;
-}
-
-.left-pane {
-    left: 0;
+.mapboxgl-ctrl-top-left {
     z-index: $app-left-z-index !important;
 }
 
-.right-pane {
-    right: 0;
+.mapboxgl-ctrl-top-right {
     z-index: $app-left-z-index - 10 !important;
 }
 
-.bottom-pane {
-    bottom: 0;
+.mapboxgl-ctrl-bttom-left {
     z-index: $app-left-z-index - 20 !important;
 }
 
-.bottom-pane.left-pane {
+.mapboxgl-ctrl-bottom-left {
     z-index: $app-left-z-index - 30 !important;
 }
 
-.ol-scale-line {
-    left: unset !important;
-    bottom: 40px !important;
-    right: 5px !important
-}
-
-aol-map canvas {
+mgl-map {
+    height: 100%;
+    width: 100%;
     object-fit: cover;
 }
-

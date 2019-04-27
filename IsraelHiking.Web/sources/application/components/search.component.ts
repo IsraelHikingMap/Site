@@ -13,9 +13,7 @@ import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
 import { remove } from "lodash";
-import { Coordinate, MapBrowserEvent, Feature } from "ol";
-import { Point } from "ol/geom";
-import { MapComponent } from "ngx-ol";
+import { PointLike } from "mapbox-gl";
 import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../services/resources.service";
@@ -29,6 +27,7 @@ import { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt } from "../m
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
 import { AddRouteAction } from "../reducres/routes.reducer";
 import { SpatialService } from "../services/spatial.service";
+import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
 
 
 export interface ISearchContext {
@@ -43,10 +42,9 @@ interface ISearchRequestQueueItem {
 
 interface IDirectionalContext {
     isOn: boolean;
-    isOverlayOpen: boolean;
     overlayLocation: LatLngAlt;
     showResults: boolean;
-    routeCoordinates: Coordinate[];
+    routeCoordinates: PointLike[];
     routeTitle: string;
     routeSegments: RouteSegmentData[];
 }
@@ -84,14 +82,12 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         private readonly toastService: ToastService,
         private readonly routeLayerFactory: RouteLayerFactory,
         private readonly router: Router,
-        private readonly ngRedux: NgRedux<ApplicationState>,
-        private readonly host: MapComponent
+        private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
         this.requestsQueue = [];
         this.directional = {
             isOn: false,
-            isOverlayOpen: false,
             overlayLocation: null,
             routeCoordinates: [],
             routeTitle: "",
@@ -136,6 +132,15 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             });
     }
 
+    public openDirectionalSearchPopup(event) {
+        if (this.directional.overlayLocation == null ||
+            SpatialService.getDistanceInMeters(this.directional.overlayLocation, event.lngLat) > 10) {
+            this.directional.overlayLocation = event.lngLat;
+            return;
+        }
+        this.directional.overlayLocation = null;
+    }
+
     public ngAfterViewInit() {
         if (this.isVisible) {
             setTimeout(() => {
@@ -143,20 +148,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 this.search(this.fromContext);
             }, 100);
         }
-        this.host.instance.on("singleclick",
-            (event: MapBrowserEvent) => {
-                let features = (this.host.instance.getFeaturesAtPixel(event.pixel) || []) as Feature[];
-                let startOrEnd = features.find(f => f.getId() && f.getId().toString().indexOf("directional") !== -1);
-                if (startOrEnd != null) {
-                    let location = SpatialService.fromViewCoordinate((startOrEnd.getGeometry() as Point).getCoordinates());
-                    if (SpatialService.getDistanceInMeters(location, this.directional.overlayLocation) < 10) {
-                        this.directional.isOverlayOpen = !this.directional.isOverlayOpen;
-                    } else {
-                        this.directional.overlayLocation = location;
-                        this.directional.isOverlayOpen = true;
-                    }
-                }
-            });
     }
 
     public toggleVisibility = () => {
@@ -232,7 +223,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             " - " +
             this.toContext.selectedSearchResults.displayName;
         this.directional.overlayLocation = latlngs[0];
-        this.directional.isOverlayOpen = true;
         let bounds = SpatialService.getBounds(latlngs);
         this.fitBoundsService.fitBounds(bounds);
     }
@@ -243,12 +233,15 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.ngRedux.dispatch(new AddRouteAction({
             routeData: route
         }));
+        this.ngRedux.dispatch(new SetSelectedRouteAction({
+            routeId: route.id
+        }));
+        this.directionalCleared();
     }
 
     public directionalCleared() {
         this.directional.routeCoordinates = [];
         this.directional.showResults = false;
-        this.directional.isOverlayOpen = false;
     }
 
     @HostListener("window:keydown", ["$event"])
@@ -257,6 +250,9 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             return this.handleEnterKeydown();
         }
         if ($event.ctrlKey === false) {
+            return true;
+        }
+        if ($event.key == null) {
             return true;
         }
         switch ($event.key.toLowerCase()) {

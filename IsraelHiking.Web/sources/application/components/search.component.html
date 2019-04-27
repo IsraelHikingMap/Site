@@ -1,8 +1,8 @@
-﻿<div class="side-control" *ngIf="!isVisible" [dir]="resources.direction">
+﻿<div class="side-control mapboxgl-ctrl" *ngIf="!isVisible" [dir]="resources.direction">
     <button mat-button (click)="toggleVisibility()" matTooltip="{{resources.search}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search toggle"><i class="fa icon-search fa-lg"></i></button>
 </div>
 <div *ngIf="isVisible">
-    <div class="side-control" fxLayout="row">
+    <div class="side-control mapboxgl-ctrl" fxLayout="row">
         <button mat-button class="pull-right" (click)="toggleDirectional()" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle directional search on"><i class="fa fa-lg" [ngClass]="{'icon-plus': !directional.isOn, 'icon-minus': directional.isOn}"></i></button>
         <div [dir]="resources.direction">
             <mat-form-field class="search-input-container">
@@ -17,14 +17,14 @@
         </div>
         <button mat-button class="pull-right" (click)="toggleVisibility()"><i class="fa icon-search fa-lg"></i></button>
     </div>
-    <div class="side-control pull-left-important" fxLayout="row" *ngIf="directional.isOn" [style.float]="'left'">
+    <div class="side-control mapboxgl-ctrl pull-left-important" fxLayout="row" *ngIf="directional.isOn" [style.float]="'left'">
         <button mat-button class="pull-right" (click)="setRouting('Hike')" [ngClass]="{active : routingType == 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></button>
         <button mat-button class="pull-right" (click)="setRouting('Bike')" [ngClass]="{active : routingType == 'Bike' }" matTooltip="{{resources.bikeRouting}}" matTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></button>
         <button mat-button class="pull-right" (click)="setRouting('4WD')" [ngClass]="{active : routingType == '4WD' }" matTooltip="{{resources.fourWheelDriveRouting}}" matTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></button>
         <button mat-button class="pull-right" (click)="setRouting('None')" [ngClass]="{active : routingType == 'None' }" matTooltip="{{resources.straightLines}}" matTooltipPosition="below"><i class="fa icon-none fa-lg"></i></button>
     </div>
     <br *ngIf="directional.isOn" />
-    <div class="side-control" *ngIf="directional.isOn" fxLayout="row">
+    <div class="side-control mapboxgl-ctrl" *ngIf="directional.isOn" fxLayout="row">
         <button mat-button class="pull-right" (click)="searchRoute()"><i class="fa icon-arrow-left fa-lg"></i></button>
         <div [dir]="resources.direction">
             <mat-form-field class="pull-right search-input-container">
@@ -41,57 +41,48 @@
     </div>
 </div>
 <div *ngIf="directional.showResults && directional.routeCoordinates.length > 0">
-    <aol-layer-vector [zIndex]="600">
-        <aol-source-vector>
-            <aol-feature>
-                <aol-geometry-linestring>
-                    <aol-collection-coordinates [coordinates]="directional.routeCoordinates"
-                                                [srid]="'EPSG:4326'">
-                    </aol-collection-coordinates>
-                </aol-geometry-linestring>
-                <aol-style>
-                    <aol-style-stroke [width]="3" [color]="'blue'"></aol-style-stroke>
-                </aol-style>
-            </aol-feature>
-            <aol-feature [id]="'directionalStart'">
-                <aol-geometry-point>
-                    <aol-coordinate [x]="directional.routeCoordinates[0][0]"
-                                    [y]="directional.routeCoordinates[0][1]"
-                                    [srid]="'EPSG:4326'">
-                    </aol-coordinate>
-                </aol-geometry-point>
-                <aol-style>
-                    <aol-style-circle [radius]="7">
-                        <aol-style-fill [color]="'#43a047'"></aol-style-fill>
-                    </aol-style-circle>
-                    <aol-style-text [text]="resources.getCharacterForIcon('icon-play')" font="normal 8px IsraelHikingMap">
-                        <aol-style-fill [color]="'white'"></aol-style-fill>
-                    </aol-style-text>
-                </aol-style>
-            </aol-feature>
-            <aol-feature [id]="'directionalEnd'">
-                <aol-geometry-point>
-                    <aol-coordinate [x]="directional.routeCoordinates[directional.routeCoordinates.length - 1][0]"
-                                    [y]="directional.routeCoordinates[directional.routeCoordinates.length - 1][1]"
-                                    [srid]="'EPSG:4326'">
-                    </aol-coordinate>
-                </aol-geometry-point>
-                <aol-style>
-                    <aol-style-circle [radius]="7">
-                        <aol-style-fill [color]="'red'"></aol-style-fill>
-                    </aol-style-circle>
-                    <aol-style-text [text]="resources.getCharacterForIcon('icon-stop')" font="normal 8px IsraelHikingMap">
-                        <aol-style-fill [color]="'white'"></aol-style-fill>
-                    </aol-style-text>
-                </aol-style>
-            </aol-feature>
-        </aol-source-vector>
-    </aol-layer-vector>
-    <clearable-overlay [title]="directional.routeTitle"
-                       [isOpen]="directional.isOverlayOpen"
-                       (closed)="directional.isOverlayOpen = false"
-                       (cleared)="directionalCleared()"
-                       (convertToRoute)="convertToRoute()"
-                       [latlng]="directional.overlayLocation">
-    </clearable-overlay>
+    <mgl-geojson-source id="directional-source">
+        <mgl-feature id="0" [geometry]="{ type: 'LineString', coordinates: directional.routeCoordinates }">
+        </mgl-feature>
+        <mgl-feature #start id="1" [properties]="{ 'class': 'start' }" [geometry]="{ type: 'Point', coordinates: directional.routeCoordinates[0] }">
+        </mgl-feature>
+        <mgl-feature id="2" [properties]="{ 'class': 'end' }" [geometry]="{ type: 'Point', coordinates: directional.routeCoordinates[directional.routeCoordinates.length - 1] }">
+        </mgl-feature>
+    </mgl-geojson-source>
+    <mgl-layer id="directional-layer"
+               type="line"
+               source="directional-source"
+               [paint]="{ 'line-color': 'blue', 'line-width': 3 }">
+    </mgl-layer>
+    <mgl-layer id="directional-layer-start"
+               type="circle"
+               source="directional-source"
+               [filter]="['==', 'class', 'start']"
+               [paint]="{ 'circle-stroke-color': '#43a047', 'circle-radius': 7, 'circle-stroke-width': 3, 'circle-color': 'blue' }"
+               (click)="openDirectionalSearchPopup($event)">
+    </mgl-layer>
+    <mgl-layer id="directional-layer-end"
+               type="circle"
+               source="directional-source"
+               [filter]="['==', 'class', 'end']"
+               [paint]="{ 'circle-stroke-color': 'red', 'circle-radius': 7, 'circle-stroke-width': 3, 'circle-color': 'blue' }"
+               (click)="openDirectionalSearchPopup($event)">
+    </mgl-layer>
+    <mgl-popup [lngLat]="directional.overlayLocation" *ngIf="directional.overlayLocation" [closeOnClick]="true">
+        <h3 *ngIf="directional.routeTitle" [ngClass]="resources.getTextAlignment(directional.routeTitle)" [dir]="resources.getDirection(directional.routeTitle)" class="chrome-wordwrap-fix">{{title}}</h3>
+        <div fxLayout="row">
+            <div fxFlex="33">
+                <button mat-button fxFill (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Convert search to route"><i class="fa icon-plus"></i></button>
+            </div>
+            <div fxFlex="33">
+                <button mat-button fxFill (click)="directionalCleared()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Remove search route from map"><i class="fa icon-eye-slash"></i></button>
+            </div>
+            <div fxFlex>
+                <button mat-button fxFill (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
+            </div>
+        </div>
+        <div *ngIf="!hideCoordinates">
+            <coordinates [latlng]="directional.overlayLocation"></coordinates>
+        </div>
+    </mgl-popup>
 </div>

@@ -1,19 +1,26 @@
-﻿import { Component, Input, HostListener, OnChanges } from "@angular/core";
+﻿import { Component, Input, HostListener, OnChanges, Output, EventEmitter } from "@angular/core";
 
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
-import { ClosableOverlayComponent } from "./closable-overlay.component";
+import { LatLngAlt } from "../../models/models";
+import { BaseMapComponent } from "../base-map.component";
 
 @Component({
     selector: "route-point-overlay",
     templateUrl: "./route-point-overlay.component.html"
 })
-export class RoutePointOverlayComponent extends ClosableOverlayComponent implements OnChanges {
+export class RoutePointOverlayComponent extends BaseMapComponent implements OnChanges {
     public canMerge: boolean;
     public isMiddle: boolean;
 
     @Input()
+    public latlng: LatLngAlt;
+
+    @Input()
     private segmentIndex: number;
+
+    @Output()
+    public close = new EventEmitter();
 
     public hideCoordinates: boolean;
 
@@ -36,22 +43,22 @@ export class RoutePointOverlayComponent extends ClosableOverlayComponent impleme
 
     public split(): void {
         this.selectedRouteService.splitRoute(this.segmentIndex);
-        this.close();
+        this.close.next();
     }
 
     public merge() {
         this.selectedRouteService.mergeRoutes(this.isFirst());
-        this.close();
+        this.close.next();
     }
 
     public reverse() {
         this.selectedRouteService.reverseRoute();
-        this.close();
+        this.close.next();
     }
 
     public remove = () => {
         this.selectedRouteService.removeSegment(this.segmentIndex);
-        this.close();
+        this.close.next();
     }
 
     private isFirst(): boolean {
