@@ -171,16 +171,14 @@ export class RouteEditRouteInteraction {
                 this.handleRouteMiddleSegmentDrag(event);
             }
         } else {
-            let latLng = this.getSnappingForRoute(event.lngLat);
-            this.raisePointerMove(latLng);
+            //let latLng = this.getSnappingForRoute(event.lngLat);
+            //this.raisePointerMove(latLng);
         }
     }
 
     private handleRoutePointDrag(event: MapMouseEvent) {
-        // HM TODO: bring back snappings and make this faster...
-        // let snappingLatLng = this.getSnappingForRoute(event.lngLat);
-        // let coordinate = SpatialService.toCoordinate(snappingLatLng);
-        let coordinate = SpatialService.toCoordinate(event.lngLat);
+        let snappingLatLng = this.getSnappingForRoute(event.lngLat);
+        let coordinate = SpatialService.toCoordinate(snappingLatLng);
         this.selectedRoutePoint.geometry.coordinates = coordinate;
         this.updateData(this.selectedRoutePoint);
         let index = this.getPointIndex();

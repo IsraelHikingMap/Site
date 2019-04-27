@@ -34,10 +34,40 @@ export class SpatialService {
         return Math.sqrt(Math.pow(coordinate1[0] - coordinate2[0], 2) + Math.pow(coordinate1[1] - coordinate2[1], 2));
     }
 
-    public static getDistanceFromPointToLine(coordinate: [number, number], coordinates: [number, number][]) {
-        let lineStringObject = lineString(coordinates);
-        let closestPointFeature = nearestPointOnLine(lineStringObject, coordinate);
-        return SpatialService.getDistanceForCoordinates(closestPointFeature.geometry.coordinates as [number, number], coordinate);
+    public static getDistanceFromPointToLine(coordinate: [number, number], coordinates: [number, number][]): number {
+        function sqr(x: number): number {
+            return x * x;
+        }
+
+        function dist2(p1: [number, number], p2: [number, number]): number {
+            return sqr(p1[0] - p2[0]) + sqr(p1[1] - p2[1]);
+        }
+
+        // p - point
+        // s - start point of segment
+        // e - end point of segment
+        function distToSegmentSquared(p: [number, number], s: [number, number], e: [number, number]): number {
+            let l2 = dist2(s, e);
+            if (l2 === 0) {
+                return dist2(p, s)
+            }
+            let t = ((p[0] - s[0]) * (e[0] - s[0]) + (p[1] - s[1]) * (e[1] - s[1])) / l2;
+            t = Math.max(0, Math.min(1, t));
+            return dist2(p, [s[0] + t * (e[0] - s[0]), s[1] + t * (e[1] - s[1])]);
+        }
+
+        function distToSegment(point: [number, number], startPoint: [number, number], endPoint: [number, number]) {
+            return Math.sqrt(distToSegmentSquared(point, startPoint, endPoint));
+        }
+
+        let minimalDistance = Infinity;
+        for (let coordinateIndex = 1; coordinateIndex < coordinates.length; coordinateIndex++) {
+            let distance = distToSegment(coordinate, coordinates[coordinateIndex - 1], coordinates[coordinateIndex]);
+            if (distance < minimalDistance) {
+                minimalDistance = distance;
+            }
+        }
+        return minimalDistance;
     }
 
     public static getClosestPoint(latlng: LatLngAlt, line: LatLngAlt[]): LatLngAlt {
