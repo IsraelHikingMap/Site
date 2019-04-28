@@ -37,19 +37,18 @@
                 <mat-slider [(ngModel)]="opacity" min="0.1" max="1.0" step="0.1" color="primary" vertical></mat-slider>
             </div>
             <div fxFlex>
-                <aol-map fxfill [width]="'100%'" [height]="'138px'">
-                    <auto-layer [address]="getTilesAddress()"
-                                [minZoom]="minZoom"
-                                [maxZoom]="maxZoom"
-                                [opacity]="opacity"
-                                [visible]="true"
-                                [zIndex]="1">
-
-                    </auto-layer>
-                    <aol-view [zoom]="(minZoom + maxZoom) / 2">
-                        <aol-coordinate [x]="(location | async).longitude" [y]="(location | async).latitude" [srid]="'EPSG:4326'"></aol-coordinate>
-                    </aol-view>
-                </aol-map>
+                <div style="width: 100%; height: 138px">
+                    <mgl-map [zoom]="[(minZoom + maxZoom) / 2]"
+                             [center]="[(location | async).longitude, (location | async).latitude]"
+                             [style]='{"version": 8, "sources": {}, "layers": [] }'>
+                        <auto-layer [address]="getTilesAddress()"
+                                    [minZoom]="minZoom"
+                                    [maxZoom]="maxZoom"
+                                    [opacity]="opacity"
+                                    [visible]="true">
+                        </auto-layer>
+                    </mgl-map>
+                </div>
             </div>
         </div>
     </div>

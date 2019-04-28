@@ -78,7 +78,7 @@ export class HashService {
         let location = this.ngRedux.getState().location;
         this.router.navigate([
                 RouteStrings.ROUTE_MAP,
-                location.zoom,
+                location.zoom.toFixed(2),
                 location.latitude.toFixed(HashService.PERSICION),
                 location.longitude.toFixed(HashService.PERSICION)
             ],

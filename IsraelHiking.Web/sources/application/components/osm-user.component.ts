@@ -118,12 +118,12 @@ export class OsmUserComponent extends BaseMapComponent {
 
     public getProgressbarType() {
         if (this.getRankPercentage() < 5) {
-            return "Warn";
+            return "warn";
         }
         if (this.getRankPercentage() < 30) {
-            return "Accent";
+            return "accent";
         }
-        return "Primary";
+        return "primary";
     }
 
     public toggleIsAdvanced() {

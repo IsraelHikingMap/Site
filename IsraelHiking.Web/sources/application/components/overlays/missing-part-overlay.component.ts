@@ -5,6 +5,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { ClosableOverlayComponent } from "./closable-overlay.component";
 import { Urls } from "../../urls";
+import { LatLngAlt } from "../../models/models";
 
 @Component({
     selector: "missing-part-overlay",
@@ -12,6 +13,9 @@ import { Urls } from "../../urls";
     styleUrls: ["./missing-part-overlay.component.scss"]
 })
 export class MissingPartOverlayComponent extends ClosableOverlayComponent {
+    @Input()
+    public latlng: LatLngAlt;
+
     @Input()
     public feature: GeoJSON.Feature<GeoJSON.LineString>;
 

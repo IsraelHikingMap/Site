@@ -1,4 +1,4 @@
-﻿<div class="side-control" *ngIf="!isLoggedIn()" [dir]="resources.direction">
+﻿<div class="side-control mapboxgl-ctrl" *ngIf="!isLoggedIn()" [dir]="resources.direction">
     <div class="control-container">
         <button mat-button class="pull-right" (click)="login()" matTooltip="{{resources.login}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM login - sign-in icon"><i class="fa icon-sign-in"></i></button>
         <div class="pull-right">
@@ -10,7 +10,7 @@
     </div>
 </div>
 
-<div class="side-control" *ngIf="isLoggedIn()">
+<div class="side-control mapboxgl-ctrl" *ngIf="isLoggedIn()">
     <div class="control-container">
         <button mat-button class="pull-right" (click)="logout()" matTooltip="{{resources.logout}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM logout"><i class="fa fa-lg icon-sign-out"></i></button>
         <div class="pull-right">

@@ -1,4 +1,4 @@
-﻿<div class="side-control">
+﻿<div class="side-control mapboxgl-ctrl">
     <button mat-button (click)="toggleTracking()" [class.active]="isActive()" matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle GPS location">
         <i *ngIf="isDisabled() || isActive() && isFollowing" class="fa fa-lg icon-crosshairs"></i>
         <i *ngIf="isActive() && !isFollowing" class="fa fa-lg icon-follow-me"></i>
@@ -13,29 +13,38 @@
     </button>
 </div>
 
-<aol-layer-vector *ngIf="locationCoordinate" [visible]="locationCoordinate != null" [updateWhileAnimating]="true" [zIndex]="1101">
-    <aol-source-vector>
-        <aol-feature [id]="'location'">
-            <aol-geometry-point>
-                <aol-coordinate [x]="locationCoordinate.lng" [y]="locationCoordinate.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-            </aol-geometry-point>
-            <aol-style>
-                <aol-style-icon [src]="'content/gps-direction.png'"
-                                [rotation]="getMarkerRotation(locationCoordinate.heading)"
-                                [rotateWithView]="true"
-                                [scale]="0.4">
-                </aol-style-icon>
-            </aol-style>
-        </aol-feature>
-        <aol-feature>
-            <aol-geometry-circle [radius]="locationCoordinate.radius">
-                <aol-coordinate [x]="locationCoordinate.lng" [y]="locationCoordinate.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-            </aol-geometry-circle>
-            <aol-style>
-                <aol-style-fill [color]="'rgba(19, 106, 224, 0.2)'"></aol-style-fill>
-                <aol-style-stroke [color]="'#136AEC'" [width]="2"></aol-style-stroke>
-            </aol-style>
-        </aol-feature>
-    </aol-source-vector>
-</aol-layer-vector>
-<gps-location-overlay [latlng]="locationCoordinate" [isOpen]="isLocationOverlayOpen" (closed)="isLocationOverlayOpen = false"></gps-location-overlay>
+<mgl-geojson-source id="location-source" [data]="locationFeatures"></mgl-geojson-source>
+<mgl-layer *ngIf="locationFeatures.features.length > 0" id="location-icon"
+           type="symbol"
+           source="location-source"
+           [filter]="['==', '$type', 'Point']"
+           [layout]="{
+                'icon-image': 'gps-direction',
+                'icon-size': 0.4,
+                'icon-rotate': ['get', 'heading'],
+                'icon-rotation-alignment': 'map'
+            }"
+           (click)="openLocationPopup()">
+</mgl-layer>
+<mgl-layer *ngIf="locationFeatures.features.length > 0" id="location-circle"
+           type="fill"
+           source="location-source"
+           [filter]="['==', '$type', 'Polygon']"
+           [paint]="{
+                'fill-color': '#136AEC',
+                'fill-outline-color': '#136AEC',
+                'fill-opacity': 0.2
+            }">
+</mgl-layer>
+<mgl-layer *ngIf="locationFeatures.features.length > 0" id="location-circle-stroke"
+           type="line"
+           source="location-source"
+           [filter]="['==', '$type', 'Polygon']"
+           [paint]="{
+                'line-color': '#136AEC',
+                'line-width': 2
+            }">
+</mgl-layer>
+<mgl-popup *ngIf="locationLatLng" [lngLat]="locationLatLng" (close)="locationLatLng = null">
+    <gps-location-overlay [latlng]="locationLatLng" (close)="locationLatLng = null"></gps-location-overlay>
+</mgl-popup>

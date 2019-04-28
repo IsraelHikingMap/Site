@@ -1,52 +1,45 @@
-﻿<aol-layer-vector *ngIf="visibleTrace && visibleTrace.dataContainer" [zIndex]="500">
-    <aol-source-vector>
-        <aol-feature>
-            <aol-geometry-linestring>
-                <aol-collection-coordinates [coordinates]="traceCoordinates" [srid]="'EPSG:4326'"></aol-collection-coordinates>
-            </aol-geometry-linestring>
-            <aol-style>
-                <aol-style-stroke [width]="3" [color]="'blue'"></aol-style-stroke>
-            </aol-style>
-        </aol-feature>
-        <aol-feature [id]="TRACE_CONFIG">
-            <aol-geometry-point>
-                <aol-coordinate [x]="traceCoordinates[0][0]" [y]="traceCoordinates[0][1]" [srid]="'EPSG:4326'"></aol-coordinate>
-            </aol-geometry-point>
-            <aol-style>
-                <aol-style-circle [radius]="15">
-                    <aol-style-fill [color]="'white'"></aol-style-fill>
-                    <aol-style-stroke [color]="'black'" [width]="2"></aol-style-stroke>
-                </aol-style-circle>
-                <aol-style-text [text]="resources.getCharacterForIcon('icon-cogs')" font="normal 20px IsraelHikingMap"></aol-style-text>
-            </aol-style>
-        </aol-feature>
-    </aol-source-vector>
-</aol-layer-vector>
-<clearable-overlay *ngIf="traceCoordinates.length > 0" 
-                   [latlng]="{ lat: traceCoordinates[0][1], lng: traceCoordinates[0][0]}" 
-                   [title]="visibleTrace.name"
-                   [isOpen]="isConfigOpen"
-                   (closed)="isConfigOpen = false"
-                   (cleared)="clearTrace()"
-                   (convertToRoute)="convertToRoute()"></clearable-overlay>
-<div *ngIf="missingParts">
-    <aol-layer-vector [zIndex]="501">
-        <aol-source-vector>
-            <aol-feature *ngFor="let feature of missingParts.features">
-                <aol-geometry-linestring>
-                    <aol-collection-coordinates [coordinates]="feature.geometry.coordinates" [srid]="'EPSG:4326'"></aol-collection-coordinates>
-                </aol-geometry-linestring>
-                <aol-style>
-                    <aol-style-stroke [width]="3" [color]="feature === selectedFeature ? 'brown' : 'red'"></aol-style-stroke>
-                </aol-style>
-            </aol-feature>
-            <aol-feature [id]="MISSING_PART + idx" *ngFor="let feature of missingParts.features; let idx = index">
-                <aol-geometry-point>
-                    <aol-coordinate [x]="feature.geometry.coordinates[0][0]" [y]="feature.geometry.coordinates[0][1]" [srid]="'EPSG:4326'"></aol-coordinate>
-                </aol-geometry-point>
-            </aol-feature>
-        </aol-source-vector>
-    </aol-layer-vector>
-    <missing-part-overlay [feature]="selectedFeature" [isOpen]="missingCoordinates != null" [latlng]="missingCoordinates" (closed)="clearSelection()" (removed)="removeMissingPart()"></missing-part-overlay>
+﻿<mgl-geojson-source id="selected-trace" [data]="selectedTrace"></mgl-geojson-source>
+<mgl-layer id="selected-trace-line"
+           type="line"
+           source="selected-trace"
+           [paint]="{
+            'line-color': 'blue',
+            'line-width': 3
+           }">
+</mgl-layer>
+<div *ngIf="selectedTraceStart">
+    <mgl-marker [lngLat]="selectedTraceStart" #tracesConfigMarker>
+        <span class='fa-stack fa-lg'>
+            <i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>
+            <i class='fa icon-cog fa-stack-1x stack-icon-top' style='color:blue;'></i>
+        </span>
+    </mgl-marker>
+    <mgl-popup [marker]="tracesConfigMarker" (close)="isConfigOpen = false">
+        <clearable-overlay [latlng]="selectedTraceStart"
+                           [title]="visibleTrace.name"
+                           (cleared)="clearTrace()"
+                           (convertToRoute)="convertToRoute()"></clearable-overlay>
+    </mgl-popup>
 </div>
-
+<mgl-geojson-source id="missing-parts" [data]="missingParts"></mgl-geojson-source>
+<mgl-layer id="missing-part-line"
+           source="missing-parts"
+           type="line"
+           [paint]="{
+            'line-color': 'red',
+            'line-width': 3
+           }">
+</mgl-layer>
+<mgl-popup *ngIf="missingCoordinates" [lngLat]="missingCoordinates" [offset]="[0, -30]">
+    <missing-part-overlay [feature]="selectedFeature" [latlng]="missingCoordinates" (removed)="removeMissingPart()"></missing-part-overlay>
+</mgl-popup>
+<div *ngFor="let feature of missingParts.features">
+    <mgl-marker [lngLat]="getLatLngForFeature(feature)" anchor="bottom">
+        <div (click)="setSelectedFeature(feature, $event)">
+            <span class='fa-stack fa-lg'>
+                <i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>
+                <i class='fa icon-star fa-stack-1x stack-icon-top' style='color:orange;'></i>
+            </span>
+        </div>
+    </mgl-marker>
+</div>

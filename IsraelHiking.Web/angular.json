@@ -22,13 +22,18 @@
               "sources/resource-not-found.html",
               "sources/empty-for-oauth.html",
               "sources/robots.txt",
-              "sources/cordova.js"
+              "sources/cordova.js",
+              {
+                "glob": "**/mapbox-gl-rtl-text.js",
+                "input": "./node_modules/@mapbox/mapbox-gl-rtl-text",
+                "output": "./"
+              }
             ],
             "styles": [
               "sources/scss/common.scss"
             ],
             "scripts": [
-              "sources/google-analytics.js",
+              "sources/google-analytics.js"
             ]
           },
           "configurations": {

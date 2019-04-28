@@ -5,6 +5,7 @@ namespace IsraelHiking.DataAccess.Tests
     [TestClass]
     public class OffRoadGatewayTests
     {
+        [Ignore]
         [TestMethod]
         public void GetAll()
         {

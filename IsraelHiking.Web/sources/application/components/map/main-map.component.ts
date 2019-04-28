@@ -1,8 +1,8 @@
-﻿import { Component, ViewChild, AfterViewInit, ViewEncapsulation } from "@angular/core";
+import { Component, ViewChild, AfterViewInit, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
 import { NgxImageGalleryComponent } from "ngx-image-gallery";
 import { NgRedux } from "@angular-redux/store";
-import { MapEvent } from "ol";
-import { MapComponent } from "ngx-ol";
+import { MapComponent, CustomControl } from "ngx-mapbox-gl";
+import { Style, setRTLTextPlugin } from "mapbox-gl";
 
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
@@ -13,7 +13,7 @@ import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SnappingService } from "../../services/snapping.service";
-import { SpatialService } from "../../services/spatial.service";
+import { ScaleControl } from "mapbox-gl";
 
 @Component({
     selector: "main-map",
@@ -29,7 +29,18 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
     @ViewChild(MapComponent)
     public mapComponent: MapComponent;
 
+    @ViewChildren("topLeftControl", { read: ElementRef })
+    public topLeftControls: QueryList<ElementRef>;
+    @ViewChildren("topRightControl", { read: ElementRef })
+    public topRightControls: QueryList<ElementRef>;
+    @ViewChildren("bottomLeftControl", { read: ElementRef })
+    public bottomLeftControls: QueryList<ElementRef>;
+    @ViewChildren("bottomRightControl", { read: ElementRef })
+    public bottomRightControls: QueryList<ElementRef>;
+
     public location: Location;
+
+    public initialStyle: Style;
 
     constructor(resources: ResourcesService,
         public readonly imageGalleryService: ImageGalleryService,
@@ -42,29 +53,82 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
     ) {
         super(resources);
         this.location = this.ngRedux.getState().location;
+        this.initialStyle = { ...this.resources.mapDefaultStyle };
+        this.initialStyle.sources = {
+            dummy: {
+                type: "geojson",
+                data: {
+                    type: "Feature",
+                    properties: {},
+                    geometry: {
+                        type: "Point",
+                        coordinates: [0, 0]
+                    }
+                }
+            }
+        };
+        this.initialStyle.layers = [
+            {
+                id: this.resources.endOfBaseLayer,
+                type: "circle",
+                source: "dummy",
+                layout: { visibility: "none" }
+            },
+            {
+                id: this.resources.endOfOverlays,
+                type: "circle",
+                source: "dummy",
+                layout: { visibility: "none" }
+            },
+            {
+                id: this.resources.endOfClusters,
+                type: "circle",
+                source: "dummy",
+                layout: { visibility: "none" }
+            },
+            {
+                id: this.resources.endOfRoutes,
+                type: "circle",
+                source: "dummy",
+                layout: { visibility: "none" }
+            }];
     }
 
-    public moveEnd(e: MapEvent) {
+    public moveEnd(e: DragEvent) {
         if (!e) {
             return;
         }
-        let centerLatLon = SpatialService.fromViewCoordinate(e.map.getView().getCenter());
-        let currentLocation = { lat: this.location.latitude, lng: this.location.longitude };
-        if (SpatialService.getDistanceInMeters(centerLatLon, currentLocation) < 1) {
-            return;
-        }
+        let centerLatLon = this.mapComponent.mapInstance.getCenter();
         this.ngRedux.dispatch(new SetLocationAction({
             longitude: centerLatLon.lng,
             latitude: centerLatLon.lat,
-            zoom: e.map.getView().getZoom()
+            zoom: this.mapComponent.mapInstance.getZoom()
         }));
         this.hashService.resetAddressbar();
     }
 
     public ngAfterViewInit(): void {
         this.imageGalleryService.setGalleryComponent(this.ngxImageGallery);
-        this.mapService.setMap(this.mapComponent.instance);
-        this.snappingService.setMap(this.mapComponent.instance);
+    }
+    public mapLoaded() {
+        setRTLTextPlugin("./mapbox-gl-rtl-text.js", () => {});
+
+        this.mapService.setMap(this.mapComponent.mapInstance);
+        this.snappingService.setMap(this.mapComponent.mapInstance);
+
+        this.topLeftControls.forEach(c => {
+            this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "top-left");
+        });
+        this.topRightControls.forEach(c => {
+            this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "top-right");
+        });
+        this.bottomLeftControls.forEach(c => {
+            this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-left");
+        });
+        this.bottomRightControls.forEach(c => {
+            this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-right");
+        });
+        this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" }), "bottom-right");
     }
 
     public isMobile() {

@@ -1,0 +1,27 @@
+﻿.has-extra-data {
+    width: 4px;
+    height: 4px;
+    display: block;
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.marker-cluster {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #4f615a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    border: 2px solid #56C498;
+    cursor: pointer;
+}
+
+.marker-icon {
+    transform: translate(0, -50%);
+}

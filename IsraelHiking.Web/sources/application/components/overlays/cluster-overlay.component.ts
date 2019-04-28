@@ -1,24 +1,32 @@
-﻿import { Component, Input } from "@angular/core";
+﻿import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Router } from "@angular/router";
 
 import { ResourcesService } from "../../services/resources.service";
 import { RouteStrings } from "../../services/hash.service";
-import { ClosableOverlayComponent } from "./closable-overlay.component";
 import { PointOfInterest } from "../../models/models";
+import { BaseMapComponent } from "../base-map.component";
 
 @Component({
     selector: "cluster-overlay",
     templateUrl: "./cluster-overlay.component.html"
 })
-export class ClusterOverlayComponent extends ClosableOverlayComponent {
+export class ClusterOverlayComponent extends BaseMapComponent {
 
     @Input()
     public points: PointOfInterest[];
 
-    constructor(resources: ResourcesService) {
+    @Output()
+    public close: EventEmitter<void>;
+
+    constructor(resources: ResourcesService,
+        private readonly router: Router) {
         super(resources);
+        this.close = new EventEmitter();
     }
 
-    public getRouterLinkForPoint(point: PointOfInterest) {
-        return [RouteStrings.POI, point.source, point.id];
+    public clickOnItem(point: PointOfInterest) {
+        this.close.emit();
+        this.router.navigate([RouteStrings.POI, point.source, point.id],
+            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
 }

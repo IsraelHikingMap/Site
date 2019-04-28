@@ -71,6 +71,12 @@ export class FileService {
         return filesToReturn;
     }
 
+    public getFullFilePath(relativePath: string) {
+        return this.runningContextService.isCordova
+            ? cordova.file.applicationDirectory + "www/" + relativePath
+            : window.origin + "/" + relativePath;
+    }
+
     public saveToFile = async (fileName: string, format: string, dataContainer: DataContainer): Promise<boolean> => {
         let responseData = await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
         return await this.saveBytesResponseToFile(responseData, fileName);

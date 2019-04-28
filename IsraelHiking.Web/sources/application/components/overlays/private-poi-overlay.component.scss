@@ -1,9 +1,4 @@
-﻿.marker-popup {
-    bottom: 34px !important;
-    padding-top: 5px !important;
-}
-
-.img-placeholder {
+﻿.img-placeholder {
     height: 64px;
 }
 
@@ -11,4 +6,16 @@
     .img-placeholder {
         display: none;
     }
+}
+
+.popup-like-marker .mapboxgl-popup-content {
+    margin-bottom: 10px;
+    background: #fffb !important;
+}
+
+.popup-like-marker .mapboxgl-popup-tip {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    left: 50%;
+    border-top-color: #fffb !important;
 }
