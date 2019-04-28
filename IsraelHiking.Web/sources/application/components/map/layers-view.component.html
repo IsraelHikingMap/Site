@@ -46,5 +46,5 @@
     </span>
 </mgl-marker>
 <mgl-geojson-source id="selected-poi" [data]="selectedPoiGeoJson"></mgl-geojson-source>
-<mgl-layer id="selected-poi-fill" source="selected-poi" type="fill" [paint]="{ 'fill-color': 'rgba(19, 106, 224, 0.2)'}"></mgl-layer>
+<mgl-layer id="selected-poi-fill" source="selected-poi" type="fill" [paint]="{ 'fill-color': 'rgba(19, 106, 224, 0.2)'}" [filter]="['==', '$type', 'Polygon']"></mgl-layer>
 <mgl-layer id="selected-poi-line" source="selected-poi" type="line" [paint]="{ 'line-color': 'blue', 'line-width': 2 }"></mgl-layer>
