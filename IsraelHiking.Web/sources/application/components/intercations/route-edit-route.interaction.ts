@@ -171,8 +171,8 @@ export class RouteEditRouteInteraction {
                 this.handleRouteMiddleSegmentDrag(event);
             }
         } else {
-            //let latLng = this.getSnappingForRoute(event.lngLat);
-            //this.raisePointerMove(latLng);
+            // let latLng = this.getSnappingForRoute(event.lngLat);
+            // this.raisePointerMove(latLng);
         }
     }
 

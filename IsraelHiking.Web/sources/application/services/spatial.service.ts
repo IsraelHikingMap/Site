@@ -49,7 +49,7 @@ export class SpatialService {
         function distToSegmentSquared(p: [number, number], s: [number, number], e: [number, number]): number {
             let l2 = dist2(s, e);
             if (l2 === 0) {
-                return dist2(p, s)
+                return dist2(p, s);
             }
             let t = ((p[0] - s[0]) * (e[0] - s[0]) + (p[1] - s[1]) * (e[1] - s[1])) / l2;
             t = Math.max(0, Math.min(1, t));
