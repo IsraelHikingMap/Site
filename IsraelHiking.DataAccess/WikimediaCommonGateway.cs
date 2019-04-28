@@ -16,6 +16,24 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace IsraelHiking.DataAccess
 {
+
+    internal class LoginAgainAccountAssertionFailureHandler : IAccountAssertionFailureHandler
+    {
+
+        private readonly NonPublicConfigurationData _options;
+
+        public LoginAgainAccountAssertionFailureHandler(NonPublicConfigurationData options)
+        {
+            _options = options;
+        }
+
+        public async Task<bool> Login(WikiSite site)
+        {
+            await site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
+            return true;
+        }
+    }
+
     public class WikimediaCommonGateway : IWikimediaCommonGateway
     {
         private const string BASE_API_ADDRESS = "https://commons.wikimedia.org/w/api.php";
@@ -46,6 +64,7 @@ namespace IsraelHiking.DataAccess
             _site = new WikiSite(wikiClient, new SiteOptions(BASE_API_ADDRESS));
             await _site.Initialization;
             await _site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
+            _site.AccountAssertionFailureHandler = new LoginAgainAccountAssertionFailureHandler(_options);
         }
 
         public async Task<string> UploadImage(string title, string description, string author, string fileName, Stream contentStream, Coordinate location)
