@@ -46,7 +46,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove=".angular-cli.json" />
     <Content Remove="angular.json" />
     <Content Remove="package-lock.json" />
     <Content Remove="package.json" />

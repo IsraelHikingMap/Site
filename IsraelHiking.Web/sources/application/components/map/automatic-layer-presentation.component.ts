@@ -1,7 +1,10 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 import { MapComponent } from "ngx-mapbox-gl";
 import { Style, RasterSource, RasterLayout, Layer } from "mapbox-gl";
 import { Subscription } from "rxjs";
+
+import { FileService } from "../../services/file.service";
 
 @Component({
     selector: "auto-layer",
@@ -9,7 +12,10 @@ import { Subscription } from "rxjs";
 })
 export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
 
-    constructor(private readonly host: MapComponent) {
+    constructor(private readonly host: MapComponent,
+        private readonly httpClient: HttpClient,
+        private readonly fileService: FileService,
+        ) {
         let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
         this.rasterSourceId = `raster-source-${layerIndex}`;
@@ -78,9 +84,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             // address += "/tile/{z}/{y}/{x}"
             address += "/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&f=image";
         }
-        if (address.startsWith("http://")) {
-            address = "https://cors-anywhere.herokuapp.com/" + address;
-        }
+        address = this.fixNonHttpsAddress(address);
         let source = {
             type: "raster",
             tiles: [address],
@@ -109,18 +113,24 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private async createJsonLayer() {
-        let response = await fetch("https://cors-anywhere.herokuapp.com/" + this.address);
-        let json = await response.json() as Style;
-        for (let source in json.sources) {
-            if (json.sources.hasOwnProperty(source)) {
+        let response = await this.httpClient.get(this.fixNonHttpsAddress(this.address)).toPromise() as Style;
+        for (let source in response.sources) {
+            if (response.sources.hasOwnProperty(source)) {
                 this.jsonSourcesIds.push(source);
-                this.host.mapInstance.addSource(source, json.sources[source]);
+                this.host.mapInstance.addSource(source, response.sources[source]);
             }
         }
-        for (let layer of json.layers) {
+        for (let layer of response.layers) {
             this.jsonLayersIds.push(layer.id);
             this.host.mapInstance.addLayer(layer, this.before);
         }
+    }
+
+    private fixNonHttpsAddress(address: string) {
+        if (address.startsWith("http://")) {
+            return "https://cors-anywhere.herokuapp.com/" + address;
+        }
+        return address;
     }
 
     private removeJsonLayer() {

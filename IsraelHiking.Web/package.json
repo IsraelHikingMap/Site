@@ -20,8 +20,8 @@
     "@ngx-progressbar/http": "5.3.1",
     "@nicky-lenaers/ngx-scroll-to": "1.1.1",
     "@turf/bbox": "6.0.1",
-    "@turf/circle": "6.0.1",
     "@turf/center": "6.0.1",
+    "@turf/circle": "6.0.1",
     "@turf/distance": "6.0.1",
     "@turf/helpers": "6.1.4",
     "@turf/nearest-point-on-line": "6.0.2",
@@ -95,6 +95,7 @@
     "karma-junit-reporter": "2.0.0",
     "md5-file": "^4.0.0",
     "opn": "5.4.0",
+    "patch-package": "^6.1.2",
     "po2json": "0.4.5",
     "protractor": "^5.3.2",
     "ts-node": "7.0.1",
@@ -121,7 +122,8 @@
     "run-android": "cordova run android",
     "build-apk": "cordova build android --release --no-telemetry",
     "1-upload": "node extract-and-upload.js",
-    "2-download": "node download-and-compile.js"
+    "2-download": "node download-and-compile.js",
+    "postinstall": "patch-package"
   },
   "cordova": {
     "plugins": {
