@@ -149,6 +149,7 @@ namespace IsraelHiking.Web
             app.UseDefaultFiles();
             var configurationData = app.ApplicationServices.GetRequiredService<IOptions<ConfigurationData>>().Value;
             var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
+            fileExtensionContentTypeProvider.Mappings.Add(".pbf", "application/x-protobuf");
             fileExtensionContentTypeProvider.Mappings.Add(".db", "application/octet-stream");
 
             foreach (var proxy in configurationData.ProxiesDictionary)
@@ -194,7 +195,10 @@ namespace IsraelHiking.Web
                 });
             }
             // wwwroot
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ContentTypeProvider = fileExtensionContentTypeProvider
+            });
         }
 
         private void InitializeServices(IServiceProvider serviceProvider)

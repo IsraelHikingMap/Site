@@ -84,6 +84,7 @@ import { RunningContextService } from "./services/running-context.service";
 import { TracesService } from "./services/traces.service";
 import { OpenWithService } from "./services/open-with.service";
 import { LoggingService } from "./services/logging.service";
+import { DefaultStyleService } from "./services/default-style.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -350,6 +351,7 @@ NgModule({
         RunningContextService,
         TracesService,
         LoggingService,
+        DefaultStyleService,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction
     ],

@@ -18,7 +18,11 @@ if (environment.production) {
 if (environment.isCordova) {
     let onDeviceReady = () => {
         window.open = cordova.InAppBrowser.open;
-        (window as any).plugins.insomnia.keepAwake();
+        let win = (window as any);
+        win.openDatabase = (dbname, ignored1, ignored2, ignored3) => {
+            return win.sqlitePlugin.openDatabase({ name: dbname, location: 'default', createFromLocation: 1 });
+        };
+        win.plugins.insomnia.keepAwake();
         bootstrapInitializationFunction();
         let exitApp = false;
         let interval = setInterval(() => { exitApp = false; }, 5000);

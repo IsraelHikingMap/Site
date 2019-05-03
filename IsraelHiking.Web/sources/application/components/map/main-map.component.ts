@@ -14,6 +14,7 @@ import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SnappingService } from "../../services/snapping.service";
 import { ScaleControl } from "mapbox-gl";
+import { DefaultStyleService } from "../../services/default-style.service";
 
 @Component({
     selector: "main-map",
@@ -48,12 +49,13 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         private readonly snappingService: SnappingService,
         private readonly hashService: HashService,
         private readonly runningContextService: RunningContextService,
+        private readonly defaultStyleService: DefaultStyleService,
         private readonly ngRedux: NgRedux<ApplicationState>,
 
     ) {
         super(resources);
         this.location = this.ngRedux.getState().location;
-        this.initialStyle = { ...this.resources.mapDefaultStyle };
+        this.initialStyle = { ...this.defaultStyleService.style };
         this.initialStyle.sources = {
             dummy: {
                 type: "geojson",

@@ -2,7 +2,7 @@
     <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer">
         <mgl-map [zoom]="[item.zoom - 1]"
                  [center]="[item.latlng.lng, item.latlng.lat]" 
-                 [style]="resources.mapDefaultStyle" 
+                 [style]="defaultStyle" 
                  [interactive]="false"
                  [attributionControl]="false">
             <auto-layer [address]="getUrl()"

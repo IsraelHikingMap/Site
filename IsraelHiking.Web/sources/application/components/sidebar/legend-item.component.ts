@@ -1,10 +1,12 @@
 import { Component, ViewChild, ElementRef, Input } from "@angular/core";
+import { Style } from "mapbox-gl";
 
 import { LayersService } from "../../services/layers/layers.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { LatLngAlt } from "../../models/models";
 import { FitBoundsService } from "../../services/fit-bounds.service";
+import { DefaultStyleService } from "../../services/default-style.service";
+import { LatLngAlt } from "../../models/models";
 
 type LegendItemType = "POI" | "Way";
 
@@ -33,10 +35,15 @@ export class LegendItemComponent extends BaseMapComponent {
     @Input()
     public item: ILegendItem;
 
+    public defaultStyle: Style;
+
     constructor(resources: ResourcesService,
-        private fitBoundsService: FitBoundsService,
-        private layersService: LayersService) {
+        private readonly fitBoundsService: FitBoundsService,
+        private readonly layersService: LayersService,
+        private readonly defaultStyleService: DefaultStyleService) {
         super(resources);
+
+        this.defaultStyle = this.defaultStyleService.style;
     }
 
     public getUrl() {
