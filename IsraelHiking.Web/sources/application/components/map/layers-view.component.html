@@ -15,7 +15,8 @@
     </auto-layer>
 </div>
 <div *ngFor="let categoriesType of categoriesTypes">
-    <mgl-marker-cluster [data]="poiGeoJsonData[categoriesType]"
+    <mgl-marker-cluster *ngIf="isVisible(categoriesType)"
+                        [data]="poiGeoJsonData[categoriesType]"
                         [radius]="100"
                         (load)="superCluster[categoriesType] = $event">
         <ng-template mglPoint let-feature>
