@@ -108,6 +108,8 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
 
     public async addShareUrlToRoutes(shareUrl: ShareUrl) {
         let share = await this.shareUrlsService.getShareUrl(shareUrl.id);
+        share.dataContainer.overlays = [];
+        share.dataContainer.baseLayer = null;
         this.dataContainerService.setData(share.dataContainer, true);
     }
 
