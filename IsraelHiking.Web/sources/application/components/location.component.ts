@@ -125,7 +125,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public toggleKeepNorthUp() {
-        if (!this.isFollowing) {
+        if (!this.isFollowing || this.isDisabled()) {
             this.host.mapInstance.rotateTo(0);
         }
         //this.isResettingNorthUp = true;
