@@ -2,8 +2,9 @@ import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { BackgroundGeolocationPlugin, Location } from "cordova-plugin-mauron85-background-geolocation";
 
 import { ResourcesService } from "./resources.service";
-import { ILatLngTime } from "../models/models";
 import { RunningContextService } from "./running-context.service";
+import { SpatialService } from "./spatial.service";
+import { ILatLngTime } from "../models/models";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
 
@@ -12,7 +13,9 @@ declare var BackgroundGeolocation: BackgroundGeolocationPlugin;
 @Injectable()
 export class GeoLocationService {
     private static readonly TIME_OUT = 30000;
-    private static readonly MAX_TIME_DIFFERENCE = 60 * 1000;
+    private static readonly MAX_TIME_DIFFERENCE = 60; // seconds
+    private static readonly MAX_SPPED = 55; // meters / seconds =~ 200 Km/hs
+    private static readonly MIN_ACCURACY = 50; // meters
 
     private state: GeoLocationServiceState;
     private watchNumber: number;
@@ -192,7 +195,12 @@ export class GeoLocationService {
             this.updatePositionAndRaiseEvent(position);
             return;
         }
-        let timeDifference = Math.abs(position.timestamp - this.currentLocation.timestamp.getTime());
+        let distance = SpatialService.getDistanceInMeters(this.currentLocation, this.positionToLatLngTime(position));
+        let timeDifference = Math.abs(position.timestamp - this.currentLocation.timestamp.getTime()) / 1000;
+        if (distance / timeDifference > GeoLocationService.MAX_SPPED || position.coords.accuracy > GeoLocationService.MIN_ACCURACY) {
+            // speed is too high or accuracy circle is too big - must be an invalid point
+            return;
+        }
         if (timeDifference < GeoLocationService.MAX_TIME_DIFFERENCE) {
             this.updatePositionAndRaiseEvent(position);
             return;
@@ -201,7 +209,7 @@ export class GeoLocationService {
             this.rejectedPosition = position;
             return;
         }
-        let rejectedPositionTimeDifference = Math.abs(position.timestamp - this.rejectedPosition.timestamp);
+        let rejectedPositionTimeDifference = Math.abs(position.timestamp - this.rejectedPosition.timestamp) / 1000;
         if (rejectedPositionTimeDifference > GeoLocationService.MAX_TIME_DIFFERENCE) {
             this.rejectedPosition = position;
             return;
@@ -211,13 +219,17 @@ export class GeoLocationService {
     }
 
     private updatePositionAndRaiseEvent(position: Position) {
-        this.currentLocation = {
+        this.currentLocation = this.positionToLatLngTime(position);
+
+        this.positionChanged.next(position);
+    }
+
+    private positionToLatLngTime(position: Position): ILatLngTime {
+        return {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
             alt: position.coords.altitude,
             timestamp: new Date(position.timestamp)
-        } as ILatLngTime;
-
-        this.positionChanged.next(position);
+        };
     }
 }
