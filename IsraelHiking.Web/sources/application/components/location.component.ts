@@ -128,16 +128,16 @@ export class LocationComponent extends BaseMapComponent {
         if (!this.isFollowing || this.isDisabled()) {
             this.host.mapInstance.rotateTo(0);
         }
-        //this.isResettingNorthUp = true;
-        //this.isKeepNorthUp = !this.isKeepNorthUp;
-        //if (!this.isFollowing) {
+        // this.isResettingNorthUp = true;
+        // this.isKeepNorthUp = !this.isKeepNorthUp;
+        // if (!this.isFollowing) {
         //    this.host.mapInstance.setBearing(0);
-        //} else {
+        // } else {
         //    this.host.mapInstance.rotateTo(0);
         //    this.isResettingNorthUp = false;
-        //}
-        
-        
+        // }
+
+
     }
 
     public getRotationAngle() {

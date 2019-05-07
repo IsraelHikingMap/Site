@@ -252,17 +252,17 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routeEditPoiInteraction.setActive(false, this.host.mapInstance);
         this.routeEditRouteInteraction.setActive(false, this.host.mapInstance);
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        this.host.mapInstance.getCanvas().style.cursor = '';
+        this.host.mapInstance.getCanvas().style.cursor = "";
         if (selectedRoute == null) {
-            
+
             return;
         }
         if (selectedRoute.state === "Poi") {
             this.routeEditPoiInteraction.setActive(true, this.host.mapInstance);
-            this.host.mapInstance.getCanvas().style.cursor = 'pointer';
+            this.host.mapInstance.getCanvas().style.cursor = "pointer";
         } else if (selectedRoute.state === "Route") {
             this.routeEditRouteInteraction.setActive(true, this.host.mapInstance);
-            this.host.mapInstance.getCanvas().style.cursor = 'pointer';
+            this.host.mapInstance.getCanvas().style.cursor = "pointer";
         }
     }
 
