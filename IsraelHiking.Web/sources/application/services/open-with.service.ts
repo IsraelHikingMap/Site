@@ -88,6 +88,8 @@ export class OpenWithService {
                 blob.name = "file.gpx";
             } else if (item.type.indexOf("twl") !== -1) {
                 blob.name = "file.twl";
+            } else if (item.type.indexOf("jpg") !== -1 || item.type.indexOf("jpeg") !== -1) {
+                blob.name = "file.jpeg";
             }
         }
         try {
