@@ -20,7 +20,7 @@ export class GeoLocationService {
     private state: GeoLocationServiceState;
     private watchNumber: number;
     private isBackground: boolean;
-    private rejectedPosition: Position;
+    private rejectedPosition: ILatLngTime;
     public positionChanged: EventEmitter<Position>;
     public currentLocation: ILatLngTime;
 
@@ -53,12 +53,12 @@ export class GeoLocationService {
     public disable() {
         this.ngZone.run(() => {
             switch (this.state) {
-            case "disabled":
-                return;
-            case "searching":
-            case "tracking":
-                this.stopWatching();
-                return;
+                case "disabled":
+                    return;
+                case "searching":
+                case "tracking":
+                    this.stopWatching();
+                    return;
             }
         });
     }
@@ -195,32 +195,42 @@ export class GeoLocationService {
             this.updatePositionAndRaiseEvent(position);
             return;
         }
-        let distance = SpatialService.getDistanceInMeters(this.currentLocation, this.positionToLatLngTime(position));
-        let timeDifference = Math.abs(position.timestamp - this.currentLocation.timestamp.getTime()) / 1000;
-        if (distance / timeDifference > GeoLocationService.MAX_SPPED || position.coords.accuracy > GeoLocationService.MIN_ACCURACY) {
-            // speed is too high or accuracy circle is too big - must be an invalid point
-            return;
-        }
-        if (timeDifference < GeoLocationService.MAX_TIME_DIFFERENCE) {
+        if (this.isValid(this.currentLocation, position)) {
             this.updatePositionAndRaiseEvent(position);
             return;
         }
         if (this.rejectedPosition == null) {
-            this.rejectedPosition = position;
+            this.rejectedPosition = this.positionToLatLngTime(position);
             return;
         }
-        let rejectedPositionTimeDifference = Math.abs(position.timestamp - this.rejectedPosition.timestamp) / 1000;
-        if (rejectedPositionTimeDifference > GeoLocationService.MAX_TIME_DIFFERENCE) {
-            this.rejectedPosition = position;
+        if (this.isValid(this.rejectedPosition, position)) {
+            this.updatePositionAndRaiseEvent(position);
             return;
         }
-        this.rejectedPosition = null;
-        this.updatePositionAndRaiseEvent(position);
+        this.rejectedPosition = this.positionToLatLngTime(position);
+    }
+
+    private isValid(test: ILatLngTime, position: Position): boolean {
+        let distance = SpatialService.getDistanceInMeters(test, this.positionToLatLngTime(position));
+        let timeDifference = Math.abs(position.timestamp - test.timestamp.getTime()) / 1000;
+        if (timeDifference === 0) {
+            return false;
+        }
+        if (distance / timeDifference > GeoLocationService.MAX_SPPED) {
+            return false;
+        }
+        if (timeDifference > GeoLocationService.MAX_TIME_DIFFERENCE) {
+            return false;
+        }
+        if (position.coords.accuracy > GeoLocationService.MIN_ACCURACY) {
+            return false;
+        }
+        return true;
     }
 
     private updatePositionAndRaiseEvent(position: Position) {
         this.currentLocation = this.positionToLatLngTime(position);
-
+        this.rejectedPosition = null;
         this.positionChanged.next(position);
     }
 
