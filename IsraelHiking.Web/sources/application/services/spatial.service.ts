@@ -62,9 +62,9 @@ export class SpatialService {
 
         let minimalDistance = Infinity;
         for (let coordinateIndex = 1; coordinateIndex < coordinates.length; coordinateIndex++) {
-            let distance = distToSegment(coordinate, coordinates[coordinateIndex - 1], coordinates[coordinateIndex]);
-            if (distance < minimalDistance) {
-                minimalDistance = distance;
+            let currentDistance = distToSegment(coordinate, coordinates[coordinateIndex - 1], coordinates[coordinateIndex]);
+            if (currentDistance < minimalDistance) {
+                minimalDistance = currentDistance;
             }
         }
         return minimalDistance;
