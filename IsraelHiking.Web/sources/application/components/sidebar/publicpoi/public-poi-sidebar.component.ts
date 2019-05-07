@@ -294,7 +294,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             icon = this.poiExtended.icon;
             id = this.poiExtended.id;
         }
-        let urls = await this.getUrls();
+        let urls = this.getUrls();
         this.ngRedux.dispatch(new AddPrivatePoiAction({
             routeId: selectedRoute.id,
             markerData: {
@@ -318,7 +318,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.close();
     }
 
-    private async getUrls(): Promise<LinkData[]> {
+    private getUrls(): LinkData[] {
         let urls = [] as LinkData[];
         for (let reference of this.info.references) {
             urls.push({
@@ -329,10 +329,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         }
         if (this.poiExtended && this.poiExtended.imagesUrls.length > 0) {
             for (let imageUrl of this.poiExtended.imagesUrls) {
-                let res = await fetch(imageUrl);
-                let blob = await res.blob();
                 urls.push({
-                    mimeType: blob.type,
+                    mimeType: `image/${imageUrl.split(".").pop().replace("jpg", "jpeg")}`,
                     text: "",
                     url: imageUrl
                 });
