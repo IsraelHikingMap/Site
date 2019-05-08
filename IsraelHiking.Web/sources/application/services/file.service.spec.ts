@@ -6,7 +6,7 @@ import { FileService, IFormatViewModel } from "./file.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { ImageResizeService } from "./image-resize.service";
 import { Urls } from "../urls";
-import { DataContainer } from "../models/models";
+import { DataContainer, MarkerData, RouteData } from "../models/models";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
@@ -108,7 +108,8 @@ describe("FileService", () => {
             let file = new Blob([""], { type: "image/jpeg" }) as File;
             imageResizeService.resizeImageAndConvert = () => Promise.resolve({
                 northEast: { lat: 0, lng: 0 },
-                southWest: { lat: 1, lng: 1 }
+                southWest: { lat: 1, lng: 1 },
+                routes: [{ markers: [{} as MarkerData] }] as RouteData[]
             } as DataContainer);
             let promise = fileService.addRoutesFromFile(file).then(() => {
                 expect(selectedRouteService.addRoutes).toHaveBeenCalled();
