@@ -79,17 +79,19 @@ export class OpenWithService {
             } else if (stringValue.indexOf("<kml") !== -1) {
                 blob.name = "file.kml";
             }
+        } else if (item.path) {
+            blob.name = item.path.split("/").slice(-1)[0];
         } else {
             if (item.type.indexOf("kml") !== -1) {
                 blob.name = "file.kml";
             } else if (item.type.indexOf("kmz") !== -1) {
-                blob.name = "file.kmz";
+                blob.name = "file.kml";
             } else if (item.type.indexOf("gpx") !== -1) {
-                blob.name = "file.gpx";
+                blob.name = "file.kml";
             } else if (item.type.indexOf("twl") !== -1) {
-                blob.name = "file.twl";
+                blob.name = "file.kml";
             } else if (item.type.indexOf("jpg") !== -1 || item.type.indexOf("jpeg") !== -1) {
-                blob.name = "file.jpeg";
+                blob.name = "file.kml";
             }
         }
         try {

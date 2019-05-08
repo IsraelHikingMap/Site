@@ -178,6 +178,7 @@ export class ImageResizeService {
                         {
                             title: name,
                             latlng: latLng,
+                            type: "star",
                             urls: [
                                 {
                                     mimeType: ImageResizeService.JPEG,

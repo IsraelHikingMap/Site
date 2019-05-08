@@ -140,7 +140,7 @@ export class PoiService {
         poiExtended.title = poiExtended.title || markerData.title;
         poiExtended.description = poiExtended.description || markerData.description;
         poiExtended.location = poiExtended.location || markerData.latlng;
-        poiExtended.icon = poiExtended.icon || `icon-${markerData.type}`;
+        poiExtended.icon = poiExtended.icon || `icon-${markerData.type || "star"}`;
 
         markerData.urls.filter(u => u.mimeType.startsWith("image")).map(u => u.url).forEach(url => {
             poiExtended.imagesUrls.push(url);

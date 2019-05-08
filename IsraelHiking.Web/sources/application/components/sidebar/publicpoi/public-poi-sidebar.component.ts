@@ -164,6 +164,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.contribution = this.poiExtended.contribution || {} as Contribution;
         // clone:
         this.info = JSON.parse(JSON.stringify(this.poiExtended));
+        this.info.icon = this.info.icon;
     }
 
     private getRatingNumber(rating: Rating): number {

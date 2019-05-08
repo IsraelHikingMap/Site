@@ -85,6 +85,9 @@ export class FileService {
     public async addRoutesFromFile(file: File): Promise<any> {
         if (file.type === ImageResizeService.JPEG) {
             let container = await this.imageResizeService.resizeImageAndConvert(file);
+            if (container.routes.length === 0 || container.routes[0].markers.length === 0) {
+                throw new Error("no geographic information found in file...")
+            }
             this.addRoutesFromContainer(container);
             return;
         }
@@ -122,7 +125,7 @@ export class FileService {
 
     private addRoutesFromContainer(container: DataContainer) {
         this.selectedRouteService.addRoutes(container.routes);
-        this.fitBoundsService.fitBounds(SpatialService.getBounds([container.northEast, container.southWest]));
+        this.fitBoundsService.fitBounds(SpatialService.getBounds([container.southWest, container.northEast]));
     }
 
     private saveBytesResponseToFile = async (data: string, fileName: string): Promise<boolean> => {

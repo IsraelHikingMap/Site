@@ -23,17 +23,17 @@ export class FitBoundsService {
         if (noPadding) {
             padding = 0;
         }
-        if (this.sidebarService.isSidebarOpen() && window.innerWidth < 768) {
+        if (this.sidebarService.isSidebarOpen() && window.innerWidth >= 768) {
             this.mapService.map.fitBounds(mbBounds,
                 {
                     maxZoom: maxZoom,
-                    padding: padding
+                    padding: { top: 50, left: 400, bottom: 50, right: 50 }
                 });
         } else {
             this.mapService.map.fitBounds(mbBounds,
                 {
                     maxZoom: maxZoom,
-                    padding: { top: 50, left: 400, bottom: 50, right: 50 }
+                    padding: padding
                 });
         }
     }
