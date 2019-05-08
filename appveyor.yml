@@ -1,6 +1,6 @@
 version: 8.0.{build}
 clone_depth: 3
-image: Visual Studio 2017
+image: Previous Visual Studio 2017
 configuration: Release
 environment:
     ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
