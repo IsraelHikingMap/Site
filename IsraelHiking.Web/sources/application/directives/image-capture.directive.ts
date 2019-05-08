@@ -61,7 +61,8 @@ export class ImageCaptureDirective implements OnDestroy {
             {
                 destinationType: Camera.DestinationType.DATA_URL,
                 sourceType: sourceType,
-                saveToPhotoAlbum: saveToPhotoAlbum
+                saveToPhotoAlbum: saveToPhotoAlbum,
+                correctOrientation: true
             });
     }
 
