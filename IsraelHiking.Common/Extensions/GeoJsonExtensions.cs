@@ -77,23 +77,7 @@ namespace IsraelHiking.Common.Extensions
 
         public static bool IsValidContainer(this IFeature feature)
         {
-            if (feature.Geometry is Point)
-            {
-                return false;
-            }
-            if (feature.Geometry is LineString)
-            {
-                return false;
-            }
-            if (feature.Geometry is MultiLineString)
-            {
-                return false;
-            }
-            if (feature.Geometry is MultiPoint)
-            {
-                return false;
-            }
-            if (feature.Geometry is GeometryCollection)
+            if (!(feature.Geometry is Polygon) && !(feature.Geometry is MultiPolygon))
             {
                 return false;
             }

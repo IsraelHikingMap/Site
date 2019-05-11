@@ -3,6 +3,7 @@ using System.Linq;
 using IsraelHiking.API.Converters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Valid;
 using OsmSharp;
 using OsmSharp.Tags;
 using OsmSharp.Complete;
@@ -395,6 +396,41 @@ namespace IsraelHiking.API.Tests.Converters
             Assert.AreEqual(1, multiLineString.Geometries.Length);
             var lineString = multiLineString.Geometries.First();
             Assert.AreEqual(4, lineString.Coordinates.Length);
+        }
+
+        [TestMethod]
+        public void ToGeoJson_RelationWithTouchingPolygones_ShouldReturnValidMultiPolygon()
+        {
+            int id = 1;
+            var node1 = CreateNode(id++, 0, 0);
+            var node2 = CreateNode(id++, 0, 1);
+            var node3 = CreateNode(id++, 1, 1);
+            var node4 = CreateNode(id++, 1, 0);
+            var node5 = CreateNode(id++, 0, 2);
+            var node6 = CreateNode(id++, 1, 2);
+            var node7 = CreateNode(id++, -1, -1);
+            var node8 = CreateNode(id++, 3, -1);
+            var node9 = CreateNode(id++, 3, 3);
+            var node10 = CreateNode(id++, -1, 3);
+            var polygon1inner = new CompleteWay { Id = id++, Nodes = new[] { node1, node2, node3, node4, node1 } };
+            var polygon2inner = new CompleteWay { Id = id++, Nodes = new[] { node2, node5, node6, node3, node2 } };
+            var polygonOuter = new CompleteWay { Id = id++, Nodes = new[] { node7, node8, node9, node10, node7 } };
+
+            var relation = new CompleteRelation { Id = id++, Tags = new TagsCollection() };
+            relation.Tags.Add(NAME, NAME);
+            relation.Tags.Add("type", "multipolygon");
+            relation.Members = new[] {
+                new CompleteRelationMember { Member = polygonOuter, Role = "outer" },
+                new CompleteRelationMember { Member = polygon1inner },
+                new CompleteRelationMember { Member = polygon2inner }
+            };
+
+            var feature = _converter.ToGeoJson(relation);
+            var multiPolygon = feature.Geometry as MultiPolygon;
+
+            Assert.IsNotNull(multiPolygon);
+            var isValidOp = new IsValidOp(multiPolygon);
+            Assert.IsTrue(isValidOp.IsValid);
         }
     }
 }

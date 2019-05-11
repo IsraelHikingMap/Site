@@ -105,7 +105,7 @@ In order to be able to make the server work a few prerequisits are needed:
 * Create a task to rebuild Graph Hopper and Elastic Search:
   * Open Windows' Task Scheduler
   * Create task
-  * Add an action to run `curl -k -X POST https://israelhiking.osm.org.il/api/update - d ""`
+  * Add an action to run `curl -k -X POST https://israelhiking.osm.org.il/api/update -d ""`
   * Add a "On a schedule" trigger to run once a day or at the frequency of the map updates.
-* Create a task to update elastic search using the above steps with the action `curl -k -X PUT https://israelhiking.osm.org.il/api/update - d ""`
+* Create a task to update elastic search using the above steps with the action `curl -k -X PUT https://israelhiking.osm.org.il/api/update -d ""`
 * Create a task to clean the IIS logs using `Scripts\CleanLogs.cmd`

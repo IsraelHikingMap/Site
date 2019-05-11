@@ -7,6 +7,7 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Valid;
 using Microsoft.Extensions.Logging;
 using OsmSharp.Tags;
 using OsmSharp.Complete;
@@ -72,7 +73,7 @@ namespace IsraelHiking.API.Executors
 
             geoJsonNamesDictionary.Values.SelectMany(v => v).ToList().ForEach(g =>
             {
-                var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(g.Geometry);
+                var isValidOp = new IsValidOp(g.Geometry);
                 if (!isValidOp.IsValid)
                 {
                     _logger.LogError($"{g.Geometry.GeometryType} with ID: {g.Attributes[FeatureAttributes.ID]} {isValidOp.ValidationError.Message} ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");

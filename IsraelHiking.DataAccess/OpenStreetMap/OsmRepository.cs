@@ -30,6 +30,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 var source = new PBFOsmStreamSource(osmFileStream);
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
                 var namesDictionary = completeSource
+                    .Where(o => !o.Tags.Contains("highway", "construction"))
                     .Where(o => string.IsNullOrWhiteSpace(o.Tags.GetName()) == false)
                     .GroupBy(o => o.Tags.GetName())
                     .ToDictionary(g => g.Key, g => g.ToList());
@@ -48,7 +49,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
                 var higways = completeSource
                     .OfType<CompleteWay>()
-                    .Where(o => o.Tags.ContainsKey("highway"))
+                    .Where(o => o.Tags.ContainsKey("highway") && !o.Tags.Contains("highway", "construction"))
                     .ToList();
                 _logger.LogInformation("Finished getting highways. " + higways.Count);
                 return higways;

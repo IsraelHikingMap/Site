@@ -5,6 +5,7 @@ using GeoAPI.Geometries;
 using IsraelHiking.Common;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Union;
 using OsmSharp.Complete;
 using OsmSharp;
 
@@ -143,11 +144,34 @@ namespace IsraelHiking.API.Converters
             var allWaysInRelationByRole = GetAllWaysGroupedByRole(relation);
             var outerWays = allWaysInRelationByRole.Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
             var outerPolygons = GetGeometriesFromWays(outerWays).OfType<IPolygon>().ToList();
+            outerPolygons = MergePolygons(outerPolygons);
             var innerWays = allWaysInRelationByRole.Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
             var innerPolygons = GetGeometriesFromWays(innerWays).OfType<IPolygon>().ToList();
+            innerPolygons = MergePolygons(innerPolygons);
             MergeInnerIntoOuterPolygon(ref outerPolygons, ref innerPolygons);
             var multiPolygon = new MultiPolygon(outerPolygons.Union(innerPolygons).ToArray());
             return new Feature(multiPolygon, ConvertTags(relation));
+        }
+
+        private List<IPolygon> MergePolygons(List<IPolygon> polygons)
+        {
+            if (!polygons.Any())
+            {
+                return polygons;
+            }
+            try
+            {
+                var merged = UnaryUnionOp.Union(polygons.Cast<IGeometry>().ToList());
+                if (merged is MultiPolygon multipolygon)
+                {
+                    return multipolygon.Geometries.Cast<IPolygon>().ToList();
+                }
+                return new List<IPolygon> { merged as Polygon };
+            }
+            catch
+            {
+                return polygons;
+            }
         }
 
         private void MergeInnerIntoOuterPolygon(ref List<IPolygon> outerPolygons, ref List<IPolygon> innerPolygons)
@@ -203,10 +227,6 @@ namespace IsraelHiking.API.Converters
 
         private bool IsMultipolygon(ICompleteOsmGeo relation)
         {
-            if (relation.Tags.ContainsKey(BOUNDARY))
-            {
-                return true;
-            }
             if (relation.Tags.ContainsKey(TYPE) == false)
             {
                 return false;
