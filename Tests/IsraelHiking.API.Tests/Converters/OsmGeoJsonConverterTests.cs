@@ -148,7 +148,7 @@ namespace IsraelHiking.API.Tests.Converters
                 Nodes = new[] {node1, node2, node3, node4}
             };
             var relation = new CompleteRelation { Id = 5, Tags = new TagsCollection() };
-            relation.Tags.Add("boundary", "true");
+            relation.Tags.Add("type", "boundary");
             relation.Members = new[] { new CompleteRelationMember { Member = way, Role = "outer" } };
 
             var feature = _converter.ToGeoJson(relation);
@@ -358,7 +358,7 @@ namespace IsraelHiking.API.Tests.Converters
                     new CompleteRelationMember {Member = wayOuter, Role = "outer"}
                 }
             };
-            relation.Tags.Add("boundary", "true");
+            relation.Tags.Add("type", "boundary");
 
             var geoJson = _converter.ToGeoJson(relation);
 
