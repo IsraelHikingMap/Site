@@ -116,7 +116,7 @@ namespace IsraelHiking.Common
             MaxLengthPerLine = 3000;
             RadialSimplificationAngle = 90;
             SearchFactor = 0.5;
-            MergePointsOfInterestThreshold = 0.0015;
+            MergePointsOfInterestThreshold = 1 / 60.0; // 1 minute
             BinariesFolder = string.Empty;
             OsmConfiguration = new OsmConfiguraionData
             {
