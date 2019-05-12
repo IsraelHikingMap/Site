@@ -4,8 +4,6 @@ import { MapComponent } from "ngx-mapbox-gl";
 import { Style, RasterSource, RasterLayout, Layer } from "mapbox-gl";
 import { Subscription } from "rxjs";
 
-import { FileService } from "../../services/file.service";
-
 @Component({
     selector: "auto-layer",
     templateUrl: "./automatic-layer-presentation.component.html"
@@ -13,9 +11,7 @@ import { FileService } from "../../services/file.service";
 export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
 
     constructor(private readonly host: MapComponent,
-        private readonly httpClient: HttpClient,
-        private readonly fileService: FileService,
-        ) {
+        private readonly httpClient: HttpClient) {
         let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
         this.rasterSourceId = `raster-source-${layerIndex}`;
