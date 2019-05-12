@@ -1,10 +1,12 @@
 ﻿<mgl-geojson-source id="routes-geojson" [data]="routesGeoJson"></mgl-geojson-source>
+<!--
+    antPath
+    [antPathDashLength]="5"
+    [antPathDashGap]="2"
+-->
 <mgl-layer id="route-line"
            type="line"
            source="routes-geojson"
-           antPath
-           [antPathDashLength]="5"
-           [antPathDashGap]="2"
            [before]="resources.endOfRoutes"
            [filter]="['==', '$type', 'LineString']"
            [layout]="{
