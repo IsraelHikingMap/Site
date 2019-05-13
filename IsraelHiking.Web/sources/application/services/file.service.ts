@@ -86,7 +86,7 @@ export class FileService {
         if (file.type === ImageResizeService.JPEG) {
             let container = await this.imageResizeService.resizeImageAndConvert(file);
             if (container.routes.length === 0 || container.routes[0].markers.length === 0) {
-                throw new Error("no geographic information found in file...")
+                throw new Error("no geographic information found in file...");
             }
             this.addRoutesFromContainer(container);
             return;
