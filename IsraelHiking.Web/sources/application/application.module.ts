@@ -91,7 +91,6 @@ import { RouteEditRouteInteraction } from "./components/intercations/route-edit-
 // directives
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 import { ImageCaptureDirective } from "./directives/image-capture.directive";
-import { AntPathDirective } from "./directives/ant-path.directive";
 // components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { MainMapComponent } from "./components/map/main-map.component";
@@ -405,8 +404,7 @@ NgModule({
         TracesComponent,
         AutomaticLayerPresentationComponent,
         NameInUseValidatorDirective,
-        ImageCaptureDirective,
-        AntPathDirective
+        ImageCaptureDirective
     ],
     bootstrap: [MainMapComponent]
 })

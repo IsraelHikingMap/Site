@@ -1,9 +1,4 @@
 ﻿<mgl-geojson-source id="routes-geojson" [data]="routesGeoJson"></mgl-geojson-source>
-<!--
-    antPath
-    [antPathDashLength]="5"
-    [antPathDashGap]="2"
--->
 <mgl-layer id="route-line"
            type="line"
            source="routes-geojson"
@@ -17,6 +12,17 @@
                 'line-color': ['get', 'color'],
                 'line-width': ['get', 'weight'],
                 'line-opacity': ['get', 'opacity']
+            }">
+</mgl-layer>
+<mgl-layer id="route-line-direction"
+           type="line"
+           source="routes-geojson"
+           [before]="resources.endOfRoutes"
+           [filter]="['==', '$type', 'LineString']"
+           [paint]="{
+                'line-width': ['get', 'weight'],
+                'line-opacity': ['get', 'opacity'],
+                'line-pattern': 'arrowline'
             }">
 </mgl-layer>
 <mgl-layer id="route-points"

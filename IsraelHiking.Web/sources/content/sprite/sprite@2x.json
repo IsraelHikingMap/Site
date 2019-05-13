@@ -350,9 +350,9 @@
 		"pixelRatio": 2
 	},
 	"bushes_pattern": {
-		"width": 128,
-		"height": 128,
-		"x": 398,
+		"width": 64,
+		"height": 64,
+		"x": 388,
 		"y": 908,
 		"pixelRatio": 2
 	},
@@ -434,10 +434,17 @@
 		"pixelRatio": 2
 	},
 	"arrowhead": {
-		"width": 72,
+		"width": 68,
 		"height": 60,
 		"x": 512,
-		"y": 650,
+		"y": 1300,
+		"pixelRatio": 2
+	},
+	"arrowline": {
+		"width": 64,
+		"height": 56,
+		"x": 640,
+		"y": 1300,
 		"pixelRatio": 2
 	},
 	"shield_blue": {

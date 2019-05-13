@@ -434,9 +434,16 @@
 		"pixelRatio": 1
 	},
 	"arrowhead": {
-		"width": 38,
+		"width": 34,
 		"height": 30,
 		"x": 256,
+		"y": 650,
+		"pixelRatio": 1
+	},
+	"arrowline": {
+		"width": 32,
+		"height": 28,
+		"x": 320,
 		"y": 650,
 		"pixelRatio": 1
 	},
