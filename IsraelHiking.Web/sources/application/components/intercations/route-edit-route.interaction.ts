@@ -102,7 +102,7 @@ export class RouteEditRouteInteraction {
 
     private handleDown = (event: MapMouseEvent) => {
         this.mouseDownPoint = event.point;
-        if (this.isMultiTouchEvent(event.originalEvent)) {
+        if (this.isTouchesBiggerThan(event.originalEvent, 1)) {
             this.selectedRoutePoint = null;
             this.selectedRouteSegments = [];
             this.state = "canceled";
@@ -156,7 +156,7 @@ export class RouteEditRouteInteraction {
             Math.abs((this.mouseDownPoint.x - event.point.x) + (this.mouseDownPoint.y - event.point.y)) < DRAG_PIXEL_TOLERANCE) {
             return;
         }
-        if (this.isMultiTouchEvent(event.originalEvent)) {
+        if (this.isTouchesBiggerThan(event.originalEvent, 1)) {
             return;
         }
         if (this.state === "down") {
@@ -219,8 +219,8 @@ export class RouteEditRouteInteraction {
         this.mouseDownPoint = null;
         // this is used here to support touch screen and prevent additional mouse events
         event.originalEvent.preventDefault();
-        if (event.originalEvent instanceof TouchEvent && event.originalEvent.touches.length > 0) {
-            // more than one touch - no need to do any thing.
+        if (this.isTouchesBiggerThan(event.originalEvent, 0)) {
+            // more than zero touches - no need to do any thing.
             return;
         }
         if (this.state === "canceled") {
@@ -433,7 +433,7 @@ export class RouteEditRouteInteraction {
         });
     }
 
-    private isMultiTouchEvent(event: Event): boolean {
-        return event instanceof TouchEvent && event.touches.length > 1;
+    private isTouchesBiggerThan(event: Event, touches: number): boolean {
+        return (window as any).TouchEvent && event instanceof TouchEvent && event.touches.length > touches;
     }
 }
