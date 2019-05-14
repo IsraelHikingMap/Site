@@ -59,7 +59,7 @@ import { SidebarService } from "./services/sidebar.service";
 import { HashService } from "./services/hash.service";
 import { LayersService } from "./services/layers/layers.service";
 import { DataContainerService } from "./services/data-container.service";
-import { RouteLayerFactory } from "./services/layers/routelayers/route-layer.factory";
+import { RoutesFactory } from "./services/layers/routelayers/routes.factory";
 import { RouterService } from "./services/routers/router.service";
 import { SnappingService } from "./services/snapping.service";
 import { FitBoundsService } from "./services/fit-bounds.service";
@@ -325,7 +325,7 @@ NgModule({
         HashService,
         LayersService,
         DataContainerService,
-        RouteLayerFactory,
+        RoutesFactory,
         RouterService,
         SnappingService,
         FitBoundsService,

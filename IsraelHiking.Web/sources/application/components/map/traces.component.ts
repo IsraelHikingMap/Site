@@ -7,8 +7,9 @@ import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducres/traces.reducer";
 import { AddRouteAction } from "../../reducres/routes.reducer";
+import { RoutesFactory } from "../../services/layers/routelayers/routes.factory";
 import { Trace, ApplicationState, LatLngAlt } from "../../models/models";
-import { RouteLayerFactory } from "../../services/layers/routelayers/route-layer.factory";
+
 
 @Component({
     selector: "traces",
@@ -34,7 +35,7 @@ export class TracesComponent extends BaseMapComponent {
     private missingParts$: Observable<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
 
     constructor(resources: ResourcesService,
-        private readonly routeLayerFactory: RouteLayerFactory,
+        private readonly routesFactory: RoutesFactory,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.isConfigOpen = false;
@@ -122,7 +123,7 @@ export class TracesComponent extends BaseMapComponent {
 
     public convertToRoute() {
         for (let route of this.visibleTrace.dataContainer.routes) {
-            let routeToAdd = this.routeLayerFactory.createRouteData(route.name);
+            let routeToAdd = this.routesFactory.createRouteData(route.name);
             routeToAdd.segments = route.segments;
             routeToAdd.markers = route.markers;
             this.ngRedux.dispatch(new AddRouteAction({

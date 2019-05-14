@@ -9,7 +9,7 @@ import { BaseMapComponent } from "./base-map.component";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToastService } from "../services/toast.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
-import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
+import { RoutesFactory } from "../services/layers/routelayers/routes.factory";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
@@ -42,7 +42,7 @@ export class LocationComponent extends BaseMapComponent {
         private readonly geoLocationService: GeoLocationService,
         private readonly toastService: ToastService,
         private readonly selectedRouteService: SelectedRouteService,
-        private readonly routeLayerFactory: RouteLayerFactory,
+        private readonly routesFactory: RoutesFactory,
         private readonly cancelableTimeoutService: CancelableTimeoutService,
         private readonly fitBoundsService: FitBoundsService,
         private readonly fileService: FileService,
@@ -205,7 +205,7 @@ export class LocationComponent extends BaseMapComponent {
                 `${date.toISOString().split("T")[0]} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
             name = this.resources.route + " " + dateString;
         }
-        let route = this.routeLayerFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
+        let route = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
         let currentLocation = this.geoLocationService.currentLocation;
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
         route.segments.push({

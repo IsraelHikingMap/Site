@@ -6,10 +6,10 @@ import { RouteData } from "../../../models/models";
 
 
 @Injectable()
-export class RouteLayerFactory {
+export class RoutesFactory {
 
-    private static readonly DEFAULT_OPACITY = 0.5;
-    private static readonly DEFAULT_WEIGHT = 7;
+    private static readonly DEFAULT_OPACITY = 0.9;
+    private static readonly DEFAULT_WEIGHT = 9;
 
     // default values - in case the response from server takes too long.
     public colors: string[] = [
@@ -42,8 +42,8 @@ export class RouteLayerFactory {
             description: "",
             state: "ReadOnly",
             color: color || this.colors[this.nextColorIndex],
-            opacity: RouteLayerFactory.DEFAULT_OPACITY,
-            weight: RouteLayerFactory.DEFAULT_WEIGHT,
+            opacity: RoutesFactory.DEFAULT_OPACITY,
+            weight: RoutesFactory.DEFAULT_WEIGHT,
             markers: [],
             segments: []
         };
@@ -54,8 +54,8 @@ export class RouteLayerFactory {
     public createRouteDataAddMissingFields(routeData: RouteData, color: string): RouteData {
         let route = { ...routeData };
         route.color = route.color || color;
-        route.opacity = route.opacity || RouteLayerFactory.DEFAULT_OPACITY;
-        route.weight = route.weight || RouteLayerFactory.DEFAULT_WEIGHT;
+        route.opacity = route.opacity || RoutesFactory.DEFAULT_OPACITY;
+        route.weight = route.weight || RoutesFactory.DEFAULT_WEIGHT;
         route.id = route.id || this.generateRandomId();
         route.state = "ReadOnly";
         return route;

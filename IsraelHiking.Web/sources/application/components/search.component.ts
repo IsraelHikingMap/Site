@@ -24,7 +24,7 @@ import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider, ISearchResultsPointOfInterest } from "../services/search-results.provider";
 import { BaseMapComponent } from "./base-map.component";
 import { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt } from "../models/models";
-import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
+import { RoutesFactory } from "../services/layers/routelayers/routes.factory";
 import { AddRouteAction } from "../reducres/routes.reducer";
 import { SpatialService } from "../services/spatial.service";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
@@ -80,7 +80,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         private readonly routerService: RouterService,
         private readonly fitBoundsService: FitBoundsService,
         private readonly toastService: ToastService,
-        private readonly routeLayerFactory: RouteLayerFactory,
+        private readonly routesFactory: RoutesFactory,
         private readonly router: Router,
         private readonly ngRedux: NgRedux<ApplicationState>
     ) {
@@ -228,7 +228,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public convertToRoute() {
-        let route = this.routeLayerFactory.createRouteData(this.directional.routeTitle);
+        let route = this.routesFactory.createRouteData(this.directional.routeTitle);
         route.segments = this.directional.routeSegments;
         this.ngRedux.dispatch(new AddRouteAction({
             routeData: route

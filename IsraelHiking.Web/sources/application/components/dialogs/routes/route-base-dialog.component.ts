@@ -3,10 +3,9 @@ import { Observable } from "rxjs";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { ToastService } from "../../../services/toast.service";
-import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
+import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
 import { BaseMapComponent } from "../../base-map.component";
 import { ApplicationState, RouteData } from "../../../models/models";
-import { ChangeRoutePropertiesAction } from "../../../reducres/routes.reducer";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 
 export abstract class RouteBaseDialogComponent extends BaseMapComponent {
@@ -22,11 +21,11 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         protected readonly selectedRouteService: SelectedRouteService,
-        protected readonly routeLayerFactory: RouteLayerFactory,
+        protected readonly routesFactory: RoutesFactory,
         protected readonly toastService: ToastService,
         protected readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
-        this.colors = this.routeLayerFactory.colors;
+        this.colors = this.routesFactory.colors;
     }
 
     public saveRoute() {

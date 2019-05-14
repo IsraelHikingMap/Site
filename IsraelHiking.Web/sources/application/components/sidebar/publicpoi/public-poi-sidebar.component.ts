@@ -13,7 +13,7 @@ import { ToastService } from "../../../services/toast.service";
 import { HashService, RouteStrings, IPoiRouterData } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducres/routes.reducer";
-import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
+import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducres/poi.reducer";
 import { SpatialService } from "../../../services/spatial.service";
@@ -60,7 +60,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         private readonly poiService: PoiService,
         private readonly authorizationService: AuthorizationService,
         private readonly selectedRouteService: SelectedRouteService,
-        private readonly routeLayerFactory: RouteLayerFactory,
+        private readonly routesFactory: RoutesFactory,
         private readonly toastService: ToastService,
         private readonly hashService: HashService,
         private readonly fitBoundsService: FitBoundsService,
@@ -275,7 +275,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes)) as RouteData[];
         for (let routeData of routesCopy) {
             let name = this.selectedRouteService.createRouteName(routeData.name);
-            let newRoute = this.routeLayerFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
+            let newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
             newRoute.description = this.info.description;
             newRoute.segments = routeData.segments;
             newRoute.markers = routeData.markers;

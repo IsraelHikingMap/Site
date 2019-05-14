@@ -5,7 +5,7 @@ import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { ToastService } from "../../../services/toast.service";
-import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
+import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
@@ -23,13 +23,13 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
 
     constructor(resources: ResourcesService,
         selectedRouteService: SelectedRouteService,
-        routeLayerFactory: RouteLayerFactory,
+        routesFactory: RoutesFactory,
         toastService: ToastService,
         ngRedux: NgRedux<ApplicationState>,
         private readonly fileService: FileService,
         private readonly fitBoundsService: FitBoundsService
     ) {
-        super(resources, selectedRouteService, routeLayerFactory, toastService, ngRedux);
+        super(resources, selectedRouteService, routesFactory, toastService, ngRedux);
 
         this.isNew = false;
         this.title = this.resources.routeProperties;

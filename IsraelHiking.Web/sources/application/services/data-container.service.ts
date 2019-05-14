@@ -11,7 +11,7 @@ import { FitBoundsService } from "./fit-bounds.service";
 import { BulkReplaceRoutesAction } from "../reducres/routes.reducer";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { MapService } from "./map.service";
-import { RouteLayerFactory } from "./layers/routelayers/route-layer.factory";
+import { RoutesFactory } from "./layers/routelayers/routes.factory";
 import { RunningContextService } from "./running-context.service";
 import { SetFileUrlAndBaseLayerAction } from "../reducres/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
@@ -20,8 +20,6 @@ import { DataContainer, ApplicationState, LayerData } from "../models/models";
 @Injectable()
 export class DataContainerService {
 
-    // private layersInitializationPromise: Promise<any>;
-
     constructor(private readonly shareUrlsService: ShareUrlsService,
         private readonly layersService: LayersService,
         private readonly fileService: FileService,
@@ -29,7 +27,7 @@ export class DataContainerService {
         private readonly toastService: ToastService,
         private readonly fitBoundsService: FitBoundsService,
         private readonly selectedRouteService: SelectedRouteService,
-        private readonly routeLayerFactory: RouteLayerFactory,
+        private readonly routesFactory: RoutesFactory,
         private readonly mapService: MapService,
         private readonly runningContextService: RunningContextService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -38,7 +36,7 @@ export class DataContainerService {
     public setData(dataContainer: DataContainer, keepCurrentRoutes: boolean) {
         let routesData = [];
         for (let route of dataContainer.routes) {
-            let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
+            let routeToAdd = this.routesFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
             routesData.push(routeToAdd);
         }
         if (keepCurrentRoutes) {
@@ -86,7 +84,6 @@ export class DataContainerService {
     }
 
     public setFileUrlAfterNavigation = async (url: string, baseLayer: string) => {
-        // await this.layersInitializationPromise;
         try {
             let data = await this.fileService.openFromUrl(url);
             this.ngRedux.dispatch(new SetFileUrlAndBaseLayerAction({
@@ -105,8 +102,6 @@ export class DataContainerService {
         if (shareUrl && shareUrl.id === shareId) {
             return;
         }
-        // HM TODO: do we need this promise?
-        // await this.layersInitializationPromise;
         try {
             shareUrl = await this.shareUrlsService.setShareUrlById(shareId);
             this.setData(shareUrl.dataContainer, false);

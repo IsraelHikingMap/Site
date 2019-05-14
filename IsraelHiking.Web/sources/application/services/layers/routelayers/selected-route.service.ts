@@ -15,7 +15,7 @@ import {
     AddPrivatePoiAction,
     ChangeEditStateAction
 } from "../../../reducres/routes.reducer";
-import { RouteLayerFactory } from "./route-layer.factory";
+import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "../../resources.service";
 import { RouteData, ApplicationState, RouteSegmentData, ILatLngTime } from "../../../models/models";
 import { SpatialService } from "../../spatial.service";
@@ -39,7 +39,7 @@ export class SelectedRouteService {
     private recordingRouteId$: Observable<string>;
 
     constructor(private readonly resourcesService: ResourcesService,
-        private readonly routeLayerFactory: RouteLayerFactory,
+        private readonly routesFactory: RoutesFactory,
         private readonly routerService: RouterService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         this.routes = [];
@@ -75,7 +75,7 @@ export class SelectedRouteService {
             this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: this.routes[0].id }));
         }
         if (this.routes.length === 0) {
-            let data = this.routeLayerFactory.createRouteData(this.createRouteName(), this.getLeastUsedColor());
+            let data = this.routesFactory.createRouteData(this.createRouteName(), this.getLeastUsedColor());
             this.ngRedux.dispatch(new AddRouteAction({ routeData: data }));
             this.setSelectedRoute(data.id);
         }
@@ -107,8 +107,8 @@ export class SelectedRouteService {
 
     public getLeastUsedColor() {
         let colorCount = Number.POSITIVE_INFINITY;
-        let selectedColor = this.routeLayerFactory.colors[0];
-        for (let color of this.routeLayerFactory.colors) {
+        let selectedColor = this.routesFactory.colors[0];
+        for (let color of this.routesFactory.colors) {
             let currentColorCount = this.routes.filter(r => r.color === color).length;
             if (currentColorCount < colorCount) {
                 selectedColor = color;
@@ -167,7 +167,7 @@ export class SelectedRouteService {
                 routingType: postfixSegments[0].routingType
             } as RouteSegmentData);
         let splitRouteData =
-            this.routeLayerFactory.createRouteData(
+            this.routesFactory.createRouteData(
                 this.createRouteName(selectedRoute.name + " " + this.resourcesService.split),
                 this.getLeastUsedColor());
         splitRouteData.segments = postfixSegments;
@@ -329,7 +329,7 @@ export class SelectedRouteService {
             if (this.isNameAvailable(routeData.name) === false) {
                 routeData.name = this.createRouteName(routeData.name);
             }
-            let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(routeData, this.getLeastUsedColor());
+            let routeToAdd = this.routesFactory.createRouteDataAddMissingFields(routeData, this.getLeastUsedColor());
             this.ngRedux.dispatch(new AddRouteAction({
                 routeData: routeToAdd
             }));
