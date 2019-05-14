@@ -3,7 +3,8 @@
             [maxZoom]="getBaseLayer().maxZoom"
             [opacity]="1.0"
             [visible]="true"
-            [before]="resources.endOfBaseLayer">
+            [before]="resources.endOfBaseLayer"
+            [isBaselayer]="true">
 </auto-layer>
 <div *ngFor="let overlay of (overlays | async)">
     <auto-layer [address]="overlay.address"

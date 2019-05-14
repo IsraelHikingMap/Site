@@ -78,7 +78,7 @@ export class HashService {
         let location = this.ngRedux.getState().location;
         this.router.navigate([
                 RouteStrings.ROUTE_MAP,
-                location.zoom.toFixed(2),
+                (location.zoom + 1).toFixed(2),
                 location.latitude.toFixed(HashService.PERSICION),
                 location.longitude.toFixed(HashService.PERSICION)
             ],
@@ -109,7 +109,7 @@ export class HashService {
         }
         let latLng = this.parsePathToGeoLocation();
         if (latLng != null) {
-            this.router.navigate([RouteStrings.ROUTE_MAP, latLng.alt, latLng.lat, latLng.lng], { replaceUrl: true });
+            this.router.navigate([RouteStrings.ROUTE_MAP, latLng.alt + 1, latLng.lat, latLng.lng], { replaceUrl: true });
             return;
         }
         // no flags - navigate to root
@@ -125,7 +125,7 @@ export class HashService {
         return {
             lat: +array[2],
             lng: +array[3],
-            alt: +array[1]
+            alt: +array[1] - 1
         };
     }
 

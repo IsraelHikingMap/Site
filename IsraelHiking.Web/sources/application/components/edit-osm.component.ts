@@ -35,7 +35,7 @@ export class EditOSMComponent extends BaseMapComponent {
         }
         let currentLocation = this.ngRedux.getState().location;
         return this.authorizationService.getEditOsmLocationAddress(baseLayerAddress,
-            currentLocation.zoom,
+            currentLocation.zoom + 1,
             currentLocation.latitude,
             currentLocation.longitude);
     }

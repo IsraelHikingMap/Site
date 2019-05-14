@@ -9,17 +9,6 @@ import { Subscription } from "rxjs";
     templateUrl: "./automatic-layer-presentation.component.html"
 })
 export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
-
-    constructor(private readonly host: MapComponent,
-        private readonly httpClient: HttpClient) {
-        let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
-        this.rasterLayerId = `raster-layer-${layerIndex}`;
-        this.rasterSourceId = `raster-source-${layerIndex}`;
-        this.sourceAdded = false;
-        this.jsonSourcesIds = [];
-        this.jsonLayersIds = [];
-    }
-
     private static indexNumber = 0;
 
     @Input()
@@ -34,12 +23,25 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     public visible: boolean;
     @Input()
     public before: string;
+    @Input()
+    public isBaselayer: string;
+
     private rasterSourceId;
     private rasterLayerId;
     private sourceAdded: boolean;
     private subscription: Subscription;
     private jsonSourcesIds: string[];
     private jsonLayersIds: string[];
+
+    constructor(private readonly host: MapComponent,
+        private readonly httpClient: HttpClient) {
+        let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
+        this.rasterLayerId = `raster-layer-${layerIndex}`;
+        this.rasterSourceId = `raster-source-${layerIndex}`;
+        this.sourceAdded = false;
+        this.jsonSourcesIds = [];
+        this.jsonLayersIds = [];
+    }
 
     public ngOnInit() {
         if (this.host.mapInstance == null) {
@@ -84,8 +86,8 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         let source = {
             type: "raster",
             tiles: [address],
-            minzoom: this.minZoom,
-            maxzoom: this.maxZoom,
+            minzoom: this.minZoom - 1,
+            maxzoom: this.maxZoom - 1,
             tileSize: 256
         } as RasterSource;
         this.host.mapInstance.addSource(this.rasterSourceId, source);
@@ -145,6 +147,9 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             this.createRasterLayer();
         } else {
             await this.createJsonLayer();
+        }
+        if (this.isBaselayer) {
+            this.host.mapInstance.setMinZoom(this.minZoom - 1);
         }
     }
 

@@ -33,7 +33,7 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
                 this.fitBoundsService.flyTo({
                     lng: +params[RouteStrings.LON],
                     lat: +params[RouteStrings.LAT]
-                }, +params[RouteStrings.ZOOM]);
+                }, +params[RouteStrings.ZOOM] - 1);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {
                 this.dataContainerService.setShareUrlAfterNavigation(params[RouteStrings.ID]);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL)) {

@@ -77,7 +77,7 @@ export class SnappingService {
         if (!this.map) {
             return;
         }
-        if (this.map.getZoom() <= 13 || this.enabled === false) {
+        if (this.map.getZoom() <= 12 || this.enabled === false) {
             this.highwaySnappings.splice(0);
             this.pointsSnappings.splice(0);
             return;
