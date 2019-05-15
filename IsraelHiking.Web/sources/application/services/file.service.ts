@@ -74,7 +74,7 @@ export class FileService {
     public getFullFilePath(relativePath: string) {
         return this.runningContextService.isCordova
             ? cordova.file.applicationDirectory + "www/" + relativePath
-            : window.origin + "/" + relativePath;
+            : (window.origin || window.location.origin) + "/" + relativePath;
     }
 
     public saveToFile = async (fileName: string, format: string, dataContainer: DataContainer): Promise<boolean> => {

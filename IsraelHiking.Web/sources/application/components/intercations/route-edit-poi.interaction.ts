@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, NgZone } from "@angular/core";
 import { MapMouseEvent, Map } from "mapbox-gl";
 import { MatDialog } from "@angular/material";
 import { NgRedux } from "@angular-redux/store";
@@ -14,6 +14,7 @@ import { ApplicationState, MarkerData, LatLngAlt } from "../../models/models";
 export class RouteEditPoiInteraction {
 
     constructor(private readonly matDialog: MatDialog,
+        private readonly ngZone: NgZone,
         private readonly selectedRouteService: SelectedRouteService,
         private readonly geoLocationService: GeoLocationService,
         private readonly snappingService: SnappingService,
@@ -29,14 +30,16 @@ export class RouteEditPoiInteraction {
     }
 
     private handleClick = (event: MapMouseEvent) => {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        if (selectedRoute == null) {
-            return;
-        }
-        if (selectedRoute.state !== "Poi") {
-            return;
-        }
-        this.addPrivatePoi(event.lngLat);
+        this.ngZone.run(() => {
+            let selectedRoute = this.selectedRouteService.getSelectedRoute();
+            if (selectedRoute == null) {
+                return;
+            }
+            if (selectedRoute.state !== "Poi") {
+                return;
+            }
+            this.addPrivatePoi(event.lngLat);
+        });
     }
 
     public handleDragEnd(latlng: LatLngAlt, index: number) {
