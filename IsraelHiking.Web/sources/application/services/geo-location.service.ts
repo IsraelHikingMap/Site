@@ -4,6 +4,7 @@ import { BackgroundGeolocationPlugin, Location } from "cordova-plugin-mauron85-b
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
+import { LoggingService } from "./logging.service";
 import { ILatLngTime } from "../models/models";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
@@ -26,6 +27,7 @@ export class GeoLocationService {
 
     constructor(private readonly resources: ResourcesService,
         private readonly runningContextService: RunningContextService,
+        private readonly loggingService: LoggingService,
         private readonly ngZone: NgZone) {
         this.watchNumber = -1;
         this.positionChanged = new EventEmitter<Position>();
@@ -78,6 +80,7 @@ export class GeoLocationService {
     }
 
     private startNavigator() {
+        this.loggingService.debug("Starting browser geo-location");
         if (window.navigator && window.navigator.geolocation) {
             if (this.watchNumber !== -1) {
                 return;
@@ -85,7 +88,13 @@ export class GeoLocationService {
             this.watchNumber = window.navigator.geolocation.watchPosition(
                 (position: Position): void => {
                     this.ngZone.run(() => {
-                        this.state = "tracking";
+                        this.loggingService.debug("geo-location received from browser location, bg: " + this.isBackground + " p: " + JSON.stringify(position));
+                        if (this.state === "searching") {
+                            this.state = "tracking";
+                        }
+                        if (this.state != "tracking") {
+                            return;
+                        }
                         this.validRecordingAndUpdate(position);
                     });
                 },
@@ -112,6 +121,7 @@ export class GeoLocationService {
     }
 
     private stopNavigator() {
+        this.loggingService.debug("Stopping browser geo-location: " + this.watchNumber);
         if (this.watchNumber !== -1) {
             window.navigator.geolocation.clearWatch(this.watchNumber);
             this.watchNumber = -1;
@@ -137,11 +147,17 @@ export class GeoLocationService {
         });
 
         BackgroundGeolocation.on("location", (location: Location) => {
+            this.loggingService.debug("geo-location received location, bg: " + this.isBackground + " l: " + JSON.stringify(location));
             if (this.isBackground === false) {
                 return;
             }
             this.ngZone.run(() => {
-                this.state = "tracking";
+                if (this.state === "searching") {
+                    this.state = "tracking";
+                }
+                if (this.state != "tracking") {
+                    return;
+                }
                 let position = {
                     coords: {
                         accuracy: location.accuracy,
@@ -172,21 +188,25 @@ export class GeoLocationService {
         BackgroundGeolocation.on("start",
             () => {
                 this.startNavigator();
+                this.loggingService.debug("Start geo-location service");
             });
 
         BackgroundGeolocation.on("stop",
             () => {
                 this.stopNavigator();
+                this.loggingService.debug("Stop geo-location service");
             });
 
         BackgroundGeolocation.on("background",
             () => {
                 this.isBackground = true;
+                this.loggingService.debug("geo-location now in background");
             });
 
         BackgroundGeolocation.on("foreground",
             () => {
                 this.isBackground = false;
+                this.loggingService.debug("geo-location now in foreground");
             });
     }
 
@@ -232,6 +252,7 @@ export class GeoLocationService {
         this.currentLocation = this.positionToLatLngTime(position);
         this.rejectedPosition = null;
         this.positionChanged.next(position);
+        this.loggingService.debug("Valid position, updating: [" + position.coords.longitude + "," + position.coords.latitude + "]");
     }
 
     private positionToLatLngTime(position: Position): ILatLngTime {

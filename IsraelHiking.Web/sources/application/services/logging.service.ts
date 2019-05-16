@@ -51,7 +51,15 @@ export class LoggingService {
         if (this.runningContextService.isProduction) {
             return;
         }
-        console.log(message);
+        console.debug(message);
         await this.writeToFile(new Date().toISOString() + " | DEBUG | " + message + "\n");
+    }
+
+    public async error(message: string) {
+        if (this.runningContextService.isProduction) {
+            return;
+        }
+        console.error(message);
+        await this.writeToFile(new Date().toISOString() + " | ERROR | " + message + "\n");
     }
 }

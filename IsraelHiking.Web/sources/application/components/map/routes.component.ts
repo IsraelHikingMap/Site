@@ -10,6 +10,7 @@ import { RouteEditRouteInteraction } from "../intercations/route-edit-route.inte
 import { SnappingService } from "../../services/snapping.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
+import { LoggingService } from "../../services/logging.service";
 import { LatLngAlt, ApplicationState, RouteData } from "../../models/models";
 
 interface RoutePointViewData {
@@ -47,6 +48,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
         private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
         private readonly snappingService: SnappingService,
+        private readonly loggingService: LoggingService,
         private readonly host: MapComponent
     ) {
         super(resources);
@@ -68,6 +70,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     private handleRoutesChanges = (routes: RouteData[]) => {
+        this.loggingService.debug("handling route change - this is where the UI gets updated.");
         this.routes = routes;
         this.snappingService.enable(this.isEditMode());
         if (!this.isEditMode()) {

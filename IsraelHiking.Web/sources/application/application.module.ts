@@ -1,5 +1,5 @@
 // 3rd party
-import { NgModule, APP_INITIALIZER, Injector } from "@angular/core";
+import { NgModule, APP_INITIALIZER, Injector, ErrorHandler } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
@@ -85,6 +85,7 @@ import { TracesService } from "./services/traces.service";
 import { OpenWithService } from "./services/open-with.service";
 import { LoggingService } from "./services/logging.service";
 import { DefaultStyleService } from "./services/default-style.service";
+import { GlobalErrorHandler } from "./services/global-error.handler";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -316,6 +317,7 @@ NgModule({
         { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
         { provide: "Window", useFactory: getWindow },
         { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [Injector], multi: true },
+        { provide: ErrorHandler, useClass: GlobalErrorHandler },
         NgxD3Service,
         GetTextCatalogService,
         MapService,

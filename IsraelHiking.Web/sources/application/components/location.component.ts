@@ -14,6 +14,7 @@ import { CancelableTimeoutService } from "../services/cancelable-timeout.service
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
 import { FileService } from "../services/file.service";
+import { LoggingService } from "../services/logging.service";
 import { AddRouteAction, AddRecordingPointAction } from "../reducres/routes.reducer";
 import { AddTraceAction } from "../reducres/traces.reducer";
 import { StopRecordingAction, StartRecordingAction } from "../reducres/route-editing-state.reducer";
@@ -46,6 +47,7 @@ export class LocationComponent extends BaseMapComponent {
         private readonly cancelableTimeoutService: CancelableTimeoutService,
         private readonly fitBoundsService: FitBoundsService,
         private readonly fileService: FileService,
+        private readonly loggingService: LoggingService,
         private readonly ngRedux: NgRedux<ApplicationState>,
         private readonly host: MapComponent) {
         super(resources);
@@ -266,6 +268,7 @@ export class LocationComponent extends BaseMapComponent {
 
         let recordingRoute = this.selectedRouteService.getRecordingRoute();
         if (recordingRoute != null) {
+            this.loggingService.debug("Adding a new point to the recording route.");
             this.ngRedux.dispatch(new AddRecordingPointAction({
                 routeId: recordingRoute.id,
                 latlng: this.geoLocationService.currentLocation
