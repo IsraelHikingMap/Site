@@ -93,7 +93,8 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
                 type: "circle",
                 source: "dummy",
                 layout: { visibility: "none" }
-            }];
+            }
+        ];
     }
 
     public moveEnd(e: DragEvent) {
