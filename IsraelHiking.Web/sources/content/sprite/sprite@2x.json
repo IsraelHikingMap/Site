@@ -287,7 +287,7 @@
 		"pixelRatio": 2
 	},
 	"ruins": {
-		"width": 28,
+		"width": 68,
 		"height": 68,
 		"x": 720,
 		"y": 600,
@@ -301,29 +301,29 @@
 		"pixelRatio": 2
 	},
 	"riding_park": {
-		"width": 64,
-		"height": 64,
+		"width": 128,
+		"height": 128,
 		"x": 120,
 		"y": 720,
 		"pixelRatio": 2
 	},
 	"RTG": {
-		"width": 64,
-		"height": 64,
+		"width": 128,
+		"height": 128,
 		"x": 300,
 		"y": 720,
 		"pixelRatio": 2
 	},
 	"square": {
-		"width": 64,
-		"height": 64,
+		"width": 68,
+		"height": 68,
 		"x": 480,
 		"y": 720,
 		"pixelRatio": 2
 	},
 	"flower": {
 		"width": 64,
-		"height": 64,
+		"height": 68,
 		"x": 600,
 		"y": 720,
 		"pixelRatio": 2
@@ -350,8 +350,8 @@
 		"pixelRatio": 2
 	},
 	"bushes_pattern": {
-		"width": 64,
-		"height": 64,
+		"width": 128,
+		"height": 128,
 		"x": 388,
 		"y": 908,
 		"pixelRatio": 2
@@ -359,7 +359,7 @@
 	"stones_pattern": {
 		"width": 128,
 		"height": 128,
-		"x": 492,
+		"x": 580,
 		"y": 908,
 		"pixelRatio": 2
 	},
@@ -394,7 +394,7 @@
 	"red_nesw_pattern": {
 		"width": 128,
 		"height": 128,
-		"x": 492,
+		"x": 580,
 		"y": 1100,
 		"pixelRatio": 2
 	},
@@ -429,8 +429,8 @@
 	"gradient_pattern": {
 		"width": 64,
 		"height": 64,
-		"x": 384,
-		"y": 1288,
+		"x": 388,
+		"y": 1292,
 		"pixelRatio": 2
 	},
 	"arrowhead": {
@@ -471,7 +471,7 @@
 	"shield_brown": {
 		"width": 136,
 		"height": 96,
-		"x":540,
+		"x": 540,
 		"y": 1444,
 		"pixelRatio": 2
 	}

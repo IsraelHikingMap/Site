@@ -57,6 +57,8 @@
     <Content Include="IsraelHiking.Web.nlog">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="sources\content\sprite\sprite%402x.json" />
+    <None Include="sources\content\sprite\sprite.json" />
     <None Include="angular.json" />
     <None Include="package-lock.json" />
     <None Include="sources\tsconfig.app.json" />

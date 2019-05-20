@@ -287,7 +287,7 @@
 		"pixelRatio": 1
 	},
 	"ruins": {
-		"width": 28,
+		"width": 34,
 		"height": 34,
 		"x": 360,
 		"y": 300,
@@ -315,15 +315,15 @@
 		"pixelRatio": 1
 	},
 	"square": {
-		"width": 32,
-		"height": 32,
+		"width": 34,
+		"height": 34,
 		"x": 240,
 		"y": 360,
 		"pixelRatio": 1
 	},
 	"flower": {
 		"width": 32,
-		"height": 32,
+		"height": 34,
 		"x": 300,
 		"y": 360,
 		"pixelRatio": 1
@@ -359,7 +359,7 @@
 	"stones_pattern": {
 		"width": 64,
 		"height": 64,
-		"x": 246,
+		"x": 290,
 		"y": 454,
 		"pixelRatio": 1
 	},
@@ -394,7 +394,7 @@
 	"red_nesw_pattern": {
 		"width": 64,
 		"height": 64,
-		"x": 246,
+		"x": 290,
 		"y": 550,
 		"pixelRatio": 1
 	},
@@ -429,8 +429,8 @@
 	"gradient_pattern": {
 		"width": 32,
 		"height": 32,
-		"x": 192,
-		"y": 644,
+		"x": 194,
+		"y": 646,
 		"pixelRatio": 1
 	},
 	"arrowhead": {
