@@ -56,7 +56,7 @@
                 }
               ]
             },
-            "android": {
+            "cordova": {
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -71,7 +71,7 @@
               "fileReplacements": [
                 {
                   "replace": "sources/environments/environment.ts",
-                  "with": "sources/environments/environment.android.ts"
+                  "with": "sources/environments/environment.cordova.ts"
                 }
               ]
             },

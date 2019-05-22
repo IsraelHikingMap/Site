@@ -11,8 +11,8 @@ npm install --loglevel=error
 Write-Host "increase-memory-limit"
 increase-memory-limit
 
-Write-Host "npm run build -- -c android --no-progress"
-npm run build -- -c android --no-progress
+Write-Host "npm run build:cordova -- --no-progress"
+npm run build:cordova -- --no-progress
 
 if ($lastexitcode)
 {

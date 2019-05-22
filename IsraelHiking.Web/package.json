@@ -114,6 +114,7 @@
     "build:watch": "ng build --watch",
     "build:prod": "ng build --prod",
     "build:prod-beta": "ng build --prod --base-href=/beta/",
+    "build:cordova": "ng build -c cordova",
     "build:cordova-watch": "ng build -c cordova-debug --watch",
     "test": "ng test",
     "lint": "ng lint --fix",
