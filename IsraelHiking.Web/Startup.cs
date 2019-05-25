@@ -179,7 +179,10 @@ namespace IsraelHiking.Web
                         Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices
                             .GetRequiredService<IFileSystemHelper>())
                     },
-                    StaticFileOptions = { ContentTypeProvider = fileExtensionContentTypeProvider },
+                    StaticFileOptions = {
+                        OnPrepareResponse = GetPrepareCORSResponse(),
+                        ContentTypeProvider = fileExtensionContentTypeProvider
+                    },
                 };
                 app.UseFileServer(fileServerOptions);
             }
@@ -197,8 +200,18 @@ namespace IsraelHiking.Web
             // wwwroot
             app.UseStaticFiles(new StaticFileOptions
             {
+                OnPrepareResponse = GetPrepareCORSResponse(),
                 ContentTypeProvider = fileExtensionContentTypeProvider
             });
+        }
+
+        private static Action<StaticFileResponseContext> GetPrepareCORSResponse()
+        {
+            return (StaticFileResponseContext ctx) =>
+            {
+                ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+                ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            };
         }
 
         private void InitializeServices(IServiceProvider serviceProvider)
