@@ -24,10 +24,12 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     private marker: MarkerData;
     private routeId: string;
     private markerIndex: number;
-    public imageLink: LinkData;
 
+    public url: LinkData;
+    public imageLink: LinkData;
     public showIcons: boolean;
     public showCoordinates: boolean;
+    public showUrl: boolean;
     public title: string;
     public markerType: string;
     public description: string;
@@ -104,8 +106,9 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         this.markerType = marker.type;
         this.title = marker.title;
         this.description = marker.description;
-        let url = marker.urls.find(u => u.mimeType.startsWith("image"));
-        this.imageLink = url;
+        this.imageLink = marker.urls.find(u => u.mimeType.startsWith("image"));
+        this.url = marker.urls.find(u => !u.mimeType.startsWith("image"));
+        this.showUrl = this.url != null;
     }
 
     public setMarkerType = (markerType: string): void => {
@@ -113,12 +116,20 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public save = () => {
+        let urls = [];
+        if (this.imageLink) {
+            urls.push(this.imageLink);
+        }
+        if (this.url) {
+            this.url.text = this.title;
+            urls.push(this.url);
+        }
         let updatedMarker = {
             title: this.title,
             description: this.description,
             latlng: this.marker.latlng,
             type: this.markerType,
-            urls: this.imageLink ? [this.imageLink] : [],
+            urls: urls,
         };
         this.ngRedux.dispatch(new UpdatePrivatePoiAction({
             index: this.markerIndex,
@@ -155,6 +166,22 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
             routeId: this.routeId,
             index: this.markerIndex
         }));
+    }
+
+    public addUrl() {
+        this.showUrl = true;
+        if (this.url == null) {
+            this.url = {
+                text: this.title,
+                mimeType: "text/html",
+                url: ""
+            }
+        }
+        
+    }
+
+    public removeUrl() {
+        this.url = null;
     }
 
     @HostListener("window:keydown", ["$event"])

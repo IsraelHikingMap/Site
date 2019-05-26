@@ -19,6 +19,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     private index: number;
 
     public imageLink: LinkData;
+    public url: LinkData;
     public title: string;
     public description: string;
     public showCoordinates: boolean;
@@ -53,6 +54,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
         this.title = this.marker.title;
         this.description = this.marker.description;
         this.imageLink = this.marker.urls.find(u => u.mimeType.startsWith("image"));
+        this.url = this.marker.urls.find(u => !u.mimeType.startsWith("image"));
     }
 
     public toggleCoordinates() {

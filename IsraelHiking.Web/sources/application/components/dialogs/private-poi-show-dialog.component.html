@@ -1,8 +1,11 @@
 ﻿<div [dir]="resources.direction">
     <div matDialogTitle>
-        <div>
+        <div *ngIf="url == null">
             {{title}}
         </div>
+        <a *ngIf="url != null" href="{{url.url}}" target="_blank">
+            {{title}}
+        </a>
         <div>
             <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
         </div>
