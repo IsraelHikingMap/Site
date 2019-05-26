@@ -1,7 +1,7 @@
-import { Injectable, ErrorHandler } from '@angular/core';
+import { Injectable, ErrorHandler } from "@angular/core";
 
-import { LoggingService } from './logging.service';
-import { RunningContextService } from './running-context.service';
+import { LoggingService } from "./logging.service";
+import { RunningContextService } from "./running-context.service";
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {

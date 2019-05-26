@@ -88,11 +88,12 @@ export class GeoLocationService {
             this.watchNumber = window.navigator.geolocation.watchPosition(
                 (position: Position): void => {
                     this.ngZone.run(() => {
-                        this.loggingService.debug("geo-location received from browser location, bg: " + this.isBackground + " p: " + JSON.stringify(position));
+                        this.loggingService.debug("geo-location received from browser location, bg: " +
+                            this.isBackground + " p: " + JSON.stringify(position));
                         if (this.state === "searching") {
                             this.state = "tracking";
                         }
-                        if (this.state != "tracking") {
+                        if (this.state !== "tracking") {
                             return;
                         }
                         this.validRecordingAndUpdate(position);
@@ -147,7 +148,8 @@ export class GeoLocationService {
         });
 
         BackgroundGeolocation.on("location", (location: Location) => {
-            this.loggingService.debug("geo-location received location, bg: " + this.isBackground + " l: " + JSON.stringify(location));
+            this.loggingService.debug("geo-location received location, bg: " +
+                this.isBackground + " l: " + JSON.stringify(location));
             if (this.isBackground === false) {
                 return;
             }
@@ -155,7 +157,7 @@ export class GeoLocationService {
                 if (this.state === "searching") {
                     this.state = "tracking";
                 }
-                if (this.state != "tracking") {
+                if (this.state !== "tracking") {
                     return;
                 }
                 let position = {

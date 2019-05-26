@@ -51,6 +51,7 @@ export class LoggingService {
         if (this.runningContextService.isProduction) {
             return;
         }
+        // tslint:disable-next-line
         console.debug(message);
         await this.writeToFile(new Date().toISOString() + " | DEBUG | " + message + "\n");
     }
