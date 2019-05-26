@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, EventEmitter } from "@angular/core";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { some } from "lodash";
@@ -17,7 +17,7 @@ import {
 } from "../../../reducres/routes.reducer";
 import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "../../resources.service";
-import { RouteData, ApplicationState, RouteSegmentData, ILatLngTime } from "../../../models/models";
+import { RouteData, ApplicationState, RouteSegmentData, ILatLngTime, LatLngAlt } from "../../../models/models";
 import { SpatialService } from "../../spatial.service";
 import { RouterService } from "../../routers/router.service";
 
@@ -38,11 +38,14 @@ export class SelectedRouteService {
     @select((state: ApplicationState) => state.routeEditingState.recordingRouteId)
     private recordingRouteId$: Observable<string>;
 
+    public selectedRouteHover: EventEmitter<LatLngAlt>;
+
     constructor(private readonly resourcesService: ResourcesService,
         private readonly routesFactory: RoutesFactory,
         private readonly routerService: RouterService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         this.routes = [];
+        this.selectedRouteHover = new EventEmitter();
         this.routes$.subscribe((r) => {
             this.routes = r;
         });
@@ -337,6 +340,9 @@ export class SelectedRouteService {
                 this.setSelectedRoute(routeToAdd.id);
             }
         }
+    }
 
+    public raiseHoverSelectedRoute(latLng: LatLngAlt) {
+        this.selectedRouteHover.emit(latLng);
     }
 }

@@ -11,7 +11,6 @@ import { BaseMapComponent } from "./base-map.component";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
-import { RunningContextService } from "../services/running-context.service";
 import { LatLngAlt, RouteData, ApplicationState } from "../models/models";
 import { GeoLocationService } from "../services/geo-location.service";
 
@@ -108,7 +107,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         private readonly routeStatisticsService: RouteStatisticsService,
         private readonly cancelableTimeoutService: CancelableTimeoutService,
         private readonly sidebarService: SidebarService,
-        private readonly runningContextService: RunningContextService,
         private readonly geoLocationService: GeoLocationService
     ) {
         super(resources);
@@ -139,6 +137,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.componentSubscriptions.push(this.sidebarService.sideBarStateChanged.subscribe(() => {
             this.redrawChart();
         }));
+        this.componentSubscriptions.push(this.selectedRouteService.selectedRouteHover.subscribe(this.onSelectedRouteHover));
     }
 
     private initializeStatistics(statistics: IRouteStatistics): void {
@@ -693,5 +692,22 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.chartElements.dragRect.style("display", "none");
         this.subRouteRange = null;
         this.initializeStatistics(this.statistics);
+    }
+
+    private onSelectedRouteHover = (latlng: LatLngAlt) => {
+        if (!this.statistics || !this.isVisible) {
+            return;
+        }
+        if (latlng == null) {
+            this.hideChartHover();
+            return;
+        }
+        let x = this.routeStatisticsService.findDistanceForLatLng(this.statistics, latlng);
+        if (x <= 0) {
+            this.hideChartHover();
+            return;
+        }
+        let point = this.routeStatisticsService.interpolateStatistics(this.statistics, x);
+        this.showChartHover(point);
     }
 }

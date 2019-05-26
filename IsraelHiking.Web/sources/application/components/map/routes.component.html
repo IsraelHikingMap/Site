@@ -12,7 +12,9 @@
                 'line-color': ['get', 'color'],
                 'line-width': ['get', 'weight'],
                 'line-opacity': ['get', 'opacity']
-            }">
+            }"
+            (mouseMove)="routeLineMouseOver($event)"
+            (mouseLeave)="routeLineMouseLeave()">
 </mgl-layer>
 <mgl-layer id="route-line-direction"
            type="line"

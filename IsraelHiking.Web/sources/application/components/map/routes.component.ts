@@ -297,4 +297,22 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && selectedRoute.id === route.id && selectedRoute.state === "Poi";
     }
+
+    public routeLineMouseOver(event) {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute == null) {
+            return;
+        }
+        if (event.features == null || event.features.length === 0) {
+            return;
+        }
+        if (event.features[0].properties.id !== selectedRoute.id) {
+            return;
+        }
+        this.selectedRouteService.raiseHoverSelectedRoute(event.lngLat);
+    }
+
+    public routeLineMouseLeave() {
+        this.selectedRouteService.raiseHoverSelectedRoute(null);
+    }
 }
