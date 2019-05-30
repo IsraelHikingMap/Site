@@ -78,9 +78,13 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
 
     private createRasterLayer() {
         let address = this.address;
+        let scheme = "xyz";
         if (this.address.toLocaleLowerCase().endsWith("/mapserver")) {
             // address += "/tile/{z}/{y}/{x}"
             address += "/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&f=image";
+        } else if (this.address.indexOf("{-y}") != -1) {
+            address = address.replace("{-y}", "{y}");
+            scheme = "tms";
         }
         address = this.fixNonHttpsAddress(address);
         let source = {
@@ -88,6 +92,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             tiles: [address],
             minzoom: this.minZoom - 1,
             maxzoom: this.maxZoom - 1,
+            scheme: scheme,
             tileSize: 256
         } as RasterSource;
         this.host.mapInstance.addSource(this.rasterSourceId, source);
