@@ -82,7 +82,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         if (this.address.toLocaleLowerCase().endsWith("/mapserver")) {
             // address += "/tile/{z}/{y}/{x}"
             address += "/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&f=image";
-        } else if (this.address.indexOf("{-y}") != -1) {
+        } else if (this.address.indexOf("{-y}") !== -1) {
             address = address.replace("{-y}", "{y}");
             scheme = "tms";
         }

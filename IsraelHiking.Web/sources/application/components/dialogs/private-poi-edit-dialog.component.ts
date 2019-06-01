@@ -175,9 +175,9 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                 text: this.title,
                 mimeType: "text/html",
                 url: ""
-            }
+            };
         }
-        
+
     }
 
     public removeUrl() {
