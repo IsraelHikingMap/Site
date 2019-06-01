@@ -3,6 +3,7 @@
 namespace IsraelHiking.DataAccess.Tests
 {
     [TestClass]
+    [Ignore]
     public class NakebGatewayTests
     {
         [TestMethod]
