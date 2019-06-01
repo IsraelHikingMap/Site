@@ -101,6 +101,7 @@ export class GeoLocationService {
                 },
                 (err) => {
                     // sending error will terminate the stream
+                    this.loggingService.error("Failed to start tracking " + JSON.stringify(err));
                     this.positionChanged.next(null);
                     this.disable();
                 },

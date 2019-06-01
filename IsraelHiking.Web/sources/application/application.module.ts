@@ -42,12 +42,8 @@ import { DndModule } from "@beyerleinf/ngx-dnd";
 import { NgxImageGalleryModule } from "ngx-image-gallery";
 import { NgxD3Service } from "ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
-import { NgReduxModule, NgRedux } from "@angular-redux/store";
+import { NgReduxModule } from "@angular-redux/store";
 import { NgxMapboxGLModule } from "ngx-mapbox-gl";
-import PouchDB from "pouchdb";
-import WorkerPouch from "worker-pouch";
-import WebFont from "webfontloader";
-import deepmerge from "deepmerge";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -85,6 +81,8 @@ import { TracesService } from "./services/traces.service";
 import { OpenWithService } from "./services/open-with.service";
 import { LoggingService } from "./services/logging.service";
 import { DefaultStyleService } from "./services/default-style.service";
+import { DatabaseService } from "./services/database.service";
+import { ApplicationExitService } from "./services/application-exit.service";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
@@ -144,69 +142,14 @@ import { TracesComponent } from "./components/map/traces.component";
 import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
 // variables and functions
 import { routes } from "./routes";
-import { ApplicationState } from "./models/models";
-import { rootReducer } from "./reducres/root.reducer";
-import { initialState } from "./reducres/initial-state";
-import { debounceTime } from "rxjs/operators";
-import { classToActionMiddleware } from "./reducres/reducer-action-decorator";
 
 export function initializeApplication(injector: Injector) {
     return async () => {
         let loggingService = injector.get<LoggingService>(LoggingService);
         try {
             await loggingService.debug("Starting IHM Application Initialization");
-            await new Promise((resolve, _) => {
-                WebFont.load({
-                    custom: {
-                        families: ["IsraelHikingMap"]
-                    },
-                    active: () => resolve(),
-                    inactive: () => resolve(),
-                    timeout: 5000
-                });
-            });
-            let runningContext = injector.get<RunningContextService>(RunningContextService);
-            let useWorkerPouch = (await WorkerPouch.isSupportedBrowser()) && !runningContext.isIos && !runningContext.isEdge;
-            let database;
-            await loggingService.debug(`useWorkerPouch: ${useWorkerPouch}`);
-            if (useWorkerPouch) {
-                (PouchDB as any).adapter("worker", WorkerPouch);
-                database = new PouchDB("IHM", { adapter: "worker", auto_compaction: true });
-            } else {
-                database = new PouchDB("IHM", { auto_compaction: true });
-            }
-            let storedState = initialState;
-            // tslint:disable-next-line
-            let ngRedux = injector.get(NgRedux) as NgRedux<ApplicationState>;
-            if (runningContext.isIFrame) {
-                ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
-            } else {
-                try {
-                    let dbState = await database.get("state") as any;
-                    storedState = deepmerge(initialState, dbState.state, {
-                        arrayMerge: (destinationArray, sourceArray) => {
-                            return sourceArray == null ? destinationArray : sourceArray;
-                        }
-                    });
-                    storedState.inMemoryState = initialState.inMemoryState;
-                    if (!runningContext.isCordova) {
-                        storedState.routes = initialState.routes;
-                    }
-                } catch (ex) {
-                    // no initial state.
-                    (database as any).put({
-                        _id: "state",
-                        state: initialState
-                    });
-                }
-                await loggingService.debug(JSON.stringify(storedState));
-                ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
-                ngRedux.select().pipe(debounceTime(useWorkerPouch ? 2000 : 30000)).subscribe(async (state) => {
-                    let dbState = await database.get("state") as any;
-                    dbState.state = state;
-                    (database as any).put(dbState);
-                });
-            }
+            await injector.get<DatabaseService>(DatabaseService).initialize();
+            injector.get<ApplicationExitService>(ApplicationExitService).initialize();
             injector.get<OpenWithService>(OpenWithService).initialize();
             await loggingService.debug("Finished IHM Application Initialization");
         } catch (error) {
@@ -353,6 +296,8 @@ NgModule({
         TracesService,
         LoggingService,
         DefaultStyleService,
+        DatabaseService,
+        ApplicationExitService,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction
     ],

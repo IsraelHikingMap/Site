@@ -24,7 +24,6 @@ export class OpenWithService {
     private static readonly URL = "/url/";
     private static readonly POI = "/poi/";
 
-
     constructor(private readonly resources: ResourcesService,
         private readonly runningContextService: RunningContextService,
         private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,

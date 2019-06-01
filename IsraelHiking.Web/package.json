@@ -64,7 +64,6 @@
     "redux-undo": "1.0.0-beta9-9-7",
     "rxjs": "6.3.3",
     "rxjs-compat": "6.3.3",
-    "webfontloader": "^1.6.28",
     "worker-pouch": "^2.1.0",
     "zone.js": "0.8.26"
   },

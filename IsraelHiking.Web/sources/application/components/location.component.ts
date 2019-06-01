@@ -192,6 +192,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     private stopRecording() {
+        this.loggingService.debug("Stop recording");
         let recordingRoute = this.selectedRouteService.getRecordingRoute();
         this.ngRedux.dispatch(new StopRecordingAction({
             routeId: recordingRoute.id
@@ -200,6 +201,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     private createRecordingRoute() {
+        this.loggingService.debug("Starting recording");
         let date = new Date();
         let name = this.resources.route + " " + date.toISOString().split("T")[0];
         if (!this.selectedRouteService.isNameAvailable(name)) {
