@@ -137,7 +137,6 @@
         <variable name="ALWAYS_USAGE_DESCRIPTION" value="App requires background tracking enabled" />
         <variable name="MOTION_USAGE_DESCRIPTION" value="App requires motion detection" />
     </plugin>
-    <plugin name="cordova-plugin-x-toast" spec="2.7.2" />
     <plugin name="cc.fovea.cordova.openwith" spec="^1.2.0">
         <variable name="ANDROID_MIME_TYPE" value="application/gpx" />
         <variable name="IOS_URL_SCHEME" value="israelhikingmap" />

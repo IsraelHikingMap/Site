@@ -18,12 +18,13 @@ interface PouchDB {
 
 @Injectable()
 export class DatabaseService {
-    private database;
+    private database: PouchDB.Database;
+    private updating: boolean;
 
     constructor(private readonly loggingService: LoggingService,
         private readonly runningContext: RunningContextService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
-
+        this.updating = false;
     }
 
     public async initialize() {
@@ -74,7 +75,12 @@ export class DatabaseService {
 
     private async updateState(state: ApplicationState) {
         let dbState = await this.database.get("state") as any;
+        if (this.updating) {
+            return;
+        }
+        this.updating = true;
         dbState.state = state;
-        this.database.put(dbState);
+        await this.database.put(dbState);
+        this.updating = false;
     }
 }

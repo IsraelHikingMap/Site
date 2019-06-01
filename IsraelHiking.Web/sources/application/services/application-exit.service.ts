@@ -5,6 +5,7 @@ import { RunningContextService } from "./running-context.service";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
+import { ToastService } from "./toast.service";
 
 declare var navigator: Navigator;
 declare var cordova: any;
@@ -15,7 +16,6 @@ interface Navigator {
 }
 
 interface Window {
-    plugins: any;
     resolveLocalFileSystemURL: Function;
 }
 
@@ -24,7 +24,8 @@ export class ApplicationExitService {
     constructor(private readonly resources: ResourcesService,
         private readonly databaseService: DatabaseService,
         private readonly runningContext: RunningContextService,
-        private readonly loggingService: LoggingService) {
+        private readonly loggingService: LoggingService,
+        private readonly toastService: ToastService) {
     }
 
     public initialize() {
@@ -39,6 +40,7 @@ export class ApplicationExitService {
             if (exitApp) {
                 clearInterval(interval);
                 if (navigator.app) {
+                    this.toastService.info(this.resources.wrappingThingsUp);
                     this.loggingService.debug("Starting IHM Application Exit");
                     await this.databaseService.close();
                     this.loggingService.debug("Finished IHM Application Exit");
@@ -49,7 +51,7 @@ export class ApplicationExitService {
                 }
             } else {
                 exitApp = true;
-                window.plugins.toast.showShortBottom(this.resources.clickBackAgainToCloseTheApp);
+                this.toastService.info(this.resources.clickBackAgainToCloseTheApp);
                 history.back();
             }
         }, false);
