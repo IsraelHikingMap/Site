@@ -131,12 +131,6 @@
     <plugin name="cordova-plugin-file" spec="^6.0.1" />
     <plugin name="cordova-plugin-camera" spec="~4.0.3" />
     <plugin name="cordova-plugin-insomnia" spec="^4.3.0" />
-    <plugin name="cordova-plugin-mauron85-background-geolocation" spec="3.0.1">
-        <variable name="GOOGLE_PLAY_SERVICES_VERSION" value="11+" />
-        <variable name="ANDROID_SUPPORT_LIBRARY_VERSION" value="26+" />
-        <variable name="ALWAYS_USAGE_DESCRIPTION" value="App requires background tracking enabled" />
-        <variable name="MOTION_USAGE_DESCRIPTION" value="App requires motion detection" />
-    </plugin>
     <plugin name="cc.fovea.cordova.openwith" spec="^1.2.0">
         <variable name="ANDROID_MIME_TYPE" value="application/gpx" />
         <variable name="IOS_URL_SCHEME" value="israelhikingmap" />
@@ -144,5 +138,15 @@
         <variable name="ANDROID_EXTRA_ACTIONS" value=" " />
     </plugin>
     <plugin name="cordova-plugin-device" spec="~2.0.2" />
+    <plugin name="cordova-plugin-mauron85-background-geolocation" spec="@mauron85/cordova-plugin-background-geolocation@~3.0.3">
+        <variable name="GOOGLE_PLAY_SERVICES_VERSION" value="11+" />
+        <variable name="ANDROID_SUPPORT_LIBRARY_VERSION" value="26+" />
+        <variable name="ICON" value="@mipmap/icon" />
+        <variable name="SMALL_ICON" value="@mipmap/icon" />
+        <variable name="ACCOUNT_NAME" value="@string/app_name" />
+        <variable name="ACCOUNT_LABEL" value="@string/app_name" />
+        <variable name="ACCOUNT_TYPE" value="$PACKAGE_NAME.account" />
+        <variable name="CONTENT_AUTHORITY" value="$PACKAGE_NAME" />
+    </plugin>
     <engine name="android" spec="^7.1.4" />
 </widget>

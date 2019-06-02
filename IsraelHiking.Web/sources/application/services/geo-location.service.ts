@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { BackgroundGeolocationPlugin, Location } from "cordova-plugin-mauron85-background-geolocation";
+import { BackgroundGeolocationPlugin, Location } from "@mauron85/cordova-plugin-background-geolocation";
 
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
@@ -145,7 +145,8 @@ export class GeoLocationService {
             debug: false,
             interval: 1000,
             fastestInterval: 1000,
-            activitiesInterval: 10000
+            activitiesInterval: 10000,
+            startForeground: true
         });
 
         BackgroundGeolocation.on("location", (location: Location) => {
