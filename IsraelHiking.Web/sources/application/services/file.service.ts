@@ -10,6 +10,7 @@ import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
+import { LoggingService } from "./logging.service";
 
 declare var cordova: any;
 
@@ -28,7 +29,8 @@ export class FileService {
         private readonly imageResizeService: ImageResizeService,
         private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
         private readonly selectedRouteService: SelectedRouteService,
-        private readonly fitBoundsService: FitBoundsService) {
+        private readonly fitBoundsService: FitBoundsService,
+        private readonly loggingService: LoggingService) {
         this.formats = [];
         this.httpClient.get(Urls.fileFormats).toPromise().then((response: IFormatViewModel[]) => {
             this.formats.splice(0);
@@ -144,30 +146,20 @@ export class FileService {
     private saveAsWorkAround(blob: Blob, fileName: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             if (this.runningContextService.isCordova) {
-                let folder = device.platform.toUpperCase().indexOf("OS") !== -1
-                    ? cordova.file.documentsDirectory
-                    : cordova.file.externalRootDirectory;
-                (window as any).resolveLocalFileSystemURL(folder,
-                    (directoryEntry) => {
-                        directoryEntry.getDirectory("IsraelHikingMap",
-                            { create: true },
-                            dir => {
-                                let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
-                                    .replace("Z", "_") +
-                                    fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
-                                dir.getFile(fullFileName,
-                                    { create: true },
-                                    fileEntry => {
-                                        fileEntry.createWriter(fileWriter => {
-                                            fileWriter.write(blob);
-                                            resolve(true);
-                                        });
-                                    },
-                                    reject);
-                            },
-                            reject);
-                    },
-                    reject);
+                this.loggingService.getIHMDirectory().then((dir) => {
+                    let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
+                        .replace("Z", "_") +
+                        fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
+                    dir.getFile(fullFileName,
+                        { create: true },
+                        fileEntry => {
+                            fileEntry.createWriter(fileWriter => {
+                                fileWriter.write(blob);
+                                resolve(true);
+                            });
+                        },
+                        reject);
+                }, reject);     
             } else {
                 this.nonAngularObjectsFactory.saveAs(blob, fileName);
                 resolve(false);

@@ -31,7 +31,7 @@ export class DatabaseService {
         let useWorkerPouch = (await WorkerPouch.isSupportedBrowser()) &&
             !this.runningContext.isIos &&
             !this.runningContext.isEdge;
-        await this.loggingService.debug(`useWorkerPouch: ${useWorkerPouch}`);
+        this.loggingService.debug(`useWorkerPouch: ${useWorkerPouch}`);
         if (useWorkerPouch) {
             (PouchDB as any).adapter("worker", WorkerPouch);
             this.database = new PouchDB("IHM", { adapter: "worker", auto_compaction: true });
@@ -60,7 +60,7 @@ export class DatabaseService {
                     state: initialState
                 });
             }
-            await this.loggingService.debug(JSON.stringify(storedState));
+            this.loggingService.debug(JSON.stringify(storedState));
             this.ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
             this.ngRedux.select().pipe(debounceTime(useWorkerPouch ? 2000 : 30000)).subscribe(async (state: ApplicationState) => {
                 this.updateState(state);
@@ -82,5 +82,6 @@ export class DatabaseService {
         dbState.state = state;
         await this.database.put(dbState);
         this.updating = false;
+        this.loggingService.debug("State was updated");
     }
 }

@@ -46,11 +46,11 @@ export class ApplicationExitService {
                 if (this.state === "FirstClick") {
                     this.state = "SecondClick";
                     this.toastService.info(this.resources.wrappingThingsUp);
-                    await this.loggingService.debug("Starting IHM Application Exit");
+                    this.loggingService.debug("Starting IHM Application Exit");
                     await this.databaseService.close();
-                    await this.loggingService.debug("Finished IHM Application Exit");
+                    this.loggingService.debug("Finished IHM Application Exit");
                     if (!this.runningContext.isProduction) {
-                        await this.moveLogFile();
+                        this.loggingService.close();
                     }
                     navigator.app.exitApp();
                 } else if (this.state === "None") {
@@ -60,30 +60,5 @@ export class ApplicationExitService {
                 }
             })
         }, false);
-    }
-
-    private moveLogFile(): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
-            let folder = device.platform.toUpperCase().indexOf("OS") !== -1
-                ? cordova.file.documentsDirectory
-                : cordova.file.externalRootDirectory;
-            window.resolveLocalFileSystemURL(folder,
-                (directoryEntry: DirectoryEntry) => {
-                    directoryEntry.getDirectory("IsraelHikingMap",
-                        { create: true },
-                        dir => {
-                            let fullFileName = "log.txt";
-                            dir.getFile(fullFileName,
-                                { create: false },
-                                fileEntry => {
-                                    let newFileName = "log_" + new Date().toISOString().split(":").join("-").replace("T", "_") + ".txt";
-                                    fileEntry.moveTo(dir, newFileName, resolve, reject);
-                                },
-                                reject);
-                        },
-                        reject);
-                },
-                reject);
-        });
     }
 }

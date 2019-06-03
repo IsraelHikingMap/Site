@@ -52,17 +52,16 @@ export class GeoLocationService {
 
         }
     }
+
     public disable() {
-        this.ngZone.run(() => {
-            switch (this.state) {
-                case "disabled":
-                    return;
-                case "searching":
-                case "tracking":
-                    this.stopWatching();
-                    return;
-            }
-        });
+        switch (this.state) {
+            case "disabled":
+                return;
+            case "searching":
+            case "tracking":
+                this.stopWatching();
+                return;
+        }
     }
 
     public canRecord(): boolean {
@@ -89,7 +88,7 @@ export class GeoLocationService {
                 (position: Position): void => {
                     this.ngZone.run(() => {
                         this.loggingService.debug("geo-location received from browser location, bg: " +
-                            this.isBackground + " p: " + JSON.stringify(position));
+                            this.isBackground + " p: " + JSON.stringify(this.positionToLatLngTime(position)));
                         if (this.state === "searching") {
                             this.state = "tracking";
                         }
@@ -100,10 +99,12 @@ export class GeoLocationService {
                     });
                 },
                 (err) => {
-                    // sending error will terminate the stream
-                    this.loggingService.error("Failed to start tracking " + JSON.stringify(err));
-                    this.positionChanged.next(null);
-                    this.disable();
+                    this.ngZone.run(() => {
+                        // sending error will terminate the stream
+                        this.loggingService.error("Failed to start tracking " + JSON.stringify(err));
+                        this.positionChanged.next(null);
+                        this.disable();
+                    });
                 },
                 {
                     enableHighAccuracy: true,
@@ -152,9 +153,9 @@ export class GeoLocationService {
         BackgroundGeolocation.on("location", (location: Location) => {
             this.loggingService.debug("geo-location received location, bg: " +
                 this.isBackground + " l: " + JSON.stringify(location));
-            if (this.isBackground === false) {
-                return;
-            }
+            //if (this.isBackground === false) {
+            //    return;
+            //}
             this.ngZone.run(() => {
                 if (this.state === "searching") {
                     this.state = "tracking";
@@ -191,13 +192,13 @@ export class GeoLocationService {
 
         BackgroundGeolocation.on("start",
             () => {
-                this.startNavigator();
+                //this.startNavigator();
                 this.loggingService.debug("Start geo-location service");
             });
 
         BackgroundGeolocation.on("stop",
             () => {
-                this.stopNavigator();
+                //this.stopNavigator();
                 this.loggingService.debug("Stop geo-location service");
             });
 
@@ -216,47 +217,53 @@ export class GeoLocationService {
 
     private validRecordingAndUpdate(position: Position) {
         if (this.currentLocation == null) {
+            this.loggingService.debug("Adding the first position: " + JSON.stringify(this.positionToLatLngTime(position)));
             this.updatePositionAndRaiseEvent(position);
             return;
         }
-        if (this.isValid(this.currentLocation, position)) {
+        let nonValidReason = this.isValid(this.currentLocation, position)
+        if (nonValidReason === "") {
             this.updatePositionAndRaiseEvent(position);
             return;
         }
         if (this.rejectedPosition == null) {
             this.rejectedPosition = this.positionToLatLngTime(position);
+            this.loggingService.debug("Rejecting position: " + JSON.stringify(this.positionToLatLngTime(position)) + " reason:" + nonValidReason);
             return;
         }
-        if (this.isValid(this.rejectedPosition, position)) {
+        nonValidReason = this.isValid(this.rejectedPosition, position)
+        if (nonValidReason === "") {
+            this.loggingService.debug("Validating a rejected position: " + JSON.stringify(this.positionToLatLngTime(position)));
             this.updatePositionAndRaiseEvent(position);
             return;
         }
         this.rejectedPosition = this.positionToLatLngTime(position);
+        this.loggingService.debug("Rejecting position for rejected: " + JSON.stringify(position) + " reason: " + nonValidReason);
     }
 
-    private isValid(test: ILatLngTime, position: Position): boolean {
+    private isValid(test: ILatLngTime, position: Position): string {
         let distance = SpatialService.getDistanceInMeters(test, this.positionToLatLngTime(position));
         let timeDifference = Math.abs(position.timestamp - test.timestamp.getTime()) / 1000;
         if (timeDifference === 0) {
-            return false;
+            return "Time difference is 0";
         }
         if (distance / timeDifference > GeoLocationService.MAX_SPPED) {
-            return false;
+            return "Spped too high: " + distance / timeDifference;
         }
         if (timeDifference > GeoLocationService.MAX_TIME_DIFFERENCE) {
-            return false;
+            return "Time difference too high: " + timeDifference;
         }
         if (position.coords.accuracy > GeoLocationService.MIN_ACCURACY) {
-            return false;
+            return "Accuracy too low: " + position.coords.accuracy;
         }
-        return true;
+        return "";
     }
 
     private updatePositionAndRaiseEvent(position: Position) {
         this.currentLocation = this.positionToLatLngTime(position);
         this.rejectedPosition = null;
         this.positionChanged.next(position);
-        this.loggingService.debug("Valid position, updating: [" + position.coords.longitude + "," + position.coords.latitude + "]");
+        this.loggingService.debug("Valid position, updating: (" + position.coords.latitude + ", " + position.coords.longitude + ")");
     }
 
     private positionToLatLngTime(position: Position): ILatLngTime {
