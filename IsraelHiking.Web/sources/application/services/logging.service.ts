@@ -13,7 +13,7 @@ export class LoggingService {
     private fileWriter: FileWriter;
 
     constructor(private readonly runningContextService: RunningContextService) {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCordova || this.runningContextService.isProduction) {
             return;
         }
         this.queue = [];
@@ -40,6 +40,9 @@ export class LoggingService {
     }
 
     private writeToFile(message: string): void {
+        if (!this.runningContextService.isCordova) {
+            return;
+        }
         if (this.fileWriter && this.fileWriter.readyState !== FileWriter.WRITING) {
             this.fileWriter.write(message as any);
         } else {
@@ -47,7 +50,7 @@ export class LoggingService {
         }
     }
 
-    public log(message: string) {
+    public info(message: string) {
         console.log(message);
         this.writeToFile(new Date().toISOString() + " |  INFO | " + message + "\n");
     }
@@ -70,6 +73,9 @@ export class LoggingService {
     }
 
     public async close(): Promise<any> {
+        if (this.runningContextService.isProduction) {
+            return;
+        }
         let checkQueuePromise = new Promise((resolve, _) => {
             var checkQueue = () => {
                 if (this.queue.length == 0) {
