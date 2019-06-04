@@ -16,7 +16,6 @@
     "@angular/router": "7.1.1",
     "@beyerleinf/ngx-dnd": "6.0.0-preview3",
     "@mapbox/mapbox-gl-rtl-text": "0.2.1",
-    "@mauron85/cordova-plugin-background-geolocation": "^3.0.3",
     "@ngx-progressbar/core": "5.3.1",
     "@ngx-progressbar/http": "5.3.1",
     "@nicky-lenaers/ngx-scroll-to": "1.1.1",
