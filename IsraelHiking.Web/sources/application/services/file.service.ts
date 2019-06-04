@@ -159,7 +159,7 @@ export class FileService {
                             });
                         },
                         reject);
-                }, reject);     
+                }, reject);
             } else {
                 this.nonAngularObjectsFactory.saveAs(blob, fileName);
                 resolve(false);

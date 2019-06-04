@@ -1,3 +1,4 @@
+/// <reference types="cordova-plugin-device"/>
 import { TestBed, inject, fakeAsync } from "@angular/core/testing";
 import { HttpClientModule, HttpClient } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
@@ -10,6 +11,7 @@ import { DataContainer, MarkerData, RouteData } from "../models/models";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
+import { LoggingService } from "./logging.service";
 
 describe("FileService", () => {
 
@@ -39,15 +41,18 @@ describe("FileService", () => {
             ],
             providers: [
                 RunningContextService,
+                LoggingService,
                 {
                     provide: FileService,
-                    useFactory: fakeAsync((http, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+                    useFactory: fakeAsync((http, mockBackend: HttpTestingController,
+                        runningContextService: RunningContextService, loggingService: LoggingService) => {
                         let fileService = new FileService(http,
                             runningContextService,
                             imageResizeService,
                             nonAngularObjectsFactory,
                             selectedRouteService,
-                            fitBoundsService);
+                            fitBoundsService,
+                            loggingService);
                         mockBackend.expectOne(Urls.fileFormats).flush([{
                             extension: "ex",
                             label: "label",
@@ -55,7 +60,7 @@ describe("FileService", () => {
                         } as IFormatViewModel]);
                         return fileService;
                     }),
-                    deps: [HttpClient, HttpTestingController, RunningContextService]
+                    deps: [HttpClient, HttpTestingController, RunningContextService, LoggingService]
                 }
             ]
         });

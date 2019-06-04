@@ -1,4 +1,4 @@
-﻿/// <reference types="cordova-plugin-device"/>
+/// <reference types="cordova-plugin-device"/>
 import { Injectable } from "@angular/core";
 
 import { RunningContextService } from "./running-context.service";
@@ -9,7 +9,7 @@ declare var cordova: any;
 export class LoggingService {
     private static readonly LOG_FILE_NAME = "log.txt";
 
-    private queue: string[]
+    private queue: string[];
     private fileWriter: FileWriter;
 
     constructor(private readonly runningContextService: RunningContextService) {
@@ -31,7 +31,7 @@ export class LoggingService {
                                 this.fileWriter.write(this.queue[0] as any);
                                 this.queue.splice(0, 1);
                             }
-                        }
+                        };
                     });
                 },
                 () => { }
@@ -77,20 +77,20 @@ export class LoggingService {
             return;
         }
         let checkQueuePromise = new Promise((resolve, _) => {
-            var checkQueue = () => {
-                if (this.queue.length == 0) {
+            let checkQueue = () => {
+                if (this.queue.length === 0) {
                     resolve();
                     return;
                 }
                 setTimeout(checkQueue, 100);
-            }
+            };
             setTimeout(checkQueue, 100);
         });
         await checkQueuePromise;
         this.fileWriter = null;
         await new Promise<any>((resolve, reject) => {
             if (this.queue.length > 0) {
-                setTimeout(() => this.close(), 100)
+                setTimeout(() => this.close(), 100);
             }
             this.getIHMDirectory().then((dir) => {
                 let fullFileName = LoggingService.LOG_FILE_NAME;
@@ -116,7 +116,7 @@ export class LoggingService {
                         { create: true },
                         dir => {
                             resolve(dir);
-                        }, reject)
+                        }, reject);
                 }, resolve);
         });
     }

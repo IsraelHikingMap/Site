@@ -11,7 +11,7 @@ declare var navigator: Navigator;
 declare var cordova: any;
 declare var window: Window;
 
-declare type ExitState = "None" | "FirstClick" | "SecondClick"
+declare type ExitState = "None" | "FirstClick" | "SecondClick";
 
 interface Navigator {
     app: any;
@@ -42,7 +42,7 @@ export class ApplicationExitService {
         document.addEventListener("backbutton", async (e) => {
             e.preventDefault();
             await this.ngZone.run(async () => {
-                setTimeout(() => { this.state = "None" }, 5000);
+                setTimeout(() => { this.state = "None"; }, 5000);
                 if (this.state === "FirstClick") {
                     this.state = "SecondClick";
                     this.toastService.info(this.resources.wrappingThingsUp);
@@ -56,7 +56,7 @@ export class ApplicationExitService {
                     this.toastService.info(this.resources.clickBackAgainToCloseTheApp);
                     history.back();
                 }
-            })
+            });
         }, false);
     }
 }

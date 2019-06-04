@@ -153,9 +153,9 @@ export class GeoLocationService {
         BackgroundGeolocation.on("location", (location: Location) => {
             this.loggingService.debug("geo-location received location, bg: " +
                 this.isBackground + " l: " + JSON.stringify(location));
-            //if (this.isBackground === false) {
+            // if (this.isBackground === false) {
             //    return;
-            //}
+            // }
             this.ngZone.run(() => {
                 if (this.state === "searching") {
                     this.state = "tracking";
@@ -192,13 +192,13 @@ export class GeoLocationService {
 
         BackgroundGeolocation.on("start",
             () => {
-                //this.startNavigator();
+                // this.startNavigator();
                 this.loggingService.debug("Start geo-location service");
             });
 
         BackgroundGeolocation.on("stop",
             () => {
-                //this.stopNavigator();
+                // this.stopNavigator();
                 this.loggingService.debug("Stop geo-location service");
             });
 
@@ -221,17 +221,18 @@ export class GeoLocationService {
             this.updatePositionAndRaiseEvent(position);
             return;
         }
-        let nonValidReason = this.isValid(this.currentLocation, position)
+        let nonValidReason = this.isValid(this.currentLocation, position);
         if (nonValidReason === "") {
             this.updatePositionAndRaiseEvent(position);
             return;
         }
         if (this.rejectedPosition == null) {
             this.rejectedPosition = this.positionToLatLngTime(position);
-            this.loggingService.debug("Rejecting position: " + JSON.stringify(this.positionToLatLngTime(position)) + " reason:" + nonValidReason);
+            this.loggingService.debug("Rejecting position: " + JSON.stringify(this.positionToLatLngTime(position)) +
+                " reason:" + nonValidReason);
             return;
         }
-        nonValidReason = this.isValid(this.rejectedPosition, position)
+        nonValidReason = this.isValid(this.rejectedPosition, position);
         if (nonValidReason === "") {
             this.loggingService.debug("Validating a rejected position: " + JSON.stringify(this.positionToLatLngTime(position)));
             this.updatePositionAndRaiseEvent(position);
