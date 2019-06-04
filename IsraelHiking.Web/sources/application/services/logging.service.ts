@@ -1,4 +1,5 @@
 /// <reference types="cordova-plugin-device"/>
+/// <reference types="cordova-plugin-file"/>
 import { Injectable } from "@angular/core";
 
 import { RunningContextService } from "./running-context.service";
