@@ -1,0 +1,12 @@
+﻿<div class="banner-container" *ngIf="isOpen">
+    <mat-card [dir]="resources.direction">
+        <mat-card-title>Israel Hiking על אייפון</mat-card-title>
+        <mat-card-content>השקנו קמפיין מימון המונים ואתם יכולים לתמוך בו, גם אם יש לכם אנדרואיד!</mat-card-content>
+        <mat-card-actions>
+            <div fxLayout="row" fxLayoutAlign="end center">
+                <button mat-button (click)="later()" angulartics2On="click" angularticsCategory="banner" angularticsAction="later">אולי אח"כ...</button>
+                <a mat-raised-button (click)="tellMeMore()" color="primary" target="_blank" href="https://giveback.co.il/project/52018" angulartics2On="click" angularticsCategory="banner" angularticsAction="tell me more">ספרו לי עוד!</a>
+            </div>
+        </mat-card-actions>
+    </mat-card>
+</div>
