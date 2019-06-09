@@ -209,6 +209,10 @@ namespace IsraelHiking.Web
         {
             return (StaticFileResponseContext ctx) =>
             {
+                if (ctx.Context.Response.Headers.Keys.Contains("Access-Control-Allow-Origin"))
+                {
+                    ctx.Context.Response.Headers.Remove("Access-Control-Allow-Origin");
+                }
                 ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
                 ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
             };
