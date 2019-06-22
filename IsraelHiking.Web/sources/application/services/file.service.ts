@@ -74,9 +74,14 @@ export class FileService {
     }
 
     public getFullFilePath(relativePath: string) {
-        return this.runningContextService.isCordova
-            ? cordova.file.applicationDirectory + "www/" + relativePath
-            : (window.origin || window.location.origin) + "/" + relativePath;
+        if (!this.runningContextService.isCordova) {
+            return (window.origin || window.location.origin) + "/" + relativePath;
+        }
+        let path = cordova.file.applicationDirectory + "www/" + relativePath;
+        if (this.runningContextService.isIos) {
+            return (window as any).Ionic.WebView.convertFileSrc(path);
+        }
+        return path;
     }
 
     public saveToFile = async (fileName: string, format: string, dataContainer: DataContainer): Promise<boolean> => {
