@@ -29,7 +29,6 @@ import { AddRouteAction } from "../reducres/routes.reducer";
 import { SpatialService } from "../services/spatial.service";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
 
-
 export interface ISearchContext {
     searchTerm: string;
     searchResults: ISearchResultsPointOfInterest[];
@@ -69,20 +68,20 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     private requestsQueue: ISearchRequestQueueItem[];
     private selectFirstSearchResults: boolean;
 
-    @ViewChild("searchFromInput")
+    @ViewChild("searchFromInput", { static: false })
     public searchFromInput: ElementRef;
 
     @ViewChildren(MatAutocompleteTrigger)
     public matAutocompleteTriggers: QueryList<MatAutocompleteTrigger>;
 
     constructor(resources: ResourcesService,
-        private readonly searchResultsProvider: SearchResultsProvider,
-        private readonly routerService: RouterService,
-        private readonly fitBoundsService: FitBoundsService,
-        private readonly toastService: ToastService,
-        private readonly routesFactory: RoutesFactory,
-        private readonly router: Router,
-        private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly searchResultsProvider: SearchResultsProvider,
+                private readonly routerService: RouterService,
+                private readonly fitBoundsService: FitBoundsService,
+                private readonly toastService: ToastService,
+                private readonly routesFactory: RoutesFactory,
+                private readonly router: Router,
+                private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
         this.requestsQueue = [];
@@ -291,7 +290,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     private internalSearch = async (searchContext: ISearchContext) => {
         let searchTerm = searchContext.searchTerm;
         this.requestsQueue.push({
-            searchTerm: searchTerm
+            searchTerm
         } as ISearchRequestQueueItem);
         try {
             let results = await this.searchResultsProvider.getResults(searchTerm, this.resources.hasRtlCharacters(searchTerm));

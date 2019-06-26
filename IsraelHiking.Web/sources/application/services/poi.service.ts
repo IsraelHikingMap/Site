@@ -42,9 +42,9 @@ export class PoiService {
     private poiCache: PointOfInterestExtended[];
 
     constructor(private readonly resources: ResourcesService,
-        private readonly httpClient: HttpClient,
-        private readonly whatsappService: WhatsAppService,
-        private readonly hashService: HashService) {
+                private readonly httpClient: HttpClient,
+                private readonly whatsappService: WhatsAppService,
+                private readonly hashService: HashService) {
 
         this.poiCache = [];
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
@@ -97,7 +97,7 @@ export class PoiService {
             .set("southWest", southWest.lat + "," + southWest.lng)
             .set("categories", categoriesTypes.join(","))
             .set("language", this.resources.getCurrentLanguageCodeSimplified());
-        return this.httpClient.get(Urls.poi, { params: params }).toPromise() as Promise<PointOfInterest[]>;
+        return this.httpClient.get(Urls.poi, { params }).toPromise() as Promise<PointOfInterest[]>;
     }
 
     public async getPoint(id: string, source: string, language?: string): Promise<PointOfInterestExtended> {
@@ -107,7 +107,7 @@ export class PoiService {
         }
         let params = new HttpParams()
             .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-        let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as PointOfInterestExtended;
+        let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params }).toPromise() as PointOfInterestExtended;
         this.poiCache.splice(0, 0, poi);
         return { ...poi };
     }
@@ -130,7 +130,7 @@ export class PoiService {
         } as IPoiRouterData);
         let escaped = encodeURIComponent(poiLink);
         return {
-            poiLink: poiLink,
+            poiLink,
             facebook: `${Urls.facebook}${escaped}`,
             whatsapp: this.whatsappService.getUrl(poiExtended.title, escaped) as string,
         };

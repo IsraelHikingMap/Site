@@ -5,4 +5,3 @@ export const environment = {
     baseTilesAddress: window.location.origin,
     isCordova: false
 };
-

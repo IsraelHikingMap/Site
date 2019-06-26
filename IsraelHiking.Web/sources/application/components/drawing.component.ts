@@ -27,9 +27,9 @@ export class DrawingComponent extends BaseMapComponent {
     public undoQueueLength: Observable<number>;
 
     constructor(resources: ResourcesService,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly toastService: ToastService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly toastService: ToastService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
     }
 
@@ -127,7 +127,7 @@ export class DrawingComponent extends BaseMapComponent {
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return;
         }
-        this.ngRedux.dispatch(new SetRouteEditingStateAction({ routingType: routingType }));
+        this.ngRedux.dispatch(new SetRouteEditingStateAction({ routingType }));
     }
 
     public undo = () => {

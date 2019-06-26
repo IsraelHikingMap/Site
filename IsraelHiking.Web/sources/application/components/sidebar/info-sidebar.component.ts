@@ -26,10 +26,10 @@ export class InfoSidebarComponent extends BaseMapComponent {
     private selectedSection: ILegendSection;
 
     constructor(resources: ResourcesService,
-        private readonly router: Router,
-        private readonly sidebarService: SidebarService,
-        private readonly layersService: LayersService,
-        private readonly runningContext: RunningContextService) {
+                private readonly router: Router,
+                private readonly sidebarService: SidebarService,
+                private readonly layersService: LayersService,
+                private readonly runningContext: RunningContextService) {
         super(resources);
 
         this.selectedTabIndex = 0;
@@ -41,7 +41,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
         });
     }
 
-    public showDownloadDialog(): Boolean {
+    public showDownloadDialog(): boolean {
         return !this.runningContext.isCordova;
     }
 
@@ -1102,7 +1102,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendObservationTower);
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendAntenna);
 
-
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendBikePark);
 
         this.removeItemInSection(this.resources.legendRoads, this.resources.legendLowSpeedStreet);
@@ -1129,4 +1128,3 @@ export class InfoSidebarComponent extends BaseMapComponent {
         }
     }
 }
-

@@ -23,11 +23,11 @@ export class CategoriesLayer extends BaseMapComponent {
     public pointsOfInterest: PointOfInterest[];
 
     constructor(resources: ResourcesService,
-        private readonly mapService: MapService,
-        private readonly poiService: PoiService,
-        private readonly runningContextService: RunningContextService,
-        private readonly ngRedux: NgRedux<ApplicationState>,
-        private readonly categoriesType: CategoriesType) {
+                private readonly mapService: MapService,
+                private readonly poiService: PoiService,
+                private readonly runningContextService: RunningContextService,
+                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly categoriesType: CategoriesType) {
         super(resources);
         this.categories = [];
         this.pointsOfInterest = [];

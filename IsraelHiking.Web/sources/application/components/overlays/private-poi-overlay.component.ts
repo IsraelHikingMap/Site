@@ -1,4 +1,4 @@
-﻿import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material";
 
 import { MarkerData, LinkData } from "../../models/models";
@@ -31,8 +31,8 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
     public imageLink: LinkData;
 
     constructor(resources: ResourcesService,
-        private readonly matDialog: MatDialog,
-        private readonly selectedRouteService: SelectedRouteService) {
+                private readonly matDialog: MatDialog,
+                private readonly selectedRouteService: SelectedRouteService) {
         super(resources);
     }
 

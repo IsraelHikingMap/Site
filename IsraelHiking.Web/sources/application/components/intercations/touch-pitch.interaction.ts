@@ -1,4 +1,4 @@
-﻿import { Map, MapTouchEvent, Point } from "mapbox-gl";
+import { Map, MapTouchEvent, Point } from "mapbox-gl";
 
 export class TouchPitchInteraction {
     /**
@@ -6,8 +6,8 @@ export class TouchPitchInteraction {
      */
     private static readonly MIN_DIFF_X = 55;
     /**
-     * max x distance to recognize pitch gesture - 
-     * this is in order to allow rotate when the fingers are spread apart enough 
+     * max x distance to recognize pitch gesture -
+     * this is in order to allow rotate when the fingers are spread apart enough
      * and both have the "same" y value
      */
     private static readonly MAX_DIFF_X = 200;
@@ -16,11 +16,11 @@ export class TouchPitchInteraction {
      */
     private static readonly MAX_DIFF_Y = 100;
     /**
-     * min distance threshold the fingers drifted from the original touch - 
+     * min distance threshold the fingers drifted from the original touch -
      * this is in order to recognize zoom gesture
      */
     private static readonly MIN_DIFF = 30;
-    /** 
+    /**
      * delay for pitch, in case it's a zoom gesture
      */
     private static readonly DELAY = 160;
@@ -48,7 +48,7 @@ export class TouchPitchInteraction {
         });
         this.map.on("touchend", () => {
             this.resetInteractions();
-        })
+        });
         this.map.on("touchcancel", () => {
             this.resetInteractions();
         });

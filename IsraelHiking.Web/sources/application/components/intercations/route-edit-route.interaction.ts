@@ -41,13 +41,13 @@ export class RouteEditRouteInteraction {
     private map: Map;
 
     constructor(private readonly resources: ResourcesService,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly routerService: RouterService,
-        private readonly elevationProvider: ElevationProvider,
-        private readonly geoLocationService: GeoLocationService,
-        private readonly snappingService: SnappingService,
-        private readonly ngZone: NgZone,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly routerService: RouterService,
+                private readonly elevationProvider: ElevationProvider,
+                private readonly geoLocationService: GeoLocationService,
+                private readonly snappingService: SnappingService,
+                private readonly ngZone: NgZone,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.geoJsonData = null;
         this.selectedRouteSegments = [];
         this.selectedRoutePoint = null;

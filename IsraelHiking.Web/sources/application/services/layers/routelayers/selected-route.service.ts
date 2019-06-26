@@ -41,9 +41,9 @@ export class SelectedRouteService {
     public selectedRouteHover: EventEmitter<LatLngAlt>;
 
     constructor(private readonly resourcesService: ResourcesService,
-        private readonly routesFactory: RoutesFactory,
-        private readonly routerService: RouterService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly routesFactory: RoutesFactory,
+                private readonly routerService: RouterService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.routes = [];
         this.selectedRouteHover = new EventEmitter();
         this.routes$.subscribe((r) => {
@@ -87,13 +87,13 @@ export class SelectedRouteService {
 
     public setSelectedRoute(routeId: string) {
         if (this.selectedRouteId == null) {
-            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: routeId }));
+            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId }));
         } else {
             this.ngRedux.dispatch(new ChangeEditStateAction({
                 routeId: this.selectedRouteId,
                 state: "ReadOnly"
             }));
-            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: routeId }));
+            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId }));
         }
     }
 
@@ -176,12 +176,12 @@ export class SelectedRouteService {
         splitRouteData.segments = postfixSegments;
         let routeData = {
             ...selectedRoute,
-            segments: segments
+            segments
         };
         this.ngRedux.dispatch(new SplitRouteAction({
             routeId: selectedRoute.id,
-            routeData: routeData,
-            splitRouteData: splitRouteData
+            routeData,
+            splitRouteData
         }));
     }
 
@@ -237,7 +237,7 @@ export class SelectedRouteService {
         segments = segments.reverse();
         return {
             ...route,
-            segments: segments
+            segments
         } as RouteData;
     }
 
@@ -270,7 +270,7 @@ export class SelectedRouteService {
             }
             let updatedSegment = {
                 ...selectedRoute.segments[segmentIndex + 1],
-                latlngs: latlngs
+                latlngs
             } as RouteSegmentData;
             this.ngRedux.dispatch(new UpdateSegmentsAction({
                 routeId: selectedRoute.id,
@@ -304,7 +304,7 @@ export class SelectedRouteService {
             }
         }
         this.ngRedux.dispatch(new ReplaceSegmentsAction({
-            routeId: routeId,
+            routeId,
             segmentsData: segments
         }));
     }

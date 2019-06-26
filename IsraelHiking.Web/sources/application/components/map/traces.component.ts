@@ -10,7 +10,6 @@ import { AddRouteAction } from "../../reducres/routes.reducer";
 import { RoutesFactory } from "../../services/layers/routelayers/routes.factory";
 import { Trace, ApplicationState, LatLngAlt } from "../../models/models";
 
-
 @Component({
     selector: "traces",
     templateUrl: "./traces.component.html"
@@ -35,8 +34,8 @@ export class TracesComponent extends BaseMapComponent {
     private missingParts$: Observable<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
 
     constructor(resources: ResourcesService,
-        private readonly routesFactory: RoutesFactory,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly routesFactory: RoutesFactory,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.isConfigOpen = false;
         this.selectedTrace = null;
@@ -66,8 +65,8 @@ export class TracesComponent extends BaseMapComponent {
                 type: "FeatureCollection",
                 features: [{
                     type: "Feature",
-                    id: id,
-                    properties: { id: id },
+                    id,
+                    properties: { id },
                     geometry: {
                         type: "LineString",
                         coordinates: traceCoordinates

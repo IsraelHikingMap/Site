@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { ResourcesService, LanguageCode } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
 

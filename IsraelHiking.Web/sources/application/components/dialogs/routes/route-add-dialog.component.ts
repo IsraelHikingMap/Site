@@ -17,10 +17,10 @@ import { AddRouteAction } from "../../../reducres/routes.reducer";
 })
 export class RouteAddDialogComponent extends RouteBaseDialogComponent {
     constructor(resources: ResourcesService,
-        selectedRouteService: SelectedRouteService,
-        routesFactory: RoutesFactory,
-        toastService: ToastService,
-        ngRedux: NgRedux<ApplicationState>,
+                selectedRouteService: SelectedRouteService,
+                routesFactory: RoutesFactory,
+                toastService: ToastService,
+                ngRedux: NgRedux<ApplicationState>,
     ) {
         super(resources, selectedRouteService, routesFactory, toastService, ngRedux);
         this.routeData = routesFactory.createRouteData(selectedRouteService.createRouteName(),

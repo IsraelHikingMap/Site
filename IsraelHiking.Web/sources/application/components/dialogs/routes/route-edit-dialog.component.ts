@@ -22,12 +22,12 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     private originalName: string;
 
     constructor(resources: ResourcesService,
-        selectedRouteService: SelectedRouteService,
-        routesFactory: RoutesFactory,
-        toastService: ToastService,
-        ngRedux: NgRedux<ApplicationState>,
-        private readonly fileService: FileService,
-        private readonly fitBoundsService: FitBoundsService
+                selectedRouteService: SelectedRouteService,
+                routesFactory: RoutesFactory,
+                toastService: ToastService,
+                ngRedux: NgRedux<ApplicationState>,
+                private readonly fileService: FileService,
+                private readonly fitBoundsService: FitBoundsService
     ) {
         super(resources, selectedRouteService, routesFactory, toastService, ngRedux);
 

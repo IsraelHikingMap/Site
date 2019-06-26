@@ -1,4 +1,4 @@
-﻿import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
+import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
 
 import { ShareUrl, InMemoryState } from "../models/models";
 import { initialState } from "./initial-state";
@@ -6,7 +6,6 @@ import { initialState } from "./initial-state";
 const SET_DOWNLOAD = "SET_DOWNLOAD";
 const SET_SHARE_URL = "SET_SHARE_URL";
 const SET_FILE_URL_AND_BASE_LAYER = "SET_FILE_URL_AND_BASE_LAYER";
-
 
 export interface SetDownloadPayload {
     download: boolean;
@@ -55,7 +54,6 @@ export class InMemoryReducer {
             shareUrl: action.payload.shareUrl
         };
     }
-
 
     @ReduxAction(SET_FILE_URL_AND_BASE_LAYER)
     public setFileUrl(lastState: InMemoryState, action: SetFileUrlAndBaseLayerAction): InMemoryState {

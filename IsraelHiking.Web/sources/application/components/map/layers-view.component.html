@@ -35,7 +35,7 @@
     </mgl-marker-cluster>
 </div>
 <mgl-popup *ngIf="selectedCluster" [lngLat]="selectedCluster.geometry.coordinates" (close)="clearSelectedClusterPopup()" [closeOnClick]="true">
-    <cluster-overlay [points]="clusterPoints" (close)="clearSelectedClusterPopup()"></cluster-overlay>
+    <cluster-overlay [points]="clusterPoints" (closed)="clearSelectedClusterPopup()"></cluster-overlay>
 </mgl-popup>
 <mgl-popup *ngIf="hoverFeature" [lngLat]="hoverFeature.geometry.coordinates" [closeButton]="false" [offset]="[0, -20]">
     <span [dir]="resources.getDirection(hoverFeature.properties.title)">{{hoverFeature.properties.title}}</span>

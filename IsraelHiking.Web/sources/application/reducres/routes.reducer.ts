@@ -4,7 +4,6 @@ import { RouteData, MarkerData, RouteSegmentData, RouteStateName, ILatLngTime } 
 import { initialState } from "./initial-state";
 import { ReduxAction, createReducerFromClass, BaseAction } from "./reducer-action-decorator";
 
-
 const ADD_ROUTE = "ADD_ROUTE";
 const DELETE_ROUTE = "DELETE_ROUTE";
 const CHANGE_PROPERTIES = "CHANGE_PROPERTIES";
@@ -273,7 +272,7 @@ class RoutesReducer {
                 markers.splice(action.payload.index, 1, action.payload.markerData);
                 return {
                     ...route,
-                    markers: markers
+                    markers
                 } as RouteData;
             });
     }
@@ -287,7 +286,7 @@ class RoutesReducer {
                 markers.splice(action.payload.index, 1);
                 return {
                     ...route,
-                    markers: markers
+                    markers
                 } as RouteData;
             });
     }
@@ -321,7 +320,7 @@ class RoutesReducer {
                 }
                 return {
                     ...route,
-                    segments: segments
+                    segments
                 } as RouteData;
             });
     }
@@ -346,7 +345,7 @@ class RoutesReducer {
                 segments.splice(action.payload.index, 1);
                 return {
                     ...route,
-                    segments: segments
+                    segments
                 } as RouteData;
             });
     }
@@ -372,7 +371,6 @@ class RoutesReducer {
                     state: action.payload.isVisible ? "ReadOnly" : "Hidden"
                 } as RouteData));
     }
-
 
     @ReduxAction(REVERSE_ROUTE)
     public reverseRoute(lastState: RouteData[], action: ReverseRouteAction): RouteData[] {
@@ -411,7 +409,7 @@ class RoutesReducer {
                 segments.splice(segments.length - 1, 1, lastSegment);
                 return {
                     ...route,
-                    segments: segments
+                    segments
                 };
             });
     }

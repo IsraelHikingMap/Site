@@ -1,4 +1,4 @@
-﻿import { Component, Input, HostListener, OnChanges, Output, EventEmitter } from "@angular/core";
+import { Component, Input, HostListener, OnChanges, Output, EventEmitter } from "@angular/core";
 
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
@@ -20,12 +20,12 @@ export class RoutePointOverlayComponent extends BaseMapComponent implements OnCh
     private segmentIndex: number;
 
     @Output()
-    public close = new EventEmitter();
+    public closed = new EventEmitter();
 
     public hideCoordinates: boolean;
 
     constructor(resources: ResourcesService,
-        private readonly selectedRouteService: SelectedRouteService) {
+                private readonly selectedRouteService: SelectedRouteService) {
         super(resources);
         this.canMerge = false;
         this.isMiddle = false;
@@ -43,22 +43,22 @@ export class RoutePointOverlayComponent extends BaseMapComponent implements OnCh
 
     public split(): void {
         this.selectedRouteService.splitRoute(this.segmentIndex);
-        this.close.next();
+        this.closed.next();
     }
 
     public merge() {
         this.selectedRouteService.mergeRoutes(this.isFirst());
-        this.close.next();
+        this.closed.next();
     }
 
     public reverse() {
         this.selectedRouteService.reverseRoute();
-        this.close.next();
+        this.closed.next();
     }
 
     public remove = () => {
         this.selectedRouteService.removeSegment(this.segmentIndex);
-        this.close.next();
+        this.closed.next();
     }
 
     private isFirst(): boolean {

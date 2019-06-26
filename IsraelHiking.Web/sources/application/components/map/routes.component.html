@@ -67,7 +67,7 @@
 <mgl-popup *ngIf="routePointPopupData != null"
            [lngLat]="[routePointPopupData.latlng.lng, routePointPopupData.latlng.lat]"
            (close)="closeRoutePointPopup()">
-    <route-point-overlay [latlng]="routePointPopupData.latlng" [segmentIndex]="routePointPopupData.segmentIndex" (close)="closeRoutePointPopup()"></route-point-overlay>
+    <route-point-overlay [latlng]="routePointPopupData.latlng" [segmentIndex]="routePointPopupData.segmentIndex" (closed)="closeRoutePointPopup()"></route-point-overlay>
 </mgl-popup>
 
 

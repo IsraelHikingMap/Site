@@ -1,4 +1,4 @@
-﻿import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "./route-statistics.service";
+import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "./route-statistics.service";
 import { RouteData } from "../models/models";
 
 describe("RouteStatisticsService", () => {

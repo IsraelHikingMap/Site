@@ -131,7 +131,7 @@ class LayersReducer {
         baseLayers.splice(baseLayers.indexOf(baseLayers.find(b => b.key === action.payload.key)), 1);
         return {
             ...lastState,
-            baseLayers: baseLayers
+            baseLayers
         };
     }
 
@@ -141,7 +141,7 @@ class LayersReducer {
         overlays.splice(overlays.indexOf(overlays.find(o => o.key === action.payload.key)), 1);
         return {
             ...lastState,
-            overlays: overlays
+            overlays
         };
     }
 
@@ -151,7 +151,7 @@ class LayersReducer {
         baseLayers.splice(baseLayers.indexOf(baseLayers.find(b => b.key === action.payload.key)), 1, action.payload.layerData);
         return {
             ...lastState,
-            baseLayers: baseLayers
+            baseLayers
         };
     }
 
@@ -161,7 +161,7 @@ class LayersReducer {
         overlays.splice(overlays.indexOf(overlays.find(o => o.key === action.payload.key)), 1, action.payload.layerData);
         return {
             ...lastState,
-            overlays: overlays
+            overlays
         };
     }
 
@@ -182,7 +182,7 @@ class LayersReducer {
         expanded.push(action.payload.name);
         return {
             ...lastState,
-            expanded: expanded
+            expanded
         };
     }
 
@@ -195,7 +195,7 @@ class LayersReducer {
         expanded.splice(expanded.indexOf(action.payload.name));
         return {
             ...lastState,
-            expanded: expanded
+            expanded
         };
     }
 
@@ -208,13 +208,13 @@ class LayersReducer {
             visible.push(item);
             return {
                 ...lastState,
-                visible: visible
+                visible
             };
         }
         visible.splice(visible.indexOf(item), 1, { ...item, visible: action.payload.visible });
         return {
             ...lastState,
-            visible: visible
+            visible
         };
     }
 }

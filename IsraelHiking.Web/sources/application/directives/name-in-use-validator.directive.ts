@@ -1,4 +1,4 @@
-﻿import { Directive, Input, AfterViewInit } from "@angular/core";
+import { Directive, Input, AfterViewInit } from "@angular/core";
 import { Validator, AbstractControl, NG_VALIDATORS } from "@angular/forms";
 
 import { LayersService } from "../services/layers/layers.service";
@@ -27,6 +27,6 @@ export class NameInUseValidatorDirective implements Validator, AfterViewInit {
         if (this.layersService.isNameAvailable(this.initialKey, control.value, this.isOverlay)) {
             return null;
         }
-        return { "nameInUse": control.value };
+        return { nameInUse: control.value };
     }
 }

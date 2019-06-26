@@ -24,8 +24,8 @@ export class CoordinatesComponent extends BaseMapComponent implements OnInit {
     public itmCoordinates: INorthEast;
 
     constructor(resources: ResourcesService,
-        private readonly httpClient: HttpClient,
-        private readonly elevationProvider: ElevationProvider) {
+                private readonly httpClient: HttpClient,
+                private readonly elevationProvider: ElevationProvider) {
         super(resources);
         this.itmCoordinates = { north: 0, east: 0 };
     }
@@ -34,7 +34,7 @@ export class CoordinatesComponent extends BaseMapComponent implements OnInit {
         let params = new HttpParams()
             .set("lat", this.latlng.lat.toString())
             .set("lon", this.latlng.lng.toString());
-        this.itmCoordinates = await this.httpClient.get(Urls.itmGrid, { params: params }).toPromise() as INorthEast;
+        this.itmCoordinates = await this.httpClient.get(Urls.itmGrid, { params }).toPromise() as INorthEast;
         let response = await this.elevationProvider.updateHeights([this.latlng]);
         this.latlng.alt = response[0].alt;
     }

@@ -1,4 +1,4 @@
-﻿import { Component, ViewEncapsulation } from "@angular/core";
+import { Component, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material";
 import { select, NgRedux } from "@angular-redux/store";
 import { Observable } from "rxjs";
@@ -45,15 +45,14 @@ export class LayersSidebarComponent extends BaseMapComponent {
     @select((state: ApplicationState) => state.configuration.isAdvanced)
     public isAdvanced: Observable<boolean>;
 
-
     constructor(resources: ResourcesService,
-        private readonly dialog: MatDialog,
-        private readonly layersService: LayersService,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly categoriesLayerFactory: CategoriesLayerFactory,
-        private readonly sidebarService: SidebarService,
-        private readonly poiService: PoiService,
-        private ngRedux: NgRedux<ApplicationState>) {
+                private readonly dialog: MatDialog,
+                private readonly layersService: LayersService,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly categoriesLayerFactory: CategoriesLayerFactory,
+                private readonly sidebarService: SidebarService,
+                private readonly poiService: PoiService,
+                private ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
     }
@@ -157,7 +156,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
             this.ngRedux.dispatch(new ChangeRoutePropertiesAction(
                 {
                     routeId: routeData.id,
-                    routeData: routeData
+                    routeData
                 }));
             return;
         }
@@ -166,7 +165,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
             this.ngRedux.dispatch(new ChangeRoutePropertiesAction(
                 {
                     routeId: routeData.id,
-                    routeData: routeData
+                    routeData
                 }));
         }
         this.selectedRouteService.setSelectedRoute(routeData.id);

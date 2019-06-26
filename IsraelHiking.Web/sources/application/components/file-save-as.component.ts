@@ -21,20 +21,19 @@ export class FileSaveAsComponent extends BaseMapComponent {
     public formats: IFormatViewModel[];
     public selectedFormat: IFormatViewModel;
 
-    @ViewChild("dropdown")
+    @ViewChild("dropdown", { static: false })
     public dropdown: MatSelect;
 
     constructor(resources: ResourcesService,
-        private readonly dataContainerService: DataContainerService,
-        private readonly fileService: FileService,
-        private readonly toastService: ToastService) {
+                private readonly dataContainerService: DataContainerService,
+                private readonly fileService: FileService,
+                private readonly toastService: ToastService) {
         super(resources);
 
         this.isOpen = false;
         this.formats = this.fileService.formats;
         this.selectedFormat = this.formats[0];
     }
-
 
     public toggleSaveAs() {
         this.isOpen = !this.isOpen;

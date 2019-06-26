@@ -29,7 +29,7 @@ export class LegendItemComponent extends BaseMapComponent {
     public static readonly OSM_TAG_LINK = "osm-tag-link";
     public static readonly OSM_KEY_LINK = "osm-key-link";
 
-    @ViewChild("mapContainer")
+    @ViewChild("mapContainer", { static: false })
     public mapContainer: ElementRef;
 
     @Input()
@@ -38,9 +38,9 @@ export class LegendItemComponent extends BaseMapComponent {
     public defaultStyle: Style;
 
     constructor(resources: ResourcesService,
-        private readonly fitBoundsService: FitBoundsService,
-        private readonly layersService: LayersService,
-        private readonly defaultStyleService: DefaultStyleService) {
+                private readonly fitBoundsService: FitBoundsService,
+                private readonly layersService: LayersService,
+                private readonly defaultStyleService: DefaultStyleService) {
         super(resources);
 
         this.defaultStyle = this.defaultStyleService.style;

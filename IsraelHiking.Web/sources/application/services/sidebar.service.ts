@@ -21,7 +21,7 @@ export class SidebarService {
     private isPoiSidebarOpen: boolean;
 
     constructor(private readonly hashService: HashService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.sideBarStateChanged = new EventEmitter();
         this.isPoiSidebarOpen = false;
         this.hideWithoutChangingAddressbar();
@@ -63,6 +63,5 @@ export class SidebarService {
     public isSidebarOpen(): boolean {
         return this.isVisible || this.isPoiSidebarOpen;
     }
-
 
 }

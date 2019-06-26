@@ -9,9 +9,9 @@ import { RouteData } from "../models/models";
 export class DragAndDropService {
 
     constructor(private readonly resourcesService: ResourcesService,
-        private readonly fileService: FileService,
-        private readonly dataContainerService: DataContainerService,
-        private readonly toastService: ToastService) {
+                private readonly fileService: FileService,
+                private readonly dataContainerService: DataContainerService,
+                private readonly toastService: ToastService) {
 
         document.addEventListener("dragover", (event) => {
             event.preventDefault();

@@ -1,4 +1,4 @@
-﻿import { Input, Output, EventEmitter } from "@angular/core";
+import { Input, Output, EventEmitter } from "@angular/core";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";

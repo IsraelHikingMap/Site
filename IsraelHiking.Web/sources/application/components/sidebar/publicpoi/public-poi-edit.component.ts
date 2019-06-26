@@ -6,7 +6,6 @@ import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { PointOfInterestExtended } from "../../../models/models";
 
-
 @Component({
     selector: "public-poi-edit",
     templateUrl: "./public-poi-edit.component.html",
@@ -20,7 +19,7 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
     public selectedCategory: ISelectableCategory;
 
     constructor(resources: ResourcesService,
-        private readonly poiService: PoiService) {
+                private readonly poiService: PoiService) {
         super(resources);
         this.selectedCategory = null;
         this.categories = [];

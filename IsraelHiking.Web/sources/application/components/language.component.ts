@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material";
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -10,7 +10,7 @@ import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 })
 export class LanguageComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
-        private dialog: MatDialog) {
+                private dialog: MatDialog) {
         super(resources);
     }
 

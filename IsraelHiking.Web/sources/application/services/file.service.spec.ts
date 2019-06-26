@@ -45,7 +45,7 @@ describe("FileService", () => {
                 {
                     provide: FileService,
                     useFactory: fakeAsync((http, mockBackend: HttpTestingController,
-                        runningContextService: RunningContextService, loggingService: LoggingService) => {
+                                           runningContextService: RunningContextService, loggingService: LoggingService) => {
                         let fileService = new FileService(http,
                             runningContextService,
                             imageResizeService,
@@ -81,7 +81,6 @@ describe("FileService", () => {
             mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
             return promise;
         }));
-
 
     it("Should open from file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {

@@ -25,12 +25,12 @@ export class OpenWithService {
     private static readonly POI = "/poi/";
 
     constructor(private readonly resources: ResourcesService,
-        private readonly runningContextService: RunningContextService,
-        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
-        private readonly fileService: FileService,
-        private readonly toastService: ToastService,
-        private readonly router: Router,
-        private readonly ngZone: NgZone) { }
+                private readonly runningContextService: RunningContextService,
+                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+                private readonly fileService: FileService,
+                private readonly toastService: ToastService,
+                private readonly router: Router,
+                private readonly ngZone: NgZone) { }
 
     public initialize() {
         if (!this.runningContextService.isCordova) {

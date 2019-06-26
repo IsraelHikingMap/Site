@@ -47,9 +47,9 @@ export class AuthorizationService {
     private userState: UserState;
 
     constructor(private readonly httpClient: HttpClient,
-        private readonly runningContextService: RunningContextService,
-        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly runningContextService: RunningContextService,
+                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.ohauth = this.nonAngularObjectsFactory.createOhAuth();
         this.oauthRequestTokenSecret = "";
         this.setOptions({});
@@ -111,7 +111,7 @@ export class AuthorizationService {
             imageUrl: detailJson.image
         };
         this.ngRedux.dispatch(new SetUserInfoAction({
-            userInfo: userInfo
+            userInfo
         }));
     }
 
@@ -128,7 +128,7 @@ export class AuthorizationService {
         let accessToken = this.ohauth.stringQs(response);
         let token = accessToken.oauth_token + ";" + accessToken.oauth_token_secret;
         this.ngRedux.dispatch(new SetTokenAction({
-            token: token
+            token
         }));
     }
 
@@ -204,7 +204,7 @@ export class AuthorizationService {
         });
     }
 
-    private async watchPopup(popup, resolve: Function, reject: Function) {
+    private async watchPopup(popup, resolve: (value?: any) => void, reject: (value?: any) => void) {
         try {
             if (popup.closed) {
                 reject(new Error(`The OSM sign in flow was canceled`));

@@ -32,10 +32,10 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
     private page: number;
 
     constructor(resources: ResourcesService,
-        private readonly router: Router,
-        private readonly toastService: ToastService,
-        private readonly shareUrlsService: ShareUrlsService,
-        private readonly dataContainerService: DataContainerService) {
+                private readonly router: Router,
+                private readonly toastService: ToastService,
+                private readonly shareUrlsService: ShareUrlsService,
+                private readonly dataContainerService: DataContainerService) {
         super(resources);
         this.loadingShareUrls = false;
         this.shareUrlInEditMode = null;
@@ -86,7 +86,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
         let displayName = this.shareUrlsService.getShareUrlDisplayName(shareUrl);
         let message = `${this.resources.deletionOf} ${displayName}, ${this.resources.areYouSure}`;
         this.toastService.confirm({
-            message: message,
+            message,
             confirmAction: () => this.shareUrlsService.deleteShareUrl(shareUrl),
             type: "YesNo"
         });

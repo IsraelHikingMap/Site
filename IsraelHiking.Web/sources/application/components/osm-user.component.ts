@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material";
 import { select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
@@ -39,10 +39,10 @@ export class OsmUserComponent extends BaseMapComponent {
     public agreedToTheTermsOfService = false;
 
     constructor(resources: ResourcesService,
-        private readonly authorizationService: AuthorizationService,
-        private readonly dialog: MatDialog,
-        private readonly toastService: ToastService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly authorizationService: AuthorizationService,
+                private readonly dialog: MatDialog,
+                private readonly toastService: ToastService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.initializeRanks();
         resources.languageChanged.subscribe(() => this.initializeRanks());

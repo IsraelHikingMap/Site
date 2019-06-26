@@ -33,12 +33,12 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     public storedUserEmail = "";
 
     constructor(resources: ResourcesService,
-        private readonly sanitizer: DomSanitizer,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly dataContainerService: DataContainerService,
-        private readonly shareUrlsService: ShareUrlsService,
-        private readonly toastService: ToastService,
-        private readonly authorizationService: AuthorizationService
+                private readonly sanitizer: DomSanitizer,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly dataContainerService: DataContainerService,
+                private readonly shareUrlsService: ShareUrlsService,
+                private readonly toastService: ToastService,
+                private readonly authorizationService: AuthorizationService
     ) {
         super(resources);
 
@@ -118,7 +118,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         let selectedShare = this.shareUrlsService.getSelectedShareUrl();
         let id = selectedShare ? selectedShare.id : "";
         let shareUrl = {
-            id: id,
+            id,
             title: this.title,
             description: this.description,
             dataContainer: this.getDataFiltered(),

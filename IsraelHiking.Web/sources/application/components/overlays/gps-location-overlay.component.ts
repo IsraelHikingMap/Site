@@ -1,4 +1,4 @@
-﻿import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -6,7 +6,6 @@ import { SelectedRouteService } from "../../services/layers/routelayers/selected
 import { AddPrivatePoiAction } from "../../reducres/routes.reducer";
 import { ApplicationState, LatLngAlt } from "../../models/models";
 import { BaseMapComponent } from "../base-map.component";
-
 
 @Component({
     selector: "gps-location-overlay",
@@ -18,13 +17,13 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     public latlng: LatLngAlt;
 
     @Output()
-    public close = new EventEmitter();
+    public closed = new EventEmitter();
 
     public hideCoordinates: boolean;
 
     constructor(resources: ResourcesService,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.hideCoordinates = true;
     }
@@ -41,6 +40,6 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
                 urls: []
             }
         }));
-        this.close.emit();
+        this.closed.emit();
     }
 }

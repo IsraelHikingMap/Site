@@ -87,7 +87,7 @@ export class TracesReducer {
         traces.splice(traces.indexOf(traceToReplace), 1, action.payload.trace);
         return {
             ...lastState,
-            traces: traces
+            traces
         };
     }
 
@@ -98,7 +98,7 @@ export class TracesReducer {
         traces.splice(traces.indexOf(traceToRemove), 1);
         return {
             ...lastState,
-            traces: traces
+            traces
         };
     }
 
@@ -126,7 +126,7 @@ export class TracesReducer {
         missingParts.features = features;
         return {
             ...lastState,
-            missingParts: missingParts
+            missingParts
         };
     }
 }

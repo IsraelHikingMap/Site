@@ -3,7 +3,6 @@ import { NgxImageGalleryComponent, GALLERY_IMAGE, GALLERY_CONF } from "ngx-image
 
 import { MapService } from "./map.service";
 
-
 @Injectable()
 export class ImageGalleryService {
     public config: GALLERY_CONF;
@@ -27,7 +26,7 @@ export class ImageGalleryService {
     public setImages(urls: string[]) {
         this.images = [];
         for (let url of urls) {
-            this.images.push({ url: url });
+            this.images.push({ url });
         }
         this.galleryComponent.conf.showThumbnails = this.images.length > 1;
         this.galleryComponent.open();

@@ -25,7 +25,6 @@ export class SetTokenAction extends BaseAction<SetTokenPayload> {
     }
 }
 
-
 export class UserInfoReducer {
     @ReduxAction(SET_USER_INFO)
     public setUserInfo(lastState: UserState, action: SetUserInfoAction) {

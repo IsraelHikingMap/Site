@@ -1,4 +1,4 @@
-﻿import { Injectable, Inject } from "@angular/core";
+import { Injectable, Inject } from "@angular/core";
 import { HttpParams } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { NgRedux } from "@angular-redux/store";
@@ -49,8 +49,8 @@ export class HashService {
     private readonly window: Window;
 
     constructor(private readonly router: Router,
-        @Inject("Window") window: any, // bug in angular aot
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                @Inject("Window") window: any, // bug in angular aot
+                private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.window = window;
         this.backwardCompatibilitySupport();
@@ -72,7 +72,7 @@ export class HashService {
                 queryParams.baselayer = inMemoryState.baseLayer;
             }
             this.router.navigate([RouteStrings.ROUTE_URL, inMemoryState.fileUrl],
-                { queryParams: queryParams, replaceUrl: true });
+                { queryParams, replaceUrl: true });
             return;
         }
         let location = this.ngRedux.getState().location;

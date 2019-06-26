@@ -13,7 +13,7 @@ import { classToActionMiddleware } from "../reducres/reducer-action-decorator";
 import { rootReducer } from "../reducres/root.reducer";
 
 interface PouchDB {
-    adapter: Function;
+    adapter: (name: string, adapter: any) => void;
 }
 
 @Injectable()
@@ -22,8 +22,8 @@ export class DatabaseService {
     private updating: boolean;
 
     constructor(private readonly loggingService: LoggingService,
-        private readonly runningContext: RunningContextService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly runningContext: RunningContextService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.updating = false;
     }
 

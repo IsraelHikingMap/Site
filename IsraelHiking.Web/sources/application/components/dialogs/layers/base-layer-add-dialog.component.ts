@@ -14,10 +14,10 @@ import { LayerData } from "../../../models/models";
 })
 export class BaseLayerAddDialogComponent extends LayerBaseDialogComponent {
     constructor(resources: ResourcesService,
-        layersService: LayersService,
-        mapService: MapService,
-        toastService: ToastService,
-        http: HttpClient
+                layersService: LayersService,
+                mapService: MapService,
+                toastService: ToastService,
+                http: HttpClient
         ) {
         super(resources, mapService, layersService, toastService, http);
         this.title = this.resources.addBaseLayer;

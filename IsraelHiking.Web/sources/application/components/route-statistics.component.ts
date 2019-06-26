@@ -1,7 +1,7 @@
 import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
 import { Subscription, Observable } from "rxjs";
-import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "ngx-d3";
+import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "@katze/ngx-d3";
 import { select } from "@angular-redux/store";
 
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
@@ -82,7 +82,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public chartHoverSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public subRouteRange: IChartSubRouteRange;
 
-    @ViewChild("lineChartContainer")
+    @ViewChild("lineChartContainer", { static: false })
     public lineChartContainer: ElementRef;
 
     @select((state: ApplicationState) => state.routes.present)
@@ -101,13 +101,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     private routeColor: string;
 
     constructor(resources: ResourcesService,
-        private readonly changeDetectorRef: ChangeDetectorRef,
-        private readonly d3Service: NgxD3Service,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly routeStatisticsService: RouteStatisticsService,
-        private readonly cancelableTimeoutService: CancelableTimeoutService,
-        private readonly sidebarService: SidebarService,
-        private readonly geoLocationService: GeoLocationService
+                private readonly changeDetectorRef: ChangeDetectorRef,
+                private readonly d3Service: NgxD3Service,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly routeStatisticsService: RouteStatisticsService,
+                private readonly cancelableTimeoutService: CancelableTimeoutService,
+                private readonly sidebarService: SidebarService,
+                private readonly geoLocationService: GeoLocationService
     ) {
         super(resources);
         this.isKmMarkersOn = false;
@@ -226,15 +226,15 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         return this.sidebarService.isSidebarOpen();
     }
 
-    public getUnits = (number: number): string => {
-        return Math.abs(number) > 1000 ? this.resources.kmUnit : this.resources.meterUnit;
+    public getUnits = (value: number): string => {
+        return Math.abs(value) > 1000 ? this.resources.kmUnit : this.resources.meterUnit;
     }
 
-    public toShortNumber = (number: number): string => {
-        if (number == null) {
+    public toShortNumber = (value: number): string => {
+        if (value == null) {
             return "0";
         }
-        return Math.abs(number) > 1000 ? (number / 1000.0).toFixed(2) : number.toFixed(0);
+        return Math.abs(value) > 1000 ? (value / 1000.0).toFixed(2) : value.toFixed(0);
     }
 
     public toggle(): void {
@@ -614,7 +614,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         this.kmMarkersSource = {
             type: "FeatureCollection",
-            features: features
+            features
         };
     }
 

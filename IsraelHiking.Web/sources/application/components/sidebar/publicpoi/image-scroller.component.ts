@@ -1,4 +1,4 @@
-﻿import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -23,9 +23,9 @@ export class ImageScrollerComponent extends BaseMapComponent {
     public currentImageChanged: EventEmitter<string>;
 
     constructor(resources: ResourcesService,
-        private readonly fileService: FileService,
-        private readonly imageGalleryService: ImageGalleryService,
-        private readonly imageResizeService: ImageResizeService) {
+                private readonly fileService: FileService,
+                private readonly imageGalleryService: ImageGalleryService,
+                private readonly imageResizeService: ImageResizeService) {
         super(resources);
         this.currentIndex = 0;
         this.currentImageChanged = new EventEmitter();

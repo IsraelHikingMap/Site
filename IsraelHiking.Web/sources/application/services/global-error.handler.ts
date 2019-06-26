@@ -7,7 +7,7 @@ import { RunningContextService } from "./running-context.service";
 export class GlobalErrorHandler implements ErrorHandler {
 
     constructor(private readonly loggingService: LoggingService,
-        private readonly runningContextService: RunningContextService) {
+                private readonly runningContextService: RunningContextService) {
     }
 
     public handleError(error) {

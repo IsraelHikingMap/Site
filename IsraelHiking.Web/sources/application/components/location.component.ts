@@ -40,16 +40,16 @@ export class LocationComponent extends BaseMapComponent {
     public locationLatLng: LatLngAlt;
 
     constructor(resources: ResourcesService,
-        private readonly geoLocationService: GeoLocationService,
-        private readonly toastService: ToastService,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly routesFactory: RoutesFactory,
-        private readonly cancelableTimeoutService: CancelableTimeoutService,
-        private readonly fitBoundsService: FitBoundsService,
-        private readonly fileService: FileService,
-        private readonly loggingService: LoggingService,
-        private readonly ngRedux: NgRedux<ApplicationState>,
-        private readonly host: MapComponent) {
+                private readonly geoLocationService: GeoLocationService,
+                private readonly toastService: ToastService,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly routesFactory: RoutesFactory,
+                private readonly cancelableTimeoutService: CancelableTimeoutService,
+                private readonly fitBoundsService: FitBoundsService,
+                private readonly fileService: FileService,
+                private readonly loggingService: LoggingService,
+                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly host: MapComponent) {
         super(resources);
 
         this.isFollowing = true;
@@ -139,7 +139,6 @@ export class LocationComponent extends BaseMapComponent {
         //    this.isResettingNorthUp = false;
         // }
 
-
     }
 
     public getRotationAngle() {
@@ -213,12 +212,12 @@ export class LocationComponent extends BaseMapComponent {
         let currentLocation = this.geoLocationService.currentLocation;
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
         route.segments.push({
-            routingType: routingType,
+            routingType,
             latlngs: [currentLocation, currentLocation],
             routePoint: currentLocation
         });
         route.segments.push({
-            routingType: routingType,
+            routingType,
             latlngs: [currentLocation],
             routePoint: currentLocation
         });
@@ -248,9 +247,7 @@ export class LocationComponent extends BaseMapComponent {
             this.isFollowing = true;
         }
         let heading = null;
-        let needToUpdateHeading = position.coords.heading != null &&
-            position.coords.heading !== NaN &&
-            position.coords.speed !== 0;
+        let needToUpdateHeading = !isNaN(position.coords.heading) && position.coords.speed !== 0;
         if (needToUpdateHeading) {
             heading = position.coords.heading;
         }
@@ -295,7 +292,7 @@ export class LocationComponent extends BaseMapComponent {
             let center = SpatialService.toLatLng(coordinates);
             let zoom = this.host.mapInstance.getZoom();
             if (bearing) {
-                this.host.mapInstance.easeTo({ bearing: bearing, center: center, zoom: zoom });
+                this.host.mapInstance.easeTo({ bearing, center, zoom });
             } else {
                 this.fitBoundsService.flyTo(center, this.host.mapInstance.getZoom());
             }
@@ -308,8 +305,8 @@ export class LocationComponent extends BaseMapComponent {
         let southWest = { lat: Math.min(...latLngs.map(l => l.lat)), lng: Math.min(...latLngs.map(l => l.lng)) };
         let container = {
             routes: [routeData],
-            northEast: northEast,
-            southWest: southWest
+            northEast,
+            southWest
         } as DataContainer;
 
         let trace = {
@@ -327,7 +324,7 @@ export class LocationComponent extends BaseMapComponent {
             dataUrl: "",
             user: ""
         };
-        this.ngRedux.dispatch(new AddTraceAction({ trace: trace }));
+        this.ngRedux.dispatch(new AddTraceAction({ trace }));
     }
 
     private updateLocationFeatureCollection(center: LatLngAlt, radius?: number, heading?: number) {
@@ -343,7 +340,7 @@ export class LocationComponent extends BaseMapComponent {
         }
         let features: GeoJSON.Feature<GeoJSON.Geometry>[] = [{
             type: "Feature",
-            properties: { heading: heading },
+            properties: { heading },
             geometry: {
                 type: "Point",
                 coordinates: SpatialService.toCoordinate(center)
@@ -354,7 +351,7 @@ export class LocationComponent extends BaseMapComponent {
         }
         this.locationFeatures = {
             type: "FeatureCollection",
-            features: features
+            features
         };
     }
 }

@@ -9,7 +9,6 @@ import { Urls } from "../urls";
 import { SpatialService } from "./spatial.service";
 import { LatLngAlt, MarkerData } from "../models/models";
 
-
 export interface ISnappingRouteOptions {
     lines: LatLngAlt[][];
     /**
@@ -54,9 +53,9 @@ export class SnappingService {
     private map: Map;
 
     constructor(private readonly httpClient: HttpClient,
-        private readonly resources: ResourcesService,
-        private readonly toastService: ToastService,
-        private readonly geoJsonParser: GeoJsonParser
+                private readonly resources: ResourcesService,
+                private readonly toastService: ToastService,
+                private readonly geoJsonParser: GeoJsonParser
     ) {
         this.resources = resources;
         this.highwaySnappings = [];
@@ -92,13 +91,13 @@ export class SnappingService {
             ]
             .join(",");
         this.requestsQueue.push({
-            boundsString: boundsString
+            boundsString
         } as ISnappingRequestQueueItem);
         let params = new HttpParams()
             .set("northEast", bounds.northEast.lat + "," + bounds.northEast.lng)
             .set("southWest", bounds.southWest.lat + "," + bounds.southWest.lng);
         try {
-            let features = await this.httpClient.get(Urls.osm, { params: params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>[];
+            let features = await this.httpClient.get(Urls.osm, { params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>[];
             let queueItem = this.requestsQueue.find((itemToFind) => itemToFind.boundsString === boundsString);
             if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                 this.requestsQueue.splice(0, this.requestsQueue.length - 1);
@@ -139,7 +138,7 @@ export class SnappingService {
         }
         let minDistance = Infinity;
         let response = {
-            latlng: latlng,
+            latlng,
             line: null
         } as ISnappingRouteResponse;
 
@@ -172,7 +171,7 @@ export class SnappingService {
         options = Object.assign(defaultOptions, options);
 
         let response = {
-            latlng: latlng,
+            latlng,
             markerData: null,
             id: null
         } as ISnappingPointResponse;
@@ -208,7 +207,7 @@ export class SnappingService {
     public async getClosestPoint(location: LatLngAlt): Promise<MarkerData> {
         let params = new HttpParams()
             .set("location", location.lat + "," + location.lng);
-        let feature = await this.httpClient.get(Urls.osmClosest, { params: params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>;
+        let feature = await this.httpClient.get(Urls.osmClosest, { params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>;
         if (feature == null) {
             return null;
         }

@@ -34,7 +34,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private jsonLayersIds: string[];
 
     constructor(private readonly host: MapComponent,
-        private readonly httpClient: HttpClient) {
+                private readonly httpClient: HttpClient) {
         let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
         this.rasterSourceId = `raster-source-${layerIndex}`;
@@ -92,7 +92,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             tiles: [address],
             minzoom: this.minZoom - 1,
             maxzoom: this.maxZoom - 1,
-            scheme: scheme,
+            scheme,
             tileSize: 256
         } as RasterSource;
         this.host.mapInstance.addSource(this.rasterSourceId, source);

@@ -11,7 +11,7 @@ export class FitBoundsService {
     public isFlying: boolean;
 
     constructor(private readonly sidebarService: SidebarService,
-        private readonly mapService: MapService) {
+                private readonly mapService: MapService) {
         this.isFlying = false;
     }
 
@@ -26,20 +26,20 @@ export class FitBoundsService {
         if (this.sidebarService.isSidebarOpen() && window.innerWidth >= 768) {
             this.mapService.map.fitBounds(mbBounds,
                 {
-                    maxZoom: maxZoom,
+                    maxZoom,
                     padding: { top: 50, left: 400, bottom: 50, right: 50 }
                 });
         } else {
             this.mapService.map.fitBounds(mbBounds,
                 {
-                    maxZoom: maxZoom,
-                    padding: padding
+                    maxZoom,
+                    padding
                 });
         }
     }
 
     public async flyTo(latLng: LatLngAlt, zoom: number) {
         await this.mapService.initializationPromise;
-        this.mapService.map.flyTo({ center: latLng, zoom: zoom });
+        this.mapService.map.flyTo({ center: latLng, zoom });
     }
 }

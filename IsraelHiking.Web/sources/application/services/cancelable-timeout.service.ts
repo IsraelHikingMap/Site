@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 
 @Injectable()
 export class CancelableTimeoutService {
@@ -8,7 +8,7 @@ export class CancelableTimeoutService {
         this.idsByGroup = new Map<string, number[]>();
     }
 
-    public setTimeoutByGroup(action: Function, timeout: number, type: string) {
+    public setTimeoutByGroup(action: () => void, timeout: number, type: string) {
         if (!this.idsByGroup.has(type)) {
             this.idsByGroup.set(type, []);
         }

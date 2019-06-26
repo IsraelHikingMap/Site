@@ -1,4 +1,4 @@
-﻿import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -25,29 +25,29 @@ export class MissingPartOverlayComponent extends ClosableOverlayComponent {
     public hideCoordinates: boolean;
 
     constructor(resources: ResourcesService,
-        private readonly httpClient: HttpClient,
-        private readonly toastService: ToastService) {
+                private readonly httpClient: HttpClient,
+                private readonly toastService: ToastService) {
         super(resources);
         this.removed = new EventEmitter();
         this.hideCoordinates = true;
     }
 
     public getHighwayType = (): string => {
-        return this.feature.properties["highway"] || "track";
+        return this.feature.properties.highway || "track";
     }
 
     public setHighwayType = (highwayType: string) => {
-        this.feature.properties["highway"] = highwayType;
+        this.feature.properties.highway = highwayType;
     }
 
     public getColor = (): string => {
-        return this.feature.properties["colour"] || "none";
+        return this.feature.properties.colour || "none";
     }
 
     public setColor = (color: string) => {
-        this.feature.properties["colour"] = color;
+        this.feature.properties.colour = color;
         if (color === "none") {
-            delete this.feature.properties["colour"];
+            delete this.feature.properties.colour;
         }
     }
 

@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { BaseMapComponent } from "./base-map.component";
 import { SidebarService } from "../services/sidebar.service";
 import { ResourcesService } from "../services/resources.service";
@@ -9,7 +9,7 @@ import { ResourcesService } from "../services/resources.service";
 })
 export class LayersComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
-        private readonly sidebarService: SidebarService) {
+                private readonly sidebarService: SidebarService) {
         super(resources);
     }
 

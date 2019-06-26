@@ -35,7 +35,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     public description: string;
     public iconsGroups: IIconsGroup[];
 
-    @ViewChild("titleInput")
+    @ViewChild("titleInput", { static: false })
     public titleInput: ElementRef;
 
     public static openDialog(matDialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
@@ -45,9 +45,9 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                     {
                         maxWidth: "378px",
                         data: {
-                            marker: marker,
-                            routeId: routeId,
-                            index: index
+                            marker,
+                            routeId,
+                            index
                         }
                     });
             },
@@ -55,12 +55,12 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     constructor(resources: ResourcesService,
-        private readonly fileService: FileService,
-        private readonly imageResizeService: ImageResizeService,
-        private readonly privatePoiUploaderService: PrivatePoiUploaderService,
-        private readonly dialogRef: MatDialogRef<PrivatePoiEditDialogComponent>,
-        private readonly ngRedux: NgRedux<ApplicationState>,
-        @Inject(MAT_DIALOG_DATA) data) {
+                private readonly fileService: FileService,
+                private readonly imageResizeService: ImageResizeService,
+                private readonly privatePoiUploaderService: PrivatePoiUploaderService,
+                private readonly dialogRef: MatDialogRef<PrivatePoiEditDialogComponent>,
+                private readonly ngRedux: NgRedux<ApplicationState>,
+                @Inject(MAT_DIALOG_DATA) data) {
         super(resources);
         this.showIcons = false;
         this.showCoordinates = false;
@@ -129,7 +129,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
             description: this.description,
             latlng: this.marker.latlng,
             type: this.markerType,
-            urls: urls,
+            urls,
         };
         this.ngRedux.dispatch(new UpdatePrivatePoiAction({
             index: this.markerIndex,

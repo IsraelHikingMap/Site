@@ -22,9 +22,9 @@ export class ShareUrlsService {
     public shareUrls: ShareUrl[];
 
     constructor(private readonly httpClient: HttpClient,
-        private readonly whatsAppService: WhatsAppService,
-        private readonly hashService: HashService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly whatsAppService: WhatsAppService,
+                private readonly hashService: HashService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.shareUrls = [];
     }
@@ -49,7 +49,7 @@ export class ShareUrlsService {
         let ihm = this.hashService.getFullUrlFromShareId(shareUrl.id);
         let escaped = encodeURIComponent(ihm);
         return {
-            ihm: ihm,
+            ihm,
             facebook: `${Urls.facebook}${escaped}`,
             whatsapp: this.whatsAppService.getUrl(this.getShareUrlDisplayName(shareUrl), escaped) as string,
             nakeb: `https://www.nakeb.co.il/add_new_hike?ihm_link=${shareUrl.id}`
@@ -106,7 +106,7 @@ export class ShareUrlsService {
 
     public setShareUrl(shareUrl: ShareUrl) {
         this.ngRedux.dispatch(new SetShareUrlAction({
-            shareUrl: shareUrl
+            shareUrl
         }));
     }
 

@@ -80,7 +80,7 @@ export class SpatialService {
         let returnValue = {
             lat: (latlng2.lat - latlng1.lat) * ratio + latlng1.lat,
             lng: (latlng2.lng - latlng1.lng) * ratio + latlng1.lng,
-            alt: alt
+            alt
         };
         return returnValue;
     }
@@ -126,7 +126,7 @@ export class SpatialService {
         return [bounds.southWest, bounds.northEast];
     }
 
-    public static mBBoundsToBounds(bounds: LngLatBounds):  Bounds {
+    public static mBBoundsToBounds(bounds: LngLatBounds): Bounds {
         return {
             northEast: bounds.getNorthEast(),
             southWest: bounds.getSouthWest()

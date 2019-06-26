@@ -23,10 +23,10 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     public location;
 
     protected constructor(resources: ResourcesService,
-        protected readonly mapService: MapService,
-        protected readonly layersService: LayersService,
-        protected readonly toastService: ToastService,
-        private readonly http: HttpClient
+                          protected readonly mapService: MapService,
+                          protected readonly layersService: LayersService,
+                          protected readonly toastService: ToastService,
+                          private readonly http: HttpClient
     ) {
         super(resources);
         this.minZoom = LayersService.MIN_ZOOM;

@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { transition, trigger, style, animate } from "@angular/animations";
 
 import { SidebarService } from "../../services/sidebar.service";
@@ -35,7 +35,7 @@ export const sidebarAnimate = trigger(
 })
 export class SidebarComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
-        private sidebarService: SidebarService) {
+                private sidebarService: SidebarService) {
         super(resources);
     }
 

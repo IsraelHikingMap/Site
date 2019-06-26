@@ -1,4 +1,4 @@
-﻿import { Component, Inject } from "@angular/core";
+import { Component, Inject } from "@angular/core";
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -31,9 +31,9 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
                     {
                         maxWidth: "378px",
                         data: {
-                            marker: marker,
-                            routeId: routeId,
-                            index: index
+                            marker,
+                            routeId,
+                            index
                         }
                     });
             },
@@ -41,11 +41,11 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     }
 
     constructor(resources: ResourcesService,
-        private readonly matDialog: MatDialog,
-        private readonly imageGalleryService: ImageGalleryService,
-        private readonly privatePoiUploaderService: PrivatePoiUploaderService,
-        private readonly dialogRef: MatDialogRef<PrivatePoiShowDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data) {
+                private readonly matDialog: MatDialog,
+                private readonly imageGalleryService: ImageGalleryService,
+                private readonly privatePoiUploaderService: PrivatePoiUploaderService,
+                private readonly dialogRef: MatDialogRef<PrivatePoiShowDialogComponent>,
+                @Inject(MAT_DIALOG_DATA) data) {
         super(resources);
 
         this.marker = data.marker;

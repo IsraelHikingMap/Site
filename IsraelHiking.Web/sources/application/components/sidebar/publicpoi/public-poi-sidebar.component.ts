@@ -55,17 +55,17 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     private subscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
-        private readonly router: Router,
-        private readonly route: ActivatedRoute,
-        private readonly poiService: PoiService,
-        private readonly authorizationService: AuthorizationService,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly routesFactory: RoutesFactory,
-        private readonly toastService: ToastService,
-        private readonly hashService: HashService,
-        private readonly fitBoundsService: FitBoundsService,
-        private readonly sidebarService: SidebarService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly router: Router,
+                private readonly route: ActivatedRoute,
+                private readonly poiService: PoiService,
+                private readonly authorizationService: AuthorizationService,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly routesFactory: RoutesFactory,
+                private readonly toastService: ToastService,
+                private readonly hashService: HashService,
+                private readonly fitBoundsService: FitBoundsService,
+                private readonly sidebarService: SidebarService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.sidebarService.hideWithoutChangingAddressbar();
         this.isLoading = true;
@@ -264,7 +264,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         }
         let userId = this.authorizationService.getUserInfo().id;
         this.poiExtended.rating.raters = this.poiExtended.rating.raters.filter(r => r.id !== userId);
-        this.poiExtended.rating.raters.push({ id: userId, value: value } as Rater);
+        this.poiExtended.rating.raters.push({ id: userId, value } as Rater);
         this.poiService.uploadRating(this.poiExtended.rating).then((rating) => {
             this.poiExtended.rating = rating;
             this.rating = this.getRatingNumber(rating);
@@ -303,8 +303,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 title: this.info.title,
                 description: this.info.description,
                 type: icon.replace("icon-", ""),
-                id: id,
-                urls: urls
+                id,
+                urls
             }
         }));
         this.clear();

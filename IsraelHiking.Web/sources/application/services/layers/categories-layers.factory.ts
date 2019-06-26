@@ -13,10 +13,10 @@ export class CategoriesLayerFactory {
     private categoryLayers: Map<CategoriesType, CategoriesLayer>;
 
     constructor(private readonly mapService: MapService,
-        private readonly resources: ResourcesService,
-        private readonly poiService: PoiService,
-        private readonly runningContextService: RunningContextService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly resources: ResourcesService,
+                private readonly poiService: PoiService,
+                private readonly runningContextService: RunningContextService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.categoryLayers = new Map<CategoriesType, CategoriesLayer>();
         for (let category of this.poiService.getCategoriesTypes()) {
             let layer = new CategoriesLayer(

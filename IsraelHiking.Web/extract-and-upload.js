@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-var opn = require("opn");
+var open = require("open");
 var fs = require("fs");
 var request = require("request");
 var md5File = require("md5-file");
@@ -51,6 +51,5 @@ request({
         return console.error("Upload failed: ", err);
     }
     console.log("Upload successful! opening browser so you can start translating :-)");
-    opn("https://translate.zanata.org/webtrans/translate?project=IsraelHiking&iteration=Main&localeId=en-US&locale=en-US#view:doc;doc:IsraelHiking;untranslated:show;fuzzy:show;rejected:show");
-    opn("https://translate.zanata.org/webtrans/translate?project=IsraelHiking&iteration=Main&localeId=he&locale=he#view:doc;doc:IsraelHiking;untranslated:show;fuzzy:show;rejected:show");
+        open("https://translate.zanata.org/webtrans/translate?project=IsraelHiking&iteration=Main&localeId=en-US&locale=en-US#view:doc;doc:IsraelHiking;untranslated:show;fuzzy:show;rejected:show");
 });

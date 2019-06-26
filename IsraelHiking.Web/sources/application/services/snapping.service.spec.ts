@@ -12,7 +12,7 @@ import { LngLatBounds } from "mapbox-gl";
 describe("SnappingService", () => {
 
     let mapMock: any;
-    let moveEndAction: Function;
+    let moveEndAction: () => void;
     let centerAndZoom = { lat: 0.0, lng: 0.0, alt: 7 };
 
     beforeEach(() => {
@@ -144,7 +144,6 @@ describe("SnappingService", () => {
             expect(snap.line).toBeNull();
         })));
 
-
     it("Should snap to its own layers", inject([SnappingService], (snappingService: SnappingService) => {
         snappingService.setMap(mapMock);
         snappingService.enable(true);
@@ -152,7 +151,7 @@ describe("SnappingService", () => {
 
         let snap = snappingService.snapToRoute({ lat: 1.00001, lng: 1 },
             {
-                lines: lines,
+                lines,
                 sensitivity: 10
             } as ISnappingRouteOptions);
 
@@ -167,7 +166,7 @@ describe("SnappingService", () => {
 
         let snap = snappingService.snapToRoute({ lat: 1, lng: 1.0001 },
             {
-                lines: lines,
+                lines,
                 sensitivity: 10
             } as ISnappingRouteOptions);
 
@@ -182,7 +181,7 @@ describe("SnappingService", () => {
 
             let snap = snappingService.snapToRoute({ lat: 1.00001, lng: 1 },
                 {
-                    lines: lines,
+                    lines,
                     sensitivity: 10
                 } as ISnappingRouteOptions);
 
@@ -196,7 +195,7 @@ describe("SnappingService", () => {
 
         let snap = snappingService.snapToRoute({ lat: 1.01, lng: 1 },
             {
-                lines: lines,
+                lines,
                 sensitivity: 2000
             } as ISnappingRouteOptions);
 
@@ -218,7 +217,7 @@ describe("SnappingService", () => {
 
         let snap = snappingService.snapToRoute({ lat: 10, lng: 10 },
             {
-                lines: lines,
+                lines,
                 sensitivity: 10
             } as ISnappingRouteOptions);
 

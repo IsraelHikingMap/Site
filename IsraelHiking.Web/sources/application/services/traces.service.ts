@@ -10,7 +10,7 @@ import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducre
 export class TracesService {
 
     constructor(private readonly httpClient: HttpClient,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
     public getMissingParts(trace: Trace): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
@@ -57,7 +57,7 @@ export class TracesService {
     public updateTrace = async (trace: Trace): Promise<any> => {
         trace.tags = trace.tagsString.split(",").map(t => t.trim()).filter(t => t);
         await this.httpClient.put(Urls.osmTrace + trace.id, trace, { responseType: "text" }).toPromise();
-        this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace: trace }));
+        this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace }));
     }
 
     public deleteTrace = async (trace: Trace): Promise<any> => {

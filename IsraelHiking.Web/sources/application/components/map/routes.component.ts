@@ -44,12 +44,12 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     private routes: RouteData[];
 
     constructor(resources: ResourcesService,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
-        private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
-        private readonly snappingService: SnappingService,
-        private readonly loggingService: LoggingService,
-        private readonly host: MapComponent
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
+                private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
+                private readonly snappingService: SnappingService,
+                private readonly loggingService: LoggingService,
+                private readonly host: MapComponent
     ) {
         super(resources);
         this.routesGeoJson = {
@@ -95,7 +95,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         }
         this.routesGeoJson = {
             type: "FeatureCollection",
-            features: features
+            features
         };
         this.editingRoute = {
             type: "FeatureCollection",
@@ -192,7 +192,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             {
                 type: "Feature",
                 id: route.id,
-                properties: properties,
+                properties,
                 geometry: {
                     type: "LineString",
                     coordinates: routeCoordinates
@@ -205,7 +205,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             {
                 type: "Feature",
                 id: properties.id,
-                properties: properties,
+                properties,
                 geometry: {
                     type: "Point",
                     coordinates: routeCoordinates[0]
@@ -221,7 +221,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             {
                 type: "Feature",
                 id: properties.id,
-                properties: properties,
+                properties,
                 geometry: {
                     type: "Point",
                     coordinates: routeCoordinates[routeCoordinates.length - 1]
@@ -240,9 +240,9 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             width = 6;
         }
         return {
-            color: color,
+            color,
             weight: width,
-            opacity: opacity,
+            opacity,
             name: route.name,
             id: route.id
         };

@@ -47,5 +47,5 @@
             }">
 </mgl-layer>
 <mgl-popup *ngIf="locationLatLng" [lngLat]="locationLatLng" (close)="locationLatLng = null">
-    <gps-location-overlay [latlng]="locationLatLng" (close)="locationLatLng = null"></gps-location-overlay>
+    <gps-location-overlay [latlng]="locationLatLng" (closed)="locationLatLng = null"></gps-location-overlay>
 </mgl-popup>

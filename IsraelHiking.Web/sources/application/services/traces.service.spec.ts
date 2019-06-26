@@ -1,4 +1,4 @@
-﻿import { TestBed, inject } from "@angular/core/testing";
+import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { NgRedux } from "@angular-redux/store";

@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 
 import { ResourcesService } from "./resources.service";
@@ -10,8 +10,8 @@ import { LatLngAlt } from "../models/models";
 export class ElevationProvider {
 
     constructor(private readonly httpClient: HttpClient,
-        private readonly resourcesService: ResourcesService,
-        private readonly toastService: ToastService,
+                private readonly resourcesService: ResourcesService,
+                private readonly toastService: ToastService,
     ) { }
 
     public updateHeights = async (latlngs: LatLngAlt[]): Promise<LatLngAlt[]> => {
@@ -30,7 +30,7 @@ export class ElevationProvider {
         }
         try {
             let params = new HttpParams().set("points", points.join("|"));
-            let response = await this.httpClient.get(Urls.elevation, { params: params }).toPromise();
+            let response = await this.httpClient.get(Urls.elevation, { params }).toPromise();
             for (let index = 0; index < relevantIndexes.length; index++) {
                 latlngs[relevantIndexes[index]].alt = response[index];
             }

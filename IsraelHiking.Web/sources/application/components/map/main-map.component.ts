@@ -25,10 +25,10 @@ import { TouchPitchInteraction } from "../intercations/touch-pitch.interaction";
 })
 export class MainMapComponent extends BaseMapComponent implements AfterViewInit {
 
-    @ViewChild(NgxImageGalleryComponent)
+    @ViewChild(NgxImageGalleryComponent, { static: false })
     public ngxImageGallery: NgxImageGalleryComponent;
 
-    @ViewChild(MapComponent)
+    @ViewChild(MapComponent, { static: false })
     public mapComponent: MapComponent;
 
     @ViewChildren("topLeftControl", { read: ElementRef })
@@ -45,13 +45,13 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
     public initialStyle: Style;
 
     constructor(resources: ResourcesService,
-        public readonly imageGalleryService: ImageGalleryService,
-        private readonly mapService: MapService,
-        private readonly snappingService: SnappingService,
-        private readonly hashService: HashService,
-        private readonly runningContextService: RunningContextService,
-        private readonly defaultStyleService: DefaultStyleService,
-        private readonly ngRedux: NgRedux<ApplicationState>,
+                public readonly imageGalleryService: ImageGalleryService,
+                private readonly mapService: MapService,
+                private readonly snappingService: SnappingService,
+                private readonly hashService: HashService,
+                private readonly runningContextService: RunningContextService,
+                private readonly defaultStyleService: DefaultStyleService,
+                private readonly ngRedux: NgRedux<ApplicationState>,
 
     ) {
         super(resources);

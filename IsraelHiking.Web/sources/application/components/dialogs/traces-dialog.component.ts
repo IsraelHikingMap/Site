@@ -37,7 +37,6 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public traces$: Observable<Trace[]>;
     private traces: Trace[];
 
-
     @SharedStorage()
     private sessionSearchTerm = "";
 
@@ -45,15 +44,15 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     private tracesChangedSubscription: Subscription;
 
     constructor(resources: ResourcesService,
-        private readonly matDialogRef: MatDialogRef<TracesDialogComponent>,
-        private readonly fileService: FileService,
-        private readonly layersService: LayersService,
-        private readonly fitBoundsService: FitBoundsService,
-        private readonly toastService: ToastService,
-        private readonly authorizationService: AuthorizationService,
-        private readonly tracesService: TracesService,
-        private readonly runningContextService: RunningContextService,
-        private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly matDialogRef: MatDialogRef<TracesDialogComponent>,
+                private readonly fileService: FileService,
+                private readonly layersService: LayersService,
+                private readonly fitBoundsService: FitBoundsService,
+                private readonly toastService: ToastService,
+                private readonly authorizationService: AuthorizationService,
+                private readonly tracesService: TracesService,
+                private readonly runningContextService: RunningContextService,
+                private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
         this.loadingTraces = false;
@@ -116,7 +115,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.selectedTrace.isInEditMode = false;
         let message = `${this.resources.deletionOf} ${this.selectedTrace.name}, ${this.resources.areYouSure}`;
         this.toastService.confirm({
-            message: message,
+            message,
             type: "YesNo",
             confirmAction: () => {
                 this.tracesService.deleteTrace(this.selectedTrace);

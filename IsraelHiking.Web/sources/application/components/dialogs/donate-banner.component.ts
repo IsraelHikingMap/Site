@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core"; 
+import { Component } from "@angular/core";
 import { LocalStorage } from "ngx-store";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -11,11 +11,11 @@ import { ResourcesService } from "../../services/resources.service";
 })
 export class DonateBannerComponent extends BaseMapComponent {
     private static readonly BANNER_RESTORE_TIMEOUT = 4 * (1000 * 60 * 60 * 24);
-    
+
     public isOpen: boolean;
 
     @LocalStorage()
-    public showBanner: boolean = true;
+    public showBanner = true;
 
     @LocalStorage()
     private bannerClickDate: Date = null;
@@ -41,6 +41,6 @@ export class DonateBannerComponent extends BaseMapComponent {
 
     public later() {
         this.isOpen = false;
-        this.bannerClickDate = new Date(); 
+        this.bannerClickDate = new Date();
     }
 }

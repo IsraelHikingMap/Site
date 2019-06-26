@@ -25,12 +25,12 @@ export class FileService {
     public formats: IFormatViewModel[];
 
     constructor(private readonly httpClient: HttpClient,
-        private readonly runningContextService: RunningContextService,
-        private readonly imageResizeService: ImageResizeService,
-        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly fitBoundsService: FitBoundsService,
-        private readonly loggingService: LoggingService) {
+                private readonly runningContextService: RunningContextService,
+                private readonly imageResizeService: ImageResizeService,
+                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly fitBoundsService: FitBoundsService,
+                private readonly loggingService: LoggingService) {
         this.formats = [];
         this.httpClient.get(Urls.fileFormats).toPromise().then((response: IFormatViewModel[]) => {
             this.formats.splice(0);
@@ -145,8 +145,8 @@ export class FileService {
      * https://github.com/eligrey/FileSaver.js/issues/330
      * Plus cordova file save.
      * Return true if there's a need to show a toast message.
-     * @param blob
-     * @param fileName
+     * @param blob - the file to save
+     * @param fileName - the file name
      */
     private saveAsWorkAround(blob: Blob, fileName: string): Promise<boolean> {
         return new Promise((resolve, reject) => {

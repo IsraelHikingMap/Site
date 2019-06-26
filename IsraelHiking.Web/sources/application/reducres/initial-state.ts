@@ -1,4 +1,4 @@
-﻿import { StateWithHistory } from "redux-undo";
+import { StateWithHistory } from "redux-undo";
 
 import {
     ApplicationState,

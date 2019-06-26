@@ -1,4 +1,4 @@
-﻿export const environment = {
+export const environment = {
     production: true,
     baseAddress: "https://israelhiking.osm.org.il",
     baseApiAddress: "https://israelhiking.osm.org.il/api/",

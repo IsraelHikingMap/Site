@@ -56,7 +56,7 @@ export class RouteStatisticsService {
         for (let segment of route.segments) {
             for (let latlng of segment.latlngs) {
                 let distance = SpatialService.getDistanceInMeters(previousPoint, latlng);
-                if (distance < 1 || latlng.alt == null || latlng.alt === NaN) {
+                if (distance < 1 || isNaN(latlng.alt)) {
                     continue;
                 }
                 routeStatistics.length += distance;

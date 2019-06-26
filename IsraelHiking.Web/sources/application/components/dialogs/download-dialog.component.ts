@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -18,7 +18,7 @@ export class DownloadDialogComponent extends BaseMapComponent {
     public zoom: number;
 
     constructor(resources: ResourcesService,
-        private readonly sanitizer: DomSanitizer) {
+                private readonly sanitizer: DomSanitizer) {
         super(resources);
 
         this.app = "Locus";
@@ -81,5 +81,3 @@ export class DownloadDialogComponent extends BaseMapComponent {
         return "";
     }
 }
-
-

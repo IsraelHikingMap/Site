@@ -1,4 +1,4 @@
-﻿import { Component, HostListener, ViewChild, ElementRef } from "@angular/core";
+import { Component, HostListener, ViewChild, ElementRef } from "@angular/core";
 import { every } from "lodash";
 
 import { DataContainerService } from "../services/data-container.service";
@@ -15,14 +15,14 @@ import { RunningContextService } from "../services/running-context.service";
 })
 export class FileComponent extends BaseMapComponent {
 
-    @ViewChild("openFile")
+    @ViewChild("openFile", { static: false })
     public openFileElement: ElementRef;
 
     constructor(resources: ResourcesService,
-        private readonly dataContainerService: DataContainerService,
-        private readonly fileService: FileService,
-        private readonly toastService: ToastService,
-        private readonly runningContextService: RunningContextService
+                private readonly dataContainerService: DataContainerService,
+                private readonly fileService: FileService,
+                private readonly toastService: ToastService,
+                private readonly runningContextService: RunningContextService
     ) {
         super(resources);
     }

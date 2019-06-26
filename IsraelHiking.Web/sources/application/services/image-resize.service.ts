@@ -29,7 +29,6 @@ export interface IPiexif {
     insert(exifBytes: any[], binaryStringData: string): string;
 }
 
-
 import { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models/models";
 
 @Injectable()
@@ -45,8 +44,8 @@ export class ImageResizeService {
     }
 
     private resizeImageAndConvertToAny<TReturn>(file: File,
-        convertMethod: (data: string, name: string, geoLocation: LatLngAlt) => TReturn,
-        throwIfNoLocation = true) {
+                                                convertMethod: (data: string, name: string, geoLocation: LatLngAlt) => TReturn,
+                                                throwIfNoLocation = true) {
         return new Promise<TReturn>((resolve, reject) => {
             let reader = new FileReader();
             reader.onload = (event: any) => {
@@ -81,7 +80,7 @@ export class ImageResizeService {
             exifData.GPS[piexif.GPSIFD.GPSLatitudeRef]);
         let lng = piexif.GPSHelper.dmsRationalToDeg(exifData.GPS[piexif.GPSIFD.GPSLongitude],
             exifData.GPS[piexif.GPSIFD.GPSLongitudeRef]);
-        return { lat: lat, lng: lng };
+        return { lat, lng };
     }
 
     private getAndUpdateOrientation(exifData: any) {

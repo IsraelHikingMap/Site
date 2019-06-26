@@ -20,10 +20,10 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     public isAdvanced: Observable<boolean>;
 
     constructor(resources: ResourcesService,
-        protected readonly selectedRouteService: SelectedRouteService,
-        protected readonly routesFactory: RoutesFactory,
-        protected readonly toastService: ToastService,
-        protected readonly ngRedux: NgRedux<ApplicationState>) {
+                protected readonly selectedRouteService: SelectedRouteService,
+                protected readonly routesFactory: RoutesFactory,
+                protected readonly toastService: ToastService,
+                protected readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.colors = this.routesFactory.colors;
     }

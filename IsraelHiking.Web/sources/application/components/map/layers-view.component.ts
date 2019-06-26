@@ -40,10 +40,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     public selectedPoi$: Observable<PointOfInterestExtended>;
 
     constructor(resources: ResourcesService,
-        private readonly router: Router,
-        private readonly layersService: LayersService,
-        private readonly categoriesLayerFactory: CategoriesLayerFactory,
-        private readonly poiService: PoiService) {
+                private readonly router: Router,
+                private readonly layersService: LayersService,
+                private readonly categoriesLayerFactory: CategoriesLayerFactory,
+                private readonly poiService: PoiService) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
         this.selectedCluster = null;
@@ -73,13 +73,12 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     }
 
     ngOnInit() {
-        for (let categoriesTypeIndex = 0; categoriesTypeIndex < this.categoriesTypes.length; categoriesTypeIndex++) {
-            let categoriesType = this.categoriesTypes[categoriesTypeIndex];
+        for (let categoriesType of this.categoriesTypes) {
             this.categoriesLayerFactory.get(categoriesType).markersLoaded.subscribe(() => {
                 let features = this.categoriesLayerFactory.get(categoriesType).pointsOfInterest.map(p => this.poiToFeature(p));
                 this.poiGeoJsonData[categoriesType] = {
                     type: "FeatureCollection",
-                    features: features
+                    features
                 };
             });
         }
@@ -107,13 +106,13 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         return {
             type: "Feature",
             properties: {
-                id: id,
+                id,
                 icon: p.icon,
                 iconColor: p.iconColor,
                 title: p.title,
                 hasExtraData: p.hasExtraData
             },
-            id: id,
+            id,
             geometry: {
                 type: "Point",
                 coordinates: [p.location.lng, p.location.lat]
@@ -156,7 +155,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         let id = sourceAndId.split("__")[1];
         return {
             source: poiSource,
-            id: id
+            id
         };
     }
 

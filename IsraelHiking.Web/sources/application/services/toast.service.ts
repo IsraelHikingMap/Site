@@ -6,8 +6,8 @@ import { ConfirmDialogComponent, ConfirmType } from "../components/dialogs/confi
 export interface IConfirmOptions {
     message: string;
     type: ConfirmType;
-    confirmAction?: Function;
-    declineAction?: Function;
+    confirmAction?: () => void;
+    declineAction?: () => void;
     customConfirmText?: string;
     customDeclineText?: string;
     confirmIcon?: string;
@@ -19,7 +19,7 @@ export class ToastService {
     private duration: number;
 
     constructor(private resources: ResourcesService,
-        private snackbar: MatSnackBar) {
+                private snackbar: MatSnackBar) {
         this.duration = 6000;
     }
 

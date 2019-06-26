@@ -1,4 +1,4 @@
-﻿import { LatLngAlt, RouteSegmentData } from "../../models/models";
+import { LatLngAlt, RouteSegmentData } from "../../models/models";
 
 export class NoneRouter {
 

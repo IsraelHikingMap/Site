@@ -17,20 +17,16 @@ interface Navigator {
     app: any;
 }
 
-interface Window {
-    resolveLocalFileSystemURL: Function;
-}
-
 @Injectable()
 export class ApplicationExitService {
     private state: ExitState;
 
     constructor(private readonly resources: ResourcesService,
-        private readonly ngZone: NgZone,
-        private readonly databaseService: DatabaseService,
-        private readonly runningContext: RunningContextService,
-        private readonly loggingService: LoggingService,
-        private readonly toastService: ToastService) {
+                private readonly ngZone: NgZone,
+                private readonly databaseService: DatabaseService,
+                private readonly runningContext: RunningContextService,
+                private readonly loggingService: LoggingService,
+                private readonly toastService: ToastService) {
 
         this.state = "None";
     }

@@ -30,7 +30,6 @@ describe("Share Urls Service", () => {
         });
     });
 
-
     it("Should update share url", inject([ShareUrlsService, HttpTestingController],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
 
@@ -57,7 +56,6 @@ describe("Share Urls Service", () => {
             mockBackend.expectOne(Urls.urls + shareUrl.id).flush({});
             return promise;
         }));
-
 
     it("Should get image for share url", inject([ShareUrlsService], (shareUrlsService: ShareUrlsService) => {
         let shareUrl = { id: "42" } as ShareUrl;

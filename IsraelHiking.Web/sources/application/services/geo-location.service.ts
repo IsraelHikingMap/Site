@@ -26,9 +26,9 @@ export class GeoLocationService {
     public currentLocation: ILatLngTime;
 
     constructor(private readonly resources: ResourcesService,
-        private readonly runningContextService: RunningContextService,
-        private readonly loggingService: LoggingService,
-        private readonly ngZone: NgZone) {
+                private readonly runningContextService: RunningContextService,
+                private readonly loggingService: LoggingService,
+                private readonly ngZone: NgZone) {
         this.watchNumber = -1;
         this.positionChanged = new EventEmitter<Position>();
         this.state = "disabled";

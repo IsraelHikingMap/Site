@@ -1,4 +1,4 @@
-﻿import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -16,16 +16,16 @@ export class ClusterOverlayComponent extends BaseMapComponent {
     public points: PointOfInterest[];
 
     @Output()
-    public close: EventEmitter<void>;
+    public closed: EventEmitter<void>;
 
     constructor(resources: ResourcesService,
-        private readonly router: Router) {
+                private readonly router: Router) {
         super(resources);
-        this.close = new EventEmitter();
+        this.closed = new EventEmitter();
     }
 
     public clickOnItem(point: PointOfInterest) {
-        this.close.emit();
+        this.closed.emit();
         this.router.navigate([RouteStrings.POI, point.source, point.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }

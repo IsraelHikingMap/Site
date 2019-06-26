@@ -1,4 +1,4 @@
-﻿import { TestBed, inject } from "@angular/core/testing";
+import { TestBed, inject } from "@angular/core/testing";
 import { NgRedux } from "@angular-redux/store";
 
 import { SidebarService } from "./sidebar.service";

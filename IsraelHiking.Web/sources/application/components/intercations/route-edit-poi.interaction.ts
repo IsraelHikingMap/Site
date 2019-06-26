@@ -14,11 +14,11 @@ import { ApplicationState, MarkerData, LatLngAlt } from "../../models/models";
 export class RouteEditPoiInteraction {
 
     constructor(private readonly matDialog: MatDialog,
-        private readonly ngZone: NgZone,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly geoLocationService: GeoLocationService,
-        private readonly snappingService: SnappingService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly ngZone: NgZone,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly geoLocationService: GeoLocationService,
+                private readonly snappingService: SnappingService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
     public setActive(active: boolean, map: Map) {
@@ -48,8 +48,8 @@ export class RouteEditPoiInteraction {
         markerData.latlng = latlng;
         this.ngRedux.dispatch(new UpdatePrivatePoiAction({
             routeId: routeData.id,
-            index: index,
-            markerData: markerData
+            index,
+            markerData
         }));
     }
 
@@ -58,7 +58,7 @@ export class RouteEditPoiInteraction {
         let markerData = (snapping.markerData != null)
             ? { ...snapping.markerData }
             : {
-                latlng: latlng,
+                latlng,
                 urls: [],
                 title: "",
                 description: "",
@@ -66,7 +66,7 @@ export class RouteEditPoiInteraction {
             };
         this.ngRedux.dispatch(new AddPrivatePoiAction({
             routeId: this.selectedRouteService.getSelectedRoute().id,
-            markerData: markerData
+            markerData
         }));
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         let index = selectedRoute.markers.length - 1;

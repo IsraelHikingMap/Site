@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 
@@ -14,9 +14,9 @@ export class RouterService {
     private readonly noneRouter: NoneRouter;
 
     constructor(private readonly httpClient: HttpClient,
-        private readonly resourcesService: ResourcesService,
-        private readonly geoJsonParser: GeoJsonParser,
-        private readonly toastService: ToastService,
+                private readonly resourcesService: ResourcesService,
+                private readonly geoJsonParser: GeoJsonParser,
+                private readonly toastService: ToastService,
     ) {
         this.noneRouter = new NoneRouter();
     }

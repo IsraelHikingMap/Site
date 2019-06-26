@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { HashService } from "../services/hash.service";
 import { ResourcesService } from "../services/resources.service";
 import { RunningContextService } from "../services/running-context.service";
@@ -15,8 +15,8 @@ export class IhmLinkComponent extends BaseMapComponent {
     public target: string;
 
     constructor(resources: ResourcesService,
-        private readonly hashService: HashService,
-        private readonly runningContextService: RunningContextService) {
+                private readonly hashService: HashService,
+                private readonly runningContextService: RunningContextService) {
         super(resources);
 
         if (this.runningContextService.isIFrame) {

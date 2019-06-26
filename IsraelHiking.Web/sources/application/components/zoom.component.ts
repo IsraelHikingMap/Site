@@ -10,7 +10,7 @@ import { ResourcesService } from "../services/resources.service";
 })
 export class ZoomComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
-        private readonly host: MapComponent) {
+                private readonly host: MapComponent) {
         super(resources);
     }
 

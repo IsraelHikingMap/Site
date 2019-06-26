@@ -60,10 +60,10 @@ export class LayersService {
     public userState$: Observable<UserState>;
 
     constructor(private readonly resourcesService: ResourcesService,
-        private readonly authorizationService: AuthorizationService,
-        private readonly httpClient: HttpClient,
-        private readonly toastService: ToastService,
-        private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly authorizationService: AuthorizationService,
+                private readonly httpClient: HttpClient,
+                private readonly toastService: ToastService,
+                private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         this.baseLayers = [];
         this.overlays = [];
@@ -219,7 +219,7 @@ export class LayersService {
     private addOverlayFromData = (layerData: LayerData, visible: boolean): Overlay => {
         let overlay = {
             ...layerData,
-            visible: visible,
+            visible,
             isEditable: true
         } as Overlay;
         this.ngRedux.dispatch(new AddOverlayAction({
@@ -298,7 +298,7 @@ export class LayersService {
 
     public selectBaseLayer = (key: string) => {
         this.ngRedux.dispatch(new SelectBaseLayerAction({
-            key: key
+            key
         }));
     }
 
@@ -349,7 +349,7 @@ export class LayersService {
         }
 
         this.addBaseLayer({
-            key: key,
+            key,
             address: layerData.address,
             minZoom: layerData.minZoom,
             maxZoom: layerData.maxZoom,

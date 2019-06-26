@@ -12,18 +12,18 @@ import { ToastService } from "../services/toast.service";
 export class ImageCaptureDirective implements OnDestroy {
 
     @Output()
-    public change: EventEmitter<any>;
+    public changed: EventEmitter<any>;
 
-    private listenFunction: Function;
+    private listenFunction: () => void;
 
     constructor(elementRef: ElementRef,
-        private readonly renderer: Renderer2,
-        private readonly ngZone: NgZone,
-        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
-        private readonly resources: ResourcesService,
-        private readonly toastService: ToastService) {
+                private readonly renderer: Renderer2,
+                private readonly ngZone: NgZone,
+                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+                private readonly resources: ResourcesService,
+                private readonly toastService: ToastService) {
 
-        this.change = new EventEmitter();
+        this.changed = new EventEmitter();
         this.listenFunction = this.renderer.listen(elementRef.nativeElement, "click", (event) => {
             if (!environment.isCordova) {
                 return;
@@ -53,15 +53,15 @@ export class ImageCaptureDirective implements OnDestroy {
                     },
                     target: {}
                 };
-                this.ngZone.run(() => this.change.next(changeEvent));
+                this.ngZone.run(() => this.changed.next(changeEvent));
             },
             (err) => {
                 console.error(err);
             },
             {
                 destinationType: Camera.DestinationType.DATA_URL,
-                sourceType: sourceType,
-                saveToPhotoAlbum: saveToPhotoAlbum,
+                sourceType,
+                saveToPhotoAlbum,
                 correctOrientation: true
             });
     }

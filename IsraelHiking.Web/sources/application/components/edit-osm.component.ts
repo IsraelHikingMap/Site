@@ -8,7 +8,6 @@ import { AuthorizationService } from "../services/authorization.service";
 import { BaseMapComponent } from "./base-map.component";
 import { ApplicationState } from "../models/models";
 
-
 @Component({
     selector: "edit-osm",
     templateUrl: "./edit-osm.component.html"
@@ -19,9 +18,9 @@ export class EditOSMComponent extends BaseMapComponent {
     public isAdvanced: Observable<boolean>;
 
     constructor(resources: ResourcesService,
-        private readonly layersService: LayersService,
-        private readonly authorizationService: AuthorizationService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly layersService: LayersService,
+                private readonly authorizationService: AuthorizationService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
     }
 

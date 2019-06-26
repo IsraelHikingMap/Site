@@ -21,16 +21,16 @@ import { DataContainer, ApplicationState, LayerData } from "../models/models";
 export class DataContainerService {
 
     constructor(private readonly shareUrlsService: ShareUrlsService,
-        private readonly layersService: LayersService,
-        private readonly fileService: FileService,
-        private readonly resourcesService: ResourcesService,
-        private readonly toastService: ToastService,
-        private readonly fitBoundsService: FitBoundsService,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly routesFactory: RoutesFactory,
-        private readonly mapService: MapService,
-        private readonly runningContextService: RunningContextService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly layersService: LayersService,
+                private readonly fileService: FileService,
+                private readonly resourcesService: ResourcesService,
+                private readonly toastService: ToastService,
+                private readonly fitBoundsService: FitBoundsService,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly routesFactory: RoutesFactory,
+                private readonly mapService: MapService,
+                private readonly runningContextService: RunningContextService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
     public setData(dataContainer: DataContainer, keepCurrentRoutes: boolean) {
@@ -43,7 +43,7 @@ export class DataContainerService {
             routesData = [...this.ngRedux.getState().routes.present, ...routesData];
         }
         this.ngRedux.dispatch(new BulkReplaceRoutesAction({
-            routesData: routesData
+            routesData
         }));
         if (routesData.length > 0) {
             this.ngRedux.dispatch(new SetSelectedRouteAction({
@@ -88,7 +88,7 @@ export class DataContainerService {
             let data = await this.fileService.openFromUrl(url);
             this.ngRedux.dispatch(new SetFileUrlAndBaseLayerAction({
                 fileUrl: url,
-                baseLayer: baseLayer
+                baseLayer
             }));
             data.baseLayer = this.stringToBaseLayer(baseLayer);
             this.setData(data, false);

@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgRedux } from "@angular-redux/store";
 import { chain, flatten, map } from "lodash";
@@ -14,11 +14,11 @@ import { SetUploadMarkerDataAction } from "../reducres/poi.reducer";
 @Injectable()
 export class PrivatePoiUploaderService {
     constructor(private readonly router: Router,
-        private readonly resources: ResourcesService,
-        private readonly poiService: PoiService,
-        private readonly snappingService: SnappingService,
-        private readonly toastService: ToastService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly resources: ResourcesService,
+                private readonly poiService: PoiService,
+                private readonly snappingService: SnappingService,
+                private readonly toastService: ToastService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
     public async uploadPoint(
@@ -34,15 +34,15 @@ export class PrivatePoiUploaderService {
             urls = [imageLink];
         }
         let markerData = {
-            description: description,
-            title: title,
+            description,
+            title,
             latlng: latLng,
             type: markerType,
-            urls: urls
+            urls
         } as MarkerData;
 
         this.ngRedux.dispatch(new SetUploadMarkerDataAction({
-            markerData: markerData
+            markerData
         }));
 
         if (results == null) {
@@ -66,7 +66,7 @@ export class PrivatePoiUploaderService {
             }
         }
         this.toastService.confirm({
-            message: message,
+            message,
             type: "YesNo",
             confirmAction: () => {
                 this.router.navigate([RouteStrings.ROUTE_POI, "OSM", results.id],

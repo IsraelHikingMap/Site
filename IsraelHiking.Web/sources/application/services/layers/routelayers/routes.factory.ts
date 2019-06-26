@@ -1,9 +1,8 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 
 import { Urls } from "../../../urls";
 import { RouteData } from "../../../models/models";
-
 
 @Injectable()
 export class RoutesFactory {
@@ -38,7 +37,7 @@ export class RoutesFactory {
     public createRouteData(name: string, color?: string): RouteData {
         let route: RouteData = {
             id: this.generateRandomId(),
-            name: name,
+            name,
             description: "",
             state: "ReadOnly",
             color: color || this.colors[this.nextColorIndex],

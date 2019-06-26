@@ -40,7 +40,7 @@ import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { DndModule } from "@beyerleinf/ngx-dnd";
 import { NgxImageGalleryModule } from "ngx-image-gallery";
-import { NgxD3Service } from "ngx-d3";
+import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule } from "@angular-redux/store";
 import { NgxMapboxGLModule } from "ngx-mapbox-gl";
@@ -199,7 +199,7 @@ NgModule({
         NgProgressHttpModule,
         NgxPaginationModule,
         ScrollToModule.forRoot(),
-        DndModule.forRoot(),
+        DndModule,
         NgxImageGalleryModule,
         InfiniteScrollModule,
         NgReduxModule,
@@ -359,7 +359,7 @@ NgModule({
 })
 export class ApplicationModule {
     constructor(angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
-        dragAndDropService: DragAndDropService) {
+                dragAndDropService: DragAndDropService) {
         angulartics2GoogleAnalytics.startTracking();
     }
 }

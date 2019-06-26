@@ -22,10 +22,10 @@ export class InfoComponent extends BaseMapComponent {
     public download$: Observable<boolean>;
 
     constructor(resources: ResourcesService,
-        private readonly hashService: HashService,
-        private readonly sidebarService: SidebarService,
-        private readonly dialog: MatDialog,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly hashService: HashService,
+                private readonly sidebarService: SidebarService,
+                private readonly dialog: MatDialog,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
 
         this.download$.subscribe((isOpenDownload) => {
@@ -55,4 +55,3 @@ export class InfoComponent extends BaseMapComponent {
         });
     }
 }
-

@@ -6,7 +6,7 @@ export class MapService {
     public map: Map;
     public initializationPromise: Promise<void>;
 
-    private resolve: Function;
+    private resolve: (value?: void | PromiseLike<void>) => void;
 
     constructor() {
         this.initializationPromise = new Promise((resolve) => { this.resolve = resolve; });
