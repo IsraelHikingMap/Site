@@ -14,7 +14,9 @@ environment:
         - PRODUCT: android
 install:
 - ps: >-
-    npm install -g npm@6.2.0 --loglevel=error
+    Install-Product node 10.15
+
+    npm update -g --loglevel=error
 
     npm install -g increase-memory-limit
         
