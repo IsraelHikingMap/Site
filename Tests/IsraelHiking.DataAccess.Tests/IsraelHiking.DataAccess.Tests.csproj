@@ -5,6 +5,10 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;NU1608</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="TestData\test.gpx" />
     <None Remove="TestData\test.kml" />

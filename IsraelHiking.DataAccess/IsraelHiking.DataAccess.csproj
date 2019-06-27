@@ -15,6 +15,10 @@
     <RepositoryUrl>https://github.com/IsraelHikingMap/site</RepositoryUrl>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;NU1608</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="elevation-cache\N28E034.hgt.zip" />
     <None Remove="elevation-cache\N29E034.hgt.zip" />

@@ -35,10 +35,10 @@ namespace IsraelHiking.API.Controllers
         /// <param name="base64ImageConverter"></param>
         /// <param name="imgurGateway"></param>
         /// <param name="logger"></param>
-        public UrlsController(IRepository repository, 
+        public UrlsController(IRepository repository,
             IDataContainerConverterService dataContainerConverterService,
             IBase64ImageStringToFileConverter base64ImageConverter,
-            IImgurGateway imgurGateway, 
+            IImgurGateway imgurGateway,
             ILogger logger)
         {
             _repository = repository;
@@ -128,7 +128,10 @@ namespace IsraelHiking.API.Controllers
             }
             shareUrl.Id = id;
             await _repository.AddUrl(shareUrl);
+
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             UploadImagesIfNeeded(shareUrl);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
             return Ok(shareUrl);
         }
