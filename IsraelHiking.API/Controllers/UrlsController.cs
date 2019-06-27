@@ -235,29 +235,5 @@ namespace IsraelHiking.API.Controllers
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
-
-        /// <summary>
-        /// This is used to update the database and convert data images to imgur urls
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("shrink")]
-        public async Task<IActionResult> PostShrinkUrls()
-        {
-            _logger.LogInformation("Starting shrinking shares.");
-            var urls = await _repository.GetUrls();
-            for (var shareIndex = 0; shareIndex < urls.Count; shareIndex++)
-            {
-                var shareUrl = urls[shareIndex];
-                if (shareIndex % 5000 == 0)
-                {
-                    _logger.LogInformation($"Processing {shareIndex} out of {urls.Count}");
-                }
-                await UploadImagesIfNeeded(shareUrl);
-            }
-
-            _logger.LogInformation("Finished shrinking shares.");
-            return Ok();
-        }
     }
 }
