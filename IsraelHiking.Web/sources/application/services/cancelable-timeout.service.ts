@@ -13,7 +13,7 @@ export class CancelableTimeoutService {
             this.idsByGroup.set(type, []);
         }
         let id = setTimeout(action, timeout);
-        this.idsByGroup.get(type).push(id);
+        this.idsByGroup.get(type).push(id as any);
     }
 
     public clearTimeoutByGroup(type: string) {
