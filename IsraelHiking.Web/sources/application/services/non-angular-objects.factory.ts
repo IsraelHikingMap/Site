@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { saveAs } from "file-saver";
+import { saveAs, FileSaverOptions } from "file-saver";
 import b64toBlob from "b64-to-blob";
 import * as ohauth from "ohauth";
 
@@ -15,8 +15,8 @@ export class NonAngularObjectsFactory {
         return b64toBlob(data, contentType);
     }
 
-    public get saveAs(): (data: Blob, filename?: string, disableAutoBOM?: boolean) => void {
-        return saveAs;
+    public saveAsWrapper(data: Blob, filename?: string, options?: FileSaverOptions): void {
+        saveAs(data, filename, options);
     }
 
     public createOhAuth() {

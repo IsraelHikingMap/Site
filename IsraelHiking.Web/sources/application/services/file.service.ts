@@ -65,6 +65,7 @@ export class FileService {
             return [];
         }
         let filesToReturn = [];
+        // tslint:disable-next-line:prefer-for-of
         for (let i = 0; i < files.length; i++) {
             filesToReturn.push(files[i]);
         }
@@ -166,7 +167,7 @@ export class FileService {
                         reject);
                 }, reject);
             } else {
-                this.nonAngularObjectsFactory.saveAs(blob, fileName);
+                this.nonAngularObjectsFactory.saveAsWrapper(blob, fileName, { autoBom: false });
                 resolve(false);
             }
         });

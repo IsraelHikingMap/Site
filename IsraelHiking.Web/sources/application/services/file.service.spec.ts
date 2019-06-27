@@ -25,7 +25,7 @@ describe("FileService", () => {
             resizeImageAndConvert: jasmine.createSpy("resizeImageAndConvert")
         } as any as ImageResizeService;
         nonAngularObjectsFactory = {
-            saveAs: jasmine.createSpy("saveAs"),
+            saveAsWrapper: jasmine.createSpy("saveAsWrapper"),
             b64ToBlob: jasmine.createSpy("b64ToBlob"),
         } as any as NonAngularObjectsFactory;
         selectedRouteService = {
@@ -74,7 +74,7 @@ describe("FileService", () => {
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
             let promise = fileService.saveToFile("file.name", "format", {} as DataContainer).then(() => {
-                expect(nonAngularObjectsFactory.saveAs).toHaveBeenCalled();
+                expect(nonAngularObjectsFactory.saveAsWrapper).toHaveBeenCalled();
                 expect(nonAngularObjectsFactory.b64ToBlob).toHaveBeenCalled();
             });
 

@@ -1,7 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { NgReduxTestingModule } from "@angular-redux/store/lib/testing";
+import { NgReduxTestingModule } from "@angular-redux/store/testing";
 
 import { ShareUrlsService } from "./share-urls.service";
 import { WhatsAppService } from "./whatsapp.service";
