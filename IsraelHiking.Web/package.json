@@ -77,7 +77,6 @@
     "@types/jasmine": "^3.3.13",
     "@types/lodash": "^4.14.134",
     "@types/mapbox-gl": "0.51.7",
-    "@types/node": "^12.0.10",
     "@types/pouchdb": "^6.3.2",
     "@types/supercluster": "5.0.1",
     "codelyzer": "^5.1.0",
