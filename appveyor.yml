@@ -16,7 +16,7 @@ install:
 - ps: >-
     Install-Product node 10.15
 
-    npm update -g --loglevel=error
+    npm install -g npm@6.9.0 --loglevel=error
 
     npm install -g increase-memory-limit
         
