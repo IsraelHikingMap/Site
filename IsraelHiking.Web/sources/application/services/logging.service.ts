@@ -14,30 +14,32 @@ export class LoggingService {
     private fileWriter: FileWriter;
 
     constructor(private readonly runningContextService: RunningContextService) {
+        this.queue = [];
+        this.fileWriter = null;
+    }
+
+    public async initialize() {
         if (!this.runningContextService.isCordova || this.runningContextService.isProduction) {
             return;
         }
-        this.queue = [];
-        this.fileWriter = null;
-        this.getIHMDirectory().then((dir) => {
-            let fullFileName = LoggingService.LOG_FILE_NAME;
-            dir.getFile(fullFileName,
-                { create: true },
-                fileEntry => {
-                    fileEntry.createWriter(fileWriter => {
-                        this.fileWriter = fileWriter;
-                        fileWriter.seek(fileWriter.length);
-                        this.fileWriter.onwriteend = () => {
-                            if (this.queue.length > 0) {
-                                this.fileWriter.write(this.queue[0] as any);
-                                this.queue.splice(0, 1);
-                            }
-                        };
-                    });
-                },
-                () => { }
-            );
-        });
+        let dir = await this.getIHMDirectory();
+        let fullFileName = LoggingService.LOG_FILE_NAME;
+        dir.getFile(fullFileName,
+            { create: true },
+            fileEntry => {
+                fileEntry.createWriter(fileWriter => {
+                    this.fileWriter = fileWriter;
+                    fileWriter.seek(fileWriter.length);
+                    this.fileWriter.onwriteend = () => {
+                        if (this.queue.length > 0) {
+                            this.fileWriter.write(this.queue[0] as any);
+                            this.queue.splice(0, 1);
+                        }
+                    };
+                });
+            },
+            () => { }
+        );
     }
 
     private writeToFile(message: string): void {
@@ -118,7 +120,7 @@ export class LoggingService {
                         dir => {
                             resolve(dir);
                         }, reject);
-                }, resolve);
+                }, reject);
         });
     }
 }
