@@ -75,7 +75,7 @@ export class RouteStatisticsService {
             routeStatistics.points.push(end);
             routeStatistics.length = (end.coordinate[0] - start.coordinate[0]) * 1000;
         }
-        let simplifiedCoordinates = SpatialService.simplify(routeStatistics.points.map(p => p.coordinate));
+        let simplifiedCoordinates = SpatialService.simplify(routeStatistics.points.map(p => p.coordinate), 0.05);
         let previousSimplifiedPoint = simplifiedCoordinates[0];
         for (let simplifiedPoint of simplifiedCoordinates) {
             routeStatistics.gain += ((simplifiedPoint[1] - previousSimplifiedPoint[1]) > 0 &&

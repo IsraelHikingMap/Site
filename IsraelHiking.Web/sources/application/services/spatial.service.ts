@@ -17,11 +17,11 @@ export class SpatialService {
             SpatialService.toCoordinate(latlng2), { units: "meters" });
     }
 
-    public static simplify(coordinates: [number, number][]): [number, number][] {
+    public static simplify(coordinates: [number, number][], tolerance: number): [number, number][] {
         if (coordinates.length <= 1) {
             return coordinates;
         }
-        let simplified = simplify(lineString(coordinates), { tolerance: 1 });
+        let simplified = simplify(lineString(coordinates), { tolerance: tolerance });
         return simplified.geometry.coordinates as [number, number][];
     }
 
