@@ -22,6 +22,8 @@ export class GeoLocationService {
     private watchNumber: number;
     private isBackground: boolean;
     private rejectedPosition: ILatLngTime;
+    private wasInitialized: boolean;
+
     public positionChanged: EventEmitter<Position>;
     public currentLocation: ILatLngTime;
 
@@ -35,6 +37,7 @@ export class GeoLocationService {
         this.currentLocation = null;
         this.isBackground = false;
         this.rejectedPosition = null;
+        this.wasInitialized = false;
     }
 
     public getState(): GeoLocationServiceState {
@@ -71,8 +74,8 @@ export class GeoLocationService {
     private startWatching() {
         this.state = "searching";
         if (this.runningContextService.isCordova) {
-            this.configureBackgroundService();
-            BackgroundGeolocation.start();
+            this.startBackgroundGeolocation();
+
         } else {
             this.startNavigator();
         }
@@ -80,62 +83,34 @@ export class GeoLocationService {
 
     private startNavigator() {
         this.loggingService.debug("Starting browser geo-location");
-        if (window.navigator && window.navigator.geolocation) {
-            if (this.watchNumber !== -1) {
-                return;
-            }
-            this.watchNumber = window.navigator.geolocation.watchPosition(
-                (position: Position): void => {
-                    this.ngZone.run(() => {
-                        this.loggingService.debug("geo-location received from browser location, bg: " +
-                            this.isBackground + " p: " + JSON.stringify(this.positionToLatLngTime(position)));
-                        if (this.state === "searching") {
-                            this.state = "tracking";
-                        }
-                        if (this.state !== "tracking") {
-                            return;
-                        }
-                        this.validRecordingAndUpdate(position);
-                    });
-                },
-                (err) => {
-                    this.ngZone.run(() => {
-                        // sending error will terminate the stream
-                        this.loggingService.error("Failed to start tracking " + JSON.stringify(err));
-                        this.positionChanged.next(null);
-                        this.disable();
-                    });
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: GeoLocationService.TIME_OUT
-                });
-        }
-    }
-
-    private stopWatching() {
-        this.state = "disabled";
-        this.currentLocation = null;
-        if (this.runningContextService.isCordova) {
-            BackgroundGeolocation.stop();
-        } else {
-            this.stopNavigator();
-        }
-    }
-
-    private stopNavigator() {
-        this.loggingService.debug("Stopping browser geo-location: " + this.watchNumber);
-        if (this.watchNumber !== -1) {
-            window.navigator.geolocation.clearWatch(this.watchNumber);
-            this.watchNumber = -1;
-        }
-    }
-
-    private configureBackgroundService() {
-        if (!this.runningContextService.isCordova) {
+        if (!window.navigator || !window.navigator.geolocation) {
             return;
         }
+        if (this.watchNumber !== -1) {
+            return;
+        }
+        this.watchNumber = window.navigator.geolocation.watchPosition(
+            (position: Position): void => this.handlePoistionChange(position),
+            (err) => {
+                this.ngZone.run(() => {
+                    // sending error will terminate the stream
+                    this.loggingService.error("Failed to start tracking " + JSON.stringify(err));
+                    this.positionChanged.next(null);
+                    this.disable();
+                });
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: GeoLocationService.TIME_OUT
+            });
+    }
 
+    private startBackgroundGeolocation() {
+        if (this.wasInitialized) {
+            BackgroundGeolocation.start();
+            return;
+        }
+        this.wasInitialized = true;
         BackgroundGeolocation.configure({
             locationProvider: BackgroundGeolocation.RAW_PROVIDER,
             desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
@@ -151,31 +126,18 @@ export class GeoLocationService {
         });
 
         BackgroundGeolocation.on("location", (location: Location) => {
-            this.loggingService.debug("geo-location received location, bg: " +
-                this.isBackground + " l: " + JSON.stringify(location));
-            // if (this.isBackground === false) {
-            //    return;
-            // }
-            this.ngZone.run(() => {
-                if (this.state === "searching") {
-                    this.state = "tracking";
-                }
-                if (this.state !== "tracking") {
-                    return;
-                }
-                let position = {
-                    coords: {
-                        accuracy: location.accuracy,
-                        altitude: location.altitude,
-                        latitude: location.latitude,
-                        longitude: location.longitude,
-                        speed: location.speed,
-                        heading: location.bearing
-                    },
-                    timestamp: location.time
-                } as Position;
-                this.validRecordingAndUpdate(position);
-            });
+            let position = {
+                coords: {
+                    accuracy: location.accuracy,
+                    altitude: location.altitude,
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    speed: location.speed,
+                    heading: location.bearing
+                },
+                timestamp: location.time
+            } as Position;
+            this.handlePoistionChange(position);
         });
 
         BackgroundGeolocation.on("authorization", status => {
@@ -192,13 +154,11 @@ export class GeoLocationService {
 
         BackgroundGeolocation.on("start",
             () => {
-                // this.startNavigator();
                 this.loggingService.debug("Start geo-location service");
             });
 
         BackgroundGeolocation.on("stop",
             () => {
-                // this.stopNavigator();
                 this.loggingService.debug("Stop geo-location service");
             });
 
@@ -213,6 +173,44 @@ export class GeoLocationService {
                 this.isBackground = false;
                 this.loggingService.debug("geo-location now in foreground");
             });
+        BackgroundGeolocation.start();
+    }
+
+    private stopWatching() {
+        this.state = "disabled";
+        this.currentLocation = null;
+        if (this.runningContextService.isCordova) {
+            this.stopBackgroundGeolocation();
+        } else {
+            this.stopNavigator();
+        }
+    }
+
+    private stopNavigator() {
+        this.loggingService.debug("Stopping browser geo-location: " + this.watchNumber);
+        if (this.watchNumber !== -1) {
+            window.navigator.geolocation.clearWatch(this.watchNumber);
+            this.watchNumber = -1;
+        }
+    }
+
+    private stopBackgroundGeolocation() {
+        this.loggingService.debug("Stopping background geo-location");
+        BackgroundGeolocation.stop();
+    }
+
+    private handlePoistionChange(position: Position): void {
+        this.ngZone.run(() => {
+            this.loggingService.debug("geo-location received, bg: " + this.isBackground +
+                " p: " + JSON.stringify(this.positionToLatLngTime(position)));
+            if (this.state === "searching") {
+                this.state = "tracking";
+            }
+            if (this.state !== "tracking") {
+                return;
+            }
+            this.validRecordingAndUpdate(position);
+        });
     }
 
     private validRecordingAndUpdate(position: Position) {

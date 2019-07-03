@@ -151,12 +151,11 @@ export class LocationComponent extends BaseMapComponent {
     public toggleTracking() {
         if (this.isLoading()) {
             this.disableGeoLocation();
-        }
-        if (this.isActive() && this.isFollowing) {
-            this.disableGeoLocation();
-        } else if (!this.isActive()) {
+        } else if (this.isDisabled()) {
             this.geoLocationService.enable();
             this.isFollowing = true;
+        } else if (this.isActive() && this.isFollowing) {
+            this.disableGeoLocation();
         } else if (this.isActive() && !this.isFollowing) {
             this.setLocation();
             this.isFollowing = true;
