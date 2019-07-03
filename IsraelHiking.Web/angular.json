@@ -77,7 +77,6 @@
             },
             "cordova-debug": {
               "optimization": false,
-              "outputHashing": "all",
               "sourceMap": true,
               "extractCss": true,
               "namedChunks": false,

@@ -1,7 +1,6 @@
-﻿import { LoggingService } from "./logging.service";
+import { LoggingService } from "./logging.service";
 import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { RunningContextService } from "./running-context.service";
-
 
 describe("LoggingService", () => {
     let loggingService: LoggingService;
@@ -26,10 +25,10 @@ describe("LoggingService", () => {
         (window as any).cordova = {
             file: { documentsDirectory: "docs" }
         };
-        let spy = jasmine.createSpy('resolveLocalFileSystemURL');
+        let spy = jasmine.createSpy("resolveLocalFileSystemURL");
         let dir = {
             getDirectory: (name, options, successCallback, failureCallback) => successCallback({
-                getFile: (name, options, success, failure) => {
+                getFile: (fileName, fileOptions, success, failure) => {
                     failure();
                 }
             })

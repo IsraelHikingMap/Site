@@ -21,7 +21,7 @@ export class SpatialService {
         if (coordinates.length <= 1) {
             return coordinates;
         }
-        let simplified = simplify(lineString(coordinates), { tolerance: tolerance });
+        let simplified = simplify(lineString(coordinates), { tolerance });
         return simplified.geometry.coordinates as [number, number][];
     }
 

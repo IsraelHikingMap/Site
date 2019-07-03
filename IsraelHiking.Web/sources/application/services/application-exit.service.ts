@@ -51,7 +51,7 @@ export class ApplicationExitService {
                     this.state = "FirstClick";
                     this.toastService.info(this.resources.clickBackAgainToCloseTheApp);
                     // ionic webview doesn't change the internal addressbar...
-                    //history.back();
+                    // history.back();
                 }
             });
         }, false);
