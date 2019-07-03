@@ -78,9 +78,12 @@ export class FileService {
         if (!this.runningContextService.isCordova) {
             return (window.origin || window.location.origin) + "/" + relativePath;
         }
-        let path = cordova.file.applicationDirectory + "www/" + relativePath;
+        let path = relativePath;
         if (this.runningContextService.isIos) {
-            return (window as any).Ionic.WebView.convertFileSrc(path);
+            path = cordova.file.applicationDirectory + "www/" + relativePath;
+            path = (window as any).Ionic.WebView.convertFileSrc(path)
+        } else {
+            path = "http://localhost/" + relativePath;
         }
         return path;
     }
