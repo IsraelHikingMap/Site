@@ -25,23 +25,42 @@ describe("RouteStatisticsService", () => {
         let routeData = {
             segments: [
                 {
-                    latlngs: [{ lat: 1, lng: 1, alt: 1 }, { lat: 2, lng: 2, alt: 2 }]
+                    latlngs: [{ lat: 10, lng: 10, alt: 10 }, { lat: 20, lng: 20, alt: 20 }]
                 },
                 {
-                    latlngs: [{ lat: 2, lng: 2, alt: 2 }, { lat: 3, lng: 3, alt: 3 }]
+                    latlngs: [{ lat: 20, lng: 20, alt: 20 }, { lat: 30, lng: 30, alt: 30 }]
                 },
                 {
-                    latlngs: [{ lat: 2, lng: 2, alt: 2 }, { lat: 1, lng: 1, alt: 1 }]
+                    latlngs: [{ lat: 20, lng: 20, alt: 20 }, { lat: 10, lng: 10, alt: 10 }]
                 }
             ]
         } as RouteData;
 
         let statistics = service.getStatistics(routeData);
 
-        expect(statistics.gain).toBe(2);
-        expect(statistics.loss).toBe(-2);
+        expect(statistics.gain).toBe(20);
+        expect(statistics.loss).toBe(-20);
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(5);
+    });
+
+    it("Should get simplified statistics on route", () => {
+        let routeData = {
+            segments: [
+                {
+                    latlngs: [{ lat: 1, lng: 1, alt: 1 }, { lat: 4, lng: 4, alt: 4 }]
+                },
+                {
+                    latlngs: [{ lat: 4, lng: 4, alt: 4 }, { lat: 1, lng: 1, alt: 1 }]
+                }
+            ]
+        } as RouteData;
+
+        let statistics = service.getStatistics(routeData);
+
+        expect(statistics.gain).toBe(0);
+        expect(statistics.loss).toBe(0);
+        expect(statistics.length).not.toBe(0);
     });
 
     it("Should get statistics on part of route", () => {
