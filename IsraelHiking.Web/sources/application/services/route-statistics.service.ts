@@ -75,7 +75,9 @@ export class RouteStatisticsService {
             routeStatistics.points.push(end);
             routeStatistics.length = (end.coordinate[0] - start.coordinate[0]) * 1000;
         }
-        let simplifiedCoordinates = SpatialService.simplify(routeStatistics.points.map(p => p.coordinate), 0.05);
+        // smooth the line in order to better calculate gain and loss:
+        // changing x from Km to Km * 100 to better align with required altitude sensitivity
+        let simplifiedCoordinates = SpatialService.simplify(routeStatistics.points.map(p => [p.coordinate[0] * 100, p.coordinate[1]]), 5);
         let previousSimplifiedPoint = simplifiedCoordinates[0];
         for (let simplifiedPoint of simplifiedCoordinates) {
             routeStatistics.gain += ((simplifiedPoint[1] - previousSimplifiedPoint[1]) > 0 &&
