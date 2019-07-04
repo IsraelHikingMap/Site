@@ -89,6 +89,7 @@ export class RouteEditRouteInteraction {
             map.on("touchmove", this.handleMove);
             map.on("mouseup", this.handleUp);
             map.on("touchend", this.handleUp);
+            map.getCanvas().addEventListener('keydown', this.cancelInteraction);
         } else {
             map.off("mousedown", this.handleDown);
             map.off("touchstart", this.handleDown);
@@ -97,15 +98,20 @@ export class RouteEditRouteInteraction {
             map.off("drag", this.handleMove);
             map.off("mouseup", this.handleUp);
             map.off("touchend", this.handleUp);
+            map.getCanvas().removeEventListener('keydown', this.cancelInteraction);
         }
+    }
+
+    private cancelInteraction = () => {
+        this.selectedRoutePoint = null;
+        this.selectedRouteSegments = [];
+        this.state = "canceled";
     }
 
     private handleDown = (event: MapMouseEvent) => {
         this.mouseDownPoint = event.point;
         if (this.isTouchesBiggerThan(event.originalEvent, 1)) {
-            this.selectedRoutePoint = null;
-            this.selectedRouteSegments = [];
-            this.state = "canceled";
+            this.cancelInteraction();
             return;
         }
         this.state = "down";
