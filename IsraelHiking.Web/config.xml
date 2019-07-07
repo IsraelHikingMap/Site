@@ -16,7 +16,7 @@
     <allow-intent href="whatsapp:*" />
     <platform name="android">
         <allow-intent href="market:*" />
-        <preference name="android-SdkVersion" value="28" />
+        <preference name="android-targetSdkVersion" value="28" />
         <preference name="android-minSdkVersion" value="28" />
         <icon density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />
         <icon density="mdpi" src="www/content/favicons/android-chrome-48x48.png" />
