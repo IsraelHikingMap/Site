@@ -10,7 +10,7 @@ import { ResourcesService } from "../../services/resources.service";
     styleUrls: ["./donate-banner.component.scss"]
 })
 export class DonateBannerComponent extends BaseMapComponent {
-    private static readonly BANNER_RESTORE_TIMEOUT = 4 * (1000 * 60 * 60 * 24);
+    private static readonly BANNER_RESTORE_TIMEOUT = 2 * (1000 * 60 * 60 * 24);
 
     public isOpen: boolean;
 
