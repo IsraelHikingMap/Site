@@ -1,5 +1,8 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { BackgroundGeolocationPlugin, Location } from "@mauron85/cordova-plugin-background-geolocation";
+import BackgroundGeolocation, {
+    State,
+    Location,
+} from "cordova-background-geolocation-lt";
 
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
@@ -8,8 +11,6 @@ import { LoggingService } from "./logging.service";
 import { ILatLngTime } from "../models/models";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
-
-declare var BackgroundGeolocation: BackgroundGeolocationPlugin;
 
 @Injectable()
 export class GeoLocationService {
@@ -110,70 +111,46 @@ export class GeoLocationService {
             BackgroundGeolocation.start();
             return;
         }
-        this.wasInitialized = true;
-        BackgroundGeolocation.configure({
-            locationProvider: BackgroundGeolocation.RAW_PROVIDER,
-            desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
-            stationaryRadius: 10,
-            distanceFilter: 5,
-            notificationTitle: this.resources.israelHikingMap,
-            notificationText: this.resources.runningInBackground,
-            debug: false,
-            interval: 1000,
-            fastestInterval: 1000,
-            activitiesInterval: 10000,
-            startForeground: true
-        });
-
-        BackgroundGeolocation.on("location", (location: Location) => {
+        BackgroundGeolocation.onLocation((location: Location) => {
+            console.log("geo-location service get location: " + JSON.stringify(location))
             let position = {
                 coords: {
-                    accuracy: location.accuracy,
-                    altitude: location.altitude,
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    speed: location.speed,
-                    heading: location.bearing
+                    accuracy: location.coords.accuracy,
+                    altitude: location.coords.altitude,
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude,
+                    speed: location.coords.speed,
+                    heading: location.coords.heading,
+                    altitudeAccuracy: location.coords.altitude_accuracy
                 },
-                timestamp: location.time
+                timestamp: new Date(location.timestamp).getTime()
             } as Position;
             this.handlePoistionChange(position);
         });
 
-        BackgroundGeolocation.on("authorization", status => {
-            if (status !== BackgroundGeolocation.AUTHORIZED) {
-                // we need to set delay or otherwise alert may not be shown
-                setTimeout(() => {
-                    let showSettings = confirm("App requires location tracking permission. Would you like to open app settings?");
-                    if (showSettings) {
-                        return BackgroundGeolocation.showAppSettings();
-                    }
-                }, 1000);
+        BackgroundGeolocation.onEnabledChange((enabled) => this.loggingService.debug("geo-location service enabled changed: " + enabled));
+        BackgroundGeolocation.ready({
+            reset: true,
+            desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
+            allowIdenticalLocations: false,
+            distanceFilter: 10,
+            notification: {
+                text: this.resources.runningInBackground,
+                title: this.resources.israelHikingMap
+            },
+            debug: true,
+            stopOnTerminate: false,
+            foregroundService: true,
+            logLevel: BackgroundGeolocation.LOG_LEVEL_VERBOSE,
+        }, (state: State) => {
+            this.loggingService.debug("State: " + JSON.stringify(state))
+            this.wasInitialized = true;
+            if (!state.enabled) {
+                BackgroundGeolocation.start();
             }
+        }, (error: string) => {
+            this.loggingService.error("location ready error: " + error);
         });
-
-        BackgroundGeolocation.on("start",
-            () => {
-                this.loggingService.debug("Start geo-location service");
-            });
-
-        BackgroundGeolocation.on("stop",
-            () => {
-                this.loggingService.debug("Stop geo-location service");
-            });
-
-        BackgroundGeolocation.on("background",
-            () => {
-                this.isBackground = true;
-                this.loggingService.debug("geo-location now in background");
-            });
-
-        BackgroundGeolocation.on("foreground",
-            () => {
-                this.isBackground = false;
-                this.loggingService.debug("geo-location now in foreground");
-            });
-        BackgroundGeolocation.start();
     }
 
     private stopWatching() {

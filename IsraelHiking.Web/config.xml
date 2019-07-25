@@ -141,17 +141,13 @@
         <variable name="ANDROID_EXTRA_ACTIONS" value=" " />
     </plugin>
     <plugin name="cordova-plugin-device" spec="~2.0.2" />
-    <plugin name="cordova-plugin-mauron85-background-geolocation" spec="@mauron85/cordova-plugin-background-geolocation@~3.0.3">
-        <variable name="GOOGLE_PLAY_SERVICES_VERSION" value="11+" />
-        <variable name="ANDROID_SUPPORT_LIBRARY_VERSION" value="26+" />
-        <variable name="ICON" value="@mipmap/icon" />
-        <variable name="SMALL_ICON" value="@mipmap/icon" />
-        <variable name="ACCOUNT_NAME" value="@string/app_name" />
-        <variable name="ACCOUNT_LABEL" value="@string/app_name" />
-        <variable name="ACCOUNT_TYPE" value="$PACKAGE_NAME.account" />
-        <variable name="CONTENT_AUTHORITY" value="$PACKAGE_NAME" />
-    </plugin>
     <plugin name="cordova-plugin-ionic-webview" spec="^4.1.0" />
-    <engine name="android" spec="^7.1.4" />
+    <plugin name="cordova-background-geolocation-lt" spec="^3.0.8">
+        <variable name="GOOGLE_API_VERSION" value="16.+" />
+        <variable name="APPCOMPAT_VERSION" value="27.+" />
+        <variable name="OKHTTP_VERSION" value="3.12.+" />
+        <variable name="EVENTBUS_VERSION" value="3.0.0" />
+    </plugin>
     <engine name="ios" spec="^4.5.5" />
+    <engine name="android" spec="^7.1.4" />
 </widget>

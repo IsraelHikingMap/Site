@@ -15,7 +15,6 @@
     "@beyerleinf/ngx-dnd": "8.0.2",
     "@katze/ngx-d3": "0.2.0",
     "@mapbox/mapbox-gl-rtl-text": "0.2.1",
-    "@mauron85/cordova-plugin-background-geolocation": "^3.0.3",
     "@ngx-progressbar/core": "5.3.2",
     "@ngx-progressbar/http": "5.3.2",
     "@nicky-lenaers/ngx-scroll-to": "2.0.0",
@@ -32,7 +31,9 @@
     "cc.fovea.cordova.openwith": "^1.2.0",
     "cordova-android": "^7.1.4",
     "cordova-android-play-services-gradle-release": "^2.0.0",
+    "cordova-background-geolocation-lt": "^3.0.8",
     "cordova-ios": "^4.5.5",
+    "cordova-plugin-background-fetch": "^5.5.0",
     "cordova-plugin-camera": "^4.0.3",
     "cordova-plugin-device": "^2.0.3",
     "cordova-plugin-file": "^6.0.1",
@@ -150,25 +151,19 @@
       },
       "cordova-plugin-device": {},
       "cordova-sqlite-ext": {},
-      "cordova-plugin-mauron85-background-geolocation": {
-        "GOOGLE_PLAY_SERVICES_VERSION": "11+",
-        "ANDROID_SUPPORT_LIBRARY_VERSION": "26+",
-        "ICON": "@mipmap/icon",
-        "SMALL_ICON": "@mipmap/icon",
-        "ACCOUNT_NAME": "@string/app_name",
-        "ACCOUNT_LABEL": "@string/app_name",
-        "ACCOUNT_TYPE": "$PACKAGE_NAME.account",
-        "CONTENT_AUTHORITY": "$PACKAGE_NAME",
-        "ALWAYS_USAGE_DESCRIPTION": "This app always requires location tracking",
-        "MOTION_USAGE_DESCRIPTION": "This app requires motion detection"
-      },
       "cordova-plugin-ionic-webview": {
         "ANDROID_SUPPORT_ANNOTATIONS_VERSION": "27.+"
+      },
+      "cordova-background-geolocation-lt": {
+        "GOOGLE_API_VERSION": "16.+",
+        "APPCOMPAT_VERSION": "27.+",
+        "OKHTTP_VERSION": "3.12.+",
+        "EVENTBUS_VERSION": "3.0.0"
       }
     },
     "platforms": [
-      "android",
-      "ios"
+      "ios",
+      "android"
     ]
   },
   "version": "8.0.0"
