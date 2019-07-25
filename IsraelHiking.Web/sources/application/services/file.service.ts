@@ -1,6 +1,9 @@
 /// <reference types="cordova-plugin-device"/>
+/// <reference types="cordova-plugin-file"/>
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { Style, VectorSource, RasterDemSource, RasterSource } from "mapbox-gl";
+import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
@@ -88,6 +91,13 @@ export class FileService {
         return path;
     }
 
+    public getStyleJsonContent(url: string): Promise<Style> {
+        if (!url.startsWith("https://") && this.runningContextService.isCordova) {
+            url = (window as any).Ionic.WebView.convertFileSrc(cordova.file.dataDirectory + url);
+        }
+        return this.httpClient.get(url).toPromise() as Promise<Style>;
+    }
+
     public saveToFile = async (fileName: string, format: string, dataContainer: DataContainer): Promise<boolean> => {
         let responseData = await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
         return await this.saveBytesResponseToFile(responseData, fileName);
@@ -154,25 +164,74 @@ export class FileService {
      */
     private saveAsWorkAround(blob: Blob, fileName: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            if (this.runningContextService.isCordova) {
-                this.loggingService.getIHMDirectory().then((dir) => {
-                    let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
-                        .replace("Z", "_") +
-                        fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
-                    dir.getFile(fullFileName,
-                        { create: true },
-                        fileEntry => {
-                            fileEntry.createWriter(fileWriter => {
-                                fileWriter.write(blob);
-                                resolve(true);
-                            });
-                        },
-                        reject);
-                }, reject);
-            } else {
+            if (!this.runningContextService.isCordova) {
                 this.nonAngularObjectsFactory.saveAsWrapper(blob, fileName, { autoBom: false });
                 resolve(false);
+                return;
             }
+            this.loggingService.getIHMDirectory().then((dir) => {
+                let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
+                    .replace("Z", "_") +
+                    fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
+                dir.getFile(fullFileName,
+                    { create: true },
+                    fileEntry => {
+                        fileEntry.createWriter(fileWriter => {
+                            fileWriter.write(blob);
+                            resolve(true);
+                        });
+                    },
+                    reject);
+            }, reject);
         });
+    }
+
+    public async openIHMfile(file: File, progressCallback: (message: string, address: string, content: string) => Promise<void>): Promise<Style> {
+        let zip = new JSZip();
+        await zip.loadAsync(file);
+        let styleFileName = Object.keys(zip.files).find(name => name.endsWith(".json"));
+        if (styleFileName == null) {
+            throw new Error("Missing style json file!");
+        }
+        let styleText = (await zip.file(styleFileName).async("text")).trim();
+        let styleJson = JSON.parse(styleText) as Style;
+        this.saveStyleJson(styleFileName, styleText);
+        for (let sourceName of Object.keys(styleJson.sources)) {
+            let source = styleJson.sources[sourceName] as VectorSource | RasterDemSource | RasterSource;
+            if (source.tiles && source.tiles[0].startsWith("custom://")) {
+                let parts = Object.keys(zip.files).filter(name => name.startsWith(sourceName + "/" + sourceName));
+                await progressCallback(`Loading ${sourceName}, it has: ${parts.length} parts, please don't close the app.`, null, null);
+                let partIndex = 1;
+                for (let sourceFile of parts) {
+                    this.loggingService.debug("Adding: " + sourceFile);
+                    await progressCallback(`Loading ${partIndex++}/${parts.length}`, source.tiles[0], await zip.file(sourceFile).async("text") as string);
+                    this.loggingService.debug("Added: " + sourceFile);
+                }
+            }
+        }
+        return styleJson;
+    }
+
+    private saveStyleJson(styleFileName: string, styleJsonText: string) {
+        if (!this.runningContextService.isCordova) {
+            return;
+        }
+        window.resolveLocalFileSystemURL(cordova.file.dataDirectory,
+            (directoryEntry: DirectoryEntry) => {
+                directoryEntry.getFile(styleFileName,
+                    { create: true },
+                    fileEntry => {
+                        fileEntry.createWriter(fileWriter => {
+                            fileWriter.onwriteend = () => {
+                                fileWriter.seek(0);
+                                fileWriter.onwriteend = () => {
+                                    this.loggingService.info("Style Json File was written!");
+                                };
+                                fileWriter.write(styleJsonText as any);
+                            }
+                            fileWriter.truncate(0);
+                        });
+                    }, (err) => this.loggingService.error("File: " + err.code.toString()));
+            }, (err) => this.loggingService.error("Folder: " + err.code.toString()));
     }
 }

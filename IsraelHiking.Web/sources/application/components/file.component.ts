@@ -8,6 +8,7 @@ import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
 import { DataContainer } from "../models/models";
 import { RunningContextService } from "../services/running-context.service";
+import { DatabaseService } from "../services/database.service";
 
 @Component({
     selector: "file",
@@ -19,10 +20,11 @@ export class FileComponent extends BaseMapComponent {
     public openFileElement: ElementRef;
 
     constructor(resources: ResourcesService,
-                private readonly dataContainerService: DataContainerService,
-                private readonly fileService: FileService,
-                private readonly toastService: ToastService,
-                private readonly runningContextService: RunningContextService
+        private readonly dataContainerService: DataContainerService,
+        private readonly fileService: FileService,
+        private readonly toastService: ToastService,
+        private readonly runningContextService: RunningContextService,
+        private readonly databaseService: DatabaseService
     ) {
         super(resources);
     }
@@ -32,11 +34,29 @@ export class FileComponent extends BaseMapComponent {
         if (!file) {
             return;
         }
-        try {
-            await this.fileService.addRoutesFromFile(file);
-        } catch (ex) {
-            this.toastService.error(this.resources.unableToLoadFromFile);
+        if (!file.name.endsWith(".ihm")) {
+            try {
+                await this.fileService.addRoutesFromFile(file);
+            } catch (ex) {
+                this.toastService.error(this.resources.unableToLoadFromFile);
+            }
         }
+        this.toastService.info("Opening file, this might take a while, please don't close the app...");
+        await this.fileService.openIHMfile(file, async (message: string, address: string, content: string) => {
+            try {
+                if (!address || !content) {
+                    this.toastService.info(message);
+                    return;
+                }
+                let dbName = this.databaseService.getDbNameFromUrl(address);
+                await this.databaseService.saveContent(dbName, content);
+                this.toastService.info(message);
+            } catch (ex) {
+                this.toastService.error(ex.toString());
+            }
+            
+        });
+        this.toastService.confirm({ type: "Ok", message: "Finished opening file." });
     }
 
     public async save() {

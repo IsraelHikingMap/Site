@@ -54,25 +54,28 @@ export class LoggingService {
     }
 
     public info(message: string) {
+        message = new Date().toISOString() + " | INFO  | " + message;
         console.log(message);
-        this.writeToFile(new Date().toISOString() + " |  INFO | " + message + "\n");
+        this.writeToFile(message + "\n");
     }
 
     public debug(message: string) {
         if (this.runningContextService.isProduction) {
             return;
         }
+        message = new Date().toISOString() + " | DEBUG | " + message;
         // tslint:disable-next-line
         console.debug(message);
-        this.writeToFile(new Date().toISOString() + " | DEBUG | " + message + "\n");
+        this.writeToFile(message + "\n");
     }
 
     public error(message: string) {
         if (this.runningContextService.isProduction) {
             return;
         }
+        message = new Date().toISOString() + " | ERROR | " + message;
         console.error(message);
-        this.writeToFile(new Date().toISOString() + " | ERROR | " + message + "\n");
+        this.writeToFile(message + "\n");
     }
 
     public async close(): Promise<any> {
@@ -113,8 +116,8 @@ export class LoggingService {
             let folder = device.platform.toUpperCase().indexOf("OS") !== -1
                 ? cordova.file.documentsDirectory
                 : cordova.file.externalRootDirectory;
-            (window as any).resolveLocalFileSystemURL(folder,
-                (directoryEntry) => {
+            window.resolveLocalFileSystemURL(folder,
+                (directoryEntry: DirectoryEntry) => {
                     directoryEntry.getDirectory("IsraelHikingMap",
                         { create: true },
                         dir => {

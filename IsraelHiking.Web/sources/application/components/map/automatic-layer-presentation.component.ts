@@ -1,8 +1,9 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 import { MapComponent } from "ngx-mapbox-gl";
-import { Style, RasterSource, RasterLayout, Layer } from "mapbox-gl";
+import { RasterSource, RasterLayout, Layer } from "mapbox-gl";
 import { Subscription } from "rxjs";
+
+import { FileService } from "../../services/file.service";
 
 @Component({
     selector: "auto-layer",
@@ -34,7 +35,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private jsonLayersIds: string[];
 
     constructor(private readonly host: MapComponent,
-                private readonly httpClient: HttpClient) {
+                private readonly fileService: FileService) {
         let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
         this.rasterSourceId = `raster-source-${layerIndex}`;
@@ -80,7 +81,6 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         let address = this.address;
         let scheme = "xyz";
         if (this.address.toLocaleLowerCase().endsWith("/mapserver")) {
-            // address += "/tile/{z}/{y}/{x}"
             address += "/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&f=image";
         } else if (this.address.indexOf("{-y}") !== -1) {
             address = address.replace("{-y}", "{y}");
@@ -116,7 +116,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     }
 
     private async createJsonLayer() {
-        let response = await this.httpClient.get(this.fixNonHttpsAddress(this.address)).toPromise() as Style;
+        let response = await this.fileService.getStyleJsonContent(this.fixNonHttpsAddress(this.address));
         for (let source in response.sources) {
             if (response.sources.hasOwnProperty(source)) {
                 this.jsonSourcesIds.push(source);
