@@ -247,7 +247,7 @@ export class GeoLocationService {
             return "Time difference is 0";
         }
         if (distance / timeDifference > GeoLocationService.MAX_SPPED) {
-            return "Spped too high: " + distance / timeDifference;
+            return "Speed too high: " + distance / timeDifference;
         }
         if (timeDifference > GeoLocationService.MAX_TIME_DIFFERENCE) {
             return "Time difference too high: " + timeDifference;
