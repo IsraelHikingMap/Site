@@ -186,7 +186,8 @@ export class FileService {
         });
     }
 
-    public async openIHMfile(file: File, progressCallback: (message: string, address: string, content: string) => Promise<void>): Promise<Style> {
+    public async openIHMfile(file: File,
+                             progressCallback: (message: string, address: string, content: string) => Promise<void>): Promise<Style> {
         let zip = new JSZip();
         await zip.loadAsync(file);
         let styleFileName = Object.keys(zip.files).find(name => name.endsWith(".json") && name.indexOf("/") === -1);
@@ -204,7 +205,8 @@ export class FileService {
                 let partIndex = 1;
                 for (let sourceFile of parts) {
                     this.loggingService.debug("Adding: " + sourceFile);
-                    await progressCallback(`Loading ${partIndex++}/${parts.length}`, source.tiles[0], await zip.file(sourceFile).async("text") as string);
+                    await progressCallback(`Loading ${partIndex++}/${parts.length}`, source.tiles[0],
+                        await zip.file(sourceFile).async("text") as string);
                     this.loggingService.debug("Added: " + sourceFile);
                 }
             }
@@ -228,7 +230,7 @@ export class FileService {
                                     this.loggingService.info("Style Json File was written!");
                                 };
                                 fileWriter.write(styleJsonText as any);
-                            }
+                            };
                             fileWriter.truncate(0);
                         });
                     }, (err) => this.loggingService.error("File: " + err.code.toString()));

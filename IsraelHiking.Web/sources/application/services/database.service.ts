@@ -21,16 +21,16 @@ export class DatabaseService {
     private updating: boolean;
 
     constructor(private readonly loggingService: LoggingService,
-        private readonly runningContext: RunningContextService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly runningContext: RunningContextService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.updating = false;
         this.sourcesDatabases = new Map<string, Dexie>();
     }
 
     public async initialize() {
-        this.stateDatabase = new Dexie('State');
+        this.stateDatabase = new Dexie("State");
         this.stateDatabase.version(1).stores({
-            state: 'id'
+            state: "id"
         });
         this.initCustomTileLoadFunction();
         let storedState = initialState;
@@ -89,7 +89,7 @@ export class DatabaseService {
                 }
             });
             return { cancel: () => { } };
-        }
+        };
     }
 
     public async close() {
@@ -104,7 +104,7 @@ export class DatabaseService {
         this.updating = true;
         await this.stateDatabase.table("state").put({
             id: "state",
-            state: state
+            state
         });
         this.updating = false;
         this.loggingService.debug("State was updated");
@@ -123,7 +123,7 @@ export class DatabaseService {
         let db = this.getDatabase(dbName);
         let splitUrl = url.split("/");
         let id = splitUrl[splitUrl.length - 3] + "_" + splitUrl[splitUrl.length - 2] +
-            "_" + splitUrl[splitUrl.length - 1].split(".")[0]
+            "_" + splitUrl[splitUrl.length - 1].split(".")[0];
         let tile = await db.table("tiles").get(id);
         if (tile == null) {
             return null;
