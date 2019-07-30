@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { debounceTime } from "rxjs/operators";
+import { decode } from "base64-arraybuffer";
 import PouchDB from "pouchdb";
-import pouchdbLoad from "pouchdb-load";
-import WorkerPouch from "worker-pouch";
+import Dexie from "dexie";
 import deepmerge from "deepmerge";
 import * as mapboxgl from "mapbox-gl";
 
@@ -14,62 +14,65 @@ import { ApplicationState } from "../models/models";
 import { classToActionMiddleware } from "../reducres/reducer-action-decorator";
 import { rootReducer } from "../reducres/root.reducer";
 
-interface PouchDB {
-    adapter: (name: string, adapter: any) => void;
-}
-
 @Injectable()
 export class DatabaseService {
-    private useWorkers: boolean;
-    private stateDatabase: PouchDB.Database;
-    private sourcesDatabases: Map<string, PouchDB.Database>;
+    private stateDatabase: Dexie;
+    private sourcesDatabases: Map<string, Dexie>;
     private updating: boolean;
 
     constructor(private readonly loggingService: LoggingService,
-                private readonly runningContext: RunningContextService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+        private readonly runningContext: RunningContextService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         this.updating = false;
-        this.useWorkers = false;
-        this.sourcesDatabases = new Map();
+        this.sourcesDatabases = new Map<string, Dexie>();
     }
 
     public async initialize() {
-        this.useWorkers = !this.runningContext.isIos && !this.runningContext.isEdge &&
-            (await WorkerPouch.isSupportedBrowser());
-        if (this.useWorkers) {
-            (PouchDB as any).adapter("worker", WorkerPouch);
-            PouchDB.plugin(pouchdbLoad);
-        }
-        this.stateDatabase = new PouchDB("IHM", this.getAdapeterSettings());
+        this.stateDatabase = new Dexie('State');
+        this.stateDatabase.version(1).stores({
+            state: 'id'
+        });
+        this.initCustomTileLoadFunction();
         let storedState = initialState;
         if (this.runningContext.isIFrame) {
             this.ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
-        } else {
-            try {
-                let dbState = await this.stateDatabase.get("state") as any;
-                storedState = deepmerge(initialState, dbState.state, {
-                    arrayMerge: (destinationArray, sourceArray) => {
-                        return sourceArray == null ? destinationArray : sourceArray;
-                    }
-                });
-                storedState.inMemoryState = initialState.inMemoryState;
-                if (!this.runningContext.isCordova) {
-                    storedState.routes = initialState.routes;
-                }
-            } catch (ex) {
-                // no initial state.
-                this.stateDatabase.put({
-                    _id: "state",
-                    state: initialState
-                });
-            }
-            this.loggingService.debug(JSON.stringify(storedState));
-            this.ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
-            this.ngRedux.select().pipe(debounceTime(this.useWorkers ? 2000 : 30000)).subscribe(async (state: ApplicationState) => {
-                this.updateState(state);
-            });
-            this.initCustomTileLoadFunction();
+            return;
         }
+        let oldDb = new PouchDB("IHM", { auto_compaction: true });
+        let dbState = await this.stateDatabase.table("state").get("state");
+        try {
+            let state = await oldDb.get("state") as any;
+            this.loggingService.debug("State exists in pouch db: " + (state != null).toString());
+            await oldDb.remove(state);
+            dbState = {
+                id: "state",
+                state: state.state
+            };
+        } catch {
+            // don't do anything - this is for a transition phase...
+            this.loggingService.debug("State does not exists in pouch db");
+        }
+        if (dbState != null) {
+            storedState = deepmerge(initialState, dbState.state, {
+                arrayMerge: (destinationArray, sourceArray) => {
+                    return sourceArray == null ? destinationArray : sourceArray;
+                }
+            });
+            storedState.inMemoryState = initialState.inMemoryState;
+            if (!this.runningContext.isCordova) {
+                storedState.routes = initialState.routes;
+            }
+        } else {
+            this.stateDatabase.table("state").put({
+                id: "state",
+                state: initialState
+            });
+        }
+        this.loggingService.debug(JSON.stringify(storedState));
+        this.ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
+        this.ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state: ApplicationState) => {
+            this.updateState(state);
+        });
     }
 
     private initCustomTileLoadFunction() {
@@ -95,13 +98,14 @@ export class DatabaseService {
     }
 
     private async updateState(state: ApplicationState) {
-        let dbState = await this.stateDatabase.get("state") as any;
         if (this.updating) {
             return;
         }
         this.updating = true;
-        dbState.state = state;
-        await this.stateDatabase.put(dbState);
+        await this.stateDatabase.table("state").put({
+            id: "state",
+            state: state
+        });
         this.updating = false;
         this.loggingService.debug("State was updated");
     }
@@ -114,36 +118,31 @@ export class DatabaseService {
         return splitUrl.join("_");
     }
 
-    private getAdapeterSettings() {
-        if (this.useWorkers) {
-            return { adapter: "worker", auto_compaction: true };
-        } else {
-            return { auto_compaction: true };
-        }
-    }
-
     public async getTile(url: string): Promise<ArrayBuffer> {
         let dbName = this.getDbNameFromUrl(url);
         let db = this.getDatabase(dbName);
-        try {
-            let splitUrl = url.split("/");
-            let id = splitUrl[splitUrl.length - 3] + "_" + splitUrl[splitUrl.length - 2] +
-                "_" + splitUrl[splitUrl.length - 1].split(".")[0]
-            let tileBlob = await db.getAttachment(id, id);
-            let response = new Response(tileBlob);
-            return response.arrayBuffer();
-        } catch (ex) {
+        let splitUrl = url.split("/");
+        let id = splitUrl[splitUrl.length - 3] + "_" + splitUrl[splitUrl.length - 2] +
+            "_" + splitUrl[splitUrl.length - 1].split(".")[0]
+        let tile = await db.table("tiles").get(id);
+        if (tile == null) {
             return null;
         }
+        return decode(tile.data);
     }
 
     public async saveContent(dbName: string, sourceText: string): Promise<void> {
-        await (this.getDatabase(dbName) as any).load(sourceText);
+        let objectToSave = JSON.parse(sourceText.trim());
+        await this.getDatabase(dbName).table("tiles").bulkPut(objectToSave);
     }
 
-    private getDatabase(dbName: string): PouchDB.Database {
+    private getDatabase(dbName: string): Dexie {
         if (!this.sourcesDatabases.has(dbName)) {
-            this.sourcesDatabases.set(dbName, new PouchDB(dbName, this.getAdapeterSettings()));
+            let db = new Dexie(dbName);
+            db.version(1).stores({
+                tiles: "id, x, y"
+            });
+            this.sourcesDatabases.set(dbName, db);
         }
         return this.sourcesDatabases.get(dbName);
     }

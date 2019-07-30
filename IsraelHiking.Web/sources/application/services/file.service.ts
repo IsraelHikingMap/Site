@@ -189,7 +189,7 @@ export class FileService {
     public async openIHMfile(file: File, progressCallback: (message: string, address: string, content: string) => Promise<void>): Promise<Style> {
         let zip = new JSZip();
         await zip.loadAsync(file);
-        let styleFileName = Object.keys(zip.files).find(name => name.endsWith(".json"));
+        let styleFileName = Object.keys(zip.files).find(name => name.endsWith(".json") && name.indexOf("/") === -1);
         if (styleFileName == null) {
             throw new Error("Missing style json file!");
         }
