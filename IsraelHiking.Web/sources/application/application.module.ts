@@ -140,7 +140,6 @@ import { LayersViewComponent } from "./components/map/layers-view.component";
 import { RoutesComponent } from "./components/map/routes.component";
 import { TracesComponent } from "./components/map/traces.component";
 import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
-import { DonateBannerComponent } from "./components/dialogs/donate-banner.component";
 // variables and functions
 import { routes } from "./routes";
 
@@ -352,7 +351,6 @@ NgModule({
         RoutesComponent,
         TracesComponent,
         AutomaticLayerPresentationComponent,
-        DonateBannerComponent,
         NameInUseValidatorDirective,
         ImageCaptureDirective
     ],
