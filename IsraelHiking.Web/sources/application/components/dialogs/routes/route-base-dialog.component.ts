@@ -1,5 +1,6 @@
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
+import invert from "invert-color";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { ToastService } from "../../../services/toast.service";
@@ -34,6 +35,10 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
             this.toastService.warning(this.resources.routeNameAlreadyInUse);
         }
         this.saveImplementation();
+    }
+
+    public getCheckIconColor(color: string) {
+        return invert(color, true);
     }
 
     protected isRouteNameAlreadyInUse(): boolean {

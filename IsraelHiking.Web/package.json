@@ -31,6 +31,7 @@
     "b64-to-blob": "1.2.19",
     "base64-arraybuffer": "^0.2.0",
     "cc.fovea.cordova.openwith": "^1.2.0",
+    "invert-color": "2.0.0",
     "cordova-android": "^7.1.4",
     "cordova-android-play-services-gradle-release": "^2.0.0",
     "cordova-ios": "^4.5.5",
