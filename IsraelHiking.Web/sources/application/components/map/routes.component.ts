@@ -243,9 +243,11 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             width = 6;
         }
         let iconcolor = opacity > 0.5 ? invert(color, true) : color;
+        let iconsize = width < 10 ? 0.5 : 0.5 * width / 10.0;
         return {
             color,
             iconcolor,
+            iconsize,
             weight: width,
             opacity,
             name: route.name,

@@ -7,7 +7,7 @@ import { RouteData } from "../../../models/models";
 @Injectable()
 export class RoutesFactory {
 
-    private static readonly DEFAULT_OPACITY = 0.9;
+    private static readonly DEFAULT_OPACITY = 0.4;
     private static readonly DEFAULT_WEIGHT = 9;
 
     // default values - in case the response from server takes too long.
