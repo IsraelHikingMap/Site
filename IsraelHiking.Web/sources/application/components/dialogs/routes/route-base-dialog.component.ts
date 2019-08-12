@@ -8,6 +8,7 @@ import { RoutesFactory } from "../../../services/layers/routelayers/routes.facto
 import { BaseMapComponent } from "../../base-map.component";
 import { ApplicationState, RouteData } from "../../../models/models";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
+import { SetOpacityAndWeightAction } from "../../../reducres/route-editing-state.reducer";
 
 export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     public colors: string[];
@@ -35,6 +36,10 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
             this.toastService.warning(this.resources.routeNameAlreadyInUse);
         }
         this.saveImplementation();
+        this.ngRedux.dispatch(new SetOpacityAndWeightAction({
+            opacity: this.routeData.opacity,
+            weight: this.routeData.weight
+        }));
     }
 
     public getCheckIconColor(color: string) {

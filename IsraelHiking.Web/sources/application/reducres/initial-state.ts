@@ -37,6 +37,8 @@ export const initialState =
             routingType: "Hike",
             selectedRouteId: null,
             recordingRouteId: null,
+            opacity: 0.4,
+            weight: 9
         } as RouteEditingState,
         tracesState: {
             visibleTraceId: null,

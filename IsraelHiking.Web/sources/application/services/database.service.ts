@@ -33,11 +33,11 @@ export class DatabaseService {
             state: "id"
         });
         this.initCustomTileLoadFunction();
-        let storedState = initialState;
         if (this.runningContext.isIFrame) {
-            this.ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
+            this.ngRedux.configureStore(rootReducer, initialState, [classToActionMiddleware]);
             return;
         }
+        let storedState = initialState;
         let oldDb = new PouchDB("IHM", { auto_compaction: true });
         let dbState = await this.stateDatabase.table("state").get("state");
         try {

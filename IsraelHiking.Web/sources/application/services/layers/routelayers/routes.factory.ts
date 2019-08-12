@@ -1,14 +1,12 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { NgRedux } from "@angular-redux/store";
 
 import { Urls } from "../../../urls";
-import { RouteData } from "../../../models/models";
+import { RouteData, ApplicationState } from "../../../models/models";
 
 @Injectable()
 export class RoutesFactory {
-
-    private static readonly DEFAULT_OPACITY = 0.4;
-    private static readonly DEFAULT_WEIGHT = 9;
 
     // default values - in case the response from server takes too long.
     public colors: string[] = [
@@ -28,21 +26,23 @@ export class RoutesFactory {
 
     private nextColorIndex = 0;
 
-    constructor(private readonly httpClient: HttpClient) {
+    constructor(private readonly httpClient: HttpClient,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.httpClient.get(Urls.colors).toPromise().then((colors: string[]) => {
             this.colors.splice(0, this.colors.length, ...colors);
         });
     }
 
     public createRouteData(name: string, color?: string): RouteData {
+        let routeEditingState = this.ngRedux.getState().routeEditingState;
         let route: RouteData = {
             id: this.generateRandomId(),
             name,
             description: "",
             state: "ReadOnly",
             color: color || this.colors[this.nextColorIndex],
-            opacity: RoutesFactory.DEFAULT_OPACITY,
-            weight: RoutesFactory.DEFAULT_WEIGHT,
+            opacity: routeEditingState.opacity,
+            weight: routeEditingState.weight,
             markers: [],
             segments: []
         };
@@ -51,10 +51,11 @@ export class RoutesFactory {
     }
 
     public createRouteDataAddMissingFields(routeData: RouteData, color: string): RouteData {
+        let routeEditingState = this.ngRedux.getState().routeEditingState;
         let route = { ...routeData };
         route.color = route.color || color;
-        route.opacity = route.opacity || RoutesFactory.DEFAULT_OPACITY;
-        route.weight = route.weight || RoutesFactory.DEFAULT_WEIGHT;
+        route.opacity = route.opacity || routeEditingState.opacity;
+        route.weight = route.weight || routeEditingState.weight;
         route.id = route.id || this.generateRandomId();
         route.state = "ReadOnly";
         return route;

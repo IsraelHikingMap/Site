@@ -6,6 +6,7 @@ const SET_ROUTING_TYPE = "SET_ROUTING_TYPE";
 const SET_SELECTED_ROUTE = "SET_SELECTED_ROUTE";
 const START_RECORDING = "START_RECORDING";
 const STOP_RECORDING = "STOP_RECORDING";
+const SET_OPACITY_AND_WEIGHT = "SET_OPACITY_AND_WEIGHT";
 
 export interface RoutePayload {
     routeId: string;
@@ -13,6 +14,11 @@ export interface RoutePayload {
 
 export interface SetRouteEditingStatePayload {
     routingType: RoutingType;
+}
+
+export interface SetOpacityAndWeightPayload {
+    opacity: number;
+    weight: number;
 }
 
 export class SetRouteEditingStateAction extends BaseAction<SetRouteEditingStatePayload> {
@@ -36,6 +42,12 @@ export class StartRecordingAction extends BaseAction<RoutePayload> {
 export class StopRecordingAction extends BaseAction<{}> {
     constructor(payload: {}) {
         super(STOP_RECORDING, payload);
+    }
+}
+
+export class SetOpacityAndWeightAction extends BaseAction<SetOpacityAndWeightPayload> {
+    constructor(payload: SetOpacityAndWeightPayload) {
+        super(SET_OPACITY_AND_WEIGHT, payload);
     }
 }
 
@@ -69,6 +81,15 @@ class RouteEditingStateReducer {
         return {
             ...lastState,
             recordingRouteId: null
+        };
+    }
+
+    @ReduxAction(SET_OPACITY_AND_WEIGHT)
+    public setOpacityAndWeight(lastState: RouteEditingState, action: SetOpacityAndWeightAction): RouteEditingState {
+        return {
+            ...lastState,
+            opacity: action.payload.opacity,
+            weight: action.payload.weight
         };
     }
 }
