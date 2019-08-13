@@ -23,10 +23,12 @@ $OpenCoverAPIResultsFile = "$($env:APPVEYOR_BUILD_FOLDER)\results-api.trx"
 $OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test --logger:trx;LogFileName=$OpenCoverDAResultsFile /p:DebugType=full $DATests`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverDACoverageFile"
 Write-Host $OpenCoverCmd
 Invoke-Expression $OpenCoverCmd
+$OpenCoverDAResultsFile = Get-ChildItem results-dataaccess*.trx -recurse | select-object -first 1 | select -expand FullName
 
 $OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test --logger:trx;LogFileName=$OpenCoverAPIResultsFile /p:DebugType=full $APITests`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverAPICoverageFile"
 Write-Host $OpenCoverCmd
 Invoke-Expression $OpenCoverCmd
+$OpenCoverAPIResultsFile = Get-ChildItem results-api*.trx -recurse | select-object -first 1 | select -expand FullName
 
 # Run tests using Karma and export results as JUnit and Lcov format
 

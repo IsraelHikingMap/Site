@@ -90,7 +90,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
         let source = {
             type: "raster",
             tiles: [address],
-            minzoom: this.minZoom - 1,
+            minzoom: Math.max(this.minZoom - 1, 0),
             maxzoom: this.maxZoom - 1,
             scheme,
             tileSize: 256

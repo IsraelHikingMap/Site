@@ -17,14 +17,19 @@
             (mouseLeave)="routeLineMouseLeave()">
 </mgl-layer>
 <mgl-layer id="route-line-direction"
-           type="line"
+           type="symbol"
            source="routes-geojson"
            [before]="resources.endOfRoutes"
            [filter]="['==', '$type', 'LineString']"
+           [layout]="{
+                'symbol-placement': 'line',
+                'symbol-spacing': 40,
+                'icon-image': 'arrow',
+                'icon-size': ['get', 'iconsize'],
+                'icon-allow-overlap': true
+           }"
            [paint]="{
-                'line-width': ['get', 'weight'],
-                'line-opacity': ['get', 'opacity'],
-                'line-pattern': 'arrowline'
+                'icon-color': ['get', 'iconcolor']
             }">
 </mgl-layer>
 <mgl-layer id="route-points"

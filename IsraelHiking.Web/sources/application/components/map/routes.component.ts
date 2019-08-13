@@ -2,6 +2,7 @@ import { Component, AfterViewInit, ViewEncapsulation } from "@angular/core";
 import { select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { MapComponent } from "ngx-mapbox-gl";
+import invert from "invert-color";
 
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
@@ -12,6 +13,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { LoggingService } from "../../services/logging.service";
 import { LatLngAlt, ApplicationState, RouteData } from "../../models/models";
+import { FileService } from "../../services/file.service";
 
 interface RoutePointViewData {
     latlng: LatLngAlt;
@@ -48,6 +50,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
                 private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
                 private readonly snappingService: SnappingService,
+                private readonly fileService: FileService,
                 private readonly loggingService: LoggingService,
                 private readonly host: MapComponent
     ) {
@@ -239,8 +242,12 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             opacity = 1.0;
             width = 6;
         }
+        let iconcolor = opacity > 0.5 ? invert(color, true) : color;
+        let iconsize = width < 10 ? 0.5 : 0.5 * width / 10.0;
         return {
             color,
+            iconcolor,
+            iconsize,
             weight: width,
             opacity,
             name: route.name,
@@ -276,6 +283,10 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     public ngAfterViewInit(): void {
         this.host.load.subscribe(() => {
             this.setInteractionAccordingToState();
+            let fullFilePath = this.fileService.getFullFilePath("content/arrow.png");
+            this.host.mapInstance.loadImage(fullFilePath, (_, image) => {
+                this.host.mapInstance.addImage("arrow", image, { sdf: true });
+            });
         });
     }
 

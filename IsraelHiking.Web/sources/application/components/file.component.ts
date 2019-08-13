@@ -20,11 +20,11 @@ export class FileComponent extends BaseMapComponent {
     public openFileElement: ElementRef;
 
     constructor(resources: ResourcesService,
-        private readonly dataContainerService: DataContainerService,
-        private readonly fileService: FileService,
-        private readonly toastService: ToastService,
-        private readonly runningContextService: RunningContextService,
-        private readonly databaseService: DatabaseService
+                private readonly dataContainerService: DataContainerService,
+                private readonly fileService: FileService,
+                private readonly toastService: ToastService,
+                private readonly runningContextService: RunningContextService,
+                private readonly databaseService: DatabaseService
     ) {
         super(resources);
     }
@@ -54,7 +54,7 @@ export class FileComponent extends BaseMapComponent {
             } catch (ex) {
                 this.toastService.error(ex.toString());
             }
-            
+
         });
         this.toastService.confirm({ type: "Ok", message: "Finished opening file." });
     }
