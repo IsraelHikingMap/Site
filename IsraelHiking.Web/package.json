@@ -31,9 +31,7 @@
     "b64-to-blob": "1.2.19",
     "base64-arraybuffer": "^0.2.0",
     "cc.fovea.cordova.openwith": "^1.2.0",
-    "invert-color": "2.0.0",
     "cordova-android": "^7.1.4",
-    "cordova-android-play-services-gradle-release": "^2.0.0",
     "cordova-ios": "^4.5.5",
     "cordova-plugin-camera": "^4.0.3",
     "cordova-plugin-device": "^2.0.3",
@@ -50,6 +48,7 @@
     "font-awesome": "4.7.0",
     "hammerjs": "2.0.8",
     "intl": "1.2.5",
+    "invert-color": "2.0.0",
     "jszip": "^3.2.2",
     "lodash": "4.17.15",
     "mapbox-gl": "0.53.1",
@@ -140,9 +139,6 @@
       "cordova-plugin-file": {},
       "cordova-plugin-camera": {},
       "cordova-plugin-insomnia": {},
-      "cordova-android-play-services-gradle-release": {
-        "PLAY_SERVICES_VERSION": "11.6.2"
-      },
       "cc.fovea.cordova.openwith": {
         "ANDROID_MIME_TYPE": "application/gpx",
         "IOS_URL_SCHEME": "israelhikingmap",
