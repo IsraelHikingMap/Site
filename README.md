@@ -31,7 +31,7 @@ The technology stack of this site is base on the following frameworks:
 * [Imgur](https://imgur.com/) - Used for uploadling anonymous images
 * [Cordova](https://cordova.apache.org/) - Used to wrap the site as a mobile application and add some native capabilities
 * [Redux using angular-redux](https://github.com/angular-redux/platform)
-* [PouchDB](https://pouchdb.com/)
+* [Dexie](https://dexie.org/)
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:
