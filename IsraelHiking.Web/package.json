@@ -17,7 +17,7 @@
     "@mapbox/mapbox-gl-rtl-text": "0.2.1",
     "@ngx-progressbar/core": "5.3.2",
     "@ngx-progressbar/http": "5.3.2",
-    "@nicky-lenaers/ngx-scroll-to": "2.0.0",
+    "@nicky-lenaers/ngx-scroll-to": "3.0.1",
     "@turf/bbox": "6.0.1",
     "@turf/center": "6.0.1",
     "@turf/circle": "6.0.1",

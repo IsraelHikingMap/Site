@@ -21,7 +21,6 @@ export class GeoLocationService {
 
     private state: GeoLocationServiceState;
     private watchNumber: number;
-    private isBackground: boolean;
     private rejectedPosition: ILatLngTime;
     private wasInitialized: boolean;
 
@@ -36,7 +35,6 @@ export class GeoLocationService {
         this.positionChanged = new EventEmitter<Position>();
         this.state = "disabled";
         this.currentLocation = null;
-        this.isBackground = false;
         this.rejectedPosition = null;
         this.wasInitialized = false;
     }
@@ -133,13 +131,13 @@ export class GeoLocationService {
             reset: true,
             desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
             allowIdenticalLocations: false,
-            distanceFilter: 10,
+            distanceFilter: 5,
             notification: {
                 text: this.resources.runningInBackground,
                 title: this.resources.israelHikingMap
             },
-            debug: true,
-            stopOnTerminate: false,
+            debug: !this.runningContextService.isProduction,
+            stopOnTerminate: true,
             foregroundService: true,
             logLevel: BackgroundGeolocation.LOG_LEVEL_VERBOSE,
         }, (state: State) => {
@@ -149,7 +147,7 @@ export class GeoLocationService {
                 BackgroundGeolocation.start();
             }
         }, (error: string) => {
-            this.loggingService.error("location ready error: " + error);
+            this.loggingService.error("Location ready error: " + error);
         });
     }
 
@@ -178,8 +176,7 @@ export class GeoLocationService {
 
     private handlePoistionChange(position: Position): void {
         this.ngZone.run(() => {
-            this.loggingService.debug("geo-location received, bg: " + this.isBackground +
-                " p: " + JSON.stringify(this.positionToLatLngTime(position)));
+            this.loggingService.debug("geo-location received pos: " + JSON.stringify(this.positionToLatLngTime(position)));
             if (this.state === "searching") {
                 this.state = "tracking";
             }
