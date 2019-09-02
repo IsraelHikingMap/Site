@@ -31,20 +31,22 @@ The technology stack of this site is base on the following frameworks:
 * [Imgur](https://imgur.com/) - Used for uploadling anonymous images
 * [Cordova](https://cordova.apache.org/) - Used to wrap the site as a mobile application and add some native capabilities
 * [Redux using angular-redux](https://github.com/angular-redux/platform)
-* [PouchDB](https://pouchdb.com/)
+* [Dexie](https://dexie.org/) - Used for client side storage
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:
 * application - where all the is, topmost folder.
-  * common - used to store data types that are common to the entire app.
-  * content - used for images, mainly favicon.
   * components - this layer handles the UI calls and bindings along with the relevant css and html files.
   * directives - folder for all the directives.
+  * models - used to store data types that are common to the entire app.
+  * reducers - used for redux reducers, actions and payloads.
   * services - this layer hold the lower level data handling.
     * layers - where the layers logic is - POI, route, wiki, nakeb, relevant services, etc...
-    * routers - handles the routing - currently there are 4 routers - hike, bike, fourbyfour and none.
-* fonts - icomoon generated font for icons instead of images.
+    * routers - handles the routing using server side - if server fails the none-router will be used.
+* content - used for images and static content.
 * environments - used for angular-cli to define production and dev variables.
+* fonts - icomoon generated font for icons instead of images.
+* scss - used for global style files
 * translations - all relevant data related to i18n
  
 # Architecture of Server
@@ -55,15 +57,16 @@ The architecture is based on layers
 * Executers - basic logical building blocks
 * DataAccessInterfaces - a slim layer to decouple business logic from data access
 * DataAccess - database, file system and network request are processed in this layer
+* Common - Mainly for POCOs
 
 # Setting Up the Project for Development
 In order to be able to build this site you'll need some tools:
 * Install [Java runtime](https://java.com/en/download/) - make sure to install 64bit version.
-* Download and install [Visual Studio community 2017](https://www.visualstudio.com/downloads) or later. Select:
+* Download and install [Visual Studio community 2019](https://www.visualstudio.com/downloads) or later. Select:
   * ASP.NET and web development
   * .NET cross-platform development
 * [.Net core SDK 2.1 ](https://www.microsoft.com/net/download/core)
-* Install [node.js](https://nodejs.org/en/) for windows (8.9+). Use the recommended 64-bit installer on modern Windows versions.
+* Install [node.js](https://nodejs.org/en/) for windows (10.1+). Use the recommended 64-bit installer on modern Windows versions.
 * Open Visual Studio
 * Follow [these steps](https://stackoverflow.com/a/43850262/368683) to update the version of node.js Visual Studio uses
 * If asked, and you don't have any other preference, choose "General" development settings
@@ -71,7 +74,7 @@ In order to be able to build this site you'll need some tools:
 * From Visual Studio's _Tools &rarr; Extensions and Updates..._ 
   * Go to _Online_
   * Search for the following and `Download` them: 
-    * Web Essentials 2017
+    * Web Essentials 2019
   * Exit Visual Studio to complete the installation
   * Find the `VSIX Installer` window and click _Modify_, wait for the installation to complete, and close it
   * Open Visual Studio, wait for the installations to complete, and restart when asked

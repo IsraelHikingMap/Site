@@ -29,6 +29,7 @@ using NLog.Web;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace IsraelHiking.Web
 {
@@ -164,6 +165,11 @@ namespace IsraelHiking.Web
                     return targetAddress;
                 });
             }
+
+            app.UseProxy("proxy/{*x}", (context, args) =>
+            {
+                return args[args.Keys.First()].ToString().Replace("https:/", "https://").Replace("http:/", "http://");
+            });
 
             foreach (var directory in configurationData.ListingDictionary)
             {

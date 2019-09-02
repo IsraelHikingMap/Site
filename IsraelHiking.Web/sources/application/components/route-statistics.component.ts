@@ -321,6 +321,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         this.chartElements.hoverGroup.select("g").attr("transform", `translate(${boxPosition}, 0)`);
         this.buildAllTextInHoverBox(point);
+        this.updatePointOnMap(point);
+    }
+
+    private updatePointOnMap(point: IRouteStatisticsPoint) {
         this.chartHoverSource = {
             type: "FeatureCollection",
             features: [{
@@ -348,8 +352,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         d3.event.stopPropagation();
         let chartXCoordinate = d3.mouse(this.chartElements.chartArea.node())[0];
         let xPosition = this.chartElements.xScale.invert(chartXCoordinate);
+        let point = this.routeStatisticsService.interpolateStatistics(this.statistics, xPosition);
         if (this.chartElements.dragState === "none") {
-            let point = this.routeStatisticsService.interpolateStatistics(this.statistics, xPosition);
             this.showChartHover(point);
             this.updateSubRouteSelectionOnChart();
             return;
@@ -361,6 +365,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.subRouteRange.xEnd = xPosition;
             this.updateSubRouteSelectionOnChart();
             this.hideChartHover();
+            this.updatePointOnMap(point);
         }
 
     }

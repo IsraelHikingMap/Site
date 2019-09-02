@@ -4,6 +4,7 @@ export class Urls {
     public static readonly baseAddress = environment.baseAddress;
     public static readonly baseTilesAddress = environment.baseTilesAddress;
     public static readonly apiBase = environment.baseApiAddress;
+    public static readonly proxy = Urls.baseAddress + "/proxy/";
     public static readonly emptyHtml = Urls.baseAddress + "/empty-for-oauth.html";
     public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";

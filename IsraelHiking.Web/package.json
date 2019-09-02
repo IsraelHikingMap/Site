@@ -86,7 +86,7 @@
     "@types/pouchdb": "^6.3.2",
     "@types/supercluster": "5.0.1",
     "codelyzer": "^5.1.0",
-    "cordova": "8.1.2",
+    "cordova": "9.0.0",
     "gettext-extractor": "3.4.3",
     "jasmine-core": "^3.4.0",
     "jasmine-spec-reporter": "^4.2.1",
