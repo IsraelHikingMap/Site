@@ -4,6 +4,7 @@ import { RasterSource, RasterLayout, Layer } from "mapbox-gl";
 import { Subscription } from "rxjs";
 
 import { FileService } from "../../services/file.service";
+import { Urls } from "../../urls";
 
 @Component({
     selector: "auto-layer",
@@ -131,7 +132,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
 
     private fixNonHttpsAddress(address: string) {
         if (address.startsWith("http://")) {
-            return "https://cors-anywhere.herokuapp.com/" + address;
+            return Urls.proxy + address;
         }
         return address;
     }
