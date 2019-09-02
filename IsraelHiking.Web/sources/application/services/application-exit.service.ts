@@ -45,7 +45,6 @@ export class ApplicationExitService {
                     this.loggingService.debug("Starting IHM Application Exit");
                     await this.databaseService.close();
                     this.loggingService.debug("Finished IHM Application Exit");
-                    await this.loggingService.close();
                     navigator.app.exitApp();
                 } else if (this.state === "None") {
                     this.state = "FirstClick";

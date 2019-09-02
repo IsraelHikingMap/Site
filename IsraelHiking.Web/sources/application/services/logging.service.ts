@@ -1,129 +1,50 @@
-/// <reference types="cordova-plugin-device"/>
-/// <reference types="cordova-plugin-file"/>
 import { Injectable } from "@angular/core";
+import BackgroundGeoLocation, { Logger } from "cordova-background-geolocation-lt";
 
 import { RunningContextService } from "./running-context.service";
 
-declare var cordova: any;
-
 @Injectable()
 export class LoggingService {
-    private static readonly LOG_FILE_NAME = "log.txt";
-
-    private queue: string[];
-    private fileWriter: FileWriter;
+    private logger: Logger;
 
     constructor(private readonly runningContextService: RunningContextService) {
-        this.queue = [];
-        this.fileWriter = null;
-    }
-
-    public async initialize() {
-        if (!this.runningContextService.isCordova || this.runningContextService.isProduction) {
-            return;
-        }
-        let dir = await this.getIHMDirectory();
-        let fullFileName = LoggingService.LOG_FILE_NAME;
-        dir.getFile(fullFileName,
-            { create: true },
-            fileEntry => {
-                fileEntry.createWriter(fileWriter => {
-                    this.fileWriter = fileWriter;
-                    fileWriter.seek(fileWriter.length);
-                    this.fileWriter.onwriteend = () => {
-                        if (this.queue.length > 0) {
-                            this.fileWriter.write(this.queue[0] as any);
-                            this.queue.splice(0, 1);
-                        }
-                    };
-                });
-            },
-            () => { }
-        );
-    }
-
-    private writeToFile(message: string): void {
-        if (!this.runningContextService.isCordova) {
-            return;
-        }
-        if (this.fileWriter && this.fileWriter.readyState !== FileWriter.WRITING) {
-            this.fileWriter.write(message as any);
+        if (this.runningContextService.isCordova) {
+            this.logger = BackgroundGeoLocation.logger;
         } else {
-            this.queue.push(message);
+            this.logger = {
+                info: (message) => {
+                    message = new Date().toISOString() + " | INFO  | " + message;
+                    console.log(message);
+                },
+                debug: (message) => {
+                    message = new Date().toISOString() + " | DEBUG | " + message;
+                    // tslint:disable-next-line
+                    console.debug(message);
+                },
+                error: (message) => {
+                    message = new Date().toISOString() + " | ERROR | " + message;
+                    console.error(message);
+                }
+            } as any;
         }
     }
 
     public info(message: string) {
-        message = new Date().toISOString() + " | INFO  | " + message;
-        console.log(message);
-        this.writeToFile(message + "\n");
+        this.logger.info(message);
     }
 
     public debug(message: string) {
         if (this.runningContextService.isProduction) {
             return;
         }
-        message = new Date().toISOString() + " | DEBUG | " + message;
-        // tslint:disable-next-line
-        console.debug(message);
-        this.writeToFile(message + "\n");
+        this.logger.debug(message);
     }
 
     public error(message: string) {
-        if (this.runningContextService.isProduction) {
-            return;
-        }
-        message = new Date().toISOString() + " | ERROR | " + message;
-        console.error(message);
-        this.writeToFile(message + "\n");
+        this.logger.error(message);
     }
 
-    public async close(): Promise<any> {
-        if (this.runningContextService.isProduction) {
-            return;
-        }
-        let checkQueuePromise = new Promise((resolve, _) => {
-            let checkQueue = () => {
-                if (this.queue.length === 0) {
-                    resolve();
-                    return;
-                }
-                setTimeout(checkQueue, 100);
-            };
-            setTimeout(checkQueue, 100);
-        });
-        await checkQueuePromise;
-        this.fileWriter = null;
-        await new Promise<any>((resolve, reject) => {
-            if (this.queue.length > 0) {
-                setTimeout(() => this.close(), 100);
-            }
-            this.getIHMDirectory().then((dir) => {
-                let fullFileName = LoggingService.LOG_FILE_NAME;
-                dir.getFile(fullFileName,
-                    { create: false },
-                    fileEntry => {
-                        let newFileName = "log_" + new Date().toISOString().split(":").join("-").replace("T", "_") + ".txt";
-                        fileEntry.moveTo(dir, newFileName, resolve, reject);
-                    },
-                    reject);
-            });
-        });
-    }
-
-    public getIHMDirectory(): Promise<DirectoryEntry> {
-        return new Promise((resolve, reject) => {
-            let folder = device.platform.toUpperCase().indexOf("OS") !== -1
-                ? cordova.file.documentsDirectory
-                : cordova.file.externalRootDirectory;
-            window.resolveLocalFileSystemURL(folder,
-                (directoryEntry: DirectoryEntry) => {
-                    directoryEntry.getDirectory("IsraelHikingMap",
-                        { create: true },
-                        dir => {
-                            resolve(dir);
-                        }, reject);
-                }, reject);
-        });
+    public emailLog() {
+        BackgroundGeoLocation.emailLog("israelhikingmap@gmail.com");
     }
 }

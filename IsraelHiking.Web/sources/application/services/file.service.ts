@@ -169,7 +169,7 @@ export class FileService {
                 resolve(false);
                 return;
             }
-            this.loggingService.getIHMDirectory().then((dir) => {
+            this.getIHMDirectory().then((dir) => {
                 let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
                     .replace("Z", "_") +
                     fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
@@ -183,6 +183,22 @@ export class FileService {
                     },
                     reject);
             }, reject);
+        });
+    }
+
+    private getIHMDirectory(): Promise<DirectoryEntry> {
+        return new Promise((resolve, reject) => {
+            let folder = device.platform.toUpperCase().indexOf("OS") !== -1
+                ? cordova.file.documentsDirectory
+                : cordova.file.externalRootDirectory;
+            window.resolveLocalFileSystemURL(folder,
+                (directoryEntry: DirectoryEntry) => {
+                    directoryEntry.getDirectory("IsraelHikingMap",
+                        { create: true },
+                        dir => {
+                            resolve(dir);
+                        }, reject);
+                }, reject);
         });
     }
 

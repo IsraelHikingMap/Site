@@ -8,6 +8,8 @@ import { NgRedux } from "@angular-redux/store";
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { ToastService } from "../services/toast.service";
+import { LoggingService } from "../services/logging.service";
+import { RunningContextService } from "../services/running-context.service";
 import { BaseMapComponent } from "./base-map.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
@@ -41,7 +43,9 @@ export class OsmUserComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
                 private readonly authorizationService: AuthorizationService,
                 private readonly dialog: MatDialog,
+                private readonly runningContextService: RunningContextService,
                 private readonly toastService: ToastService,
+                private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.initializeRanks();
@@ -124,6 +128,14 @@ export class OsmUserComponent extends BaseMapComponent {
             return "accent";
         }
         return "primary";
+    }
+
+    public isApp() {
+        return this.runningContextService.isCordova;
+    }
+
+    public reportAnIssue() {
+        this.loggingService.emailLog();
     }
 
     public toggleIsAdvanced() {

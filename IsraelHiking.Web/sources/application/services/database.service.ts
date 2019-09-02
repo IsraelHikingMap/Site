@@ -107,7 +107,6 @@ export class DatabaseService {
             state
         });
         this.updating = false;
-        this.loggingService.debug("State was updated");
     }
 
     public getDbNameFromUrl(url: string) {

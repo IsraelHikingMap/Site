@@ -146,15 +146,14 @@ import { routes } from "./routes";
 export function initializeApplication(injector: Injector) {
     return async () => {
         let loggingService = injector.get<LoggingService>(LoggingService);
-        await loggingService.initialize();
         try {
-            await loggingService.debug("Starting IHM Application Initialization");
+            await loggingService.info("Starting IHM Application Initialization");
             await injector.get<DatabaseService>(DatabaseService).initialize();
             injector.get<ApplicationExitService>(ApplicationExitService).initialize();
             injector.get<OpenWithService>(OpenWithService).initialize();
-            await loggingService.debug("Finished IHM Application Initialization");
+            await loggingService.info("Finished IHM Application Initialization");
         } catch (error) {
-            loggingService.debug(`Failed IHM Application Initialization: ${error.toString()}`);
+            loggingService.error(`Failed IHM Application Initialization: ${error.toString()}`);
         }
     };
 }
