@@ -34,9 +34,10 @@ export class LoggingService {
     }
 
     public debug(message: string) {
-        if (this.runningContextService.isProduction) {
-            return;
-        }
+        // for testing to see how it behaves in production.
+        //if (this.runningContextService.isProduction) {
+        //    return;
+        //}
         this.logger.debug(message);
     }
 

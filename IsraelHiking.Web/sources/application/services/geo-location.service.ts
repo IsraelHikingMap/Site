@@ -81,7 +81,7 @@ export class GeoLocationService {
     }
 
     private startNavigator() {
-        this.loggingService.debug("Starting browser geo-location");
+        this.loggingService.info("Starting browser geo-location");
         if (!window.navigator || !window.navigator.geolocation) {
             return;
         }
@@ -110,7 +110,7 @@ export class GeoLocationService {
             return;
         }
         BackgroundGeolocation.onLocation((location: Location) => {
-            console.log("geo-location service get location: " + JSON.stringify(location))
+            this.loggingService.info("Geo-location service got location: " + JSON.stringify(location))
             let position = {
                 coords: {
                     accuracy: location.coords.accuracy,
@@ -126,7 +126,7 @@ export class GeoLocationService {
             this.handlePoistionChange(position);
         });
 
-        BackgroundGeolocation.onEnabledChange((enabled) => this.loggingService.debug("geo-location service enabled changed: " + enabled));
+        BackgroundGeolocation.onEnabledChange((enabled) => this.loggingService.info("Geo-location service enabled changed: " + enabled));
         BackgroundGeolocation.ready({
             reset: true,
             desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
@@ -141,7 +141,6 @@ export class GeoLocationService {
             foregroundService: true,
             logLevel: BackgroundGeolocation.LOG_LEVEL_VERBOSE,
         }, (state: State) => {
-            this.loggingService.debug("State: " + JSON.stringify(state))
             this.wasInitialized = true;
             if (!state.enabled) {
                 BackgroundGeolocation.start();
@@ -176,7 +175,7 @@ export class GeoLocationService {
 
     private handlePoistionChange(position: Position): void {
         this.ngZone.run(() => {
-            this.loggingService.debug("geo-location received pos: " + JSON.stringify(this.positionToLatLngTime(position)));
+            this.loggingService.debug("Geo-location received position: " + JSON.stringify(this.positionToLatLngTime(position)));
             if (this.state === "searching") {
                 this.state = "tracking";
             }
