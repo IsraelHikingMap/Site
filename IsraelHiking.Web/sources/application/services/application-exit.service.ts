@@ -7,6 +7,8 @@ import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { ToastService } from "./toast.service";
+import { MatDialog } from "@angular/material";
+import { SidebarService } from "./sidebar.service";
 
 declare var navigator: Navigator;
 
@@ -21,6 +23,8 @@ export class ApplicationExitService {
     private state: ExitState;
 
     constructor(private readonly resources: ResourcesService,
+                private readonly matDialog: MatDialog,
+                private readonly sidebarService: SidebarService,
                 private readonly ngZone: NgZone,
                 private readonly databaseService: DatabaseService,
                 private readonly runningContext: RunningContextService,
@@ -31,12 +35,20 @@ export class ApplicationExitService {
     }
 
     public initialize() {
-        if (!this.runningContext.isCordova || !navigator.app) {
+        if (this.runningContext.isCordova || !navigator.app) {
             return;
         }
         document.addEventListener("backbutton", async (e) => {
             e.preventDefault();
             await this.ngZone.run(async () => {
+                if (this.matDialog.openDialogs.length > 0) {
+                    this.matDialog.closeAll();
+                    return;
+                }
+                if (this.sidebarService.isVisible) {
+                    this.sidebarService.hide();
+                    return;
+                }
                 setTimeout(() => { this.state = "None"; }, 5000);
                 if (this.state === "FirstClick") {
                     this.state = "SecondClick";
