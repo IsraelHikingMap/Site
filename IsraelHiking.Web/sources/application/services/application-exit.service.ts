@@ -1,3 +1,4 @@
+/// <reference types="cordova" />
 /// <reference types="cordova-plugin-file" />
 import { Injectable, NgZone } from "@angular/core";
 
@@ -8,8 +9,6 @@ import { DatabaseService } from "./database.service";
 import { ToastService } from "./toast.service";
 
 declare var navigator: Navigator;
-declare var cordova: any;
-declare var window: Window;
 
 declare type ExitState = "None" | "FirstClick" | "SecondClick";
 
@@ -45,6 +44,7 @@ export class ApplicationExitService {
                     this.loggingService.debug("Starting IHM Application Exit");
                     await this.databaseService.close();
                     this.loggingService.debug("Finished IHM Application Exit");
+                    await this.loggingService.close();
                     navigator.app.exitApp();
                 } else if (this.state === "None") {
                     this.state = "FirstClick";

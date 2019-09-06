@@ -146,6 +146,7 @@ import { routes } from "./routes";
 export function initializeApplication(injector: Injector) {
     return async () => {
         let loggingService = injector.get<LoggingService>(LoggingService);
+        await loggingService.initialize();
         try {
             await loggingService.info("Starting IHM Application Initialization");
             await injector.get<DatabaseService>(DatabaseService).initialize();

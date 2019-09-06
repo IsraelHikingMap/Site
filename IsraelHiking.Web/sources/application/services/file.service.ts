@@ -1,3 +1,4 @@
+/// <reference types="cordova" />
 /// <reference types="cordova-plugin-device"/>
 /// <reference types="cordova-plugin-file"/>
 import { Injectable } from "@angular/core";
@@ -14,8 +15,6 @@ import { SelectedRouteService } from "./layers/routelayers/selected-route.servic
 import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
-
-declare var cordova: any;
 
 export interface IFormatViewModel {
     label: string;
