@@ -94,7 +94,9 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             minzoom: Math.max(this.minZoom - 1, 0),
             maxzoom: this.maxZoom - 1,
             scheme,
-            tileSize: 256
+            tileSize: 256,
+            attribution: "<a href='https://github.com/IsraelHikingMap/Site/wiki/Attribution' target='_blank'>" +
+                "Click me to see attribution</a>"
         } as RasterSource;
         this.host.mapInstance.addSource(this.rasterSourceId, source);
         let layer = {

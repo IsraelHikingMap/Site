@@ -2,7 +2,7 @@ import { Component, ViewChild, AfterViewInit, ViewEncapsulation, ViewChildren, Q
 import { NgxImageGalleryComponent } from "ngx-image-gallery";
 import { NgRedux } from "@angular-redux/store";
 import { MapComponent, CustomControl } from "ngx-mapbox-gl";
-import { Style, setRTLTextPlugin } from "mapbox-gl";
+import { Style, setRTLTextPlugin, AttributionControl, ScaleControl } from "mapbox-gl";
 
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
@@ -13,7 +13,6 @@ import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SnappingService } from "../../services/snapping.service";
-import { ScaleControl } from "mapbox-gl";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { TouchPitchInteraction } from "../intercations/touch-pitch.interaction";
 
@@ -133,6 +132,7 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
             this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-right");
         });
         this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" }), "bottom-right");
+        this.mapComponent.mapInstance.addControl(new AttributionControl({ compact: true }), "bottom-right");
 
         let touchPitch = new TouchPitchInteraction(this.mapComponent.mapInstance);
         touchPitch.enable();
