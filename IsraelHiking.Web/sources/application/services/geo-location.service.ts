@@ -110,7 +110,7 @@ export class GeoLocationService {
             return;
         }
         BackgroundGeolocation.onLocation((location: Location) => {
-            this.loggingService.info("Geo-location service got location: " + JSON.stringify(location))
+            this.loggingService.info("Geo-location service got location: " + JSON.stringify(location));
             let position = {
                 coords: {
                     accuracy: location.coords.accuracy,
