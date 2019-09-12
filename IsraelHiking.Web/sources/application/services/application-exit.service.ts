@@ -1,6 +1,7 @@
 /// <reference types="cordova" />
 /// <reference types="cordova-plugin-file" />
 import { Injectable, NgZone } from "@angular/core";
+import { NgRedux } from "@angular-redux/store";
 
 import { RunningContextService } from "./running-context.service";
 import { ResourcesService } from "./resources.service";
@@ -9,6 +10,8 @@ import { DatabaseService } from "./database.service";
 import { ToastService } from "./toast.service";
 import { MatDialog } from "@angular/material";
 import { SidebarService } from "./sidebar.service";
+import { ApplicationState } from "../models/models";
+import { SetSidebarAction } from "../reducres/poi.reducer";
 
 declare var navigator: Navigator;
 
@@ -28,6 +31,7 @@ export class ApplicationExitService {
                 private readonly ngZone: NgZone,
                 private readonly databaseService: DatabaseService,
                 private readonly runningContext: RunningContextService,
+                private readonly ngRedux: NgRedux<ApplicationState>,
                 private readonly loggingService: LoggingService,
                 private readonly toastService: ToastService) {
 
@@ -47,6 +51,12 @@ export class ApplicationExitService {
                 }
                 if (this.sidebarService.isVisible) {
                     this.sidebarService.hide();
+                    return;
+                }
+                if (this.ngRedux.getState().poiState.isSidebarOpen) {
+                    this.ngRedux.dispatch(new SetSidebarAction({
+                        isOpen: false
+                    }));
                     return;
                 }
                 setTimeout(() => { this.state = "None"; }, 5000);
