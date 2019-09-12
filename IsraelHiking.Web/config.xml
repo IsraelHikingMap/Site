@@ -24,10 +24,6 @@
         <icon density="xhdpi" src="www/content/favicons/android-chrome-96x96.png" />
         <icon density="xxhdpi" src="www/content/favicons/android-chrome-144x144.png" />
         <icon density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
-        <config-file parent="/manifest/application" target="AndroidManifest.xml">
-          <meta-data android:name="com.transistorsoft.locationmanager.license_key" 
-                     android:value="1aa6ddead8faa33ebffe1fa547a5581513ee975c4c4832d604f350a1ed766ad2" />
-        </config-file>
         <config-file parent="/manifest/application/activity" target="AndroidManifest.xml">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -134,16 +130,16 @@
         <icon height="58" src="www/content/favicons/icon-small@2x.png" width="58" />
         <icon height="87" src="www/content/favicons/icon-small@3x.png" width="87" />
         <config-file parent="NSLocationAlwaysAndWhenInUseUsageDescription" target="*-Info.plist">
-          <string>Background location tracking is required for our app so you can record your outdoor activity for sharing and personal use</string>
+            <string>Background location tracking is required for our app so you can record your outdoor activity for sharing and personal use</string>
         </config-file>
         <config-file parent="NSLocationAlwaysUsageDescription" target="*-Info.plist">
-          <string>Background location tracking is required for our app so you can record your outdoor activity for sharing and personal use</string>
+            <string>Background location tracking is required for our app so you can record your outdoor activity for sharing and personal use</string>
         </config-file>
         <config-file parent="NSLocationWhenInUseUsageDescription" target="*-Info.plist">
-          <string>Background location tracking is required for our app so you can record your outdoor activity for sharing and personal use</string>
+            <string>Background location tracking is required for our app so you can record your outdoor activity for sharing and personal use</string>
         </config-file>
         <config-file parent="NSMotionUsageDescription" target="*-Info.plist">
-          <string>Device motion updates help determine when the device is stationary so the app can save power by turning off location-updates</string>
+            <string>Device motion updates help determine when the device is stationary so the app can save power by turning off location-updates</string>
         </config-file>
     </platform>
     <plugin name="cordova-plugin-inappbrowser" spec="^3.0.0" />
@@ -158,12 +154,6 @@
     </plugin>
     <plugin name="cordova-plugin-device" spec="~2.0.2" />
     <plugin name="cordova-plugin-ionic-webview" spec="^4.1.0" />
-    <plugin name="cordova-background-geolocation-lt" spec="^3.0.8">
-        <variable name="GOOGLE_API_VERSION" value="16.+" />
-        <variable name="APPCOMPAT_VERSION" value="27.+" />
-        <variable name="OKHTTP_VERSION" value="3.12.+" />
-        <variable name="EVENTBUS_VERSION" value="3.0.0" />
-    </plugin>
     <engine name="ios" spec="^4.5.5" />
     <engine name="android" spec="^7.1.4" />
 </widget>

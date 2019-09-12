@@ -15,6 +15,7 @@
     "@beyerleinf/ngx-dnd": "8.0.2",
     "@katze/ngx-d3": "0.2.0",
     "@mapbox/mapbox-gl-rtl-text": "0.2.1",
+    "@mauron85/cordova-plugin-background-geolocation": "^3.0.6",
     "@ngx-progressbar/core": "5.3.2",
     "@ngx-progressbar/http": "5.3.2",
     "@nicky-lenaers/ngx-scroll-to": "3.0.1",
@@ -31,9 +32,7 @@
     "base64-arraybuffer": "^0.2.0",
     "cc.fovea.cordova.openwith": "^1.2.0",
     "cordova-android": "^7.1.4",
-    "cordova-background-geolocation-lt": "^3.0.8",
     "cordova-ios": "^4.5.5",
-    "cordova-plugin-background-fetch": "^5.5.0",
     "cordova-plugin-camera": "^4.0.3",
     "cordova-plugin-device": "^2.0.3",
     "cordova-plugin-email-composer": "^0.9.2",
@@ -151,14 +150,18 @@
       "cordova-plugin-ionic-webview": {
         "ANDROID_SUPPORT_ANNOTATIONS_VERSION": "27.+"
       },
-      "cordova-background-geolocation-lt": {
-        "GOOGLE_API_VERSION": "16.+",
-        "APPCOMPAT_VERSION": "27.+",
-        "OKHTTP_VERSION": "3.12.+",
-        "EVENTBUS_VERSION": "3.0.0"
-      },
       "cordova-plugin-email-composer": {
         "ANDROID_SUPPORT_V4_VERSION": "27.+"
+      },
+      "cordova-plugin-mauron85-background-geolocation": {
+        "GOOGLE_PLAY_SERVICES_VERSION": "11+",
+        "ANDROID_SUPPORT_LIBRARY_VERSION": "26+",
+        "ICON": "@mipmap/icon",
+        "SMALL_ICON": "@mipmap/icon",
+        "ACCOUNT_NAME": "@string/app_name",
+        "ACCOUNT_LABEL": "@string/app_name",
+        "ACCOUNT_TYPE": "$PACKAGE_NAME.account",
+        "CONTENT_AUTHORITY": "$PACKAGE_NAME"
       }
     },
     "platforms": [
