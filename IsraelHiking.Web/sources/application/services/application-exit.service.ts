@@ -35,7 +35,7 @@ export class ApplicationExitService {
     }
 
     public initialize() {
-        if (this.runningContext.isCordova || !navigator.app) {
+        if (!this.runningContext.isCordova || !navigator.app) {
             return;
         }
         document.addEventListener("backbutton", async (e) => {
