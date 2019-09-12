@@ -306,39 +306,6 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
-        public void MergeFeatures_KKLRoutefromOsmAndOffRoad_ShouldMergeByPrefix()
-        {
-            var feature1 = CreateFeature("1", 0, 0);
-            feature1.Geometry = new LineString(new[]
-                {
-                    new Coordinate(0, 0),
-                    new Coordinate(1, 1),
-                    new Coordinate(2, 2)
-                }
-            );  
-            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
-            feature1.Attributes.AddOrUpdate("operator", "kkl");
-            feature1.Attributes.AddOrUpdate("route", "mtb");
-            feature1.SetTitles();
-            var feature2 = CreateFeature("2", 0, 0);
-            feature2.Geometry = new LineString(new[]
-                {
-                    new Coordinate(0, 0),
-                    new Coordinate(1.1, 1.1),
-                    new Coordinate(2, 2),
-                }
-            );
-            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1_offroad");
-            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.OFFROAD);
-            feature2.SetTitles();
-
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 });
-
-            Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(1, results.First().GetIdsFromCombinedPoi().Count);
-        }
-
-        [TestMethod]
         public void MergeFeatures_TwoBusStopsAndWikipedia_ShouldMergeOnlyBusStops()
         {
             var node1 = CreateFeature("1", 0, 0);

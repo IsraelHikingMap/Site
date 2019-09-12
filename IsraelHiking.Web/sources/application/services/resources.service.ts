@@ -144,10 +144,8 @@ export class ResourcesService {
     public offlineMapBenefits: string;
     public installationInstructionsMobileOruxMaps: string;
     public installationInstructionsMobileLocus: string;
-    public installationInstructionsMobileOffroad: string;
     public installationInstructionsDesktopOruxMaps: string;
     public installationInstructionsDesktopLocus: string;
-    public installationInstructionsDesktopOffroad: string;
     public mapsAreUpdatedEveryTwoDays: string;
     public junior: string;
     public partner: string;
@@ -155,7 +153,6 @@ export class ResourcesService {
     public guru: string;
     public changes: string;
     public userEmail: string;
-    public userEmailMutedOffroad: string;
     public difficulty: string;
     public easy: string;
     public moderate: string;
@@ -170,7 +167,6 @@ export class ResourcesService {
     public editRouteDetails: string;
     public shareWithFacebook: string;
     public shareWithWhatsapp: string;
-    public shareWithOffroad: string;
     public findUnmappedRoutes: string;
     public nonMarkedTrail: string;
     public dirtRoad: string;
@@ -619,14 +615,10 @@ export class ResourcesService {
             .getString("Installation instructions for OruxMaps on mobile - surround each new line with <li></li>");
         this.installationInstructionsMobileLocus = this.gettextCatalog
             .getString("Installation instructions for Locus on mobile - surround each new line with <li></li>");
-        this.installationInstructionsMobileOffroad = this.gettextCatalog
-            .getString("Installation instructions for Offroad on mobile - surround each new line with <li></li>");
         this.installationInstructionsDesktopOruxMaps = this.gettextCatalog
             .getString("Installation instructions for OruxMaps on desktop - surround each new line with <li></li>");
         this.installationInstructionsDesktopLocus = this.gettextCatalog
             .getString("Installation instructions for Locus on desktop - surround each new line with <li></li>");
-        this.installationInstructionsDesktopOffroad = this.gettextCatalog
-            .getString("Installation instructions for Offroad on desktop - surround each new line with <li></li>");
         // end
         this.mapsAreUpdatedEveryTwoDays = this.gettextCatalog.getString("Maps are updated every two days");
         this.junior = this.gettextCatalog.getString("Junior");
@@ -635,7 +627,6 @@ export class ResourcesService {
         this.guru = this.gettextCatalog.getString("Guru");
         this.changes = this.gettextCatalog.getString("Changes");
         this.userEmail = this.gettextCatalog.getString("User E-Mail");
-        this.userEmailMutedOffroad = this.gettextCatalog.getString("Use the e-mail you used to login to off-road app.");
         this.difficulty = this.gettextCatalog.getString("Difficulty");
         this.easy = this.gettextCatalog.getString("Easy");
         this.moderate = this.gettextCatalog.getString("Moderate");
@@ -650,7 +641,6 @@ export class ResourcesService {
         this.editRouteDetails = this.gettextCatalog.getString("Edit Route Details");
         this.shareWithFacebook = this.gettextCatalog.getString("Share With Facebook");
         this.shareWithWhatsapp = this.gettextCatalog.getString("Share With WhatsApp");
-        this.shareWithOffroad = this.gettextCatalog.getString("Share With off-road");
         this.findUnmappedRoutes = this.gettextCatalog.getString("Find Unmapped Routes");
         this.nonMarkedTrail = this.gettextCatalog.getString("Non-Marked Trail");
         this.dirtRoad = this.gettextCatalog.getString("Dirt Road");

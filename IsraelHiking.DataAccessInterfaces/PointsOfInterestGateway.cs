@@ -13,9 +13,6 @@ namespace IsraelHiking.DataAccessInterfaces
     }
 
     // the following are used for dependency injection
-    public interface IOffRoadGateway : IPointsOfInterestGateway
-    {
-    }
 
     public interface INakebGateway : IPointsOfInterestGateway
     {

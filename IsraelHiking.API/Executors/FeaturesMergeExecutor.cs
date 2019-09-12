@@ -68,7 +68,6 @@ namespace IsraelHiking.API.Executors
         {
             AddAlternativeTitleToNatureReserves(features);
             features = MergeWikipediaToOsmByWikipediaTags(features);
-            features = MergeOffRoadKklRoutesToOsm(features);
             features = MergeByTitle(features);
             return features;
         }
@@ -360,31 +359,6 @@ namespace IsraelHiking.API.Executors
                 }
             }
             WriteToBothLoggers($"Finished joining Wikipedia markers. Merged features: {featureIdsToRemove.Count}");
-            return features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID].ToString()) == false).ToList();
-        }
-
-        private List<Feature> MergeOffRoadKklRoutesToOsm(List<Feature> features)
-        {
-            var featureIdsToRemove = new List<string>();
-            var osmKklRoutes = features.Where(f => f.Attributes.Has("operator", "kkl") && f.Attributes.Has("route", "mtb")).ToArray();
-            var offRoadRoutes = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OFFROAD)).ToList();
-            WriteToBothLoggers("Starting joining off-road-kkl routes.");
-            foreach (var osmKklRoute in osmKklRoutes)
-            {
-                var titles = osmKklRoute.GetTitles();
-                var offRoadRoutesToMerge = offRoadRoutes.Where(r =>
-                    titles.Any(t => t.Contains(r.Attributes[FeatureAttributes.NAME].ToString()) ||
-                                    r.Attributes[FeatureAttributes.NAME].ToString().Contains(t)) &&
-                    r.Geometry.Distance(osmKklRoute.Geometry) < _options.MergePointsOfInterestThreshold).ToArray();
-                foreach (var offRoadRoute in offRoadRoutesToMerge)
-                {
-                    WriteToReport(osmKklRoute, offRoadRoute);
-                    offRoadRoutes.Remove(offRoadRoute);
-                    osmKklRoute.AddIdToCombinedPoi(offRoadRoute);
-                    featureIdsToRemove.Add(offRoadRoute.Attributes[FeatureAttributes.ID].ToString());
-                }
-            }
-            WriteToBothLoggers($"Finished joining off-road-kkl routes. Merged features: {featureIdsToRemove.Count}");
             return features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID].ToString()) == false).ToList();
         }
 
