@@ -1,138 +1,158 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="il.org.osm.israelhiking" version="8.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Israel Hiking Map</name>
-    <description>An application for outdoor navigation.</description>
-    <author email="IsraelHikingMap@gmail.com" href="http://israelhiking.osm.org.il">Israel Hiking Map</author>
-    <preference name="AndroidLaunchMode" value="singleInstance" />
-    <content src="index.html" />
-    <plugin name="cordova-plugin-whitelist" spec="1" />
-    <access origin="*" />
-    <allow-intent href="http://*/*" />
-    <allow-intent href="https://*/*" />
-    <allow-intent href="tel:*" />
-    <allow-intent href="sms:*" />
-    <allow-intent href="mailto:*" />
-    <allow-intent href="geo:*" />
-    <allow-intent href="whatsapp:*" />
-    <platform name="android">
-        <allow-intent href="market:*" />
-        <preference name="android-targetSdkVersion" value="28" />
-        <preference name="android-minSdkVersion" value="28" />
-        <icon density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />
-        <icon density="mdpi" src="www/content/favicons/android-chrome-48x48.png" />
-        <icon density="hdpi" src="www/content/favicons/android-chrome-72x72.png" />
-        <icon density="xhdpi" src="www/content/favicons/android-chrome-96x96.png" />
-        <icon density="xxhdpi" src="www/content/favicons/android-chrome-144x144.png" />
-        <icon density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
-        <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission" xmlns:android="http://schemas.android.com/apk/res/android">
-          <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-        </edit-config>
-        <config-file parent="/manifest/application/activity" target="AndroidManifest.xml">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="*" android:scheme="http" />
-                <data android:host="*" android:scheme="https" />
-                <data android:host="*" android:scheme="content" />
-                <data android:mimeType="application/gpx" />
-                <data android:mimeType="application/vnd.google-earth.kml+xml" />
-                <data android:mimeType="application/vnd.google-earth.kmz" />
-                <data android:mimeType="text/xml" />
-                <data android:mimeType="text/plain" />
-                <data android:mimeType="text/gpx" />
-                <data android:mimeType="text/kml" />
-                <data android:mimeType="text/kmz" />
-                <data android:mimeType="text/kml+xml" />
-                <data android:mimeType="text/kmz+xml" />
-                <data android:mimeType="text/gpx+xml" />
-                <data android:mimeType="text/xml+kml" />
-                <data android:mimeType="text/xml+kmz" />
-                <data android:mimeType="text/xml+gpx" />
-                <data android:mimeType="application/gpx+xml" />
-                <data android:mimeType="application/kml" />
-                <data android:mimeType="application/kml+xml" />
-                <data android:mimeType="application/kmz" />
-                <data android:mimeType="application/kmz+xml" />
-                <data android:mimeType="application/octet-stream" />
-                <data android:mimeType="application/xml" />
-                <data android:mimeType="image/jpeg" />
-                <data android:mimeType="image/jpg" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/jpeg" />
-                <data android:mimeType="image/jpg" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="*" android:scheme="http" />
-                <data android:host="*" android:scheme="https" />
-                <data android:host="*" android:scheme="content" />
-                <data android:host="*" android:scheme="file" />
-                <data android:host="*" android:pathPattern=".*\.gpx" />
-                <data android:host="*" android:pathPattern=".*\..*\.gpx" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\.gpx" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.gpx" />
-                <data android:host="*" android:pathPattern=".*\.kml" />
-                <data android:host="*" android:pathPattern=".*\..*\.kml" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\.kml" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.kml" />
-                <data android:host="*" android:pathPattern=".*\.kmz" />
-                <data android:host="*" android:pathPattern=".*\..*\.kmz" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\.kmz" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.kmz" />
-                <data android:host="*" android:pathPattern=".*\.twl" />
-                <data android:host="*" android:pathPattern=".*\..*\.twl" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\.twl" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.twl" />
-                <data android:host="*" android:pathPattern=".*\.jpg" />
-                <data android:host="*" android:pathPattern=".*\..*\.jpg" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\.jpg" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.jpg" />
-                <data android:host="*" android:pathPattern=".*\.jpeg" />
-                <data android:host="*" android:pathPattern=".*\..*\.jpeg" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\.jpeg" />
-                <data android:host="*" android:pathPattern=".*\..*\..*\..*\.jpeg" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="israelhiking.osm.org.il" android:pathPattern="/share/.*" android:scheme="https" />
-                <data android:host="israelhiking.osm.org.il" android:pathPattern="/poi/.*" android:scheme="https" />
-                <data android:host="israelhiking.osm.org.il" android:pathPattern="/url/.*" android:scheme="https" />
-            </intent-filter>
-        </config-file>
-    </platform>
-    <platform name="ios">
-        <allow-intent href="itms:*" />
-        <allow-intent href="itms-apps:*" />
-        <preference name="WKSuspendInBackground" value="false" />
-        <icon height="57" src="www/content/favicons/icon.png" width="57" />
-        <icon height="114" src="www/content/favicons/icon@2x.png" width="114" />
-        <icon height="20" src="www/content/favicons/icon-20.png" width="20" />
-        <icon height="40" src="www/content/favicons/icon-20@2x.png" width="40" />
-        <icon height="40" src="www/content/favicons/icon-40.png" width="40" />
-        <icon height="80" src="www/content/favicons/icon-40@2x.png" width="80" />
-        <icon height="80" src="www/content/favicons/icon-40@3x.png" width="120" />
-        <icon height="50" src="www/content/favicons/icon-50.png" width="50" />
-        <icon height="100" src="www/content/favicons/icon-50@2x.png" width="100" />
-        <icon height="60" src="www/content/favicons/icon-60.png" width="60" />
-        <icon height="120" src="www/content/favicons/icon-60@2x.png" width="120" />
-        <icon height="180" src="www/content/favicons/icon-60@3x.png" width="180" />
-        <icon height="72" src="www/content/favicons/icon-72.png" width="72" />
-        <icon height="144" src="www/content/favicons/icon-72@2x.png" width="144" />
-        <icon height="76" src="www/content/favicons/icon-76.png" width="76" />
-        <icon height="152" src="www/content/favicons/icon-76@2x.png" width="152" />
-        <icon height="167" src="www/content/favicons/icon-83.5@2x.png" width="167" />
-        <icon height="29" src="www/content/favicons/icon-small.png" width="29" />
-        <icon height="58" src="www/content/favicons/icon-small@2x.png" width="58" />
-        <icon height="87" src="www/content/favicons/icon-small@3x.png" width="87" />
-    </platform>
+  <name>Israel Hiking Map</name>
+  <description>An application for outdoor navigation.</description>
+  <author email="IsraelHikingMap@gmail.com" href="http://israelhiking.osm.org.il">Israel Hiking Map</author>
+  <preference name="AndroidLaunchMode" value="singleInstance" />
+  <content src="index.html" />
+  <plugin name="cordova-plugin-whitelist" spec="1" />
+  <access origin="*" />
+  <allow-intent href="http://*/*" />
+  <allow-intent href="https://*/*" />
+  <allow-intent href="tel:*" />
+  <allow-intent href="sms:*" />
+  <allow-intent href="mailto:*" />
+  <allow-intent href="geo:*" />
+  <allow-intent href="whatsapp:*" />
+  <platform name="android">
+    <allow-intent href="market:*" />
+    <preference name="android-targetSdkVersion" value="28" />
+    <preference name="android-minSdkVersion" value="28" />
+    <icon density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />
+    <icon density="mdpi" src="www/content/favicons/android-chrome-48x48.png" />
+    <icon density="hdpi" src="www/content/favicons/android-chrome-72x72.png" />
+    <icon density="xhdpi" src="www/content/favicons/android-chrome-96x96.png" />
+    <icon density="xxhdpi" src="www/content/favicons/android-chrome-144x144.png" />
+    <icon density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
+    <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission" xmlns:android="http://schemas.android.com/apk/res/android">
+      <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    </edit-config>
+    <config-file parent="/manifest/application/activity" target="AndroidManifest.xml">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:host="*" android:scheme="http" />
+        <data android:host="*" android:scheme="https" />
+        <data android:host="*" android:scheme="content" />
+        <data android:mimeType="application/gpx" />
+        <data android:mimeType="application/vnd.google-earth.kml+xml" />
+        <data android:mimeType="application/vnd.google-earth.kmz" />
+        <data android:mimeType="text/xml" />
+        <data android:mimeType="text/plain" />
+        <data android:mimeType="text/gpx" />
+        <data android:mimeType="text/kml" />
+        <data android:mimeType="text/kmz" />
+        <data android:mimeType="text/kml+xml" />
+        <data android:mimeType="text/kmz+xml" />
+        <data android:mimeType="text/gpx+xml" />
+        <data android:mimeType="text/xml+kml" />
+        <data android:mimeType="text/xml+kmz" />
+        <data android:mimeType="text/xml+gpx" />
+        <data android:mimeType="application/gpx+xml" />
+        <data android:mimeType="application/kml" />
+        <data android:mimeType="application/kml+xml" />
+        <data android:mimeType="application/kmz" />
+        <data android:mimeType="application/kmz+xml" />
+        <data android:mimeType="application/octet-stream" />
+        <data android:mimeType="application/xml" />
+        <data android:mimeType="image/jpeg" />
+        <data android:mimeType="image/jpg" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.SEND" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="image/jpeg" />
+        <data android:mimeType="image/jpg" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:host="*" android:scheme="http" />
+        <data android:host="*" android:scheme="https" />
+        <data android:host="*" android:scheme="content" />
+        <data android:host="*" android:scheme="file" />
+        <data android:host="*" android:pathPattern=".*\.gpx" />
+        <data android:host="*" android:pathPattern=".*\..*\.gpx" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\.gpx" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\..*\.gpx" />
+        <data android:host="*" android:pathPattern=".*\.kml" />
+        <data android:host="*" android:pathPattern=".*\..*\.kml" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\.kml" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\..*\.kml" />
+        <data android:host="*" android:pathPattern=".*\.kmz" />
+        <data android:host="*" android:pathPattern=".*\..*\.kmz" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\.kmz" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\..*\.kmz" />
+        <data android:host="*" android:pathPattern=".*\.twl" />
+        <data android:host="*" android:pathPattern=".*\..*\.twl" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\.twl" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\..*\.twl" />
+        <data android:host="*" android:pathPattern=".*\.jpg" />
+        <data android:host="*" android:pathPattern=".*\..*\.jpg" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\.jpg" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\..*\.jpg" />
+        <data android:host="*" android:pathPattern=".*\.jpeg" />
+        <data android:host="*" android:pathPattern=".*\..*\.jpeg" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\.jpeg" />
+        <data android:host="*" android:pathPattern=".*\..*\..*\..*\.jpeg" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:host="israelhiking.osm.org.il" android:pathPattern="/share/.*" android:scheme="https" />
+        <data android:host="israelhiking.osm.org.il" android:pathPattern="/poi/.*" android:scheme="https" />
+        <data android:host="israelhiking.osm.org.il" android:pathPattern="/url/.*" android:scheme="https" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:host="maps.google.com" android:scheme="http"/>
+        <data android:host="maps.google.com" android:scheme="https" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:host="www.google.com" android:pathPattern="/maps/place/.*" android:scheme="http" />
+        <data android:host="www.google.com" android:pathPattern="/maps/place/.*" android:scheme="https"/>
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="geo"/>
+      </intent-filter>
+    </config-file>
+  </platform>
+  <platform name="ios">
+    <allow-intent href="itms:*" />
+    <allow-intent href="itms-apps:*" />
+    <preference name="WKSuspendInBackground" value="false" />
+    <icon height="57" src="www/content/favicons/icon.png" width="57" />
+    <icon height="114" src="www/content/favicons/icon@2x.png" width="114" />
+    <icon height="20" src="www/content/favicons/icon-20.png" width="20" />
+    <icon height="40" src="www/content/favicons/icon-20@2x.png" width="40" />
+    <icon height="40" src="www/content/favicons/icon-40.png" width="40" />
+    <icon height="80" src="www/content/favicons/icon-40@2x.png" width="80" />
+    <icon height="80" src="www/content/favicons/icon-40@3x.png" width="120" />
+    <icon height="50" src="www/content/favicons/icon-50.png" width="50" />
+    <icon height="100" src="www/content/favicons/icon-50@2x.png" width="100" />
+    <icon height="60" src="www/content/favicons/icon-60.png" width="60" />
+    <icon height="120" src="www/content/favicons/icon-60@2x.png" width="120" />
+    <icon height="180" src="www/content/favicons/icon-60@3x.png" width="180" />
+    <icon height="72" src="www/content/favicons/icon-72.png" width="72" />
+    <icon height="144" src="www/content/favicons/icon-72@2x.png" width="144" />
+    <icon height="76" src="www/content/favicons/icon-76.png" width="76" />
+    <icon height="152" src="www/content/favicons/icon-76@2x.png" width="152" />
+    <icon height="167" src="www/content/favicons/icon-83.5@2x.png" width="167" />
+    <icon height="29" src="www/content/favicons/icon-small.png" width="29" />
+    <icon height="58" src="www/content/favicons/icon-small@2x.png" width="58" />
+    <icon height="87" src="www/content/favicons/icon-small@3x.png" width="87" />
+  </platform>
   <plugin name="cordova-plugin-mauron85-background-geolocation" spec="@mauron85/cordova-plugin-background-geolocation@~3.0.6">
     <variable name="GOOGLE_PLAY_SERVICES_VERSION" value="11+" />
     <variable name="ANDROID_SUPPORT_LIBRARY_VERSION" value="26+" />
@@ -141,5 +161,5 @@
     <variable name="ALWAYS_USAGE_DESCRIPTION" value="App requires background tracking " />
     <variable name="MOTION_USAGE_DESCRIPTION" value="App requires motion detection" />
   </plugin>
-    <engine name="ios" spec="^4.5.5" />
+  <engine name="ios" spec="^4.5.5" />
 </widget>

@@ -63,7 +63,31 @@ export class OpenWithService {
             this.router.navigateByUrl(item.uri.replace(regexpToUse, ""));
             return;
         }
+        if (item.uri.indexOf("maps?q=") !== -1) {
+            console.log("maps:" + decodeURIComponent(item.uri));
+            let coordsRegExp = /q=(\d+\.\d+),(\d+\.\d+)&z=/;
+            let coords = coordsRegExp.exec(decodeURIComponent(item.uri));
+            this.moveToCoordinates(coords);
+            return;
+        }
+        if (item.uri.indexOf("maps/place") !== -1) {
+            let coordsRegExp = /\@(\d+\.\d+),(\d+\.\d+),/;
+            let coords = coordsRegExp.exec(item.uri);
+            this.moveToCoordinates(coords);
+            return;
+        }
+        if (item.uri.indexOf("geo:") !== -1) {
+            let coordsRegExp = /:(\d+\.\d+),(\d+\.\d+)/;
+            let coords = coordsRegExp.exec(item.uri);
+            this.moveToCoordinates(coords);
+            return;
+        }
         this.router.navigate([RouteStrings.ROUTE_URL, item.uri]);
+    }
+
+    private moveToCoordinates(coords: string[]) {
+        this.router.navigate([RouteStrings.ROUTE_POI, "Coordinates", `${(+coords[1]).toFixed(4)}_${(+coords[2]).toFixed(4)}`],
+            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
 
     private async handleFile(data: string, item: Item) {
