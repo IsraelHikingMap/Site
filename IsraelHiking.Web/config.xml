@@ -24,6 +24,9 @@
         <icon density="xhdpi" src="www/content/favicons/android-chrome-96x96.png" />
         <icon density="xxhdpi" src="www/content/favicons/android-chrome-144x144.png" />
         <icon density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
+        <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission" xmlns:android="http://schemas.android.com/apk/res/android">
+          <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+        </edit-config>
         <config-file parent="/manifest/application/activity" target="AndroidManifest.xml">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -129,31 +132,14 @@
         <icon height="29" src="www/content/favicons/icon-small.png" width="29" />
         <icon height="58" src="www/content/favicons/icon-small@2x.png" width="58" />
         <icon height="87" src="www/content/favicons/icon-small@3x.png" width="87" />
-        <config-file parent="NSLocationAlwaysAndWhenInUseUsageDescription" target="*-Info.plist">
-            <string>Background location tracking is required for our app so you can record your outdoor activity for sharing and personal use</string>
-        </config-file>
-        <config-file parent="NSLocationAlwaysUsageDescription" target="*-Info.plist">
-            <string>Background location tracking is required for our app so you can record your outdoor activity for sharing and personal use</string>
-        </config-file>
-        <config-file parent="NSLocationWhenInUseUsageDescription" target="*-Info.plist">
-            <string>Background location tracking is required for our app so you can record your outdoor activity for sharing and personal use</string>
-        </config-file>
-        <config-file parent="NSMotionUsageDescription" target="*-Info.plist">
-            <string>Device motion updates help determine when the device is stationary so the app can save power by turning off location-updates</string>
-        </config-file>
     </platform>
-    <plugin name="cordova-plugin-inappbrowser" spec="^3.0.0" />
-    <plugin name="cordova-plugin-file" spec="^6.0.1" />
-    <plugin name="cordova-plugin-camera" spec="~4.0.3" />
-    <plugin name="cordova-plugin-insomnia" spec="^4.3.0" />
-    <plugin name="cc.fovea.cordova.openwith" spec="^1.2.0">
-        <variable name="ANDROID_MIME_TYPE" value="application/gpx" />
-        <variable name="IOS_URL_SCHEME" value="israelhikingmap" />
-        <variable name="IOS_UNIFORM_TYPE_IDENTIFIER" value="public.data" />
-        <variable name="ANDROID_EXTRA_ACTIONS" value=" " />
-    </plugin>
-    <plugin name="cordova-plugin-device" spec="~2.0.2" />
-    <plugin name="cordova-plugin-ionic-webview" spec="^4.1.0" />
+  <plugin name="cordova-plugin-mauron85-background-geolocation" spec="@mauron85/cordova-plugin-background-geolocation@~3.0.6">
+    <variable name="GOOGLE_PLAY_SERVICES_VERSION" value="11+" />
+    <variable name="ANDROID_SUPPORT_LIBRARY_VERSION" value="26+" />
+    <variable name="ICON" value="@mipmap/ic_launcher" />
+    <variable name="SMALL_ICON" value="@mipmap/ic_launcher" />
+    <variable name="ALWAYS_USAGE_DESCRIPTION" value="App requires background tracking " />
+    <variable name="MOTION_USAGE_DESCRIPTION" value="App requires motion detection" />
+  </plugin>
     <engine name="ios" spec="^4.5.5" />
-    <engine name="android" spec="^7.1.4" />
 </widget>

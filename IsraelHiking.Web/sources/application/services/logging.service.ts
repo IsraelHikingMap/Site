@@ -70,29 +70,27 @@ export class LoggingService {
     }
 
     public debug(message: string) {
-        if (this.runningContextService.isProduction) {
-            return;
-        }
         let logLine = {
             date: new Date(),
             level: "debug",
             message
         } as LogLine;
-        // tslint:disable-next-line
-        console.debug(this.logLineToString(logLine));
+        if (!this.runningContextService.isProduction) {
+            // tslint:disable-next-line
+            console.debug(this.logLineToString(logLine));
+        }
         this.writeToStorage(logLine);
     }
 
     public error(message: string) {
-        if (this.runningContextService.isProduction) {
-            return;
-        }
         let logLine = {
             date: new Date(),
             level: "error",
             message
         } as LogLine;
-        console.error(this.logLineToString(logLine));
+        if (!this.runningContextService.isProduction) {
+            console.error(this.logLineToString(logLine));
+        }
         this.writeToStorage(logLine);
     }
 

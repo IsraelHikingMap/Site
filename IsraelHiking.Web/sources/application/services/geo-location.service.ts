@@ -118,7 +118,6 @@ export class GeoLocationService {
             distanceFilter: 5,
             notificationTitle: this.resources.israelHikingMap,
             notificationText: this.resources.runningInBackground,
-            debug: false,
             interval: 1000,
             fastestInterval: 1000,
             activitiesInterval: 10000,
@@ -165,13 +164,13 @@ export class GeoLocationService {
         BackgroundGeolocation.on("background",
             () => {
                 this.isBackground = true;
-                this.loggingService.debug("geo-location now in background");
+                this.loggingService.debug("Geo-location now in background");
             });
 
         BackgroundGeolocation.on("foreground",
             () => {
                 this.isBackground = false;
-                this.loggingService.debug("geo-location now in foreground");
+                this.loggingService.debug("Geo-location now in foreground");
             });
         BackgroundGeolocation.start();
     }
