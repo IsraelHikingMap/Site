@@ -294,6 +294,7 @@ export class ResourcesService {
     public areYouSureYouWantToDeleteAllRoutes: string;
     public clickBackAgainToCloseTheApp: string;
     public wrappingThingsUp: string;
+    public unableToDeleteShare: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -494,7 +495,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1567619189564");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1568485828930");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -778,6 +779,7 @@ export class ResourcesService {
         this.areYouSureYouWantToDeleteAllRoutes = this.gettextCatalog.getString("Are you sure you want to delete all routes?");
         this.clickBackAgainToCloseTheApp = this.gettextCatalog.getString("Click back again to close the app");
         this.wrappingThingsUp = this.gettextCatalog.getString("Wrapping things up, please wait a few seconds...");
+        this.unableToDeleteShare = this.gettextCatalog.getString("Unable to delete the share...");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

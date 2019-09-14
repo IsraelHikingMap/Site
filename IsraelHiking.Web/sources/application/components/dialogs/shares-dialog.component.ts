@@ -87,7 +87,15 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
         let message = `${this.resources.deletionOf} ${displayName}, ${this.resources.areYouSure}`;
         this.toastService.confirm({
             message,
-            confirmAction: () => this.shareUrlsService.deleteShareUrl(shareUrl),
+            confirmAction: async () => {
+                try {
+                    await this.shareUrlsService.deleteShareUrl(shareUrl);
+                    this.updateFilteredLists(this.searchTerm.value);
+                } catch (ex) {
+                    this.toastService.error(this.resources.unableToDeleteShare);
+                }
+                
+            },
             type: "YesNo"
         });
     }
