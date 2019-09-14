@@ -1,8 +1,10 @@
-import { Component } from "@angular/core";
+/// <reference types="cordova" />
+/// <reference types="cordova-plugin-email-composer" />
+import { Component, OnDestroy } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material";
 import { select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
-import { Observable } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../services/resources.service";
@@ -27,12 +29,15 @@ interface IRank {
     templateUrl: "./osm-user.component.html",
     styleUrls: ["./osm-user.component.scss"]
 })
-export class OsmUserComponent extends BaseMapComponent {
+export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
 
     private ranks: IRank[];
+    private subscription: Subscription;
+
+    public userInfo: UserInfo;
 
     @select((state: ApplicationState) => state.userState.userInfo)
-    public userInfo: Observable<UserInfo>;
+    public userInfo$: Observable<UserInfo>;
 
     @select((state: ApplicationState) => state.configuration.isAdvanced)
     public isAdvanced: Observable<boolean>;
@@ -50,6 +55,11 @@ export class OsmUserComponent extends BaseMapComponent {
         super(resources);
         this.initializeRanks();
         resources.languageChanged.subscribe(() => this.initializeRanks());
+        this.subscription = this.userInfo$.subscribe(userInfo => this.userInfo = userInfo);
+    }
+
+    public ngOnDestroy(): void {
+        this.subscription.unsubscribe();
     }
 
     private initializeRanks() {
@@ -134,8 +144,17 @@ export class OsmUserComponent extends BaseMapComponent {
         return this.runningContextService.isCordova;
     }
 
-    public reportAnIssue() {
-        this.loggingService.emailLog();
+    public async reportAnIssue() {
+        if (!this.runningContextService.isCordova) {
+            return;
+        }
+        let logs = await this.loggingService.getLog();
+        cordova.plugins.email.open({
+            to: ["israelhikingmap@gmail.com"],
+            subject: "Issue reported by " + this.userInfo.displayName,
+            body: this.resources.reportAnIssueInstructions,
+            attachments: ["base64:log.txt//" + btoa(logs)]
+        });
     }
 
     public toggleIsAdvanced() {

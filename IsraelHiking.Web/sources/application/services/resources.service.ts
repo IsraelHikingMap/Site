@@ -249,6 +249,7 @@ export class ResourcesService {
     public duration: string;
     public kmPerHourUnit: string;
     public reportAnIssue: string;
+    public reportAnIssueInstructions: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -495,7 +496,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1568485828930");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1568487945938");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -724,6 +725,7 @@ export class ResourcesService {
         this.duration = this.gettextCatalog.getString("Duration");
         this.kmPerHourUnit = this.gettextCatalog.getString("km per hour");
         this.reportAnIssue = this.gettextCatalog.getString("Report an issue");
+        this.reportAnIssueInstructions = this.gettextCatalog.getString("Report an issue instructions");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

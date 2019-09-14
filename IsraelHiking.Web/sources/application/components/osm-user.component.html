@@ -16,9 +16,9 @@
         <div class="pull-right">
             <div class="control-container-item gutters cursor-pointer" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.myProfile}}">
                 <div class="table-cell button-height">
-                    <img *ngIf="(userInfo | async).imageUrl" class="pull-right space-after" [src]="(userInfo | async).imageUrl" alt="" width="16" height="16" />
-                    <span class="pull-right space-after" *ngIf="!(userInfo | async).imageUrl"><i class="fa icon-user fa-lg"></i> </span>
-                    <span class="pull-right hidden-xs"> {{(userInfo | async).displayName}}</span>
+                    <img *ngIf="userInfo.imageUrl" class="pull-right space-after" [src]="userInfo.imageUrl" alt="" width="16" height="16" />
+                    <span class="pull-right space-after" *ngIf="!userInfo.imageUrl"><i class="fa icon-user fa-lg"></i> </span>
+                    <span class="pull-right hidden-xs"> {{userInfo.displayName}}</span>
                 </div>
             </div>
         </div>
@@ -27,9 +27,9 @@
                 <div [dir]="resources.direction">
                     <div fxLayout="row" class="margin-sides">
                         <div class="table">
-                            <img *ngIf="(userInfo | async).imageUrl" class="pull-right space-after" [src]="(userInfo | async).imageUrl" alt="" width="64" height="64" />
+                            <img *ngIf="userInfo.imageUrl" class="pull-right space-after" [src]="userInfo.imageUrl" alt="" width="64" height="64" />
                             <div class="table-cell">
-                                <span class="text-large">{{(userInfo | async).displayName}}</span><br />
+                                <span class="text-large">{{userInfo.displayName}}</span><br />
                                 {{getRank().name}}
                             </div>
                         </div>
@@ -38,7 +38,7 @@
                         <mat-progress-bar [color]="getProgressbarType()" [mode]="'determinate'" [value]="getRankPercentage()"></mat-progress-bar>
                     </div>
                     <div fxLayout="row" class="margin-sides">
-                        <span class="text-small">{{(userInfo | async).changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</span>
+                        <span class="text-small">{{userInfo.changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</span>
                     </div>
                     <button mat-menu-item (click)="openTraces()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user traces open">
                         <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>

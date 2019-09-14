@@ -1,5 +1,3 @@
-/// <reference types="cordova" />
-/// <reference types="cordova-plugin-email-composer" />
 import { Injectable } from "@angular/core";
 import Dexie from "dexie";
 
@@ -112,16 +110,9 @@ export class LoggingService {
         this.loggingDatabase = null;
     }
 
-    public async emailLog() {
-        let logLine = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).toArray();
-        let body = logLine.map(l => this.logLineToString(l)).join("\n");
-        if (this.runningContextService.isCordova) {
-            cordova.plugins.email.open({
-                to: ["israelhikingmap@gmail.com"],
-                subject: "Issue reported by user",
-                body
-            });
-        }
+    public async getLog(): Promise<string> {
+        let logLines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).toArray();
+        return logLines.map(l => this.logLineToString(l)).join("\n");
     }
 
     private logLineToString(logLine: LogLine) {
