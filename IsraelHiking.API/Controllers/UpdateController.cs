@@ -23,21 +23,21 @@ namespace IsraelHiking.API.Controllers
 
         private readonly ILogger _logger;
         private readonly IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
-        private readonly IElasticSearchUpdaterService _elasticSearchUpdaterService;
+        private readonly IDatabasesUpdaterService _databasesUpdaterService;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="osmLatestFileFetcherExecutor"></param>
-        /// <param name="elasticSearchUpdaterService"></param>
+        /// <param name="databasesUpdaterService"></param>
         /// <param name="logger"></param>
         public UpdateController(
             IOsmLatestFileFetcherExecutor osmLatestFileFetcherExecutor,
-            IElasticSearchUpdaterService elasticSearchUpdaterService,
+            IDatabasesUpdaterService databasesUpdaterService,
             ILogger logger)
         {
             _osmLatestFileFetcherExecutor = osmLatestFileFetcherExecutor;
-            _elasticSearchUpdaterService = elasticSearchUpdaterService;
+            _databasesUpdaterService = databasesUpdaterService;
             _logger = logger;
             
         }
@@ -67,14 +67,16 @@ namespace IsraelHiking.API.Controllers
                     request.Routing == false &&
                     request.Highways == false &&
                     request.PointsOfInterest == false &&
-                    request.OsmFile == false)
+                    request.OsmFile == false &&
+                    request.SiteMap == false)
                 {
                     request = new UpdateRequest
                     {
                         Routing = true,
                         Highways = true,
                         PointsOfInterest = true,
-                        OsmFile = true
+                        OsmFile = true,
+                        SiteMap = true
                     };
                     _logger.LogInformation("No specific filters were applied, updating all databases.");
                 }
@@ -82,7 +84,7 @@ namespace IsraelHiking.API.Controllers
                 await _osmLatestFileFetcherExecutor.Update(request.OsmFile);
                 _logger.LogInformation("Update OSM file completed.");
 
-                await _elasticSearchUpdaterService.Rebuild(request);
+                await _databasesUpdaterService.Rebuild(request);
                 _logger.LogInformation("Finished updating site's databases according to request");
                 return Ok();
             }
@@ -119,7 +121,7 @@ namespace IsraelHiking.API.Controllers
                 {
                     XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
                     var changes = (OsmChange) serializer.Deserialize(updatesStream);
-                    await _elasticSearchUpdaterService.Update(changes);
+                    await _databasesUpdaterService.Update(changes);
                 }
                 _logger.LogInformation("Finished incremental site's databases update");
                 return Ok();

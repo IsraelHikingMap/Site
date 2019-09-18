@@ -41,6 +41,7 @@ namespace IsraelHiking.API
             services.AddTransient<ITagsHelper, TagsHelper>();
             services.AddTransient<IPointsOfInterestProvider, OsmPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAggregatorService, PointsOfInterestAggregatorService>();
+            services.AddTransient<IPointsOfInterestFilesCreatorExecutor, PointsOfInterestFilesCreatorExecutor>();
 
             // registration here is what determines the order of which to merge points:
             services.AddTransient<IPointsOfInterestAdapter, OsmPointsOfInterestAdapter>();
@@ -52,7 +53,7 @@ namespace IsraelHiking.API
             // last one is the least important
 
             services.AddSingleton<IItmWgs84MathTransfromFactory, ItmWgs84MathTransfromFactory>();
-            services.AddTransient<IElasticSearchUpdaterService, ElasticSearchUpdaterService>();
+            services.AddTransient<IDatabasesUpdaterService, DatabasesUpdaterService>();
             services.AddTransient<IBase64ImageStringToFileConverter, Base64ImageStringToFileConverter>();
             services.AddTransient<IConverterFlowItem, GeoJsonGpxConverterFlow>();
             services.AddTransient<IConverterFlowItem, GpxGeoJsonConverterFlow>();

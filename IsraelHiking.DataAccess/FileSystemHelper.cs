@@ -45,7 +45,7 @@ namespace IsraelHiking.DataAccess
 
         public Stream CreateWriteStream(string filePath)
         {
-            return File.OpenWrite(filePath);
+            return File.Create(filePath);
         }
     }
 }

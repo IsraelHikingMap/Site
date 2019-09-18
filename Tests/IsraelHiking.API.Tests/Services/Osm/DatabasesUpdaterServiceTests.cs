@@ -22,9 +22,9 @@ using OsmSharp.Tags;
 namespace IsraelHiking.API.Tests.Services.Osm
 {
     [TestClass]
-    public class OsmElasticSearchUpdaterServiceTests
+    public class DatabasesUpdaterServiceTests
     {
-        private IElasticSearchUpdaterService _service;
+        private IDatabasesUpdaterService _service;
         private IHttpGatewayFactory _httpGatewayFactory;
         private IOsmGateway _osmGateway;
         private IOsmRepository _osmRepository;
@@ -33,6 +33,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         private IFeaturesMergeExecutor _featuresMergeExecutor;
         private IGraphHopperGateway _graphHopperGateway;
         private IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
+        private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
 
         [TestInitialize]
         public void TestInitialize()
@@ -49,16 +50,28 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _featuresMergeExecutor = Substitute.For<IFeaturesMergeExecutor>();
             _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
             _osmLatestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
-            _service = new ElasticSearchUpdaterService(_httpGatewayFactory, _elasticSearchGateway, _geoJsonPreprocessorExecutor, new TagsHelper(optionsProvider), _osmRepository, Substitute.For<IPointsOfInterestAdapterFactory>(), _featuresMergeExecutor, _osmLatestFileFetcherExecutor, _graphHopperGateway, Substitute.For<ILogger>());
+            _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
+            _service = new DatabasesUpdaterService(_httpGatewayFactory, 
+                _elasticSearchGateway, 
+                _geoJsonPreprocessorExecutor, 
+                new TagsHelper(optionsProvider), 
+                _osmRepository, 
+                Substitute.For<IPointsOfInterestAdapterFactory>(), 
+                _featuresMergeExecutor, 
+                _osmLatestFileFetcherExecutor, 
+                _graphHopperGateway,
+                _pointsOfInterestFilesCreatorExecutor,
+                Substitute.For<ILogger>());
         }
 
         [TestMethod]
         public void TestRebuild_ShouldRebuildHighwaysAndPoints()
         {
-            _service.Rebuild(new UpdateRequest { Highways = true, PointsOfInterest = true }).Wait();
+            _service.Rebuild(new UpdateRequest { Highways = true, PointsOfInterest = true, SiteMap = true }).Wait();
 
             _elasticSearchGateway.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
             _elasticSearchGateway.Received(1).UpdatePointsOfInterestZeroDownTime(Arg.Any<List<Feature>>());
+            _pointsOfInterestFilesCreatorExecutor.Received(1).Create(Arg.Any<List<Feature>>());
         }
 
         [TestMethod]

@@ -15,7 +15,7 @@ using OsmSharp.Complete;
 namespace IsraelHiking.API.Services.Osm
 {
     /// <inheritdoc />
-    public class ElasticSearchUpdaterService : IElasticSearchUpdaterService
+    public class DatabasesUpdaterService : IDatabasesUpdaterService
     {
         private readonly IOsmGateway _osmGateway;
         private readonly IElasticSearchGateway _elasticSearchGateway;
@@ -26,6 +26,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IFeaturesMergeExecutor _featuresMergeExecutor;
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private readonly IGraphHopperGateway _graphHopperGateway;
+        private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -40,15 +41,17 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="featuresMergeExecutor"></param>
         /// <param name="latestFileFetcherExecutor"></param>
         /// <param name="graphHopperGateway"></param>
+        /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
         /// <param name="logger"></param>
-        public ElasticSearchUpdaterService(IHttpGatewayFactory factory, 
-            IElasticSearchGateway elasticSearchGateway, 
-            IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
+        public DatabasesUpdaterService(IHttpGatewayFactory factory,
+            IElasticSearchGateway elasticSearchGateway,
+            IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             ITagsHelper tagsHelper, IOsmRepository osmRepository,
             IPointsOfInterestAdapterFactory pointsOfInterestAdapterFactory,
             IFeaturesMergeExecutor featuresMergeExecutor,
             IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
             IGraphHopperGateway graphHopperGateway,
+            IPointsOfInterestFilesCreatorExecutor pointsOfInterestFilesCreatorExecutor,
             ILogger logger)
         {
             _elasticSearchGateway = elasticSearchGateway;
@@ -56,11 +59,12 @@ namespace IsraelHiking.API.Services.Osm
             _tagsHelper = tagsHelper;
             _osmRepository = osmRepository;
             _pointsOfInterestAdapterFactory = pointsOfInterestAdapterFactory;
-            _logger = logger;
+            _pointsOfInterestFilesCreatorExecutor = pointsOfInterestFilesCreatorExecutor;
             _featuresMergeExecutor = featuresMergeExecutor;
             _latestFileFetcherExecutor = latestFileFetcherExecutor;
             _graphHopperGateway = graphHopperGateway;
             _osmGateway = factory.CreateOsmGateway(new TokenAndSecret("", ""));
+            _logger = logger;
         }
 
         /// <inheritdoc />
@@ -130,7 +134,7 @@ namespace IsraelHiking.API.Services.Osm
 
                 foreach (var attributeKey in featureFromDb.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_PREFIX)))
                 {
-                    featureToUpdate.Attributes.AddOrUpdate(attributeKey, featureFromDb.Attributes[attributeKey]);   
+                    featureToUpdate.Attributes.AddOrUpdate(attributeKey, featureFromDb.Attributes[attributeKey]);
                 }
             }
             await _elasticSearchGateway.UpdatePointsOfInterestData(features);
@@ -148,7 +152,7 @@ namespace IsraelHiking.API.Services.Osm
             if (request.Routing)
             {
                 rebuildRoutingTask = RebuildRouting();
-            } 
+            }
             if (request.Highways)
             {
                 await RebuildHighways();
@@ -156,6 +160,10 @@ namespace IsraelHiking.API.Services.Osm
             if (request.PointsOfInterest)
             {
                 await RebuildPointsOfInterest();
+            }
+            if (request.SiteMap)
+            {
+                await RebuildSiteMap();
             }
             await rebuildRoutingTask;
         }
@@ -194,6 +202,14 @@ namespace IsraelHiking.API.Services.Osm
             }
 
             _logger.LogInformation("Finished rebuilding highways database.");
+        }
+
+        private async Task RebuildSiteMap()
+        {
+            _logger.LogInformation("Starting rebuilding sitemap.");
+            var features = await _elasticSearchGateway.GetAllPointsOfInterest();
+            _pointsOfInterestFilesCreatorExecutor.Create(features);
+            _logger.LogInformation("Finished rebuilding sitemap.");
         }
     }
 }

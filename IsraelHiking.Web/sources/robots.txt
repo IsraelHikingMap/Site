@@ -6,3 +6,6 @@ Disallow: /share
 Disallow: /search
 Disallow: /map
 Disallow: /url
+
+# Sitemap files
+Sitemap: https://israelhiking.osm.org.il/sitemap.xml

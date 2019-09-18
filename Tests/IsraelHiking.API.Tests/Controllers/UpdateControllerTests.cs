@@ -21,15 +21,15 @@ namespace IsraelHiking.API.Tests.Controllers
     {
         private UpdateController _controller;
         private IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
-        private IElasticSearchUpdaterService _elasticSearchUpdaterService;
+        private IDatabasesUpdaterService _databasesUpdaterService;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _osmLatestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
             var logger = Substitute.For<ILogger>();
-            _elasticSearchUpdaterService = Substitute.For<IElasticSearchUpdaterService>();
-            _controller = new UpdateController(_osmLatestFileFetcherExecutor, _elasticSearchUpdaterService, logger);
+            _databasesUpdaterService = Substitute.For<IDatabasesUpdaterService>();
+            _controller = new UpdateController(_osmLatestFileFetcherExecutor, _databasesUpdaterService, logger);
         }
 
         private void SetupContext(IPAddress localIp, IPAddress remoteIp)
@@ -65,7 +65,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             _controller.PostUpdateData(null).Wait();
 
-            _elasticSearchUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>());
+            _databasesUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>());
             
         }
 
@@ -77,7 +77,7 @@ namespace IsraelHiking.API.Tests.Controllers
             
             _controller.PostUpdateData(new UpdateRequest()).Wait();
 
-            _elasticSearchUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>());
+            _databasesUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>());
         }
 
         [TestMethod]
@@ -99,7 +99,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             _controller.PutUpdateData().Wait();
 
-            _elasticSearchUpdaterService.Received(1).Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
+            _databasesUpdaterService.Received(1).Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
         }
 
         [TestMethod]
@@ -113,7 +113,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.PutUpdateData().ContinueWith((t) => { });
             _controller.PutUpdateData().Wait();
 
-            _elasticSearchUpdaterService.Received(2).Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
+            _databasesUpdaterService.Received(2).Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
         }
 
         [TestMethod]
@@ -127,7 +127,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.PostUpdateData(new UpdateRequest()).ContinueWith((t) => { });
             var results = _controller.PutUpdateData().Result as BadRequestObjectResult;
 
-            _elasticSearchUpdaterService.DidNotReceive().Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
+            _databasesUpdaterService.DidNotReceive().Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
             Assert.IsNotNull(results);
         }
 

@@ -328,6 +328,26 @@ namespace IsraelHiking.DataAccess
             return response.Documents.ToList();
         }
 
+        public async Task<List<Feature>> GetAllPointsOfInterest()
+        {
+            var list = new List<Feature>();
+            var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
+            var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
+                    .Size(10000)
+                    .Scroll("10s")
+                    .Query(q => q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories))
+                    ));
+            list.AddRange(response.Documents.ToList());
+            var results = _elasticClient.Scroll<Feature>("10s", response.ScrollId);
+            list.AddRange(results.Documents.ToList());
+            while (results.Documents.Any())
+            {
+                results = _elasticClient.Scroll<Feature>("10s", results.ScrollId);
+                list.AddRange(results.Documents.ToList());
+            }
+            return list;
+        }
+
         private GeoBoundingBoxQueryDescriptor<Feature> ConvertToGeoBoundingBox(GeoBoundingBoxQueryDescriptor<Feature> b,
             Coordinate northEast, Coordinate southWest)
         {

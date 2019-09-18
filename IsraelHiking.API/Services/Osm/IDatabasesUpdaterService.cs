@@ -8,7 +8,7 @@ namespace IsraelHiking.API.Services.Osm
     /// <summary>
     /// This service is responsible for updating the database with change made in OSM
     /// </summary>
-    public interface IElasticSearchUpdaterService
+    public interface IDatabasesUpdaterService
     {
         /// <summary>
         /// This method is responsible of taking the changes, converting them and updating the database,
