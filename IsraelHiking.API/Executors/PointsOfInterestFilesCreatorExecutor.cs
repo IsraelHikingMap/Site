@@ -35,12 +35,12 @@ namespace IsraelHiking.API.Executors
             {
                 var list = features.Select(p =>
                 {
-                    var dateString = DateTime.Now.ToString("o");
+                    var dateString = DateTime.Now.ToUniversalTime().ToString("o");
                     if (p.Attributes.Exists(FeatureAttributes.POI_LAST_MODIFIED))
                     {
                         if (p.Attributes[FeatureAttributes.POI_LAST_MODIFIED] is DateTime dateTime)
                         {
-                            dateString = dateTime.ToString("o");
+                            dateString = dateTime.ToUniversalTime().ToString("o");
                         }
                         else
                         {
