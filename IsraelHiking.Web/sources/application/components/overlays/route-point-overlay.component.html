@@ -11,7 +11,7 @@
         </div>
         <div fxFlex>
             <button mat-button *ngIf="isMiddle" (click)="split()" matTooltip="{{resources.split}}" matTooltipPosition="above" fxFill><i class="fa icon-cut"></i></button>
-            <button mat-button *ngIf="!isMiddle" [disabled]="!canMerge" (click)="merge()" matTooltip="{{resources.merge}}" matTooltipPosition="above" fxFill><i class="fa icon-plus"></i></button>
+            <button mat-button *ngIf="!isMiddle" [disabled]="!canMerge" (click)="merge()" matTooltip="{{resources.merge}}" matTooltipPosition="above" fxFill><i class="fa icon-merge"></i></button>
         </div>
     </div>
     <div *ngIf="!hideCoordinates">
