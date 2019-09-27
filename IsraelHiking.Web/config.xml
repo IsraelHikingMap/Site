@@ -132,6 +132,8 @@
     <allow-intent href="itms:*" />
     <allow-intent href="itms-apps:*" />
     <preference name="WKSuspendInBackground" value="false" />
+    <preference name="StatusBarOverlaysWebView" value="false" />
+    <preference name="StatusBarBackgroundColor" value="#0a42bb" />
     <icon src="www/content/favicons/icon.png" height="57" width="57" />
     <icon src="www/content/favicons/icon@2x.png" height="114" width="114" />
     <icon src="www/content/favicons/icon-20.png" height="20" width="20" />
