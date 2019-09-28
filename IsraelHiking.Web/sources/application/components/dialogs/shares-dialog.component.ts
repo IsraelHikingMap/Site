@@ -94,7 +94,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
                 } catch (ex) {
                     this.toastService.error(this.resources.unableToDeleteShare);
                 }
-                
+
             },
             type: "YesNo"
         });
