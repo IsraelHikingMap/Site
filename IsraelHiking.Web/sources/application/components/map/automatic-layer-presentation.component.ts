@@ -92,7 +92,7 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
             type: "raster",
             tiles: [address],
             minzoom: Math.max(this.minZoom - 1, 0),
-            maxzoom: this.maxZoom - 1,
+            maxzoom: this.maxZoom,
             scheme,
             tileSize: 256,
             attribution: "<a href='https://github.com/IsraelHikingMap/Site/wiki/Attribution' target='_blank'>" +
