@@ -120,7 +120,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         if (this.imageLink) {
             urls.push(this.imageLink);
         }
-        if (this.url) {
+        if (this.url && this.url.url) {
             this.url.text = this.title;
             urls.push(this.url);
         }
