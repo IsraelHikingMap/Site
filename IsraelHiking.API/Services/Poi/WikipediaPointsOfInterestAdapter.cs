@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -75,35 +76,43 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public override async Task<List<Feature>> GetPointsForIndexing()
         {
-            _logger.LogInformation("Start getting wikipedia pages for indexing");
+            _logger.LogInformation("Start getting Wikipedia pages for indexing.");
             var startCoordinate = new Coordinate(34, 29);
             var endCoordinate = new Coordinate(36, 34);
             
             var itmToWgs84 = _itmWgs84MathTransfromFactory.Create();
             var wgs84ToItm = _itmWgs84MathTransfromFactory.CreateInverse();
-            double step = 10000 * 2 / Math.Sqrt(2);
-            var tasksList = new List<Task<List<Feature>>>();
-            foreach (var language in Languages.Array)
+            double step = 10000 * Math.Sqrt(2);
+            var coordinatesList = new List<Coordinate>();
+            var currentCoordinate = new Coordinate(startCoordinate);
+            while (currentCoordinate.X < endCoordinate.X && currentCoordinate.Y < endCoordinate.Y)
             {
-                var currentCoordinate = new Coordinate(startCoordinate);
-                while (currentCoordinate.X < endCoordinate.X && currentCoordinate.Y < endCoordinate.Y)
+                var itm = wgs84ToItm.Transform(currentCoordinate);
+                itm.X += step;
+                currentCoordinate = itmToWgs84.Transform(itm);
+                if (currentCoordinate.X > endCoordinate.X)
                 {
-                    var itm = wgs84ToItm.Transform(currentCoordinate);
-                    itm.X += step;
+                    currentCoordinate.X = startCoordinate.X;
+                    itm = wgs84ToItm.Transform(currentCoordinate);
+                    itm.Y += step;
                     currentCoordinate = itmToWgs84.Transform(itm);
-                    if (currentCoordinate.X > endCoordinate.X)
-                    {
-                        currentCoordinate.X = startCoordinate.X;
-                        itm = wgs84ToItm.Transform(currentCoordinate);
-                        itm.Y += step;
-                        currentCoordinate = itmToWgs84.Transform(itm);
-                    }
-                    tasksList.Add(_wikipediaGateway.GetByLocation(currentCoordinate, language));
                 }
+                coordinatesList.Add(currentCoordinate);
             }
             
-            _logger.LogInformation($"Created {tasksList.Count} tasks to fetch wikipedia data.");
-            var lists = await Task.WhenAll(tasksList);
+            _logger.LogInformation($"Created {coordinatesList.Count} coordinates centers to fetch Wikipedia data.");
+            var lists = new ConcurrentBag<List<Feature>>();
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(coordinatesList, new ParallelOptions { MaxDegreeOfParallelism = 10 }, (coordinate) =>
+                {
+                    foreach (var language in Languages.Array)
+                    {
+                        lists.Add(_wikipediaGateway.GetByLocation(coordinate, language).Result);
+                    }
+                });
+            }).ConfigureAwait(false);
+            
             var wikiFeatures = lists.SelectMany(l => l)
                 .GroupBy(f => f.Attributes[FeatureAttributes.ID])
                 .Select(g => g.First())

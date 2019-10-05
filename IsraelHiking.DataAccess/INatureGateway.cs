@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -48,9 +49,19 @@ namespace IsraelHiking.DataAccess
             };
             var results = await allpagesGenerator.EnumItemsAsync().ToList().ConfigureAwait(false);
             _logger.LogInformation($"Got {results.Count} pages from iNature, fetching their content and images");
-            var list = results.AsParallel().WithDegreeOfParallelism(5).Select(PageToFeature);
-            var features = await Task.WhenAll(list).ConfigureAwait(false);
-            return features.Where(f => f != null).ToList();
+            var features = new ConcurrentBag<Feature>();
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(results, new ParallelOptions { MaxDegreeOfParallelism = 5 }, (page) =>
+               {
+                   var feature = PageToFeature(page).Result;
+                   if (feature != null)
+                   {
+                       features.Add(feature);
+                   }
+               });
+            }).ConfigureAwait(false);
+            return features.ToList();
         }
 
         private async Task<string> GetPageImageUrl(WikiPage page)

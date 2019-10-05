@@ -192,7 +192,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public override async Task<List<Feature>> GetPointsForIndexing()
         {
-            _logger.LogInformation("Starting getting OSM points of interetes");
+            _logger.LogInformation("Starting getting OSM points of interest");
             using (var stream = _latestFileFetcherExecutor.Get())
             {
                 var osmNamesDictionary = await _osmRepository.GetElementsWithName(stream);
@@ -202,7 +202,7 @@ namespace IsraelHiking.API.Services.Poi
                 var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
                 var containers = features.Where(f => f.IsValidContainer()).OrderBy(f => f.Geometry.Area).ToList();
                 features = _osmGeoJsonPreprocessorExecutor.MergePlaceNodes(features, containers);
-                _logger.LogInformation("Finished getting OSM points of interetes: " + features.Count);
+                _logger.LogInformation("Finished getting OSM points of interest: " + features.Count);
                 return features;
             }
         }
