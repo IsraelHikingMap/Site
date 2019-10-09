@@ -159,7 +159,7 @@ namespace IsraelHiking.API.Executors
                         .Concat(geometryCollection.Geometries.OfType<LineString>())
                         .Cast<ILineString>()
                         .ToArray();
-                    feature.Geometry = new MultiLineString(lines);
+                    feature.Geometry = _geometryFactory.CreateMultiLineString(lines);
                     continue;
                 }
                 if (geometryCollection.Geometries.All(g => g is Point || g is MultiPoint))
@@ -170,7 +170,18 @@ namespace IsraelHiking.API.Executors
                         .Concat(geometryCollection.Geometries.OfType<Point>())
                         .Cast<IPoint>()
                         .ToArray();
-                    feature.Geometry = new MultiPoint(points);
+                    feature.Geometry = _geometryFactory.CreateMultiPoint(points);
+                    continue;
+                }
+                if (geometryCollection.Geometries.All(g => g is Polygon || g is MultiPolygon))
+                {
+                    var polygons = geometryCollection.Geometries
+                        .OfType<MultiPolygon>()
+                        .SelectMany(mls => mls.Geometries.OfType<Polygon>())
+                        .Concat(geometryCollection.Geometries.OfType<Polygon>())
+                        .Cast<IPolygon>()
+                        .ToArray();
+                    feature.Geometry = _geometryFactory.CreateMultiPolygon(polygons);
                     continue;
                 }
                 var nonPointGeometry = geometryCollection.Geometries.FirstOrDefault(g => !(g is Point));

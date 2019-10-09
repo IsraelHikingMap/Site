@@ -306,6 +306,51 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
+        public void MergeFeatures_MultiPolygonWithPolygon_ShouldMergeAndCreateASingleMultiPolygon()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Geometry = new MultiPolygon(new IPolygon[]
+            {
+                new Polygon(new LinearRing(new[]
+                    {
+                        new Coordinate(0, 0),
+                        new Coordinate(1, 1),
+                        new Coordinate(2, 2),
+                        new Coordinate(0, 0),
+                    })
+                ),
+                new Polygon(new LinearRing(new[]
+                    {
+                        new Coordinate(2.0001, 2),
+                        new Coordinate(3, 3),
+                        new Coordinate(4, 4),
+                        new Coordinate(2.0001, 2),
+                    }
+                ))
+            });
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Geometry = new Polygon(new LinearRing(new[]
+                {
+                    new Coordinate(0, 2),
+                    new Coordinate(1, 1),
+                    new Coordinate(2, 0),
+                    new Coordinate(0, 2),
+                })
+            );
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { feature1, feature2 });
+
+            Assert.AreEqual(1, results.Count);
+            var mls = results.First().Geometry as MultiPolygon;
+            Assert.IsNotNull(mls);
+            Assert.AreEqual(3, mls.Geometries.Length);
+        }
+
+        [TestMethod]
         public void MergeFeatures_TwoBusStopsAndWikipedia_ShouldMergeOnlyBusStops()
         {
             var node1 = CreateFeature("1", 0, 0);
