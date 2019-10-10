@@ -150,18 +150,6 @@ namespace IsraelHiking.API.Executors
                 {
                     continue;
                 }
-                
-                if (geometryCollection.Geometries.All(g => g is LineString || g is MultiLineString))
-                {
-                    var lines = geometryCollection.Geometries
-                        .OfType<MultiLineString>()
-                        .SelectMany(mls => mls.Geometries.OfType<LineString>())
-                        .Concat(geometryCollection.Geometries.OfType<LineString>())
-                        .Cast<ILineString>()
-                        .ToArray();
-                    feature.Geometry = _geometryFactory.CreateMultiLineString(lines);
-                    continue;
-                }
                 if (geometryCollection.Geometries.All(g => g is Point || g is MultiPoint))
                 {
                     var points = geometryCollection.Geometries
@@ -173,19 +161,36 @@ namespace IsraelHiking.API.Executors
                     feature.Geometry = _geometryFactory.CreateMultiPoint(points);
                     continue;
                 }
-                if (geometryCollection.Geometries.All(g => g is Polygon || g is MultiPolygon))
+                var nonPointGeometries = geometryCollection.Geometries.Where(g => !(g is Point));
+                if (nonPointGeometries.Count() == 1)
                 {
-                    var polygons = geometryCollection.Geometries
+                    feature.Geometry = nonPointGeometries.First();
+                    continue;
+                }
+                if (nonPointGeometries.All(g => g is LineString || g is MultiLineString))
+                {
+                    var lines = nonPointGeometries
+                        .OfType<MultiLineString>()
+                        .SelectMany(mls => mls.Geometries.OfType<LineString>())
+                        .Concat(nonPointGeometries.OfType<LineString>())
+                        .Cast<ILineString>()
+                        .ToArray();
+                    feature.Geometry = _geometryFactory.CreateMultiLineString(lines);
+                    continue;
+                }
+                if (nonPointGeometries.All(g => g is Polygon || g is MultiPolygon))
+                {
+                    var polygons = nonPointGeometries
                         .OfType<MultiPolygon>()
                         .SelectMany(mls => mls.Geometries.OfType<Polygon>())
-                        .Concat(geometryCollection.Geometries.OfType<Polygon>())
+                        .Concat(nonPointGeometries.OfType<Polygon>())
                         .Cast<IPolygon>()
                         .ToArray();
                     feature.Geometry = _geometryFactory.CreateMultiPolygon(polygons);
                     continue;
                 }
-                var nonPointGeometry = geometryCollection.Geometries.FirstOrDefault(g => !(g is Point));
-                feature.Geometry = nonPointGeometry ?? geometryCollection.First();
+                _reportLogger.LogWarning("The following merge created a weird geometry: " + feature.GetTitle(Languages.HEBREW) + " (" + feature.Attributes[FeatureAttributes.ID] + ") " + geometryCollection.ToString());
+                feature.Geometry = nonPointGeometries.FirstOrDefault();
             }
         }
 
