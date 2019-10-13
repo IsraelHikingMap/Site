@@ -200,8 +200,6 @@ namespace IsraelHiking.API.Services.Poi
                 var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(stream, relevantTagsDictionary);
                 osmNamesDictionary.Add(string.Empty, namelessNodes.Cast<ICompleteOsmGeo>().ToList());
                 var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-                var containers = features.Where(f => f.IsValidContainer()).OrderBy(f => f.Geometry.Area).ToList();
-                features = _osmGeoJsonPreprocessorExecutor.MergePlaceNodes(features, containers);
                 _logger.LogInformation("Finished getting OSM points of interest: " + features.Count);
                 return features;
             }

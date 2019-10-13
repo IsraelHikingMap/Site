@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Tests.Converters
         [TestInitialize]
         public void TestInitialize()
         {
-            _converter = new OsmGeoJsonConverter();
+            _converter = new OsmGeoJsonConverter(new GeometryFactory());
         }
 
         [TestMethod]
@@ -57,7 +57,8 @@ namespace IsraelHiking.API.Tests.Converters
             node.Tags = new TagsCollection(new Tag(NAME, NAME));
             node.UserName = "UserName";
             node.TimeStamp = DateTime.Now;
-
+            node.Latitude = 10.1234567890;
+            node.Longitude = 11.234567890;
             var feature = _converter.ToGeoJson(node);
             var point = feature.Geometry as Point;
 

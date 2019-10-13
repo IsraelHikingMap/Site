@@ -19,6 +19,16 @@ namespace IsraelHiking.API.Converters
         private const string BOUNDARY = "boundary";
         private const string TYPE = "type";
         private const string MULTIPOLYGON = "multipolygon";
+        private readonly IGeometryFactory _geometryFactory;
+
+        /// <summary>
+        /// Class constrcutor
+        /// </summary>
+        /// <param name="geometryFactory"></param>
+        public OsmGeoJsonConverter(IGeometryFactory geometryFactory)
+        {
+            _geometryFactory = geometryFactory;
+        }
 
         /// <inheritdoc />
         public Feature ToGeoJson(ICompleteOsmGeo completeOsmGeo)
@@ -31,7 +41,7 @@ namespace IsraelHiking.API.Converters
             {
                 case OsmGeoType.Node:
                     var node = completeOsmGeo as Node;
-                    return new Feature(new Point(ConvertNode(node)), ConvertTags(node));
+                    return new Feature(_geometryFactory.CreatePoint(ConvertNode(node)), ConvertTags(node));
                 case OsmGeoType.Way:
                     if (!(completeOsmGeo is CompleteWay way) || way.Nodes.Length <= 1)
                     {
@@ -124,7 +134,7 @@ namespace IsraelHiking.API.Converters
             var nodes = relation.Members.Select(m => m.Member).OfType<Node>().ToList();
             if (nodes.Any())
             {
-                var multiPoint = new MultiPoint(nodes.Select(n => new Point(ConvertNode(n)) as IPoint).ToArray());
+                var multiPoint = _geometryFactory.CreateMultiPoint(nodes.Select(n => _geometryFactory.CreatePoint(ConvertNode(n)) as IPoint).ToArray());
                 return new Feature(multiPoint, ConvertTags(relation));
             }
 
@@ -134,8 +144,8 @@ namespace IsraelHiking.API.Converters
                 return null;
             }
             var jointLines = geometries.OfType<ILineString>().ToList();
-            jointLines.AddRange(geometries.OfType<Polygon>().Select(p => new LineString(p.Coordinates) as ILineString));
-            var multiLineString = new MultiLineString(jointLines.ToArray());
+            jointLines.AddRange(geometries.OfType<Polygon>().Select(p => _geometryFactory.CreateLineString(p.Coordinates) as ILineString));
+            var multiLineString = _geometryFactory.CreateMultiLineString(jointLines.ToArray());
             return new Feature(multiLineString, ConvertTags(relation));
         }
 
@@ -149,7 +159,7 @@ namespace IsraelHiking.API.Converters
             var innerPolygons = GetGeometriesFromWays(innerWays).OfType<IPolygon>().ToList();
             innerPolygons = MergePolygons(innerPolygons);
             MergeInnerIntoOuterPolygon(ref outerPolygons, ref innerPolygons);
-            var multiPolygon = new MultiPolygon(outerPolygons.Union(innerPolygons).ToArray());
+            var multiPolygon = _geometryFactory.CreateMultiPolygon(outerPolygons.Union(innerPolygons).ToArray());
             return new Feature(multiPolygon, ConvertTags(relation));
         }
 
@@ -180,9 +190,9 @@ namespace IsraelHiking.API.Converters
             foreach (var outerPolygon in outerPolygons)
             {
                 var currentInnerPolygons = innerPolygons.Where(p => p.Within(outerPolygon)).ToArray();
-                var holes = currentInnerPolygons.Select(p => new LinearRing(p.Coordinates) as ILinearRing).ToArray();
+                var holes = currentInnerPolygons.Select(p => _geometryFactory.CreateLinearRing(p.Coordinates)).ToArray();
                 innerPolygons = innerPolygons.Except(currentInnerPolygons).ToList();
-                newOuterPolygons.Add(new Polygon(new LinearRing(outerPolygon.Coordinates), holes));
+                newOuterPolygons.Add(_geometryFactory.CreatePolygon(_geometryFactory.CreateLinearRing(outerPolygon.Coordinates), holes));
             }
             outerPolygons = newOuterPolygons;
         }
@@ -238,8 +248,8 @@ namespace IsraelHiking.API.Converters
         {
             var coordinates = nodes.Select(ConvertNode).ToArray();
             return nodes.First().Id == nodes.Last().Id && nodes.Length >= 4
-                        ? new Polygon(new LinearRing(coordinates)) as IGeometry
-                        : new LineString(coordinates);
+                        ? _geometryFactory.CreatePolygon(_geometryFactory.CreateLinearRing(coordinates)) as IGeometry
+                        : _geometryFactory.CreateLineString(coordinates);
         }
     }
 }

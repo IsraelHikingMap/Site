@@ -94,7 +94,7 @@ namespace IsraelHiking.API.Tests.Executors
             Assert.AreEqual("green", results.First().Attributes[FeatureAttributes.ICON_COLOR]);
         }
 
-        
+
         [TestMethod]
         public void MergeFeatures_HasSameTitleButFarAway_ShouldNotMerge()
         {
@@ -196,7 +196,7 @@ namespace IsraelHiking.API.Tests.Executors
             point.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             point.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> {point, area});
+            var results = _executor.Merge(new List<Feature> { point, area });
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue(results.First().Geometry is Polygon);
@@ -225,7 +225,7 @@ namespace IsraelHiking.API.Tests.Executors
         public void MergeFeatures_TwoPolygonsAndPoint_ShouldMerge()
         {
             var feature1 = CreateFeature("1", 0, 0);
-            feature1.Geometry = new Polygon(new LinearRing(new []
+            feature1.Geometry = new Polygon(new LinearRing(new[]
             {
                 new Coordinate(0, 0),
                 new Coordinate(0, 1),
@@ -464,6 +464,124 @@ namespace IsraelHiking.API.Tests.Executors
             Assert.IsNotNull(multiPoint);
             Assert.AreEqual(0, multiPoint.Geometries.OfType<GeometryCollection>().Count());
             Assert.AreEqual(4, multiPoint.Geometries.Length);
+        }
+
+        [TestMethod]
+        public void MergePlaceAndWay_ShouldMergePolygonIntoNode()
+        {
+
+            var placeNode = CreateFeature("1", 0.5, 0.6);
+            placeNode.Attributes.AddOrUpdate("place", "any");
+            placeNode.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            placeNode.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, false);
+            placeNode.SetTitles();
+
+            var placeBoundary = CreateFeature("2", 0, 0);
+            placeBoundary.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            placeBoundary.Attributes.AddOrUpdate("place", "any");
+            placeBoundary.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, true);
+            placeBoundary.SetTitles();
+            placeBoundary.Geometry = new Polygon(new LinearRing(new[]
+            {
+                new Coordinate(0,0),
+                new Coordinate(0,1),
+                new Coordinate(1,1),
+                new Coordinate(1,0),
+                new Coordinate(0,0),
+            }));
+
+            var results = _executor.Merge(new List<Feature>() { placeBoundary, placeNode });
+
+            Assert.AreEqual(1, results.Count);
+            Assert.IsTrue(results.First().Geometry is Polygon);
+        }
+
+
+        [TestMethod]
+        public void MergePlaceNodeWithInPlaceWithinBondary_ShouldMergeAndRemove()
+        {
+            var placeNode = CreateFeature("1", 0.5, 0.6);
+            placeNode.Attributes.AddOrUpdate("place", "any");
+            placeNode.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            placeNode.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, false);
+            placeNode.SetTitles();
+
+            var placeBoundary = CreateFeature("2", 0, 0);
+            placeBoundary.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            placeBoundary.Attributes.AddOrUpdate("place", "any");
+            placeBoundary.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, true);
+            placeBoundary.SetTitles();
+            placeBoundary.Geometry = new Polygon(new LinearRing(new[]
+            {
+                new Coordinate(0,0),
+                new Coordinate(0,1),
+                new Coordinate(1,1),
+                new Coordinate(1,0),
+                new Coordinate(0,0),
+            }));
+
+            var placeBoundary2 = CreateFeature("3", 0, 0);
+            placeBoundary2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            placeBoundary2.Attributes.AddOrUpdate("boundary", "administrative");
+            placeBoundary2.Attributes.AddOrUpdate("admin_level", 8);
+            placeBoundary2.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, true);
+            placeBoundary2.SetTitles();
+            placeBoundary2.Geometry = new Polygon(new LinearRing(new[]
+            {
+                new Coordinate(-1, -1),
+                new Coordinate(-1, 2),
+                new Coordinate(2,2),
+                new Coordinate(2,-1),
+                new Coordinate(-1,-1),
+            }));
+
+            var results = _executor.Merge(new List<Feature> { placeBoundary, placeBoundary2, placeNode }).ToList();
+
+            Assert.AreEqual(1, results.Count);
+        }
+
+        [TestMethod]
+        public void MergePlaceNodeWithInPlaceWithinBondary_NodeIsInsideBoundaryButNotInsidePlace_ShouldMergeAndRemove()
+        {
+            var placeNode = CreateFeature("1", -0.0001, -0.0001);
+            placeNode.Attributes.AddOrUpdate("place", "any");
+            placeNode.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            placeNode.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, false);
+            placeNode.SetTitles();
+
+            var placeBoundary = CreateFeature("2", 0, 0);
+            placeBoundary.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            placeBoundary.Attributes.AddOrUpdate("place", "any");
+            placeBoundary.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, true);
+            placeBoundary.SetTitles();
+            placeBoundary.Geometry = new Polygon(new LinearRing(new[]
+            {
+                new Coordinate(0,0),
+                new Coordinate(0,1),
+                new Coordinate(1,1),
+                new Coordinate(1,0),
+                new Coordinate(0,0),
+            }));
+
+            var placeBoundary2 = CreateFeature("3", 0, 0);
+            placeBoundary2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            placeBoundary2.Attributes.AddOrUpdate("boundary", "administrative");
+            placeBoundary2.Attributes.AddOrUpdate("admin_level", 8);
+            placeBoundary2.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, true);
+            placeBoundary2.SetTitles();
+            placeBoundary2.Geometry = new Polygon(new LinearRing(new[]
+            {
+                new Coordinate(-1, -1),
+                new Coordinate(-1, 2),
+                new Coordinate(2,2),
+                new Coordinate(2,-1),
+                new Coordinate(-1,-1),
+            }));
+
+            var results = _executor.Merge(new List<Feature> { placeBoundary, placeBoundary2, placeNode }).ToList();
+
+            Assert.AreEqual(1, results.Count);
+            Assert.IsTrue(results.First().Geometry.IsValid);
         }
     }
 }

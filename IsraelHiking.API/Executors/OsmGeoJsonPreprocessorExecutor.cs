@@ -18,8 +18,6 @@ namespace IsraelHiking.API.Executors
     /// <inheritdoc />
     public class OsmGeoJsonPreprocessorExecutor : IOsmGeoJsonPreprocessorExecutor
     {
-        private const string PLACE = "place";
-
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
         private readonly ITagsHelper _tagsHelper;
@@ -113,66 +111,6 @@ namespace IsraelHiking.API.Executors
             {
                 feature.Attributes[FeatureAttributes.POI_CATEGORY] = Categories.NONE;
             }
-        }
-
-        private List<Feature> UpdatePlacesGeometry(Feature feature, List<Feature> places)
-        {
-            if (feature.Geometry is Point == false ||
-                feature.Attributes.Exists(PLACE) == false || 
-                feature.Attributes.Exists(FeatureAttributes.NAME) == false)
-            {
-                return new List<Feature>();
-            }
-            var placeContainers = places.Where(c => IsPlaceContainer(c, feature))
-                .OrderBy(f => f.Geometry.Area)
-                .ToList();
-
-            if (!placeContainers.Any())
-            {
-                return placeContainers;
-            }
-            // setting the geometry of the area to the point to facilitate for updating the place point while showing the area
-            var container = placeContainers.First();
-            feature.Geometry = container.Geometry;
-            feature.Attributes[FeatureAttributes.POI_CONTAINER] = container.Attributes[FeatureAttributes.POI_CONTAINER];
-            return placeContainers;
-        }
-
-        private bool IsPlaceContainer(IFeature container, IFeature feature)
-        {
-            try
-            {
-                return container.Attributes.Exists(FeatureAttributes.NAME) &&
-                       container.Attributes[FeatureAttributes.NAME].Equals(feature.Attributes[FeatureAttributes.NAME]) &&
-                       container.Geometry.Contains(feature.Geometry) &&
-                       !container.Geometry.EqualsTopologically(feature.Geometry) &&
-                       !container.Attributes[FeatureAttributes.ID].Equals(feature.Attributes[FeatureAttributes.ID]);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Problem with places check for container: {container} name: {container.Attributes[FeatureAttributes.NAME]} feature {feature} name: {feature.Attributes[FeatureAttributes.NAME]}\n{ex.Message}");
-            }
-            return false;
-        }
-
-        /// <inheritdoc />
-        public List<Feature> MergePlaceNodes(List<Feature> features, List<Feature> containers)
-        {
-            _logger.LogInformation($"Starting places merging: {features.Count}, places: {containers.Count}");
-            var featureIdsToRemove = new List<string>();
-            foreach (var feature in features)
-            {
-                var placesToRemove = UpdatePlacesGeometry(feature, containers);
-                if (placesToRemove.Any())
-                {
-                    // database places are nodes that should not be removed.
-                    var ids = placesToRemove.Select(p => p.Attributes[FeatureAttributes.ID].ToString()).ToList();
-                    featureIdsToRemove.AddRange(ids);
-                }
-            }
-
-            _logger.LogInformation($"Finished places merging. Merged places: {featureIdsToRemove.Count}");
-            return features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID]) == false).ToList();
         }
 
         private IEnumerable<ICompleteOsmGeo> MergeOsmElements(IReadOnlyCollection<ICompleteOsmGeo> elements)

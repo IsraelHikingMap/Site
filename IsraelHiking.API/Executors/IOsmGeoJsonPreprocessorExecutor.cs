@@ -16,13 +16,6 @@ namespace IsraelHiking.API.Executors
         /// <returns>a list of preprocessed features</returns>
         List<Feature> Preprocess(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary);
         /// <summary>
-        /// Merges places geometry into their relevant nodes
-        /// </summary>
-        /// <param name="features"></param>
-        /// <param name="containers"></param>
-        /// <returns>A merged list</returns>
-        List<Feature> MergePlaceNodes(List<Feature> features, List<Feature> containers);
-        /// <summary>
         /// Preprocess highways into features - line strings
         /// </summary>
         /// <param name="highways"></param>

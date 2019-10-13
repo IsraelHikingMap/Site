@@ -27,7 +27,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
-            _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), new TagsHelper(optionsProvider));
+            _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(optionsProvider));
         }
 
         private Node CreateNode(int id)
@@ -251,115 +251,6 @@ namespace IsraelHiking.API.Tests.Services.Osm
             Assert.AreEqual(10, results.Count);
             Assert.AreEqual(1, results.Count(f => f.Geometry is Polygon));
             Assert.AreEqual(1, results.Count(f => f.Geometry is MultiLineString));
-        }
-
-        [TestMethod]
-        public void PreprocessWithPlaceAndWay_ShouldMergePlaceIntoIt()
-        {
-            var node1 = CreateNode(1, 0, 0);
-            var node2 = CreateNode(2, 0, 1);
-            var node3 = CreateNode(3, 1, 1);
-            var node4 = CreateNode(4, 1, 0);
-            var node5 = CreateNode(5, 0.5, 0.6);
-            node5.Tags.Add("place", "any");
-            var way1 = new CompleteWay
-            {
-                Id = 6,
-                Tags = new TagsCollection
-                {
-                    {FeatureAttributes.NAME, "name"},
-                    {"place", "any"}
-                },
-                Nodes = new[] {node1, node2, node3, node4, node1}
-            };
-            var osmElements = new List<ICompleteOsmGeo> { node5, way1 };
-
-            var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { FeatureAttributes.NAME, osmElements } };
-
-            var results = _preprocessorExecutor.Preprocess(dictionary);
-            results = _preprocessorExecutor.MergePlaceNodes(results, results.Where(f => f.Geometry is Polygon).ToList());
-
-            Assert.AreEqual(1, results.Count);
-            var geoLocation = results.First().Attributes[FeatureAttributes.GEOLOCATION] as AttributesTable;
-            Assert.IsNotNull(geoLocation);
-            Assert.AreEqual(0.5, geoLocation[FeatureAttributes.LAT]);
-            Assert.AreEqual(0.6, geoLocation[FeatureAttributes.LON]);
-            Assert.IsTrue(results.First().Geometry is Polygon);
-        }
-
-        
-        [TestMethod]
-        public void PreprocessPlaceNodeWithInPlaceWithinBondary_ShouldMergeAndRemove()
-        {
-            var node1 = CreateNode(1, 0, 0);
-            var node2 = CreateNode(2, 0, 1);
-            var node3 = CreateNode(3, 1, 1);
-            var node4 = CreateNode(4, 1, 0);
-            var node5 = CreateNode(5, 0.5, 0.6);
-            node5.Tags.Add("place", "any");
-            var way1 = new CompleteWay
-            {
-                Id = 6,
-                Tags = new TagsCollection
-                {
-                    {FeatureAttributes.NAME, FeatureAttributes.NAME},
-                    {"place", "any"}
-                },
-                Nodes = new[] { node1, node2, node3, node4, node1 }
-            };
-            var node6 = CreateNode(7, -1, -1);
-            var node7 = CreateNode(8, -1, 2);
-            var node8 = CreateNode(9, 2, 2);
-            var node9 = CreateNode(10, 2, -1);
-            var way2 = new CompleteWay
-            {
-                Id = 11,
-                Tags = new TagsCollection
-                {
-                    {FeatureAttributes.NAME, FeatureAttributes.NAME},
-                },
-                Nodes = new[] { node6, node7, node8, node9, node6 }
-            };
-            var dictionary = new Dictionary<string, List<ICompleteOsmGeo>>
-            {
-                { FeatureAttributes.NAME, new List<ICompleteOsmGeo> {node5, way1, way2 } },
-            };
-            var results = _preprocessorExecutor.Preprocess(dictionary);
-            results = _preprocessorExecutor.MergePlaceNodes(results, results.Where(f => f.Geometry is Polygon).ToList());
-
-            Assert.AreEqual(1, results.Count);
-        }
-
-        [TestMethod]
-        public void PreprocessPlaceNodeWithContainerPlaceFromDatabase_ShouldUpdateAddress()
-        {
-            var node1 = CreateNode(1, 0, 0);
-            var node2 = CreateNode(2, 0, 1);
-            var node3 = CreateNode(3, 1, 1);
-            var node4 = CreateNode(4, 1, 0);
-            var node5 = CreateNode(5, 0.5, 0.6);
-            node5.Tags.Add("place", "any");
-            var way1 = new CompleteWay
-            {
-                Id = 6,
-                Tags = new TagsCollection
-                {
-                    {FeatureAttributes.NAME, FeatureAttributes.NAME},
-                    {"place", "any"}
-                },
-                Nodes = new[] { node1, node2, node3, node4, node1 }
-            };
-            var dictionary = new Dictionary<string, List<ICompleteOsmGeo>>
-            {
-                { FeatureAttributes.NAME, new List<ICompleteOsmGeo> {node5, way1} },
-            };
-            var databaseMock = _preprocessorExecutor.Preprocess(dictionary);
-            var cloned = _preprocessorExecutor.Preprocess(dictionary);
-            databaseMock.First().Geometry = databaseMock.Last().Geometry;
-            var results = _preprocessorExecutor.MergePlaceNodes(cloned.Take(1).ToList(), databaseMock.Where(f => f.Geometry is Polygon).ToList());
-
-            Assert.AreEqual(1, results.Count);
-            Assert.IsTrue(results.First().Geometry is Polygon);
         }
 
         [TestMethod]

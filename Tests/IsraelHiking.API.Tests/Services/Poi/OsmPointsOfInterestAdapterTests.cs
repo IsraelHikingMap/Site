@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             InitializeSubstitues();
             _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
             _tagsHelper = new TagsHelper(_options);
-            _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), _tagsHelper);
+            _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
             _osmRepository = Substitute.For<IOsmRepository>();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
             _latestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();

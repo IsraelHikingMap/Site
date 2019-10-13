@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
@@ -40,6 +41,8 @@ namespace IsraelHiking.API.Executors
     /// <inheritdoc />
     public class FeaturesMergeExecutor : IFeaturesMergeExecutor
     {
+        private const string PLACE = "place";
+
         private readonly ConfigurationData _options;
         private readonly ILogger<FeaturesMergeExecutor> _reportLogger;
         private readonly ILogger _logger;
@@ -82,6 +85,7 @@ namespace IsraelHiking.API.Executors
                 .OrderBy(f => f, new FeatureComparer())
                 .ToArray();
             _logger.LogInformation($"Sorted features by importance: {osmFeatures.Length}");
+            osmFeatures = MergePlaceNodes(osmFeatures, featureIdsToRemove);
             var nonOsmFeatures = features.Where(f => !f.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM));
             var orderedFeatures = osmFeatures.Concat(nonOsmFeatures).ToArray();
             for (var featureIndex = 0; featureIndex < orderedFeatures.Length; featureIndex++)
@@ -134,12 +138,81 @@ namespace IsraelHiking.API.Executors
                     }
                 }
             }
-
+            _logger.LogInformation($"Processed {features.Count} of {features.Count}");
             featureIdsToRemove = featureIdsToRemove.Distinct().ToList();
             var results = features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID].ToString()) == false).ToList();
             SimplifyGeometriesCollection(results);
             _logger.LogInformation($"Finished feature merging by title. merged features: {featureIdsToRemove.Count}");
             return results;
+        }
+
+        private Feature[] MergePlaceNodes(Feature[] features, List<string> featureIdsToRemove)
+        {
+            var containers = features.Where(f => f.IsValidContainer()).OrderBy(f => f.Geometry.Area).ToList();
+            WriteToBothLoggers($"Starting places merging: {features.Length}, places: {containers.Count}");
+            foreach (var feature in features)
+            {
+                var placesToRemove = UpdatePlacesGeometry(feature, containers);
+                if (placesToRemove.Any())
+                {
+                    // database places are nodes that should not be removed.
+                    var ids = placesToRemove.Select(p => p.Attributes[FeatureAttributes.ID].ToString()).ToList();
+                    featureIdsToRemove.AddRange(ids);
+                }
+            }
+
+            WriteToBothLoggers($"Finished places merging. Merged places: {featureIdsToRemove.Count}");
+            return features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID]) == false).ToArray();
+        }
+
+        private List<Feature> UpdatePlacesGeometry(Feature feature, List<Feature> places)
+        {
+            if (feature.Geometry is Point == false ||
+                feature.Attributes.Exists(PLACE) == false ||
+                feature.Attributes.Exists(FeatureAttributes.NAME) == false)
+            {
+                return new List<Feature>();
+            }
+            var placeContainers = places.Where(c => IsPlaceContainer(c, feature))
+                .OrderBy(f => f.Geometry.Area)
+                .ToList();
+
+            if (!placeContainers.Any())
+            {
+                return placeContainers;
+            }
+            // setting the geometry of the area to the point to facilitate for updating the place point while showing the area
+            var container = placeContainers.First();
+            feature.Geometry = container.Geometry;
+            feature.Attributes[FeatureAttributes.POI_CONTAINER] = container.Attributes[FeatureAttributes.POI_CONTAINER];
+            WriteToReport(feature, container);
+            return placeContainers;
+        }
+
+        private bool IsPlaceContainer(IFeature container, IFeature feature)
+        {
+            try
+            {
+                var containsOrClose = false;
+                if (feature.Geometry is Point)
+                {
+                    containsOrClose = container.Geometry.Contains(feature.Geometry) ||
+                        container.Geometry.Distance(feature.Geometry) <= _options.MergePointsOfInterestThreshold;
+                } else
+                {
+                    containsOrClose = container.Geometry.Contains(feature.Geometry);
+                }
+                return container.Attributes.Exists(FeatureAttributes.NAME) &&
+                       container.Attributes[FeatureAttributes.NAME].Equals(feature.Attributes[FeatureAttributes.NAME]) &&
+                       containsOrClose &&
+                       !container.Geometry.EqualsTopologically(feature.Geometry) &&
+                       !container.Attributes[FeatureAttributes.ID].Equals(feature.Attributes[FeatureAttributes.ID]);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Problem with places check for container: {container} name: {container.Attributes[FeatureAttributes.NAME]} feature {feature} name: {feature.Attributes[FeatureAttributes.NAME]}\n{ex.Message}");
+            }
+            return false;
         }
 
         private void SimplifyGeometriesCollection(List<Feature> results)
@@ -187,9 +260,14 @@ namespace IsraelHiking.API.Executors
                         .Cast<IPolygon>()
                         .ToArray();
                     feature.Geometry = _geometryFactory.CreateMultiPolygon(polygons);
+                    if (!feature.Geometry.IsValid)
+                    {
+                        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, false);
+                        _reportLogger.LogWarning("There was a problem merging the following feature " + feature.GetTitle(Languages.HEBREW) + " (" + feature.Attributes[FeatureAttributes.ID] + ") ");
+                    }
                     continue;
                 }
-                _reportLogger.LogWarning("The following merge created a weird geometry: " + feature.GetTitle(Languages.HEBREW) + " (" + feature.Attributes[FeatureAttributes.ID] + ") " + geometryCollection.ToString());
+                _reportLogger.LogWarning("The following merge created a weird geometry: " + feature.GetTitle(Languages.HEBREW) + " (" + feature.Attributes[FeatureAttributes.ID] + ") " + string.Join(", ", geometryCollection.Geometries.Select(g => g.GeometryType)));
                 feature.Geometry = nonPointGeometries.FirstOrDefault();
             }
         }
