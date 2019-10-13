@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Converters.CoordinatesParsers;
-using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
@@ -79,33 +78,14 @@ namespace IsraelHiking.API.Controllers
         private SearchResultsPointOfInterest ConvertFromCoordinates(string name, Coordinate coordinates)
         {
             var latLng = new LatLng(coordinates.Y, coordinates.X, coordinates.Z);
-            return CoordinatesToPointOfInterestConverter.Convert(latLng, name);
+            return SearchResultsPointOfInterestConverter.FromLatlng(latLng, name);
         }
 
         private async Task<SearchResultsPointOfInterest> ConvertFromFeature(IFeature feature, string language)
         {
-            var title = feature.GetTitle(language);
-            var geoLocation = (AttributesTable)feature.Attributes[FeatureAttributes.GEOLOCATION];
-            var latLng = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
-            var icon = feature.Attributes[FeatureAttributes.ICON].ToString();
-            if (string.IsNullOrWhiteSpace(icon))
-            {
-                icon = OsmPointsOfInterestAdapter.SEARCH_ICON;
-            }
-            return new SearchResultsPointOfInterest
-            {
-                Id = feature.Attributes[FeatureAttributes.ID].ToString(),
-                Title = title,
-                DisplayName = await GetDisplayName(feature, language, title),
-                Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString(),
-                Icon = icon,
-                IconColor = feature.Attributes[FeatureAttributes.ICON_COLOR].ToString(),
-                Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(),
-                Location = latLng,
-                HasExtraData = feature.HasExtraData(language),
-                NorthEast = new LatLng(feature.Geometry.EnvelopeInternal.MaxY, feature.Geometry.EnvelopeInternal.MaxX),
-                SouthWest = new LatLng(feature.Geometry.EnvelopeInternal.MinY, feature.Geometry.EnvelopeInternal.MinX)
-            };
+            var searchResultsPoi = SearchResultsPointOfInterestConverter.FromFeature(feature, language);
+            searchResultsPoi.DisplayName = await GetDisplayName(feature, language, searchResultsPoi.Title);
+            return searchResultsPoi;
         }
 
         private async Task<string> GetDisplayName(IFeature feature, string language, string title)

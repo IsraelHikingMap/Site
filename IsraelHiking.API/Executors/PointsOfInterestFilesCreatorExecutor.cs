@@ -1,12 +1,17 @@
-﻿using IsraelHiking.Common;
+﻿using IsraelHiking.API.Converters;
+using IsraelHiking.API.Gpx;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml.Serialization;
 
 namespace IsraelHiking.API.Executors
@@ -30,6 +35,12 @@ namespace IsraelHiking.API.Executors
 
         /// <inheritdoc/>
         public void Create(List<Feature> features)
+        {
+            CreateSitemapXmlFile(features);
+            //CreateJsonFile(features);
+        }
+
+        private void CreateSitemapXmlFile(List<Feature> features)
         {
             using (var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "sitemap.xml")))
             {
@@ -55,11 +66,21 @@ namespace IsraelHiking.API.Executors
                 });
                 var siteMap = new urlset
                 {
-                    url = list.ToArray()
+                    url = list.Concat(new[] { new tUrl {
+                        loc = "https://israelhiking.osm.org.il/",
+                        lastmod =  DateTime.Now.ToUniversalTime().ToString("o")
+                    }}).ToArray()
                 };
                 var serializer = new XmlSerializer(typeof(urlset));
                 serializer.Serialize(fileStream, siteMap);
             }
+        }
+
+        private void CreateJsonFile(List<Feature> features)
+        {
+            var pois = features.Select(f=> SearchResultsPointOfInterestConverter.FromFeature(f, "he")).ToArray();
+            var jsonString = JsonConvert.SerializeObject(pois, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() } );
+            _fileSystemHelper.WriteAllBytes("pois.json", Encoding.UTF8.GetBytes(jsonString));
         }
     }
 }

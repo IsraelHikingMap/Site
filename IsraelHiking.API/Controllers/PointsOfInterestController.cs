@@ -104,8 +104,8 @@ namespace IsraelHiking.API.Controllers
         {
             if (source.Equals(Sources.COORDINATES, StringComparison.InvariantCultureIgnoreCase))
             {
-                var latLng = CoordinatesToPointOfInterestConverter.GetLatLngFromId(id);
-                return Ok(CoordinatesToPointOfInterestConverter.Convert(latLng, id));
+                var latLng = SearchResultsPointOfInterestConverter.GetLatLngFromId(id);
+                return Ok(SearchResultsPointOfInterestConverter.FromLatlng(latLng, id));
             }
             var poiItem = await _pointsOfInterestAggregatorService.Get(source, id, language);
             if (poiItem == null)

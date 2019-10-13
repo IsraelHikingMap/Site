@@ -2,7 +2,9 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -12,7 +14,7 @@ namespace IsraelHiking.API.Converters
     /// <summary>
     /// This class converts location to point of interest
     /// </summary>
-    public class CoordinatesToPointOfInterestConverter
+    public class SearchResultsPointOfInterestConverter
     {
         private const string ID_SEPARATOR = "_";
 
@@ -22,7 +24,7 @@ namespace IsraelHiking.API.Converters
         /// <param name="latLng"></param>
         /// <param name="displayName"></param>
         /// <returns></returns>
-        public static SearchResultsPointOfInterest Convert(LatLng latLng, string displayName)
+        public static SearchResultsPointOfInterest FromLatlng(LatLng latLng, string displayName)
         {
             var id = GetIdFromLatLng(latLng);
             return new SearchResultsPointOfInterest
@@ -71,6 +73,37 @@ namespace IsraelHiking.API.Converters
         private static string GetIdFromLatLng(LatLng latLng)
         {
             return latLng.Lat.ToString("F4") + ID_SEPARATOR + latLng.Lng.ToString("F4");
+        }
+
+        /// <summary>
+        /// Converts feature to Search results object
+        /// </summary>
+        /// <param name="feature"></param>
+        /// <param name="language"></param>
+        /// <returns></returns>
+        public static SearchResultsPointOfInterest FromFeature(IFeature feature, string language)
+        {
+            var title = feature.GetTitle(language);
+            var geoLocation = (AttributesTable)feature.Attributes[FeatureAttributes.GEOLOCATION];
+            var latLng = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
+            var icon = feature.Attributes[FeatureAttributes.ICON].ToString();
+            if (string.IsNullOrWhiteSpace(icon))
+            {
+                icon = OsmPointsOfInterestAdapter.SEARCH_ICON;
+            }
+            return new SearchResultsPointOfInterest
+            {
+                Id = feature.Attributes[FeatureAttributes.ID].ToString(),
+                Title = title,
+                Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString(),
+                Icon = icon,
+                IconColor = feature.Attributes[FeatureAttributes.ICON_COLOR].ToString(),
+                Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(),
+                Location = latLng,
+                HasExtraData = feature.HasExtraData(language),
+                NorthEast = new LatLng(feature.Geometry.EnvelopeInternal.MaxY, feature.Geometry.EnvelopeInternal.MaxX),
+                SouthWest = new LatLng(feature.Geometry.EnvelopeInternal.MinY, feature.Geometry.EnvelopeInternal.MinX)
+            };
         }
     }
 }
