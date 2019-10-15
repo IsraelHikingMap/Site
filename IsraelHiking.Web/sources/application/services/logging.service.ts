@@ -118,9 +118,6 @@ export class LoggingService {
     private logLineToString(logLine: LogLine) {
         let dateString = new Date(logLine.date.getTime() - (logLine.date.getTimezoneOffset() * 60 * 1000))
             .toISOString().replace(/T/, " ").replace(/\..+/, "");
-        if (!logLine.level.padStart) {
-            throw new Error("padStart is missing, log level is: " + logLine.level + ", type: " + typeof(logLine.level) + ".");
-        }
         return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;
     }
 }
