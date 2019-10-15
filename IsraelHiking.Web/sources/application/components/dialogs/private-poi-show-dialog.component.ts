@@ -14,10 +14,10 @@ import { MarkerData, LinkData } from "../../models/models";
 })
 export class PrivatePoiShowDialogComponent extends BaseMapComponent {
 
-    private marker: MarkerData;
     private routeId: string;
     private index: number;
 
+    public marker: MarkerData;
     public imageLink: LinkData;
     public url: LinkData;
     public title: string;

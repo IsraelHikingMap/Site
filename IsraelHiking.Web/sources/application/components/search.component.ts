@@ -63,6 +63,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     public searchFrom: FormControl;
     public searchTo: FormControl;
     public hasFocus: boolean;
+    public hideCoordinates: boolean;
     public directional: IDirectionalContext;
 
     private requestsQueue: ISearchRequestQueueItem[];
@@ -194,7 +195,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         }
     }
 
-    public setRouting = (routingType: RoutingType, e: Event) => {
+    public setRouting = (routingType: RoutingType) => {
         this.routingType = routingType;
     }
 

@@ -59,7 +59,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
 
     protected abstract internalSave(layerData: LayerData): void;
 
-    public removeLayer(e: Event) { } // should be derived if needed.
+    public removeLayer() { } // should be derived if needed.
 
     public getTilesAddress() {
         return decodeURI(this.address).replace("{zoom}", "{z}").trim();

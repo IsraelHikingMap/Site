@@ -77,7 +77,7 @@
                     <coordinates *ngIf="!isLoading" [latlng]="latlng"></coordinates>
                     <div fxLayout="row">
                         <a *ngFor="let reference of info.references;" [href]="reference.url" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site">
-                            <img *ngIf="reference.sourceImageUrl" [src]="reference.sourceImageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />
+                            <img *ngIf="reference.sourceImageUrl" [src]="reference.sourceImageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(info.title)" />
                         </a>
                         <a *ngIf="getElementOsmAddress()" [href]="getElementOsmAddress()" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View element in OSM">
                             <img [src]="resources.getResizedImageUrl('https://upload.wikimedia.org/wikipedia/commons/b/b0/Openstreetmap_logo.svg', 32)" height="32" width="32" />

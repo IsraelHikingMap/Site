@@ -69,7 +69,7 @@
                (click)="openDirectionalSearchPopup($event)">
     </mgl-layer>
     <mgl-popup [lngLat]="directional.overlayLocation" *ngIf="directional.overlayLocation" [closeOnClick]="true">
-        <h3 *ngIf="directional.routeTitle" [ngClass]="resources.getTextAlignment(directional.routeTitle)" [dir]="resources.getDirection(directional.routeTitle)" class="chrome-wordwrap-fix">{{title}}</h3>
+        <h3 *ngIf="directional.routeTitle" [ngClass]="resources.getTextAlignment(directional.routeTitle)" [dir]="resources.getDirection(directional.routeTitle)" class="chrome-wordwrap-fix">{{directional.routeTitle}}</h3>
         <div fxLayout="row">
             <div fxFlex="33">
                 <button mat-button fxFill (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Convert search to route"><i class="fa icon-plus"></i></button>

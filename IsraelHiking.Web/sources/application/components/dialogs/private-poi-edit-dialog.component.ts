@@ -21,10 +21,10 @@ interface IIconsGroup {
 export class PrivatePoiEditDialogComponent extends BaseMapComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;
 
-    private marker: MarkerData;
     private routeId: string;
     private markerIndex: number;
 
+    public marker: MarkerData;
     public url: LinkData;
     public imageLink: LinkData;
     public showIcons: boolean;
