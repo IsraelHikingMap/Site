@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using NetTopologySuite.Features;
+﻿using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.Common.Extensions
 {
@@ -11,7 +11,7 @@ namespace IsraelHiking.Common.Extensions
         {
             if (!attributes.Exists(key))
             {
-                attributes.AddAttribute(key, value);
+                attributes.Add(key, value);
             }
             else
             {
@@ -207,7 +207,7 @@ namespace IsraelHiking.Common.Extensions
         {
             if (!featureToMergeTo.Attributes.Exists(FeatureAttributes.POI_COMBINED_IDS))
             {
-                featureToMergeTo.Attributes.AddAttribute(FeatureAttributes.POI_COMBINED_IDS, new string[0]);
+                featureToMergeTo.Attributes.Add(FeatureAttributes.POI_COMBINED_IDS, new string[0]);
             }
             var list = GetStringListFromAttributeValue(featureToMergeTo.Attributes[FeatureAttributes.POI_COMBINED_IDS]);
             list.Add(feature.Attributes[FeatureAttributes.POI_SOURCE] + "__" + feature.Attributes[FeatureAttributes.ID]);

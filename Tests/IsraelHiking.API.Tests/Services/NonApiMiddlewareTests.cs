@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using IsraelHiking.API.Services;
+﻿using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Poi;
@@ -11,6 +8,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using System;
+using System.IO;
+using System.Text;
 using Wangkanai.Detection;
 
 namespace IsraelHiking.API.Tests.Services
@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Tests.Services
     public class NonApiMiddlewareTests
     {
         private NonApiMiddleware _middleware;
-        private IHostingEnvironment _hostingEnvironment;
+        private IWebHostEnvironment _hostingEnvironment;
         private IServiceProvider _serviceProvider;
         private IRepository _repository;
         private IPointsOfInterestAggregatorService _pointsOfInterestAggregatorService;
@@ -27,7 +27,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestInitialize]
         public void TestInitialize()
         {
-            _hostingEnvironment = Substitute.For<IHostingEnvironment>();
+            _hostingEnvironment = Substitute.For<IWebHostEnvironment>();
             _serviceProvider = Substitute.For<IServiceProvider>();
             var browserResolver = Substitute.For<IBrowserResolver>();
             var browser = Substitute.For<IBrowser>();

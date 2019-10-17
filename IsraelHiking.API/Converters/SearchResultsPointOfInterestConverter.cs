@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Services.Poi;
+﻿using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Converters
 {
@@ -48,10 +46,8 @@ namespace IsraelHiking.API.Converters
                 ImagesUrls = new string[0],
                 References = new Reference[0],
                 DataContainer = new DataContainer(),
-                FeatureCollection = new FeatureCollection(new Collection<IFeature>(new List<IFeature>
-                {
-                    new Feature(new Point(new Coordinate().FromLatLng(latLng)), new AttributesTable())
-                }))
+                // HN TODO: add elevation?
+                FeatureCollection = new FeatureCollection { new Feature(new Point(new Coordinate().FromLatLng(latLng)), new AttributesTable()) }
             };
         }
         

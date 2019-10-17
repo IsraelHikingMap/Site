@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Valid;
-using Microsoft.Extensions.Logging;
-using OsmSharp.Tags;
-using OsmSharp.Complete;
 using OsmSharp;
+using OsmSharp.Complete;
+using OsmSharp.Tags;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Executors
 {
@@ -92,13 +92,13 @@ namespace IsraelHiking.API.Executors
             foreach (var feature in features)
             {
                 (var searchFactor, var iconColorCategory) = _tagsHelper.GetInfo(feature.Attributes);
-                feature.Attributes.AddAttribute(FeatureAttributes.SEARCH_FACTOR, searchFactor);
-                feature.Attributes.AddAttribute(FeatureAttributes.ICON, iconColorCategory.Icon);
-                feature.Attributes.AddAttribute(FeatureAttributes.ICON_COLOR, iconColorCategory.Color);
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_LANGUAGE, Languages.ALL);
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_CONTAINER, feature.IsValidContainer());
+                feature.Attributes.Add(FeatureAttributes.SEARCH_FACTOR, searchFactor);
+                feature.Attributes.Add(FeatureAttributes.ICON, iconColorCategory.Icon);
+                feature.Attributes.Add(FeatureAttributes.ICON_COLOR, iconColorCategory.Color);
+                feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
+                feature.Attributes.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
+                feature.Attributes.Add(FeatureAttributes.POI_LANGUAGE, Languages.ALL);
+                feature.Attributes.Add(FeatureAttributes.POI_CONTAINER, feature.IsValidContainer());
                 feature.SetTitles();
                 UpdateLocation(feature);
             }
@@ -245,7 +245,7 @@ namespace IsraelHiking.API.Executors
             var highwayFeatures = highways.Select(_osmGeoJsonConverter.ToGeoJson).Where(h => h != null).ToList();
             foreach (var highwayFeature in highwayFeatures)
             {
-                highwayFeature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
+                highwayFeature.Attributes.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
             }
             return highwayFeatures;
         }
@@ -263,7 +263,7 @@ namespace IsraelHiking.API.Executors
                     {FeatureAttributes.LAT, feature.Geometry.Coordinate.Y},
                     {FeatureAttributes.LON, feature.Geometry.Coordinate.X}
                 };
-                feature.Attributes.AddAttribute(FeatureAttributes.GEOLOCATION, geoLocationTable);
+                feature.Attributes.Add(FeatureAttributes.GEOLOCATION, geoLocationTable);
                 return;
             }
             if (feature.Geometry.Centroid == null || feature.Geometry.Centroid.IsEmpty)
@@ -275,7 +275,7 @@ namespace IsraelHiking.API.Executors
                 {FeatureAttributes.LAT, feature.Geometry.Centroid.Y},
                 {FeatureAttributes.LON, feature.Geometry.Centroid.X}
             };
-            feature.Attributes.AddAttribute(FeatureAttributes.GEOLOCATION, table);
+            feature.Attributes.Add(FeatureAttributes.GEOLOCATION, table);
         }
     }
 }

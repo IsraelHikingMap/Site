@@ -1,7 +1,6 @@
-﻿using GeoAPI.CoordinateSystems.Transformations;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using Microsoft.AspNetCore.Mvc;
+using ProjNet.CoordinateSystems.Transformations;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -24,9 +23,9 @@ namespace IsraelHiking.API.Controllers
     /// This controller facilitates for conversion between WGS84 coordinates to ITM coordinates
     /// </summary>
     [Route("api/[controller]")]
-    public class ItmGridController : Controller
+    public class ItmGridController : ControllerBase
     {
-        private readonly IMathTransform _wgs84ItmMathTransform;
+        private readonly MathTransform _wgs84ItmMathTransform;
 
         /// <summary>
         /// Controller's constructor
@@ -47,8 +46,8 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public NorthEast GetItmCoordinates(double lat, double lon)
         {
-            var coordiante = _wgs84ItmMathTransform.Transform(new Coordinate { Y = lat, X = lon });
-            return new NorthEast { East = (int)coordiante.X, North = (int)coordiante.Y };
+            var coordiante = _wgs84ItmMathTransform.Transform(lon, lat);
+            return new NorthEast { East = (int)coordiante.x, North = (int)coordiante.y };
         }
     }
 }

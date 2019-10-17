@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using GeoAPI.CoordinateSystems.Transformations;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -15,6 +8,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using ProjNet.CoordinateSystems.Transformations;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -39,7 +37,7 @@ namespace IsraelHiking.API.Services.Poi
 
         private readonly IElevationDataStorage _elevationDataStorage;
         
-        private readonly IMathTransform _wgs84ItmMathTransform;
+        private readonly MathTransform _wgs84ItmMathTransform;
 
         private readonly ConfigurationData _options;
 
@@ -108,9 +106,9 @@ namespace IsraelHiking.API.Services.Poi
         /// <returns></returns>
         protected async Task<PointOfInterestExtended> ConvertToPoiExtended(FeatureCollection featureCollection, string language)
         {
-            var mainFeature = featureCollection.Features.Count == 1
-                ? featureCollection.Features.First()
-                : featureCollection.Features.First(f => f.Geometry is LineString);
+            var mainFeature = featureCollection.Count == 1
+                ? featureCollection.First()
+                : featureCollection.First(f => f.Geometry is LineString);
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, language);
             await SetDataContainerAndLength(poiItem, featureCollection);
 
@@ -152,7 +150,7 @@ namespace IsraelHiking.API.Services.Poi
 
         private async Task SetDataContainerAndLength(PointOfInterestExtended poiItem, FeatureCollection featureCollection)
         {
-            foreach (var coordinate in featureCollection.Features.SelectMany(f => f.Geometry.Coordinates))
+            foreach (var coordinate in featureCollection.SelectMany(f => f.Geometry.Coordinates))
             {
                 coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
             }
@@ -170,7 +168,8 @@ namespace IsraelHiking.API.Services.Poi
             foreach (var route in poiItem.DataContainer.Routes)
             {
                 var itmRoute = route.Segments.SelectMany(s => s.Latlngs)
-                    .Select(l => _wgs84ItmMathTransform.Transform(new Coordinate().FromLatLng(l))).ToArray();
+                    .Select(l => _wgs84ItmMathTransform.Transform(new Coordinate().FromLatLng(l).ToDoubleArray()))
+                    .Select(c => new Coordinate().FromDoubleArray(c)).ToArray();
                 var skip1 = itmRoute.Skip(1);
                 poiItem.LengthInKm += itmRoute.Zip(skip1, (curr, prev) => curr.Distance(prev)).Sum() / 1000;
             }
@@ -220,7 +219,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 return null;
             }
-            var feature = featureCollection.Features.First();
+            var feature = featureCollection.First();
             if (!feature.Attributes.Exists(FeatureAttributes.POI_CACHE_DATE))
             {
                 return null;
@@ -237,7 +236,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="feature"></param>
         protected FeatureCollection SetToCache(Feature feature)
         {
-            var featureCollection = new FeatureCollection(new Collection<IFeature> { feature });
+            var featureCollection = new FeatureCollection { feature };
             SetToCache(featureCollection);
             return featureCollection;
         }
@@ -249,7 +248,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <returns></returns>
         protected void SetToCache(FeatureCollection featureCollection)
         {
-            featureCollection.Features.First().Attributes.AddOrUpdate(FeatureAttributes.POI_CACHE_DATE, DateTime.Now.ToString("o"));
+            featureCollection.First().Attributes.AddOrUpdate(FeatureAttributes.POI_CACHE_DATE, DateTime.Now.ToString("o"));
             _elasticSearchGateway.CacheItem(featureCollection);
         }
     }

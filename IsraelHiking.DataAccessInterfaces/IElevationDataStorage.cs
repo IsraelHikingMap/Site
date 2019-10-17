@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using GeoAPI.Geometries;
+﻿using NetTopologySuite.Geometries;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccessInterfaces
 {

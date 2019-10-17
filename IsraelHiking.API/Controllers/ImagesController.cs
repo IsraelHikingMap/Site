@@ -1,12 +1,12 @@
-﻿using System.Threading.Tasks;
-using IsraelHiking.API.Services;
+﻿using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -15,7 +15,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller is responsible for image creation
     /// </summary>
     [Route("api/[controller]")]
-    public class ImagesController : Controller
+    public class ImagesController : ControllerBase
     {
         private readonly IImageCreationService _imageCreationService;
         private readonly IImgurGateway _imgurGateway;

@@ -1,15 +1,13 @@
-﻿using System.Collections.Generic;
-using GeoAPI.CoordinateSystems;
-using GeoAPI.CoordinateSystems.Transformations;
-using ProjNet.CoordinateSystems;
+﻿using ProjNet.CoordinateSystems;
 using ProjNet.CoordinateSystems.Transformations;
+using System.Collections.Generic;
 
 namespace IsraelHiking.API.Executors
 {
     /// <inheritdoc />
     public class ItmWgs84MathTransfromFactory : IItmWgs84MathTransfromFactory
     {
-        private readonly IProjectedCoordinateSystem _itm;
+        private readonly ProjectedCoordinateSystem _itm;
 
         /// <summary>
         /// Factory's constructor
@@ -38,14 +36,14 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc />
-        public IMathTransform Create()
+        public MathTransform Create()
         {
             var coordinateTransformFactory = new CoordinateTransformationFactory();
             return coordinateTransformFactory.CreateFromCoordinateSystems(_itm, GeographicCoordinateSystem.WGS84).MathTransform;
         }
 
         /// <inheritdoc />
-        public IMathTransform CreateInverse()
+        public MathTransform CreateInverse()
         {
             var coordinateTransformFactory = new CoordinateTransformationFactory();
             return coordinateTransformFactory.CreateFromCoordinateSystems(GeographicCoordinateSystem.WGS84, _itm).MathTransform;

@@ -1,6 +1,5 @@
 ﻿using IsraelHiking.API.Converters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
 
 namespace IsraelHiking.API.Tests.Converters
 {

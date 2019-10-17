@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller handles the shared routes
     /// </summary>
     [Route("api/[controller]")]
-    public class UrlsController : Controller
+    public class UrlsController : ControllerBase
     {
         private readonly IRepository _repository;
         private readonly IDataContainerConverterService _dataContainerConverterService;

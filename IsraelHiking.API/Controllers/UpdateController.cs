@@ -1,14 +1,14 @@
 ﻿using IsraelHiking.API.Executors;
+using IsraelHiking.API.Services.Osm;
+using IsraelHiking.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using OsmSharp.Changesets;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using IsraelHiking.API.Services.Osm;
-using IsraelHiking.Common;
-using Newtonsoft.Json;
-using OsmSharp.Changesets;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -16,7 +16,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller handles updates in elastic search and graphhopper
     /// </summary>
     [Route("api/[controller]")]
-    public class UpdateController : Controller
+    public class UpdateController : ControllerBase
     {
         private static readonly Semaphore RebuildSemaphore = new Semaphore(1, 1);
         private static readonly SemaphoreSlim UpdateSemaphore = new SemaphoreSlim(1, 1);

@@ -1,27 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using GeoAPI.Geometries;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using GeoAPI.CoordinateSystems.Transformations;
-using IsraelHiking.API.Executors;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using IsraelHiking.API.Swagger;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using OsmSharp.API;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using ProjNet.CoordinateSystems.Transformations;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using GpxFile = NetTopologySuite.IO.GpxFile;
 
 namespace IsraelHiking.API.Controllers
@@ -30,16 +26,16 @@ namespace IsraelHiking.API.Controllers
     /// This controller is responsible for all OSM related requests
     /// </summary>
     [Route("api/[controller]")]
-    public class OsmController : Controller
+    public class OsmController : ControllerBase
     {
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
-        private readonly IMathTransform _itmWgs84MathTransform;
-        private readonly IMathTransform _wgs84ItmMathTransform;
+        private readonly MathTransform _itmWgs84MathTransform;
+        private readonly MathTransform _wgs84ItmMathTransform;
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
         private readonly IOsmLineAdderService _osmLineAdderService;
-        private readonly IGeometryFactory _geometryFactory;
+        private readonly GeometryFactory _geometryFactory;
         private readonly LruCache<string, TokenAndSecret> _cache;
         private readonly ConfigurationData _options;
 
@@ -62,7 +58,7 @@ namespace IsraelHiking.API.Controllers
             IAddibleGpxLinesFinderService addibleGpxLinesFinderService,
             IOsmLineAdderService osmLineAdderService,
             IOptions<ConfigurationData> options,
-            IGeometryFactory geometryFactory,
+            GeometryFactory geometryFactory,
             LruCache<string, TokenAndSecret> cache)
         {
             _httpGatewayFactory = httpGatewayFactory;
@@ -159,8 +155,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(FeatureCollection), 200)]
-        [SwaggerOperationFilter(typeof(OptionalFileUploadParams))]
-        public async Task<IActionResult> PostGpsTrace([FromQuery]string url = "", [FromForm]IFormFile file = null)
+        public async Task<IActionResult> PostGpsTrace([FromQuery]string url = "", IFormFile file = null)
         {
             var fileFetcherGatewayResponse = await GetFile(url, file);
             if (fileFetcherGatewayResponse == null)
@@ -181,8 +176,12 @@ namespace IsraelHiking.API.Controllers
             {
                 attributesTable.Add("source", url);
             }
-            var features = manipulatedItmLines.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
-            return Ok(new FeatureCollection(new Collection<IFeature>(features)));
+            var featureCollection = new FeatureCollection();
+            foreach (var line in manipulatedItmLines)
+            {
+                featureCollection.Add(new Feature(ToWgs84LineString(line.Coordinates), attributesTable));
+            }
+            return Ok(featureCollection);
         }
 
 
@@ -247,10 +246,10 @@ namespace IsraelHiking.API.Controllers
             return "track";
         }
 
-        private ILineString ToItmLineString(IEnumerable<GpxWaypoint> waypoints)
+        private LineString ToItmLineString(IEnumerable<GpxWaypoint> waypoints)
         {
-            var coordinates = waypoints.Select(waypoint => _wgs84ItmMathTransform.Transform(new Coordinate(waypoint.Longitude, waypoint.Latitude)))
-                .Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1)));
+            var coordinates = waypoints.Select(waypoint => _wgs84ItmMathTransform.Transform(waypoint.Longitude, waypoint.Latitude))
+                .Select(c => new Coordinate(Math.Round(c.x, 1), Math.Round(c.y, 1)));
             var nonDuplicates = new List<Coordinate>();
             foreach (var coordinate in coordinates)
             {
@@ -262,9 +261,9 @@ namespace IsraelHiking.API.Controllers
             return _geometryFactory.CreateLineString(nonDuplicates.ToArray());
         }
 
-        private ILineString ToWgs84LineString(IEnumerable<Coordinate> coordinates)
+        private LineString ToWgs84LineString(IEnumerable<Coordinate> coordinates)
         {
-            var wgs84Coordinates = coordinates.Select(_itmWgs84MathTransform.Transform);
+            var wgs84Coordinates = coordinates.Select(c => _itmWgs84MathTransform.Transform(c.X, c.Y)).Select(c => new Coordinate(c.x, c.y));
             var nonDuplicates = new List<Coordinate>();
             foreach (var coordinate in wgs84Coordinates)
             {
@@ -276,7 +275,7 @@ namespace IsraelHiking.API.Controllers
             return _geometryFactory.CreateLineString(nonDuplicates.ToArray());
         }
 
-        private List<ILineString> GpxToItmLineStrings(GpxFile gpx)
+        private List<LineString> GpxToItmLineStrings(GpxFile gpx)
         {
             return (gpx.Routes ?? new List<GpxRoute>())
                 .Select(route => ToItmLineString(route.Waypoints))

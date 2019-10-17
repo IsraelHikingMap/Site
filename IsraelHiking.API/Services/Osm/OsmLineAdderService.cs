@@ -1,18 +1,17 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using GeoAPI.CoordinateSystems.Transformations;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
-using OsmSharp.Tags;
-using Microsoft.Extensions.Options;
 using OsmSharp.Changesets;
+using OsmSharp.Tags;
+using ProjNet.CoordinateSystems.Transformations;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Osm
 {
@@ -20,8 +19,8 @@ namespace IsraelHiking.API.Services.Osm
     public class OsmLineAdderService : IOsmLineAdderService
     {
         private readonly IElasticSearchGateway _elasticSearchGateway;
-        private readonly IMathTransform _itmWgs84MathTransform;
-        private readonly IMathTransform _wgs84ItmMathTransform;
+        private readonly MathTransform _itmWgs84MathTransform;
+        private readonly MathTransform _wgs84ItmMathTransform;
         private readonly IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly ConfigurationData _options;
@@ -208,32 +207,24 @@ namespace IsraelHiking.API.Services.Osm
 
         private async Task<List<Feature>> GetHighwaysInArea(LineString line)
         {
-            var northEast = _wgs84ItmMathTransform.Transform(new Coordinate
-            {
-                Y = line.Coordinates.Max(c => c.Y),
-                X = line.Coordinates.Max(c => c.X)
-            });
-            var southWest = _wgs84ItmMathTransform.Transform(new Coordinate
-            {
-                Y = line.Coordinates.Min(c => c.Y),
-                X = line.Coordinates.Min(c => c.X)
-            });
+            var northEast = _wgs84ItmMathTransform.Transform(line.Coordinates.Max(c => c.X), line.Coordinates.Max(c => c.Y));
+            var southWest = _wgs84ItmMathTransform.Transform(line.Coordinates.Min(c => c.X), line.Coordinates.Min(c => c.Y));
             // adding tolerance perimiter to find ways.
-            northEast.Y += _options.MinimalDistanceToClosestPoint;
-            northEast.X += _options.MinimalDistanceToClosestPoint;
-            southWest.Y -= _options.MinimalDistanceToClosestPoint;
-            southWest.X -= _options.MinimalDistanceToClosestPoint;
-            var northEastLatLon = _itmWgs84MathTransform.Transform(northEast);
-            var southWestLatLon = _itmWgs84MathTransform.Transform(southWest);
+            northEast.y += _options.MinimalDistanceToClosestPoint;
+            northEast.x += _options.MinimalDistanceToClosestPoint;
+            southWest.y -= _options.MinimalDistanceToClosestPoint;
+            southWest.x -= _options.MinimalDistanceToClosestPoint;
+            var northEastLatLon = _itmWgs84MathTransform.Transform(northEast.x, northEast.y);
+            var southWestLatLon = _itmWgs84MathTransform.Transform(southWest.x, southWest.y);
 
-            var highways = await _elasticSearchGateway.GetHighways(northEastLatLon, southWestLatLon);
+            var highways = await _elasticSearchGateway.GetHighways(new Coordinate(northEastLatLon.x, northEastLatLon.y), new Coordinate(southWestLatLon.x, southWestLatLon.y));
             return highways.ToList();
         }
 
         private Point GetItmCoordinate(Coordinate coordinate)
         {
-            var northEast = _wgs84ItmMathTransform.Transform(coordinate);
-            return new Point(northEast);
+            var northEast = _wgs84ItmMathTransform.Transform(coordinate.X, coordinate.Y);
+            return new Point(northEast.x, northEast.y);
         }
 
         private Feature GetClosetHighway(Coordinate coordinate, List<LineString> itmHighways, List<Feature> highways)
@@ -255,7 +246,7 @@ namespace IsraelHiking.API.Services.Osm
 
         private LineString ToItmLineString(Feature feature)
         {
-            var itmCoordinates = feature.Geometry.Coordinates.Select(_wgs84ItmMathTransform.Transform).ToArray();
+            var itmCoordinates = feature.Geometry.Coordinates.Select(c => _wgs84ItmMathTransform.Transform(c.X, c.Y)).Select(c => new Coordinate(c.x, c.y)).ToArray();
             var lineString = new LineString(itmCoordinates);
             lineString.SetOsmId(feature.GetOsmId());
             return lineString;

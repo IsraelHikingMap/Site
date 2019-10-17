@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using GeoAPI.Geometries;
+﻿using NetTopologySuite.Geometries;
+using System.Collections.Generic;
 
 namespace IsraelHiking.API.Executors
 {
@@ -13,6 +13,6 @@ namespace IsraelHiking.API.Executors
         /// </summary>
         /// <param name="input">Algorithm's input</param>
         /// <returns>Updated list of lines</returns>
-        List<ILineString> Prolong(GpxProlongerExecutorInput input);
+        List<LineString> Prolong(GpxProlongerExecutorInput input);
     }
 }

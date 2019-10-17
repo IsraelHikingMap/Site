@@ -1,12 +1,8 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using GeoAPI.Geometries;
-using ICSharpCode.SharpZipLib.BZip2;
+﻿using ICSharpCode.SharpZipLib.BZip2;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Zip;
 using IsraelHiking.API.Converters;
+using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
@@ -14,11 +10,14 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
 using NSubstitute;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
-using IsraelHiking.API.Converters.ConverterFlows;
-using NetTopologySuite.IO;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace IsraelHiking.API.Tests.Services
 {
@@ -75,7 +74,7 @@ namespace IsraelHiking.API.Tests.Services
             var dataContainer = new DataContainer { Routes = new List<RouteData> { new RouteData { Markers = new List<MarkerData> { new MarkerData { Latlng = new LatLng() } } } } };
             var results = _converterService.ToAnyFormat(dataContainer, FlowFormats.GEOJSON).Result.ToFeatureCollection();
 
-            Assert.AreEqual(1, results.Features.Count);
+            Assert.AreEqual(1, results.Count);
         }
 
         [TestMethod]
@@ -287,7 +286,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertGeoJsonToDataContainer_ShouldConvertToDataContainer()
         {
-            var collection = new FeatureCollection { Features = { new Feature(new Point(new Coordinate(1, 2, 3)), new AttributesTable()) } };
+            var collection = new FeatureCollection { new Feature(new Point(new CoordinateZ(1, 2, 3)), new AttributesTable()) };
 
             var dataContainer = _converterService.ToDataContainer(collection.ToBytes(), FlowFormats.GEOJSON).Result;
 

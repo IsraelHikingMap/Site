@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using GeoAPI.Geometries;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using WikiClientLibrary.Client;
 using WikiClientLibrary.Generators;
 using WikiClientLibrary.Pages;
@@ -47,7 +45,7 @@ namespace IsraelHiking.DataAccess
             {
                 PaginationSize = 500
             };
-            var results = await allpagesGenerator.EnumItemsAsync().ToList().ConfigureAwait(false);
+            var results = await allpagesGenerator.EnumItemsAsync().ToListAsync().ConfigureAwait(false);
             _logger.LogInformation($"Got {results.Count} pages from iNature, fetching their content and images");
             var features = new ConcurrentBag<Feature>();
             await Task.Run(() =>
@@ -124,7 +122,7 @@ namespace IsraelHiking.DataAccess
         {
             var wikiPageStub = new WikiPageStub(int.Parse(id));
             var feature = await PageToFeature(wikiPageStub);
-            return new FeatureCollection(new Collection<IFeature> {feature});
+            return new FeatureCollection { feature };
         }
 
         private async Task<Feature> PageToFeature(WikiPageStub pageStub)
@@ -193,16 +191,16 @@ namespace IsraelHiking.DataAccess
                 });
             if (shareMatch.Success)
             {
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE);
-                feature.Attributes.AddAttribute(FeatureAttributes.ICON, "icon-hike");
-                feature.Attributes.AddAttribute(FeatureAttributes.ICON_COLOR, "black");
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_SHARE_REFERENCE, shareMatch.Groups[1].Value);
+                feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE);
+                feature.Attributes.Add(FeatureAttributes.ICON, "icon-hike");
+                feature.Attributes.Add(FeatureAttributes.ICON_COLOR, "black");
+                feature.Attributes.Add(FeatureAttributes.POI_SHARE_REFERENCE, shareMatch.Groups[1].Value);
             }
             else
             {
-                feature.Attributes.AddAttribute(FeatureAttributes.ICON, "icon-inature");
-                feature.Attributes.AddAttribute(FeatureAttributes.ICON_COLOR, "#116C00");
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, Categories.INATURE);
+                feature.Attributes.Add(FeatureAttributes.ICON, "icon-inature");
+                feature.Attributes.Add(FeatureAttributes.ICON_COLOR, "#116C00");
+                feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, Categories.INATURE);
             }
             return feature;
         }

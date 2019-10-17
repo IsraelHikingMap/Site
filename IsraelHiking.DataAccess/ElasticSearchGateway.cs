@@ -1,48 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Elasticsearch.Net;
-using GeoAPI.Geometries;
+﻿using Elasticsearch.Net;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Nest;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.IO.Converters;
-using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Feature = NetTopologySuite.Features.Feature;
 
 namespace IsraelHiking.DataAccess
 {
     public class GeoJsonNetSerializer : JsonNetSerializer
     {
-        public GeoJsonNetSerializer(IConnectionSettingsValues settings) : base(settings)
+        public GeoJsonNetSerializer(IConnectionSettingsValues settings, GeometryFactory factory) : base(settings)
         {
             OverwriteDefaultSerializers((s, cvs) =>
             {
-                s.Converters.Add(new CoordinateConverter());
-                s.Converters.Add(new GeometryConverter());
+                s.Converters.Add(new CoordinateConverter(factory.PrecisionModel, 3));
+                s.Converters.Add(new CoordinateConverterPatch(factory.PrecisionModel, 3));
+                s.Converters.Add(new GeometryConverter(factory, 3));
+                s.Converters.Add(new GeometryArrayConverter(factory, 3));
                 s.Converters.Add(new FeatureCollectionConverter());
                 s.Converters.Add(new FeatureConverter());
                 s.Converters.Add(new AttributesTableConverter());
-                s.Converters.Add(new ICRSObjectConverter());
-                s.Converters.Add(new GeometryArrayConverter());
-                s.Converters.Add(new EnvelopeConverter());
-            });
-        }
-
-        public GeoJsonNetSerializer(IConnectionSettingsValues settings, JsonConverter statefulConverter) : base(settings, statefulConverter)
-        {
-            OverwriteDefaultSerializers((s, cvs) =>
-            {
-                s.Converters.Add(new CoordinateConverter());
-                s.Converters.Add(new GeometryConverter());
-                s.Converters.Add(new FeatureCollectionConverter());
-                s.Converters.Add(new FeatureConverter());
-                s.Converters.Add(new AttributesTableConverter());
-                s.Converters.Add(new ICRSObjectConverter());
-                s.Converters.Add(new GeometryArrayConverter());
                 s.Converters.Add(new EnvelopeConverter());
             });
         }
@@ -66,11 +51,13 @@ namespace IsraelHiking.DataAccess
 
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
+        private readonly GeometryFactory _geometryFactory;
         private IElasticClient _elasticClient;
 
-        public ElasticSearchGateway(ILogger logger)
+        public ElasticSearchGateway(ILogger logger, GeometryFactory geometryFactory)
         {
             _logger = logger;
+            _geometryFactory = geometryFactory;
         }
 
         public void Initialize(string uri = "http://localhost:9200/")
@@ -80,7 +67,7 @@ namespace IsraelHiking.DataAccess
             var connectionString = new ConnectionSettings(
                 pool,
                 new HttpConnection(),
-                new SerializerFactory(s => new GeoJsonNetSerializer(s)))
+                new SerializerFactory(s => new GeoJsonNetSerializer(s, _geometryFactory)))
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
             if (_elasticClient.IndexExists(OSM_POIS_INDEX1).Exists == false &&
@@ -405,7 +392,7 @@ namespace IsraelHiking.DataAccess
             {
                 await CreateCacheIndex();
             }
-            await _elasticClient.IndexAsync(featureCollection, r => r.Index(CACHE).Id(GetId(featureCollection.Features.First() as Feature)));
+            await _elasticClient.IndexAsync(featureCollection, r => r.Index(CACHE).Id(GetId(featureCollection.First() as Feature)));
         }
 
         public Task<Rating> GetRating(string id, string source)

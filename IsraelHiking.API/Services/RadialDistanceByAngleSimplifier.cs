@@ -1,9 +1,8 @@
-﻿using System;
+﻿using NetTopologySuite.Algorithm;
+using NetTopologySuite.Geometries;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using GeoAPI.Geometries;
-using NetTopologySuite.Algorithm;
-using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services
 {
@@ -13,7 +12,7 @@ namespace IsraelHiking.API.Services
     /// </summary>
     public class RadialDistanceByAngleSimplifier
     {
-        private readonly IGeometry _geometry;
+        private readonly Geometry _geometry;
         /// <summary>
         /// The radial distance tolerance - the lower it is the less simplified the line will be
         /// </summary>
@@ -30,7 +29,7 @@ namespace IsraelHiking.API.Services
         /// <param name="distanceTolerance">The radial distance tolerance</param>
         /// <param name="angleTolerace">The angle tolerance in degrees</param>
         /// <returns>A simlified <see cref="LineString"/></returns>
-        public static LineString Simplify(IGeometry geometry, double distanceTolerance, double angleTolerace)
+        public static LineString Simplify(Geometry geometry, double distanceTolerance, double angleTolerace)
         {
             var simplifier = new RadialDistanceByAngleSimplifier(geometry)
             {
@@ -44,7 +43,7 @@ namespace IsraelHiking.API.Services
         /// Constructor
         /// </summary>
         /// <param name="geometry">The geometry to simplify</param>
-        public RadialDistanceByAngleSimplifier(IGeometry geometry)
+        public RadialDistanceByAngleSimplifier(Geometry geometry)
         {
             _geometry = geometry;
         }

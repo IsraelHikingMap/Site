@@ -1,6 +1,4 @@
-﻿using System.IO;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
@@ -11,8 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp.API;
+using System.IO;
 
 namespace IsraelHiking.API.Tests.Controllers
 {

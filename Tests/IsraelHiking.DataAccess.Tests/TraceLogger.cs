@@ -1,8 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Internal;
 
 namespace IsraelHiking.DataAccess.Tests
 {
@@ -20,8 +18,7 @@ namespace IsraelHiking.DataAccess.Tests
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            var format = state as FormattedLogValues;
-            Trace.WriteLine(format.First().Value);
+            throw new NotImplementedException();
         }
 
         public void LogDebug(string message)

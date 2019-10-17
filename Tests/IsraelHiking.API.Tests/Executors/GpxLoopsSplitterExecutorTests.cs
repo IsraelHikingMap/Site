@@ -1,8 +1,7 @@
-﻿using System.Linq;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Executors
 {

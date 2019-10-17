@@ -1,10 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using IsraelHiking.API.Controllers;
-using NSubstitute;
-using IsraelHiking.DataAccessInterfaces;
-using System.Linq;
-using GeoAPI.Geometries;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Geometries;
+using NSubstitute;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Controllers
 {

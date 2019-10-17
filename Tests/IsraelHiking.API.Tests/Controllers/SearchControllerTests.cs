@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Converters.CoordinatesParsers;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -10,6 +7,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -135,7 +134,7 @@ namespace IsraelHiking.API.Tests.Controllers
             });
             placeFeature.SetTitles();
             var featureLocation = new Coordinate(0.5, 0.5);
-            var featureInPlace = new Feature(new GeometryCollection(new IGeometry[]
+            var featureInPlace = new Feature(new GeometryCollection(new Geometry[]
                 {
                     new Point(featureLocation)
                 }), new AttributesTable

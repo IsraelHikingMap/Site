@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
-using IsraelHiking.API.Services;
-using IsraelHiking.API.Services.Poi;
+﻿using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using NSubstitute;
+using System.Collections.Generic;
 
 namespace IsraelHiking.API.Tests.Services.Poi
 {
@@ -32,10 +29,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             var poiId = "42";
             var language = "en";
-            var featureCollection = new FeatureCollection
-            {
-                Features = { GetValidFeature(poiId, _adapter.Source) }
-            };
+            var featureCollection = new FeatureCollection { GetValidFeature(poiId, _adapter.Source) };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
             _nakebGateway.GetById("42").Returns(featureCollection);
 

@@ -1,32 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using NetTopologySuite.Geometries;
+using System.Collections.Generic;
 using System.Linq;
-using GeoAPI.Geometries;
-using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Executors
 {
     /// <inheritdoc/>
     public class GpxLoopsSplitterExecutor : IGpxLoopsSplitterExecutor
     {
-        private readonly IGeometryFactory _geometryFactory;
+        private readonly GeometryFactory _geometryFactory;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="geometryFactory"></param>
-        public GpxLoopsSplitterExecutor(IGeometryFactory geometryFactory)
+        public GpxLoopsSplitterExecutor(GeometryFactory geometryFactory)
         {
             _geometryFactory = geometryFactory;
         }
 
         /// <inheritdoc/>
-        public List<ILineString> GetMissingLines(ILineString gpxLine, IReadOnlyList<ILineString> existingLineStrings, double minimalMissingPartLength, double minimalDistanceToClosestPoint)
+        public List<LineString> GetMissingLines(LineString gpxLine, IReadOnlyList<LineString> existingLineStrings, double minimalMissingPartLength, double minimalDistanceToClosestPoint)
         {
             if (gpxLine.Coordinates.Length <= 1)
             {
-                return new List<ILineString>();
+                return new List<LineString>();
             }
-            var gpxSplit = new List<ILineString>();
+            var gpxSplit = new List<LineString>();
             var waypointsGroup = new List<Coordinate>();
             
             foreach (var coordinate in gpxLine.Coordinates)
@@ -45,9 +44,9 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc/>
-        public List<ILineString> SplitSelfLoops(ILineString gpxLine, double minimalDistanceToClosestPoint)
+        public List<LineString> SplitSelfLoops(LineString gpxLine, double minimalDistanceToClosestPoint)
         {
-            var lines = new List<ILineString>();
+            var lines = new List<LineString>();
             var reversedGpxLine = ReverseLine(gpxLine);
 
             int coordinateIndex = 0;
@@ -71,7 +70,7 @@ namespace IsraelHiking.API.Executors
             return lines;
         }
 
-        private int GetClosingLoopIndex(ILineString gpxLine, int currentIndex, double minimalDistanceToClosestPoint)
+        private int GetClosingLoopIndex(LineString gpxLine, int currentIndex, double minimalDistanceToClosestPoint)
         {
             int indexOfFarEnoughLinePrefix = currentIndex - 1;
             var currentCoordinatePoint = new Point(gpxLine.Coordinates[currentIndex]);
@@ -94,7 +93,7 @@ namespace IsraelHiking.API.Executors
             return distance < minimalDistanceToClosestPoint ? indexOfFarEnoughLinePrefix + 1 : -1;
         }
 
-        private void AddLineString(ICollection<ILineString> gpxSplit, Coordinate[] coordinates)
+        private void AddLineString(ICollection<LineString> gpxSplit, Coordinate[] coordinates)
         {
             if (coordinates.Length < 3)
             {
@@ -103,7 +102,7 @@ namespace IsraelHiking.API.Executors
             gpxSplit.Add(_geometryFactory.CreateLineString(coordinates));
         }
 
-        private bool IsCloseToALine(Coordinate coordinate, IReadOnlyList<ILineString> lineStrings, double minimalDistanceToClosestPoint)
+        private bool IsCloseToALine(Coordinate coordinate, IReadOnlyList<LineString> lineStrings, double minimalDistanceToClosestPoint)
         {
             var point = new Point(coordinate);
             if (!lineStrings.Any())
@@ -113,9 +112,9 @@ namespace IsraelHiking.API.Executors
             return lineStrings.Min(l => l.Distance(point)) < minimalDistanceToClosestPoint;
         }
 
-        private ILineString ReverseLine(ILineString lineString)
+        private LineString ReverseLine(LineString lineString)
         {
-            return (ILineString)lineString.Reverse();
+            return (LineString)lineString.Reverse();
         }
     }
 }

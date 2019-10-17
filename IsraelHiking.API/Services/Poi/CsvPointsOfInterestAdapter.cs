@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using CsvHelper;
-using GeoAPI.Geometries;
+﻿using CsvHelper;
 using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
@@ -15,6 +10,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -147,14 +146,14 @@ namespace IsraelHiking.API.Services.Poi
                 {
                     var content = await _remoteFileFetcherGateway.GetFileContent(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
                     var convertedBytes = await _dataContainerConverterService.Convert(content.Content, content.FileName, FlowFormats.GEOJSON);
-                    feature.Geometry = convertedBytes.ToFeatureCollection().Features.FirstOrDefault()?.Geometry ?? feature.Geometry;
+                    feature.Geometry = convertedBytes.ToFeatureCollection().FirstOrDefault()?.Geometry ?? feature.Geometry;
                 }
                 featureCollection = SetToCache(feature);
             }
             var poiItem = await ConvertToPoiExtended(featureCollection, language);
             poiItem.IsEditable = false;
             poiItem.IsArea = false;
-            poiItem.IsRoute = !(featureCollection.Features.First().Geometry is Point);
+            poiItem.IsRoute = !(featureCollection.First().Geometry is Point);
             
             return poiItem;
         }

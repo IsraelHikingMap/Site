@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using GeoAPI.CoordinateSystems.Transformations;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Simplify;
-using Microsoft.Extensions.Options;
+using ProjNet.CoordinateSystems.Transformations;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Services
 {
     ///<inheritdoc/>
     public class RouteDataSplitterService : IRouteDataSplitterService
     {
-        private readonly IMathTransform _wgs84ItmMathTransform;
+        private readonly MathTransform _wgs84ItmMathTransform;
         private readonly ConfigurationData _options;
 
         /// <summary>
@@ -72,7 +71,7 @@ namespace IsraelHiking.API.Services
 
         private Coordinate[] ToWgs84Coordinates(IEnumerable<LatLng> latLngs)
         {
-            return latLngs.Select(latLng => _wgs84ItmMathTransform.Transform(new Coordinate { X = latLng.Lng, Y = latLng.Lat })).ToArray();
+            return latLngs.Select(latLng => _wgs84ItmMathTransform.Transform(latLng.Lng, latLng.Lat)).Select(c => new Coordinate(c.x, c.y)).ToArray();
         }
     }
 }

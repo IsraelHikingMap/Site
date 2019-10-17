@@ -1,9 +1,9 @@
-﻿using IsraelHiking.DataAccessInterfaces;
+﻿using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
+using Microsoft.AspNetCore.Mvc;
+using NetTopologySuite.Geometries;
 using System.Linq;
 using System.Threading.Tasks;
-using GeoAPI.Geometries;
-using IsraelHiking.Common;
-using Microsoft.AspNetCore.Mvc;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -11,7 +11,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller allows elevation queries
     /// </summary>
     [Route("api/[controller]")]
-    public class ElevationController : Controller
+    public class ElevationController : ControllerBase
     {
         private readonly IElevationDataStorage _elevationDataStorage;
 

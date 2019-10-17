@@ -1,14 +1,13 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using GeoAPI.Geometries;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+using System;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess
 {
@@ -47,15 +46,15 @@ namespace IsraelHiking.DataAccess
                 var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
                 if (jsonResponse?.paths == null || !jsonResponse.paths.Any())
                 {
-                    return new LineString(new Coordinate[0]);
+                    return new LineString(new CoordinateZ[0]);
                 }
                 if (jsonResponse.paths.First().points.coordinates.Count == 1)
                 {
                     var jsonCoordinates = jsonResponse.paths.First().points.coordinates.First();
-                    var convertedCoordiates = new Coordinate(jsonCoordinates[0], jsonCoordinates[1], jsonCoordinates.Count > 2 ? jsonCoordinates[2] : 0.0);
+                    var convertedCoordiates = new CoordinateZ(jsonCoordinates[0], jsonCoordinates[1], jsonCoordinates.Count > 2 ? jsonCoordinates[2] : 0.0);
                     return new LineString(new [] { convertedCoordiates, convertedCoordiates});
                 }
-                return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new Coordinate(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());
+                return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new CoordinateZ(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());
             }
         }
 

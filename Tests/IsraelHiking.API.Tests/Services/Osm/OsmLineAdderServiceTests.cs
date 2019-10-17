@@ -1,18 +1,17 @@
-﻿using System.Collections.Generic;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp;
-using Microsoft.Extensions.Options;
-using OsmSharp.Complete;
-using System.Linq;
 using OsmSharp.Changesets;
+using OsmSharp.Complete;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Services.Osm
 {

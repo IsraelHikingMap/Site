@@ -1,6 +1,6 @@
-﻿using System.IO;
+﻿using NetTopologySuite.Geometries;
+using System.IO;
 using System.Threading.Tasks;
-using GeoAPI.Geometries;
 
 namespace IsraelHiking.DataAccessInterfaces
 {

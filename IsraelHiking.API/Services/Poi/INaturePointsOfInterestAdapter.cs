@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using IsraelHiking.API.Converters.ConverterFlows;
+﻿using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
@@ -10,6 +7,9 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -66,7 +66,7 @@ namespace IsraelHiking.API.Services.Poi
             var poiItem = await ConvertToPoiExtended(featureCollection, language);
             poiItem.IsEditable = false;
             poiItem.IsArea = false;
-            var mainFeature = featureCollection.Features.First();
+            var mainFeature = featureCollection.First();
             if (mainFeature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE))
             {
                 var share = await _repository.GetUrlById(mainFeature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());

@@ -1,19 +1,17 @@
-﻿using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using CsvHelper;
+﻿using CsvHelper;
 using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
-using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -21,7 +19,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller is responsible for processing csv files
     /// </summary>
     [Route("api/[controller]")]
-    public class CsvController : Controller
+    public class CsvController : ControllerBase
     {
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
@@ -49,8 +47,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="category">the relevant category <see cref="Categories"/></param>
         /// <returns></returns>
         [HttpPost]
-        [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
-        public async Task<IActionResult> UploadCsv([FromForm]IFormFile file, [FromQuery]string idRegExPattern, [FromQuery]string sourceImageUrl, [FromQuery]string icon = "icon-bike", [FromQuery]string iconColor = "black", [FromQuery]string category = Categories.ROUTE_BIKE)
+        public async Task<IActionResult> UploadCsv(IFormFile file, [FromQuery]string idRegExPattern, [FromQuery]string sourceImageUrl, [FromQuery]string icon = "icon-bike", [FromQuery]string iconColor = "black", [FromQuery]string category = Categories.ROUTE_BIKE)
         {
             var reader = new StreamReader(file.OpenReadStream());
             var csvReader = new CsvReader(reader);
@@ -74,7 +71,7 @@ namespace IsraelHiking.API.Controllers
                         var geojsonBytes = await _dataContainerConverterService.Convert(response.Content,
                             response.FileName, FlowFormats.GEOJSON);
                         var geoJson = geojsonBytes.ToFeatureCollection();
-                        var coordinate = geoJson.Features.First().Geometry.Coordinate;
+                        var coordinate = geoJson.First().Geometry.Coordinate;
                         csvRow.Latitude = coordinate.Y;
                         csvRow.Longitude = coordinate.X;
                     }

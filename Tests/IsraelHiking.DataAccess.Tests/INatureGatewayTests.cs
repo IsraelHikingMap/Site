@@ -1,10 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Features;
-using NetTopologySuite.IO;
-using Newtonsoft.Json;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IsraelHiking.DataAccess.Tests
 {
@@ -19,9 +13,6 @@ namespace IsraelHiking.DataAccess.Tests
             wikiGateway.Initialize().Wait();
             var results = wikiGateway.GetAll().Result;
             Assert.IsTrue(results.Count > 0);
-            var writer = new GeoJsonWriter {SerializerSettings = new JsonSerializerSettings { Formatting = Formatting.Indented }};
-            var collection = new FeatureCollection(new Collection<IFeature>(results.Cast<IFeature>().ToArray()));
-            File.WriteAllText(@"D:\iNature.geojson", writer.Write(collection));
         }
     }
 }

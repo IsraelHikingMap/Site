@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using GeoAPI.Geometries;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using WikiClientLibrary;
 using WikiClientLibrary.Client;
 using WikiClientLibrary.Generators;
@@ -69,7 +67,7 @@ namespace IsraelHiking.DataAccess
                         Radius = 10000,
                         PaginationSize = 500
                     };
-                    var results = await geoSearchGenerator.EnumItemsAsync().ToList();
+                    var results = await geoSearchGenerator.EnumItemsAsync().ToListAsync();
                     var features = new List<Feature>();
                     foreach (var geoSearchResultItem in results)
                     {
@@ -104,7 +102,7 @@ namespace IsraelHiking.DataAccess
             var language = splitId.First();
             var pageId = splitId.Last();
             var site = _wikiSites[language];
-            var stub = await WikiPageStub.FromPageIds(site, new[] { int.Parse(pageId) }).First();
+            var stub = await WikiPageStub.FromPageIds(site, new[] { int.Parse(pageId) }).FirstAsync();
             var page = new WikiPage(site, stub.Title);
             return await ConvertPageToFeatureCollection(page, language);
         }
@@ -138,7 +136,7 @@ namespace IsraelHiking.DataAccess
             attributes.Add(FeatureAttributes.POI_USER_NAME, page.LastRevision.UserName);
             attributes.Add(FeatureAttributes.POI_USER_ADDRESS, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeUriString(page.LastRevision.UserName)}"));
             attributes.Add(FeatureAttributes.POI_LAST_MODIFIED, page.LastRevision.TimeStamp.ToString("o"));
-            return new FeatureCollection(new Collection<IFeature> { new Feature(new Point(coordinate), attributes) });
+            return new FeatureCollection { new Feature(new Point(coordinate), attributes) };
         }
 
         private AttributesTable GetAttributes(Coordinate location, string title, string id, string language)

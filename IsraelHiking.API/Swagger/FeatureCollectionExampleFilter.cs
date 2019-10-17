@@ -1,49 +1,51 @@
-﻿using System.Collections.ObjectModel;
-using GeoAPI.Geometries;
+﻿using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Swashbuckle.AspNetCore.Swagger;
 using NetTopologySuite.IO;
+using Newtonsoft.Json;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Diagnostics.CodeAnalysis;
 
 namespace IsraelHiking.API.Swagger
 {
     /// <summary>
     /// Provides example for feature collection in swagger API
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class FeatureCollectionExampleFilter : ISchemaFilter
     {
         /// <summary>
         /// Applys the example of a <see cref="FeatureCollection"/> to the schema
         /// </summary>
-        /// <param name="model"></param>
         /// <param name="context"></param>
-        public void Apply(Schema model, SchemaFilterContext context)
+        /// <param name="schema"></param>
+        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
         {
             if (context == null)
             {
                 return;
             }
-            if (context.SystemType != typeof(FeatureCollection))
+            if (context.ApiModel.Type != typeof(FeatureCollection))
             {
                 return;
             }
-            var writer = new GeoJsonWriter();
+            var writer = new GeoJsonWriter
+            {
+                SerializerSettings = new JsonSerializerSettings { Formatting = Formatting.Indented }
+            };
             var exampleFeatureCollectionString = writer.Write(
-                new FeatureCollection(new Collection<IFeature>
+                new FeatureCollection
                 {
                     new Feature(new LineString(new[]
                         {
                             new Coordinate(1, 2),
                             new Coordinate(3, 4),
                         }),
-                        new AttributesTable())
-                }));
-            var jsonObject = JsonConvert.DeserializeObject<JObject>(exampleFeatureCollectionString);
-            model.Example = jsonObject;
-            model.Default = jsonObject;
+                        new AttributesTable { {"key", "value" } })
+                });
+            schema.Example = new OpenApiString(exampleFeatureCollectionString);
+            schema.Default = new OpenApiString(exampleFeatureCollectionString);
         }
     }
 }

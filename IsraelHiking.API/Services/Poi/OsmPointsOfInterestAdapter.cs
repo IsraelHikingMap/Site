@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
@@ -17,6 +10,11 @@ using NetTopologySuite.Geometries;
 using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.Tags;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -104,7 +102,7 @@ namespace IsraelHiking.API.Services.Poi
 
         private async Task<PointOfInterestExtended> FeatureToExtendedPoi(IFeature feature, string language)
         {
-            var poiItem = await ConvertToPoiExtended(new FeatureCollection(new Collection<IFeature> {feature}), language);
+            var poiItem = await ConvertToPoiExtended(new FeatureCollection { feature }, language);
             poiItem.IsArea = feature.Geometry is Polygon || feature.Geometry is MultiPolygon;
             poiItem.IsRoute = !poiItem.IsArea && poiItem.DataContainer.Routes.Any(r => r.Segments.Count > 1);
             poiItem.IsEditable = true;
@@ -268,7 +266,7 @@ namespace IsraelHiking.API.Services.Poi
                 {
                     continue;
                 }
-                await _elasticSearchGateway.DeletePointOfInterestById(pageFetaure.Features.First().Attributes[FeatureAttributes.ID].ToString(), Sources.WIKIPEDIA);
+                await _elasticSearchGateway.DeletePointOfInterestById(pageFetaure.First().Attributes[FeatureAttributes.ID].ToString(), Sources.WIKIPEDIA);
             }
             return feature;
         }

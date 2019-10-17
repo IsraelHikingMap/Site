@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using GeoAPI.Geometries;
-using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.LinearReferencing;
 using NetTopologySuite.Operation.Distance;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Executors
 {
     internal class LineAndCoordinate {
-        public ILineString Line { get; set; }
+        public LineString Line { get; set; }
         public Coordinate Coordinate { get; set; }
     }
 
@@ -29,7 +28,7 @@ namespace IsraelHiking.API.Executors
         /// <summary>
         /// The lines that needs to be prolonged - non-readonly lines
         /// </summary>
-        public List<ILineString> LinesToProlong { get; set; }
+        public List<LineString> LinesToProlong { get; set; }
 
         /// <summary>
         /// The original coordinates that start from the line's end
@@ -38,7 +37,7 @@ namespace IsraelHiking.API.Executors
         /// <summary>
         /// Existing lines in the area in ITM coordinates
         /// </summary>
-        public IReadOnlyList<ILineString> ExistingItmHighways { get; set; }
+        public IReadOnlyList<LineString> ExistingItmHighways { get; set; }
         /// <summary>
         /// The minimal distance to another line in order to stop prolonging
         /// </summary>
@@ -52,23 +51,23 @@ namespace IsraelHiking.API.Executors
     /// <inheritdoc/>
     public class GpxProlongerExecutor : IGpxProlongerExecutor
     {
-        private readonly IGeometryFactory _geometryFactory;
+        private readonly GeometryFactory _geometryFactory;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="geometryFactory"></param>
-        public GpxProlongerExecutor(IGeometryFactory geometryFactory)
+        public GpxProlongerExecutor(GeometryFactory geometryFactory)
         {
             _geometryFactory = geometryFactory;
         }
 
         /// <inheritdoc/>
-        public List<ILineString> Prolong(GpxProlongerExecutorInput input)
+        public List<LineString> Prolong(GpxProlongerExecutorInput input)
         {
             // going from end to start.
             var endTostart = input.OriginalCoordinates.Reverse().ToList();
-            var linesToProlong = input.LinesToProlong.Select(l => l.Reverse() as ILineString).Reverse().ToList();
+            var linesToProlong = input.LinesToProlong.Select(l => l.Reverse() as LineString).Reverse().ToList();
             var allLines = input.ExistingItmHighways.Concat(linesToProlong).ToList();
             var current = GetClosest(endTostart, allLines, input);
             if (current == null)
@@ -103,10 +102,10 @@ namespace IsraelHiking.API.Executors
                 current.Coordinate = next.Coordinate;
                 current.Line = next.Line;
             }
-            return linesToProlong.Select(l => l.Reverse() as ILineString).Reverse().ToList();
+            return linesToProlong.Select(l => l.Reverse() as LineString).Reverse().ToList();
         }
 
-        private void HandleSelfClosingCase(GpxProlongerExecutorInput input, SegmentWithLines segment, List<ILineString> linesToProlong)
+        private void HandleSelfClosingCase(GpxProlongerExecutorInput input, SegmentWithLines segment, List<LineString> linesToProlong)
         {
             var lengthIndexedLine = new LengthIndexedLine(segment.Start.Line);
             var closestCoordinateCurrentIndex = lengthIndexedLine.Project(segment.Start.Coordinate);
@@ -128,7 +127,7 @@ namespace IsraelHiking.API.Executors
             }
         }
 
-        private void HandleIntersectionCase(GpxProlongerExecutorInput input, SegmentWithLines segment, List<ILineString> linesToProlong)
+        private void HandleIntersectionCase(GpxProlongerExecutorInput input, SegmentWithLines segment, List<LineString> linesToProlong)
         {
             var intersection = segment.Start.Line.Intersection(segment.End.Line).Coordinates
                 .OrderBy(c => c.Distance(segment.Start.Coordinate) + c.Distance(segment.End.Coordinate)).FirstOrDefault();
@@ -168,7 +167,7 @@ namespace IsraelHiking.API.Executors
             linesToProlong.Add(line);
         }
 
-        private void HandleTwoLinesCase(GpxProlongerExecutorInput input, SegmentWithLines segment, List<ILineString> linesToProlong)
+        private void HandleTwoLinesCase(GpxProlongerExecutorInput input, SegmentWithLines segment, List<LineString> linesToProlong)
         {
             var bothLinesAreInList = linesToProlong.Contains(segment.Start.Line) && linesToProlong.Contains(segment.End.Line);
             if (bothLinesAreInList && 
@@ -200,7 +199,7 @@ namespace IsraelHiking.API.Executors
         /// <param name="allLines"></param>
         /// <param name="input"></param>
         /// <returns></returns>
-        private LineAndCoordinate GetClosest(List<Coordinate> endTostart, List<ILineString> allLines, GpxProlongerExecutorInput input)
+        private LineAndCoordinate GetClosest(List<Coordinate> endTostart, List<LineString> allLines, GpxProlongerExecutorInput input)
         {
             foreach (var coordinate in endTostart)
             {
@@ -219,7 +218,7 @@ namespace IsraelHiking.API.Executors
             return null;
         }
 
-        private bool AddSegmentToLine(ILineString line, SegmentWithLines segment, List<ILineString> linesToProlong, double minimalDistance)
+        private bool AddSegmentToLine(LineString line, SegmentWithLines segment, List<LineString> linesToProlong, double minimalDistance)
         {
             if (linesToProlong.Contains(line) == false)
             {
@@ -245,7 +244,7 @@ namespace IsraelHiking.API.Executors
             return false;
         }
 
-        private ILineString CreateLineString(Coordinate currentCoordinate, Coordinate[] originalCoordinates, Coordinate nextCoordinate)
+        private LineString CreateLineString(Coordinate currentCoordinate, Coordinate[] originalCoordinates, Coordinate nextCoordinate)
         {
             var list = originalCoordinates.ToList();
             if (currentCoordinate != null)

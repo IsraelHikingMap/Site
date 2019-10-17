@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -11,7 +11,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller handles rating
     /// </summary>
     [Route("api/[controller]")]
-    public class RatingController : Controller
+    public class RatingController : ControllerBase
     {
         private readonly IRepository _repository;
 

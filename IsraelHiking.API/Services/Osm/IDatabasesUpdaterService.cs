@@ -1,7 +1,6 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using OsmSharp.Changesets;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Osm
 {

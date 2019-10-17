@@ -1,5 +1,4 @@
 ﻿using IsraelHiking.API.Converters;
-using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Hosting;
@@ -8,7 +7,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -20,14 +18,14 @@ namespace IsraelHiking.API.Executors
     public class PointsOfInterestFilesCreatorExecutor : IPointsOfInterestFilesCreatorExecutor
     {
         private readonly IFileSystemHelper _fileSystemHelper;
-        private readonly IHostingEnvironment _environment;
+        private readonly IWebHostEnvironment _environment;
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="fileSystemHelper"></param>
         /// <param name="environment"></param>
         public PointsOfInterestFilesCreatorExecutor(IFileSystemHelper fileSystemHelper,
-            IHostingEnvironment environment)
+            IWebHostEnvironment environment)
         {
             _fileSystemHelper = fileSystemHelper;
             _environment = environment;

@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -7,6 +6,7 @@ using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller allows viewing, editing and filtering of points of interest (POI)
     /// </summary>
     [Route("api/poi")]
-    public class PointsOfInterestController : Controller
+    public class PointsOfInterestController : ControllerBase
     {
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly ITagsHelper _tagsHelper;

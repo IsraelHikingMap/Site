@@ -1,15 +1,15 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using GeoAPI.Geometries;
-using IsraelHiking.DataAccessInterfaces;
-using NetTopologySuite.Features;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Converters.CoordinatesParsers;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
+using IsraelHiking.DataAccessInterfaces;
+using Microsoft.AspNetCore.Mvc;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -17,7 +17,7 @@ namespace IsraelHiking.API.Controllers
     /// This contoller allows search of geo-locations
     /// </summary>
     [Route("api/[controller]")]
-    public class SearchController : Controller
+    public class SearchController : ControllerBase
     {
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IEnumerable<ICoordinatesParser> _coordinatesParsers;

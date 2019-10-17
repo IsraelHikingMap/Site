@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Gpx;
+﻿using IsraelHiking.API.Gpx;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace IsraelHiking.API.Converters
 {
@@ -22,23 +21,23 @@ namespace IsraelHiking.API.Converters
             var collection = new FeatureCollection();
             var points = gpx.Waypoints ?? new List<GpxWaypoint>();
             var pointsFeatures = points.Select(point => new Feature(new Point(CreateGeoPosition(point)), CreateProperties(point.Name, point.Description)));
-            pointsFeatures.ToList().ForEach(f => collection.Features.Add(f));
+            pointsFeatures.ToList().ForEach(f => collection.Add(f));
 
             var routes = gpx.Routes ?? new List<GpxRoute>();
             var routesFeatures = routes.Select(route => new Feature(new LineString(route.Waypoints.Select(CreateGeoPosition).ToArray()), CreateProperties(route.Name, route.Description)));
-            routesFeatures.ToList().ForEach(f => collection.Features.Add(f));
+            routesFeatures.ToList().ForEach(f => collection.Add(f));
 
             foreach (var track in gpx.Tracks ?? new List<GpxTrack>())
             {
                 if (track.Segments.Length == 1)
                 {
                     var lineStringFeature = new Feature(new LineString(track.Segments[0].Waypoints.Select(CreateGeoPosition).ToArray()), CreateProperties(track.Name, track.Description));
-                    collection.Features.Add(lineStringFeature);
+                    collection.Add(lineStringFeature);
                     continue;
                 }
-                var lineStringList = track.Segments.Select(segment => new LineString(segment.Waypoints.Select(CreateGeoPosition).ToArray()) as ILineString).ToArray();
+                var lineStringList = track.Segments.Select(segment => new LineString(segment.Waypoints.Select(CreateGeoPosition).ToArray()) as LineString).ToArray();
                 var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.Name, gpx.Metadata.Creator, track.Description));
-                collection.Features.Add(feature);
+                collection.Add(feature);
             }
             return collection;
         }
@@ -48,21 +47,21 @@ namespace IsraelHiking.API.Converters
         {
             var gpx = new GpxFile
             {
-                Metadata = new GpxMetadata(collection.Features.FirstOrDefault(f => f.Attributes.Exists(CREATOR))
+                Metadata = new GpxMetadata(collection.FirstOrDefault(f => f.Attributes.Exists(CREATOR))
                                                ?.Attributes[CREATOR]?.ToString() ?? GpxDataContainerConverter.ISRAEL_HIKING_MAP + "_geojson")
             };
-            gpx.Waypoints.AddRange(collection.Features.Where(f => f.Geometry is Point)
+            gpx.Waypoints.AddRange(collection.Where(f => f.Geometry is Point)
                 .Select(CreateWaypoint)
-                .Union(collection.Features.Where(f => f.Geometry is MultiPoint)
+                .Union(collection.Where(f => f.Geometry is MultiPoint)
                     .SelectMany(CreateWayPointsFromMultiPoint))
                 .ToList());
-            gpx.Routes.AddRange(collection.Features.Where(f => f.Geometry is LineString)
+            gpx.Routes.AddRange(collection.Where(f => f.Geometry is LineString)
                 .Select(CreateRouteFromLineString)
-                .Union(collection.Features.Where(f => f.Geometry is Polygon).Select(CreateRouteFromPolygon))
-                .Union(collection.Features.Where(f => f.Geometry is MultiPolygon)
+                .Union(collection.Where(f => f.Geometry is Polygon).Select(CreateRouteFromPolygon))
+                .Union(collection.Where(f => f.Geometry is MultiPolygon)
                     .SelectMany(CreateRoutesFromMultiPolygon))
                 .ToList());
-            gpx.Tracks.AddRange(collection.Features.Where(f => f.Geometry is MultiLineString)
+            gpx.Tracks.AddRange(collection.Where(f => f.Geometry is MultiLineString)
                 .SelectMany(CreateTracksFromMultiLineString)
                 .ToList());
             gpx.UpdateBounds();
@@ -74,8 +73,8 @@ namespace IsraelHiking.API.Converters
             double lat = waypoint.Latitude;
             double lon = waypoint.Longitude;
             return waypoint.ElevationInMeters.HasValue 
-                ? new Coordinate(lon, lat, (double)waypoint.ElevationInMeters) 
-                : new Coordinate(lon, lat);
+                ? new CoordinateZ(lon, lat, (double)waypoint.ElevationInMeters)
+                : new CoordinateZ(lon, lat);
         }
 
         private GpxWaypoint CreateWaypoint(IFeature pointFeature)
@@ -156,7 +155,7 @@ namespace IsraelHiking.API.Converters
             var tracks = new List<GpxTrack>();
             var nameIndex = 0;
             var list = new List<GpxTrackSegment>();
-            foreach (var lineString in multiLineString.Geometries.OfType<ILineString>().Where(ls => ls.Coordinates.Any()))
+            foreach (var lineString in multiLineString.Geometries.OfType<LineString>().Where(ls => ls.Coordinates.Any()))
             {
                 var currentSegment =
                     new GpxTrackSegment(
@@ -225,7 +224,7 @@ namespace IsraelHiking.API.Converters
         private IAttributesTable CreateMultiLineProperties(string name, string creator, string description)
         {
             var table = CreateProperties(name, description);
-            table.AddAttribute(CREATOR, creator);
+            table.Add(CREATOR, creator);
             return table;
         }
 

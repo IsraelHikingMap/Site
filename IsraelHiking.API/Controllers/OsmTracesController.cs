@@ -1,15 +1,13 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using IsraelHiking.API.Services;
-using IsraelHiking.API.Swagger;
+﻿using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OsmSharp.API;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -17,7 +15,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller is responsible for managing OSM traces
     /// </summary>
     [Route("api/osm/trace")]
-    public class OsmTracesController : Controller
+    public class OsmTracesController : ControllerBase
     {
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly LruCache<string, TokenAndSecret> _cache;
@@ -53,7 +51,6 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpPost]
-        [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
         public async Task<IActionResult> PostUploadGpsTrace(IFormFile file)
         {
             if (file == null)

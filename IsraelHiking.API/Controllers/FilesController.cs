@@ -1,16 +1,14 @@
-﻿using IsraelHiking.DataAccessInterfaces;
-using System.Linq;
-using System.Threading.Tasks;
-using GeoAPI.Geometries;
+﻿using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
-using Microsoft.AspNetCore.Mvc;
+using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
-using System.IO;
-using IsraelHiking.API.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.AspNetCore.Mvc;
+using NetTopologySuite.Geometries;
 using System.Collections.Generic;
-using IsraelHiking.API.Converters.ConverterFlows;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -18,7 +16,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller allows fetching of remote files, opening of files and converting files
     /// </summary>
     [Route("api/[controller]")]
-    public class FilesController : Controller
+    public class FilesController : ControllerBase
     {
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
@@ -127,7 +125,6 @@ namespace IsraelHiking.API.Controllers
         [HttpPost]
         [Route("open")]
         [ProducesResponseType(typeof(DataContainer), 200)]
-        [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
         public async Task<IActionResult> PostOpenFile(IFormFile file)
         {
             if (file == null)

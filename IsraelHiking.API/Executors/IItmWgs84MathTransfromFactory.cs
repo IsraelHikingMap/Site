@@ -1,4 +1,4 @@
-﻿using GeoAPI.CoordinateSystems.Transformations;
+﻿using ProjNet.CoordinateSystems.Transformations;
 
 namespace IsraelHiking.API.Executors
 {
@@ -11,12 +11,12 @@ namespace IsraelHiking.API.Executors
         /// Creates a coordinats transfomation from ITM to WGS84.
         /// </summary>
         /// <returns></returns>
-        IMathTransform Create();
+        MathTransform Create();
 
         /// <summary>
         /// Creates a coordinats transfomation from WGS84 to ITM.
         /// </summary>
         /// <returns></returns>
-        IMathTransform CreateInverse();
+        MathTransform CreateInverse();
     }
 }

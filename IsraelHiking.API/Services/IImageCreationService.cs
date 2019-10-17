@@ -1,6 +1,5 @@
-﻿using System.Threading.Tasks;
-using IsraelHiking.Common;
-using System;
+﻿using IsraelHiking.Common;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services
 {

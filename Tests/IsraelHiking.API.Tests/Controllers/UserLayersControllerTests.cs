@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using System.Collections.Generic;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -19,12 +19,6 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             _repository = Substitute.For<IRepository>();
             _controller = new UserLayersController(_repository);
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            _controller.Dispose();
         }
 
         [TestMethod]

@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using GeoAPI.Geometries;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.Common.Poi;
+using NetTopologySuite.Geometries;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Poi
 {

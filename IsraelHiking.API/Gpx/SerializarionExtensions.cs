@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using IsraelHiking.API.Converters;
+using IsraelHiking.Common.Extensions;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
-using IsraelHiking.API.Converters;
-using NetTopologySuite.Features;
-using Newtonsoft.Json;
-using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Gpx
 {
@@ -80,7 +82,9 @@ namespace IsraelHiking.API.Gpx
             {
                 var writer = new StreamWriter(outputStream);
                 var jsonWriter = new JsonTextWriter(writer);
-                var serializer = GeoJsonSerializer.CreateDefault();
+                var factory = new GeometryFactory();
+                var serializer = GeoJsonSerializer.Create(factory, 3);
+                serializer.Converters.Add(new CoordinateConverterPatch(factory.PrecisionModel, 3));
                 serializer.Serialize(jsonWriter, featureCollection);
                 jsonWriter.Flush();
                 return outputStream.ToArray();
@@ -96,7 +100,7 @@ namespace IsraelHiking.API.Gpx
         {
             using (var stream = new MemoryStream(featureCollectionContent))
             {
-                var serializer = GeoJsonSerializer.CreateDefault();
+                var serializer = GeoJsonSerializer.Create(new GeometryFactory(), 3);
                 using (var streamReader = new StreamReader(stream))
                 using (var jsonTextReader = new JsonTextReader(streamReader))
                 {

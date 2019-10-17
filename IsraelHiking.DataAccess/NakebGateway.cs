@@ -1,14 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using GeoAPI.Geometries;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess
 {
@@ -66,7 +64,12 @@ namespace IsraelHiking.DataAccess
                 var lineString = new LineString(nakebItem.latlngs.Select(l => new Coordinate().FromLatLng(l)).ToArray());
                 var features = new List<IFeature> {new Feature(lineString, attributes)};
                 features.AddRange(nakebItem.markers.Select(ConvertToPointFeature).ToList());
-                return new FeatureCollection(new Collection<IFeature>(features));
+                var featureCollection = new FeatureCollection();
+                foreach (var feature in features)
+                {
+                    featureCollection.Add(feature);
+                }
+                return featureCollection;
             }
         }
 

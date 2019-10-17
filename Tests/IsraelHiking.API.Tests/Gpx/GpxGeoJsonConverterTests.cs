@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using IsraelHiking.API.Converters;
-using IsraelHiking.API.Gpx;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Gpx
 {
@@ -23,12 +21,12 @@ namespace IsraelHiking.API.Tests.Gpx
 
             var featureCollection = _gpxGeoJsonConverter.   ToGeoJson(gpx);
 
-            Assert.AreEqual(1, featureCollection.Features.Count);
-            var point = featureCollection.Features.Select(f => f.Geometry).OfType<Point>().FirstOrDefault();
+            Assert.AreEqual(1, featureCollection.Count);
+            var point = featureCollection.Select(f => f.Geometry).OfType<Point>().FirstOrDefault();
             Assert.IsNotNull(point);
             var coordinates = point.Coordinate;
             Assert.IsNotNull(coordinates);
-            Assert.AreEqual(gpx.Waypoints[0].Name, featureCollection.Features.First().Attributes[FeatureAttributes.NAME]);
+            Assert.AreEqual(gpx.Waypoints[0].Name, featureCollection.First().Attributes[FeatureAttributes.NAME]);
             Assert.IsTrue(double.IsNaN(coordinates.Z));
             Assert.AreEqual(gpx.Waypoints[0].Latitude, coordinates.Y);
             Assert.AreEqual(gpx.Waypoints[0].Longitude, coordinates.X);
@@ -124,8 +122,8 @@ namespace IsraelHiking.API.Tests.Gpx
 
             var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
             
-            Assert.AreEqual(1, featureCollection.Features.Count);
-            var lineString = featureCollection.Features.First().Geometry as LineString;
+            Assert.AreEqual(1, featureCollection.Count);
+            var lineString = featureCollection.First().Geometry as LineString;
             Assert.IsNotNull(lineString);
             Assert.AreEqual(2, lineString.Coordinates.Length);
         }

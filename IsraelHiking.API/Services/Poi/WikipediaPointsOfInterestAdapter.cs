@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -63,7 +63,7 @@ namespace IsraelHiking.API.Services.Poi
                 SetToCache(featureCollection);
             }
             
-            var mainFeature = featureCollection.Features.First();
+            var mainFeature = featureCollection.First();
             if (!mainFeature.Attributes[FeatureAttributes.POI_LANGUAGE].Equals(language))
             {
                 return null;
@@ -79,26 +79,26 @@ namespace IsraelHiking.API.Services.Poi
             _logger.LogInformation("Start getting Wikipedia pages for indexing.");
             var itmToWgs84 = _itmWgs84MathTransfromFactory.Create();
             var wgs84ToItm = _itmWgs84MathTransfromFactory.CreateInverse();
-            var startCoordinate = wgs84ToItm.Transform(new Coordinate(34, 29));
-            var endCoordinate = wgs84ToItm.Transform(new Coordinate(36, 34));
-            
+            var startCoordinate = wgs84ToItm.Transform(34, 29);
+            var endCoordinate = wgs84ToItm.Transform(36, 34);
+            // HM TODO: change to bbox
             double step = 10000 * Math.Sqrt(2);
-            var coordinatesList = new List<Coordinate>();
+            var coordinatesList = new List<(double x, double y)>();
             var currentCoordinate = new Coordinate();
 
             for (
-                currentCoordinate.X = startCoordinate.X;
-                currentCoordinate.X < endCoordinate.X;
+                currentCoordinate.X = startCoordinate.x;
+                currentCoordinate.X < endCoordinate.x;
                 currentCoordinate.X += step
                 )
             {
                 for (
-                    currentCoordinate.Y = startCoordinate.Y;
-                    currentCoordinate.Y < endCoordinate.Y;
+                    currentCoordinate.Y = startCoordinate.y;
+                    currentCoordinate.Y < endCoordinate.y;
                     currentCoordinate.Y += step
                     )
                 {
-                    coordinatesList.Add(itmToWgs84.Transform(currentCoordinate));
+                    coordinatesList.Add(itmToWgs84.Transform(currentCoordinate.X, currentCoordinate.Y));
                 }
             }
             
@@ -110,7 +110,7 @@ namespace IsraelHiking.API.Services.Poi
                 {
                     foreach (var language in Languages.Array)
                     {
-                        lists.Add(_wikipediaGateway.GetByLocation(coordinate, language).Result);
+                        lists.Add(_wikipediaGateway.GetByLocation(new Coordinate(coordinate.x, coordinate.y), language).Result);
                     }
                 });
             }).ConfigureAwait(false);

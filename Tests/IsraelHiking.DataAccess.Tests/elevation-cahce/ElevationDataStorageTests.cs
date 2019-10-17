@@ -1,8 +1,8 @@
-﻿using System.IO;
-using GeoAPI.Geometries;
-using IsraelHiking.DataAccessInterfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Geometries;
+using System.IO;
 
 namespace IsraelHiking.DataAccess.Tests
 {

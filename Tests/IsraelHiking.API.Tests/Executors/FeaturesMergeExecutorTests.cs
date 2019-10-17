@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using Microsoft.Extensions.Logging;
@@ -10,6 +7,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Executors
 {
@@ -267,7 +266,7 @@ namespace IsraelHiking.API.Tests.Executors
         public void MergeFeatures_MultiLineWithLine_ShouldMergeAndCreateASingleMultiLine()
         {
             var feature1 = CreateFeature("1", 0, 0);
-            feature1.Geometry = new MultiLineString(new ILineString[]
+            feature1.Geometry = new MultiLineString(new LineString[]
             {
                 new LineString(new[]
                     {
@@ -309,7 +308,7 @@ namespace IsraelHiking.API.Tests.Executors
         public void MergeFeatures_MultiPolygonWithPolygon_ShouldMergeAndCreateASingleMultiPolygon()
         {
             var feature1 = CreateFeature("1", 0, 0);
-            feature1.Geometry = new MultiPolygon(new IPolygon[]
+            feature1.Geometry = new MultiPolygon(new Polygon[]
             {
                 new Polygon(new LinearRing(new[]
                     {
@@ -354,7 +353,7 @@ namespace IsraelHiking.API.Tests.Executors
         public void MergeFeatures_MultiPolygonWithPoint_ShouldMergeAndCreateASingleMultiPolygon()
         {
             var feature1 = CreateFeature("1", 0, 0);
-            feature1.Geometry = new MultiPolygon(new IPolygon[]
+            feature1.Geometry = new MultiPolygon(new Polygon[]
             {
                 new Polygon(new LinearRing(new[]
                     {

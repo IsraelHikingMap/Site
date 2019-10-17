@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using IsraelHiking.Common;
+using System;
 using System.Text.RegularExpressions;
-using IsraelHiking.Common;
 
 namespace IsraelHiking.API.Converters
 {

@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Executors
 {
@@ -58,7 +57,7 @@ namespace IsraelHiking.API.Tests.Executors
             var existingLines = new List<LineString>();
             var input = new GpxProlongerExecutorInput
             {
-                LinesToProlong = new List<ILineString> { lineToProlong },
+                LinesToProlong = new List<LineString> { lineToProlong },
                 OriginalCoordinates = originlaCoordinates,
                 ExistingItmHighways = existingLines,
                 MinimalDistance = 2,
@@ -78,7 +77,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestMethod]
         public void Prolong_TwoSepeateLines_ShouldProlong()
         {
-            var linesToProlong = new List<ILineString>
+            var linesToProlong = new List<LineString>
             {
                 new LineString(new[]
                 {
@@ -124,7 +123,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestMethod]
         public void Prolong_TwoIntersectingLinesWithSmallArea_ShouldNotProlong()
         {
-            var linesToProlong = new List<ILineString>
+            var linesToProlong = new List<LineString>
             {
                 new LineString(new[]
                 {
@@ -174,7 +173,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestMethod]
         public void Prolong_TwoIntersectingLinesWithLargeArea_ShouldNotProlong()
         {
-            var linesToProlong = new List<ILineString>
+            var linesToProlong = new List<LineString>
             {
                 new LineString(new[]
                 {
@@ -224,7 +223,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestMethod]
         public void Prolong_LineToExistingLine_ShouldProlong()
         {
-            var linesToProlong = new List<ILineString>
+            var linesToProlong = new List<LineString>
             {
                 new LineString(new[]
                 {
@@ -269,7 +268,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestMethod]
         public void Prolong_TLines_ShouldProlongAndMerge()
         {
-            var linesToProlong = new List<ILineString>
+            var linesToProlong = new List<LineString>
             {
                 new LineString(new[]
                 {
@@ -319,7 +318,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestMethod]
         public void Prolong_NoneStraightGap_ShouldProlongAccordingToGap()
         {
-            var linesToProlong = new List<ILineString>
+            var linesToProlong = new List<LineString>
             {
                 new LineString(new[]
                 {
@@ -366,7 +365,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestMethod]
         public void Prolong_TLinesVeryClose_ShouldProlongAndMerge()
         {
-            var linesToProlong = new List<ILineString>
+            var linesToProlong = new List<LineString>
             {
                 new LineString(new[]
                 {
@@ -420,7 +419,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestMethod]
         public void Prolong_LinesIntersects_ShouldAddASection()
         {
-            var linesToProlong = new List<ILineString>
+            var linesToProlong = new List<LineString>
             {
                 new LineString(new []
                 {
@@ -475,7 +474,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestMethod]
         public void Prolong_PreferLineEnd_ShouldProlong()
         {
-            var linesToProlong = new List<ILineString>
+            var linesToProlong = new List<LineString>
             {
                 new LineString(new[]
                 {
@@ -527,7 +526,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestMethod]
         public void Prolong_SimplifiedLongLine_ShouldNotProlong()
         {
-            var linesToProlong = new List<ILineString>
+            var linesToProlong = new List<LineString>
             {
                 new LineString(new[]
                 {

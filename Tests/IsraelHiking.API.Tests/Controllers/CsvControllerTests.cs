@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Text;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
@@ -15,6 +10,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
+using System.IO;
+using System.Text;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -43,10 +40,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
             fetcher.GetFileContent("file").Returns(new RemoteFileFetcherGatewayResponse());
             _httpGatewayFactory.CreateRemoteFileFetcherGateway(null).Returns(fetcher);
-            var featureCollection = new FeatureCollection(new Collection<IFeature>
-            {
-                new Feature(new Point(new Coordinate(11, 12)), new AttributesTable())
-            });
+            var featureCollection = new FeatureCollection { new Feature(new Point(new Coordinate(11, 12)), new AttributesTable()) };
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), FlowFormats.GEOJSON)
                 .Returns(featureCollection.ToBytes());
 

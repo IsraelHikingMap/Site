@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using GeoAPI.Geometries;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Executors
 {
@@ -46,7 +45,7 @@ namespace IsraelHiking.API.Executors
         private readonly ConfigurationData _options;
         private readonly ILogger<FeaturesMergeExecutor> _reportLogger;
         private readonly ILogger _logger;
-        private readonly IGeometryFactory _geometryFactory;
+        private readonly GeometryFactory _geometryFactory;
 
         /// <summary>
         /// Class's constructor
@@ -56,7 +55,7 @@ namespace IsraelHiking.API.Executors
         /// <param name="reportLogger"></param>
         /// <param name="logger"></param>
         public FeaturesMergeExecutor(IOptions<ConfigurationData> options,
-            IGeometryFactory geometryFactory,
+            GeometryFactory geometryFactory,
             ILogger<FeaturesMergeExecutor> reportLogger, 
             ILogger logger)
         {
@@ -229,7 +228,6 @@ namespace IsraelHiking.API.Executors
                         .OfType<MultiPoint>()
                         .SelectMany(mls => mls.Geometries.OfType<Point>())
                         .Concat(geometryCollection.Geometries.OfType<Point>())
-                        .Cast<IPoint>()
                         .ToArray();
                     feature.Geometry = _geometryFactory.CreateMultiPoint(points);
                     continue;
@@ -246,7 +244,6 @@ namespace IsraelHiking.API.Executors
                         .OfType<MultiLineString>()
                         .SelectMany(mls => mls.Geometries.OfType<LineString>())
                         .Concat(nonPointGeometries.OfType<LineString>())
-                        .Cast<ILineString>()
                         .ToArray();
                     feature.Geometry = _geometryFactory.CreateMultiLineString(lines);
                     continue;
@@ -257,7 +254,6 @@ namespace IsraelHiking.API.Executors
                         .OfType<MultiPolygon>()
                         .SelectMany(mls => mls.Geometries.OfType<Polygon>())
                         .Concat(nonPointGeometries.OfType<Polygon>())
-                        .Cast<IPolygon>()
                         .ToArray();
                     feature.Geometry = _geometryFactory.CreateMultiPolygon(polygons);
                     if (!feature.Geometry.IsValid)
@@ -485,7 +481,7 @@ namespace IsraelHiking.API.Executors
                     {
                         index++;
                     } while (natureReserveFeature.Attributes.Exists(FeatureAttributes.NAME + ":he" + index));
-                    natureReserveFeature.Attributes.AddAttribute(FeatureAttributes.NAME + ":he" + index, alternativeTitle);
+                    natureReserveFeature.Attributes.Add(FeatureAttributes.NAME + ":he" + index, alternativeTitle);
                 }
                 natureReserveFeature.SetTitles();
             }

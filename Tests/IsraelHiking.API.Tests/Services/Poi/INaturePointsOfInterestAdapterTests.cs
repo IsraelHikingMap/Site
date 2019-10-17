@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using IsraelHiking.API.Services.Poi;
+﻿using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NSubstitute;
+using System.Collections.Generic;
 
 namespace IsraelHiking.API.Tests.Services.Poi
 {
@@ -43,9 +42,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var poiId = "poiId";
             var shareId = "shareId";
             var feature = GetValidFeature(poiId, _adapter.Source);
-            feature.Attributes.AddAttribute(FeatureAttributes.POI_SHARE_REFERENCE, shareId);
+            feature.Attributes.Add(FeatureAttributes.POI_SHARE_REFERENCE, shareId);
             _repository.GetUrlById(shareId).Returns(new ShareUrl {DataContainer = new DataContainer()});
-            _iNatureGateway.GetById(poiId).Returns(new FeatureCollection(new Collection<IFeature> {feature}));
+            _iNatureGateway.GetById(poiId).Returns(new FeatureCollection { feature });
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
 
             var resutls = _adapter.GetPointOfInterestById(poiId, Languages.HEBREW).Result;

@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -88,7 +88,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             Assert.IsNotNull(results);
             Assert.IsNotNull(results.Value as IEnumerable<ShareUrl>);
-            Assert.AreEqual(list.Count, ((IEnumerable<ShareUrl>) results.Value).Count());
+            Assert.AreEqual(list.Count, ((IEnumerable<ShareUrl>)results.Value).Count());
             Assert.AreEqual(list.OrderByDescending(d => d.CreationDate).First().CreationDate, ((IEnumerable<ShareUrl>)results.Value).First().CreationDate);
         }
 
@@ -241,7 +241,6 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.DeleteShareUrl(shareUrl.Id).Wait();
 
             _repository.Received(1).Delete(shareUrl);
-            _controller.Dispose();
         }
     }
 }

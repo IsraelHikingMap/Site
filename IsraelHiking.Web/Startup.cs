@@ -1,10 +1,10 @@
 ﻿using AspNetCore.Proxy;
-using GeoAPI.Geometries;
 using IsraelHiking.API;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccessInterfaces;
@@ -18,15 +18,14 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO.Converters;
-using NLog.Extensions.Logging;
-using NLog.Web;
-using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
 using System.Linq;
@@ -38,7 +37,7 @@ namespace IsraelHiking.Web
         private readonly bool _isDevelopment;
         private readonly IConfigurationRoot _nonPublicConfiguration;
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             _isDevelopment = env.IsDevelopment();
             var builder = new ConfigurationBuilder();
@@ -62,21 +61,22 @@ namespace IsraelHiking.Web
             services.AddIHMDataAccess();
             services.AddIHMApi();
             services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
-            services.AddSingleton<IGeometryFactory, GeometryFactory>(serviceProvider => new GeometryFactory(new PrecisionModel(100000000)));
-            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerOptionsValidatorConfigureOptions>(); // .net core 2.0
-            services.AddMvc(options =>
+            var geometryFactory = new GeometryFactory(new PrecisionModel(100000000));
+            services.AddSingleton<GeometryFactory, GeometryFactory>(serviceProvider => geometryFactory);
+            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerOptionsValidatorConfigureOptions>();
+            services.AddControllers(options =>
             {
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(PointOfInterestExtended)));
-            }).AddJsonOptions(options =>
+            }).AddNewtonsoftJson(options =>
             {
-                options.SerializerSettings.Converters.Add(new CoordinateConverter());
-                options.SerializerSettings.Converters.Add(new GeometryConverter());
+                options.SerializerSettings.Converters.Add(new CoordinateConverter(geometryFactory.PrecisionModel, 3));
+                options.SerializerSettings.Converters.Add(new CoordinateConverterPatch(geometryFactory.PrecisionModel, 3));
+                options.SerializerSettings.Converters.Add(new GeometryConverter(geometryFactory, 3));
+                options.SerializerSettings.Converters.Add(new GeometryArrayConverter(geometryFactory, 3));
                 options.SerializerSettings.Converters.Add(new FeatureCollectionConverter());
                 options.SerializerSettings.Converters.Add(new FeatureConverter());
                 options.SerializerSettings.Converters.Add(new AttributesTableConverter());
-                options.SerializerSettings.Converters.Add(new ICRSObjectConverter());
-                options.SerializerSettings.Converters.Add(new GeometryArrayConverter());
                 options.SerializerSettings.Converters.Add(new EnvelopeConverter());
             });
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
@@ -99,9 +99,18 @@ namespace IsraelHiking.Web
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "Israel Hiking API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Israel Hiking API", Version = "v1" });
                 c.SchemaFilter<FeatureExampleFilter>();
                 c.SchemaFilter<FeatureCollectionExampleFilter>();
+                c.AddSecurityDefinition("Bearer",
+                    new OpenApiSecurityScheme
+                    {
+                        Description = "JWT Authorization header using the Bearer scheme - need OSM token and secret joined by ';'",
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        In = ParameterLocation.Header
+                    }
+                );
                 c.OperationFilter<AssignOAuthSecurityRequirements>();
                 c.IncludeXmlComments(Path.Combine(binariesFolder, "IsraelHiking.API.xml"));
             });
@@ -109,11 +118,8 @@ namespace IsraelHiking.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            env.ConfigureNLog("IsraelHiking.Web.nlog");
-            loggerFactory.AddNLog();
-
             var rewriteOptions = new RewriteOptions();
             rewriteOptions.Rules.Add(new RewriteWithQueryRule(".*_escaped_fragment_=%2F%3Fs%3D(.*)", "api/opengraph/$1", false));
 
@@ -129,10 +135,15 @@ namespace IsraelHiking.Web
 
             app.UseCors(builder =>
             {
-                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();//.AllowCredentials();
             });
             app.UseAuthentication();
-            app.UseMvc();
+            app.UseAuthorization();
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
             SetupStaticFilesAndProxies(app);
 
             app.UseSwagger();

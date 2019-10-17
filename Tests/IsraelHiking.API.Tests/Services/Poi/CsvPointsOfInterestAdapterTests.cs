@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Text;
-using IsraelHiking.API.Converters.ConverterFlows;
+﻿using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -13,6 +8,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NSubstitute;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace IsraelHiking.API.Tests.Services.Poi
 {
@@ -64,9 +63,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var fileUrl = "fileUrl";
             var dataContainer = new DataContainer { Routes = new List<RouteData> { new RouteData { Name = "name" } } };
             var feature = GetValidFeature(id, source);
-            feature.Attributes.AddAttribute(FeatureAttributes.POI_SHARE_REFERENCE, fileUrl);
-            feature.Attributes.AddAttribute(FeatureAttributes.POI_CACHE_DATE, DateTime.Now.AddDays(-1).ToString("o"));
-            _elasticSearchGateway.GetCachedItemById(id, source).Returns(new FeatureCollection(new Collection<IFeature> {feature}));
+            feature.Attributes.Add(FeatureAttributes.POI_SHARE_REFERENCE, fileUrl);
+            feature.Attributes.Add(FeatureAttributes.POI_CACHE_DATE, DateTime.Now.AddDays(-1).ToString("o"));
+            _elasticSearchGateway.GetCachedItemById(id, source).Returns(new FeatureCollection { feature });
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(dataContainer);
 
             var point = _adapter.GetPointOfInterestById(id, Languages.HEBREW).Result;
@@ -84,10 +83,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var fileUrl = "fileUrl";
             var dataContainer = new DataContainer { Routes = new List<RouteData> { new RouteData { Name = "name" } } };
             var feature = GetValidFeature(id, source);
-            feature.Attributes.AddAttribute(FeatureAttributes.POI_SHARE_REFERENCE, fileUrl);
-            _elasticSearchGateway.GetCachedItemById(id, source).Returns(new FeatureCollection(new Collection<IFeature> { feature }));
+            feature.Attributes.Add(FeatureAttributes.POI_SHARE_REFERENCE, fileUrl);
+            _elasticSearchGateway.GetCachedItemById(id, source).Returns(new FeatureCollection { feature });
             _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(new RemoteFileFetcherGatewayResponse { FileName = fileUrl, Content = new byte[0] });
-            _dataContainerConverterService.Convert(Arg.Any<byte[]>(), fileUrl, FlowFormats.GEOJSON).Returns(new FeatureCollection(new Collection<IFeature> { feature }).ToBytes());
+            _dataContainerConverterService.Convert(Arg.Any<byte[]>(), fileUrl, FlowFormats.GEOJSON).Returns(new FeatureCollection { feature }.ToBytes());
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(dataContainer);
             SetupFileStream();
 

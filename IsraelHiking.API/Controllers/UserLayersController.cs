@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -13,7 +13,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller handles the user custom layers
     /// </summary>
     [Route("api/[controller]")]
-    public class UserLayersController : Controller
+    public class UserLayersController : ControllerBase
     {
         private readonly IRepository _repository;
 

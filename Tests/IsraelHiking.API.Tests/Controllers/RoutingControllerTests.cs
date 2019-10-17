@@ -1,14 +1,13 @@
-﻿using System.Linq;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
-using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -49,8 +48,8 @@ namespace IsraelHiking.API.Tests.Controllers
             var results = _controller.GetRouting("0.00001,0.00001", "0.00002,0.00002", RoutingType.NONE).Result as OkObjectResult;
             var content = results.Value as FeatureCollection;
 
-            Assert.AreEqual(1, content.Features.Count);
-            var lineString = content.Features.First().Geometry as LineString;
+            Assert.AreEqual(1, content.Count);
+            var lineString = content.First().Geometry as LineString;
             Assert.IsNotNull(lineString);
             var points = lineString.Coordinates.OfType<Coordinate>();
             Assert.AreEqual(0.00001, points.First().X);
@@ -66,8 +65,8 @@ namespace IsraelHiking.API.Tests.Controllers
             var results = _controller.GetRouting("1,1", "2,2", RoutingType.NONE).Result as OkObjectResult;
             var content = results.Value as FeatureCollection;
 
-            Assert.AreEqual(1, content.Features.Count);
-            var lineString = content.Features.First().Geometry as LineString;
+            Assert.AreEqual(1, content.Count);
+            var lineString = content.First().Geometry as LineString;
             Assert.IsNotNull(lineString);
             var points = lineString.Coordinates.OfType<Coordinate>();
             Assert.AreEqual(1, points.First().X);
@@ -86,8 +85,8 @@ namespace IsraelHiking.API.Tests.Controllers
             var results = _controller.GetRouting("1,1", "2,2", RoutingType.FOUR_WHEEL_DRIVE).Result as OkObjectResult;
             var content = results.Value as FeatureCollection;
 
-            Assert.AreEqual(1, content.Features.Count);
-            var lineString = content.Features.First().Geometry as LineString;
+            Assert.AreEqual(1, content.Count);
+            var lineString = content.First().Geometry as LineString;
             Assert.IsNotNull(lineString);
             var points = lineString.Coordinates.OfType<Coordinate>();
             Assert.AreEqual(1, points.First().X);
@@ -105,16 +104,16 @@ namespace IsraelHiking.API.Tests.Controllers
             _graphHopperGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
                 .Returns(new LineString(new []
                 {
-                    new Coordinate(1,1),
-                    new Coordinate(1.5,1.5),
-                    new Coordinate(2,2)
+                    new CoordinateZ(1,1),
+                    new CoordinateZ(1.5,1.5),
+                    new CoordinateZ(2,2)
                 }));
 
             var results = _controller.GetRouting("1,1", "2,2", RoutingType.FOUR_WHEEL_DRIVE).Result as OkObjectResult;
             var content = results.Value as FeatureCollection;
 
-            Assert.AreEqual(1, content.Features.Count);
-            var lineString = content.Features.First().Geometry as LineString;
+            Assert.AreEqual(1, content.Count);
+            var lineString = content.First().Geometry as LineString;
             Assert.IsNotNull(lineString);
             var points = lineString.Coordinates.OfType<Coordinate>();
             Assert.AreEqual(3, points.Count());

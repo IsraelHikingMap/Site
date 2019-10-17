@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using GeoAPI.Geometries;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
-using OsmSharp.Complete;
 using OsmSharp;
+using OsmSharp.Complete;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Converters
 {
@@ -19,13 +18,13 @@ namespace IsraelHiking.API.Converters
         private const string BOUNDARY = "boundary";
         private const string TYPE = "type";
         private const string MULTIPOLYGON = "multipolygon";
-        private readonly IGeometryFactory _geometryFactory;
+        private readonly GeometryFactory _geometryFactory;
 
         /// <summary>
         /// Class constrcutor
         /// </summary>
         /// <param name="geometryFactory"></param>
-        public OsmGeoJsonConverter(IGeometryFactory geometryFactory)
+        public OsmGeoJsonConverter(GeometryFactory geometryFactory)
         {
             _geometryFactory = geometryFactory;
         }
@@ -49,7 +48,7 @@ namespace IsraelHiking.API.Converters
                         return null;
                     }
                     var properties = ConvertTags(way);
-                    properties.AddAttribute(FeatureAttributes.OSM_NODES, way.Nodes.Select(n => n.Id).ToArray());
+                    properties.Add(FeatureAttributes.OSM_NODES, way.Nodes.Select(n => n.Id).ToArray());
                     var geometry = GetGeometryFromNodes(way.Nodes);
                     return new Feature(geometry, properties);
                 case OsmGeoType.Relation:
@@ -79,10 +78,10 @@ namespace IsraelHiking.API.Converters
 
         private Coordinate ConvertNode(Node node)
         {
-            return new Coordinate(node.Longitude ?? 0, node.Latitude ?? 0);
+            return new CoordinateZ(node.Longitude ?? 0, node.Latitude ?? 0);
         }
 
-        private List<IGeometry> GetGeometriesFromWays(IEnumerable<CompleteWay> ways)
+        private List<Geometry> GetGeometriesFromWays(IEnumerable<CompleteWay> ways)
         {
             var nodesGroups = new List<List<Node>>();
             var waysToGroup = new List<CompleteWay>(ways.Where(w => w.Nodes.Any()));
@@ -134,7 +133,7 @@ namespace IsraelHiking.API.Converters
             var nodes = relation.Members.Select(m => m.Member).OfType<Node>().ToList();
             if (nodes.Any())
             {
-                var multiPoint = _geometryFactory.CreateMultiPoint(nodes.Select(n => _geometryFactory.CreatePoint(ConvertNode(n)) as IPoint).ToArray());
+                var multiPoint = _geometryFactory.CreateMultiPoint(nodes.Select(n => _geometryFactory.CreatePoint(ConvertNode(n))).ToArray());
                 return new Feature(multiPoint, ConvertTags(relation));
             }
 
@@ -143,8 +142,8 @@ namespace IsraelHiking.API.Converters
             {
                 return null;
             }
-            var jointLines = geometries.OfType<ILineString>().ToList();
-            jointLines.AddRange(geometries.OfType<Polygon>().Select(p => _geometryFactory.CreateLineString(p.Coordinates) as ILineString));
+            var jointLines = geometries.OfType<LineString>().ToList();
+            jointLines.AddRange(geometries.OfType<Polygon>().Select(p => _geometryFactory.CreateLineString(p.Coordinates) as LineString));
             var multiLineString = _geometryFactory.CreateMultiLineString(jointLines.ToArray());
             return new Feature(multiLineString, ConvertTags(relation));
         }
@@ -153,17 +152,17 @@ namespace IsraelHiking.API.Converters
         {
             var allWaysInRelationByRole = GetAllWaysGroupedByRole(relation);
             var outerWays = allWaysInRelationByRole.Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
-            var outerPolygons = GetGeometriesFromWays(outerWays).OfType<IPolygon>().ToList();
+            var outerPolygons = GetGeometriesFromWays(outerWays).OfType<Polygon>().ToList();
             outerPolygons = MergePolygons(outerPolygons);
             var innerWays = allWaysInRelationByRole.Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
-            var innerPolygons = GetGeometriesFromWays(innerWays).OfType<IPolygon>().ToList();
+            var innerPolygons = GetGeometriesFromWays(innerWays).OfType<Polygon>().ToList();
             innerPolygons = MergePolygons(innerPolygons);
             MergeInnerIntoOuterPolygon(ref outerPolygons, ref innerPolygons);
             var multiPolygon = _geometryFactory.CreateMultiPolygon(outerPolygons.Union(innerPolygons).ToArray());
             return new Feature(multiPolygon, ConvertTags(relation));
         }
 
-        private List<IPolygon> MergePolygons(List<IPolygon> polygons)
+        private List<Polygon> MergePolygons(List<Polygon> polygons)
         {
             if (!polygons.Any())
             {
@@ -171,12 +170,12 @@ namespace IsraelHiking.API.Converters
             }
             try
             {
-                var merged = UnaryUnionOp.Union(polygons.Cast<IGeometry>().ToList());
+                var merged = UnaryUnionOp.Union(polygons.Cast<Geometry>().ToList());
                 if (merged is MultiPolygon multipolygon)
                 {
-                    return multipolygon.Geometries.Cast<IPolygon>().ToList();
+                    return multipolygon.Geometries.Cast<Polygon>().ToList();
                 }
-                return new List<IPolygon> { merged as Polygon };
+                return new List<Polygon> { merged as Polygon };
             }
             catch
             {
@@ -184,9 +183,9 @@ namespace IsraelHiking.API.Converters
             }
         }
 
-        private void MergeInnerIntoOuterPolygon(ref List<IPolygon> outerPolygons, ref List<IPolygon> innerPolygons)
+        private void MergeInnerIntoOuterPolygon(ref List<Polygon> outerPolygons, ref List<Polygon> innerPolygons)
         {
-            var newOuterPolygons = new List<IPolygon>();
+            var newOuterPolygons = new List<Polygon>();
             foreach (var outerPolygon in outerPolygons)
             {
                 var currentInnerPolygons = innerPolygons.Where(p => p.Within(outerPolygon)).ToArray();
@@ -244,11 +243,11 @@ namespace IsraelHiking.API.Converters
             return relation.Tags[TYPE] == MULTIPOLYGON || relation.Tags[TYPE] == BOUNDARY;
         }
 
-        private IGeometry GetGeometryFromNodes(Node[] nodes)
+        private Geometry GetGeometryFromNodes(Node[] nodes)
         {
             var coordinates = nodes.Select(ConvertNode).ToArray();
             return nodes.First().Id == nodes.Last().Id && nodes.Length >= 4
-                        ? _geometryFactory.CreatePolygon(_geometryFactory.CreateLinearRing(coordinates)) as IGeometry
+                        ? _geometryFactory.CreatePolygon(_geometryFactory.CreateLinearRing(coordinates)) as Geometry
                         : _geometryFactory.CreateLineString(coordinates);
         }
     }

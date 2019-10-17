@@ -1,14 +1,13 @@
-﻿using System;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using System.Collections.ObjectModel;
+using Microsoft.AspNetCore.Mvc;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
+using ProjNet.CoordinateSystems.Transformations;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using GeoAPI.CoordinateSystems.Transformations;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
-using NetTopologySuite.Features;
-using Microsoft.AspNetCore.Mvc;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -16,12 +15,12 @@ namespace IsraelHiking.API.Controllers
     /// This controller allows routing between two points
     /// </summary>
     [Route("api/[controller]")]
-    public class RoutingController : Controller
+    public class RoutingController : ControllerBase
     {
         private readonly IGraphHopperGateway _graphHopperGateway;
         private readonly IElevationDataStorage _elevationDataStorage;
-        private readonly IGeometryFactory _geometryFactory;
-        private readonly IMathTransform _wgs84ItmMathTransform;
+        private readonly GeometryFactory _geometryFactory;
+        private readonly MathTransform _wgs84ItmMathTransform;
 
         /// <summary>
         /// Controller's constructor
@@ -33,7 +32,7 @@ namespace IsraelHiking.API.Controllers
         public RoutingController(IGraphHopperGateway graphHopperGateway,
             IElevationDataStorage elevationDataStorage,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
-            IGeometryFactory geometryFactory)
+            GeometryFactory geometryFactory)
         {
             _graphHopperGateway = graphHopperGateway;
             _elevationDataStorage = elevationDataStorage;
@@ -53,7 +52,7 @@ namespace IsraelHiking.API.Controllers
         [ProducesResponseType(typeof(FeatureCollection), 200)]
         public async Task<IActionResult> GetRouting(string from, string to, string type)
         {
-            ILineString lineString;
+            LineString lineString;
             var profile = ConvertProfile(type);
             var pointFrom = await GetGeographicPosition(from);
             var pointTo = await GetGeographicPosition(to);
@@ -88,7 +87,7 @@ namespace IsraelHiking.API.Controllers
                 {"Creator", "IsraelHikingMap"}
             };
             var feature = new Feature(lineString, table);
-            return Ok(new FeatureCollection(new Collection<IFeature> { feature }));
+            return Ok(new FeatureCollection { feature });
         }
 
         private static ProfileType ConvertProfile(string type)
@@ -123,7 +122,7 @@ namespace IsraelHiking.API.Controllers
             var lat = double.Parse(splitted.First());
             var lng = double.Parse(splitted.Last());
             var elevation = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(position));
-            return new Coordinate(lng, lat, elevation);
+            return new CoordinateZ(lng, lat, elevation);
         }
 
         /// <summary>
@@ -134,18 +133,19 @@ namespace IsraelHiking.API.Controllers
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        private ILineString GetDenseStraightLine(Coordinate from, Coordinate to)
+        private LineString GetDenseStraightLine(Coordinate from, Coordinate to)
         {
-            var itmFrom = _wgs84ItmMathTransform.Transform(from);
-            var itmTo = _wgs84ItmMathTransform.Transform(to);
-            var samples = (int)Math.Min(itmFrom.Distance(itmTo) / 30, 30);
+            var itmFrom = _wgs84ItmMathTransform.Transform(from.X, from.Y);
+            var itmTo = _wgs84ItmMathTransform.Transform(to.X, to.Y);
+            var samples = (int)Math.Min(new CoordinateZ(itmFrom.x, itmFrom.y, 0).Distance(new CoordinateZ(itmTo.x, itmTo.y, 0)) / 30, 30);
             if (samples == 0)
             {
                 return _geometryFactory.CreateLineString(new[] {from, to});
             }
-            var coordinates = Enumerable.Range(0, samples + 1).Select(s => new Coordinate(
+            var coordinates = Enumerable.Range(0, samples + 1).Select(s => new CoordinateZ(
                 (to.X - from.X) * s / samples + from.X,
-                (to.Y - from.Y) * s / samples + from.Y)
+                (to.Y - from.Y) * s / samples + from.Y,
+                0)
             );
             return _geometryFactory.CreateLineString(coordinates.ToArray());
         }

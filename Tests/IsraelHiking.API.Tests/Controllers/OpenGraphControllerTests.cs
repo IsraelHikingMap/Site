@@ -1,10 +1,10 @@
 ﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -36,8 +36,6 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsTrue(pageHtml.Contains("&gt;"));
             Assert.IsTrue(pageHtml.Contains("&lt;"));
             Assert.IsTrue(pageHtml.Contains("&quot;"));
-
-            _controller.Dispose();
         }
 
         [TestMethod]
@@ -50,8 +48,6 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(response);
             var pageHtml = response.Content;
             Assert.IsTrue(pageHtml.Contains("api/images"));
-
-            _controller.Dispose();
         }
     }
 }

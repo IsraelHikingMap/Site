@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using IsraelHiking.API.Services;
+﻿using IsraelHiking.API.Services;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -11,7 +11,7 @@ namespace IsraelHiking.API.Controllers
     /// This contoller is used to return an HTML page for facebook crawler
     /// </summary>
     [Route("api/[controller]")]
-    public class OpenGraphController : Controller
+    public class OpenGraphController : ControllerBase
     {
         private readonly ILogger _logger;
         private readonly IRepository _repository;

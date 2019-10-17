@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using GeoAPI.CoordinateSystems.Transformations;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.LinearReferencing;
 using NetTopologySuite.Simplify;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using ProjNet.CoordinateSystems.Transformations;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services
 {
@@ -21,10 +20,10 @@ namespace IsraelHiking.API.Services
     {
         private readonly IGpxLoopsSplitterExecutor _gpxLoopsSplitterExecutor;
         private readonly IGpxProlongerExecutor _gpxProlongerExecutor;
-        private readonly IMathTransform _itmWgs84MathTransform;
-        private readonly IMathTransform _wgs84ItmMathTransform;
+        private readonly MathTransform _itmWgs84MathTransform;
+        private readonly MathTransform _wgs84ItmMathTransform;
         private readonly IElasticSearchGateway _elasticSearchGateway;
-        private readonly IGeometryFactory _geometryFactory;
+        private readonly GeometryFactory _geometryFactory;
         private readonly ILogger _logger;
         private readonly ConfigurationData _options;
 
@@ -43,7 +42,7 @@ namespace IsraelHiking.API.Services
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IElasticSearchGateway elasticSearchGateway,
             IOptions<ConfigurationData> options,
-            IGeometryFactory geometryFactory,
+            GeometryFactory geometryFactory,
             ILogger logger)
         {
             _gpxLoopsSplitterExecutor = gpxLoopsSplitterExecutor;
@@ -57,12 +56,12 @@ namespace IsraelHiking.API.Services
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<ILineString>> GetLines(List<ILineString> gpxItmLines)
+        public async Task<IEnumerable<LineString>> GetLines(List<LineString> gpxItmLines)
         {
             _logger.LogInformation($"Looking for unmapped routes started on {gpxItmLines.Count} traces");
             gpxItmLines = SplitGpxLines(gpxItmLines);
             gpxItmLines = IncreaseGpxDensity(gpxItmLines);
-            var linesToReturn = new List<ILineString>();
+            var linesToReturn = new List<LineString>();
             foreach (var gpxItmLine in gpxItmLines)
             {
                 var currentLines = await FindMissingLines(gpxItmLine);
@@ -80,9 +79,9 @@ namespace IsraelHiking.API.Services
             return linesToReturn;
         }
 
-        private List<ILineString> SplitGpxLines(List<ILineString> gpxItmLines)
+        private List<LineString> SplitGpxLines(List<LineString> gpxItmLines)
         {
-            var splitGpxLines = new List<ILineString>();
+            var splitGpxLines = new List<LineString>();
             foreach (var lineString in gpxItmLines)
             {
                 var coordinates = lineString.Coordinates.ToArray();
@@ -104,9 +103,9 @@ namespace IsraelHiking.API.Services
             return splitGpxLines.Where(l => l.Coordinates.Length > 0).ToList();
         }
 
-        private List<ILineString> IncreaseGpxDensity(List<ILineString> gpxItmLines)
+        private List<LineString> IncreaseGpxDensity(List<LineString> gpxItmLines)
         {
-            var denseGpxLines = new List<ILineString>();
+            var denseGpxLines = new List<LineString>();
             foreach (var gpxItmLine in gpxItmLines.Where(l => l.Coordinates.Length > 0))
             {
                 var coordinates = gpxItmLine.Coordinates.ToList();
@@ -131,15 +130,15 @@ namespace IsraelHiking.API.Services
             return denseGpxLines;
         }
 
-        private List<ILineString> SplitSelfLoopsAndRemoveDuplication(List<ILineString> missingLines)
+        private List<LineString> SplitSelfLoopsAndRemoveDuplication(List<LineString> missingLines)
         {
-            var missingLinesWithoutLoops = new List<ILineString>();
+            var missingLinesWithoutLoops = new List<LineString>();
             foreach (var missingLine in missingLines)
             {
                 missingLinesWithoutLoops.AddRange(_gpxLoopsSplitterExecutor.SplitSelfLoops(missingLine, _options.MinimalDistanceToClosestPoint));
             }
             missingLinesWithoutLoops.Reverse(); // remove duplications set higher priority to lines that were recorded later
-            var missingLinesWithoutLoopsAndDuplications = new List<ILineString>();
+            var missingLinesWithoutLoopsAndDuplications = new List<LineString>();
             foreach (var missingLineWithoutLoops in missingLinesWithoutLoops)
             {
                 var linesToAdd = _gpxLoopsSplitterExecutor.GetMissingLines(missingLineWithoutLoops,
@@ -153,12 +152,12 @@ namespace IsraelHiking.API.Services
             return missingLinesWithoutLoopsAndDuplications;
         }
 
-        private List<ILineString> SimplifyLines(IEnumerable<ILineString> lineStings)
+        private List<LineString> SimplifyLines(IEnumerable<LineString> lineStings)
         {
-            var lines = new List<ILineString>();
+            var lines = new List<LineString>();
             foreach (var lineSting in lineStings)
             {
-                var simpleLine = DouglasPeuckerSimplifier.Simplify(lineSting, _options.SimplificationDistanceTolerance) as ILineString;
+                var simpleLine = DouglasPeuckerSimplifier.Simplify(lineSting, _options.SimplificationDistanceTolerance) as LineString;
                 if (simpleLine == null)
                 {
                     continue;
@@ -173,9 +172,9 @@ namespace IsraelHiking.API.Services
             return lines;
         }
 
-        private async Task<List<ILineString>> GetExistingCloseLines(ILineString gpxItmLine)
+        private async Task<List<LineString>> GetExistingCloseLines(LineString gpxItmLine)
         {
-            var existingLines = new List<ILineString>();
+            var existingLines = new List<LineString>();
             var splitItmLines = SplitLine(gpxItmLine);
             foreach (var itmLine in splitItmLines)
             {
@@ -185,9 +184,9 @@ namespace IsraelHiking.API.Services
             return existingLines.GroupBy(l => l.GetOsmId()).Select(g => g.First()).ToList();
         }
 
-        private async Task<List<ILineString>> FindMissingLines(ILineString gpxItmLine)
+        private async Task<List<LineString>> FindMissingLines(LineString gpxItmLine)
         {
-            var missingLinesSplit = new List<ILineString>();
+            var missingLinesSplit = new List<LineString>();
             var splitItmLines = SplitLine(gpxItmLine);
             foreach (var itmLine in splitItmLines)
             {
@@ -198,9 +197,9 @@ namespace IsraelHiking.API.Services
             return MergeBackLines(missingLinesSplit);
         }
 
-        private List<ILineString> SplitLine(ILineString itmLineSting)
+        private List<LineString> SplitLine(LineString itmLineSting)
         {
-            var splitLines = new List<ILineString>();
+            var splitLines = new List<LineString>();
             var numberOfDividesForPoints = (itmLineSting.Coordinates.Length - 1) / _options.MaxNumberOfPointsPerLine;
             var numberOfDividesForLength = (int)(itmLineSting.Length / _options.MaxLengthPerLine);
             var numberOfDivides = Math.Max(numberOfDividesForPoints, numberOfDividesForLength);
@@ -225,12 +224,12 @@ namespace IsraelHiking.API.Services
             return splitLines;
         }
 
-        private List<ILineString> MergeBackLines(List<ILineString> missingLines)
+        private List<LineString> MergeBackLines(List<LineString> missingLines)
         {
-            var mergedLines = new List<ILineString>();
+            var mergedLines = new List<LineString>();
             if (!missingLines.Any())
             {
-                return new List<ILineString>();
+                return new List<LineString>();
             }
             var lineToAdd = missingLines.First();
             for (int lineIndex = 1; lineIndex < missingLines.Count; lineIndex++)
@@ -253,9 +252,9 @@ namespace IsraelHiking.API.Services
             return mergedLines;
         }
 
-        private List<ILineString> MergeLines(List<ILineString> missingLines)
+        private List<LineString> MergeLines(List<LineString> missingLines)
         {
-            var mergedLines = new List<ILineString>();
+            var mergedLines = new List<LineString>();
             while (missingLines.Any())
             {
                 var missingLine = missingLines.First();
@@ -285,33 +284,25 @@ namespace IsraelHiking.API.Services
             return mergedLines;
         }
 
-        private async Task<List<ILineString>> GetLineStringsInArea(ILineString gpxItmLine, double tolerance)
+        private async Task<List<LineString>> GetLineStringsInArea(LineString gpxItmLine, double tolerance)
         {
-            var northEast = _itmWgs84MathTransform.Transform(new Coordinate
-            {
-                Y = gpxItmLine.Coordinates.Max(c => c.Y) + tolerance,
-                X = gpxItmLine.Coordinates.Max(c => c.X) + tolerance
-            });
-            var southWest = _itmWgs84MathTransform.Transform(new Coordinate
-            {
-                Y = gpxItmLine.Coordinates.Min(c => c.Y) - tolerance,
-                X = gpxItmLine.Coordinates.Min(c => c.X) - tolerance
-            });
-            var highways = await _elasticSearchGateway.GetHighways(northEast, southWest);
+            var northEast = _itmWgs84MathTransform.Transform(gpxItmLine.Coordinates.Max(c => c.X) + tolerance, gpxItmLine.Coordinates.Max(c => c.Y) + tolerance);
+            var southWest = _itmWgs84MathTransform.Transform(gpxItmLine.Coordinates.Min(c => c.X) - tolerance, gpxItmLine.Coordinates.Min(c => c.Y) - tolerance);
+            var highways = await _elasticSearchGateway.GetHighways(new Coordinate(northEast.x, northEast.y), new Coordinate(southWest.x, southWest.y));
             return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates, highway.GetOsmId())).ToList();
         }
 
-        private ILineString ToItmLineString(IEnumerable<Coordinate> coordinates, string id)
+        private LineString ToItmLineString(IEnumerable<Coordinate> coordinates, string id)
         {
-            var itmCoordinates = coordinates.Select(_wgs84ItmMathTransform.Transform)
-                .Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1)))
+            var itmCoordinates = coordinates.Select(c => _wgs84ItmMathTransform.Transform(c.X, c.Y))
+                .Select(c => new Coordinate(Math.Round(c.x, 1), Math.Round(c.y, 1)))
                 .ToArray();
             var line = _geometryFactory.CreateLineString(itmCoordinates);
             line.SetOsmId(id);
             return line;
         }
 
-        private async Task<List<ILineString>> ProlongLinesAccordingToOriginalGpx(List<ILineString> linesToProlong, ILineString gpxItmLine)
+        private async Task<List<LineString>> ProlongLinesAccordingToOriginalGpx(List<LineString> linesToProlong, LineString gpxItmLine)
         {
             var originalCoordinates = gpxItmLine.Coordinates;
             var prolongInputs = new List<GpxProlongerExecutorInput>();
@@ -348,9 +339,9 @@ namespace IsraelHiking.API.Services
             return linesToProlong;
         }
         
-        private List<ILineString> AdjustIntersections(List<ILineString> gpxItmLines)
+        private List<LineString> AdjustIntersections(List<LineString> gpxItmLines)
         {
-            var adjustedLines = new List<ILineString>();
+            var adjustedLines = new List<LineString>();
 
             for (int currnetLineIndex = gpxItmLines.Count - 1; currnetLineIndex >= 0; currnetLineIndex--)
             {
@@ -372,7 +363,7 @@ namespace IsraelHiking.API.Services
             return adjustedLines;
         }
 
-        private ILineString GetLineWithExtraPoints(ILineString currentLine, Coordinate coordinateToAddIfNeeded)
+        private LineString GetLineWithExtraPoints(LineString currentLine, Coordinate coordinateToAddIfNeeded)
         {
             var point = new Point(coordinateToAddIfNeeded);
             if (currentLine.Distance(point) >= _options.MaxDistanceToExisitngLineForMerge * 2)
@@ -395,7 +386,7 @@ namespace IsraelHiking.API.Services
             return _geometryFactory.CreateLineString(coordinates.ToArray());
         }
 
-        private void ReplaceEdgeIfNeeded(List<ILineString> adjustedLines, Coordinate coordinate, List<Coordinate> currentCoordinates)
+        private void ReplaceEdgeIfNeeded(List<LineString> adjustedLines, Coordinate coordinate, List<Coordinate> currentCoordinates)
         {
             var coordinateReplacement = adjustedLines.SelectMany(l => l.Coordinates)
                 .Where(c => c.Distance(coordinate) < 2 * _options.MaxDistanceToExisitngLineForMerge)

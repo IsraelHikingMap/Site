@@ -1,13 +1,13 @@
-﻿using System.IO;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
+using System.IO;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -29,12 +29,6 @@ namespace IsraelHiking.API.Tests.Controllers
             options.Value.Returns(new ConfigurationData());
             
             _controller = new ImagesController(_repository, _imageCreationService, _imgurGateway, options);
-        }
-
-        [TestCleanup]
-        public void TestCleanUp()
-        {
-            _controller.Dispose();
         }
 
         [TestMethod]

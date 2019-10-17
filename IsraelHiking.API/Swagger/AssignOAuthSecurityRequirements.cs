@@ -1,16 +1,16 @@
-﻿using Swashbuckle.AspNetCore.Swagger;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace IsraelHiking.API.Swagger
 {
-
     /// <summary>
     /// Adds the authentication icon for calls that require authentication
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class AssignOAuthSecurityRequirements : IOperationFilter
     {
         /// <summary>
@@ -18,30 +18,33 @@ namespace IsraelHiking.API.Swagger
         /// </summary>
         /// <param name="operation"></param>
         /// <param name="context"></param>
-        public void Apply(Operation operation, OperationFilterContext context)
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            var filterPipeline = context.ApiDescription.ActionDescriptor.FilterDescriptors;
-            var isAuthorized = filterPipeline.Select(f => f.Filter).Any(f => f is AuthorizeFilter);
-            var authorizationRequired = context.ApiDescription.ControllerAttributes().Any(a => a is AuthorizeAttribute);
-            if (!authorizationRequired)
+            var authAttributes = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
+            .Union(context.MethodInfo.GetCustomAttributes(true))
+            .OfType<AuthorizeAttribute>();
+            if (authAttributes.Any())
             {
-                authorizationRequired = context.ApiDescription.ActionAttributes().Any(a => a is AuthorizeAttribute);
-            }
+                operation.Security = new List<OpenApiSecurityRequirement> {
+                    new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                },
+                                Scheme = "oauth2",
+                                Name = "Bearer",
+                                In = ParameterLocation.Header,
 
-            if (isAuthorized && authorizationRequired)
-            {
-                if (operation.Parameters == null)
-                {
-                    operation.Parameters = new List<IParameter>();
-                }
-                operation.Parameters.Add(new NonBodyParameter()
-                {
-                    Name = "Authorization",
-                    In = "header",
-                    Description = "From OSM: Baerar client;client secret.",
-                    Required = true,
-                    Type = "string"
-                });
+                            },
+                            new List<string>()
+                        }
+                    }
+                };
             }
         }
     }

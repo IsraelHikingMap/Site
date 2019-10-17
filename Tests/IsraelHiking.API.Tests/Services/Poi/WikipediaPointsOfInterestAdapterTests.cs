@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
-using IsraelHiking.API.Services;
-using IsraelHiking.API.Services.Poi;
+﻿using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using NSubstitute;
+using System.Collections.Generic;
 
 namespace IsraelHiking.API.Tests.Services.Poi
 {
@@ -33,8 +30,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var poiId = "42";
             var language = "en";
             var feature = GetValidFeature(poiId, _adapter.Source);
-            feature.Attributes.AddAttribute(FeatureAttributes.POI_LANGUAGE, "he");
-            var featureCollection = new FeatureCollection { Features = { feature } };
+            feature.Attributes.Add(FeatureAttributes.POI_LANGUAGE, "he");
+            var featureCollection = new FeatureCollection { feature };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
 
             _wikipediaGateway.GetById(poiId).Returns(featureCollection);
@@ -50,8 +47,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var poiId = "42";
             var language = "en";
             var feature = GetValidFeature(poiId, _adapter.Source);
-            feature.Attributes.AddAttribute(FeatureAttributes.POI_LANGUAGE, language);
-            var featureCollection = new FeatureCollection { Features = { feature } };
+            feature.Attributes.Add(FeatureAttributes.POI_LANGUAGE, language);
+            var featureCollection = new FeatureCollection { feature };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
 
             _wikipediaGateway.GetById(poiId).Returns(featureCollection);

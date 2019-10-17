@@ -1,7 +1,7 @@
-﻿using System.Text.RegularExpressions;
-using GeoAPI.Geometries;
-using GeoAPI.CoordinateSystems.Transformations;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
+using NetTopologySuite.Geometries;
+using ProjNet.CoordinateSystems.Transformations;
+using System.Text.RegularExpressions;
 
 namespace IsraelHiking.API.Converters.CoordinatesParsers
 {
@@ -10,7 +10,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
     /// </summary>
     public class UtmParser : BaseCoordinatesParser
     {
-        private readonly IMathTransform _itmWgs84MathTransform;
+        private readonly MathTransform _itmWgs84MathTransform;
 
         /// <inheritdoc/>
         public override Regex Matcher => new Regex(@"^(\d{6})" + DELIMITER_REGEX_STRING + @"(\d{6,7})$");
@@ -45,7 +45,8 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
             }
             if (easting >= 100000 && easting <= 300000)
             {
-                return _itmWgs84MathTransform.Transform(new Coordinate(easting, northing));
+                var transformed = _itmWgs84MathTransform.Transform(easting, northing);
+                return new Coordinate(transformed.x, transformed.y);
             }
             return null;
         }

@@ -6,6 +6,7 @@ import { HashService, IPoiRouterData } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { Urls } from "../urls";
 import { MarkerData, LatLngAlt, PointOfInterestExtended, PointOfInterest, Rating } from "../models/models";
+import { DatabaseService } from "./database.service";
 
 export type CategoriesType = "Points of Interest" | "Routes";
 
@@ -44,7 +45,8 @@ export class PoiService {
     constructor(private readonly resources: ResourcesService,
                 private readonly httpClient: HttpClient,
                 private readonly whatsappService: WhatsAppService,
-                private readonly hashService: HashService) {
+                private readonly hashService: HashService,
+                private readonly databaseService: DatabaseService) {
 
         this.poiCache = [];
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
@@ -92,12 +94,13 @@ export class PoiService {
     }
 
     public getPoints(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[]): Promise<PointOfInterest[]> {
-        let params = new HttpParams()
-            .set("northEast", northEast.lat + "," + northEast.lng)
-            .set("southWest", southWest.lat + "," + southWest.lng)
-            .set("categories", categoriesTypes.join(","))
-            .set("language", this.resources.getCurrentLanguageCodeSimplified());
-        return this.httpClient.get(Urls.poi, { params }).toPromise() as Promise<PointOfInterest[]>;
+        return this.databaseService.getPois(northEast, southWest, categoriesTypes);
+        //let params = new HttpParams()
+        //    .set("northEast", northEast.lat + "," + northEast.lng)
+        //    .set("southWest", southWest.lat + "," + southWest.lng)
+        //    .set("categories", categoriesTypes.join(","))
+        //    .set("language", this.resources.getCurrentLanguageCodeSimplified());
+        //return this.httpClient.get(Urls.poi, { params }).toPromise() as Promise<PointOfInterest[]>;
     }
 
     public async getPoint(id: string, source: string, language?: string): Promise<PointOfInterestExtended> {

@@ -1,24 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using GeoAPI.Geometries;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
-using NSubstitute;
-using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
+using NSubstitute;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -46,7 +45,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>())
                 .Returns(gpx.ToBytes());
             _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
-            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<ILineString>>()).Returns(
+            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
                 addibleLines ?? new List <LineString>
                 {
                     new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})
@@ -194,7 +193,7 @@ namespace IsraelHiking.API.Tests.Controllers
             file.FileName.Returns("SomeFile.gpx");
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(gpx.ToBytes());
             _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
-            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<ILineString>>()).Returns(
+            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
                 new List<LineString>
                 {
                     new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})
@@ -207,8 +206,8 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(results);
             var featureCollection = results.Value as FeatureCollection;
             Assert.IsNotNull(featureCollection);
-            Assert.AreEqual(1, featureCollection.Features.Count);
-            Assert.IsTrue(featureCollection.Features.First().Attributes.GetValues().Contains("footway"));
+            Assert.AreEqual(1, featureCollection.Count);
+            Assert.IsTrue(featureCollection.First().Attributes.GetValues().Contains("footway"));
         }
 
         [TestMethod]
@@ -230,8 +229,8 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(results);
             var featureCollection = results.Value as FeatureCollection;
             Assert.IsNotNull(featureCollection);
-            Assert.AreEqual(1, featureCollection.Features.Count);
-            Assert.IsTrue(featureCollection.Features.First().Attributes.GetValues().Contains("cycleway"));
+            Assert.AreEqual(1, featureCollection.Count);
+            Assert.IsTrue(featureCollection.First().Attributes.GetValues().Contains("cycleway"));
         }
 
         [TestMethod]
@@ -255,8 +254,8 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(results);
             var featureCollection = results.Value as FeatureCollection;
             Assert.IsNotNull(featureCollection);
-            Assert.AreEqual(1, featureCollection.Features.Count);
-            Assert.IsTrue(featureCollection.Features.First().Attributes.GetValues().Contains("track"));
+            Assert.AreEqual(1, featureCollection.Count);
+            Assert.IsTrue(featureCollection.First().Attributes.GetValues().Contains("track"));
         }
     }
 }
