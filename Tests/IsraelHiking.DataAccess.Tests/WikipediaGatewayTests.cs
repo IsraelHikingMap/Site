@@ -6,23 +6,31 @@ namespace IsraelHiking.DataAccess.Tests
     [TestClass]
     public class WikipediaGatewayTests
     {
+        private WikipediaGateway _gateway;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _gateway = new WikipediaGateway(new TraceLogger());
+        }
+
         [TestMethod]
         [Ignore]
         public void GetWikiPageById()
         {
-            var wikiGateway = new WikipediaGateway(new TraceLogger());
-            wikiGateway.Initialize().Wait();
-            var results = wikiGateway.GetById("he_104020").Result;
+
+            _gateway.Initialize().Wait();
+            var results = _gateway.GetById("he_104020").Result;
             Assert.IsNotNull(results);
         }
 
         [TestMethod]
         [Ignore]
-        public void GetWikiPageByLocation()
+        public void GetWikiPageByBoundingBox()
         {
-            var wikiGateway = new WikipediaGateway(new TraceLogger());
-            wikiGateway.Initialize().Wait();
-            var results = wikiGateway.GetByLocation(new Coordinate(35.12, 31.773), "he").Result;
+            _gateway.Initialize().Wait();
+            var delta = 0.15;
+            var results = _gateway.GetByBoundingBox(new Coordinate(35, 32), new Coordinate(35 + delta, 32 + delta), "he").Result;
             Assert.IsTrue(results.Count > 0);
         }
 
@@ -30,9 +38,8 @@ namespace IsraelHiking.DataAccess.Tests
         [Ignore]
         public void GetWikiPageByTitle()
         {
-            var wikiGateway = new WikipediaGateway(new TraceLogger());
-            wikiGateway.Initialize().Wait();
-            var results = wikiGateway.GetByPageTitle("aaaaaaaaa", "he").Result;
+            _gateway.Initialize().Wait();
+            var results = _gateway.GetByPageTitle("aaaaaaaaa", "he").Result;
             Assert.IsNull(results);
         }
     }

@@ -27,7 +27,7 @@ namespace IsraelHiking.DataAccessInterfaces
     {
         Task Initialize();
         Task<FeatureCollection> GetByPageTitle(string title, string language);
-        Task<List<Feature>> GetByLocation(Coordinate center, string language);
+        Task<List<Feature>> GetByBoundingBox(Coordinate sourhWest, Coordinate northEast, string language);
         Reference GetReference(string title, string language);
     }
 }

@@ -21,7 +21,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             InitializeSubstitues();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
-            _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _options, Substitute.For<ILogger>());
+            _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _wikipediaGateway, _options, Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -65,10 +65,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetPointsForIndexing_ShouldGetAllPointsFromGateway()
         {
-            _wikipediaGateway.GetByLocation(Arg.Any<Coordinate>(), Arg.Any<string>()).Returns(new List<Feature> {GetValidFeature("1", Sources.WIKIPEDIA)});
+            _wikipediaGateway.GetByBoundingBox(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string>()).Returns(new List<Feature> {GetValidFeature("1", Sources.WIKIPEDIA)});
             var points = _adapter.GetPointsForIndexing().Result;
 
-            _wikipediaGateway.Received(1120).GetByLocation(Arg.Any<Coordinate>(), Arg.Any<string>());
+            _wikipediaGateway.Received(952).GetByBoundingBox(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string>());
             Assert.AreEqual(1, points.Count); // only 1 distinct
         }
 

@@ -55,7 +55,7 @@ namespace IsraelHiking.DataAccess
             return ConvertPageToFeatureCollection(page, language);
         }
 
-        public async Task<List<Feature>> GetByLocation(Coordinate center, string language)
+        public async Task<List<Feature>> GetByBoundingBox(Coordinate sourthWest, Coordinate northEast, string language)
         {
             for (int retryIndex = 0; retryIndex < 3; retryIndex++)
             {
@@ -63,8 +63,7 @@ namespace IsraelHiking.DataAccess
                 {
                     var geoSearchGenerator = new GeoSearchGenerator(_wikiSites[language])
                     {
-                        TargetCoordinate = new GeoCoordinate(center.Y, center.X),
-                        Radius = 10000,
+                        BoundingRectangle = GeoCoordinateRectangle.FromBoundingCoordinates(sourthWest.X, sourthWest.Y, northEast.X, northEast.Y),
                         PaginationSize = 500
                     };
                     var results = await geoSearchGenerator.EnumItemsAsync().ToListAsync();
@@ -78,7 +77,7 @@ namespace IsraelHiking.DataAccess
                     }
                     return features;
                 }
-                catch 
+                catch
                 {
                     // this is used since this function throws an unrelated timeout error...
                 }
