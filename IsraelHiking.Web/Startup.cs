@@ -71,7 +71,6 @@ namespace IsraelHiking.Web
             }).AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.Converters.Add(new CoordinateConverter(geometryFactory.PrecisionModel, 3));
-                options.SerializerSettings.Converters.Add(new CoordinateConverterPatch(geometryFactory.PrecisionModel, 3));
                 options.SerializerSettings.Converters.Add(new GeometryConverter(geometryFactory, 3));
                 options.SerializerSettings.Converters.Add(new GeometryArrayConverter(geometryFactory, 3));
                 options.SerializerSettings.Converters.Add(new FeatureCollectionConverter());

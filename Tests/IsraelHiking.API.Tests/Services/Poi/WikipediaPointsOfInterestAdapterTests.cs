@@ -21,7 +21,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             InitializeSubstitues();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
-            _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _wikipediaGateway, _options, Substitute.For<ILogger>());
+            _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _options, Substitute.For<ILogger>());
         }
 
         [TestMethod]

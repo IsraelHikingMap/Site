@@ -28,6 +28,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="elasticSearchGateway"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="wikipediaGateway"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
         /// 
@@ -35,6 +36,7 @@ namespace IsraelHiking.API.Services.Poi
             IElasticSearchGateway elasticSearchGateway,
             IDataContainerConverterService dataContainerConverterService,
             IWikipediaGateway wikipediaGateway,
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IOptions<ConfigurationData> options,
             ILogger logger) :
             base(elevationDataStorage, 

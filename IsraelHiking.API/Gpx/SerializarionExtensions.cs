@@ -84,7 +84,6 @@ namespace IsraelHiking.API.Gpx
                 var jsonWriter = new JsonTextWriter(writer);
                 var factory = new GeometryFactory();
                 var serializer = GeoJsonSerializer.Create(factory, 3);
-                serializer.Converters.Add(new CoordinateConverterPatch(factory.PrecisionModel, 3));
                 serializer.Serialize(jsonWriter, featureCollection);
                 jsonWriter.Flush();
                 return outputStream.ToArray();

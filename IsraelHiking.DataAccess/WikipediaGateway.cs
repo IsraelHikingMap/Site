@@ -70,7 +70,7 @@ namespace IsraelHiking.DataAccess
                     var features = new List<Feature>();
                     foreach (var geoSearchResultItem in results)
                     {
-                        var coordinate = new Coordinate(geoSearchResultItem.Coordinate.Longitude, geoSearchResultItem.Coordinate.Latitude);
+                        var coordinate = new CoordinateZ(geoSearchResultItem.Coordinate.Longitude, geoSearchResultItem.Coordinate.Latitude);
                         var attributes = GetAttributes(coordinate, geoSearchResultItem.Page.Title,
                             geoSearchResultItem.Page.Id.ToString(), language);
                         features.Add(new Feature(new Point(coordinate), attributes));

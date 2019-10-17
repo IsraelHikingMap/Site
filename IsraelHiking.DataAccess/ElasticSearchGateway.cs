@@ -22,7 +22,6 @@ namespace IsraelHiking.DataAccess
             OverwriteDefaultSerializers((s, cvs) =>
             {
                 s.Converters.Add(new CoordinateConverter(factory.PrecisionModel, 3));
-                s.Converters.Add(new CoordinateConverterPatch(factory.PrecisionModel, 3));
                 s.Converters.Add(new GeometryConverter(factory, 3));
                 s.Converters.Add(new GeometryArrayConverter(factory, 3));
                 s.Converters.Add(new FeatureCollectionConverter());

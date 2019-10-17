@@ -28,7 +28,7 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="12.1.2" />
     <PackageReference Include="NetTopologySuite" Version="2.0.0" />
-    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.0" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.1" />
     <PackageReference Include="NetTopologySuite.IO.GPX" Version="1.0.0" />
     <PackageReference Include="ProjNet" Version="2.0.0" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />

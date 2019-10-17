@@ -86,7 +86,7 @@
     <PackageReference Include="NEST" Version="5.5.0" />
     <PackageReference Include="NetTopologySuite" Version="2.0.0" />
     <PackageReference Include="NetTopologySuite.IO" Version="1.15.0-pre032" />
-    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.0" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.1" />
     <PackageReference Include="NetTopologySuite.IO.GPX" Version="1.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.0" />

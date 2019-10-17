@@ -13,7 +13,7 @@ namespace IsraelHiking.Common
 
         public static Coordinate FromLatLng(this Coordinate coordinate, LatLng latLng)
         {
-            return new Coordinate(latLng.Lng, latLng.Lat);
+            return new CoordinateZ(latLng.Lng, latLng.Lat);
         }
 
         public static double[] ToDoubleArray(this Coordinate coordinate)
