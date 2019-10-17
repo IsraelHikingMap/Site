@@ -94,13 +94,13 @@ export class PoiService {
     }
 
     public getPoints(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[]): Promise<PointOfInterest[]> {
-        return this.databaseService.getPois(northEast, southWest, categoriesTypes);
-        //let params = new HttpParams()
-        //    .set("northEast", northEast.lat + "," + northEast.lng)
-        //    .set("southWest", southWest.lat + "," + southWest.lng)
-        //    .set("categories", categoriesTypes.join(","))
-        //    .set("language", this.resources.getCurrentLanguageCodeSimplified());
-        //return this.httpClient.get(Urls.poi, { params }).toPromise() as Promise<PointOfInterest[]>;
+        // return this.databaseService.getPois(northEast, southWest, categoriesTypes);
+        let params = new HttpParams()
+           .set("northEast", northEast.lat + "," + northEast.lng)
+           .set("southWest", southWest.lat + "," + southWest.lng)
+           .set("categories", categoriesTypes.join(","))
+           .set("language", this.resources.getCurrentLanguageCodeSimplified());
+        return this.httpClient.get(Urls.poi, { params }).toPromise() as Promise<PointOfInterest[]>;
     }
 
     public async getPoint(id: string, source: string, language?: string): Promise<PointOfInterestExtended> {

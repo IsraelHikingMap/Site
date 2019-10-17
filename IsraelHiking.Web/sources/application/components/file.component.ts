@@ -20,11 +20,11 @@ export class FileComponent extends BaseMapComponent {
     public openFileElement: ElementRef;
 
     constructor(resources: ResourcesService,
-        private readonly dataContainerService: DataContainerService,
-        private readonly fileService: FileService,
-        private readonly toastService: ToastService,
-        private readonly runningContextService: RunningContextService,
-        private readonly databaseService: DatabaseService
+                private readonly dataContainerService: DataContainerService,
+                private readonly fileService: FileService,
+                private readonly toastService: ToastService,
+                private readonly runningContextService: RunningContextService,
+                private readonly databaseService: DatabaseService
     ) {
         super(resources);
     }
@@ -48,7 +48,7 @@ export class FileComponent extends BaseMapComponent {
                     let pois = JSON.parse(event.target.result);
                     this.databaseService.storePois(pois);
                     resolve();
-                }
+                };
                 reader.onerror = () => reject();
                 reader.readAsText(file);
             });

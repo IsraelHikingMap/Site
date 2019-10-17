@@ -8,8 +8,12 @@ import { WhatsAppService } from "./whatsapp.service";
 import { RunningContextService } from "./running-context.service";
 import { PoiService } from "./poi.service";
 import { HashService } from "./hash.service";
+import { DatabaseService } from './database.service';
+import { LoggingService } from './logging.service';
 import { Urls } from "../urls";
 import { PointOfInterestExtended, Rating } from "../models/models";
+import { NgRedux } from '@angular-redux/store';
+
 
 describe("Poi Service", () => {
 
@@ -26,7 +30,10 @@ describe("Poi Service", () => {
                 { provide: HashService, useValue: hashService },
                 RunningContextService,
                 WhatsAppService,
-                PoiService
+                PoiService,
+                DatabaseService,
+                LoggingService,
+                NgRedux
             ]
         });
     });

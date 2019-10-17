@@ -155,7 +155,7 @@ export function initializeApplication(injector: Injector) {
             await loggingService.info("Finished IHM Application Initialization");
         } catch (error) {
             loggingService.error(`Failed IHM Application Initialization: ${error.toString()}`);
-            alert(`Sorrrrrrrrrrrrrrrrrry.... Failed to initialize IHM due to the following error: \n${error.toString()}`)
+            alert(`Sorrrrrrrrrrrrrrrrrry.... Failed to initialize IHM due to the following error: \n${error.toString()}`);
         }
     };
 }

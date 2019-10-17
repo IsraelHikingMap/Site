@@ -43,7 +43,7 @@ export class DatabaseService {
         this.poisDatabase = new Dexie(DatabaseService.POIS_DB_NAME);
         this.poisDatabase.version(1).stores({
             pois: "id,[location.lat+location.lng]"
-        })
+        });
         this.initCustomTileLoadFunction();
         if (this.runningContext.isIFrame) {
             this.ngRedux.configureStore(rootReducer, initialState, [classToActionMiddleware]);
