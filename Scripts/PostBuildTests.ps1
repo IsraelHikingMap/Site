@@ -8,8 +8,9 @@ Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
 # Run dotnet tests with coverage
 
-Write-Host "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude=`"[IsraelHiking.Common]*`" --logger trx"
-dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov --logger trx
+$DotnetTestsCmd = "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude=`"[IsraelHiking.Common]*`" --logger trx"
+Write-Host $DotnetTestsCmd
+Invoke-Expression $DotnetTestsCmd
 
 # Run tests using Karma and export results as JUnit and Lcov format
 
