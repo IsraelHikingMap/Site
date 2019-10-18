@@ -9,7 +9,7 @@ Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 # Run dotnet tests with coverage
 
 Write-Host "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=json --logger trx"
-dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=json --logger trx
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov --logger trx
 
 # Run tests using Karma and export results as JUnit and Lcov format
 
@@ -58,8 +58,8 @@ $CodeCov = get-childitem "C:\Users\$($env:UserName)\.nuget\packages\" codecov.ex
 
 # Locate coverage files
 
-$APICoverage = "$($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.API.Tests\coverage.json"
-$DataAccessCoverage = "$($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.DataAccess.Tests\coverage.json"
+$APICoverage = "$($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.API.Tests\coverage.info"
+$DataAccessCoverage = "$($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.DataAccess.Tests\coverage.info"
 $WebCoverage = "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web\coverage\lcov.info"
 
 # Run codecov
