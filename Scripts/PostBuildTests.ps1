@@ -8,7 +8,7 @@ Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
 # Run dotnet tests with coverage
 
-Write-Host "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=json --logger trx"
+Write-Host "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude=`"[IsraelHiking.Common]*`" --logger trx"
 dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov --logger trx
 
 # Run tests using Karma and export results as JUnit and Lcov format
@@ -59,7 +59,6 @@ $CodeCov = get-childitem "C:\Users\$($env:UserName)\.nuget\packages\" codecov.ex
 # Locate coverage files
 
 $APICoverage = "$($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.API.Tests\coverage.info"
-$DataAccessCoverage = "$($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.DataAccess.Tests\coverage.info"
 $WebCoverage = "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web\coverage\lcov.info"
 
 # Run codecov
@@ -68,9 +67,6 @@ Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 $CodeCovToken = "fc1bea1d-f43a-437e-84d3-baef07be7454"
 
 $CodeCovCmd = "$($CodeCov) -f $APICoverage -t $CodeCovToken"
-Write-Host $CodeCovCmd
-Invoke-Expression $CodeCovCmd
-$CodeCovCmd = "$($CodeCov) -f $DataAccessCoverage -t $CodeCovToken"
 Write-Host $CodeCovCmd
 Invoke-Expression $CodeCovCmd
 $CodeCovCmd = "$($CodeCov) -f $WebCoverage -t $CodeCovToken"
