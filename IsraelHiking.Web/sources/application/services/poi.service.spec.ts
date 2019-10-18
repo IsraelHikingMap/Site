@@ -1,7 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule, HttpRequest } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { NgRedux } from '@angular-redux/store';
+import { NgRedux } from "@angular-redux/store";
 
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
@@ -9,8 +9,8 @@ import { WhatsAppService } from "./whatsapp.service";
 import { RunningContextService } from "./running-context.service";
 import { PoiService } from "./poi.service";
 import { HashService } from "./hash.service";
-import { DatabaseService } from './database.service';
-import { LoggingService } from './logging.service';
+import { DatabaseService } from "./database.service";
+import { LoggingService } from "./logging.service";
 import { Urls } from "../urls";
 import { PointOfInterestExtended, Rating } from "../models/models";
 
