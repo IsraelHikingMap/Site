@@ -1,12 +1,11 @@
 ﻿using Elasticsearch.Net;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Nest;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO.Converters;
+using NetTopologySuite.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,13 +20,10 @@ namespace IsraelHiking.DataAccess
         {
             OverwriteDefaultSerializers((s, cvs) =>
             {
-                s.Converters.Add(new CoordinateConverter(factory.PrecisionModel, 3));
-                s.Converters.Add(new GeometryConverter(factory, 3));
-                s.Converters.Add(new GeometryArrayConverter(factory, 3));
-                s.Converters.Add(new FeatureCollectionConverter());
-                s.Converters.Add(new FeatureConverter());
-                s.Converters.Add(new AttributesTableConverter());
-                s.Converters.Add(new EnvelopeConverter());
+                foreach (var converter in GeoJsonSerializer.Create(factory, 3).Converters)
+                {
+                    s.Converters.Add(converter);
+                }
             });
         }
     }

@@ -4,7 +4,6 @@ using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccessInterfaces;
@@ -25,7 +24,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO.Converters;
+using NetTopologySuite.IO;
 using System;
 using System.IO;
 using System.Linq;
@@ -70,13 +69,10 @@ namespace IsraelHiking.Web
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(PointOfInterestExtended)));
             }).AddNewtonsoftJson(options =>
             {
-                options.SerializerSettings.Converters.Add(new CoordinateConverter(geometryFactory.PrecisionModel, 3));
-                options.SerializerSettings.Converters.Add(new GeometryConverter(geometryFactory, 3));
-                options.SerializerSettings.Converters.Add(new GeometryArrayConverter(geometryFactory, 3));
-                options.SerializerSettings.Converters.Add(new FeatureCollectionConverter());
-                options.SerializerSettings.Converters.Add(new FeatureConverter());
-                options.SerializerSettings.Converters.Add(new AttributesTableConverter());
-                options.SerializerSettings.Converters.Add(new EnvelopeConverter());
+                foreach (var converter in GeoJsonSerializer.Create(geometryFactory,3).Converters)
+                {
+                    options.SerializerSettings.Converters.Add(converter);
+                }
             });
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
             services.AddCors();
