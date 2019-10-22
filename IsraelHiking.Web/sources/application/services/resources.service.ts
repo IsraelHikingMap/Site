@@ -296,6 +296,7 @@ export class ResourcesService {
     public clickBackAgainToCloseTheApp: string;
     public wrappingThingsUp: string;
     public unableToDeleteShare: string;
+    public preparingDataForIssueReport: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -782,6 +783,7 @@ export class ResourcesService {
         this.clickBackAgainToCloseTheApp = this.gettextCatalog.getString("Click back again to close the app");
         this.wrappingThingsUp = this.gettextCatalog.getString("Wrapping things up, please wait a few seconds...");
         this.unableToDeleteShare = this.gettextCatalog.getString("Unable to delete the share...");
+        this.preparingDataForIssueReport = this.gettextCatalog.getString("Preparing data for issue report");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

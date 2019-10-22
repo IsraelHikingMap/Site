@@ -18,6 +18,7 @@ import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 import { ConfigurationActions } from "../reducres/configuration.reducer";
 import { UserInfo, ApplicationState } from "../models/models";
+import { FileService } from '../services/file.service';
 
 interface IRank {
     name: string;
@@ -49,6 +50,7 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
                 private readonly authorizationService: AuthorizationService,
                 private readonly dialog: MatDialog,
                 private readonly runningContextService: RunningContextService,
+                private readonly fileService: FileService,
                 private readonly toastService: ToastService,
                 private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -148,12 +150,15 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
         if (!this.runningContextService.isCordova) {
             return;
         }
+        this.toastService.info(this.resources.preparingDataForIssueReport);
         let logs = await this.loggingService.getLog();
+        let logBase64 = btoa(logs);
+        await this.fileService.saveBytesResponseToFile(logBase64, "report.log");
         cordova.plugins.email.open({
             to: ["israelhikingmap@gmail.com"],
             subject: "Issue reported by " + this.userInfo.displayName,
             body: this.resources.reportAnIssueInstructions,
-            attachments: ["base64:log.txt//" + btoa(logs)]
+            attachments: ["base64:log.txt//" + logBase64]
         });
     }
 
