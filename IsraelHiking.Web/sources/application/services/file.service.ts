@@ -148,8 +148,7 @@ export class FileService {
         this.fitBoundsService.fitBounds(SpatialService.getBounds([container.southWest, container.northEast]));
     }
 
-    // HMTOD: temporary! Should be private
-    public saveBytesResponseToFile = async (data: string, fileName: string): Promise<boolean> => {
+    private saveBytesResponseToFile = async (data: string, fileName: string): Promise<boolean> => {
         let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(data, "application/octet-stream");
         return await this.saveAsWorkAround(blobToSave, fileName);
     }

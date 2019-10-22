@@ -6,6 +6,7 @@ import { select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
 import { Observable, Subscription } from "rxjs";
 import { NgRedux } from "@angular-redux/store";
+import { Base64 } from "js-base64";
 
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
@@ -18,7 +19,6 @@ import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 import { ConfigurationActions } from "../reducres/configuration.reducer";
 import { UserInfo, ApplicationState } from "../models/models";
-import { FileService } from '../services/file.service';
 
 interface IRank {
     name: string;
@@ -50,7 +50,6 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
                 private readonly authorizationService: AuthorizationService,
                 private readonly dialog: MatDialog,
                 private readonly runningContextService: RunningContextService,
-                private readonly fileService: FileService,
                 private readonly toastService: ToastService,
                 private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -152,8 +151,7 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
         }
         this.toastService.info(this.resources.preparingDataForIssueReport);
         let logs = await this.loggingService.getLog();
-        let logBase64 = btoa(logs);
-        await this.fileService.saveBytesResponseToFile(logBase64, "report.log");
+        let logBase64 = Base64.encode(logs);
         cordova.plugins.email.open({
             to: ["israelhikingmap@gmail.com"],
             subject: "Issue reported by " + this.userInfo.displayName,
