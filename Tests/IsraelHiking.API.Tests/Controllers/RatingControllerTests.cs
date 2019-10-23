@@ -80,7 +80,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var poiId = "poiId";
             var osmUserId = "42";
             var source = "source";
-            _controller.SetupIdentity(osmUserId);
+            _controller.SetupIdentity(null, osmUserId);
             _repository.GetRating(poiId, source).Returns(new Rating {Raters = new List<Rater>()});
             var resutls = _controller.UploadRating(new Rating { Id = poiId, Source = source, Raters = new List<Rater> { new Rater { Id = osmUserId, Value = 1}}}).Result as OkObjectResult;
 
@@ -97,7 +97,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var poiId = "poiId";
             var osmUserId = "42";
             var source = "source";
-            _controller.SetupIdentity(osmUserId);
+            _controller.SetupIdentity(null, osmUserId);
             _repository.GetRating(poiId, source).Returns(new Rating {Raters = new List<Rater> {new Rater {Id = osmUserId, Value = -1}}});
             var resutls = _controller.UploadRating(new Rating { Id = poiId, Source = source, Raters = new List<Rater> { new Rater { Id = osmUserId, Value = 1 } } }).Result as OkObjectResult;
 

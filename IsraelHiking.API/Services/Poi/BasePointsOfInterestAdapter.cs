@@ -34,12 +34,16 @@ namespace IsraelHiking.API.Services.Poi
         /// Data container service used to convert the data
         /// </summary>
         protected readonly IDataContainerConverterService _dataContainerConverterService;
+        /// <summary>
+        /// Global configuration data
+        /// </summary>
+        protected readonly ConfigurationData _options;
 
         private readonly IElevationDataStorage _elevationDataStorage;
         
         private readonly MathTransform _wgs84ItmMathTransform;
 
-        private readonly ConfigurationData _options;
+        
 
         /// <inheritdoc />
         public abstract string Source { get; }

@@ -140,6 +140,7 @@ import { LayersViewComponent } from "./components/map/layers-view.component";
 import { RoutesComponent } from "./components/map/routes.component";
 import { TracesComponent } from "./components/map/traces.component";
 import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
+import { SecuredImageComponent } from "./components/secure-image.component";
 // variables and functions
 import { routes } from "./routes";
 
@@ -206,9 +207,7 @@ NgModule({
         NgReduxModule,
         NgxMapboxGLModule.withConfig({ accessToken: "no-token" })
     ],
-    entryComponents: [ZoomComponent,
-        LocationComponent,
-        LayersComponent,
+    entryComponents: [
         LayersSidebarComponent,
         BaseLayerAddDialogComponent,
         BaseLayerEditDialogComponent,
@@ -216,16 +215,9 @@ NgModule({
         OverlayEditDialogComponent,
         RouteAddDialogComponent,
         RouteEditDialogComponent,
-        RouteStatisticsComponent,
-        FileComponent,
-        FileSaveAsComponent,
-        EditOSMComponent,
-        OsmUserComponent,
         TracesDialogComponent,
         SharesDialogComponent,
-        LanguageComponent,
         LanguageDialogComponent,
-        DrawingComponent,
         CoordinatesComponent,
         RoutePointOverlayComponent,
         PrivatePoiOverlayComponent,
@@ -233,14 +225,10 @@ NgModule({
         GpsLocationOverlayComponent,
         ClearableOverlayComponent,
         MissingPartOverlayComponent,
-        SearchComponent,
-        InfoComponent,
         InfoSidebarComponent,
         DownloadDialogComponent,
-        ShareComponent,
         ShareDialogComponent,
         TermsOfServiceDialogComponent,
-        IhmLinkComponent,
         ConfirmDialogComponent,
         LegendItemComponent,
         PublicPoiSidebarComponent,
@@ -249,9 +237,6 @@ NgModule({
         ApplicationStateComponent,
         PrivatePoiEditDialogComponent,
         PrivatePoiShowDialogComponent,
-        LayersViewComponent,
-        RoutesComponent,
-        TracesComponent,
         AutomaticLayerPresentationComponent
     ],
     providers: [
@@ -352,6 +337,7 @@ NgModule({
         RoutesComponent,
         TracesComponent,
         AutomaticLayerPresentationComponent,
+        SecuredImageComponent,
         NameInUseValidatorDirective,
         ImageCaptureDirective
     ],

@@ -5,7 +5,6 @@ using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,9 +13,11 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using NSubstitute;
+using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 
 namespace IsraelHiking.API.Tests.Controllers
@@ -27,37 +28,38 @@ namespace IsraelHiking.API.Tests.Controllers
         private OsmController _controller;
         private IElasticSearchGateway _elasticSearchGateway;
         private IOsmLineAdderService _osmLineAdderService;
-        private IHttpGatewayFactory _httpGatewayFactory;
+        private IClientsFactory _clientsFactory;
         private IDataContainerConverterService _dataContainerConverterService;
         private IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
         private ConfigurationData _options;
+        private LruCache<string, TokenAndSecret> _cache;
 
-        private string SetupGpxUrl(GpxFile gpx, List<LineString> addibleLines = null)
+        private int SetupGpxUrl(GpxFile gpx, List<LineString> addibleLines = null)
         {
-            var url = "url";
-            var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
-            var fileResponse = new RemoteFileFetcherGatewayResponse
+            int traceId = 1;
+            var fetcher = Substitute.For<IAuthClient>();
+            var fileResponse = new TypedStream
             {
-                FileName = url,
-                Content = new byte[0]
+                FileName = "file.gpx",
+                Stream = new MemoryStream(new byte[0])
             };
-            fetcher.GetFileContent(url).Returns(fileResponse);
+            fetcher.GetTraceData(traceId).Returns(fileResponse);
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>())
                 .Returns(gpx.ToBytes());
-            _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
+            _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(fetcher);
             _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
                 addibleLines ?? new List <LineString>
                 {
                     new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})
                 }.AsEnumerable()
             );
-            return url;
+            return traceId;
         }
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
+            _clientsFactory = Substitute.For<IClientsFactory>();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _addibleGpxLinesFinderService = Substitute.For<IAddibleGpxLinesFinderService>();
@@ -65,9 +67,10 @@ namespace IsraelHiking.API.Tests.Controllers
             _options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(_options);
-            _controller = new OsmController(_httpGatewayFactory, _dataContainerConverterService, new ItmWgs84MathTransfromFactory(), 
+            _cache = new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>());
+            _controller = new OsmController(_clientsFactory, _dataContainerConverterService, new ItmWgs84MathTransfromFactory(), 
                 _elasticSearchGateway, _addibleGpxLinesFinderService, _osmLineAdderService, optionsProvider, GeometryFactory.Default,
-                new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>()));
+                _cache);
         }
 
         [TestMethod]
@@ -122,19 +125,22 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PutGpsTraceIntoOsm_ShouldDoIt()
         {
             var feature = new Feature(new LineString(new Coordinate[0]), new AttributesTable());
-            _controller.SetupIdentity();
+            _controller.SetupIdentity(_cache);
 
             _controller.PutGpsTraceIntoOsm(feature).Wait();
 
-            _osmLineAdderService.Received(1).Add(Arg.Any<LineString>(), Arg.Any<Dictionary<string, string>>(), null);
+            _osmLineAdderService.Received(1).Add(Arg.Any<LineString>(), Arg.Any<Dictionary<string, string>>(), Arg.Any<TokenAndSecret>());
         }
 
         [TestMethod]
         public void PostGpsTrace_NoFileOrUrlProvided_ShouldReturnBadRequestResult()
         {
-            _controller.SetupIdentity();
+            _controller.SetupIdentity(_cache);
+            var fetcher = Substitute.For<IAuthClient>();
+            fetcher.GetTraceData(Arg.Any<int>()).Returns((TypedStream)null);
+            _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(fetcher);
 
-            var results = _controller.PostGpsTrace(string.Empty).Result as BadRequestObjectResult;
+            var results = _controller.PostFindUnmappedPartsFromGpsTrace(-1).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
@@ -143,9 +149,9 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PostGpsTrace_UrlProvidedForEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
         {
             var url = SetupGpxUrl(new GpxFile(), new List<LineString>());
-            _controller.SetupIdentity();
+            _controller.SetupIdentity(_cache);
 
-            var results = _controller.PostGpsTrace(url).Result as BadRequestObjectResult;
+            var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
@@ -156,58 +162,11 @@ namespace IsraelHiking.API.Tests.Controllers
             var gpx = new GpxFile();
             gpx.Tracks.Add(new GpxTrack());
             var url = SetupGpxUrl(gpx, new List<LineString>());
-            _controller.SetupIdentity();
+            _controller.SetupIdentity(_cache);
 
-            var results = _controller.PostGpsTrace(url).Result as BadRequestObjectResult;
-
-            Assert.IsNotNull(results);
-        }
-
-        [TestMethod]
-        public void PostGpsTrace_FileProvidedForFootwayGpxFile_ShouldReturnFeatureCollection()
-        {
-            var gpx = new GpxFile();
-            gpx.Routes.Add(
-                new GpxRoute().WithWaypoints(new[]
-                    {
-                        new GpxWaypoint(new GpxLongitude(0), new GpxLatitude(0)).WithTimestampUtc(
-                            DateTime.Now.ToUniversalTime()),
-                        new GpxWaypoint(new GpxLongitude(0.00001), new GpxLatitude(0.00001)).WithTimestampUtc(
-                            DateTime.Now.AddMinutes(1).ToUniversalTime())
-                    }));
-            gpx.Tracks.Add(
-                new GpxTrack().WithSegments(
-                    new[]
-                    {
-                        new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
-                        {
-                            new GpxWaypoint(new GpxLongitude(0.00002), new GpxLatitude(0.00002)).WithTimestampUtc(
-                                DateTime.Now.AddMinutes(2).ToUniversalTime()),
-                            new GpxWaypoint(new GpxLongitude(0.00003), new GpxLatitude(0.00003)).WithTimestampUtc(
-                                DateTime.Now.AddMinutes(3).ToUniversalTime())
-                        }), null)
-                    }.ToImmutableArray())
-            );
-            var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
-            var file = Substitute.For<IFormFile>();
-            file.FileName.Returns("SomeFile.gpx");
-            _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(gpx.ToBytes());
-            _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
-            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
-                new List<LineString>
-                {
-                    new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})
-                }.AsEnumerable()
-            );
-            _controller.SetupIdentity();
-
-            var results = _controller.PostGpsTrace(null, file).Result as OkObjectResult;
+            var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
-            var featureCollection = results.Value as FeatureCollection;
-            Assert.IsNotNull(featureCollection);
-            Assert.AreEqual(1, featureCollection.Count);
-            Assert.IsTrue(featureCollection.First().Attributes.GetValues().Contains("footway"));
         }
 
         [TestMethod]
@@ -222,9 +181,9 @@ namespace IsraelHiking.API.Tests.Controllers
                         .AddMinutes(1).ToUniversalTime())
                 }));
             var url = SetupGpxUrl(gpx);
-            _controller.SetupIdentity();
+            _controller.SetupIdentity(_cache);
 
-            var results = _controller.PostGpsTrace(url).Result as OkObjectResult;
+            var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
             var featureCollection = results.Value as FeatureCollection;
@@ -247,9 +206,9 @@ namespace IsraelHiking.API.Tests.Controllers
                 })
             );
             var url = SetupGpxUrl(gpx);
-            _controller.SetupIdentity();
+            _controller.SetupIdentity(_cache);
 
-            var results = _controller.PostGpsTrace(url).Result as OkObjectResult;
+            var results = _controller.PostFindUnmappedPartsFromGpsTrace(url).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
             var featureCollection = results.Value as FeatureCollection;

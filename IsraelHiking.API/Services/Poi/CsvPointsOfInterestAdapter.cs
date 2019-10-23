@@ -101,7 +101,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="dataContainerConverterService"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="fileProvider"></param>
-        /// <param name="httpGatewayFactory"></param>
+        /// <param name="remoteFileFetcherGateway"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
         public CsvPointsOfInterestAdapter(
@@ -110,7 +110,7 @@ namespace IsraelHiking.API.Services.Poi
             IDataContainerConverterService dataContainerConverterService,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IFileProvider fileProvider,
-            IHttpGatewayFactory httpGatewayFactory,
+            IRemoteFileFetcherGateway remoteFileFetcherGateway,
             IOptions<ConfigurationData> options,
             ILogger logger
         ) :
@@ -122,7 +122,7 @@ namespace IsraelHiking.API.Services.Poi
                 logger)
         {
             _fileProvider = fileProvider;
-            _remoteFileFetcherGateway = httpGatewayFactory.CreateRemoteFileFetcherGateway(null);
+            _remoteFileFetcherGateway = remoteFileFetcherGateway;
         }
 
         /// <summary>

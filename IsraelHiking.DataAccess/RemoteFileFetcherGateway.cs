@@ -2,16 +2,48 @@
 using IsraelHiking.DataAccessInterfaces;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using System.Net.Http;
+using IsraelHiking.Common;
+using System;
 
 namespace IsraelHiking.DataAccess
 {
-    public class RemoteFileFetcherGateway : BaseFileFetcherGateway, IRemoteFileSizeFetcherGateway
+    public class RemoteFileFetcherGateway : IRemoteFileSizeFetcherGateway
     {
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger _logger;
 
-        public RemoteFileFetcherGateway(ILogger logger): base(logger)
+        public RemoteFileFetcherGateway(IHttpClientFactory httpClientFactory, ILogger logger)
         {
+            _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
 
+        public async Task<RemoteFileFetcherGatewayResponse> GetFileContent(string url)
+        {
+            var client = _httpClientFactory.CreateClient();
+            _logger.LogDebug("Getting file from: " + url);
+            client.Timeout = TimeSpan.FromMinutes(20);
+            var response = await client.GetAsync(url);
+            var fileName = response.Content.Headers.ContentDisposition?.FileName.Trim('"') ??
+                url.Substring(url.LastIndexOf("/", StringComparison.Ordinal) + 1);
+            var content = new byte[0];
+            if (response.IsSuccessStatusCode)
+            {
+                content = await response.Content.ReadAsByteArrayAsync();
+                _logger.LogDebug("File was retrieved successfully from: " + url);
+            }
+            else
+            {
+                _logger.LogError("Unable to retrieve file from: " + url + ", Status code: " + response.StatusCode);
+            }
+
+            return new RemoteFileFetcherGatewayResponse
+            {
+                Content = content,
+                FileName = fileName
+            };
+        }
         public async Task<long> GetFileSize(string url)
         {
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);

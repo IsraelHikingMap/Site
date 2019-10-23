@@ -81,7 +81,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 new ShareUrl { OsmUserId = id, CreationDate = DateTime.Now.AddDays(-2)},
                 new ShareUrl { OsmUserId = id, CreationDate = DateTime.Now}
             };
-            _controller.SetupIdentity(id);
+            _controller.SetupIdentity(null, id);
             _repository.GetUrlsByUser(id).Returns(list);
 
             var results = _controller.GetShareUrlForUser().Result as OkObjectResult;
@@ -96,7 +96,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PostShareUrl_IncorrectUser_ShouldReturnBadRequest()
         {
             var url = new ShareUrl { OsmUserId = "1" };
-            _controller.SetupIdentity("2");
+            _controller.SetupIdentity(null, "2");
 
             var results = _controller.PostShareUrl(url).Result as BadRequestObjectResult;
 
@@ -186,7 +186,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var shareUrl = new ShareUrl { Id = "42", OsmUserId = "42" };
             _repository.GetUrlById(shareUrl.Id).Returns(shareUrl);
-            _controller.SetupIdentity("1");
+            _controller.SetupIdentity(null, "1");
 
             var results = _controller.PutShareUrl(shareUrl.Id, shareUrl).Result as BadRequestObjectResult;
 
@@ -199,7 +199,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var shareUrl = new ShareUrl { Id = "1", OsmUserId = "1" };
             _repository.GetUrlById(shareUrl.Id).Returns(shareUrl);
-            _controller.SetupIdentity(shareUrl.OsmUserId);
+            _controller.SetupIdentity(null, shareUrl.OsmUserId);
 
             var results = _controller.PutShareUrl(shareUrl.Id, shareUrl).Result as OkObjectResult;
 
@@ -221,7 +221,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void DeleteShareUrl_ItemUserIdDoesNotMatchUSer_ShouldReturnBadRequest()
         {
-            _controller.SetupIdentity("1");
+            _controller.SetupIdentity(null, "1");
             var shareUrl = new ShareUrl { Id = "11", OsmUserId = "11" };
             _repository.GetUrlById(shareUrl.Id).Returns(shareUrl);
 
@@ -236,7 +236,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var shareUrl = new ShareUrl { Id = "42", OsmUserId = "42" };
             _repository.GetUrlById(shareUrl.Id).Returns(shareUrl);
-            _controller.SetupIdentity(shareUrl.OsmUserId);
+            _controller.SetupIdentity(null, shareUrl.OsmUserId);
 
             _controller.DeleteShareUrl(shareUrl.Id).Wait();
 

@@ -13,18 +13,12 @@ namespace IsraelHiking.API.Tests.Controllers
         private ItmGridController _itmGridController;
 
         [TestMethod]
-        [Ignore]
-        // HM TODO: bring this back somehow
         public void GetItmCoordinates_ShouldConvertToNorthEast()
         {
-            var northEast = new Coordinate { Y = 3, X = 4 };
-            var converter = Substitute.For<MathTransform>();
-            var factory = Substitute.For<IItmWgs84MathTransfromFactory>();
-            factory.CreateInverse().Returns(converter);
-            converter.Transform(Arg.Compat.Any<double>(), Arg.Compat.Any<double>()).Returns((northEast.X, northEast.Y));
-            _itmGridController = new ItmGridController(factory);
+            var northEast = new Coordinate { Y = 656336, X = 200138 };
+            _itmGridController = new ItmGridController(new ItmWgs84MathTransfromFactory());
 
-            var response = _itmGridController.GetItmCoordinates(1, 2);
+            var response = _itmGridController.GetItmCoordinates(32, 35);
 
             Assert.AreEqual(northEast.X, response.East);
             Assert.AreEqual(northEast.Y, response.North);

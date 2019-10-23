@@ -2,26 +2,30 @@
 using System.Security.Claims;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using OsmSharp.IO.API;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.Web
 {
     public class OsmAccessTokenValidator : ISecurityTokenValidator
     {
         private readonly ILogger _logger;
-        private readonly IHttpGatewayFactory _httpGatewayFactory;
+        private readonly IClientsFactory _clientsFactory;
         private readonly LruCache<string, TokenAndSecret> _cache;
+        private readonly ConfigurationData _options;
 
-        public OsmAccessTokenValidator(IHttpGatewayFactory httpGatewayFactory,
+        public OsmAccessTokenValidator(IClientsFactory clientsFactory,
+            IOptions<ConfigurationData> options,
             LruCache<string, TokenAndSecret> cache,
             ILogger logger)
         {
-            _httpGatewayFactory = httpGatewayFactory;
+            _clientsFactory = clientsFactory;
             _cache = cache;
+            _options = options.Value;
             _logger = logger;
         }
 
@@ -42,8 +46,8 @@ namespace IsraelHiking.Web
             var userId = _cache.ReverseGet(tokenAndSecret);
             if (string.IsNullOrEmpty(userId))
             {
-                var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
-                var user = osmGateway.GetUser().Result;
+                var osmGateway = _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
+                var user = osmGateway.GetUserDetails().Result;
                 userId = user.Id.ToString();
                 _logger.LogInformation("User " + userId + " had just logged in");
                 _cache.Add(userId, tokenAndSecret);

@@ -4,12 +4,12 @@ namespace IsraelHiking.API.Services
 {
     internal static class LineStringExtensions
     {
-        public static string GetOsmId(this LineString lineString)
+        public static long GetOsmId(this LineString lineString)
         {
-            return lineString.UserData.ToString();
+            return (long)lineString.UserData;
         }
 
-        public static void SetOsmId(this LineString lineString, string id)
+        public static void SetOsmId(this LineString lineString, long id)
         {
             lineString.UserData = id;
         }

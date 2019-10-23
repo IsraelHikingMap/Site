@@ -52,12 +52,12 @@ namespace IsraelHiking.API.Services
         /// <summary>
         /// Contstructor, creates relevant colors and brushes accoridng to configuration
         /// </summary>
-        /// <param name="httpGatewayFactory"></param>
+        /// <param name="remoteFileFetcherGateway"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public ImageCreationService(IHttpGatewayFactory httpGatewayFactory, IOptions<ConfigurationData> options, ILogger logger)
+        public ImageCreationService(IRemoteFileFetcherGateway remoteFileFetcherGateway, IOptions<ConfigurationData> options, ILogger logger)
         {
-            _remoteFileFetcherGateway = httpGatewayFactory.CreateRemoteFileFetcherGateway(null);
+            _remoteFileFetcherGateway = remoteFileFetcherGateway;
             _logger = logger;
             _routeColors = options.Value.Colors.Select(c => FromColorString(c)).ToArray();
         }

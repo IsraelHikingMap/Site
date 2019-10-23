@@ -1,6 +1,7 @@
 ﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
+using IsraelHiking.API.Services.Osm;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -13,6 +14,7 @@ using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp;
 using OsmSharp.Complete;
+using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +26,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
     public class OsmPointsOfInterestAdapterTests : BasePointsOfInterestAdapterTestsHelper
     {
         private OsmPointsOfInterestAdapter _adapter;
-        private IHttpGatewayFactory _httpGatewayFactory;
+        private IClientsFactory _clientsFactory;
         private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private IOsmRepository _osmRepository;
         private IWikipediaGateway _wikipediaGateway;
@@ -35,19 +37,19 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void TestInitialize()
         {
             InitializeSubstitues();
-            _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
+            _clientsFactory = Substitute.For<IClientsFactory>();
             _tagsHelper = new TagsHelper(_options);
             _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
             _osmRepository = Substitute.For<IOsmRepository>();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
             _latestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
-            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _httpGatewayFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileFetcherExecutor, _tagsHelper, _options, Substitute.For<ILogger>());
+            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _clientsFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileFetcherExecutor, _tagsHelper, _options, Substitute.For<ILogger>());
         }
 
-        private IOsmGateway SetupHttpFactory()
+        private IAuthClient SetupHttpFactory()
         {
-            var gateway = Substitute.For<IOsmGateway>();
-            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(gateway);
+            var gateway = Substitute.For<IAuthClient>();
+            _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(gateway);
             return gateway;
         }
 
@@ -239,7 +241,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             var gateway = SetupHttpFactory();
             var language = "he";
-            gateway.CreateElement(Arg.Any<string>(), Arg.Any<Node>()).Returns("42");
+            gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
             var pointOfInterestToAdd = new PointOfInterestExtended
             {
                 Location = new LatLng(),
@@ -253,11 +255,11 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
             _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
-            var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, null, language).Result;
+            var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, new TokenAndSecret("", ""), language).Result;
 
             Assert.IsNotNull(resutls);
             _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
-            gateway.Received().CreateElement(Arg.Any<string>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("תל שלם")));
+            gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("תל שלם")));
         }
 
         [TestMethod]
@@ -273,7 +275,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 References = new Reference[0]
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
-            gateway.GetElement("1", OsmGeoType.Node.ToString()).Returns(new Node
+            gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,
                 Tags = new TagsCollection
@@ -284,7 +286,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             });
             _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
-            var results = _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Result;
+            var results = _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Result;
 
             CollectionAssert.AreEqual(pointOfInterest.ImagesUrls.OrderBy(i => i).ToArray(), results.ImagesUrls.OrderBy(i => i).ToArray());
         }
@@ -301,7 +303,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 References = new Reference[0]
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
-            gateway.GetElement("1", OsmGeoType.Node.ToString()).Returns(new Node
+            gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,
                 Tags = new TagsCollection
@@ -312,7 +314,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             });
             _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
-            var results = _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Result;
+            var results = _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Result;
 
             CollectionAssert.AreEqual(pointOfInterest.ImagesUrls.OrderBy(i => i).ToArray(), results.ImagesUrls.OrderBy(i => i).ToArray());
         }
@@ -335,7 +337,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 }
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
-            gateway.GetElement("1", OsmGeoType.Node.ToString()).Returns(new Node
+            gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,
                 Tags = new TagsCollection
@@ -345,9 +347,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
             });
             _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
-            _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Wait();
+            _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Wait();
 
-            gateway.Received().UpdateElement(Arg.Any<string>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA + ":en") && x.Tags.Contains(FeatureAttributes.WIKIPEDIA, "en:Literary Hall")));
+            gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA + ":en") && x.Tags.Contains(FeatureAttributes.WIKIPEDIA, "en:Literary Hall")));
         }
 
         [TestMethod]
@@ -362,7 +364,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 References = new Reference[0]
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
-            gateway.GetElement("1", OsmGeoType.Node.ToString()).Returns(new Node
+            gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,
                 Tags = new TagsCollection
@@ -373,11 +375,11 @@ namespace IsraelHiking.API.Tests.Services.Poi
             });
             _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
-            _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Wait();
+            _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Wait();
 
             _elasticSearchGateway.DidNotReceive().UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
-            gateway.DidNotReceive().CreateChangeset(Arg.Any<string>());
-            gateway.DidNotReceive().CloseChangeset(Arg.Any<string>());
+            gateway.DidNotReceive().CreateChangeset(Arg.Any<TagsCollection>());
+            gateway.DidNotReceive().CloseChangeset(Arg.Any<long>());
         }
 
         [TestMethod]

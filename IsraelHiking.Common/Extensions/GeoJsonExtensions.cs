@@ -1,5 +1,7 @@
 ﻿using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using OsmSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -264,24 +266,24 @@ namespace IsraelHiking.Common.Extensions
                    feature.GetIdsFromCombinedPoi().Any();
         }
 
-        public static string GetOsmId(this IFeature feature)
+        public static long GetOsmId(this IFeature feature)
         {
             return GetOsmId(feature.Attributes[FeatureAttributes.ID].ToString());
         }
 
-        public static string GetOsmType(this IFeature feature)
+        public static OsmGeoType GetOsmType(this IFeature feature)
         {
             return GetOsmType(feature.Attributes[FeatureAttributes.ID].ToString());
         }
 
-        public static string GetOsmId(string id)
+        public static long GetOsmId(string id)
         {
-            return id.Split("_").Last();
+            return long.Parse(id.Split("_").Last());
         }
 
-        public static string GetOsmType(string id)
+        public static OsmGeoType GetOsmType(string id)
         {
-            return id.Split("_").First();
+            return Enum.Parse<OsmGeoType>(id.Split("_").First(), true);
         }
     }
 }

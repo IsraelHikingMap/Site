@@ -10,6 +10,8 @@ using NSubstitute;
 using OsmSharp;
 using OsmSharp.Changesets;
 using OsmSharp.Complete;
+using OsmSharp.IO.API;
+using OsmSharp.Tags;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,14 +22,14 @@ namespace IsraelHiking.API.Tests.Services.Osm
     {
         private IOsmLineAdderService _service;
         private IElasticSearchGateway _elasticSearchGateway;
-        private IHttpGatewayFactory _httpGatewayFactory;
+        private IClientsFactory _clientsFactory;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             var geoJsonPreProcessor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
-            _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
+            _clientsFactory = Substitute.For<IClientsFactory>();
             var options = new ConfigurationData
             {
                 MinimalDistanceToClosestPoint = 30,
@@ -36,24 +38,24 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
             
-            _service = new OsmLineAdderService(_elasticSearchGateway, new ItmWgs84MathTransfromFactory(), optionsProvider, geoJsonPreProcessor, _httpGatewayFactory);
+            _service = new OsmLineAdderService(_elasticSearchGateway, new ItmWgs84MathTransfromFactory(), optionsProvider, geoJsonPreProcessor, _clientsFactory);
         }
 
-        private IOsmGateway SetupOsmGateway(string changesetId)
+        private IAuthClient SetupOsmGateway(long changesetId)
         {
-            var osmGateway = Substitute.For<IOsmGateway>();
-            osmGateway.CreateChangeset(Arg.Any<string>()).Returns(changesetId);
-            _httpGatewayFactory.CreateOsmGateway(null).Returns(osmGateway);
+            var osmGateway = Substitute.For<IAuthClient>();
+            osmGateway.CreateChangeset(Arg.Any<TagsCollection>()).Returns(changesetId);
+            _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(osmGateway);
             return osmGateway;
         }
 
-        private void SetupHighway(int wayId, Coordinate[] coordinates, IOsmGateway osmGateway)
+        private void SetupHighway(int wayId, Coordinate[] coordinates, IAuthClient osmGateway)
         {
             var osmCompleteWay = new CompleteWay { Id = wayId };
             var id = 1;
             osmCompleteWay.Nodes = coordinates.Select(coordinate => new Node { Id = id++, Latitude = coordinate.Y, Longitude = coordinate.X }).ToArray();
-            osmGateway.GetCompleteWay(wayId.ToString()).Returns(osmCompleteWay);
-            osmGateway.GetWay(wayId.ToString()).Returns(osmCompleteWay.ToSimple() as Way);
+            osmGateway.GetCompleteWay(wayId).Returns(osmCompleteWay);
+            osmGateway.GetWay(wayId).Returns(osmCompleteWay.ToSimple() as Way);
             var table = new AttributesTable
             {
                 {FeatureAttributes.ID, wayId.ToString()},
@@ -68,7 +70,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestMethod]
         public void AddLineWithTags_NoHighwaysInArea_ShouldAddTheLine()
         {
-            string changesetId = "1";
+            long changesetId = 1;
             var osmGateway = SetupOsmGateway(changesetId);
             _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature>());
             osmGateway.UploadChangeset(changesetId, Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0]});
@@ -78,9 +80,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 {"colour", "blue"}
             };
 
-            _service.Add(new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)}), tags, null).Wait();
+            _service.Add(new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)}), tags, new TokenAndSecret("", "")).Wait();
 
-            osmGateway.Received(1).CreateChangeset(Arg.Any<string>());
+            osmGateway.Received(1).CreateChangeset(Arg.Any<TagsCollection>());
             osmGateway.Received(1).CloseChangeset(changesetId);
             osmGateway.Received(1).UploadChangeset(changesetId, Arg.Is<OsmChange>(x => x.Create.OfType<Node>().Count() == 2 &&
                                                                                        x.Create.OfType<Way>().Count() == 1));
@@ -89,51 +91,51 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestMethod]
         public void AddLine_OneHighwayNearStart_ShouldAddTheLineAndConnectIt()
         {
-            var osmGateway = SetupOsmGateway("42");
+            var osmGateway = SetupOsmGateway(42);
             SetupHighway(42, new[] { new Coordinate(0.0000001, 0), new Coordinate(-1, 0) }, osmGateway);
-            osmGateway.UploadChangeset(Arg.Any<string>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
-            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), null).Wait();
+            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
 
-            osmGateway.Received(1).UploadChangeset(Arg.Any<string>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 2));
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 2));
         }
 
         [TestMethod]
         public void AddLine_OneHighwayNearStart_ShouldAddTheLineAndConnectItOnce()
         {
-            var osmGateway = SetupOsmGateway("42");
+            var osmGateway = SetupOsmGateway(42);
             SetupHighway(42, new[] { new Coordinate(-1, 0), new Coordinate(0.000007, 0), new Coordinate(1, 0) }, osmGateway);
-            osmGateway.UploadChangeset(Arg.Any<string>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
-            _service.Add(new LineString(new[] { new Coordinate(0, -0.000007), new Coordinate(0, 1), new Coordinate(0, 2) }), new Dictionary<string, string>(), null).Wait();
+            _service.Add(new LineString(new[] { new Coordinate(0, -0.000007), new Coordinate(0, 1), new Coordinate(0, 2) }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
 
-            osmGateway.Received(1).UploadChangeset(Arg.Any<string>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 3 &&
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 3 &&
                                                                                              x.Modify.OfType<Way>().First().Nodes.Length == 4));
         }
 
         [TestMethod]
         public void AddLine_OneHighwayNearStart_ShouldModifyItOnce()
         {
-            var osmGateway = SetupOsmGateway("42");
+            var osmGateway = SetupOsmGateway(42);
             SetupHighway(42, new[] { new Coordinate(-0.1, 0), new Coordinate(1, 0) }, osmGateway);
-            osmGateway.UploadChangeset(Arg.Any<string>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
-            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 0.00000001), new Coordinate(0, 0.0000002), new Coordinate(0, 1) }), new Dictionary<string, string>(), null).Wait();
+            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 0.00000001), new Coordinate(0, 0.0000002), new Coordinate(0, 1) }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
 
-            osmGateway.Received(1).UploadChangeset(Arg.Any<string>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4 &&
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4 &&
                                                                                              x.Modify.OfType<Way>().Count() == 1));
         }
 
         [TestMethod]
         public void AddLine_OneHighwayNearEnd_ShouldAddTheLineAndConnectIt()
         {
-            var osmGateway = SetupOsmGateway("42");
+            var osmGateway = SetupOsmGateway(42);
             SetupHighway(42, new[] { new Coordinate(0, 1.0000001), new Coordinate(0, 2) }, osmGateway);
-            osmGateway.UploadChangeset(Arg.Any<string>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
-            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), null).Wait();
+            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
 
-            osmGateway.Received(1).UploadChangeset(Arg.Any<string>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 2));
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 2));
         }
 
         /// <summary>
@@ -145,18 +147,18 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestMethod]
         public void AddVShapeLine_OneHighwayNearMiddle_ShouldAddTheLineWithAnotherLine()
         {
-            var osmGateway = SetupOsmGateway("42");
+            var osmGateway = SetupOsmGateway(42);
             SetupHighway(42, new[] { new Coordinate(0, 0), new Coordinate(0, -1) }, osmGateway);
-            osmGateway.UploadChangeset(Arg.Any<string>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
             _service.Add(new LineString(new[]
             {
                 new Coordinate(-0.1, 0.001),
                 new Coordinate(-0.0001, 0),
                 new Coordinate(0.1, 0.001)
-            }), new Dictionary<string, string>(), null).Wait();
+            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
 
-            osmGateway.Received(1).UploadChangeset(Arg.Any<string>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4));
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4));
         }
 
         /// <summary>
@@ -167,9 +169,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestMethod]
         public void AddUShapeDenseLine_OneHighwayNearMiddle_OnlyOneExtraPoint()
         {
-            var osmGateway = SetupOsmGateway("42");
+            var osmGateway = SetupOsmGateway(42);
             SetupHighway(42, new[] { new Coordinate(0, 0), new Coordinate(0, -1) }, osmGateway);
-            osmGateway.UploadChangeset(Arg.Any<string>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
             _service.Add(new LineString(new[]
             {
@@ -177,9 +179,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(-0.0001, 0),
                 new Coordinate(0.0001, 0),
                 new Coordinate(0.1, 0.01)
-            }), new Dictionary<string, string>(), null).Wait();
+            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
 
-            osmGateway.Received(1).UploadChangeset(Arg.Any<string>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 5));
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 5));
         }
 
         /// <summary>
@@ -189,7 +191,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestMethod]
         public void AddWShapeDenseLine_HighwayUShape_TwoExtraPoints()
         {
-            var osmGateway = SetupOsmGateway("42");
+            var osmGateway = SetupOsmGateway(42);
             SetupHighway(42, new[]
                 {
                     new Coordinate(0, 0),
@@ -198,7 +200,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                     new Coordinate(1, 0),
                 },
                 osmGateway);
-            osmGateway.UploadChangeset(Arg.Any<string>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
             _service.Add(new LineString(new[]
             {
@@ -209,9 +211,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(0.9999, 0),
                 new Coordinate(1.0001, 0),
                 new Coordinate(1.0001, 1),
-            }), new Dictionary<string, string>(), null).Wait();
+            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
 
-            osmGateway.Received(1).UploadChangeset(Arg.Any<string>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 9));
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 9));
         }
 
         /// <summary>
@@ -220,22 +222,22 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestMethod]
         public void AddStraightLine_HighwaySparseOrthogonalStrightLine_ShouldUpdateExitingWay()
         {
-            var osmGateway = SetupOsmGateway("42");
+            var osmGateway = SetupOsmGateway(42);
             SetupHighway(42, new[]
                 {
                     new Coordinate(0, 0),
                     new Coordinate(1, 0),
                 },
                 osmGateway);
-            osmGateway.UploadChangeset(Arg.Any<string>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
             _service.Add(new LineString(new[]
             {
                 new Coordinate(0.5, 1),
                 new Coordinate(0.5, 0),
-            }), new Dictionary<string, string>(), null).Wait();
+            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
 
-            osmGateway.Received(1).UploadChangeset(Arg.Any<string>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 2 &&
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 2 &&
                                                                                              x.Create.OfType<Node>().Count() == 2 &&
                                                                                              x.Modify.OfType<Way>().Count() == 1));
         }
@@ -243,7 +245,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestMethod]
         public void TriangleBug_OneHighway_OneConnectingLines()
         {
-            var osmGateway = SetupOsmGateway("42");
+            var osmGateway = SetupOsmGateway(42);
             SetupHighway(42, new[]
                 {
                     new Coordinate(34.83509, 30.87568),
@@ -251,7 +253,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                     new Coordinate(34.83481, 30.87598)
                 },
                 osmGateway);
-            osmGateway.UploadChangeset(Arg.Any<string>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
             _service.Add(new LineString(new[]
             {
@@ -259,9 +261,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(34.8352167, 30.8754542),
                 new Coordinate(34.8353618,30.8757884),
                 new Coordinate(34.7352248,30.8760586)
-            }), new Dictionary<string, string>(), null).Wait();
+            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
 
-            osmGateway.Received(1).UploadChangeset(Arg.Any<string>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4));
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4));
         }
 
         /// <summary>
@@ -272,23 +274,23 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestMethod]
         public void AddAwayAndBackLine_NearAnotherLine_ShouldNotCreateASelfIntersectingLine()
         {
-            var osmGateway = SetupOsmGateway("42");
+            var osmGateway = SetupOsmGateway(42);
             SetupHighway(42, new[]
                 {
                     new Coordinate(0, 0),
                     new Coordinate(0, -1),
                 },
                 osmGateway);
-            osmGateway.UploadChangeset(Arg.Any<string>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
             _service.Add(new LineString(new[]
             {
                 new Coordinate(-1, 0),
                 new Coordinate(1, 0),
                 new Coordinate(-1, 0.00001),
-            }), new Dictionary<string, string>(), null).Wait();
+            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
 
-            osmGateway.Received(1).UploadChangeset(Arg.Any<string>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4 &&
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4 &&
                                                                                              x.Create.OfType<Node>().Count() == 3));
         }
     }

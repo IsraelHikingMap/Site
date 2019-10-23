@@ -31,46 +31,48 @@ namespace IsraelHiking.DataAccess
     public class NakebGateway : INakebGateway
     {
         private const string NAKEB_BASE_ADDRESS = "https://www.nakeb.co.il/api/hikes";
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public NakebGateway(IHttpClientFactory httpClientFactory)
+        {
+            _httpClientFactory = httpClientFactory;
+        }
 
         public async Task<List<Feature>> GetAll()
         {
-            using (var client = new HttpClient())
-            {
-                var reponse = await client.GetAsync($"{NAKEB_BASE_ADDRESS}/all");
-                var content = await reponse.Content.ReadAsStringAsync();
-                var nakebItem = JsonConvert.DeserializeObject<List<JsonNakebItem>>(content);
-                return nakebItem.Select(ConvertToPointFeature).ToList();
-            }
+            var client = _httpClientFactory.CreateClient();
+            var reponse = await client.GetAsync($"{NAKEB_BASE_ADDRESS}/all");
+            var content = await reponse.Content.ReadAsStringAsync();
+            var nakebItem = JsonConvert.DeserializeObject<List<JsonNakebItem>>(content);
+            return nakebItem.Select(ConvertToPointFeature).ToList();
         }
 
         public async Task<FeatureCollection> GetById(string id)
         {
-            using (var client = new HttpClient())
+            var client = _httpClientFactory.CreateClient();
+            var reponse = await client.GetAsync($"{NAKEB_BASE_ADDRESS}/{id}");
+            var content = await reponse.Content.ReadAsStringAsync();
+            var nakebItem = JsonConvert.DeserializeObject<JsonNakebItemExtended>(content);
+            var attributes = GetAttributes(nakebItem);
+            var description = nakebItem.prolog ?? string.Empty;
+            if (!description.EndsWith("."))
             {
-                var reponse = await client.GetAsync($"{NAKEB_BASE_ADDRESS}/{id}");
-                var content = await reponse.Content.ReadAsStringAsync();
-                var nakebItem = JsonConvert.DeserializeObject<JsonNakebItemExtended>(content);
-                var attributes = GetAttributes(nakebItem);
-                var description = nakebItem.prolog ?? string.Empty;
-                if (!description.EndsWith("."))
-                {
-                    description += ".";
-                }
-                description += $"\n{string.Join(", ", nakebItem.attributes)}.";
-                attributes.Add(FeatureAttributes.DESCRIPTION, description);
-                attributes.Add(FeatureAttributes.IMAGE_URL, nakebItem.picture);
-                attributes.Add(FeatureAttributes.WEBSITE, nakebItem.link);
-                attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg");
-                var lineString = new LineString(nakebItem.latlngs.Select(l => new Coordinate().FromLatLng(l)).ToArray());
-                var features = new List<IFeature> {new Feature(lineString, attributes)};
-                features.AddRange(nakebItem.markers.Select(ConvertToPointFeature).ToList());
-                var featureCollection = new FeatureCollection();
-                foreach (var feature in features)
-                {
-                    featureCollection.Add(feature);
-                }
-                return featureCollection;
+                description += ".";
             }
+            description += $"\n{string.Join(", ", nakebItem.attributes)}.";
+            attributes.Add(FeatureAttributes.DESCRIPTION, description);
+            attributes.Add(FeatureAttributes.IMAGE_URL, nakebItem.picture);
+            attributes.Add(FeatureAttributes.WEBSITE, nakebItem.link);
+            attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg");
+            var lineString = new LineString(nakebItem.latlngs.Select(l => new Coordinate().FromLatLng(l)).ToArray());
+            var features = new List<IFeature> { new Feature(lineString, attributes) };
+            features.AddRange(nakebItem.markers.Select(ConvertToPointFeature).ToList());
+            var featureCollection = new FeatureCollection();
+            foreach (var feature in features)
+            {
+                featureCollection.Add(feature);
+            }
+            return featureCollection;
         }
 
         private Feature ConvertToPointFeature(JsonNakebItem nakebItem)
@@ -106,7 +108,7 @@ namespace IsraelHiking.DataAccess
         private IFeature ConvertToPointFeature(MarkerData markerData)
         {
             var point = new Point(new Coordinate().FromLatLng(markerData.Latlng));
-            var attributes = new AttributesTable {{FeatureAttributes.NAME, markerData.Title}};
+            var attributes = new AttributesTable { { FeatureAttributes.NAME, markerData.Title } };
             return new Feature(point, attributes);
         }
     }

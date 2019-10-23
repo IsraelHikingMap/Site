@@ -11,13 +11,14 @@ using Microsoft.Extensions.Logging;
 using OsmSharp;
 using OsmSharp.Changesets;
 using OsmSharp.Complete;
+using OsmSharp.IO.API;
 
 namespace IsraelHiking.API.Services.Osm
 {
     /// <inheritdoc />
     public class DatabasesUpdaterService : IDatabasesUpdaterService
     {
-        private readonly IOsmGateway _osmGateway;
+        private readonly INonAuthClient _osmGateway;
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly ITagsHelper _tagsHelper;
@@ -32,7 +33,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <summary>
         /// Service's constructor
         /// </summary>
-        /// <param name="factory"></param>
+        /// <param name="clinetsFactory"></param>
         /// <param name="elasticSearchGateway"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="tagsHelper"></param>
@@ -43,7 +44,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="graphHopperGateway"></param>
         /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
         /// <param name="logger"></param>
-        public DatabasesUpdaterService(IHttpGatewayFactory factory,
+        public DatabasesUpdaterService(IClientsFactory clinetsFactory,
             IElasticSearchGateway elasticSearchGateway,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             ITagsHelper tagsHelper, IOsmRepository osmRepository,
@@ -63,7 +64,7 @@ namespace IsraelHiking.API.Services.Osm
             _featuresMergeExecutor = featuresMergeExecutor;
             _latestFileFetcherExecutor = latestFileFetcherExecutor;
             _graphHopperGateway = graphHopperGateway;
-            _osmGateway = factory.CreateOsmGateway(new TokenAndSecret("", ""));
+            _osmGateway = clinetsFactory.CreateNonAuthClient();
             _logger = logger;
         }
 
@@ -91,7 +92,7 @@ namespace IsraelHiking.API.Services.Osm
                 .OfType<Way>()
                 .Where(w => w.Tags != null && w.Tags.ContainsKey("highway")))
             {
-                var task = _osmGateway.GetCompleteWay(highwaysToUpdate.Id.ToString());
+                var task = _osmGateway.GetCompleteWay(highwaysToUpdate.Id.Value);
                 updateTasks.Add(task);
             }
             var updatedWays = await Task.WhenAll(updateTasks);
@@ -114,7 +115,7 @@ namespace IsraelHiking.API.Services.Osm
                 .Concat(changes.Create)
                 .Where(o => IsRelevantPointOfInterest(o, relevantTagsDictionary)))
             {
-                var task = _osmGateway.GetElement(poiToUpdate.Id.ToString(), poiToUpdate.Type.ToString().ToLower());
+                var task = _osmGateway.GetCompleteElement(poiToUpdate.Id.Value, poiToUpdate.Type);
                 updateTasks.Add(task);
             }
             var allElemets = await Task.WhenAll(updateTasks);

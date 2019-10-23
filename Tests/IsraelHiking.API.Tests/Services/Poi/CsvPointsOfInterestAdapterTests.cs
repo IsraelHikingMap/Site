@@ -21,7 +21,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private CsvPointsOfInterestAdapter _adapter;
         
         private IFileProvider _fileProvider;
-        private IHttpGatewayFactory _httpGatewayFactory;
         private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
 
         private void SetupFileStream()
@@ -36,12 +35,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void TestInitialize()
         {
             InitializeSubstitues();
-            _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
             _fileProvider = Substitute.For<IFileProvider>();
             _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
-            
-            _httpGatewayFactory.CreateRemoteFileFetcherGateway(null).Returns(_remoteFileFetcherGateway);
-            _adapter = new CsvPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _itmWgs84MathTransfromFactory, _fileProvider, _httpGatewayFactory, _options, Substitute.For<ILogger>());
+            _adapter = new CsvPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _itmWgs84MathTransfromFactory, _fileProvider, _remoteFileFetcherGateway, _options, Substitute.For<ILogger>());
             _adapter.SetFileName("csv.csv");
         }
 

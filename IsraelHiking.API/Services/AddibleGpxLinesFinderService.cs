@@ -292,7 +292,7 @@ namespace IsraelHiking.API.Services
             return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates, highway.GetOsmId())).ToList();
         }
 
-        private LineString ToItmLineString(IEnumerable<Coordinate> coordinates, string id)
+        private LineString ToItmLineString(IEnumerable<Coordinate> coordinates, long id)
         {
             var itmCoordinates = coordinates.Select(c => _wgs84ItmMathTransform.Transform(c.X, c.Y))
                 .Select(c => new Coordinate(Math.Round(c.x, 1), Math.Round(c.y, 1)))

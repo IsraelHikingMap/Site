@@ -6,7 +6,9 @@ using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Geometries;
+using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,39 +23,43 @@ namespace IsraelHiking.API.Controllers
     [Route("api/poi")]
     public class PointsOfInterestController : ControllerBase
     {
-        private readonly IHttpGatewayFactory _httpGatewayFactory;
+        private readonly IClientsFactory _clientsFactory;
         private readonly ITagsHelper _tagsHelper;
         private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly IPointsOfInterestAggregatorService _pointsOfInterestAggregatorService;
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
+        private readonly ConfigurationData _options;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="httpGatewayFactory"></param>
+        /// <param name="clientsFactory"></param>
         /// <param name="tagsHelper"></param>
         /// <param name="wikimediaCommonGateway"></param>
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="pointsOfInterestAggregatorService"></param>
         /// <param name="base64ImageConverter"></param>
+        /// <param name="options"></param>
         /// <param name="cache"></param>
-        public PointsOfInterestController(IHttpGatewayFactory httpGatewayFactory,
+        public PointsOfInterestController(IClientsFactory clientsFactory,
             ITagsHelper tagsHelper,
             IWikimediaCommonGateway wikimediaCommonGateway,
             IPointsOfInterestProvider pointsOfInterestProvider,
             IPointsOfInterestAggregatorService pointsOfInterestAggregatorService,
             IBase64ImageStringToFileConverter base64ImageConverter,
+            IOptions<ConfigurationData> options,
             LruCache<string, TokenAndSecret> cache)
         {
-            _httpGatewayFactory = httpGatewayFactory;
+            _clientsFactory = clientsFactory;
             _tagsHelper = tagsHelper;
             _cache = cache;
             _base64ImageConverter = base64ImageConverter;
             _pointsOfInterestAggregatorService = pointsOfInterestAggregatorService;
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _wikimediaCommonGateway = wikimediaCommonGateway;
+            _options = options.Value;
         }
 
         /// <summary>
@@ -132,8 +138,8 @@ namespace IsraelHiking.API.Controllers
                 return BadRequest("OSM is the only supported source for this action...");
             }
             var tokenAndSecret = _cache.Get(User.Identity.Name);
-            var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
-            var user = await osmGateway.GetUser();
+            var osmGateway = _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
+            var user = await osmGateway.GetUserDetails();
             var imageUrls = pointOfInterest.ImagesUrls ?? new string[0];
             for (var urlIndex = 0; urlIndex < imageUrls.Length; urlIndex++)
             {

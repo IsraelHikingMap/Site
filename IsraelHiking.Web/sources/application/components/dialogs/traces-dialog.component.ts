@@ -83,8 +83,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
 
     public showTrace = async (trace: Trace): Promise<DataContainer> => {
 
-        if (trace.dataContainer == null && trace.dataUrl != null) {
-            trace.dataContainer = await await this.fileService.openFromUrl(trace.dataUrl);
+        if (trace.dataContainer == null) {
+            trace.dataContainer = await this.tracesService.getTraceById(trace);
         }
 
         this.ngRedux.dispatch(new SetVisibleTraceAction({ traceId: trace.id }));
@@ -181,7 +181,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         if ((trace.id || 0).toString().toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
-        if ((trace.tags || []).filter(t => t.toLowerCase().includes(lowerSearchTerm)).length > 0) {
+        if ((trace.tagsString || "").toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
         return false;

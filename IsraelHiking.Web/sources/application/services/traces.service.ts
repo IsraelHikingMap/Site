@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { NgRedux } from "@angular-redux/store";
 
-import { Trace, ApplicationState } from "../models/models";
+import { Trace, ApplicationState, DataContainer } from "../models/models";
 import { Urls } from "../urls";
 import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducres/traces.reducer";
 
@@ -14,7 +14,7 @@ export class TracesService {
     }
 
     public getMissingParts(trace: Trace): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
-        return this.httpClient.post(Urls.osm + "?url=" + trace.dataUrl, {})
+        return this.httpClient.post(Urls.osm + "?traceId=" + trace.id, null)
             .toPromise() as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     }
 
@@ -28,12 +28,6 @@ export class TracesService {
                 trace.timeStamp = new Date(trace.timeStamp);
             }
             for (let traceJson of traces) {
-                let url = `https://www.openstreetmap.org/user/${traceJson.user}/traces/${traceJson.id}`;
-                let dataUrl = `https://www.openstreetmap.org/api/0.6/gpx/${traceJson.id}/data`;
-                traceJson.url = url;
-                traceJson.tagsString = traceJson.tags && traceJson.tags.length > 0 ? traceJson.tags.join(", ") : "";
-                traceJson.imageUrl = url + "/picture";
-                traceJson.dataUrl = dataUrl;
                 traceJson.timeStamp = new Date(traceJson.timeStamp);
                 traceJson.isInEditMode = false;
                 let existingTrace = existingTraces.find(t => t.id === traceJson.id);
@@ -54,8 +48,11 @@ export class TracesService {
         }
     }
 
+    public getTraceById(trace: Trace): Promise<DataContainer> {
+        return this.httpClient.get(Urls.osmTrace + trace.id).toPromise() as Promise<DataContainer>;
+    }
+
     public updateTrace = async (trace: Trace): Promise<any> => {
-        trace.tags = trace.tagsString.split(",").map(t => t.trim()).filter(t => t);
         await this.httpClient.put(Urls.osmTrace + trace.id, trace, { responseType: "text" }).toPromise();
         this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace }));
     }

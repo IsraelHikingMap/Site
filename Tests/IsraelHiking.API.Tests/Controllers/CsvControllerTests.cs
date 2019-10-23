@@ -19,15 +19,15 @@ namespace IsraelHiking.API.Tests.Controllers
     public class CsvControllerTests
     {
         private CsvController _controller;
-        private IHttpGatewayFactory _httpGatewayFactory;
+        private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private IDataContainerConverterService _dataContainerConverterService;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
+            _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _controller = new CsvController(_dataContainerConverterService, _httpGatewayFactory);
+            _controller = new CsvController(_dataContainerConverterService, _remoteFileFetcherGateway);
         }
 
         [TestMethod]
@@ -37,9 +37,7 @@ namespace IsraelHiking.API.Tests.Controllers
             file.OpenReadStream()
                 .Returns(new MemoryStream(Encoding.UTF8.GetBytes(
                     "Title,Description,Website,ImageUrl,FileUrl\r\ntitle,description,website?id=42,image,file")));
-            var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
-            fetcher.GetFileContent("file").Returns(new RemoteFileFetcherGatewayResponse());
-            _httpGatewayFactory.CreateRemoteFileFetcherGateway(null).Returns(fetcher);
+            _remoteFileFetcherGateway.GetFileContent("file").Returns(new RemoteFileFetcherGatewayResponse());
             var featureCollection = new FeatureCollection { new Feature(new Point(new Coordinate(11, 12)), new AttributesTable()) };
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), FlowFormats.GEOJSON)
                 .Returns(featureCollection.ToBytes());

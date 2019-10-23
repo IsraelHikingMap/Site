@@ -1,4 +1,5 @@
 ﻿using IsraelHiking.API.Executors;
+using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
@@ -9,6 +10,7 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
 using OsmSharp.Complete;
+using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System;
 using System.Collections.Generic;
@@ -28,7 +30,7 @@ namespace IsraelHiking.API.Services.Poi
         /// </summary>
         public const string SEARCH_ICON = "icon-search";
 
-        private readonly IHttpGatewayFactory _httpGatewayFactory;
+        private readonly IClientsFactory _clientsFactory;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly IOsmRepository _osmRepository;
         private readonly IWikipediaGateway _wikipediaGateway;
@@ -40,7 +42,7 @@ namespace IsraelHiking.API.Services.Poi
         /// </summary>
         /// <param name="elasticSearchGateway"></param>
         /// <param name="elevationDataStorage"></param>
-        /// <param name="httpGatewayFactory"></param>
+        /// <param name="clentsFactory"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>
         /// <param name="dataContainerConverterService"></param>
@@ -52,7 +54,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="logger"></param>
         public OsmPointsOfInterestAdapter(IElasticSearchGateway elasticSearchGateway,
             IElevationDataStorage elevationDataStorage,
-            IHttpGatewayFactory httpGatewayFactory,
+            IClientsFactory clentsFactory,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
             IDataContainerConverterService dataContainerConverterService,
@@ -69,7 +71,7 @@ namespace IsraelHiking.API.Services.Poi
                 options,
                 logger)
         {
-            _httpGatewayFactory = httpGatewayFactory;
+            _clientsFactory = clentsFactory;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _osmRepository = osmRepository;
             _wikipediaGateway = wikipediaGateway;
@@ -116,7 +118,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public async Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
-            var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
+            var osmGateway = CreateOsmGateway(tokenAndSecret);
             var changesetId = await osmGateway.CreateChangeset($"Added {pointOfInterest.Title} using IsraelHiking.osm.org.il");
             var node = new Node
             {
@@ -130,8 +132,7 @@ namespace IsraelHiking.API.Services.Poi
             SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             AddTagsByIcon(node.Tags, pointOfInterest.Icon);
             RemoveEmptyTags(node.Tags);
-            var id = await osmGateway.CreateElement(changesetId, node);
-            node.Id = long.Parse(id);
+            node.Id = await osmGateway.CreateElement(changesetId, node);
             await osmGateway.CloseChangeset(changesetId);
 
             var feature = await UpdateElasticSearch(node, pointOfInterest.Title);
@@ -141,9 +142,9 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public async Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
-            var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
+            var osmGateway = CreateOsmGateway(tokenAndSecret);
             var id = pointOfInterest.Id;
-            ICompleteOsmGeo completeOsmGeo = await osmGateway.GetElement(GeoJsonExtensions.GetOsmId(id), GeoJsonExtensions.GetOsmType(id));
+            ICompleteOsmGeo completeOsmGeo = await osmGateway.GetCompleteElement(GeoJsonExtensions.GetOsmId(id), GeoJsonExtensions.GetOsmType(id));
             var featureBeforeUpdate = ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title);
             var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.ICON].ToString();
             var oldTags = completeOsmGeo.Tags.ToArray();
@@ -381,6 +382,14 @@ namespace IsraelHiking.API.Services.Poi
                 var tagName = index == 0 ? tagKey : tagKey + index;
                 tags.AddOrReplace(tagName, value);
             }
+        }
+
+        private IAuthClient CreateOsmGateway(TokenAndSecret tokenAndSecret)
+        {
+            return _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, 
+                _options.OsmConfiguration.ConsumerSecret, 
+                tokenAndSecret.Token, 
+                tokenAndSecret.TokenSecret);
         }
     }
 }

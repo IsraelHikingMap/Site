@@ -24,13 +24,13 @@ describe("Traces Service", () => {
     it("Should get missing parts", inject([TracesService, HttpTestingController],
         async (tracesService: TracesService, mockBackend: HttpTestingController) => {
 
-            let trace = { dataUrl: "123" } as Trace;
+            let trace = { id: "123" } as Trace;
 
             let promise = tracesService.getMissingParts(trace).then((res) => {
                 expect(res).not.toBeNull();
             });
 
-            mockBackend.expectOne(Urls.osm + "?url=" + trace.dataUrl).flush({});
+            mockBackend.expectOne(Urls.osm + "?traceId=" + trace.id).flush({});
             return promise;
         }));
 });

@@ -25,9 +25,11 @@ using Microsoft.OpenApi.Models;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
+using OsmSharp.IO.API;
 using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 
 namespace IsraelHiking.Web
 {
@@ -57,9 +59,14 @@ namespace IsraelHiking.Web
         {
             services.AddDetectionCore()
                 .AddBrowser();
+            services.AddHttpClient();
             services.AddIHMDataAccess();
             services.AddIHMApi();
             services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
+            services.AddSingleton<IClientsFactory>(serviceProvider =>
+                new ClientsFactory(serviceProvider.GetRequiredService<ILogger>(), 
+                serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(), 
+                serviceProvider.GetRequiredService<IOptions<ConfigurationData>>().Value.OsmConfiguration.BaseAddress + "/api/"));
             var geometryFactory = new GeometryFactory(new PrecisionModel(100000000));
             services.AddSingleton<GeometryFactory, GeometryFactory>(serviceProvider => geometryFactory);
             services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerOptionsValidatorConfigureOptions>();
@@ -69,12 +76,15 @@ namespace IsraelHiking.Web
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(PointOfInterestExtended)));
             }).AddNewtonsoftJson(options =>
             {
-                foreach (var converter in GeoJsonSerializer.Create(geometryFactory,3).Converters)
+                foreach (var converter in GeoJsonSerializer.Create(geometryFactory, 3).Converters)
                 {
                     options.SerializerSettings.Converters.Add(converter);
                 }
             });
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+            services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer();
             services.AddCors();
             services.AddOptions();
 
@@ -132,9 +142,9 @@ namespace IsraelHiking.Web
             {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();//.AllowCredentials();
             });
+            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

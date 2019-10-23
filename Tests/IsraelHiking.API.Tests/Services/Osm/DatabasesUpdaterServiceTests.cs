@@ -13,6 +13,7 @@ using NSubstitute;
 using OsmSharp;
 using OsmSharp.Changesets;
 using OsmSharp.Complete;
+using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,8 +24,8 @@ namespace IsraelHiking.API.Tests.Services.Osm
     public class DatabasesUpdaterServiceTests
     {
         private IDatabasesUpdaterService _service;
-        private IHttpGatewayFactory _httpGatewayFactory;
-        private IOsmGateway _osmGateway;
+        private IClientsFactory _clientsFactory;
+        private INonAuthClient _osmGateway;
         private IOsmRepository _osmRepository;
         private IElasticSearchGateway _elasticSearchGateway;
         private IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
@@ -36,9 +37,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestInitialize]
         public void TestInitialize()
         {
-            _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
-            _osmGateway = Substitute.For<IOsmGateway>();
-            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(_osmGateway);
+            _clientsFactory = Substitute.For<IClientsFactory>();
+            _osmGateway = Substitute.For<INonAuthClient>();
+            _clientsFactory.CreateNonAuthClient().Returns(_osmGateway);
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
@@ -49,7 +50,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
             _osmLatestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
             _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
-            _service = new DatabasesUpdaterService(_httpGatewayFactory, 
+            _service = new DatabasesUpdaterService(_clientsFactory, 
                 _elasticSearchGateway, 
                 _geoJsonPreprocessorExecutor, 
                 new TagsHelper(optionsProvider), 
@@ -134,7 +135,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 1))
                 .Returns(list);
-            _osmGateway.GetElement("1", "way").Returns(way);
+            _osmGateway.GetCompleteWay(1).Returns(way);
 
             _service.Update(changes).Wait();
 
@@ -171,7 +172,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 1))
                 .Returns(list);
-            _osmGateway.GetElement("1", "way").Returns(way);
+            _osmGateway.GetCompleteWay(1).Returns(way);
             _elasticSearchGateway.GetPointOfInterestById("way_1", Sources.OSM).Returns(wayFeatureInDatabase);
 
             _service.Update(changes).Wait();

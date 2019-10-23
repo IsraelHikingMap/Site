@@ -5,13 +5,13 @@ using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using OsmSharp.API;
+using OsmSharp.IO.API;
 using ProjNet.CoordinateSystems.Transformations;
 using System;
 using System.Collections.Generic;
@@ -28,7 +28,7 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class OsmController : ControllerBase
     {
-        private readonly IHttpGatewayFactory _httpGatewayFactory;
+        private readonly IClientsFactory _clentsFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly MathTransform _itmWgs84MathTransform;
         private readonly MathTransform _wgs84ItmMathTransform;
@@ -42,7 +42,7 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="httpGatewayFactory"></param>
+        /// <param name="clentsFactory"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="elasticSearchGateway"></param>
@@ -51,7 +51,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="options"></param>
         /// <param name="geometryFactory"></param>
         /// <param name="cache"></param>
-        public OsmController(IHttpGatewayFactory httpGatewayFactory,
+        public OsmController(IClientsFactory clentsFactory,
             IDataContainerConverterService dataContainerConverterService,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IElasticSearchGateway elasticSearchGateway,
@@ -61,7 +61,7 @@ namespace IsraelHiking.API.Controllers
             GeometryFactory geometryFactory,
             LruCache<string, TokenAndSecret> cache)
         {
-            _httpGatewayFactory = httpGatewayFactory;
+            _clentsFactory = clentsFactory;
             _dataContainerConverterService = dataContainerConverterService;
             _itmWgs84MathTransform = itmWgs84MathTransfromFactory.Create();
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
@@ -129,9 +129,8 @@ namespace IsraelHiking.API.Controllers
         [Route("details")]
         public Task<User> GetUserDetails()
         {
-            var token = _cache.Get(User.Identity.Name);
-            var gateway = _httpGatewayFactory.CreateOsmGateway(token);
-            return gateway.GetUser();
+            var gateway = CreateOsmGateway();
+            return gateway.GetUserDetails();
         }
 
         /// <summary>
@@ -150,60 +149,37 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Finds unmapped parts of a given route
         /// </summary>
-        /// <param name="file">The file to use for finding</param>
-        /// <param name="url">The url to fetch a file from - optional, use file uploaded if not provided</param>
+        /// <param name="traceId">The id of the osm trace</param>
         /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(FeatureCollection), 200)]
-        public async Task<IActionResult> PostGpsTrace([FromQuery]string url = "", IFormFile file = null)
+        public async Task<IActionResult> PostFindUnmappedPartsFromGpsTrace([FromQuery]int traceId)
         {
-            var fileFetcherGatewayResponse = await GetFile(url, file);
-            if (fileFetcherGatewayResponse == null)
-            {
-                return BadRequest("Url is not provided or the file is empty... " + url);
-            }
-            var gpxBytes = await _dataContainerConverterService.Convert(fileFetcherGatewayResponse.Content, fileFetcherGatewayResponse.FileName, DataContainerConverterService.GPX);
-            var gpx = gpxBytes.ToGpx().UpdateBounds();
-            var highwayType = GetHighwayType(gpx);
-            var gpxItmLines = GpxToItmLineStrings(gpx);
-            if (!gpxItmLines.Any())
-            {
-                return BadRequest("File does not contain any traces...");
-            }
-            var manipulatedItmLines = await _addibleGpxLinesFinderService.GetLines(gpxItmLines);
-            var attributesTable = new AttributesTable { { "highway", highwayType } };
-            if (string.IsNullOrEmpty(url) == false)
-            {
-                attributesTable.Add("source", url);
-            }
-            var featureCollection = new FeatureCollection();
-            foreach (var line in manipulatedItmLines)
-            {
-                featureCollection.Add(new Feature(ToWgs84LineString(line.Coordinates), attributesTable));
-            }
-            return Ok(featureCollection);
-        }
-
-
-        private async Task<RemoteFileFetcherGatewayResponse> GetFile(string url, IFormFile file)
-        {
-            if (string.IsNullOrEmpty(url) == false)
-            {
-                var fetcher = _httpGatewayFactory.CreateRemoteFileFetcherGateway(_cache.Get(User.Identity.Name));
-                return await fetcher.GetFileContent(url);
-            }
+            var file = await CreateOsmGateway().GetTraceData(traceId);
             if (file == null)
             {
-                return null;
+                return BadRequest("Invalid trace id: " + traceId);
             }
             using (var memoryStream = new MemoryStream())
             {
-                await file.CopyToAsync(memoryStream);
-                return new RemoteFileFetcherGatewayResponse
+                await file.Stream.CopyToAsync(memoryStream);
+                var gpxBytes = await _dataContainerConverterService.Convert(memoryStream.ToArray(), file.FileName, DataContainerConverterService.GPX);
+                var gpx = gpxBytes.ToGpx().UpdateBounds();
+                var highwayType = GetHighwayType(gpx);
+                var gpxItmLines = GpxToItmLineStrings(gpx);
+                if (!gpxItmLines.Any())
                 {
-                    Content = memoryStream.ToArray(),
-                    FileName = file.FileName
-                };
+                    return BadRequest("File does not contain any traces...");
+                }
+                var manipulatedItmLines = await _addibleGpxLinesFinderService.GetLines(gpxItmLines);
+                var attributesTable = new AttributesTable { { "highway", highwayType } };
+                attributesTable.Add("source", "trace id: " + traceId);
+                var featureCollection = new FeatureCollection();
+                foreach (var line in manipulatedItmLines)
+                {
+                    featureCollection.Add(new Feature(ToWgs84LineString(line.Coordinates), attributesTable));
+                }
+                return Ok(featureCollection);
             }
         }
 
@@ -284,6 +260,12 @@ namespace IsraelHiking.API.Controllers
                     .Select(ToItmLineString))
                 .Where(l => l.Coordinates.Any())
                 .ToList();
+        }
+
+        private IAuthClient CreateOsmGateway()
+        {
+            var token = _cache.Get(User.Identity.Name);
+            return _clentsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, token.Token, token.TokenSecret);
         }
     }
 }

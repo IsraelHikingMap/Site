@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Controllers
     public class FilesController : ControllerBase
     {
         private readonly IElevationDataStorage _elevationDataStorage;
-        private readonly IHttpGatewayFactory _httpGatewayFactory;
+        private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
@@ -27,16 +27,16 @@ namespace IsraelHiking.API.Controllers
         /// Controller's constructor
         /// </summary>
         /// <param name="elevationDataStorage"></param>
-        /// <param name="httpGatewayFactory"></param>
+        /// <param name="remoteFileFetcherGateway"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="cache"></param>
         public FilesController(IElevationDataStorage elevationDataStorage,
-            IHttpGatewayFactory httpGatewayFactory, 
+            IRemoteFileFetcherGateway remoteFileFetcherGateway, 
             IDataContainerConverterService dataContainerConverterService,
             LruCache<string, TokenAndSecret> cache)
         {
             _elevationDataStorage = elevationDataStorage;
-            _httpGatewayFactory = httpGatewayFactory;
+            _remoteFileFetcherGateway = remoteFileFetcherGateway;
             _dataContainerConverterService = dataContainerConverterService;
             _cache = cache;
         }
@@ -99,8 +99,7 @@ namespace IsraelHiking.API.Controllers
         // GET api/files?url=http://jeeptrip.co.il/routes/pd6bccre.twl
         public async Task<DataContainer> GetRemoteFile(string url)
         {
-            var fetcher = _httpGatewayFactory.CreateRemoteFileFetcherGateway(_cache.Get(User.Identity.Name));
-            var response = await fetcher.GetFileContent(url);
+            var response = await _remoteFileFetcherGateway.GetFileContent(url);
             var dataContainer = await ConvertToDataContainer(response.Content, response.FileName);
             return dataContainer;
         }

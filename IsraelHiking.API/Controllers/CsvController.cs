@@ -22,18 +22,18 @@ namespace IsraelHiking.API.Controllers
     public class CsvController : ControllerBase
     {
         private readonly IDataContainerConverterService _dataContainerConverterService;
-        private readonly IHttpGatewayFactory _httpGatewayFactory;
+        private readonly IRemoteFileFetcherGateway _remoteFileFetcher;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="dataContainerConverterService"></param>
-        /// <param name="httpGatewayFactory"></param>
-        public CsvController(IDataContainerConverterService dataContainerConverterService, 
-            IHttpGatewayFactory httpGatewayFactory)
+        /// <param name="remoteFileFetcher"></param>
+        public CsvController(IDataContainerConverterService dataContainerConverterService,
+            IRemoteFileFetcherGateway remoteFileFetcher)
         {
             _dataContainerConverterService = dataContainerConverterService;
-            _httpGatewayFactory = httpGatewayFactory;
+            _remoteFileFetcher = remoteFileFetcher;
         }
 
         /// <summary>
@@ -62,12 +62,11 @@ namespace IsraelHiking.API.Controllers
                 csvWriter.Configuration.HasHeaderRecord = true;
                 csvWriter.WriteHeader<CsvPointOfInterestRow>();
                 csvWriter.NextRecord();
-                var fetcher = _httpGatewayFactory.CreateRemoteFileFetcherGateway(null);
                 foreach (var csvRow in pointsOfInterest)
                 {
                     if (!string.IsNullOrWhiteSpace(csvRow.FileUrl))
                     {
-                        var response = await fetcher.GetFileContent(csvRow.FileUrl);
+                        var response = await _remoteFileFetcher.GetFileContent(csvRow.FileUrl);
                         var geojsonBytes = await _dataContainerConverterService.Convert(response.Content,
                             response.FileName, FlowFormats.GEOJSON);
                         var geoJson = geojsonBytes.ToFeatureCollection();

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using OsmSharp.API;
+using OsmSharp.IO.API;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -17,24 +18,25 @@ namespace IsraelHiking.API.Tests.Controllers
     public class OsmTracesControllerTests 
     {
         private OsmTracesController _controller;
-        private IHttpGatewayFactory _httpGatewayFactory;
+        private IClientsFactory _clientsFactory;
+        private LruCache<string, TokenAndSecret> _cache;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
+            _clientsFactory = Substitute.For<IClientsFactory>();
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
-            _controller = new OsmTracesController(_httpGatewayFactory, new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>()));   
+            _cache = new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>());
+            _controller = new OsmTracesController(_clientsFactory, Substitute.For<IElevationDataStorage>(), Substitute.For<IDataContainerConverterService>(), optionsProvider, Substitute.For<IImageCreationService>(), _cache);
         }
 
         [TestMethod]
         public void GetTraces_ShouldGetThemFromOsm()
         {
-            _controller.SetupIdentity();
-            var osmGateWay = Substitute.For<IOsmGateway>();
-            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(osmGateWay);
+            _controller.SetupIdentity(_cache);
+            var osmGateWay = SetupOAuthClient();
 
             _controller.GetTraces().Wait();
 
@@ -54,24 +56,23 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var file = Substitute.For<IFormFile>();
             file.FileName.Returns("SomeFile.gpx");
-            var gateway = Substitute.For<IOsmGateway>();
-            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(gateway);
-            _controller.SetupIdentity();
+            var osmGateWay = SetupOAuthClient();
+
+            _controller.SetupIdentity(_cache);
         
             _controller.PostUploadGpsTrace(file).Wait();
-        
-            gateway.Received(1).CreateTrace(Arg.Any<string>(), Arg.Any<MemoryStream>());
+
+            osmGateWay.Received(1).CreateTrace(Arg.Any<GpxFile>(), Arg.Any<MemoryStream>());
         }
 
 
         [TestMethod]
         public void PutGpsTrace_ShouldUpdate()
         {
-            _controller.SetupIdentity();
-            var osmGateWay = Substitute.For<IOsmGateway>();
-            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(osmGateWay);
+            _controller.SetupIdentity(_cache);
+            var osmGateWay = SetupOAuthClient();
 
-            _controller.PutGpsTrace("42", new GpxFile()).Wait();
+            _controller.PutGpsTrace("42", new Trace { Id = "7", Visibility = "public" }).Wait();
 
             osmGateWay.Received(1).UpdateTrace(Arg.Any<GpxFile>());
         }
@@ -79,14 +80,20 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void DeleteGpsTrace_ShouldDeleteIt()
         {
-            var id = "id";
-            _controller.SetupIdentity();
-            var osmGateWay = Substitute.For<IOsmGateway>();
-            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(osmGateWay);
+            long id = 1;
+            _controller.SetupIdentity(_cache);
+            var osmGateWay = SetupOAuthClient();
 
             _controller.DeleteGpsTrace(id).Wait();
 
             osmGateWay.Received(1).DeleteTrace(id);
+        }
+
+        private IAuthClient SetupOAuthClient()
+        {
+            var osmGateWay = Substitute.For<IAuthClient>();
+            _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(osmGateWay);
+            return osmGateWay;
         }
     }
 }

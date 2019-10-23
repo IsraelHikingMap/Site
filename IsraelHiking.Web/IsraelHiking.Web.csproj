@@ -91,7 +91,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.0" />
     <PackageReference Include="OAuth.DotNetCore" Version="3.0.1" />
-    <PackageReference Include="OsmSharp" Version="6.2.0" />
+    <PackageReference Include="OsmApiClient" Version="0.0.1-beta.5" />
+    <PackageReference Include="OsmSharp" Version="7.0.0-pre002" />
     <PackageReference Include="ProjNet" Version="2.0.0" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc4" />

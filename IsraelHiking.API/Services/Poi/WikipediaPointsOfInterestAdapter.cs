@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;

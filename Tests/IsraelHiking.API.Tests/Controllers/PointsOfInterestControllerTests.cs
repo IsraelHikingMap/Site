@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp.API;
+using OsmSharp.IO.API;
 using System.IO;
 
 namespace IsraelHiking.API.Tests.Controllers
@@ -21,10 +22,11 @@ namespace IsraelHiking.API.Tests.Controllers
     {
         private PointsOfInterestController _controller;
         private IWikimediaCommonGateway _wikimediaCommonGateway;
-        private IOsmGateway _osmGateway;
+        private IAuthClient _osmGateway;
         private ITagsHelper _tagHelper;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
         private IPointsOfInterestAggregatorService _pointsOfInterestAggregatorService;
+        private LruCache<string, TokenAndSecret> _cache;
 
         [TestInitialize]
         public void TestInitialize()
@@ -33,11 +35,13 @@ namespace IsraelHiking.API.Tests.Controllers
             _pointsOfInterestAggregatorService = Substitute.For<IPointsOfInterestAggregatorService>();
             _tagHelper = Substitute.For<ITagsHelper>();
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
-            _osmGateway = Substitute.For<IOsmGateway>();
-            var cache = new LruCache<string, TokenAndSecret>(Substitute.For<IOptions<ConfigurationData>>(), Substitute.For<ILogger>());
-            var factory = Substitute.For<IHttpGatewayFactory>();
-            factory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(_osmGateway);
-            _controller = new PointsOfInterestController(factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, _pointsOfInterestAggregatorService, new Base64ImageStringToFileConverter(),  cache);
+            _osmGateway = Substitute.For<IAuthClient>();
+            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+            optionsProvider.Value.Returns(new ConfigurationData());
+            _cache = new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>());
+            var factory = Substitute.For<IClientsFactory>();
+            factory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(_osmGateway);
+            _controller = new PointsOfInterestController(factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, _pointsOfInterestAggregatorService, new Base64ImageStringToFileConverter(), optionsProvider, _cache);
         }
 
         [TestMethod]
@@ -119,7 +123,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void UploadPointOfInterest_IdDoesNotExists_ShouldAdd()
         {
-            _controller.SetupIdentity();
+            _controller.SetupIdentity(_cache);
             var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "" };
 
             var result = _controller.UploadPointOfInterest(poi, "he").Result as OkObjectResult;
@@ -131,7 +135,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void UploadPointOfInterest_IdExists_ShouldUpdate()
         {
-            _controller.SetupIdentity();
+            _controller.SetupIdentity(_cache);
             var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "1" };
 
             var result = _controller.UploadPointOfInterest(poi, "he").Result as OkObjectResult;
@@ -144,8 +148,8 @@ namespace IsraelHiking.API.Tests.Controllers
         public void UploadPointOfInterest_WithImageIdExists_ShouldUpdate()
         {
             var user = new User {DisplayName = "DisplayName"};
-            _controller.SetupIdentity();
-            _osmGateway.GetUser().Returns(user);
+            _controller.SetupIdentity(_cache);
+            _osmGateway.GetUserDetails().Returns(user);
             var poi = new PointOfInterestExtended
             {
                 Title = "title",
