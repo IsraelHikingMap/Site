@@ -59,14 +59,15 @@ The architecture is based on layers
 * DataAccess - database, file system and network request are processed in this layer
 * Common - Mainly for POCOs
 
-# Setting Up the Project for Development
+# Setting Up the Project for Development (Windows)
 In order to be able to build this site you'll need some tools:
 * Install [Java runtime](https://java.com/en/download/) - make sure to install 64bit version.
 * Download and install [Visual Studio community 2019](https://www.visualstudio.com/downloads) or later. Select:
   * ASP.NET and web development
   * .NET cross-platform development
-* [.Net core SDK 2.1 ](https://www.microsoft.com/net/download/core)
+* [.Net core SDK 3.0 ](https://www.microsoft.com/net/download/core)
 * Install [node.js](https://nodejs.org/en/) for windows (10.1+). Use the recommended 64-bit installer on modern Windows versions.
+* Install [Elasticsearch 6.8 msi](https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html)
 * Open Visual Studio
 * Follow [these steps](https://stackoverflow.com/a/43850262/368683) to update the version of node.js Visual Studio uses
 * If asked, and you don't have any other preference, choose "General" development settings
@@ -104,7 +105,7 @@ In order to be able to make the server work a few prerequisits are needed:
 * Windows machine with IIS enabled and a site (Although this site should be able to run on Linux it was never fully tested).
 * Install Java Runtime Environment.
 * Add `curl` to path.
-* `Elasticsearch.bat` and `GraphHopper.cmd` should be processes that run when the server machine starts and never die - use a watchdog or windows service to make sure they do (we use NSSM. for linux, check the java command inside those files and use a deamon to run them).
+* `GraphHopper.cmd` should be a process that run when the server machine starts and never die - use a watchdog or windows service to make sure they do (we use NSSM. for linux, check the java command inside those files and use a deamon to run them).
 * Create a task to rebuild Graph Hopper and Elastic Search:
   * Open Windows' Task Scheduler
   * Create task

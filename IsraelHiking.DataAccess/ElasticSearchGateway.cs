@@ -3,6 +3,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Nest;
+using Nest.JsonNetSerializer;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
@@ -14,20 +15,6 @@ using Feature = NetTopologySuite.Features.Feature;
 
 namespace IsraelHiking.DataAccess
 {
-    public class GeoJsonNetSerializer : JsonNetSerializer
-    {
-        public GeoJsonNetSerializer(IConnectionSettingsValues settings, GeometryFactory factory) : base(settings)
-        {
-            OverwriteDefaultSerializers((s, cvs) =>
-            {
-                foreach (var converter in GeoJsonSerializer.Create(factory, 3).Converters)
-                {
-                    s.Converters.Add(converter);
-                }
-            });
-        }
-    }
-
     public class ElasticSearchGateway : IElasticSearchGateway
     {
         private const int PAGE_SIZE = 10000;
@@ -62,7 +49,10 @@ namespace IsraelHiking.DataAccess
             var connectionString = new ConnectionSettings(
                 pool,
                 new HttpConnection(),
-                new SerializerFactory(s => new GeoJsonNetSerializer(s, _geometryFactory)))
+                new ConnectionSettings.SourceSerializerFactory((builtin, settings) => new JsonNetSerializer(builtin, settings, () => new Newtonsoft.Json.JsonSerializerSettings
+                {
+                    Converters = GeoJsonSerializer.Create(_geometryFactory, 3).Converters
+                })))
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
             if (_elasticClient.IndexExists(OSM_POIS_INDEX1).Exists == false &&
@@ -411,9 +401,8 @@ namespace IsraelHiking.DataAccess
                     ms.Map<Feature>(m =>
                         m.Properties(ps =>
                             ps.GeoShape(g => g.Name(f => f.Geometry)
-                                .Tree(GeoTree.Geohash)
-                                .TreeLevels(10)
-                                .DistanceErrorPercentage(0.2)))
+                            )
+                        )
                     )
                 )
             );
@@ -429,10 +418,9 @@ namespace IsraelHiking.DataAccess
                                 .Name(PROPERTIES)
                                 .Properties(p => p.GeoPoint(s => s.Name(FeatureAttributes.GEOLOCATION)))
                                 .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
-                            ).GeoShape(g => g.Name(f => f.Geometry)
-                                .Tree(GeoTree.Geohash)
-                                .TreeLevels(10)
-                                .DistanceErrorPercentage(0.2))
+                            ).GeoShape(g => 
+                                g.Name(f => f.Geometry)
+                            )
                         )
                     )
                 ).Settings(s => s.Setting("index.mapping.total_fields.limit", 10000))

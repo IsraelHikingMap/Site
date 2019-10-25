@@ -83,7 +83,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.0.0" />
-    <PackageReference Include="NEST" Version="5.5.0" />
+    <PackageReference Include="NEST" Version="6.8.3" />
+    <PackageReference Include="NEST.JsonNetSerializer" Version="6.8.3" />
     <PackageReference Include="NetTopologySuite" Version="2.0.0" />
     <PackageReference Include="NetTopologySuite.IO" Version="1.15.0-pre032" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.1" />
