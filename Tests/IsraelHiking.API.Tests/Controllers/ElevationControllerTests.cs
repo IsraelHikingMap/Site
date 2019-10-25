@@ -2,7 +2,6 @@
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Geometries;
 using NSubstitute;
 using System.Linq;
 
@@ -19,8 +18,8 @@ namespace IsraelHiking.API.Tests.Controllers
             var elevationDataStorage = Substitute.For<IElevationDataStorage>();
             var point1 = "31.8239,35.0375";
             var point2 = "31.8213,35.0965";
-            elevationDataStorage.GetElevation(new Coordinate().FromLatLng(point1)).Returns(1);
-            elevationDataStorage.GetElevation(new Coordinate().FromLatLng(point2)).Returns(2);
+            elevationDataStorage.GetElevation(point1.ToCoordinate()).Returns(1);
+            elevationDataStorage.GetElevation(point2.ToCoordinate()).Returns(2);
             _elevationController = new ElevationController(elevationDataStorage);
 
             var response = _elevationController.GetElevation($"{point1}|{point2}").Result.ToArray();

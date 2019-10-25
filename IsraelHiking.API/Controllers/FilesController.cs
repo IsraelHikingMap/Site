@@ -4,7 +4,6 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NetTopologySuite.Geometries;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,7 +30,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="dataContainerConverterService"></param>
         /// <param name="cache"></param>
         public FilesController(IElevationDataStorage elevationDataStorage,
-            IRemoteFileFetcherGateway remoteFileFetcherGateway, 
+            IRemoteFileFetcherGateway remoteFileFetcherGateway,
             IDataContainerConverterService dataContainerConverterService,
             LruCache<string, TokenAndSecret> cache)
         {
@@ -144,7 +143,7 @@ namespace IsraelHiking.API.Controllers
             var dataContainer = await _dataContainerConverterService.ToDataContainer(data, fileName);
             foreach (var latLng in dataContainer.Routes.SelectMany(routeData => routeData.Segments.SelectMany(routeSegmentData => routeSegmentData.Latlngs)))
             {
-                latLng.Alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(latLng));
+                latLng.Alt = await _elevationDataStorage.GetElevation(latLng.ToCoordinate());
             }
             return dataContainer;
         }

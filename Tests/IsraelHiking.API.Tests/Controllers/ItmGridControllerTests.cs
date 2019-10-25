@@ -2,8 +2,6 @@
 using IsraelHiking.API.Executors;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
-using NSubstitute;
-using ProjNet.CoordinateSystems.Transformations;
 
 namespace IsraelHiking.API.Tests.Controllers
 {

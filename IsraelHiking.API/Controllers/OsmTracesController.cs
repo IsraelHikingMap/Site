@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using NetTopologySuite.Geometries;
 using OsmSharp.API;
 using OsmSharp.IO.API;
 using System;
@@ -82,7 +81,7 @@ namespace IsraelHiking.API.Controllers
                 var dataContainer = await _dataContainerConverterService.ToDataContainer(memoryStream.ToArray(), file.FileName);
                 foreach (var latLng in dataContainer.Routes.SelectMany(routeData => routeData.Segments.SelectMany(routeSegmentData => routeSegmentData.Latlngs)))
                 {
-                    latLng.Alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(latLng));
+                    latLng.Alt = await _elevationDataStorage.GetElevation(latLng.ToCoordinate());
                 }
                 return dataContainer;
             }

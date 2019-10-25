@@ -121,7 +121,7 @@ namespace IsraelHiking.API.Controllers
             }
             var lat = double.Parse(splitted.First());
             var lng = double.Parse(splitted.Last());
-            var elevation = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(position));
+            var elevation = await _elevationDataStorage.GetElevation(position.ToCoordinate());
             return new CoordinateZ(lng, lat, elevation);
         }
 

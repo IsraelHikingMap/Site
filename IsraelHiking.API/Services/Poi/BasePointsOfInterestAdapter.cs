@@ -89,7 +89,7 @@ namespace IsraelHiking.API.Services.Poi
             if (feature.Attributes[FeatureAttributes.GEOLOCATION] is AttributesTable geoLocation)
             {
                 poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
-                var alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(poiItem.Location));
+                var alt = await _elevationDataStorage.GetElevation(poiItem.Location.ToCoordinate());
                 poiItem.Location.Alt = alt;
             }
             poiItem.Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString();
@@ -166,14 +166,14 @@ namespace IsraelHiking.API.Services.Poi
                 .SelectMany(s => s.Latlngs)
                 .Where(l => l.Alt == null || l.Alt.Value == 0))
             {
-                coordinate.Alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(coordinate));
+                coordinate.Alt = await _elevationDataStorage.GetElevation(coordinate.ToCoordinate());
             }
 
             foreach (var route in poiItem.DataContainer.Routes)
             {
                 var itmRoute = route.Segments.SelectMany(s => s.Latlngs)
-                    .Select(l => _wgs84ItmMathTransform.Transform(new Coordinate().FromLatLng(l).ToDoubleArray()))
-                    .Select(c => new Coordinate().FromDoubleArray(c)).ToArray();
+                    .Select(l => _wgs84ItmMathTransform.Transform(l.ToCoordinate().ToDoubleArray()))
+                    .Select(c => c.ToCoordinate()).ToArray();
                 var skip1 = itmRoute.Skip(1);
                 poiItem.LengthInKm += itmRoute.Zip(skip1, (curr, prev) => curr.Distance(prev)).Sum() / 1000;
             }

@@ -7,7 +7,6 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using NetTopologySuite.Geometries;
 using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
@@ -92,8 +91,8 @@ namespace IsraelHiking.API.Controllers
                 return new PointOfInterest[0];
             }
             var categoriesArray = categories.Split(',').Select(f => f.Trim()).ToArray();
-            var northEastCoordinate = new Coordinate().FromLatLng(northEast);
-            var southWestCoordinate = new Coordinate().FromLatLng(southWest);
+            var northEastCoordinate = northEast.ToCoordinate();
+            var southWestCoordinate = southWest.ToCoordinate();
             return await _pointsOfInterestProvider.GetPointsOfInterest(northEastCoordinate, southWestCoordinate, categoriesArray, language);
         }
 
@@ -156,7 +155,7 @@ namespace IsraelHiking.API.Controllers
                 {
                     var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title,
                         pointOfInterest.Description, user.DisplayName, file.FileName, memoryStream,
-                        new Coordinate().FromLatLng(pointOfInterest.Location));
+                        pointOfInterest.Location.ToCoordinate());
                     url = await _wikimediaCommonGateway.GetImageUrl(imageName);
                     imageUrls[urlIndex] = url;
                 }

@@ -47,7 +47,7 @@ namespace IsraelHiking.API.Converters
                 References = new Reference[0],
                 DataContainer = new DataContainer(),
                 // HN TODO: add elevation?
-                FeatureCollection = new FeatureCollection { new Feature(new Point(new Coordinate().FromLatLng(latLng)), new AttributesTable()) }
+                FeatureCollection = new FeatureCollection { new Feature(new Point(latLng.ToCoordinate()), new AttributesTable()) }
             };
         }
         

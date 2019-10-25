@@ -175,7 +175,7 @@ namespace IsraelHiking.DataAccess
                     {FeatureAttributes.LAT, geoLocation.Lat},
                     {FeatureAttributes.LON, geoLocation.Lng}
                 };
-            var feature = new Feature(new Point(new Coordinate().FromLatLng(geoLocation)), new AttributesTable
+            var feature = new Feature(new Point(geoLocation.ToCoordinate()), new AttributesTable
                 {
                     {FeatureAttributes.GEOLOCATION, geoLocationTable},
                     {FeatureAttributes.DESCRIPTION, description},

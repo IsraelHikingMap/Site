@@ -83,8 +83,8 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public async Task<List<Feature>> GetSnappings(string northEast, string southWest)
         {
-            var northEastCooridnate = new Coordinate().FromLatLng(northEast);
-            var southWestCoordinate = new Coordinate().FromLatLng(southWest);
+            var northEastCooridnate = northEast.ToCoordinate();
+            var southWestCoordinate = southWest.ToCoordinate();
             var highways = await _elasticSearchGateway.GetHighways(northEastCooridnate, southWestCoordinate);
             var points = await _elasticSearchGateway.GetPointsOfInterest(northEastCooridnate, southWestCoordinate, Categories.Points.Concat(new[] { Categories.NONE}).ToArray(), Languages.ALL);
             return highways.Concat(points).ToList();
@@ -99,7 +99,7 @@ namespace IsraelHiking.API.Controllers
         [Route("closest")]
         public async Task<Feature> GetClosestPoint(string location)
         {
-            var locationCoordinates = new Coordinate().FromLatLng(location);
+            var locationCoordinates = location.ToCoordinate();
             var distance = _options.MergePointsOfInterestThreshold;
             var results = await _elasticSearchGateway.GetPointsOfInterest(
                 new Coordinate(locationCoordinates.X + distance, locationCoordinates.Y + distance), 

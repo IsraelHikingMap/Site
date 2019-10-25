@@ -1,7 +1,6 @@
 ﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
-using NetTopologySuite.Geometries;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -32,7 +31,7 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public async Task<double[]> GetElevation(string points)
         {
-            var tasks = points.Split('|').Select(async p => await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(p)));
+            var tasks = points.Split('|').Select(async p => await _elevationDataStorage.GetElevation(p.ToCoordinate()));
             return await Task.WhenAll(tasks);
         }
     }

@@ -64,7 +64,7 @@ namespace IsraelHiking.DataAccess
             attributes.Add(FeatureAttributes.IMAGE_URL, nakebItem.picture);
             attributes.Add(FeatureAttributes.WEBSITE, nakebItem.link);
             attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg");
-            var lineString = new LineString(nakebItem.latlngs.Select(l => new Coordinate().FromLatLng(l)).ToArray());
+            var lineString = new LineString(nakebItem.latlngs.Select(l => l.ToCoordinate()).ToArray());
             var features = new List<IFeature> { new Feature(lineString, attributes) };
             features.AddRange(nakebItem.markers.Select(ConvertToPointFeature).ToList());
             var featureCollection = new FeatureCollection();
@@ -77,7 +77,7 @@ namespace IsraelHiking.DataAccess
 
         private Feature ConvertToPointFeature(JsonNakebItem nakebItem)
         {
-            var point = new Point(new Coordinate().FromLatLng(nakebItem.start));
+            var point = new Point(nakebItem.start.ToCoordinate());
             return new Feature(point, GetAttributes(nakebItem));
         }
 
@@ -107,7 +107,7 @@ namespace IsraelHiking.DataAccess
 
         private IFeature ConvertToPointFeature(MarkerData markerData)
         {
-            var point = new Point(new Coordinate().FromLatLng(markerData.Latlng));
+            var point = new Point(markerData.Latlng.ToCoordinate());
             var attributes = new AttributesTable { { FeatureAttributes.NAME, markerData.Title } };
             return new Feature(point, attributes);
         }
