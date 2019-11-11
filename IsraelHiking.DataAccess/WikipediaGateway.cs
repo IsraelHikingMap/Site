@@ -127,7 +127,7 @@ namespace IsraelHiking.DataAccess
             {
                 return null;
             }
-            var coordinate = new Coordinate(geoCoordinate.Longitude, geoCoordinate.Latitude);
+            var coordinate = new CoordinateZ(geoCoordinate.Longitude, geoCoordinate.Latitude, double.NaN);
             var attributes = GetAttributes(coordinate, page.Title, page.Id.ToString(), language);
             attributes.Add(FeatureAttributes.DESCRIPTION + ":" + language, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
             var imageUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url ?? string.Empty;
