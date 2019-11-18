@@ -106,7 +106,7 @@ namespace IsraelHiking.DataAccess
                 var hgtZipFile = new ZipFile(hgtStream);
                 foreach (ZipEntry zipEntry in hgtZipFile)
                 {
-                    if (zipEntry.Name.Contains("hgt") == false)
+                    if (zipEntry.Name.ToLowerInvariant().Contains("hgt") == false)
                     {
                         continue;
                     }
