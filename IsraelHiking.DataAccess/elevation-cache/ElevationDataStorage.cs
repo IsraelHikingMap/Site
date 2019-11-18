@@ -10,12 +10,14 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace IsraelHiking.DataAccess
 {
     public class ElevationDataStorage : IElevationDataStorage
     {
         private const string ELEVATION_CACHE = "elevation-cache";
+        private static readonly Regex HGT_NAME = new Regex(@"(?<latHem>N|S)(?<lat>\d{2})(?<lonHem>W|E)(?<lon>\d{3})");
         private readonly ILogger _logger;
         private readonly IFileProvider _fileProvider;
         private readonly ConcurrentDictionary<Coordinate, short[,]> _elevationData;
@@ -40,8 +42,11 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation("Found " + hgtZipFiles.Count() + " files in: " + _fileProvider.GetFileInfo(ELEVATION_CACHE).PhysicalPath);
             foreach (var hgtZipFile in hgtZipFiles)
             {
-                var bottomLeftLat = int.Parse(hgtZipFile.Name.Substring(1, 2));
-                var bottomLeftLng = int.Parse(hgtZipFile.Name.Substring(4, 3));
+                var match = HGT_NAME.Match(hgtZipFile.Name);
+                var latHem = match.Groups["latHem"].Value == "N" ? 1 : -1;
+                var bottomLeftLat = int.Parse(match.Groups["lat"].Value) * latHem;
+                var lonHem = match.Groups["lonHem"].Value == "E" ? 1 : -1;
+                var bottomLeftLng = int.Parse(match.Groups["lon"].Value) * lonHem;
                 var key = new Coordinate(bottomLeftLng, bottomLeftLat);
 
                 _initializationTaskPerLatLng[key] = Task.Run(() =>
