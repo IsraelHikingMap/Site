@@ -79,7 +79,7 @@ namespace IsraelHiking.DataAccess
         /// <returns>A task with the elevation results</returns>
         public async Task<double> GetElevation(Coordinate latLng)
         {
-            var key = new Coordinate((int) latLng.X, (int) latLng.Y);
+            var key = new Coordinate(Math.Floor(latLng.X), Math.Floor(latLng.Y));
             if (_initializationTaskPerLatLng.ContainsKey(key) == false)
             {
                 return 0;
@@ -90,8 +90,8 @@ namespace IsraelHiking.DataAccess
                 return 0;
             }
             var array = _elevationData[key];
-            var lat = (array.GetLength(0) - 1) - (latLng.Y - key.Y) * array.GetLength(0);
-            var lng = (latLng.X - key.X) * array.GetLength(1);
+            var lat = (array.GetLength(0) - 1) - Math.Abs(latLng.Y - key.Y) * array.GetLength(0);
+            var lng = Math.Abs(latLng.X - key.X) * array.GetLength(1);
 
             if ((lat >= array.GetLength(0) - 1) || (lng >= array.GetLength(1) - 1))
             {
