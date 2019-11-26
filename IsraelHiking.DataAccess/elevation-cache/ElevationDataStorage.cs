@@ -65,12 +65,18 @@ namespace IsraelHiking.DataAccess
                         return;
                     }
 
-                    int samples = (short) (Math.Sqrt(byteArray.Length/2.0) + 0.5);
+                    int samples = (short)(Math.Sqrt(byteArray.Length / 2.0) + 0.5);
                     var elevationArray = new short[samples, samples];
                     for (int byteIndex = 0; byteIndex < byteArray.Length; byteIndex += 2)
                     {
-                        short currentElevation = BitConverter.ToInt16(new[] {byteArray[byteIndex + 1], byteArray[byteIndex]}, 0);
-                        elevationArray[(byteIndex/2)/samples, (byteIndex/2)%samples] = currentElevation;
+                        short currentElevation = BitConverter.ToInt16(new[] { byteArray[byteIndex + 1], byteArray[byteIndex] }, 0);
+                        // if hgt file contains -32768, use 0 instead
+                        if (currentElevation == short.MinValue)
+                        {
+                            currentElevation = 0;
+                        }
+
+                        elevationArray[(byteIndex / 2) / samples, (byteIndex / 2) % samples] = currentElevation;
                     }
                     _elevationData[key] = elevationArray;
                     _logger.LogInformation("Finished reading file " + hgtZipFile.Name);
@@ -107,7 +113,7 @@ namespace IsraelHiking.DataAccess
 
             if ((lat >= array.GetLength(0) - 1) || (lng >= array.GetLength(1) - 1))
             {
-                return array[(int) lat, (int) lng];
+                return array[(int)lat, (int)lng];
             }
             var coordinate1 = new CoordinateZ((int)lng, (int)lat, array[(int)lat, (int)lng]);
             var coordinate2 = new CoordinateZ((int)lng + 1, (int)lat, array[(int)lat, (int)lng + 1]);
