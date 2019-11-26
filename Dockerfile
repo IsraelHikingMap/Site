@@ -1,4 +1,4 @@
-FROM node:8.9.3 as build-node
+FROM node:latest as build-node
 
 WORKDIR /tmp
 COPY ./IsraelHiking.Web/package.json ./IsraelHiking.Web/package-lock.json ./
@@ -6,9 +6,9 @@ COPY ./IsraelHiking.Web/package.json ./IsraelHiking.Web/package-lock.json ./
 RUN npm i 
 
 COPY /IsraelHiking.Web/ ./
-RUN npm run build -- --target=development --environment=dev --no-progress
+RUN npm run build -- --no-progress
 
-FROM microsoft/dotnet:1.1-sdk as release
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0 as release
 
 WORKDIR /usr/app
 COPY . .
