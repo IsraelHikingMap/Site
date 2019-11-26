@@ -17,7 +17,7 @@ namespace IsraelHiking.DataAccess
     public class ElevationDataStorage : IElevationDataStorage
     {
         private const string ELEVATION_CACHE = "elevation-cache";
-        private static readonly Regex HGT_NAME = new Regex(@"(?<latHem>N|S)(?<lat>\d{2})(?<lonHem>W|E)(?<lon>\d{3})");
+        private static readonly Regex HGT_NAME = new Regex(@"(?<latHem>N|S)(?<lat>\d{2})(?<lonHem>W|E)(?<lon>\d{3})(.*)\.zip");
         private readonly ILogger _logger;
         private readonly IFileProvider _fileProvider;
         private readonly ConcurrentDictionary<Coordinate, short[,]> _elevationData;
@@ -43,6 +43,12 @@ namespace IsraelHiking.DataAccess
             foreach (var hgtZipFile in hgtZipFiles)
             {
                 var match = HGT_NAME.Match(hgtZipFile.Name);
+                if (!match.Success)
+                {
+                    _logger.LogWarning($"File {hgtZipFile.Name} in elevation cache does not match naming rules");
+                    continue;
+                }
+
                 var latHem = match.Groups["latHem"].Value == "N" ? 1 : -1;
                 var bottomLeftLat = int.Parse(match.Groups["lat"].Value) * latHem;
                 var lonHem = match.Groups["lonHem"].Value == "E" ? 1 : -1;
@@ -53,6 +59,12 @@ namespace IsraelHiking.DataAccess
                 {
                     _logger.LogInformation("Reading file " + hgtZipFile.Name);
                     var byteArray = GetByteArrayFromZip(hgtZipFile);
+                    if (byteArray == null)
+                    {
+                        _logger.LogError($"Unable to find hgt file in: {hgtZipFile.Name}");
+                        return;
+                    }
+
                     int samples = (short) (Math.Sqrt(byteArray.Length/2.0) + 0.5);
                     var elevationArray = new short[samples, samples];
                     for (int byteIndex = 0; byteIndex < byteArray.Length; byteIndex += 2)
@@ -120,7 +132,7 @@ namespace IsraelHiking.DataAccess
                     return memoryStream.ToArray();
                 }
             }
-            throw new Exception("Unable to find hgt file in : " + hgtZipFileInfo.Name);
+            return null;
         }
     }
 }
