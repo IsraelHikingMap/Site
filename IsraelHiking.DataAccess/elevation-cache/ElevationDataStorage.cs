@@ -10,12 +10,14 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace IsraelHiking.DataAccess
 {
     public class ElevationDataStorage : IElevationDataStorage
     {
         private const string ELEVATION_CACHE = "elevation-cache";
+        private static readonly Regex HGT_NAME = new Regex(@"(?<latHem>N|S)(?<lat>\d{2})(?<lonHem>W|E)(?<lon>\d{3})(.*)\.zip");
         private readonly ILogger _logger;
         private readonly IFileProvider _fileProvider;
         private readonly ConcurrentDictionary<Coordinate, short[,]> _elevationData;
@@ -40,20 +42,41 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation("Found " + hgtZipFiles.Count() + " files in: " + _fileProvider.GetFileInfo(ELEVATION_CACHE).PhysicalPath);
             foreach (var hgtZipFile in hgtZipFiles)
             {
-                var bottomLeftLat = int.Parse(hgtZipFile.Name.Substring(1, 2));
-                var bottomLeftLng = int.Parse(hgtZipFile.Name.Substring(4, 3));
+                var match = HGT_NAME.Match(hgtZipFile.Name);
+                if (!match.Success)
+                {
+                    _logger.LogWarning($"File {hgtZipFile.Name} in elevation cache does not match naming rules");
+                    continue;
+                }
+
+                var latHem = match.Groups["latHem"].Value == "N" ? 1 : -1;
+                var bottomLeftLat = int.Parse(match.Groups["lat"].Value) * latHem;
+                var lonHem = match.Groups["lonHem"].Value == "E" ? 1 : -1;
+                var bottomLeftLng = int.Parse(match.Groups["lon"].Value) * lonHem;
                 var key = new Coordinate(bottomLeftLng, bottomLeftLat);
 
                 _initializationTaskPerLatLng[key] = Task.Run(() =>
                 {
                     _logger.LogInformation("Reading file " + hgtZipFile.Name);
                     var byteArray = GetByteArrayFromZip(hgtZipFile);
-                    int samples = (short) (Math.Sqrt(byteArray.Length/2.0) + 0.5);
+                    if (byteArray == null)
+                    {
+                        _logger.LogError($"Unable to find hgt file in: {hgtZipFile.Name}");
+                        return;
+                    }
+
+                    int samples = (short)(Math.Sqrt(byteArray.Length / 2.0) + 0.5);
                     var elevationArray = new short[samples, samples];
                     for (int byteIndex = 0; byteIndex < byteArray.Length; byteIndex += 2)
                     {
-                        short currentElevation = BitConverter.ToInt16(new[] {byteArray[byteIndex + 1], byteArray[byteIndex]}, 0);
-                        elevationArray[(byteIndex/2)/samples, (byteIndex/2)%samples] = currentElevation;
+                        short currentElevation = BitConverter.ToInt16(new[] { byteArray[byteIndex + 1], byteArray[byteIndex] }, 0);
+                        // if hgt file contains -32768, use 0 instead
+                        if (currentElevation == short.MinValue)
+                        {
+                            currentElevation = 0;
+                        }
+
+                        elevationArray[(byteIndex / 2) / samples, (byteIndex / 2) % samples] = currentElevation;
                     }
                     _elevationData[key] = elevationArray;
                     _logger.LogInformation("Finished reading file " + hgtZipFile.Name);
@@ -74,7 +97,7 @@ namespace IsraelHiking.DataAccess
         /// <returns>A task with the elevation results</returns>
         public async Task<double> GetElevation(Coordinate latLng)
         {
-            var key = new Coordinate((int) latLng.X, (int) latLng.Y);
+            var key = new Coordinate(Math.Floor(latLng.X), Math.Floor(latLng.Y));
             if (_initializationTaskPerLatLng.ContainsKey(key) == false)
             {
                 return 0;
@@ -85,12 +108,12 @@ namespace IsraelHiking.DataAccess
                 return 0;
             }
             var array = _elevationData[key];
-            var lat = (array.GetLength(0) - 1) - (latLng.Y - key.Y) * array.GetLength(0);
-            var lng = (latLng.X - key.X) * array.GetLength(1);
+            var lat = (array.GetLength(0) - 1) - Math.Abs(latLng.Y - key.Y) * array.GetLength(0);
+            var lng = Math.Abs(latLng.X - key.X) * array.GetLength(1);
 
             if ((lat >= array.GetLength(0) - 1) || (lng >= array.GetLength(1) - 1))
             {
-                return array[(int) lat, (int) lng];
+                return array[(int)lat, (int)lng];
             }
             var coordinate1 = new CoordinateZ((int)lng, (int)lat, array[(int)lat, (int)lng]);
             var coordinate2 = new CoordinateZ((int)lng + 1, (int)lat, array[(int)lat, (int)lng + 1]);
@@ -106,7 +129,7 @@ namespace IsraelHiking.DataAccess
                 var hgtZipFile = new ZipFile(hgtStream);
                 foreach (ZipEntry zipEntry in hgtZipFile)
                 {
-                    if (zipEntry.Name.Contains("hgt") == false)
+                    if (zipEntry.Name.ToLowerInvariant().Contains("hgt") == false)
                     {
                         continue;
                     }
@@ -115,7 +138,7 @@ namespace IsraelHiking.DataAccess
                     return memoryStream.ToArray();
                 }
             }
-            throw new Exception("Unable to find hgt file in : " + hgtZipFileInfo.Name);
+            return null;
         }
     }
 }

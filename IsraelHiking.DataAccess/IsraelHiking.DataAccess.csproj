@@ -20,63 +20,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="elevation-cache\N28E034.hgt.zip" />
-    <None Remove="elevation-cache\N29E034.hgt.zip" />
-    <None Remove="elevation-cache\N29E035.hgt.zip" />
-    <None Remove="elevation-cache\N30E033.hgt.zip" />
-    <None Remove="elevation-cache\N30E034.hgt.zip" />
-    <None Remove="elevation-cache\N30E035.hgt.zip" />
-    <None Remove="elevation-cache\N30E036.hgt.zip" />
-    <None Remove="elevation-cache\N31E034.hgt.zip" />
-    <None Remove="elevation-cache\N31E035.hgt.zip" />
-    <None Remove="elevation-cache\N32E034.hgt.zip" />
-    <None Remove="elevation-cache\N32E035.hgt.zip" />
-    <None Remove="elevation-cache\N32E036.hgt.zip" />
-    <None Remove="elevation-cache\N33E034.hgt.zip" />
-    <None Remove="elevation-cache\N33E035.hgt.zip" />
+    <None Remove="elevation-cache\*.zip" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="elevation-cache\N28E034.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N29E034.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N29E035.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N30E033.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N30E034.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N30E035.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N30E036.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N31E034.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N31E035.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N32E034.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N32E035.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N32E036.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N33E034.hgt.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="elevation-cache\N33E035.hgt.zip">
+    <Content Include="elevation-cache\*.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

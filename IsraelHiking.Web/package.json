@@ -99,7 +99,7 @@
     "karma-coverage-istanbul-reporter": "2.0.5",
     "karma-jasmine": "^2.0.1",
     "karma-jasmine-html-reporter": "^1.4.2",
-    "karma-junit-reporter": "2.0.0",
+    "karma-junit-reporter": "^2.0.1",
     "md5-file": "^4.0.0",
     "open": "6.3.0",
     "patch-package": "^6.1.2",
