@@ -1,9 +1,6 @@
-﻿using IsraelHiking.API.Executors;
-using IsraelHiking.Common;
-using IsraelHiking.Common.Poi;
+﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using System.Collections.Concurrent;
@@ -23,26 +20,13 @@ namespace IsraelHiking.API.Services.Poi
         /// <summary>
         /// Class constructor
         /// </summary>
-        /// <param name="elevationDataStorage"></param>
-        /// <param name="elasticSearchGateway"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="wikipediaGateway"></param>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
-        /// <param name="options"></param>
         /// <param name="logger"></param>
-        /// 
-        public WikipediaPointsOfInterestAdapter(IElevationDataStorage elevationDataStorage,
-            IElasticSearchGateway elasticSearchGateway,
-            IDataContainerConverterService dataContainerConverterService,
+        public WikipediaPointsOfInterestAdapter(IDataContainerConverterService dataContainerConverterService,
             IWikipediaGateway wikipediaGateway,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
-            IOptions<ConfigurationData> options,
             ILogger logger) :
-            base(elevationDataStorage, 
-                elasticSearchGateway, 
-                dataContainerConverterService, 
-                itmWgs84MathTransfromFactory,
-                options,
+            base(dataContainerConverterService,
                 logger)
         {
             _wikipediaGateway = wikipediaGateway;
@@ -50,26 +34,6 @@ namespace IsraelHiking.API.Services.Poi
 
         /// <inheritdoc />
         public override string Source => Sources.WIKIPEDIA;
-
-        /// <inheritdoc />
-        public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
-        {
-            var featureCollection = await GetFromCacheIfExists(id);
-            if (featureCollection == null)
-            {
-                featureCollection = await _wikipediaGateway.GetById(id);
-                SetToCache(featureCollection);
-            }
-            
-            var mainFeature = featureCollection.First();
-            if (!mainFeature.Attributes[FeatureAttributes.POI_LANGUAGE].Equals(language))
-            {
-                return null;
-            }
-            var poiItem = await ConvertToPoiExtended(featureCollection, language);
-            poiItem.IsRoute = false;
-            return poiItem;
-        }
 
         /// <inheritdoc />
         public override async Task<List<Feature>> GetPointsForIndexing()
@@ -115,6 +79,12 @@ namespace IsraelHiking.API.Services.Poi
                 .ToList();
             _logger.LogInformation($"Finished getting Wikipedia pages for indexing, got {wikiFeatures.Count} pages.");
             return wikiFeatures;
+        }
+
+        /// <inheritdoc />
+        public override Task<Feature> GetRawPointOfInterestById(string id)
+        {
+            return _wikipediaGateway.GetById(id);
         }
     }
 }

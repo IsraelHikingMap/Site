@@ -83,6 +83,7 @@ import { LoggingService } from "./services/logging.service";
 import { DefaultStyleService } from "./services/default-style.service";
 import { DatabaseService } from "./services/database.service";
 import { ApplicationExitService } from "./services/application-exit.service";
+import { ConnectionService } from "./services/connection.service";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
@@ -285,6 +286,7 @@ NgModule({
         DefaultStyleService,
         DatabaseService,
         ApplicationExitService,
+        ConnectionService,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction
     ],

@@ -92,14 +92,15 @@ namespace IsraelHiking.API.Executors
             foreach (var feature in features)
             {
                 (var searchFactor, var iconColorCategory) = _tagsHelper.GetInfo(feature.Attributes);
-                feature.Attributes.Add(FeatureAttributes.SEARCH_FACTOR, searchFactor);
-                feature.Attributes.Add(FeatureAttributes.ICON, iconColorCategory.Icon);
-                feature.Attributes.Add(FeatureAttributes.ICON_COLOR, iconColorCategory.Color);
+                feature.Attributes.Add(FeatureAttributes.POI_SEARCH_FACTOR, searchFactor);
+                feature.Attributes.Add(FeatureAttributes.POI_ICON, iconColorCategory.Icon);
+                feature.Attributes.Add(FeatureAttributes.POI_ICON_COLOR, iconColorCategory.Color);
                 feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
                 feature.Attributes.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
                 feature.Attributes.Add(FeatureAttributes.POI_LANGUAGE, Languages.ALL);
                 feature.Attributes.Add(FeatureAttributes.POI_CONTAINER, feature.IsValidContainer());
                 feature.SetTitles();
+                feature.SetId();
                 UpdateLocation(feature);
             }
         }
@@ -263,7 +264,7 @@ namespace IsraelHiking.API.Executors
                     {FeatureAttributes.LAT, feature.Geometry.Coordinate.Y},
                     {FeatureAttributes.LON, feature.Geometry.Coordinate.X}
                 };
-                feature.Attributes.Add(FeatureAttributes.GEOLOCATION, geoLocationTable);
+                feature.Attributes.Add(FeatureAttributes.POI_GEOLOCATION, geoLocationTable);
                 return;
             }
             if (feature.Geometry.Centroid == null || feature.Geometry.Centroid.IsEmpty)
@@ -275,7 +276,7 @@ namespace IsraelHiking.API.Executors
                 {FeatureAttributes.LAT, feature.Geometry.Centroid.Y},
                 {FeatureAttributes.LON, feature.Geometry.Centroid.X}
             };
-            feature.Attributes.Add(FeatureAttributes.GEOLOCATION, table);
+            feature.Attributes.Add(FeatureAttributes.POI_GEOLOCATION, table);
         }
     }
 }

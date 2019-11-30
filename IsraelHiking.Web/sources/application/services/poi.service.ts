@@ -1,12 +1,14 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
+import { uniq, uniqWith } from "lodash";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, IPoiRouterData } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
+import { DatabaseService } from "./database.service";
+import { RunningContextService } from "./running-context.service";
 import { Urls } from "../urls";
 import { MarkerData, LatLngAlt, PointOfInterestExtended, PointOfInterest, Rating } from "../models/models";
-import { DatabaseService } from "./database.service";
 
 export type CategoriesType = "Points of Interest" | "Routes";
 
@@ -46,8 +48,9 @@ export class PoiService {
                 private readonly httpClient: HttpClient,
                 private readonly whatsappService: WhatsAppService,
                 private readonly hashService: HashService,
-                private readonly databaseService: DatabaseService) {
-
+                private readonly databaseService: DatabaseService,
+                private readonly runningContextService: RunningContextService
+    ) {
         this.poiCache = [];
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
         this.categoriesMap.set("Points of Interest", []);
@@ -93,13 +96,18 @@ export class PoiService {
         return selectableCategories;
     }
 
-    public getPoints(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[]): Promise<PointOfInterest[]> {
-        // return this.databaseService.getPois(northEast, southWest, categoriesTypes);
+    public async getPoints(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[]): Promise<PointOfInterest[]> {
+        let language = this.resources.getCurrentLanguageCodeSimplified();
+        if (!this.runningContextService.isOnline) {
+            let features = await this.databaseService.getPois(northEast, southWest, categoriesTypes, language);
+            return features.map(f => this.featureToPoint(f));
+        }
+
         let params = new HttpParams()
-           .set("northEast", northEast.lat + "," + northEast.lng)
-           .set("southWest", southWest.lat + "," + southWest.lng)
-           .set("categories", categoriesTypes.join(","))
-           .set("language", this.resources.getCurrentLanguageCodeSimplified());
+            .set("northEast", northEast.lat + "," + northEast.lng)
+            .set("southWest", southWest.lat + "," + southWest.lng)
+            .set("categories", categoriesTypes.join(","))
+            .set("language", language);
         return this.httpClient.get(Urls.poi, { params }).toPromise() as Promise<PointOfInterest[]>;
     }
 
@@ -107,6 +115,14 @@ export class PoiService {
         let itemInCache = this.poiCache.find(p => p.id === id && p.source === source);
         if (itemInCache) {
             return { ...itemInCache };
+        }
+        if (!this.runningContextService.isOnline) {
+            let feature = await this.databaseService.getPoiById(`${source}_${id}`);
+            if (feature == null) {
+                throw new Error("Failed to load POI from offline database.");
+            }
+            let point = this.featureToPoint(feature);
+            return point;
         }
         let params = new HttpParams()
             .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
@@ -149,5 +165,54 @@ export class PoiService {
             poiExtended.imagesUrls.push(url);
         });
         return poiExtended;
+    }
+
+    private featureToPoint(f: GeoJSON.Feature): PointOfInterestExtended {
+        let language = this.resources.getCurrentLanguageCodeSimplified();
+        let imageUrls = uniq(Object.keys(f.properties).filter(k => k.toLowerCase().startsWith("image")).map(k => f.properties[k]));
+        let references = Object.keys(f.properties).filter(k => k.toLowerCase().startsWith("website")).map(k => ({
+            url: f.properties[k],
+            sourceImageUrl: f.properties["poiSourceImageUrl" + k.replace("website", "")]
+        }));
+        references = uniqWith(references, (a, b) => a.url === b.url);
+        let description = f.properties["description:" + language] || f.properties.description;
+        return {
+            id: f.properties.identifier,
+            category: f.properties.poiCategory,
+            hasExtraData: description != null || imageUrls.length > 0,
+            icon: f.properties.poiIcon,
+            iconColor: f.properties.poiIconColor,
+            location: {
+                lat: f.properties.poiGeolocation.lat,
+                lng: f.properties.poiGeolocation.lon
+            },
+            source: f.properties.poiSource,
+            isEditable: f.properties.poiSource === "OSM",
+            isRoute: f.geometry.type === "LineString" || f.geometry.type === "MultiLineString",
+            isArea: f.geometry.type === "Polygon" || f.geometry.type === "MultiPolygon",
+            lengthInKm: 0, // HM TODO: need to fill this for routes. turf?
+            dataContainer: null,
+            featureCollection: {
+                type: "FeatureCollection", features: [f] },
+            references,
+            contribution: {
+                lastModifiedDate: new Date(f.properties["poiLastModified:" + language] || f.properties.poiLastModified),
+                userAddress: f.properties["poiUserAddress:" + language] || f.properties.poiUserAddress,
+                userName: f.properties["poiUserName:" + language] || f.properties.poiUserName
+            },
+            imagesUrls: imageUrls,
+            rating: {
+                id:  null,
+                source: null,
+                raters: [],
+                total: 0
+            },
+            description,
+            title: Array.isArray(f.properties.poiNames[language]) && f.properties.poiNames[language].length !== 0
+                ? f.properties.poiNames[language][0]
+                : Array.isArray(f.properties.poiNames.all) && f.properties.poiNames.all.length !== 0
+                    ? f.properties.poiNames.all[0]
+                    : ""
+        };
     }
 }

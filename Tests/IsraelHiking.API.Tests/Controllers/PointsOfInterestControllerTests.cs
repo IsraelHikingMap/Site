@@ -25,14 +25,12 @@ namespace IsraelHiking.API.Tests.Controllers
         private IAuthClient _osmGateway;
         private ITagsHelper _tagHelper;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
-        private IPointsOfInterestAggregatorService _pointsOfInterestAggregatorService;
         private LruCache<string, TokenAndSecret> _cache;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
-            _pointsOfInterestAggregatorService = Substitute.For<IPointsOfInterestAggregatorService>();
             _tagHelper = Substitute.For<ITagsHelper>();
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
             _osmGateway = Substitute.For<IAuthClient>();
@@ -41,7 +39,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _cache = new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>());
             var factory = Substitute.For<IClientsFactory>();
             factory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(_osmGateway);
-            _controller = new PointsOfInterestController(factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, _pointsOfInterestAggregatorService, new Base64ImageStringToFileConverter(), optionsProvider, _cache);
+            _controller = new PointsOfInterestController(factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, new Base64ImageStringToFileConverter(), optionsProvider, _cache);
         }
 
         [TestMethod]
@@ -103,7 +101,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var id = "way_1";
             var source = "source";
             var language = "language";
-            _pointsOfInterestAggregatorService.Get(source, id, language).Returns(new PointOfInterestExtended());
+            _pointsOfInterestProvider.GetPointOfInterestById(source, id, language).Returns(new PointOfInterestExtended());
 
             var result = _controller.GetPointOfInterest(source, id, language).Result as OkObjectResult;
 

@@ -16,12 +16,11 @@ namespace IsraelHiking.API.Services.Poi
         string Source { get; }
 
         /// <summary>
-        /// This method should be used to get more information on a given POI
+        /// Gets the feature collection relevant to this id.
         /// </summary>
-        /// <param name="id">The POI's ID</param>
-        /// <param name="language">The relevant language</param>
-        /// <returns>A POI with more data</returns>
-        Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language);
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<Feature> GetRawPointOfInterestById(string id);
 
         /// <summary>
         /// Get all the points from the adapter in order to index them in a database

@@ -1,4 +1,5 @@
 ﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -31,6 +32,7 @@ namespace IsraelHiking.DataAccess
     public class NakebGateway : INakebGateway
     {
         private const string NAKEB_BASE_ADDRESS = "https://www.nakeb.co.il/api/hikes";
+        private const string NAKEB_LOGO = "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg";
         private readonly IHttpClientFactory _httpClientFactory;
 
         public NakebGateway(IHttpClientFactory httpClientFactory)
@@ -47,7 +49,7 @@ namespace IsraelHiking.DataAccess
             return nakebItem.Select(ConvertToPointFeature).ToList();
         }
 
-        public async Task<FeatureCollection> GetById(string id)
+        public async Task<Feature> GetById(string id)
         {
             var client = _httpClientFactory.CreateClient();
             var reponse = await client.GetAsync($"{NAKEB_BASE_ADDRESS}/{id}");
@@ -60,19 +62,16 @@ namespace IsraelHiking.DataAccess
                 description += ".";
             }
             description += $"\n{string.Join(", ", nakebItem.attributes)}.";
-            attributes.Add(FeatureAttributes.DESCRIPTION, description);
+            attributes.Add(FeatureAttributes.DESCRIPTION + ":" + Languages.HEBREW, description);
             attributes.Add(FeatureAttributes.IMAGE_URL, nakebItem.picture);
             attributes.Add(FeatureAttributes.WEBSITE, nakebItem.link);
-            attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg");
+            attributes.Add(FeatureAttributes.POI_SOURCE_IMAGE_URL, NAKEB_LOGO);
             var lineString = new LineString(nakebItem.latlngs.Select(l => l.ToCoordinate()).ToArray());
-            var features = new List<IFeature> { new Feature(lineString, attributes) };
-            features.AddRange(nakebItem.markers.Select(ConvertToPointFeature).ToList());
-            var featureCollection = new FeatureCollection();
-            foreach (var feature in features)
-            {
-                featureCollection.Add(feature);
-            }
-            return featureCollection;
+            // Ignoring markers for simplification
+            var feature = new Feature(lineString, attributes);
+            feature.SetTitles();
+            feature.SetId();
+            return feature;
         }
 
         private Feature ConvertToPointFeature(JsonNakebItem nakebItem)
@@ -90,26 +89,19 @@ namespace IsraelHiking.DataAccess
             };
             var attributes = new AttributesTable
             {
-                {FeatureAttributes.ID, nakebItem.id},
+                {FeatureAttributes.ID, nakebItem.id.ToString()},
                 {FeatureAttributes.NAME, nakebItem.title},
+                {FeatureAttributes.NAME + ":" + Languages.HEBREW, nakebItem.title},
                 {FeatureAttributes.POI_SOURCE, Sources.NAKEB},
                 {FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE},
                 {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
-                {FeatureAttributes.POI_NAMES, new AttributesTable {{Languages.HEBREW, nakebItem.title }}},
-                {FeatureAttributes.ICON, "icon-hike"},
-                {FeatureAttributes.ICON_COLOR, "black"},
-                {FeatureAttributes.SEARCH_FACTOR, 1.0},
-                {FeatureAttributes.GEOLOCATION, geoLocation},
+                {FeatureAttributes.POI_ICON, "icon-hike"},
+                {FeatureAttributes.POI_ICON_COLOR, "black"},
+                {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
+                {FeatureAttributes.POI_GEOLOCATION, geoLocation},
             };
 
             return attributes;
-        }
-
-        private IFeature ConvertToPointFeature(MarkerData markerData)
-        {
-            var point = new Point(markerData.Latlng.ToCoordinate());
-            var attributes = new AttributesTable { { FeatureAttributes.NAME, markerData.Title } };
-            return new Feature(point, attributes);
         }
     }
 }

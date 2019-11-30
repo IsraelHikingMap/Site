@@ -42,8 +42,11 @@
         public const string ID = "identifier";
         public const string NAME = "name";
         public const string DESCRIPTION = "description";
+        public const string IMAGE_URL = "image";
+        public const string WEBSITE = "website";
+        public const string WIKIPEDIA = "wikipedia";
         public const string POI_PREFIX = "poi";
-        public const string POI_COMBINED_IDS = POI_PREFIX + "CombinedIds";
+        public const string POI_ID = POI_PREFIX + "Id";
         public const string POI_SOURCE = POI_PREFIX + "Source";
         public const string POI_CATEGORY = POI_PREFIX + "Category";
         public const string POI_LANGUAGE = POI_PREFIX + "Language";
@@ -54,17 +57,15 @@
         public const string POI_LAST_MODIFIED = POI_PREFIX + "LastModified";
         public const string POI_USER_NAME = POI_PREFIX + "UserName";
         public const string POI_USER_ADDRESS = POI_PREFIX + "UserAddress";
-        public const string OSM_NODES = "osmNodes";
-        public const string WEBSITE = "website";
-        public const string WIKIPEDIA = "wikipedia";
-        public const string SEARCH_FACTOR = "searchFactor";
-        public const string GEOLOCATION = "geolocation";
+        public const string POI_SOURCE_IMAGE_URL = POI_PREFIX + "SourceImageUrl";
+        public const string POI_SEARCH_FACTOR = POI_PREFIX + "SearchFactor";
+        public const string POI_GEOLOCATION = POI_PREFIX + "Geolocation";
+        public const string POI_ICON = POI_PREFIX + "Icon";
+        public const string POI_ICON_COLOR = POI_PREFIX + "IconColor";
+        public const string POI_OSM_NODES = POI_PREFIX + "OsmNodes";
         public const string LAT = "lat";
         public const string LON = "lon";
-        public const string ICON = "icon";
-        public const string ICON_COLOR = "iconColor";
-        public const string IMAGE_URL = "image";
-        public const string SOURCE_IMAGE_URL = "sourceImageUrl";
+        
     }
 
     public static class Sources

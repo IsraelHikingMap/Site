@@ -85,7 +85,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var results = _preprocessorExecutor.Preprocess(dictionary);
 
             Assert.AreEqual(1, results.Count);
-            var geoLocation = results.First().Attributes[FeatureAttributes.GEOLOCATION] as IAttributesTable;
+            var geoLocation = results.First().Attributes[FeatureAttributes.POI_GEOLOCATION] as IAttributesTable;
             Assert.IsNotNull(geoLocation);
             Assert.AreEqual(0.5, geoLocation[FeatureAttributes.LAT]);
             Assert.AreEqual(0.5, geoLocation[FeatureAttributes.LAT]);
@@ -110,7 +110,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var results = _preprocessorExecutor.Preprocess(dictionary);
 
             Assert.AreEqual(1, results.Count);
-            var geoLocation = results.First().Attributes[FeatureAttributes.GEOLOCATION] as IAttributesTable;
+            var geoLocation = results.First().Attributes[FeatureAttributes.POI_GEOLOCATION] as IAttributesTable;
             Assert.IsNotNull(geoLocation);
             Assert.AreEqual(node1.Latitude, geoLocation[FeatureAttributes.LAT]);
         }
@@ -147,7 +147,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var results = _preprocessorExecutor.Preprocess(dictionary);
 
             Assert.AreEqual(1, results.Count);
-            var geoLocation = results.First().Attributes[FeatureAttributes.GEOLOCATION] as IAttributesTable;
+            var geoLocation = results.First().Attributes[FeatureAttributes.POI_GEOLOCATION] as IAttributesTable;
             Assert.IsNotNull(geoLocation);
             Assert.AreEqual(node1.Latitude, geoLocation[FeatureAttributes.LAT]);
         }

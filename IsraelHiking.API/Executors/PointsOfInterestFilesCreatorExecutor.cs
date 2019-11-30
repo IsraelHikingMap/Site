@@ -1,15 +1,13 @@
-﻿using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace IsraelHiking.API.Executors
@@ -19,23 +17,29 @@ namespace IsraelHiking.API.Executors
     {
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IWebHostEnvironment _environment;
+        private readonly ILogger _logger;
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="fileSystemHelper"></param>
         /// <param name="environment"></param>
+        /// <param name="logger"></param>
         public PointsOfInterestFilesCreatorExecutor(IFileSystemHelper fileSystemHelper,
-            IWebHostEnvironment environment)
+            IWebHostEnvironment environment,
+            ILogger logger)
         {
             _fileSystemHelper = fileSystemHelper;
             _environment = environment;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
         public void Create(List<Feature> features)
         {
+            _logger.LogInformation($"Starting points of interterest files creation: {features.Count}.");
             CreateSitemapXmlFile(features);
-            //CreateJsonFile(features);
+            CreateJsonFile(features);
+            _logger.LogInformation($"Finished points of interterest files creation: {features.Count}.");
         }
 
         private void CreateSitemapXmlFile(List<Feature> features)
@@ -76,9 +80,12 @@ namespace IsraelHiking.API.Executors
 
         private void CreateJsonFile(List<Feature> features)
         {
-            var pois = features.Select(f=> SearchResultsPointOfInterestConverter.FromFeature(f, "he")).ToArray();
-            var jsonString = JsonConvert.SerializeObject(pois, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() } );
-            _fileSystemHelper.WriteAllBytes("pois.json", Encoding.UTF8.GetBytes(jsonString));
+            var collection = new FeatureCollection();
+            foreach (var feature in features)
+            {
+                collection.Add(feature);
+            }
+            _fileSystemHelper.WriteAllBytes("pois.geojson", collection.ToBytes());
         }
     }
 }

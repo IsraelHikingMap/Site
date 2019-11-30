@@ -1,4 +1,5 @@
 ﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
@@ -118,11 +119,11 @@ namespace IsraelHiking.DataAccess
             return page;
         }
 
-        public async Task<FeatureCollection> GetById(string id)
+        public async Task<Feature> GetById(string id)
         {
             var wikiPageStub = new WikiPageStub(int.Parse(id));
             var feature = await PageToFeature(wikiPageStub);
-            return new FeatureCollection { feature };
+            return feature;
         }
 
         private async Task<Feature> PageToFeature(WikiPageStub pageStub)
@@ -177,31 +178,35 @@ namespace IsraelHiking.DataAccess
                 };
             var feature = new Feature(new Point(geoLocation.ToCoordinate()), new AttributesTable
                 {
-                    {FeatureAttributes.GEOLOCATION, geoLocationTable},
-                    {FeatureAttributes.DESCRIPTION, description},
+                    {FeatureAttributes.POI_GEOLOCATION, geoLocationTable},
+                    {FeatureAttributes.DESCRIPTION + ":" + Languages.HEBREW, description},
                     {FeatureAttributes.NAME, page.Title},
-                    {FeatureAttributes.ID, page.Id},
+                    {FeatureAttributes.NAME + ":" + Languages.HEBREW, page.Title},
+                    {FeatureAttributes.ID, page.Id.ToString()},
                     {FeatureAttributes.IMAGE_URL, await GetPageImageUrl(page).ConfigureAwait(false)},
                     {FeatureAttributes.POI_SOURCE, Sources.INATURE},
                     {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
-                    {FeatureAttributes.POI_NAMES, new AttributesTable {{Languages.HEBREW, page.Title}}},
-                    {FeatureAttributes.SEARCH_FACTOR, 1.0},
+                    {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                     {FeatureAttributes.WEBSITE, _wikiSite.SiteInfo.MakeArticleUrl(page.Title)},
-                    {FeatureAttributes.SOURCE_IMAGE_URL, "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" }
+                    {FeatureAttributes.POI_SOURCE_IMAGE_URL, "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" }
                 });
             if (shareMatch.Success)
             {
+                feature.Attributes[FeatureAttributes.NAME] += " - טבע ונופים";
+                feature.Attributes[FeatureAttributes.NAME + ":" + Languages.HEBREW] += " - טבע ונופים";
                 feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE);
-                feature.Attributes.Add(FeatureAttributes.ICON, "icon-hike");
-                feature.Attributes.Add(FeatureAttributes.ICON_COLOR, "black");
+                feature.Attributes.Add(FeatureAttributes.POI_ICON, "icon-hike");
+                feature.Attributes.Add(FeatureAttributes.POI_ICON_COLOR, "black");
                 feature.Attributes.Add(FeatureAttributes.POI_SHARE_REFERENCE, shareMatch.Groups[1].Value);
             }
             else
             {
-                feature.Attributes.Add(FeatureAttributes.ICON, "icon-inature");
-                feature.Attributes.Add(FeatureAttributes.ICON_COLOR, "#116C00");
+                feature.Attributes.Add(FeatureAttributes.POI_ICON, "icon-inature");
+                feature.Attributes.Add(FeatureAttributes.POI_ICON_COLOR, "#116C00");
                 feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, Categories.INATURE);
             }
+            feature.SetTitles();
+            feature.SetId();
             return feature;
         }
     }

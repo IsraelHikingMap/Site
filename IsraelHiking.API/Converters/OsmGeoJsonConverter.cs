@@ -48,7 +48,7 @@ namespace IsraelHiking.API.Converters
                         return null;
                     }
                     var properties = ConvertTags(way);
-                    properties.Add(FeatureAttributes.OSM_NODES, way.Nodes.Select(n => n.Id).ToArray());
+                    properties.Add(FeatureAttributes.POI_OSM_NODES, way.Nodes.Select(n => n.Id).ToArray());
                     var geometry = GetGeometryFromNodes(way.Nodes);
                     return new Feature(geometry, properties);
                 case OsmGeoType.Relation:

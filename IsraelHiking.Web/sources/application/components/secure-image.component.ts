@@ -1,11 +1,11 @@
-﻿import { Component, OnChanges, Input,  } from "@angular/core";
+import { Component, OnChanges, Input,  } from "@angular/core";
 import { DomSanitizer } from "@angular/platform-browser";
 import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject, Observable } from "rxjs";
 import { switchMap, map } from "rxjs/operators";
 
 @Component({
-    selector: 'secured-image',
+    selector: "secured-image",
     template: `
     <img [src]="dataUrl$|async" fxFill/>
   `
@@ -23,7 +23,7 @@ export class SecuredImageComponent implements OnChanges {
     // this stream will contain the actual url that our img tag will load
     // everytime the src changes, the previous call would be canceled and the
     // new resource would be loaded
-    dataUrl$ = this.src$.pipe(switchMap(url => this.loadImage(url)))
+    dataUrl$ = this.src$.pipe(switchMap(url => this.loadImage(url)));
 
     constructor(private httpClient: HttpClient, private domSanitizer: DomSanitizer) { }
 
@@ -34,7 +34,7 @@ export class SecuredImageComponent implements OnChanges {
     private loadImage(url: string): Observable<any> {
         return this.httpClient
             // load the image as a blob
-            .get(url, { responseType: 'blob' })
+            .get(url, { responseType: "blob" })
             // create an object url of that blob that we can use in the src attribute
             .pipe(map(e => this.domSanitizer.bypassSecurityTrustUrl(URL.createObjectURL(e))));
     }

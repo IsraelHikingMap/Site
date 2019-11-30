@@ -21,25 +21,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             InitializeSubstitues();
             _nakebGateway = Substitute.For<INakebGateway>();
-            _adapter = new NakebPointsOfInterestAdapter(_nakebGateway, _elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _itmWgs84MathTransfromFactory, _options, Substitute.For<ILogger>());
-        }
-
-        [TestMethod]
-        public void GetPointOfInterestById_ShouldGetIt()
-        {
-            var poiId = "42";
-            var language = "en";
-            var featureCollection = new FeatureCollection { GetValidFeature(poiId, _adapter.Source) };
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
-            _nakebGateway.GetById("42").Returns(featureCollection);
-
-            var results = _adapter.GetPointOfInterestById(poiId, language).Result;
-
-            Assert.IsNotNull(results);
-            Assert.AreEqual(0, results.References.Length);
-            Assert.IsFalse(results.IsEditable);
-            _elevationDataStorage.Received().GetElevation(Arg.Any<Coordinate>());
-            _elasticSearchGateway.Received().GetRating(poiId, Arg.Any<string>());
+            _adapter = new NakebPointsOfInterestAdapter(_nakebGateway, _dataContainerConverterService, Substitute.For<ILogger>());
         }
 
         [TestMethod]

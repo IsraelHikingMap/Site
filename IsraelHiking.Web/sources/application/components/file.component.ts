@@ -35,24 +35,28 @@ export class FileComponent extends BaseMapComponent {
             return;
         }
         if (file.name.endsWith(".ihm")) {
-            this.toastService.info("Opening file, this might take a while, please don't close the app...");
-            await this.fileService.openIHMfile(file, this.progressCallbackForIhmFileOpening);
-            this.toastService.confirm({ type: "Ok", message: "Finished opening file." });
+            this.toastService.info(this.resources.openingAFilePleaseWait);
+            try {
+                await this.fileService.openIHMfile(file, this.progressCallbackForIhmFileOpening);
+                this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
+            } catch (ex) {
+                this.toastService.error(ex.message);
+            }
             return;
         }
-        if (file.name.endsWith(".pois")) {
-            this.toastService.info("Opening file, this might take a while, please don't close the app...");
+        if (file.name === "pois.geojson") {
+            this.toastService.info(this.resources.openingAFilePleaseWait);
             await new Promise((resolve, reject) => {
                 let reader = new FileReader();
                 reader.onload = (event: any) => {
-                    let pois = JSON.parse(event.target.result);
-                    this.databaseService.storePois(pois);
+                    let pois = JSON.parse(event.target.result) as GeoJSON.FeatureCollection;
+                    this.databaseService.storePois(pois.features);
                     resolve();
                 };
                 reader.onerror = () => reject();
                 reader.readAsText(file);
             });
-            this.toastService.confirm({ type: "Ok", message: "Finished opening file." });
+            this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             return;
         }
         try {

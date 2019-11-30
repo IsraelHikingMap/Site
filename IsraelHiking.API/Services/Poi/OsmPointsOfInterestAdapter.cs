@@ -1,4 +1,5 @@
 ﻿using IsraelHiking.API.Executors;
+using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -12,6 +13,7 @@ using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.IO.API;
 using OsmSharp.Tags;
+using ProjNet.CoordinateSystems.Transformations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +38,10 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IWikipediaGateway _wikipediaGateway;
         private readonly ITagsHelper _tagsHelper;
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
+        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly MathTransform _wgs84ItmMathTransform;
+        private readonly ConfigurationData _options;
 
         /// <summary>
         /// Class constructor
@@ -64,11 +70,7 @@ namespace IsraelHiking.API.Services.Poi
             ITagsHelper tagsHelper,
             IOptions<ConfigurationData> options,
             ILogger logger) :
-            base(elevationDataStorage,
-                elasticSearchGateway,
-                dataContainerConverterService,
-                itmWgs84MathTransfromFactory,
-                options,
+            base(dataContainerConverterService,
                 logger)
         {
             _clientsFactory = clentsFactory;
@@ -77,6 +79,10 @@ namespace IsraelHiking.API.Services.Poi
             _wikipediaGateway = wikipediaGateway;
             _tagsHelper = tagsHelper;
             _latestFileFetcherExecutor = latestFileFetcherExecutor;
+            _elevationDataStorage = elevationDataStorage;
+            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
+            _options = options.Value;
+            _elasticSearchGateway = elasticSearchGateway;
         }
 
         /// <inheritdoc />
@@ -96,17 +102,115 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
+        public async Task<PointOfInterestExtended> GetPointOfInterestById(string source, string id, string language)
         {
-            IFeature feature = await _elasticSearchGateway.GetPointOfInterestById(id, Source);
-            return await FeatureToExtendedPoi(feature, language);
+            var feature = await _elasticSearchGateway.GetPointOfInterestById(id, source);
+            var poiItem = await FeatureToExtendedPoi(feature, language);
+            poiItem.IsRoute = feature.Geometry is LineString || feature.Geometry is MultiLineString;
+            poiItem.IsArea = feature.Geometry is Polygon || feature.Geometry is MultiPolygon;
+            poiItem.IsEditable = feature.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM);
+            return poiItem;
         }
 
-        private async Task<PointOfInterestExtended> FeatureToExtendedPoi(IFeature feature, string language)
+        /// <summary>
+        /// Adds extended data to point of interest object
+        /// </summary>
+        /// <param name="feature">The features to convert</param>
+        /// <param name="language">the user interface language</param>
+        /// <returns></returns>
+        private async Task<PointOfInterestExtended> ConvertToPoiExtended(Feature feature, string language)
         {
-            var poiItem = await ConvertToPoiExtended(new FeatureCollection { feature }, language);
-            poiItem.IsArea = feature.Geometry is Polygon || feature.Geometry is MultiPolygon;
-            poiItem.IsRoute = !poiItem.IsArea && poiItem.DataContainer.Routes.Any(r => r.Segments.Count > 1);
+            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
+            await SetDataContainerAndLength(poiItem, feature);
+
+            poiItem.References = GetReferences(feature, language);
+            poiItem.ImagesUrls = feature.Attributes.GetNames()
+                .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                .Select(n => feature.Attributes[n].ToString())
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .ToArray();
+            poiItem.Description = feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
+            poiItem.Rating = await _elasticSearchGateway.GetRating(poiItem.Id, poiItem.Source);
+            poiItem.IsEditable = false;
+            poiItem.Contribution = GetContribution(feature.Attributes);
+            return poiItem;
+        }
+
+        private Contribution GetContribution(IAttributesTable mainFeatureAttributes)
+        {
+            var contribution = new Contribution();
+            if (mainFeatureAttributes.Exists(FeatureAttributes.POI_USER_NAME))
+            {
+                contribution.UserName = mainFeatureAttributes[FeatureAttributes.POI_USER_NAME].ToString();
+            }
+            if (mainFeatureAttributes.Exists(FeatureAttributes.POI_LAST_MODIFIED))
+            {
+                contribution.LastModifiedDate = DateTime.Parse(mainFeatureAttributes[FeatureAttributes.POI_LAST_MODIFIED].ToString());
+            }
+            if (mainFeatureAttributes.Exists(FeatureAttributes.POI_USER_ADDRESS))
+            {
+                contribution.UserAddress = mainFeatureAttributes[FeatureAttributes.POI_USER_ADDRESS].ToString();
+            }
+            return contribution;
+        }
+
+        private async Task SetDataContainerAndLength(PointOfInterestExtended poiItem, Feature feature)
+        {
+            foreach (var coordinate in feature.Geometry.Coordinates)
+            {
+                coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
+            }
+            poiItem.FeatureCollection = new FeatureCollection { feature };
+            poiItem.DataContainer = await _dataContainerConverterService.ToDataContainer(
+                poiItem.FeatureCollection.ToBytes(), poiItem.Title + ".geojson");
+            foreach (var coordinate in poiItem.DataContainer.Routes
+                .SelectMany(r => r.Segments)
+                .SelectMany(s => s.Latlngs)
+                .Where(l => l.Alt == null || l.Alt.Value == 0))
+            {
+                coordinate.Alt = await _elevationDataStorage.GetElevation(coordinate.ToCoordinate());
+            }
+
+            foreach (var route in poiItem.DataContainer.Routes)
+            {
+                var itmRoute = route.Segments.SelectMany(s => s.Latlngs)
+                    .Select(l => _wgs84ItmMathTransform.Transform(l.ToCoordinate().ToDoubleArray()))
+                    .Select(c => c.ToCoordinate()).ToArray();
+                var skip1 = itmRoute.Skip(1);
+                poiItem.LengthInKm += itmRoute.Zip(skip1, (curr, prev) => curr.Distance(prev)).Sum() / 1000;
+            }
+
+        }
+
+        /// <summary>
+        /// Convers a feature to point of interest
+        /// </summary>
+        /// <typeparam name="TPoiItem">The point of interest object</typeparam>
+        /// <param name="feature">The featue to convert</param>
+        /// <param name="language">The user interface language</param>
+        /// <returns></returns>
+        private async Task<TPoiItem> ConvertToPoiItem<TPoiItem>(IFeature feature, string language) where TPoiItem : PointOfInterest, new()
+        {
+            var poiItem = new TPoiItem();
+            if (feature.Attributes[FeatureAttributes.POI_GEOLOCATION] is AttributesTable geoLocation)
+            {
+                poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
+                var alt = await _elevationDataStorage.GetElevation(poiItem.Location.ToCoordinate());
+                poiItem.Location.Alt = alt;
+            }
+            poiItem.Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString();
+            poiItem.Title = feature.Attributes.GetByLanguage(FeatureAttributes.NAME, language);
+            poiItem.Id = feature.Attributes[FeatureAttributes.ID].ToString();
+            poiItem.Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString();
+            poiItem.Icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
+            poiItem.IconColor = feature.Attributes[FeatureAttributes.POI_ICON_COLOR].ToString();
+            poiItem.HasExtraData = feature.HasExtraData(language) || poiItem.Source != Sources.OSM;
+            return poiItem;
+        }
+
+        private async Task<PointOfInterestExtended> FeatureToExtendedPoi(Feature feature, string language)
+        {
+            var poiItem = await ConvertToPoiExtended(feature, language);
             poiItem.IsEditable = true;
             if (string.IsNullOrWhiteSpace(poiItem.Icon))
             {
@@ -146,7 +250,7 @@ namespace IsraelHiking.API.Services.Poi
             var id = pointOfInterest.Id;
             ICompleteOsmGeo completeOsmGeo = await osmGateway.GetCompleteElement(GeoJsonExtensions.GetOsmId(id), GeoJsonExtensions.GetOsmType(id));
             var featureBeforeUpdate = ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title);
-            var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.ICON].ToString();
+            var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.POI_ICON].ToString();
             var oldTags = completeOsmGeo.Tags.ToArray();
 
             SetWebsiteUrl(completeOsmGeo.Tags, pointOfInterest);
@@ -267,7 +371,7 @@ namespace IsraelHiking.API.Services.Poi
                 {
                     continue;
                 }
-                await _elasticSearchGateway.DeletePointOfInterestById(pageFetaure.First().Attributes[FeatureAttributes.ID].ToString(), Sources.WIKIPEDIA);
+                await _elasticSearchGateway.DeletePointOfInterestById(pageFetaure.Attributes[FeatureAttributes.ID].ToString(), Sources.WIKIPEDIA);
             }
             return feature;
         }
@@ -336,13 +440,32 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        protected override Reference[] GetReferences(IFeature feature, string language)
+        private Reference[] GetReferences(IFeature feature, string language)
         {
-            var references = base.GetReferences(feature, language);
+            var references = new List<Reference>();
+            foreach (var websiteUrl in feature.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)))
+            {
+                var url = feature.Attributes[websiteUrl].ToString();
+                var indexString = websiteUrl.Substring(FeatureAttributes.WEBSITE.Length);
+                var sourceImageUrl = string.Empty;
+                if (feature.Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL + indexString))
+                {
+                    sourceImageUrl = feature.Attributes[FeatureAttributes.POI_SOURCE_IMAGE_URL + indexString].ToString();
+                }
+                else if (feature.Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL))
+                {
+                    sourceImageUrl = feature.Attributes[FeatureAttributes.POI_SOURCE_IMAGE_URL].ToString();
+                }
+                references.Add(new Reference
+                {
+                    Url = url,
+                    SourceImageUrl = sourceImageUrl
+                });
+            }
             var title = feature.Attributes.GetWikipediaTitle(language);
             if (string.IsNullOrWhiteSpace(title))
             {
-                return references;
+                return references.ToArray();
             }
             var wikipediaReference = _wikipediaGateway.GetReference(title, language);
             return references.Concat(new[] { wikipediaReference }).ToArray();
@@ -390,6 +513,13 @@ namespace IsraelHiking.API.Services.Poi
                 _options.OsmConfiguration.ConsumerSecret, 
                 tokenAndSecret.Token, 
                 tokenAndSecret.TokenSecret);
+        }
+
+        /// <inheritdoc />
+        public override Task<Feature> GetRawPointOfInterestById(string id)
+        {
+            // This should not return anything
+            throw new NotImplementedException();
         }
     }
 }

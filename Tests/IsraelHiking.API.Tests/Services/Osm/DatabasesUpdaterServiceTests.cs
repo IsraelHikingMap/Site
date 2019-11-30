@@ -33,6 +33,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         private IGraphHopperGateway _graphHopperGateway;
         private IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
         private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
+        private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
 
         [TestInitialize]
         public void TestInitialize()
@@ -50,12 +51,13 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
             _osmLatestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
             _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
+            _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
             _service = new DatabasesUpdaterService(_clientsFactory, 
                 _elasticSearchGateway, 
                 _geoJsonPreprocessorExecutor, 
                 new TagsHelper(optionsProvider), 
                 _osmRepository, 
-                Substitute.For<IPointsOfInterestAdapterFactory>(), 
+                _pointsOfInterestAdapterFactory, 
                 _featuresMergeExecutor, 
                 _osmLatestFileFetcherExecutor, 
                 _graphHopperGateway,
@@ -66,6 +68,11 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestMethod]
         public void TestRebuild_ShouldRebuildHighwaysAndPoints()
         {
+            var adapter = Substitute.For<IPointsOfInterestAdapter>();
+            adapter.GetPointsForIndexing().Returns(new List<Feature>());
+            _pointsOfInterestAdapterFactory.GetBySource(Arg.Any<string>()).Returns(adapter);
+            _elasticSearchGateway.GetExternalPoisBySource(Arg.Any<string>()).Returns(new List<Feature>());
+
             _service.Rebuild(new UpdateRequest { Highways = true, PointsOfInterest = true, SiteMap = true }).Wait();
 
             _elasticSearchGateway.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());

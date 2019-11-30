@@ -24,8 +24,7 @@ namespace IsraelHiking.API.Services
         private readonly IWebHostEnvironment _environment;
         private readonly IServiceProvider _serviceProvider;
         private readonly IRepository _repository;
-        private readonly IPointsOfInterestAggregatorService _pointsOfInterestAggregatorService;
-
+        private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly ConfigurationData _options;
 
         /// <summary>
@@ -35,19 +34,19 @@ namespace IsraelHiking.API.Services
         /// <param name="environment"></param>
         /// <param name="serviceProvider"></param>
         /// <param name="repository"></param>
-        /// <param name="pointsOfInterestAggregatorService"></param>
+        /// <param name="pointsOfInterestProvider"></param>
         /// <param name="options"></param>
         public NonApiMiddleware(RequestDelegate next, IWebHostEnvironment environment,
             IServiceProvider serviceProvider,
             IRepository repository,
-            IPointsOfInterestAggregatorService pointsOfInterestAggregatorService,
+            IPointsOfInterestProvider pointsOfInterestProvider,
             IOptions<ConfigurationData> options)
         {
             _environment = environment;
             _serviceProvider = serviceProvider;
             _repository = repository;
-            _pointsOfInterestAggregatorService = pointsOfInterestAggregatorService;
             _options = options.Value;
+            _pointsOfInterestProvider = pointsOfInterestProvider;
         }
 
         /// <summary>
@@ -82,7 +81,7 @@ namespace IsraelHiking.API.Services
             {
                 var split = context.Request.Path.Value.Split("/");
                 context.Request.Query.TryGetValue("language", out var language);
-                var point = await _pointsOfInterestAggregatorService.Get(split[split.Length - 2], split.Last(), language.FirstOrDefault());
+                var point = await _pointsOfInterestProvider.GetPointOfInterestById(split[split.Length - 2], split.Last(), language.FirstOrDefault());
                 var thumbnailUrl = point.ImagesUrls.FirstOrDefault() ?? string.Empty;
                 if (isWhatsApp)
                 {

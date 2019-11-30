@@ -23,11 +23,12 @@ namespace IsraelHiking.API.Tests.Executors
             {
                 {FeatureAttributes.ID, id},
                 {FeatureAttributes.POI_SOURCE, Sources.OSM },
-                {FeatureAttributes.ICON, "icon" },
+                {FeatureAttributes.POI_ICON, "icon" },
                 {FeatureAttributes.POI_CATEGORY, Categories.OTHER },
-                {FeatureAttributes.SEARCH_FACTOR, 1.0 },
+                {FeatureAttributes.POI_SEARCH_FACTOR, 1.0 },
                 {FeatureAttributes.DESCRIPTION, string.Empty }
             });
+            feature.SetId();
             return feature;
         }
 
@@ -58,7 +59,6 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.Merge(new List<Feature> { feature1, feature2 });
 
             Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(0, results.First().GetIdsFromCombinedPoi().Count);
         }
 
         [TestMethod]
@@ -68,29 +68,28 @@ namespace IsraelHiking.API.Tests.Executors
             feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":he", "11");
             feature1.Attributes.AddOrUpdate(FeatureAttributes.POI_CATEGORY, Categories.NONE);
-            feature1.Attributes.AddOrUpdate(FeatureAttributes.SEARCH_FACTOR, 0.5);
-            feature1.Attributes.AddOrUpdate(FeatureAttributes.ICON, string.Empty);
-            feature1.Attributes.AddOrUpdate(FeatureAttributes.ICON_COLOR, "black");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.POI_SEARCH_FACTOR, 0.5);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, string.Empty);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON_COLOR, "black");
             feature1.SetTitles();
             var feature2 = CreateFeature("2", 0, 0);
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "2");
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_CATEGORY, Categories.INATURE);
-            feature2.Attributes.AddOrUpdate(FeatureAttributes.ICON, "icon-inature");
-            feature2.Attributes.AddOrUpdate(FeatureAttributes.SEARCH_FACTOR, 2.0);
-            feature2.Attributes.AddOrUpdate(FeatureAttributes.ICON_COLOR, "green");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon-inature");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SEARCH_FACTOR, 2.0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON_COLOR, "green");
             feature2.SetTitles();
 
             var results = _executor.Merge(new List<Feature> { feature1, feature2 });
 
             Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(1, results.First().GetIdsFromCombinedPoi().Count);
             Assert.AreEqual(Categories.INATURE, results.First().Attributes[FeatureAttributes.POI_CATEGORY]);
             Assert.AreEqual("1", results.First().Attributes[FeatureAttributes.ID]);
-            Assert.AreEqual("icon-inature", results.First().Attributes[FeatureAttributes.ICON]);
-            Assert.AreEqual(2.0, results.First().Attributes[FeatureAttributes.SEARCH_FACTOR]);
-            Assert.AreEqual("green", results.First().Attributes[FeatureAttributes.ICON_COLOR]);
+            Assert.AreEqual("icon-inature", results.First().Attributes[FeatureAttributes.POI_ICON]);
+            Assert.AreEqual(2.0, results.First().Attributes[FeatureAttributes.POI_SEARCH_FACTOR]);
+            Assert.AreEqual("green", results.First().Attributes[FeatureAttributes.POI_ICON_COLOR]);
         }
 
 
@@ -109,7 +108,6 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.Merge(new List<Feature> { feature1, feature2 });
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(0, results.First().GetIdsFromCombinedPoi().Count);
         }
 
         [TestMethod]
@@ -217,7 +215,6 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.Merge(new List<Feature> { feature1, feature2 });
 
             Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(1, results.First().GetIdsFromCombinedPoi().Count);
         }
 
         [TestMethod]
@@ -392,22 +389,21 @@ namespace IsraelHiking.API.Tests.Executors
         {
             var node1 = CreateFeature("1", 0, 0);
             node1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "bus");
-            node1.Attributes.AddOrUpdate(FeatureAttributes.ICON, "icon-bus-stop");
+            node1.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon-bus-stop");
             node1.SetTitles();
             var node2 = CreateFeature("2", 0, 0);
             node2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "bus");
-            node2.Attributes.AddOrUpdate(FeatureAttributes.ICON, "icon-bus-stop");
+            node2.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon-bus-stop");
             node2.SetTitles();
             var node3 = CreateFeature("3", 0, 0);
             node3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "bus");
-            node3.Attributes.AddOrUpdate(FeatureAttributes.ICON, "icon-wikipedia");
+            node3.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon-wikipedia");
             node3.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA);
             node3.SetTitles();
 
             var results = _executor.Merge(new List<Feature> { node1, node2, node3 });
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(0, results.First().GetIdsFromCombinedPoi().Count);
         }
 
         [TestMethod]
@@ -428,7 +424,60 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.Merge(new List<Feature> { way, node });
 
             Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(0, results.First().GetIdsFromCombinedPoi().Count);
+        }
+
+        [TestMethod]
+        public void MergeFeatures_FeatureHasDescriptionWebsiteAndImage_ShouldMergeThem()
+        {
+            var importantDescription = "hebrew description";
+            var hebrewDescriptionKey = FeatureAttributes.DESCRIPTION + ":" + Languages.HEBREW;
+            var node1 = CreateFeature("node_1", 0, 0);
+            node1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            node1.Attributes.AddOrUpdate(hebrewDescriptionKey, importantDescription);
+            node1.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "website");
+            node1.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, "not-so-nice-looking-image.png");
+            node1.SetTitles();
+            var node2 = CreateFeature("node_2", 0, 0);
+            node2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            node2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
+            node2.Attributes.AddOrUpdate(hebrewDescriptionKey, "iNature description");
+            node2.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "inature.com");
+            node2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "inature.com/image");
+            node2.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, "nice-looking-image.png");
+            node2.SetTitles();
+            var node3 = CreateFeature("node_2", 0, 0);
+            node3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            node3.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA);
+            node3.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "wikipedia.com");
+            node3.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "wikipedia.com/image");
+            node3.Attributes.AddOrUpdate(hebrewDescriptionKey, "wiki description");
+            node3.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { node1, node2, node3 });
+
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(importantDescription, results.First().Attributes[hebrewDescriptionKey].ToString());
+            Assert.AreEqual(3, results.First().Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)).Count());
+            Assert.AreEqual(2, results.First().Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_SOURCE_IMAGE_URL)).Count());
+            Assert.AreEqual(2, results.First().Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL)).Count());
+            Assert.IsFalse(results.First().Attributes.GetNames().Any(n => n == FeatureAttributes.POI_SOURCE_IMAGE_URL));
+        }
+
+        [TestMethod]
+        public void MergeFeatures_RailwayAndPlace_ShouldNotMergeThem()
+        {
+            var node1 = CreateFeature("node_1", 0, 0);
+            node1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            node1.Attributes.AddOrUpdate("place", "city");
+            node1.SetTitles();
+            var node2 = CreateFeature("node_2", 0, 0);
+            node2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            node2.Attributes.AddOrUpdate("railway", "station");
+            node2.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { node1, node2 });
+
+            Assert.AreEqual(2, results.Count);
         }
 
         [TestMethod]

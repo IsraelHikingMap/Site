@@ -59,7 +59,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var table = new AttributesTable
             {
                 {FeatureAttributes.ID, wayId.ToString()},
-                {FeatureAttributes.OSM_NODES, osmCompleteWay.Nodes.Select(n => n.Id.Value).Cast<object>().ToList()}
+                {FeatureAttributes.POI_OSM_NODES, osmCompleteWay.Nodes.Select(n => n.Id.Value).Cast<object>().ToList()}
             };
             _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature>
             {

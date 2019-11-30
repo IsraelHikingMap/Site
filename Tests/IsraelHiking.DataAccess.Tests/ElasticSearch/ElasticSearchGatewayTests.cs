@@ -47,7 +47,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             var northEast = new Coordinate(35.0516, 31.7553);
             var southWest = new Coordinate(35.0251, 31.7467);
             var results = _gateway.GetHighways(northEast, southWest).Result;
-            Assert.IsNotNull(results[0].Attributes[FeatureAttributes.OSM_NODES] as IEnumerable<object>);
+            Assert.IsNotNull(results[0].Attributes[FeatureAttributes.POI_OSM_NODES] as IEnumerable<object>);
             Assert.AreEqual(38, results.Count);
             
         }

@@ -42,10 +42,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     {FeatureAttributes.NAME, FeatureAttributes.NAME},
                     {FeatureAttributes.ID, poiId},
                     {FeatureAttributes.POI_SOURCE, source},
-                    {FeatureAttributes.ICON, FeatureAttributes.ICON},
-                    {FeatureAttributes.ICON_COLOR, FeatureAttributes.ICON_COLOR},
+                    {FeatureAttributes.POI_ICON, FeatureAttributes.POI_ICON},
+                    {FeatureAttributes.POI_ICON_COLOR, FeatureAttributes.POI_ICON_COLOR},
                     {
-                        FeatureAttributes.GEOLOCATION, new AttributesTable
+                        FeatureAttributes.POI_GEOLOCATION, new AttributesTable
                         {
                             {FeatureAttributes.LAT, 1.1},
                             {FeatureAttributes.LON, 2.2}

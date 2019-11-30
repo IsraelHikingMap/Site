@@ -48,13 +48,13 @@ namespace IsraelHiking.API.Tests.Controllers
             {
                 {FeatureAttributes.NAME, "name"},
                 {
-                    FeatureAttributes.GEOLOCATION,
+                    FeatureAttributes.POI_GEOLOCATION,
                     new AttributesTable {{FeatureAttributes.LAT, featureLocation.Y}, {FeatureAttributes.LON, featureLocation.X} }
                 },
                 {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
                 {FeatureAttributes.POI_SOURCE, Sources.OSM},
-                {FeatureAttributes.ICON, string.Empty},
-                {FeatureAttributes.ICON_COLOR, "black"},
+                {FeatureAttributes.POI_ICON, string.Empty},
+                {FeatureAttributes.POI_ICON_COLOR, "black"},
                 {FeatureAttributes.ID, "id"}
             });
             featureInPlace.SetTitles();
@@ -92,13 +92,13 @@ namespace IsraelHiking.API.Tests.Controllers
             {
                 {FeatureAttributes.NAME, "name"},
                 {
-                    FeatureAttributes.GEOLOCATION,
+                    FeatureAttributes.POI_GEOLOCATION,
                     new AttributesTable {{FeatureAttributes.LAT, featureLocation.Y}, {FeatureAttributes.LON, featureLocation.X} }
                 },
                 {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
                 {FeatureAttributes.POI_SOURCE, Sources.OSM},
-                {FeatureAttributes.ICON, string.Empty},
-                {FeatureAttributes.ICON_COLOR, "black"},
+                {FeatureAttributes.POI_ICON, string.Empty},
+                {FeatureAttributes.POI_ICON_COLOR, "black"},
                 {FeatureAttributes.ID, "id"}
             });
             featureInPlace.SetTitles();
@@ -141,14 +141,14 @@ namespace IsraelHiking.API.Tests.Controllers
                 {
                     {FeatureAttributes.NAME, "name"},
                     {
-                        FeatureAttributes.GEOLOCATION,
+                        FeatureAttributes.POI_GEOLOCATION,
                         new AttributesTable
                             {{FeatureAttributes.LAT, featureLocation.Y}, {FeatureAttributes.LON, featureLocation.X}}
                     },
                     {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
                     {FeatureAttributes.POI_SOURCE, Sources.OSM},
-                    {FeatureAttributes.ICON, string.Empty},
-                    {FeatureAttributes.ICON_COLOR, "black"},
+                    {FeatureAttributes.POI_ICON, string.Empty},
+                    {FeatureAttributes.POI_ICON_COLOR, "black"},
                     {FeatureAttributes.ID, "id"}
                 }
             );
@@ -189,13 +189,13 @@ namespace IsraelHiking.API.Tests.Controllers
             {
                 {FeatureAttributes.NAME, "name"},
                 {
-                    FeatureAttributes.GEOLOCATION,
+                    FeatureAttributes.POI_GEOLOCATION,
                     new AttributesTable {{FeatureAttributes.LAT, featureLocation.Y}, {FeatureAttributes.LON, featureLocation.X} }
                 },
                 {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
                 {FeatureAttributes.POI_SOURCE, Sources.OSM},
-                {FeatureAttributes.ICON, string.Empty},
-                {FeatureAttributes.ICON_COLOR, "black"},
+                {FeatureAttributes.POI_ICON, string.Empty},
+                {FeatureAttributes.POI_ICON_COLOR, "black"},
                 {FeatureAttributes.ID, "id"}
             });
             featureInPlace.SetTitles();

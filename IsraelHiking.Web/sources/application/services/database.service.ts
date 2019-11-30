@@ -12,7 +12,7 @@ import { RunningContextService } from "./running-context.service";
 import { initialState } from "../reducres/initial-state";
 import { classToActionMiddleware } from "../reducres/reducer-action-decorator";
 import { rootReducer } from "../reducres/root.reducer";
-import { ApplicationState, LatLngAlt, PointOfInterest } from "../models/models";
+import { ApplicationState, LatLngAlt } from "../models/models";
 
 @Injectable()
 export class DatabaseService {
@@ -22,6 +22,8 @@ export class DatabaseService {
     private static readonly TILES_TABLE_NAME = "tiles";
     private static readonly POIS_DB_NAME = "PointsOfInterest";
     private static readonly POIS_TABLE_NAME = "pois";
+    private static readonly POIS_ID_COLUMN = "properties.poiId";
+    private static readonly POIS_LOCATION_COLUMN = "[properties.poiGeolocation.lat+properties.poiGeolocation.lon]";
 
     private stateDatabase: Dexie;
     private poisDatabase: Dexie;
@@ -42,7 +44,7 @@ export class DatabaseService {
         });
         this.poisDatabase = new Dexie(DatabaseService.POIS_DB_NAME);
         this.poisDatabase.version(1).stores({
-            pois: "id,[location.lat+location.lng]"
+            pois: DatabaseService.POIS_ID_COLUMN + "," + DatabaseService.POIS_LOCATION_COLUMN
         });
         this.initCustomTileLoadFunction();
         if (this.runningContext.isIFrame) {
@@ -158,15 +160,22 @@ export class DatabaseService {
         return this.sourcesDatabases.get(dbName);
     }
 
-    public storePois(pois: PointOfInterest[]): Promise<any> {
+    public storePois(pois: GeoJSON.Feature[]): Promise<any> {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkAdd(pois);
     }
 
-    public getPois(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[]): Promise<PointOfInterest[]> {
+    public getPois(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[], language: string): Promise<GeoJSON.Feature[]> {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME)
-            .where("[location.lat+location.lng]")
+            .where(DatabaseService.POIS_LOCATION_COLUMN)
             .between([southWest.lat, southWest.lng], [northEast.lat, northEast.lng])
-            .filter((x: PointOfInterest) => categoriesTypes.indexOf(x.category) !== -1)
+            .filter((x: GeoJSON.Feature) => x.properties.poiLanguage === language || x.properties.poiLanguage === "all")
+            .filter((x: GeoJSON.Feature) => categoriesTypes.indexOf(x.properties.poiCategory) !== -1)
             .toArray();
     }
+
+    public getPoiById(id: string): Promise<GeoJSON.Feature> {
+        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).get(id);
+    }
+
+    // HM TODO: support images...
 }

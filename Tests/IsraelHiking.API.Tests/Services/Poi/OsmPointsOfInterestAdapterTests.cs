@@ -99,7 +99,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void GetPointsOfInterest_NoIcon_ShouldReturnItWithSearchIcon()
         {
             var feature = GetValidFeature("poiId", _adapter.Source);
-            feature.Attributes.AddOrUpdate(FeatureAttributes.ICON, string.Empty);
+            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, string.Empty);
             _elasticSearchGateway.GetPointsOfInterest(null, null, null, "he").Returns(new List<Feature> { feature });
 
             var result = _adapter.GetPointsOfInterest(null, null, null, "he").Result;
@@ -143,7 +143,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     }
                 });
 
-            var result = _adapter.GetPointOfInterestById(poiId, "en").Result;
+            var result = _adapter.GetPointOfInterestById(Sources.OSM, poiId, "en").Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(string.Empty, result.Title);
@@ -166,9 +166,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer { Routes = new List<RouteData>() });
             _wikipediaGateway.GetByPageTitle(Arg.Any<string>(), Arg.Any<string>()).Returns(
-                new FeatureCollection {new Feature(new Point(0, 0), new AttributesTable())});
+                new Feature(new Point(0, 0), new AttributesTable()));
 
-            var result = _adapter.GetPointOfInterestById(poiId, null).Result;
+            var result = _adapter.GetPointOfInterestById(Sources.OSM, poiId, null).Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual("website", result.References.First().Url);
@@ -185,7 +185,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer { Routes = new List<RouteData>() });
 
-            var result = _adapter.GetPointOfInterestById(poiId, null).Result;
+            var result = _adapter.GetPointOfInterestById(Sources.OSM, poiId, null).Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual("website", result.References.First().Url);
@@ -203,10 +203,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer { Routes = new List<RouteData>() });
             _wikipediaGateway.GetByPageTitle(Arg.Any<string>(), Arg.Any<string>()).Returns(
-                new FeatureCollection{ new Feature(new Point(0, 0), new AttributesTable())});
+                new Feature(new Point(0, 0), new AttributesTable()));
             _wikipediaGateway.GetReference("page", language).Returns(new Reference { Url = "page" });
 
-            var result = _adapter.GetPointOfInterestById(poiId, language).Result;
+            var result = _adapter.GetPointOfInterestById(Sources.OSM, poiId, language).Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.References.Length);
@@ -219,15 +219,15 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var language = "he";
             var feature = GetValidFeature(poiId, _adapter.Source);
             feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
-            feature.Attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, "sourceimage");
+            feature.Attributes.Add(FeatureAttributes.POI_SOURCE_IMAGE_URL, "sourceimage");
             feature.Attributes.Add(FeatureAttributes.WEBSITE + "1", "website1");
-            feature.Attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL + "1", "sourceimage1");
+            feature.Attributes.Add(FeatureAttributes.POI_SOURCE_IMAGE_URL + "1", "sourceimage1");
             feature.Attributes.Add(FeatureAttributes.WEBSITE + "2", "website2");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer { Routes = new List<RouteData>() });
 
-            var result = _adapter.GetPointOfInterestById(poiId, language).Result;
+            var result = _adapter.GetPointOfInterestById(Sources.OSM, poiId, language).Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(3, result.References.Length);

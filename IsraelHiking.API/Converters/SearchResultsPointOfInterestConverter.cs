@@ -80,9 +80,9 @@ namespace IsraelHiking.API.Converters
         public static SearchResultsPointOfInterest FromFeature(IFeature feature, string language)
         {
             var title = feature.GetTitle(language);
-            var geoLocation = (AttributesTable)feature.Attributes[FeatureAttributes.GEOLOCATION];
+            var geoLocation = (AttributesTable)feature.Attributes[FeatureAttributes.POI_GEOLOCATION];
             var latLng = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
-            var icon = feature.Attributes[FeatureAttributes.ICON].ToString();
+            var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
             if (string.IsNullOrWhiteSpace(icon))
             {
                 icon = OsmPointsOfInterestAdapter.SEARCH_ICON;
@@ -93,7 +93,7 @@ namespace IsraelHiking.API.Converters
                 Title = title,
                 Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString(),
                 Icon = icon,
-                IconColor = feature.Attributes[FeatureAttributes.ICON_COLOR].ToString(),
+                IconColor = feature.Attributes[FeatureAttributes.POI_ICON_COLOR].ToString(),
                 Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(),
                 Location = latLng,
                 HasExtraData = feature.HasExtraData(language),

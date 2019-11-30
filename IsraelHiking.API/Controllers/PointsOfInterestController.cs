@@ -26,7 +26,6 @@ namespace IsraelHiking.API.Controllers
         private readonly ITagsHelper _tagsHelper;
         private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
-        private readonly IPointsOfInterestAggregatorService _pointsOfInterestAggregatorService;
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
         private readonly ConfigurationData _options;
         private readonly LruCache<string, TokenAndSecret> _cache;
@@ -38,7 +37,6 @@ namespace IsraelHiking.API.Controllers
         /// <param name="tagsHelper"></param>
         /// <param name="wikimediaCommonGateway"></param>
         /// <param name="pointsOfInterestProvider"></param>
-        /// <param name="pointsOfInterestAggregatorService"></param>
         /// <param name="base64ImageConverter"></param>
         /// <param name="options"></param>
         /// <param name="cache"></param>
@@ -46,7 +44,6 @@ namespace IsraelHiking.API.Controllers
             ITagsHelper tagsHelper,
             IWikimediaCommonGateway wikimediaCommonGateway,
             IPointsOfInterestProvider pointsOfInterestProvider,
-            IPointsOfInterestAggregatorService pointsOfInterestAggregatorService,
             IBase64ImageStringToFileConverter base64ImageConverter,
             IOptions<ConfigurationData> options,
             LruCache<string, TokenAndSecret> cache)
@@ -55,7 +52,6 @@ namespace IsraelHiking.API.Controllers
             _tagsHelper = tagsHelper;
             _cache = cache;
             _base64ImageConverter = base64ImageConverter;
-            _pointsOfInterestAggregatorService = pointsOfInterestAggregatorService;
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _wikimediaCommonGateway = wikimediaCommonGateway;
             _options = options.Value;
@@ -112,7 +108,7 @@ namespace IsraelHiking.API.Controllers
                 var latLng = SearchResultsPointOfInterestConverter.GetLatLngFromId(id);
                 return Ok(SearchResultsPointOfInterestConverter.FromLatlng(latLng, id));
             }
-            var poiItem = await _pointsOfInterestAggregatorService.Get(source, id, language);
+            var poiItem = await _pointsOfInterestProvider.GetPointOfInterestById(source, id, language);
             if (poiItem == null)
             {
                 return NotFound();

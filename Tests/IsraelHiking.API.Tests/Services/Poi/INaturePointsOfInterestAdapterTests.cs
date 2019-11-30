@@ -22,7 +22,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             InitializeSubstitues();
             _iNatureGateway = Substitute.For<IINatureGateway>();
             _repository = Substitute.For<IRepository>();
-            _adapter = new INaturePointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _iNatureGateway, _repository, _itmWgs84MathTransfromFactory, _options, Substitute.For<ILogger>());
+            _adapter = new INaturePointsOfInterestAdapter(_dataContainerConverterService, _iNatureGateway, _repository, Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -34,23 +34,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var resutls = _adapter.GetPointsForIndexing().Result;
 
             Assert.AreEqual(features.Count, resutls.Count);
-        }
-
-        [TestMethod]
-        public void GetPointOfInterestById_NotInCache_ShouldGetFromGatewayAndAddShareData()
-        {
-            var poiId = "poiId";
-            var shareId = "shareId";
-            var feature = GetValidFeature(poiId, _adapter.Source);
-            feature.Attributes.Add(FeatureAttributes.POI_SHARE_REFERENCE, shareId);
-            _repository.GetUrlById(shareId).Returns(new ShareUrl {DataContainer = new DataContainer()});
-            _iNatureGateway.GetById(poiId).Returns(new FeatureCollection { feature });
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
-
-            var resutls = _adapter.GetPointOfInterestById(poiId, Languages.HEBREW).Result;
-
-            Assert.IsNotNull(resutls);
-            _repository.Received(1).GetUrlById(shareId);
         }
     }
 }

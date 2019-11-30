@@ -9,7 +9,7 @@ namespace IsraelHiking.DataAccessInterfaces
     public interface IPointsOfInterestGateway
     {
         Task<List<Feature>> GetAll();
-        Task<FeatureCollection> GetById(string id);
+        Task<Feature> GetById(string id);
     }
 
     // the following are used for dependency injection
@@ -26,7 +26,7 @@ namespace IsraelHiking.DataAccessInterfaces
     public interface IWikipediaGateway : IPointsOfInterestGateway
     {
         Task Initialize();
-        Task<FeatureCollection> GetByPageTitle(string title, string language);
+        Task<Feature> GetByPageTitle(string title, string language);
         Task<List<Feature>> GetByBoundingBox(Coordinate sourhWest, Coordinate northEast, string language);
         Reference GetReference(string title, string language);
     }

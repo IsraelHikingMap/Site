@@ -185,9 +185,12 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildPointsOfInterest()
         {
             _logger.LogInformation("Starting rebuilding POIs database.");
-            var fetchTasks = _pointsOfInterestAdapterFactory.GetAll().Select(a => a.GetPointsForIndexing()).ToArray();
-            var features = (await Task.WhenAll(fetchTasks)).SelectMany(v => v).ToList();
-            features = _featuresMergeExecutor.Merge(features);
+            var osmSource = _pointsOfInterestAdapterFactory.GetBySource(Sources.OSM);
+            var osmFeaturesTask = osmSource.GetPointsForIndexing();
+            var sources = _pointsOfInterestAdapterFactory.GetAll().Where(s=> s.Source != Sources.OSM).Select(s => s.Source);
+            var otherTasks = sources.Select(s => _elasticSearchGateway.GetExternalPoisBySource(s));
+            await Task.WhenAll(new Task[] { osmFeaturesTask }.Concat(otherTasks));
+            var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result.Concat(otherTasks.SelectMany(t => t.Result)).ToList());
             await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features);
             _logger.LogInformation("Finished rebuilding POIs database.");
         }

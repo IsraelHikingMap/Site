@@ -130,6 +130,21 @@ namespace IsraelHiking.Common.Extensions
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_NAMES, table);
         }
 
+        public static void SetId(this IFeature feature)
+        {
+            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ID, GetId(feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(), feature.Attributes[FeatureAttributes.ID].ToString()));
+        }
+
+        public static string GetId(this IFeature feature)
+        {
+            return feature.Attributes[FeatureAttributes.POI_ID].ToString();
+        }
+
+        public static string GetId(string source, string id)
+        {
+            return source + "_" + id;
+        }
+
         public static string GetTitle(this IFeature feature, string language)
         {
             if (!(feature.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable titleByLanguage))
@@ -159,7 +174,7 @@ namespace IsraelHiking.Common.Extensions
             return titleByLanguage.GetValues().Select(GetStringListFromAttributeValue).SelectMany(v => v).Distinct().ToArray();
         }
 
-        private static List<string> GetStringListFromAttributeValue(object value)
+        public static List<string> GetStringListFromAttributeValue(object value)
         {
             var titles = new List<string>();
             switch (value)
@@ -180,72 +195,6 @@ namespace IsraelHiking.Common.Extensions
             return titles;
         }
 
-        public static void MergeTitles(this IFeature target, IFeature source)
-        {
-            if (!(target.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable targetTitlesByLanguage))
-            {
-                return;
-            }
-            if (!(source.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable sourceTitlesByLanguage))
-            {
-                return;
-            }
-
-            foreach (var attributeName in sourceTitlesByLanguage.GetNames())
-            {
-                if (targetTitlesByLanguage.Exists(attributeName))
-                {
-                    targetTitlesByLanguage[attributeName] = GetStringListFromAttributeValue(targetTitlesByLanguage[attributeName])
-                        .Concat(GetStringListFromAttributeValue(sourceTitlesByLanguage[attributeName])).Distinct().ToArray();
-                }
-                else
-                {
-                    targetTitlesByLanguage.Add(attributeName, GetStringListFromAttributeValue(sourceTitlesByLanguage[attributeName]));
-                }
-            }
-        }
-
-        public static void AddIdToCombinedPoi(this IFeature featureToMergeTo, IFeature feature)
-        {
-            if (!featureToMergeTo.Attributes.Exists(FeatureAttributes.POI_COMBINED_IDS))
-            {
-                featureToMergeTo.Attributes.Add(FeatureAttributes.POI_COMBINED_IDS, new string[0]);
-            }
-            var list = GetStringListFromAttributeValue(featureToMergeTo.Attributes[FeatureAttributes.POI_COMBINED_IDS]);
-            list.Add(feature.Attributes[FeatureAttributes.POI_SOURCE] + "__" + feature.Attributes[FeatureAttributes.ID]);
-            featureToMergeTo.Attributes[FeatureAttributes.POI_COMBINED_IDS] = list.Distinct().ToList();
-        }
-
-        public static Dictionary<string, List<string>> GetIdsFromCombinedPoi(this IFeature feature)
-        {
-            if (!feature.Attributes.Exists(FeatureAttributes.POI_COMBINED_IDS))
-            {
-                return new Dictionary<string, List<string>>();
-            }
-            var list = GetStringListFromAttributeValue(feature.Attributes[FeatureAttributes.POI_COMBINED_IDS]);
-            return list.Where(l => l.Contains("__"))
-                .Distinct()
-                .GroupBy(l => l.Split("__").First())
-                .ToDictionary(g => g.Key, g => g.Select(l => l.Split("__").Last()).ToList());
-        }
-
-        public static void MergeCombinedPoiIds(this IFeature featureToMergeTo, IFeature feature)
-        {
-            if (!feature.Attributes.Exists(FeatureAttributes.POI_COMBINED_IDS))
-            {
-                return;
-            }
-            var list = new List<string>();
-            if (featureToMergeTo.Attributes.Exists(FeatureAttributes.POI_COMBINED_IDS))
-            {
-                list = GetStringListFromAttributeValue(featureToMergeTo.Attributes[FeatureAttributes.POI_COMBINED_IDS]);
-            }
-            var updatedList = list
-                .Concat(GetStringListFromAttributeValue(feature.Attributes[FeatureAttributes.POI_COMBINED_IDS]))
-                .Distinct().ToList();
-            featureToMergeTo.Attributes.AddOrUpdate(FeatureAttributes.POI_COMBINED_IDS, updatedList);
-        }
-
         /// <summary>
         /// This function checks if a feature is a valid point of interest:
         /// Either has a name, description, image or related points of interest.
@@ -262,8 +211,7 @@ namespace IsraelHiking.Common.Extensions
         public static bool HasExtraData(this IFeature feature, string language)
         {
             return feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language) != string.Empty ||
-                   feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL)) ||
-                   feature.GetIdsFromCombinedPoi().Any();
+                   feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL));
         }
 
         public static long GetOsmId(this IFeature feature)

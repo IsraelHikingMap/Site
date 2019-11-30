@@ -297,6 +297,8 @@ export class ResourcesService {
     public wrappingThingsUp: string;
     public unableToDeleteShare: string;
     public preparingDataForIssueReport: string;
+    public openingAFilePleaseWait: string;
+    public finishedOpeningTheFile: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -784,6 +786,8 @@ export class ResourcesService {
         this.wrappingThingsUp = this.gettextCatalog.getString("Wrapping things up, please wait a few seconds...");
         this.unableToDeleteShare = this.gettextCatalog.getString("Unable to delete the share...");
         this.preparingDataForIssueReport = this.gettextCatalog.getString("Preparing data for issue report");
+        this.openingAFilePleaseWait = this.gettextCatalog.getString("Opening file, this might take a while, please don't close the app...");
+        this.finishedOpeningTheFile = this.gettextCatalog.getString("Finished opening file! :-)");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

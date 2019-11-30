@@ -82,7 +82,7 @@ namespace IsraelHiking.API.Services.Osm
                 var closestItmHighway = itmHighways.First(hw => hw.GetOsmId() == closetHighway.GetOsmId());
                 var closestItmPointInWay = closestItmHighway.Coordinates.OrderBy(c => c.Distance(itmPoint.Coordinate)).First();
                 var indexOnWay = closestItmHighway.Coordinates.ToList().IndexOf(closestItmPointInWay);
-                var closestNodeId = ((List<object>)closetHighway.Attributes[FeatureAttributes.OSM_NODES])[indexOnWay].ToString();
+                var closestNodeId = ((List<object>)closetHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[indexOnWay].ToString();
                 if (!CanAddNewNode(newWayNodeIds, closestNodeId))
                 {
                     continue;
@@ -173,7 +173,7 @@ namespace IsraelHiking.API.Services.Osm
                 var indexInLine = closeLine.Coordinates.ToList().IndexOf(closestPointInExistingLine.Coordinate);
                 var closestHighway = highways.First(x => x.GetOsmId() == closeLine.GetOsmId());
 
-                var nodeId = ((List<object>)closestHighway.Attributes[FeatureAttributes.OSM_NODES])[indexInLine].ToString();
+                var nodeId = ((List<object>)closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[indexInLine].ToString();
                 if (!CanAddNewNode(nodeIds, nodeId))
                 {
                     continue;

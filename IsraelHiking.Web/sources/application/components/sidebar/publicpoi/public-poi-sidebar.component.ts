@@ -139,6 +139,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                     poi: this.poiExtended
                 }));
             }
+        } catch (ex) {
+            this.toastService.warning(this.resources.unableToFindPoi);
+            this.close();
         } finally {
             this.isLoading = false;
         }

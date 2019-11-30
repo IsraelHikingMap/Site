@@ -26,7 +26,7 @@ export class IhmLinkComponent extends BaseMapComponent {
         }
     }
 
-    public getHref() {
+    public getHref(): string {
         if (this.runningContextService.isIFrame) {
             return this.hashService.getHref();
         } else {
@@ -34,11 +34,18 @@ export class IhmLinkComponent extends BaseMapComponent {
         }
     }
 
-    public getTooltipText() {
+    public getTooltipText(): string {
         if (this.runningContextService.isIFrame) {
             return this.resources.openInANewWindow;
         } else {
             return "";
         }
+    }
+
+    public getLogo(): string {
+        if (this.runningContextService.isOnline) {
+            return "content/logo.png";
+        }
+        return "content/logo-offline.png";
     }
 }

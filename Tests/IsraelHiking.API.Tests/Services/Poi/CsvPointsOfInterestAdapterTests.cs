@@ -37,7 +37,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             InitializeSubstitues();
             _fileProvider = Substitute.For<IFileProvider>();
             _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
-            _adapter = new CsvPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _itmWgs84MathTransfromFactory, _fileProvider, _remoteFileFetcherGateway, _options, Substitute.For<ILogger>());
+            _adapter = new CsvPointsOfInterestAdapter(_dataContainerConverterService, _fileProvider, _remoteFileFetcherGateway, Substitute.For<ILogger>());
             _adapter.SetFileName("csv.csv");
         }
 
@@ -49,49 +49,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var features = _adapter.GetPointsForIndexing().Result;
 
             Assert.AreEqual(1, features.Count);
-        }
-
-        [TestMethod]
-        public void GetPointById_WithUrl_ShouldGetItFromCache()
-        {
-            var id = "1";
-            var source = "csv";
-            var fileUrl = "fileUrl";
-            var dataContainer = new DataContainer { Routes = new List<RouteData> { new RouteData { Name = "name" } } };
-            var feature = GetValidFeature(id, source);
-            feature.Attributes.Add(FeatureAttributes.POI_SHARE_REFERENCE, fileUrl);
-            feature.Attributes.Add(FeatureAttributes.POI_CACHE_DATE, DateTime.Now.AddDays(-1).ToString("o"));
-            _elasticSearchGateway.GetCachedItemById(id, source).Returns(new FeatureCollection { feature });
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(dataContainer);
-
-            var point = _adapter.GetPointOfInterestById(id, Languages.HEBREW).Result;
-
-            Assert.IsNotNull(point);
-            Assert.IsNotNull(point.DataContainer);
-            Assert.AreEqual(dataContainer.Routes.Count, point.DataContainer.Routes.Count);
-        }
-
-        [TestMethod]
-        public void GetPointById_WithUrl_ShouldGetItFromCsvFileAndFetchFile()
-        {
-            var id = "1";
-            var source = "csv";
-            var fileUrl = "fileUrl";
-            var dataContainer = new DataContainer { Routes = new List<RouteData> { new RouteData { Name = "name" } } };
-            var feature = GetValidFeature(id, source);
-            feature.Attributes.Add(FeatureAttributes.POI_SHARE_REFERENCE, fileUrl);
-            _elasticSearchGateway.GetCachedItemById(id, source).Returns(new FeatureCollection { feature });
-            _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(new RemoteFileFetcherGatewayResponse { FileName = fileUrl, Content = new byte[0] });
-            _dataContainerConverterService.Convert(Arg.Any<byte[]>(), fileUrl, FlowFormats.GEOJSON).Returns(new FeatureCollection { feature }.ToBytes());
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(dataContainer);
-            SetupFileStream();
-
-            var point = _adapter.GetPointOfInterestById(id, Languages.HEBREW).Result;
-
-            Assert.IsNotNull(point);
-            Assert.IsNotNull(point.DataContainer);
-            Assert.AreEqual(dataContainer.Routes.Count, point.DataContainer.Routes.Count);
-            _elasticSearchGateway.Received(1).CacheItem(Arg.Any<FeatureCollection>());
         }
     }
 }

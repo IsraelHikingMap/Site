@@ -40,7 +40,6 @@ namespace IsraelHiking.API
             services.AddTransient<IOsmLineAdderService, OsmLineAdderService>();
             services.AddTransient<ITagsHelper, TagsHelper>();
             services.AddTransient<IPointsOfInterestProvider, OsmPointsOfInterestAdapter>();
-            services.AddTransient<IPointsOfInterestAggregatorService, PointsOfInterestAggregatorService>();
             services.AddTransient<IPointsOfInterestFilesCreatorExecutor, PointsOfInterestFilesCreatorExecutor>();
 
             // registration here is what determines the order of which to merge points:

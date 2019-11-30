@@ -1,4 +1,5 @@
 ﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
@@ -48,11 +49,11 @@ namespace IsraelHiking.DataAccess
             throw new NotImplementedException("Please use GetByLocation instead");
         }
 
-        public Task<FeatureCollection> GetByPageTitle(string title, string language)
+        public Task<Feature> GetByPageTitle(string title, string language)
         {
             var site = _wikiSites[language];
             var page = new WikiPage(site, title);
-            return ConvertPageToFeatureCollection(page, language);
+            return ConvertPageToFeature(page, language);
         }
 
         public async Task<List<Feature>> GetByBoundingBox(Coordinate sourthWest, Coordinate northEast, string language)
@@ -95,7 +96,7 @@ namespace IsraelHiking.DataAccess
             };
         }
 
-        public async Task<FeatureCollection> GetById(string id)
+        public async Task<Feature> GetById(string id)
         {
             var splitId = id.Split('_');
             var language = splitId.First();
@@ -103,10 +104,10 @@ namespace IsraelHiking.DataAccess
             var site = _wikiSites[language];
             var stub = await WikiPageStub.FromPageIds(site, new[] { int.Parse(pageId) }).FirstAsync();
             var page = new WikiPage(site, stub.Title);
-            return await ConvertPageToFeatureCollection(page, language);
+            return await ConvertPageToFeature(page, language);
         }
 
-        private async Task<FeatureCollection> ConvertPageToFeatureCollection(WikiPage page, string language)
+        private async Task<Feature> ConvertPageToFeature(WikiPage page, string language)
         {
             await page.RefreshAsync(new WikiPageQueryProvider
             {
@@ -132,10 +133,13 @@ namespace IsraelHiking.DataAccess
             attributes.Add(FeatureAttributes.DESCRIPTION + ":" + language, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
             var imageUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url ?? string.Empty;
             attributes.Add(FeatureAttributes.IMAGE_URL, imageUrl.EndsWith(".svg") ? string.Empty : imageUrl);
-            attributes.Add(FeatureAttributes.POI_USER_NAME, page.LastRevision.UserName);
-            attributes.Add(FeatureAttributes.POI_USER_ADDRESS, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeUriString(page.LastRevision.UserName)}"));
-            attributes.Add(FeatureAttributes.POI_LAST_MODIFIED, page.LastRevision.TimeStamp.ToString("o"));
-            return new FeatureCollection { new Feature(new Point(coordinate), attributes) };
+            attributes.Add(FeatureAttributes.POI_USER_NAME + ":" + language, page.LastRevision.UserName);
+            attributes.Add(FeatureAttributes.POI_USER_ADDRESS + ":" + language, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeUriString(page.LastRevision.UserName)}"));
+            attributes.Add(FeatureAttributes.POI_LAST_MODIFIED + ":" + language, page.LastRevision.TimeStamp.ToString("o"));
+            var feature = new Feature(new Point(coordinate), attributes);
+            feature.SetTitles();
+            feature.SetId();
+            return feature;
         }
 
         private AttributesTable GetAttributes(Coordinate location, string title, string id, string language)
@@ -149,18 +153,18 @@ namespace IsraelHiking.DataAccess
             {
                 {FeatureAttributes.ID, language + "_" + id},
                 {FeatureAttributes.NAME, title},
+                {FeatureAttributes.NAME + ":" + language, title},
                 {FeatureAttributes.WIKIPEDIA + ":" + language, title},
                 {FeatureAttributes.WIKIPEDIA, language + ":" + title},
                 {FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA},
                 {FeatureAttributes.POI_CATEGORY, Categories.WIKIPEDIA},
                 {FeatureAttributes.POI_LANGUAGE, language},
-                {FeatureAttributes.POI_NAMES, new AttributesTable {{language, title}}},
-                {FeatureAttributes.ICON, "icon-wikipedia-w"},
-                {FeatureAttributes.ICON_COLOR, "black"},
-                {FeatureAttributes.SEARCH_FACTOR, 1.0},
-                {FeatureAttributes.GEOLOCATION, geoLocation},
+                {FeatureAttributes.POI_ICON, "icon-wikipedia-w"},
+                {FeatureAttributes.POI_ICON_COLOR, "black"},
+                {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
+                {FeatureAttributes.POI_GEOLOCATION, geoLocation},
                 {FeatureAttributes.WEBSITE, _wikiSites[language].SiteInfo.MakeArticleUrl(title)},
-                {FeatureAttributes.SOURCE_IMAGE_URL, WIKI_LOGO }
+                {FeatureAttributes.POI_SOURCE_IMAGE_URL, WIKI_LOGO }
             };
             return attributes;
         }

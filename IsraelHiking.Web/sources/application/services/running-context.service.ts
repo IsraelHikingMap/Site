@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 
 import { environment } from "../../environments/environment";
+import { ConnectionService } from "./connection.service";
 
 @Injectable()
 export class RunningContextService {
@@ -10,13 +11,15 @@ export class RunningContextService {
     public readonly isIos: boolean;
     public readonly isEdge: boolean;
     public readonly isProduction: boolean;
-    constructor() {
+    public isOnline: boolean;
+    constructor(private readonly connectionService: ConnectionService) {
         this.isIFrame = window.self !== window.top;
         this.isMobile = false;
         this.isProduction = environment.production;
         this.isCordova = environment.isCordova;
         this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform);
         this.isEdge = /Edge/.test(navigator.userAgent);
+        this.isOnline = true;
         let agent = navigator.userAgent || navigator.vendor || (window as any).opera;
         /* tslint:disable */
         if (
@@ -27,5 +30,6 @@ export class RunningContextService {
             this.isMobile = true;
         }
         /* tslint:enable */
+        this.connectionService.monitor(true).subscribe(state => this.isOnline = state.hasInternetAccess);
     }
 }

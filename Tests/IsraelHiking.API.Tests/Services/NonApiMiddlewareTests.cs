@@ -22,7 +22,7 @@ namespace IsraelHiking.API.Tests.Services
         private IWebHostEnvironment _hostingEnvironment;
         private IServiceProvider _serviceProvider;
         private IRepository _repository;
-        private IPointsOfInterestAggregatorService _pointsOfInterestAggregatorService;
+        private IPointsOfInterestProvider _pointsOfInterestProvider;
 
         [TestInitialize]
         public void TestInitialize()
@@ -40,11 +40,11 @@ namespace IsraelHiking.API.Tests.Services
             _serviceProvider.GetService(typeof(IBrowserResolver)).Returns(browserResolver);
             _serviceProvider.GetService(typeof(IUserAgentService)).Returns(userAgentService);
             _repository = Substitute.For<IRepository>();
-            _pointsOfInterestAggregatorService = Substitute.For<IPointsOfInterestAggregatorService>();
+            _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
             var config = new ConfigurationData();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(config);
-            _middleware = new NonApiMiddleware(null, _hostingEnvironment, _serviceProvider, _repository, _pointsOfInterestAggregatorService, options);
+            _middleware = new NonApiMiddleware(null, _hostingEnvironment, _serviceProvider, _repository, _pointsOfInterestProvider, options);
         }
 
         [TestMethod]
@@ -56,7 +56,7 @@ namespace IsraelHiking.API.Tests.Services
             var stream = new MemoryStream();
             context.Response.Body = stream;
             context.Request.Path = new PathString($"/poi/{source}/{id}");
-            _pointsOfInterestAggregatorService.Get(source, id, null).Returns(new PointOfInterestExtended
+            _pointsOfInterestProvider.GetPointOfInterestById(source, id, null).Returns(new PointOfInterestExtended
             {
                 ImagesUrls = new [] { "https://upload.wikimedia.org/wikipedia/commons/archive/1/17/Israel_Hiking_Map.jpeg" }
             });

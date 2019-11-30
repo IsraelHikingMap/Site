@@ -1,5 +1,6 @@
 ﻿using Elasticsearch.Net;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Nest;
@@ -29,7 +30,7 @@ namespace IsraelHiking.DataAccess
         private const string RATINGS = "ratings";
         private const string SHARES = "shares";
         private const string CUSTOM_USER_LAYERS = "custom_user_layers";
-        private const string CACHE = "cache";
+        private const string EXTERNAL_POIS = "external_pois";
 
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
@@ -97,7 +98,7 @@ namespace IsraelHiking.DataAccess
             return q.FunctionScore(
                 fs => fs.Query(
                     qi => FeatureNameSearchQuery(qi, searchTerm, language)
-                ).Functions(fn => fn.FieldValueFactor(f => f.Field($"{PROPERTIES}.{FeatureAttributes.SEARCH_FACTOR}")))
+                ).Functions(fn => fn.FieldValueFactor(f => f.Field($"{PROPERTIES}.{FeatureAttributes.POI_SEARCH_FACTOR}")))
             );
         }
 
@@ -211,7 +212,7 @@ namespace IsraelHiking.DataAccess
 
         public async Task DeleteHighwaysById(string id)
         {
-            var fullId = GetId(Sources.OSM, id);
+            var fullId = GeoJsonExtensions.GetId(Sources.OSM, id);
             await _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_HIGHWAYS_ALIAS));
         }
 
@@ -250,7 +251,7 @@ namespace IsraelHiking.DataAccess
             {
                 foreach (var feature in features)
                 {
-                    bulk.Index<Feature>(i => i.Index(alias).Document(feature).Id(GetId(feature)));
+                    bulk.Index<Feature>(i => i.Index(alias).Document(feature).Id(feature.GetId()));
                 }
                 return bulk;
             });
@@ -326,7 +327,7 @@ namespace IsraelHiking.DataAccess
             return b.BoundingBox(
                 bb => bb.TopLeft(new GeoCoordinate(northEast.Y, southWest.X))
                     .BottomRight(new GeoCoordinate(southWest.Y, northEast.X))
-            ).Field($"{PROPERTIES}.{FeatureAttributes.GEOLOCATION}");
+            ).Field($"{PROPERTIES}.{FeatureAttributes.POI_GEOLOCATION}");
         }
 
         public async Task<Feature> GetPointOfInterestById(string id, string source)
@@ -343,20 +344,20 @@ namespace IsraelHiking.DataAccess
 
         public Task DeleteOsmPointOfInterestById(string id)
         {
-            var fullId = GetId(id, Sources.OSM);
+            var fullId = GeoJsonExtensions.GetId(Sources.OSM, id);
             return _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_POIS_ALIAS));
         }
 
         public Task DeletePointOfInterestById(string id, string source)
         {
-            var fullId = GetId(source, id);
+            var fullId = GeoJsonExtensions.GetId(source, id);
             return _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_POIS_ALIAS));
         }
 
-        public async Task<List<FeatureCollection>> GetCachedItems(string source)
+        public async Task<List<Feature>> GetExternalPoisBySource(string source)
         {
-            var response = await _elasticClient.SearchAsync<FeatureCollection>(
-                s => s.Index(CACHE)
+            var response = await _elasticClient.SearchAsync<Feature>(
+                s => s.Index(EXTERNAL_POIS)
                     .Size(10000)
                     .Query(q =>
                         q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
@@ -365,26 +366,36 @@ namespace IsraelHiking.DataAccess
             return response.Documents.ToList();
         }
 
-        public async Task<FeatureCollection> GetCachedItemById(string id, string source)
+        public async Task<Feature> GetExternalPoiById(string id, string source)
         {
-            var response = await _elasticClient.GetAsync<FeatureCollection>(GetId(source, id), r => r.Index(CACHE));
+            var response = await _elasticClient.GetAsync<Feature>(GeoJsonExtensions.GetId(source, id), r => r.Index(EXTERNAL_POIS));
             return response.Source;
         }
 
-        public async Task CacheItem(FeatureCollection featureCollection)
+        public async Task AddExternalPoi(Feature feature)
         {
-            if (_elasticClient.IndexExists(CACHE).Exists == false)
+            if (_elasticClient.IndexExists(EXTERNAL_POIS).Exists == false)
             {
-                await CreateCacheIndex();
+                await CreateExternalPoisIndex();
             }
-            await _elasticClient.IndexAsync(featureCollection, r => r.Index(CACHE).Id(GetId(featureCollection.First() as Feature)));
+            await _elasticClient.IndexAsync(feature, r => r.Index(EXTERNAL_POIS).Id(feature.GetId()));
+        }
+
+        public Task DeleteExternalPoisBySource(string source)
+        {
+            return _elasticClient.DeleteByQueryAsync<Feature>(d =>
+                d.Index(EXTERNAL_POIS)
+                .Query(q =>
+                    q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
+                )
+            );
         }
 
         public Task<Rating> GetRating(string id, string source)
         {
             return Task.Run(() =>
             {
-                var response = _elasticClient.Get<Rating>(GetId(source, id), r => r.Index(RATINGS));
+                var response = _elasticClient.Get<Rating>(GeoJsonExtensions.GetId(source, id), r => r.Index(RATINGS));
                 return response.Source ?? new Rating
                 {
                     Id = id,
@@ -400,7 +411,11 @@ namespace IsraelHiking.DataAccess
                 c => c.Mappings(ms =>
                     ms.Map<Feature>(m =>
                         m.Properties(ps =>
-                            ps.GeoShape(g => g.Name(f => f.Geometry)
+                            ps.GeoShape(g =>
+                                g.Name(f => f.Geometry)
+                                .Tree(GeoTree.Geohash)
+                                .TreeLevels(10)
+                                .DistanceErrorPercentage(0.2)
                             )
                         )
                     )
@@ -416,10 +431,13 @@ namespace IsraelHiking.DataAccess
                         m.Properties(ps =>
                             ps.Object<AttributesTable>(o => o
                                 .Name(PROPERTIES)
-                                .Properties(p => p.GeoPoint(s => s.Name(FeatureAttributes.GEOLOCATION)))
+                                .Properties(p => p.GeoPoint(s => s.Name(FeatureAttributes.POI_GEOLOCATION)))
                                 .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
-                            ).GeoShape(g => 
+                            ).GeoShape(g =>
                                 g.Name(f => f.Geometry)
+                                .Tree(GeoTree.Geohash)
+                                .TreeLevels(10)
+                                .DistanceErrorPercentage(0.2)
                             )
                         )
                     )
@@ -427,20 +445,15 @@ namespace IsraelHiking.DataAccess
             );
         }
 
-        private Task CreateCacheIndex()
+        private Task CreateExternalPoisIndex()
         {
-            return _elasticClient.CreateIndexAsync(CACHE,
+            return _elasticClient.CreateIndexAsync(EXTERNAL_POIS,
                 c => c.Mappings(ms =>
-                    ms.Map<FeatureCollection>(m =>
-                        m.Properties(ps =>
-                            ps.Object<Feature>(o => o
-                                .Name("features")
-                                .Properties(fp =>
-                                    fp.Object<AttributesTable>(a => a
-                                        .Name(PROPERTIES)
-                                        .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
-                                    )
-                                )
+                    ms.Map<Feature>(m =>
+                        m.Properties(fp =>
+                            fp.Object<AttributesTable>(a => a
+                                .Name(PROPERTIES)
+                                .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
                             )
                         )
                     )
@@ -469,19 +482,9 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation($"Finished indexing {features.Count} records");
         }
 
-        private string GetId(Feature feature)
-        {
-            return GetId(feature.Attributes[FeatureAttributes.POI_SOURCE]?.ToString() ?? string.Empty, feature.Attributes[FeatureAttributes.ID]?.ToString() ?? string.Empty);
-        }
-
         private string GetId(Rating rating)
         {
-            return GetId(rating.Source, rating.Id);
-        }
-
-        private string GetId(string source, string id)
-        {
-            return source + "_" + id;
+            return GeoJsonExtensions.GetId(rating.Source, rating.Id);
         }
 
         public Task<List<ShareUrl>> GetUrls()

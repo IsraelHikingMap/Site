@@ -42,6 +42,7 @@ export class CategoriesLayer extends BaseMapComponent {
             await this.mapService.initializationPromise;
             this.updateMarkers();
             this.mapService.map.on("moveend", () => {
+                // HM TODO: throttle - as this is called twice for some reason...
                 this.updateMarkers();
             });
         });

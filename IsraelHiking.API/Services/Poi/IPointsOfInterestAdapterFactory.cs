@@ -11,7 +11,7 @@ namespace IsraelHiking.API.Services.Poi
         /// This method is used to get an adapter by its source
         /// </summary>
         /// <param name="source"></param>
-        /// <returns></returns>
+        /// <returns>The adapter, null if it is not found</returns>
         IPointsOfInterestAdapter GetBySource(string source);
 
         /// <summary>
