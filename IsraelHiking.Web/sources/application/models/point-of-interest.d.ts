@@ -1,17 +1,5 @@
 ﻿import { DataContainer, LatLngAlt } from "./models";
 
-export interface Rater {
-    id: string;
-    value: number;
-}
-
-export interface Rating {
-    id: string;
-    source: string;
-    raters: Rater[];
-    total: number;
-}
-
 export interface PointOfInterest {
     id: string;
     category: string;
@@ -43,8 +31,6 @@ export interface PointOfInterestExtended extends PointOfInterest {
     imagesUrls: string[];
     description: string;
     references: Reference[];
-
-    rating: Rating;
     dataContainer: DataContainer;
     featureCollection: GeoJSON.FeatureCollection;
     contribution: Contribution;

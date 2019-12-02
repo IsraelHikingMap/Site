@@ -4,7 +4,6 @@ using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace IsraelHiking.API.Converters
@@ -41,7 +40,6 @@ namespace IsraelHiking.API.Converters
                 SouthWest = latLng,
                 NorthEast = latLng,
                 Category = Categories.NONE,
-                Rating = new Rating { Raters = new List<Rater>() },
                 Description = string.Empty,
                 ImagesUrls = new string[0],
                 References = new Reference[0],

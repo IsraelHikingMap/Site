@@ -25,9 +25,7 @@ import {
     LatLngAlt,
     ApplicationState,
     PointOfInterestExtended,
-    Contribution,
-    Rating,
-    Rater
+    Contribution
 } from "../../../models/models";
 
 @Component({
@@ -42,7 +40,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public info: PointOfInterestExtended;
     public isLoading: boolean;
     public sourceImageUrls: string[];
-    public rating: number;
     public latlng: LatLngAlt;
     public shareLinks: IPoiSocialLinks;
     public contribution: Contribution;
@@ -120,7 +117,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                     imagesUrls: [],
                     source: "OSM",
                     id: "",
-                    rating: { raters: [] },
                     references: [],
                     isEditable: true,
                     dataContainer: { routes: [] },
@@ -162,16 +158,11 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.poiExtended = poiExtended;
         this.latlng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng, alt: poiExtended.location.alt};
         this.sourceImageUrls = poiExtended.references.map(r => r.sourceImageUrl);
-        this.rating = this.getRatingNumber(this.poiExtended.rating);
         this.shareLinks = this.poiService.getPoiSocialLinks(poiExtended);
         this.contribution = this.poiExtended.contribution || {} as Contribution;
         // clone:
         this.info = JSON.parse(JSON.stringify(this.poiExtended));
         this.info.icon = this.info.icon;
-    }
-
-    private getRatingNumber(rating: Rating): number {
-        return sum(rating.raters.map(r => r.value));
     }
 
     public isHideEditMode(): boolean {
@@ -234,44 +225,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         } finally {
             this.isLoading = false;
         }
-    }
-
-    public voteUp() {
-        this.vote(1);
-    }
-
-    public voteDown() {
-        this.vote(-1);
-    }
-
-    public canVote(type: string): boolean {
-        if (this.authorizationService.isLoggedIn() === false) {
-            return false;
-        }
-        if (this.poiExtended == null) {
-            return false;
-        }
-        let vote = this.poiExtended.rating.raters.find(r => r.id === this.authorizationService.getUserInfo().id);
-        if (vote == null) {
-            return true;
-        }
-        return type === "up" && vote.value < 0 || type === "down" && vote.value > 0;
-    }
-
-    private vote(value: number) {
-        if (this.canVote(value > 0 ? "up" : "down") === false) {
-            if (this.authorizationService.isLoggedIn() === false) {
-                this.toastService.info(this.resources.loginRequired);
-            }
-            return;
-        }
-        let userId = this.authorizationService.getUserInfo().id;
-        this.poiExtended.rating.raters = this.poiExtended.rating.raters.filter(r => r.id !== userId);
-        this.poiExtended.rating.raters.push({ id: userId, value } as Rater);
-        this.poiService.uploadRating(this.poiExtended.rating).then((rating) => {
-            this.poiExtended.rating = rating;
-            this.rating = this.getRatingNumber(rating);
-        });
     }
 
     public convertToRoute() {

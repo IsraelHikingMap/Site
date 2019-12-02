@@ -13,10 +13,8 @@ namespace IsraelHiking.Common.Poi
         public string[] ImagesUrls { get; set; }
 
         public Reference[] References { get; set; }
-        public Rating Rating { get; set; }
         public FeatureCollection FeatureCollection { get; set; }
         public DataContainer DataContainer { get; set; }
-        public Dictionary<string, List<string>> CombinedIds { get; set; }
         public Contribution Contribution { get; set; }
     }
 }

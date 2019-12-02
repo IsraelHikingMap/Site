@@ -130,7 +130,6 @@ namespace IsraelHiking.API.Services.Poi
                 .Where(n => !string.IsNullOrWhiteSpace(n))
                 .ToArray();
             poiItem.Description = feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
-            poiItem.Rating = await _elasticSearchGateway.GetRating(poiItem.Id, poiItem.Source);
             poiItem.IsEditable = false;
             poiItem.Contribution = GetContribution(feature.Attributes);
             return poiItem;

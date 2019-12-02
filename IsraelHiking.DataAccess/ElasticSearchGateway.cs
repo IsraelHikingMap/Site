@@ -27,7 +27,6 @@ namespace IsraelHiking.DataAccess
         private const string OSM_HIGHWAYS_INDEX1 = "osm_highways1";
         private const string OSM_HIGHWAYS_INDEX2 = "osm_highways2";
         private const string OSM_HIGHWAYS_ALIAS = "osm_highways";
-        private const string RATINGS = "ratings";
         private const string SHARES = "shares";
         private const string CUSTOM_USER_LAYERS = "custom_user_layers";
         private const string EXTERNAL_POIS = "external_pois";
@@ -77,10 +76,6 @@ namespace IsraelHiking.DataAccess
                 _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists)
             {
                 _elasticClient.DeleteIndex(OSM_HIGHWAYS_INDEX2);
-            }
-            if (_elasticClient.IndexExists(RATINGS).Exists == false)
-            {
-                _elasticClient.CreateIndex(RATINGS);
             }
             if (_elasticClient.IndexExists(SHARES).Exists == false)
             {
@@ -235,16 +230,6 @@ namespace IsraelHiking.DataAccess
             return UpdateData(features, OSM_POIS_ALIAS);
         }
 
-        public Task UpdateRating(Rating rating)
-        {
-            return _elasticClient.IndexAsync(rating, r => r.Index(RATINGS).Id(GetId(rating)));
-        }
-
-        public Task DeleteRating(Rating rating)
-        {
-            return _elasticClient.DeleteAsync<Rating>(GetId(rating), r => r.Index(RATINGS));
-        }
-
         private async Task UpdateData(List<Feature> features, string alias)
         {
             var result = await _elasticClient.BulkAsync(bulk =>
@@ -391,20 +376,6 @@ namespace IsraelHiking.DataAccess
             );
         }
 
-        public Task<Rating> GetRating(string id, string source)
-        {
-            return Task.Run(() =>
-            {
-                var response = _elasticClient.Get<Rating>(GeoJsonExtensions.GetId(source, id), r => r.Index(RATINGS));
-                return response.Source ?? new Rating
-                {
-                    Id = id,
-                    Source = source,
-                    Raters = new List<Rater>()
-                };
-            });
-        }
-
         private Task CreateHighwaysIndex(string highwaysIndexName)
         {
             return _elasticClient.CreateIndexAsync(highwaysIndexName,
@@ -480,11 +451,6 @@ namespace IsraelHiking.DataAccess
             }
             await UpdateData(smallCahceList, alias);
             _logger.LogInformation($"Finished indexing {features.Count} records");
-        }
-
-        private string GetId(Rating rating)
-        {
-            return GeoJsonExtensions.GetId(rating.Source, rating.Id);
         }
 
         public Task<List<ShareUrl>> GetUrls()

@@ -8,7 +8,7 @@ import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
 import { RunningContextService } from "./running-context.service";
 import { Urls } from "../urls";
-import { MarkerData, LatLngAlt, PointOfInterestExtended, PointOfInterest, Rating } from "../models/models";
+import { MarkerData, LatLngAlt, PointOfInterestExtended, PointOfInterest } from "../models/models";
 
 export type CategoriesType = "Points of Interest" | "Routes";
 
@@ -137,10 +137,6 @@ export class PoiService {
         return this.httpClient.post(uploadAddress, poiExtended).toPromise() as Promise<PointOfInterestExtended>;
     }
 
-    public uploadRating(rating: Rating): Promise<Rating> {
-        return this.httpClient.post(Urls.rating, rating).toPromise() as Promise<Rating>;
-    }
-
     public getPoiSocialLinks(poiExtended: PointOfInterestExtended): IPoiSocialLinks {
         let poiLink = this.hashService.getFullUrlFromPoiId({
             source: poiExtended.source,
@@ -201,12 +197,6 @@ export class PoiService {
                 userName: f.properties["poiUserName:" + language] || f.properties.poiUserName
             },
             imagesUrls: imageUrls,
-            rating: {
-                id:  null,
-                source: null,
-                raters: [],
-                total: 0
-            },
             description,
             title: Array.isArray(f.properties.poiNames[language]) && f.properties.poiNames[language].length !== 0
                 ? f.properties.poiNames[language][0]

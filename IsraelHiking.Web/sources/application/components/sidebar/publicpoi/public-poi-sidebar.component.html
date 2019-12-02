@@ -16,15 +16,6 @@
             <div fxFlex *ngIf="!isEditMode()">
                 <button mat-button fxFill class="no-padding" (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
             </div>
-            <div fxFlex *ngIf="!isEditMode()">
-                <button mat-button fxFill class="no-padding" (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-up" [style.color]="canVote('up') ? 'green' : 'grey'"></i></button>
-            </div>
-            <div fxFlex *ngIf="!isEditMode()">
-                <span fxFill class="flex-center" dir="ltr">{{rating || 0}}</span>
-            </div>
-            <div fxFlex *ngIf="!isEditMode()">
-                <button mat-button fxFill class="no-padding" (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-down" [style.color]="canVote('down') ? 'red' : 'grey'"></i></button>
-            </div>
             <div fxFlex *ngIf="shareLinks.poiLink && !isEditMode()">
                 <mat-menu #appMenu="matMenu" [dir]="resources.direction">
                     <div mat-menu-item disableRipple="true">

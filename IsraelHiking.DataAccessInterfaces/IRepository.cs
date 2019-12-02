@@ -18,9 +18,5 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<MapLayerData> AddUserLayer(MapLayerData layerData);
         Task UpdateUserLayer(MapLayerData layerData);
         Task DeleteUserLayer(MapLayerData layerData);
-
-        Task<Rating> GetRating(string id, string source);
-        Task UpdateRating(Rating rating);
-        Task DeleteRating(Rating rating);
     }
 }

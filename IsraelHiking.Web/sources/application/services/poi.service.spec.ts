@@ -109,15 +109,4 @@ describe("Poi Service", () => {
                 mockBackend.expectOne((request) => request.url.includes(Urls.poi)).flush({});
                 return promise;
             }));
-
-    it("Should update rating using the server", inject([PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
-
-            let promise = poiService.uploadRating({} as Rating).then((res) => {
-                expect(res).not.toBeNull();
-            });
-
-            mockBackend.expectOne((req: HttpRequest<any>) => req.method === "POST").flush({});
-            return promise;
-        }));
 });
