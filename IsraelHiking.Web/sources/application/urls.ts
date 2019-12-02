@@ -25,7 +25,6 @@ export class Urls {
     public static readonly userLayers = Urls.apiBase + "userLayers/";
     public static readonly poi = Urls.apiBase + "poi/";
     public static readonly poiCategories = Urls.poi + "categories/";
-    public static readonly rating = Urls.apiBase + "rating/";
 
     public static readonly facebook = "http://www.facebook.com/sharer/sharer.php?u=";
 

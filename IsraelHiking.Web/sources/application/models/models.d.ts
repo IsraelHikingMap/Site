@@ -12,7 +12,7 @@ export { RouteEditingState } from "./route-editing-state";
 export { Trace, TraceVisibility } from "./trace";
 export { OsmUserDetails } from "./osm-user-details";
 export { UserInfo } from "./user-info";
-export { PointOfInterestExtended, PointOfInterest, Rating, Contribution, Rater } from "./point-of-interest";
+export { PointOfInterestExtended, PointOfInterest, Contribution } from "./point-of-interest";
 // states:
 export { ApplicationState } from "./state/application-state";
 export { Configuration } from "./state/configuration";

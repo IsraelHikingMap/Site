@@ -13,7 +13,7 @@ import { DatabaseService } from "./database.service";
 import { LoggingService } from "./logging.service";
 import { ConnectionService } from "./connection.service";
 import { Urls } from "../urls";
-import { PointOfInterestExtended, Rating } from "../models/models";
+import { PointOfInterestExtended } from "../models/models";
 
 describe("Poi Service", () => {
 
