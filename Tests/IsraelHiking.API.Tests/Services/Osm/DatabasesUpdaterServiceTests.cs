@@ -3,6 +3,7 @@ using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -167,11 +168,15 @@ namespace IsraelHiking.API.Tests.Services.Osm
             };
             var wayFeature = new Feature(new LineString(new Coordinate[0]), new AttributesTable {
                 { FeatureAttributes.ID, "1" },
+                { FeatureAttributes.POI_SOURCE, Sources.OSM }
             });
+            wayFeature.SetId();
             var wayFeatureInDatabase = new Feature(new LineString(new Coordinate[0]), new AttributesTable {
                 { FeatureAttributes.ID, "1" },
                 { FeatureAttributes.POI_CATEGORY, Categories.HISTORIC },
+                { FeatureAttributes.POI_SOURCE, Sources.OSM }
             });
+            wayFeatureInDatabase.SetId();
             var list = new List<Feature> { wayFeature };
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<Dictionary<string, List<ICompleteOsmGeo>>>(x => x.Values.Count == 1))
