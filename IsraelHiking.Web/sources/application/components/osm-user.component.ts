@@ -163,4 +163,8 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
     public toggleIsAdvanced() {
         this.ngRedux.dispatch(ConfigurationActions.toggleIsAdvanceAction);
     }
+
+    public isOnline(): boolean {
+        return this.runningContextService.isOnline;
+    }
 }

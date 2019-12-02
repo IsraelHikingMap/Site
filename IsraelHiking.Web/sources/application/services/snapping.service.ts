@@ -5,8 +5,9 @@ import { Map } from "mapbox-gl";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
-import { Urls } from "../urls";
+import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
+import { Urls } from "../urls";
 import { LatLngAlt, MarkerData } from "../models/models";
 
 export interface ISnappingRouteOptions {
@@ -55,7 +56,8 @@ export class SnappingService {
     constructor(private readonly httpClient: HttpClient,
                 private readonly resources: ResourcesService,
                 private readonly toastService: ToastService,
-                private readonly geoJsonParser: GeoJsonParser
+                private readonly geoJsonParser: GeoJsonParser,
+                private readonly runningContextService: RunningContextService
     ) {
         this.resources = resources;
         this.highwaySnappings = [];
@@ -76,7 +78,7 @@ export class SnappingService {
         if (!this.map) {
             return;
         }
-        if (this.map.getZoom() <= 12 || this.enabled === false) {
+        if (this.map.getZoom() <= 12 || this.enabled === false || !this.runningContextService.isOnline) {
             this.highwaySnappings.splice(0);
             this.pointsSnappings.splice(0);
             return;

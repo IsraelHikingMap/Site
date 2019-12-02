@@ -14,6 +14,11 @@ import { classToActionMiddleware } from "../reducres/reducer-action-decorator";
 import { rootReducer } from "../reducres/root.reducer";
 import { ApplicationState, LatLngAlt } from "../models/models";
 
+export interface ImageUrlAndData {
+    imageUrl: string;
+    data: string;
+}
+
 @Injectable()
 export class DatabaseService {
     private static readonly STATE_DB_NAME = "State";
@@ -24,9 +29,13 @@ export class DatabaseService {
     private static readonly POIS_TABLE_NAME = "pois";
     private static readonly POIS_ID_COLUMN = "properties.poiId";
     private static readonly POIS_LOCATION_COLUMN = "[properties.poiGeolocation.lat+properties.poiGeolocation.lon]";
+    private static readonly IMAGES_DB_NAME = "Images";
+    private static readonly IMAGES_TABLE_NAME = "images";
 
     private stateDatabase: Dexie;
+    // HM TODO: only for cordova?
     private poisDatabase: Dexie;
+    private imagesDatabase: Dexie;
     private sourcesDatabases: Map<string, Dexie>;
     private updating: boolean;
 
@@ -45,6 +54,10 @@ export class DatabaseService {
         this.poisDatabase = new Dexie(DatabaseService.POIS_DB_NAME);
         this.poisDatabase.version(1).stores({
             pois: DatabaseService.POIS_ID_COLUMN + "," + DatabaseService.POIS_LOCATION_COLUMN
+        });
+        this.imagesDatabase = new Dexie(DatabaseService.IMAGES_DB_NAME);
+        this.imagesDatabase.version(1).stores({
+            images: "imageUrl"
         });
         this.initCustomTileLoadFunction();
         if (this.runningContext.isIFrame) {
@@ -177,5 +190,15 @@ export class DatabaseService {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).get(id);
     }
 
-    // HM TODO: support images...
+    public storeImages(images: ImageUrlAndData[]): Promise<any> {
+        return this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).bulkAdd(images);
+    }
+
+    public async getImageByUrl(imageUrl: string): Promise<string> {
+        let imageAndData = await this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).get(imageUrl) as ImageUrlAndData;
+        if (imageAndData != null) {
+            return imageAndData.data;
+        }
+        return null;
+    }
 }

@@ -202,31 +202,47 @@ export class FileService {
     }
 
     public async openIHMfile(file: File,
-                             progressCallback: (message: string, address: string, content: string) => Promise<void>): Promise<Style> {
+                             tilesCallback: (address: string, content: string) => Promise<void>,
+                             poisCallback: (content: string) => Promise<void>,
+                             imagesCallback: (content: string) => Promise<void>,
+                             notificationCallback: (message: string) => void
+    ): Promise<any> {
         let zip = new JSZip();
         await zip.loadAsync(file);
         let styleFileName = Object.keys(zip.files).find(name => name.endsWith(".json") && name.indexOf("/") === -1);
-        if (styleFileName == null) {
-            throw new Error("Missing style json file!");
-        }
-        let styleText = (await zip.file(styleFileName).async("text")).trim();
-        let styleJson = JSON.parse(styleText) as Style;
-        this.saveStyleJson(styleFileName, styleText);
-        for (let sourceName of Object.keys(styleJson.sources)) {
-            let source = styleJson.sources[sourceName] as VectorSource | RasterDemSource | RasterSource;
-            if (source.tiles && source.tiles[0].startsWith("custom://")) {
-                let parts = Object.keys(zip.files).filter(name => name.startsWith(sourceName + "/" + sourceName));
-                await progressCallback(`Loading ${sourceName}, it has: ${parts.length} parts, please don't close the app.`, null, null);
-                let partIndex = 1;
-                for (let sourceFile of parts) {
-                    this.loggingService.debug("Adding: " + sourceFile);
-                    await progressCallback(`Loading ${partIndex++}/${parts.length}`, source.tiles[0],
-                        await zip.file(sourceFile).async("text") as string);
-                    this.loggingService.debug("Added: " + sourceFile);
+        if (styleFileName != null) {
+            let styleText = (await zip.file(styleFileName).async("text")).trim();
+            let styleJson = JSON.parse(styleText) as Style;
+            this.saveStyleJson(styleFileName, styleText);
+            for (let sourceName of Object.keys(styleJson.sources)) {
+                let source = styleJson.sources[sourceName] as VectorSource | RasterDemSource | RasterSource;
+                if (source.tiles && source.tiles[0].startsWith("custom://")) {
+                    let parts = Object.keys(zip.files).filter(name => name.startsWith(sourceName + "/" + sourceName));
+                    this.loggingService.info(`Loading ${sourceName}, it has: ${parts.length} parts.`);
+                    let partIndex = 1;
+                    for (let sourceFile of parts) {
+                        this.loggingService.debug("Adding: " + sourceFile);
+                        notificationCallback(`${partIndex++}/${parts.length}`);
+                        await tilesCallback(source.tiles[0], await zip.file(sourceFile).async("text") as string);
+                        this.loggingService.debug("Added: " + sourceFile);
+                    }
                 }
             }
         }
-        return styleJson;
+        let poisFileName = Object.keys(zip.files).find(name => name.endsWith(".geojson") && name.indexOf("/") === -1);
+        if (poisFileName != null) {
+            let poisText = (await zip.file(poisFileName).async("text")).trim();
+            await poisCallback(poisText);
+            this.loggingService.debug("Added pois.");
+        }
+        let imagesParts = Object.keys(zip.files).filter(name => name.startsWith("images/images"));
+        let imagespartIndex = 1;
+        for (let imagesFile of imagesParts) {
+            this.loggingService.debug("Adding images: " + imagesFile);
+            notificationCallback(`${imagespartIndex++}/${imagesParts.length}`);
+            await imagesCallback(await zip.file(imagesFile).async("text") as string);
+            this.loggingService.debug("Added images: " + imagesFile);
+        }
     }
 
     private saveStyleJson(styleFileName: string, styleJsonText: string) {

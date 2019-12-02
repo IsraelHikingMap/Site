@@ -11,6 +11,7 @@ import { PoiService } from "./poi.service";
 import { HashService } from "./hash.service";
 import { DatabaseService } from "./database.service";
 import { LoggingService } from "./logging.service";
+import { ConnectionService } from "./connection.service";
 import { Urls } from "../urls";
 import { PointOfInterestExtended, Rating } from "../models/models";
 
@@ -19,6 +20,13 @@ describe("Poi Service", () => {
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
         let hashService = {};
+        let connectionService = {
+            monitor: () => {
+                return {
+                    subscribe: () => { }
+                };
+            }
+        };
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -27,6 +35,7 @@ describe("Poi Service", () => {
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: HashService, useValue: hashService },
+                { provide: ConnectionService, useValue: connectionService },
                 RunningContextService,
                 WhatsAppService,
                 PoiService,

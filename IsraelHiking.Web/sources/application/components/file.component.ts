@@ -37,26 +37,15 @@ export class FileComponent extends BaseMapComponent {
         if (file.name.endsWith(".ihm")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             try {
-                await this.fileService.openIHMfile(file, this.progressCallbackForIhmFileOpening);
+                await this.fileService.openIHMfile(file,
+                    this.tilesStoreCallback,
+                    this.poisStoreCallback,
+                    this.imagesStoreCallback,
+                    (message) => this.toastService.info(message));
                 this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             } catch (ex) {
                 this.toastService.error(ex.message);
             }
-            return;
-        }
-        if (file.name === "pois.geojson") {
-            this.toastService.info(this.resources.openingAFilePleaseWait);
-            await new Promise((resolve, reject) => {
-                let reader = new FileReader();
-                reader.onload = (event: any) => {
-                    let pois = JSON.parse(event.target.result) as GeoJSON.FeatureCollection;
-                    this.databaseService.storePois(pois.features);
-                    resolve();
-                };
-                reader.onerror = () => reject();
-                reader.readAsText(file);
-            });
-            this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             return;
         }
         try {
@@ -66,15 +55,26 @@ export class FileComponent extends BaseMapComponent {
         }
     }
 
-    private progressCallbackForIhmFileOpening = async (message: string, address: string, content: string) => {
+    private tilesStoreCallback = async (address: string, content: string) => {
         try {
-            if (!address || !content) {
-                this.toastService.info(message);
-                return;
-            }
             let dbName = this.databaseService.getDbNameFromUrl(address);
             await this.databaseService.saveTilesContent(dbName, content);
-            this.toastService.info(message);
+        } catch (ex) {
+            this.toastService.error(ex.toString());
+        }
+    }
+
+    private poisStoreCallback = async (content: string) => {
+        try {
+            await this.databaseService.storePois(JSON.parse(content).features);
+        } catch (ex) {
+            this.toastService.error(ex.toString());
+        }
+    }
+
+    private imagesStoreCallback = async (content: string) => {
+        try {
+            await this.databaseService.storeImages(JSON.parse(content));
         } catch (ex) {
             this.toastService.error(ex.toString());
         }

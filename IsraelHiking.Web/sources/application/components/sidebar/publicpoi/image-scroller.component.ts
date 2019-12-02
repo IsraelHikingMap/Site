@@ -5,6 +5,7 @@ import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
 import { ImageResizeService } from "../../../services/image-resize.service";
+import { RunningContextService } from "../../../services/running-context.service";
 
 @Component({
     selector: "image-scroller",
@@ -24,6 +25,7 @@ export class ImageScrollerComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
                 private readonly fileService: FileService,
+                private readonly runningContextService: RunningContextService,
                 private readonly imageGalleryService: ImageGalleryService,
                 private readonly imageResizeService: ImageResizeService) {
         super(resources);
@@ -85,12 +87,19 @@ export class ImageScrollerComponent extends BaseMapComponent {
         if (imageUrl == null) {
             return null;
         }
-        return this.resources.getResizedImageUrl(imageUrl, 800);
+        return this.runningContextService.isOnline
+            ? this.resources.getResizedImageUrl(imageUrl, 800)
+            : imageUrl;
     }
+
     public showImage() {
         let imagesUrls = [];
         for (let imageUrl of this.images) {
-            imagesUrls.push(this.resources.getResizedImageUrl(imageUrl, 1600));
+            let imageUrlToPush = imageUrl;
+            if (this.runningContextService.isOnline) {
+                imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1600);
+            }
+            imagesUrls.push(imageUrlToPush);
         }
         this.imageGalleryService.setImages(imagesUrls);
     }

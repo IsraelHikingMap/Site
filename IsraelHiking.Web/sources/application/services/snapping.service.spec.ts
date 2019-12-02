@@ -1,13 +1,15 @@
 import { TestBed, inject, flushMicrotasks, fakeAsync, tick } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { LngLatBounds } from "mapbox-gl";
 
 import { SnappingService, ISnappingRouteOptions } from "./snapping.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { GeoJsonParser } from "./geojson.parser";
-import { LngLatBounds } from "mapbox-gl";
+import { ConnectionService } from "./connection.service";
+import { RunningContextService } from "./running-context.service";
 
 describe("SnappingService", () => {
 
@@ -17,6 +19,13 @@ describe("SnappingService", () => {
 
     beforeEach(() => {
         let toastMockCreator = new ToastServiceMockCreator();
+        let connectionService = {
+            monitor: () => {
+                return {
+                    subscribe: () => { }
+                };
+            }
+        };
         mapMock = {
             on: (event, method) => moveEndAction = method,
             getCenter: () => centerAndZoom,
@@ -33,6 +42,8 @@ describe("SnappingService", () => {
             providers: [
                 { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
                 { provide: ToastService, useValue: toastMockCreator.toastService },
+                { provide: ConnectionService, useValue: connectionService },
+                RunningContextService,
                 GeoJsonParser,
                 SnappingService
             ]

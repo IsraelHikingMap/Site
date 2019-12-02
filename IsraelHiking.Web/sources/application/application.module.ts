@@ -91,6 +91,8 @@ import { RouteEditRouteInteraction } from "./components/intercations/route-edit-
 // directives
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 import { ImageCaptureDirective } from "./directives/image-capture.directive";
+// pipes
+import { OfflineImagePipe } from "./pipes/offline-image.pipe";
 // components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { MainMapComponent } from "./components/map/main-map.component";
@@ -141,7 +143,6 @@ import { LayersViewComponent } from "./components/map/layers-view.component";
 import { RoutesComponent } from "./components/map/routes.component";
 import { TracesComponent } from "./components/map/traces.component";
 import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
-import { SecuredImageComponent } from "./components/secure-image.component";
 // variables and functions
 import { routes } from "./routes";
 
@@ -339,9 +340,9 @@ NgModule({
         RoutesComponent,
         TracesComponent,
         AutomaticLayerPresentationComponent,
-        SecuredImageComponent,
         NameInUseValidatorDirective,
-        ImageCaptureDirective
+        ImageCaptureDirective,
+        OfflineImagePipe
     ],
     bootstrap: [MainMapComponent]
 })
