@@ -183,13 +183,17 @@ namespace IsraelHiking.DataAccess
                     {FeatureAttributes.NAME, page.Title},
                     {FeatureAttributes.NAME + ":" + Languages.HEBREW, page.Title},
                     {FeatureAttributes.ID, page.Id.ToString()},
-                    {FeatureAttributes.IMAGE_URL, await GetPageImageUrl(page).ConfigureAwait(false)},
                     {FeatureAttributes.POI_SOURCE, Sources.INATURE},
                     {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
                     {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                     {FeatureAttributes.WEBSITE, _wikiSite.SiteInfo.MakeArticleUrl(page.Title)},
                     {FeatureAttributes.POI_SOURCE_IMAGE_URL, "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" }
                 });
+            var image = await GetPageImageUrl(page).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(image))
+            {
+                feature.Attributes.Add(FeatureAttributes.IMAGE_URL, image);
+            }
             if (shareMatch.Success)
             {
                 feature.Attributes[FeatureAttributes.NAME] += " - טבע ונופים";

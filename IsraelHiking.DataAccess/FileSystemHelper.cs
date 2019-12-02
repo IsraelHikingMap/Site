@@ -24,6 +24,11 @@ namespace IsraelHiking.DataAccess
             File.WriteAllBytes(filePath, content);
         }
 
+        public void WriteAllText(string filePath, string content)
+        {
+            File.WriteAllText(filePath, content);
+        }
+
         public string GetCurrentDirectory()
         {
             return Directory.GetCurrentDirectory();

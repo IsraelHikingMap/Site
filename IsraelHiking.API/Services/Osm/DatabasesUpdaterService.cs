@@ -130,9 +130,7 @@ namespace IsraelHiking.API.Services.Osm
                 {
                     continue;
                 }
-                var featureToUpdate = features.First(f =>
-                    f.Attributes[FeatureAttributes.ID].Equals(featureFromDb.Attributes[FeatureAttributes.ID]));
-
+                var featureToUpdate = features.First(f => f.GetId().Equals(featureFromDb.GetId()));
                 foreach (var attributeKey in featureFromDb.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_PREFIX)))
                 {
                     featureToUpdate.Attributes.AddOrUpdate(attributeKey, featureFromDb.Attributes[attributeKey]);

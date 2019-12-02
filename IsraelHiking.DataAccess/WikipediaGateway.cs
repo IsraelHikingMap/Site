@@ -132,7 +132,14 @@ namespace IsraelHiking.DataAccess
             var attributes = GetAttributes(coordinate, page.Title, page.Id.ToString(), language);
             attributes.Add(FeatureAttributes.DESCRIPTION + ":" + language, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
             var imageUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url ?? string.Empty;
-            attributes.Add(FeatureAttributes.IMAGE_URL, imageUrl.EndsWith(".svg") ? string.Empty : imageUrl);
+            if (!string.IsNullOrWhiteSpace(imageUrl) && 
+                (imageUrl.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                imageUrl.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+                imageUrl.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                imageUrl.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase)))
+            {
+                attributes.Add(FeatureAttributes.IMAGE_URL, imageUrl);
+            }
             attributes.Add(FeatureAttributes.POI_USER_NAME + ":" + language, page.LastRevision.UserName);
             attributes.Add(FeatureAttributes.POI_USER_ADDRESS + ":" + language, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeUriString(page.LastRevision.UserName)}"));
             attributes.Add(FeatureAttributes.POI_LAST_MODIFIED + ":" + language, page.LastRevision.TimeStamp.ToString("o"));

@@ -43,6 +43,8 @@
 
     <!--Skip Microsoft logs and so log only site logs-->
     <logger name="Microsoft.*" minlevel="Trace" maxlevel="Warn" writeTo="blackhole" final="true" />
+    <!--Skip Microsoft logs and so log only site logs-->
+    <logger name="System.Net.Http.*" minlevel="Trace" maxlevel="Warn" writeTo="blackhole" final="true" />
     
     <logger name="*" minlevel="Trace" writeTo="site" />
   </rules>

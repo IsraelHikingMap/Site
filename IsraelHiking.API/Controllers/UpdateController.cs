@@ -104,6 +104,7 @@ namespace IsraelHiking.API.Controllers
         [Route("")]
         public async Task<IActionResult> PutUpdateData()
         {
+            // HM TODO: update this code according to changes in POIs
             if (!IsRequestLocal())
             {
                 return BadRequest("This operation can't be done from a remote client, please run this from the server");

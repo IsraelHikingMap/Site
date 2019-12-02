@@ -25,7 +25,8 @@ namespace IsraelHiking.DataAccess
             _logger.LogDebug("Getting file from: " + url);
             client.Timeout = TimeSpan.FromMinutes(20);
             var response = await client.GetAsync(url);
-            var fileName = response.Content.Headers.ContentDisposition?.FileName.Trim('"') ??
+            var fileName = response.Content.Headers.ContentDisposition?.FileName?.Trim('"') ??
+                response.Content.Headers.ContentDisposition?.FileNameStar?.Trim('"') ??
                 url.Substring(url.LastIndexOf("/", StringComparison.Ordinal) + 1);
             var content = new byte[0];
             if (response.IsSuccessStatusCode)
