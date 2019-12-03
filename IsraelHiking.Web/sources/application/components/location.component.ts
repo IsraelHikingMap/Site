@@ -172,7 +172,14 @@ export class LocationComponent extends BaseMapComponent {
 
     public toggleRecording() {
         if (this.isRecording()) {
-            this.stopRecording();
+            this.toastService.confirm({
+                message: this.resources.areYouSureYouWantToStopRecording,
+                type: "YesNo",
+                confirmAction: () => {
+                    this.stopRecording();
+                },
+                declineAction: () => { },
+            });
         } else {
             if (this.showBatteryConfirmation) {
                 this.toastService.confirm({

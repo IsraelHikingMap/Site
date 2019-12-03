@@ -299,6 +299,7 @@ export class ResourcesService {
     public preparingDataForIssueReport: string;
     public openingAFilePleaseWait: string;
     public finishedOpeningTheFile: string;
+    public areYouSureYouWantToStopRecording: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -499,7 +500,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1575150091248");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1575404635104");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -788,6 +789,7 @@ export class ResourcesService {
         this.preparingDataForIssueReport = this.gettextCatalog.getString("Preparing data for issue report");
         this.openingAFilePleaseWait = this.gettextCatalog.getString("Opening file, this might take a while, please don't close the app...");
         this.finishedOpeningTheFile = this.gettextCatalog.getString("Finished opening file! :-)");
+        this.areYouSureYouWantToStopRecording = this.gettextCatalog.getString("Are you sure you want to stop the current recording?");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");
