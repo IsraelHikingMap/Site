@@ -32,8 +32,6 @@ export class LocationComponent extends BaseMapComponent {
     @LocalStorage()
     private showBatteryConfirmation = true;
 
-    private isResettingNorthUp: boolean;
-
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public isFollowing: boolean;
     public isKeepNorthUp: boolean;
@@ -54,7 +52,6 @@ export class LocationComponent extends BaseMapComponent {
 
         this.isFollowing = true;
         this.isKeepNorthUp = false;
-        this.isResettingNorthUp = false;
         this.locationLatLng = null;
         this.updateLocationFeatureCollection(null);
 
@@ -69,19 +66,14 @@ export class LocationComponent extends BaseMapComponent {
                         return;
                     }
                     this.isFollowing = false;
-                    this.cancelableTimeoutService.clearTimeoutByGroup("following");
-                    this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                        this.setLocation();
-                        this.isFollowing = true;
-                    },
-                        LocationComponent.NOT_FOLLOWING_TIMEOUT,
-                        "following");
-                });
-            this.host.mapInstance.on("rotatestart",
-                (_) => {
-                    if (this.isResettingNorthUp === false) {
-                        this.isKeepNorthUp = false;
-                    }
+                    // HM TODO: is this really needed?
+                    // this.cancelableTimeoutService.clearTimeoutByGroup("following");
+                    // this.cancelableTimeoutService.setTimeoutByGroup(() => {
+                    //     this.setLocation();
+                    //     this.isFollowing = true;
+                    // },
+                    //     LocationComponent.NOT_FOLLOWING_TIMEOUT,
+                    //     "following");
                 });
         });
 
@@ -127,18 +119,10 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public toggleKeepNorthUp() {
-        if (!this.isFollowing || this.isDisabled()) {
-            this.host.mapInstance.rotateTo(0);
+        this.isKeepNorthUp = !this.isKeepNorthUp;
+        if (this.isKeepNorthUp) {
+           this.host.mapInstance.rotateTo(0);
         }
-        // this.isResettingNorthUp = true;
-        // this.isKeepNorthUp = !this.isKeepNorthUp;
-        // if (!this.isFollowing) {
-        //    this.host.mapInstance.setBearing(0);
-        // } else {
-        //    this.host.mapInstance.rotateTo(0);
-        //    this.isResettingNorthUp = false;
-        // }
-
     }
 
     public getRotationAngle() {
@@ -151,14 +135,23 @@ export class LocationComponent extends BaseMapComponent {
     public toggleTracking() {
         if (this.isLoading()) {
             this.disableGeoLocation();
-        } else if (this.isDisabled()) {
+            return;
+        }
+        if (this.isDisabled()) {
             this.geoLocationService.enable();
             this.isFollowing = true;
-        } else if (this.isActive() && this.isFollowing) {
+            return;
+        }
+        if (this.isActive() && this.isFollowing && this.isRecording()) {
+            this.isFollowing = false;
+            return;
+        }
+        if (this.isActive() && this.isFollowing && !this.isRecording()) {
             this.disableGeoLocation();
-        } else if (this.isActive() && !this.isFollowing) {
-            this.setLocation();
+        }
+        if (this.isActive() && !this.isFollowing) {
             this.isFollowing = true;
+            this.setLocation();
         }
     }
 
@@ -263,10 +256,12 @@ export class LocationComponent extends BaseMapComponent {
             alt: position.coords.altitude
         }, position.coords.accuracy, heading);
 
-        if (this.isFollowing) {
-            if (needToUpdateHeading && this.isKeepNorthUp === false) {
+        if (!this.host.mapInstance.isMoving()) {
+            if (this.isFollowing && this.isKeepNorthUp) {
+                this.setLocation();
+            } else if (this.isFollowing && !this.isKeepNorthUp && needToUpdateHeading) {
                 this.setLocation(position.coords.heading);
-            } else {
+            } else if (this.isFollowing && !this.isKeepNorthUp && !needToUpdateHeading) {
                 this.setLocation();
             }
         }
@@ -282,9 +277,6 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     private disableGeoLocation() {
-        if (this.isRecording()) {
-            this.toggleRecording();
-        }
         this.geoLocationService.disable();
         if (this.locationFeatures.features.length > 0) {
             this.updateLocationFeatureCollection(null);
