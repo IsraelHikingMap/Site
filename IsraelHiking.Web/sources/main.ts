@@ -13,15 +13,9 @@ if (environment.production) {
 if (environment.isCordova) {
     let onDeviceReady = () => {
         window.open = cordova.InAppBrowser.open;
-        let win = (window as any);
-        win.openDatabase = (dbname, ignored1, ignored2, ignored3) => {
-            return win.sqlitePlugin.openDatabase({ name: dbname, location: "default", createFromLocation: 1 });
-        };
-        win.plugins.insomnia.keepAwake();
         bootstrapInitializationFunction();
     };
     document.addEventListener("deviceready", onDeviceReady, false);
-    document.addEventListener("resume", () => (window as any).plugins.insomnia.keepAwake(), false);
 } else {
     bootstrapInitializationFunction();
 }

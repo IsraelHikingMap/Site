@@ -21,6 +21,7 @@ export const initialState =
     {
         configuration: {
             isAdvanced: false,
+            isBatteryOptimization: false,
             version: "8.0"
         } as Configuration,
         location: {

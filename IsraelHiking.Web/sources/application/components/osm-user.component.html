@@ -49,6 +49,9 @@
                     <div mat-menu-item>
                         <mat-checkbox [checked]="isAdvanced | async" (change)="toggleIsAdvanced()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle advanced button">{{resources.toggleAdvancedSettings}}</mat-checkbox>
                     </div>
+                    <div mat-menu-item *ngIf="isApp() && isAdvanced | async">
+                        <mat-checkbox [checked]="isBatteryOptimization | async" (change)="toggleBatteryOprimization()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle battery optimization">{{resources.batteryOptimization}}</mat-checkbox>
+                    </div>
                     <button mat-menu-item *ngIf="isApp()" (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user report an issue">
                         <span><i class="fa fa-lg icon-envelope"></i> {{resources.reportAnIssue}}</span>
                     </button>

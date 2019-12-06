@@ -43,6 +43,9 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
     @select((state: ApplicationState) => state.configuration.isAdvanced)
     public isAdvanced: Observable<boolean>;
 
+    @select((state: ApplicationState) => state.configuration.isBatteryOptimization)
+    public isBatteryOptimization: Observable<boolean>;
+
     @LocalStorage()
     public agreedToTheTermsOfService = false;
 
@@ -162,6 +165,10 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
 
     public toggleIsAdvanced() {
         this.ngRedux.dispatch(ConfigurationActions.toggleIsAdvanceAction);
+    }
+
+    public toggleBatteryOprimization() {
+        this.ngRedux.dispatch(ConfigurationActions.toggleIsBatteryOptimizationAction);
     }
 
     public isOnline(): boolean {
