@@ -26,6 +26,7 @@ export class ScreenService {
         }, false);
         this.userIdleService.setInterrupts(DEFAULT_INTERRUPTSOURCES);
         this.userIdleService.setIdle(30);
+        this.userIdleService.setTimeout(false);
         this.userIdleService.onIdleStart.subscribe(() => {
             if (this.ngRedux.getState().configuration.isBatteryOptimization) {
                 brightness.setBrightness(0.01);
