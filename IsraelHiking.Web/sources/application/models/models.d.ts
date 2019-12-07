@@ -13,6 +13,7 @@ export { Trace, TraceVisibility } from "./trace";
 export { OsmUserDetails } from "./osm-user-details";
 export { UserInfo } from "./user-info";
 export { PointOfInterestExtended, PointOfInterest, Contribution } from "./point-of-interest";
+export { NorthEast } from "./north-east";
 // states:
 export { ApplicationState } from "./state/application-state";
 export { Configuration } from "./state/configuration";

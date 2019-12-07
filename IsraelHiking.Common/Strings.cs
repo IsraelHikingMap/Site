@@ -63,9 +63,12 @@
         public const string POI_ICON = POI_PREFIX + "Icon";
         public const string POI_ICON_COLOR = POI_PREFIX + "IconColor";
         public const string POI_OSM_NODES = POI_PREFIX + "OsmNodes";
+        public const string POI_ALT = POI_PREFIX + "Alt";
+        public const string POI_ITM_NORTH = POI_PREFIX + "ItmNorth";
+        public const string POI_ITM_EAST = POI_PREFIX + "ItmEast";
         public const string LAT = "lat";
         public const string LON = "lon";
-        
+
     }
 
     public static class Sources

@@ -65,7 +65,7 @@
                     <div fxLayout="row" *ngIf="contribution.userName" class="text-small">
                         <span><a [href]="contribution.userAddress" [target]="'_blank'">{{contribution.userName}}</a> - {{contribution.lastModifiedDate | date:'dd/MM/yyyy' }}</span>
                     </div>
-                    <coordinates *ngIf="!isLoading" [latlng]="latlng"></coordinates>
+                    <coordinates *ngIf="!isLoading" [latlng]="latlng" [itmCoordinates]="itmCoordinates"></coordinates>
                     <div fxLayout="row">
                         <a *ngFor="let reference of info.references;" [href]="reference.url" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site">
                             <img *ngIf="reference.sourceImageUrl" [src]="reference.sourceImageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(info.title)" />

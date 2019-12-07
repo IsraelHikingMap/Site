@@ -16,5 +16,6 @@ namespace IsraelHiking.Common.Poi
         public FeatureCollection FeatureCollection { get; set; }
         public DataContainer DataContainer { get; set; }
         public Contribution Contribution { get; set; }
+        public NorthEast ItmCoordinates { get; set; }
     }
 }

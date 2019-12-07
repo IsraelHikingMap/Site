@@ -25,7 +25,8 @@ import {
     LatLngAlt,
     ApplicationState,
     PointOfInterestExtended,
-    Contribution
+    Contribution,
+    NorthEast
 } from "../../../models/models";
 
 @Component({
@@ -41,6 +42,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public isLoading: boolean;
     public sourceImageUrls: string[];
     public latlng: LatLngAlt;
+    public itmCoordinates: NorthEast;
     public shareLinks: IPoiSocialLinks;
     public contribution: Contribution;
 
@@ -160,6 +162,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.sourceImageUrls = poiExtended.references.map(r => r.sourceImageUrl);
         this.shareLinks = this.poiService.getPoiSocialLinks(poiExtended);
         this.contribution = this.poiExtended.contribution || {} as Contribution;
+        this.itmCoordinates = this.poiExtended.itmCoordinates;
         // clone:
         this.info = JSON.parse(JSON.stringify(this.poiExtended));
         this.info.icon = this.info.icon;

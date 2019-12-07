@@ -174,7 +174,7 @@ export class DatabaseService {
     }
 
     public storePois(pois: GeoJSON.Feature[]): Promise<any> {
-        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkAdd(pois);
+        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkPut(pois);
     }
 
     public getPois(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[], language: string): Promise<GeoJSON.Feature[]> {
@@ -191,7 +191,7 @@ export class DatabaseService {
     }
 
     public storeImages(images: ImageUrlAndData[]): Promise<any> {
-        return this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).bulkAdd(images);
+        return this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).bulkPut(images);
     }
 
     public async getImageByUrl(imageUrl: string): Promise<string> {

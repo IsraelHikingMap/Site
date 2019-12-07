@@ -7,6 +7,7 @@ import { HashService, IPoiRouterData } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
 import { RunningContextService } from "./running-context.service";
+import { SpatialService } from './spatial.service';
 import { Urls } from "../urls";
 import { MarkerData, LatLngAlt, PointOfInterestExtended, PointOfInterest } from "../models/models";
 
@@ -100,7 +101,7 @@ export class PoiService {
         let language = this.resources.getCurrentLanguageCodeSimplified();
         if (!this.runningContextService.isOnline) {
             let features = await this.databaseService.getPois(northEast, southWest, categoriesTypes, language);
-            return features.map(f => this.featureToPoint(f));
+            return features.map(f => this.featureToPoint(f)).filter(f => f != null);
         }
 
         let params = new HttpParams()
@@ -166,13 +167,15 @@ export class PoiService {
     private featureToPoint(f: GeoJSON.Feature): PointOfInterestExtended {
         let language = this.resources.getCurrentLanguageCodeSimplified();
         let imageUrls = uniq(Object.keys(f.properties).filter(k => k.toLowerCase().startsWith("image")).map(k => f.properties[k]));
-        let references = Object.keys(f.properties).filter(k => k.toLowerCase().startsWith("website")).map(k => ({
-            url: f.properties[k],
-            sourceImageUrl: f.properties["poiSourceImageUrl" + k.replace("website", "")]
-        }));
-        references = uniqWith(references, (a, b) => a.url === b.url);
+        // HM TODO: remove this?
+        // let references = Object.keys(f.properties).filter(k => k.toLowerCase().startsWith("website")).map(k => ({
+        //     url: f.properties[k],
+        //     sourceImageUrl: f.properties["poiSourceImageUrl" + k.replace("website", "")]
+        // }));
+        // references = uniqWith(references, (a, b) => a.url === b.url);
+        let references = []; // no references due to offline.
         let description = f.properties["description:" + language] || f.properties.description;
-        return {
+        let poi = {
             id: f.properties.identifier,
             category: f.properties.poiCategory,
             hasExtraData: description != null || imageUrls.length > 0,
@@ -180,16 +183,23 @@ export class PoiService {
             iconColor: f.properties.poiIconColor,
             location: {
                 lat: f.properties.poiGeolocation.lat,
-                lng: f.properties.poiGeolocation.lon
+                lng: f.properties.poiGeolocation.lon,
+                alt: f.properties.poiAlt
+            },
+            itmCoordinates: {
+                east: f.properties.poiItmEast,
+                north: f.properties.poiItmNorth,
             },
             source: f.properties.poiSource,
             isEditable: f.properties.poiSource === "OSM",
             isRoute: f.geometry.type === "LineString" || f.geometry.type === "MultiLineString",
             isArea: f.geometry.type === "Polygon" || f.geometry.type === "MultiPolygon",
-            lengthInKm: 0, // HM TODO: need to fill this for routes. turf?
+            lengthInKm: SpatialService.getLengthInMetersForGeometry(f.geometry) / 1000,
             dataContainer: null,
             featureCollection: {
-                type: "FeatureCollection", features: [f] },
+                type: "FeatureCollection",
+                features: [f]
+            } as GeoJSON.FeatureCollection,
             references,
             contribution: {
                 lastModifiedDate: new Date(f.properties["poiLastModified:" + language] || f.properties.poiLastModified),
@@ -204,5 +214,9 @@ export class PoiService {
                     ? f.properties.poiNames.all[0]
                     : ""
         };
+        if (!poi.title && !poi.hasExtraData) {
+            return null;
+        }
+        return poi;
     }
 }

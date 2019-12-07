@@ -63,6 +63,8 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 _osmLatestFileFetcherExecutor, 
                 _graphHopperGateway,
                 _pointsOfInterestFilesCreatorExecutor,
+                Substitute.For<IElevationDataStorage>(),
+                Substitute.For<IItmWgs84MathTransfromFactory>(),
                 Substitute.For<ILogger>());
         }
 
@@ -73,6 +75,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             adapter.GetPointsForIndexing().Returns(new List<Feature>());
             _pointsOfInterestAdapterFactory.GetBySource(Arg.Any<string>()).Returns(adapter);
             _elasticSearchGateway.GetExternalPoisBySource(Arg.Any<string>()).Returns(new List<Feature>());
+            _featuresMergeExecutor.Merge(Arg.Any<List<Feature>>()).Returns(new List<Feature>());
 
             _service.Rebuild(new UpdateRequest { Highways = true, PointsOfInterest = true, SiteMap = true }).Wait();
 

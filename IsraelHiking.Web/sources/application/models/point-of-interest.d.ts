@@ -1,4 +1,4 @@
-﻿import { DataContainer, LatLngAlt } from "./models";
+﻿import { DataContainer, LatLngAlt, NorthEast } from "./models";
 
 export interface PointOfInterest {
     id: string;
@@ -34,4 +34,5 @@ export interface PointOfInterestExtended extends PointOfInterest {
     dataContainer: DataContainer;
     featureCollection: GeoJSON.FeatureCollection;
     contribution: Contribution;
+    itmCoordinates: NorthEast;
 }

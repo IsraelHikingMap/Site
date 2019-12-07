@@ -92,13 +92,12 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
             var features = await _elasticSearchGateway.GetPointsOfInterest(northEast, southWest, categories, language);
-            var tasks = features.Where(f => f.IsProperPoi(language)).Select(f => ConvertToPoiItem<PointOfInterest>(f, language));
-            var points = await Task.WhenAll(tasks);
+            var points = features.Where(f => f.IsProperPoi(language)).Select(f => ConvertToPoiItem<PointOfInterest>(f, language));
             foreach (var pointOfInterest in points.Where(p => string.IsNullOrWhiteSpace(p.Icon)))
             {
                 pointOfInterest.Icon = SEARCH_ICON;
             }
-            return points;
+            return points.ToArray();
         }
 
         /// <inheritdoc />
@@ -120,7 +119,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <returns></returns>
         private async Task<PointOfInterestExtended> ConvertToPoiExtended(Feature feature, string language)
         {
-            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
+            var poiItem = ConvertToPoiItem<PointOfInterestExtended>(feature, language);
             await SetDataContainerAndLength(poiItem, feature);
 
             poiItem.References = GetReferences(feature, language);
@@ -132,6 +131,8 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.Description = feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
             poiItem.IsEditable = false;
             poiItem.Contribution = GetContribution(feature.Attributes);
+            var itmCoordinate = _wgs84ItmMathTransform.Transform(poiItem.Location.Lng, poiItem.Location.Lat);
+            poiItem.ItmCoordinates = new NorthEast { East = (int)itmCoordinate.x, North = (int)itmCoordinate.y };
             return poiItem;
         }
 
@@ -188,14 +189,14 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="feature">The featue to convert</param>
         /// <param name="language">The user interface language</param>
         /// <returns></returns>
-        private async Task<TPoiItem> ConvertToPoiItem<TPoiItem>(IFeature feature, string language) where TPoiItem : PointOfInterest, new()
+        private TPoiItem ConvertToPoiItem<TPoiItem>(IFeature feature, string language) where TPoiItem : PointOfInterest, new()
         {
             var poiItem = new TPoiItem();
             if (feature.Attributes[FeatureAttributes.POI_GEOLOCATION] is AttributesTable geoLocation)
             {
-                poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
-                var alt = await _elevationDataStorage.GetElevation(poiItem.Location.ToCoordinate());
-                poiItem.Location.Alt = alt;
+                poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], 
+                    (double)geoLocation[FeatureAttributes.LON],
+                    (double)feature.Attributes[FeatureAttributes.POI_ALT]);
             }
             poiItem.Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString();
             poiItem.Title = feature.Attributes.GetByLanguage(FeatureAttributes.NAME, language);
@@ -210,7 +211,6 @@ namespace IsraelHiking.API.Services.Poi
         private async Task<PointOfInterestExtended> FeatureToExtendedPoi(Feature feature, string language)
         {
             var poiItem = await ConvertToPoiExtended(feature, language);
-            poiItem.IsEditable = true;
             if (string.IsNullOrWhiteSpace(poiItem.Icon))
             {
                 poiItem.Icon = SEARCH_ICON;
@@ -353,7 +353,14 @@ namespace IsraelHiking.API.Services.Poi
             {
                 foreach (var attributeKey in featureFromDb.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_PREFIX)))
                 {
-                    feature.Attributes.AddOrUpdate(attributeKey, featureFromDb.Attributes[attributeKey]);
+                    if (!feature.Attributes.GetNames().Any(n => n == attributeKey)) {
+                        feature.Attributes.AddOrUpdate(attributeKey, featureFromDb.Attributes[attributeKey]);
+                    }
+                }
+                if (feature.Geometry.OgcGeometryType == OgcGeometryType.Point &&
+                    featureFromDb.Geometry.OgcGeometryType != OgcGeometryType.Point)
+                {
+                    feature.Geometry = featureFromDb.Geometry;
                 }
             }
 

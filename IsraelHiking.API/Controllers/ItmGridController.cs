@@ -1,24 +1,10 @@
 ﻿using IsraelHiking.API.Executors;
+using IsraelHiking.Common.Poi;
 using Microsoft.AspNetCore.Mvc;
 using ProjNet.CoordinateSystems.Transformations;
 
 namespace IsraelHiking.API.Controllers
 {
-    /// <summary>
-    /// Return value for elevation request
-    /// </summary>
-    public class NorthEast
-    {
-        /// <summary>
-        /// North coordinates in meters
-        /// </summary>
-        public int North { get; set; }
-        /// <summary>
-        /// East coordinates in meters
-        /// </summary>
-        public int East { get; set; }
-    }
-
     /// <summary>
     /// This controller facilitates for conversion between WGS84 coordinates to ITM coordinates
     /// </summary>

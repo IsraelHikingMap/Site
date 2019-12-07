@@ -289,6 +289,7 @@ namespace IsraelHiking.DataAccess
         public async Task<List<Feature>> GetAllPointsOfInterest()
         {
             var list = new List<Feature>();
+            _elasticClient.Refresh(OSM_POIS_ALIAS);
             var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
             var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000)

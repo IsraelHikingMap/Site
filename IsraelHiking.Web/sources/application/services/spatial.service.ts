@@ -12,6 +12,28 @@ import nearestPointOnLine from "@turf/nearest-point-on-line";
 @Injectable()
 export class SpatialService {
 
+    public static getLengthInMetersForGeometry(geometry: GeoJSON.Geometry) {
+        if (geometry.type === "LineString") {
+            return SpatialService.getLengthInMetersForCoordinates(geometry.coordinates);
+        }
+        if (geometry.type === "MultiLineString") {
+            let totalDistance = 0;
+            for (let coordinates of geometry.coordinates) {
+                totalDistance += SpatialService.getLengthInMetersForCoordinates(coordinates);
+            }
+            return totalDistance;
+        }
+        return 0;
+    }
+
+    private static getLengthInMetersForCoordinates(coordinates: number[][]) {
+        let totalDistance = 0;
+        for (let coordinateIndex = 1; coordinateIndex < coordinates.length; coordinateIndex++) {
+            totalDistance += distance(coordinates[coordinateIndex - 1], coordinates[coordinateIndex], { units: "meters" });
+        }
+        return totalDistance;
+    }
+
     public static getDistanceInMeters(latlng1: LatLngAlt, latlng2: LatLngAlt) {
         return distance(SpatialService.toCoordinate(latlng1),
             SpatialService.toCoordinate(latlng2), { units: "meters" });
