@@ -1,7 +1,6 @@
 ﻿<div class="side-control mapboxgl-ctrl">
-    <button mat-button (click)="toggleTracking()" [class.active]="isActive()" matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle GPS location">
-        <i *ngIf="isDisabled() || isActive() && isFollowing" class="fa fa-lg icon-crosshairs"></i>
-        <i *ngIf="isActive() && !isFollowing" class="fa fa-lg icon-follow-me"></i>
+    <button mat-button (click)="toggleTracking()" [class.active]="isFollowing && isActive()" matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle GPS location">
+        <i *ngIf="isDisabled() || isActive()" class="fa fa-lg icon-crosshairs" [style.color]="isActive() && isFollowingLocation() ? 'green' : 'black'"></i>
         <div *ngIf="isLoading()" class="spinner-container">
             <mat-spinner diameter="24"></mat-spinner>
         </div>

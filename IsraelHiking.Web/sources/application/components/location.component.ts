@@ -32,6 +32,8 @@ export class LocationComponent extends BaseMapComponent {
     @LocalStorage()
     private showBatteryConfirmation = true;
 
+    private isPanned: boolean;
+
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public isFollowing: boolean;
     public isKeepNorthUp: boolean;
@@ -51,6 +53,7 @@ export class LocationComponent extends BaseMapComponent {
         super(resources);
 
         this.isFollowing = true;
+        this.isPanned = false;
         this.isKeepNorthUp = false;
         this.locationLatLng = null;
         this.updateLocationFeatureCollection(null);
@@ -65,15 +68,16 @@ export class LocationComponent extends BaseMapComponent {
                     if (!this.isActive()) {
                         return;
                     }
-                    this.isFollowing = false;
-                    // HM TODO: is this really needed?
-                    // this.cancelableTimeoutService.clearTimeoutByGroup("following");
-                    // this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                    //     this.setLocation();
-                    //     this.isFollowing = true;
-                    // },
-                    //     LocationComponent.NOT_FOLLOWING_TIMEOUT,
-                    //     "following");
+                    this.isPanned = true;
+                    this.cancelableTimeoutService.clearTimeoutByGroup("panned");
+                    this.cancelableTimeoutService.setTimeoutByGroup(() => {
+                        this.isPanned = false;
+                        if (this.isFollowingLocation()) {
+                            this.setLocation();
+                        }
+                    },
+                        LocationComponent.NOT_FOLLOWING_TIMEOUT,
+                        "panned");
                 });
         });
 
@@ -103,6 +107,10 @@ export class LocationComponent extends BaseMapComponent {
                 });
             });
         }
+    }
+
+    public isFollowingLocation(): boolean {
+        return this.isFollowing && !this.isPanned;
     }
 
     public openLocationPopup() {
@@ -140,18 +148,24 @@ export class LocationComponent extends BaseMapComponent {
         if (this.isDisabled()) {
             this.geoLocationService.enable();
             this.isFollowing = true;
+            this.isPanned = false;
             return;
         }
-        if (this.isActive() && this.isFollowing && this.isRecording()) {
+        // is active must be true
+        if (!this.isFollowing || this.isPanned) {
+            this.isFollowing = true;
+            this.isPanned = false;
+            this.setLocation();
+            return;
+        }
+        // following and not panned
+        if (this.isRecording()) {
             this.isFollowing = false;
             return;
         }
-        if (this.isActive() && this.isFollowing && !this.isRecording()) {
+        if (!this.isRecording()) {
             this.disableGeoLocation();
-        }
-        if (this.isActive() && !this.isFollowing) {
-            this.isFollowing = true;
-            this.setLocation();
+            return;
         }
     }
 
@@ -257,11 +271,11 @@ export class LocationComponent extends BaseMapComponent {
         }, position.coords.accuracy, heading);
 
         if (!this.host.mapInstance.isMoving()) {
-            if (this.isFollowing && this.isKeepNorthUp) {
+            if (this.isFollowingLocation() && this.isKeepNorthUp) {
                 this.setLocation();
-            } else if (this.isFollowing && !this.isKeepNorthUp && needToUpdateHeading) {
+            } else if (this.isFollowingLocation() && !this.isKeepNorthUp && needToUpdateHeading) {
                 this.setLocation(position.coords.heading);
-            } else if (this.isFollowing && !this.isKeepNorthUp && !needToUpdateHeading) {
+            } else if (this.isFollowingLocation() && !this.isKeepNorthUp && !needToUpdateHeading) {
                 this.setLocation();
             }
         }
