@@ -23,6 +23,10 @@ export class ScreenService {
         document.addEventListener("resume", () => {
             brightness.setKeepScreenOn(true);
             brightness.setBrightness(-1);
+            this.userIdleService.watch();
+        }, false);
+        document.addEventListener("pause", () => {
+            this.userIdleService.stop();
         }, false);
         this.userIdleService.setInterrupts(DEFAULT_INTERRUPTSOURCES);
         this.userIdleService.setIdle(30);
