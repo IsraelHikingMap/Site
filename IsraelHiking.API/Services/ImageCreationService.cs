@@ -78,7 +78,6 @@ namespace IsraelHiking.API.Services
             await UpdateBackGroundImage(context);
             DrawRoutesOnImage(context);
             CropAndResizeImage(context);
-            DrawWaterMark(context);
             var imageStream = new MemoryStream();
             context.Image.Save(imageStream, ImageFormat.Png);
             _logger.LogDebug("Creating image for thumbnail completed.");
@@ -466,39 +465,6 @@ namespace IsraelHiking.API.Services
 
             }
             context.Image = bmp;
-        }
-
-        private void DrawWaterMark(ImageCreationContext context)
-        {
-            if (context.Width < 200)
-            {
-                // too small...
-                return;
-            }
-            var text = "IsraelHikingMap.osm.org.il";
-            var initialFontSize = 16;
-            var fontFamiliyName = "Arial";
-            using (Graphics graphics = Graphics.FromImage(context.Image))
-            using (var fill = new SolidBrush(Color.FromArgb(128, 0, 0, 0)))
-            using (var outline = new Pen(Color.FromArgb(128, 255, 255, 255), 6))
-            {
-                Font stringFont = new Font(fontFamiliyName, initialFontSize);
-                var stringSize = graphics.MeasureString(text, stringFont);
-                var ratio = (context.Width - 4) / stringSize.Width;
-                var bottomPosition = context.Height - 2 - stringSize.Height * ratio;
-                var fontSize = initialFontSize * ratio;
-                stringFont = new Font(fontFamiliyName, fontSize);
-                // Draw string to screen.
-                GraphicsPath path = new GraphicsPath();
-                path.AddString(text,
-                    new FontFamily(fontFamiliyName),
-                    (int)FontStyle.Regular,
-                    graphics.DpiY * fontSize / 72, // em size, 
-                    new PointF(2, bottomPosition),
-                    new StringFormat());
-                graphics.DrawPath(outline, path);
-                graphics.FillPath(fill, path);
-            }
         }
     }
 }
