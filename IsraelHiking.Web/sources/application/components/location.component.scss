@@ -1,7 +1,13 @@
-﻿.spinner-container {
+﻿@import "~scss/_variables.scss";
+
+.spinner-container {
     padding: 3px;
 }
 
 .recording-button {
     color: red;
+}
+
+.following {
+    color: mat-color($app-primary)
 }

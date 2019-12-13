@@ -40,7 +40,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         }
 
         [TestMethod]
-        //[Ignore]
+        [Ignore]
         public void GetHighways_ShouldReturnResults()
         {
             _gateway.Initialize();
