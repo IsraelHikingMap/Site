@@ -262,24 +262,7 @@ namespace IsraelHiking.DataAccess
                 s => s.Index(OSM_HIGHWAYS_ALIAS)
                     .Size(5000)
                     .Query(
-                        q =>
-                        //q.Raw("{\"bool\": {" +
-                        //        "\"must\": {" +
-                        //            "\"match_all\": { }" +
-                        //        "}," +
-                        //        "\"filter\": {" +
-                        //            "\"geo_shape\": {" +
-                        //                "\"geometry\": {" +
-                        //                    "\"shape\": {" +
-                        //                        "\"type\": \"envelope\"," +
-                        //                        $"\"coordinates\" : [[{northEast.X}, {northEast.Y} ], [{southWest.X}, {southWest.Y}]]" +
-                        //                    "}," +
-                        //                    "\"relation\": \"intersects\"" +
-                        //                "}" +
-                        //            "}" +
-                        //        "}" +
-                        //    "}}")
-                        q.GeoShapeEnvelope(
+                        q => q.GeoShapeEnvelope(
                             e => e.Coordinates(new[]
                                 {
                                     ConvertCoordinate(northEast),
@@ -374,11 +357,21 @@ namespace IsraelHiking.DataAccess
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(EXTERNAL_POIS)
                     .Size(10000)
+                    .Scroll("10m")
                     .Query(q =>
                         q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
                     )
             );
-            return response.Documents.ToList();
+            var features = response.Documents.ToList();
+            var results = _elasticClient.Scroll<Feature>("10s", response.ScrollId);
+            features.AddRange(results.Documents.ToList());
+            while (results.Documents.Any())
+            {
+                results = _elasticClient.Scroll<Feature>("10s", results.ScrollId);
+                features.AddRange(results.Documents.ToList());
+            }
+            _logger.LogInformation($"Got {features.Count} features for source {source}");
+            return features;
         }
 
         public async Task<Feature> GetExternalPoiById(string id, string source)

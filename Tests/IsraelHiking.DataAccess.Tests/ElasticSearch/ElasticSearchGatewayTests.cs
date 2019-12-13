@@ -88,6 +88,18 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
             Assert.IsTrue(features.Count > 0);
         }
+
+        [TestMethod]
+        [Ignore]
+        public void GetPoisBySource_ShouldGetThem()
+        {
+            _gateway.Initialize();
+
+            var features = _gateway.GetExternalPoisBySource(Sources.INATURE).Result;
+            features = _gateway.GetExternalPoisBySource(Sources.WIKIPEDIA).Result;
+
+            Assert.IsTrue(features.Count > 10000);
+        }
     }
 }
 

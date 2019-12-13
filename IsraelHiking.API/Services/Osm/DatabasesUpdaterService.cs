@@ -191,7 +191,7 @@ namespace IsraelHiking.API.Services.Osm
             var osmSource = _pointsOfInterestAdapterFactory.GetBySource(Sources.OSM);
             var osmFeaturesTask = osmSource.GetPointsForIndexing();
             var sources = _pointsOfInterestAdapterFactory.GetAll().Where(s=> s.Source != Sources.OSM).Select(s => s.Source);
-            var otherTasks = sources.Select(s => _elasticSearchGateway.GetExternalPoisBySource(s));
+            var otherTasks = sources.Select(s => _elasticSearchGateway.GetExternalPoisBySource(s)).ToArray();
             await Task.WhenAll(new Task[] { osmFeaturesTask }.Concat(otherTasks));
             var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result.Concat(otherTasks.SelectMany(t => t.Result)).ToList());
             await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features);
