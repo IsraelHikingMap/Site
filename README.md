@@ -67,7 +67,6 @@ In order to be able to build this site you'll need some tools:
   * .NET cross-platform development
 * [.Net core SDK 3.0 ](https://www.microsoft.com/net/download/core)
 * Install [node.js](https://nodejs.org/en/) for windows (10.1+). Use the recommended 64-bit installer on modern Windows versions.
-* Install [Elasticsearch 6.8 msi](https://www.elastic.co/guide/en/elasticsearch/reference/current/windows.html)
 * Open Visual Studio
 * Follow [these steps](https://stackoverflow.com/a/43850262/368683) to update the version of node.js Visual Studio uses
 * If asked, and you don't have any other preference, choose "General" development settings

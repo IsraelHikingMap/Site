@@ -13,6 +13,7 @@ using OsmSharp.Tags;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using OsmSharp.Complete;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Tests.Services.Osm
 {
@@ -27,7 +28,10 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
-            _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(optionsProvider));
+            _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), 
+                Substitute.For<IElevationDataStorage>(), 
+                new ItmWgs84MathTransfromFactory(), 
+                new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(optionsProvider));
         }
 
         private Node CreateNode(int id)

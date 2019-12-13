@@ -4,7 +4,6 @@ using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Nest;
-using Nest.JsonNetSerializer;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
@@ -16,6 +15,20 @@ using Feature = NetTopologySuite.Features.Feature;
 
 namespace IsraelHiking.DataAccess
 {
+    public class GeoJsonNetSerializer : JsonNetSerializer
+    {
+        public GeoJsonNetSerializer(IConnectionSettingsValues settings, GeometryFactory geometryFactory) : base(settings)
+        {
+            OverwriteDefaultSerializers((s, cvs) =>
+            {
+                foreach (var converter in GeoJsonSerializer.Create(geometryFactory, 3).Converters)
+                {
+                    s.Converters.Add(converter);
+                }
+            });
+        }
+    }
+
     public class ElasticSearchGateway : IElasticSearchGateway
     {
         private const int PAGE_SIZE = 10000;
@@ -49,10 +62,7 @@ namespace IsraelHiking.DataAccess
             var connectionString = new ConnectionSettings(
                 pool,
                 new HttpConnection(),
-                new ConnectionSettings.SourceSerializerFactory((builtin, settings) => new JsonNetSerializer(builtin, settings, () => new Newtonsoft.Json.JsonSerializerSettings
-                {
-                    Converters = GeoJsonSerializer.Create(_geometryFactory, 3).Converters
-                })))
+                new SerializerFactory(s => new GeoJsonNetSerializer(s, _geometryFactory)))
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
             if (_elasticClient.IndexExists(OSM_POIS_INDEX1).Exists == false &&
@@ -250,8 +260,26 @@ namespace IsraelHiking.DataAccess
         {
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_HIGHWAYS_ALIAS)
-                    .Size(5000).Query(
-                        q => q.GeoShapeEnvelope(
+                    .Size(5000)
+                    .Query(
+                        q =>
+                        //q.Raw("{\"bool\": {" +
+                        //        "\"must\": {" +
+                        //            "\"match_all\": { }" +
+                        //        "}," +
+                        //        "\"filter\": {" +
+                        //            "\"geo_shape\": {" +
+                        //                "\"geometry\": {" +
+                        //                    "\"shape\": {" +
+                        //                        "\"type\": \"envelope\"," +
+                        //                        $"\"coordinates\" : [[{northEast.X}, {northEast.Y} ], [{southWest.X}, {southWest.Y}]]" +
+                        //                    "}," +
+                        //                    "\"relation\": \"intersects\"" +
+                        //                "}" +
+                        //            "}" +
+                        //        "}" +
+                        //    "}}")
+                        q.GeoShapeEnvelope(
                             e => e.Coordinates(new[]
                                 {
                                     ConvertCoordinate(northEast),
@@ -261,6 +289,7 @@ namespace IsraelHiking.DataAccess
                         )
                     )
             );
+            var json = response.DebugInformation;
             return response.Documents.ToList();
         }
 

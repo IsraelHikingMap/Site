@@ -8,13 +8,11 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
-using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
 using OsmSharp.Changesets;
 using OsmSharp.Complete;
 using OsmSharp.IO.API;
-using ProjNet.CoordinateSystems.Transformations;
 
 namespace IsraelHiking.API.Services.Osm
 {
@@ -31,10 +29,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private readonly IGraphHopperGateway _graphHopperGateway;
         private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
-        private readonly IElevationDataStorage _elevationDataStorage;
         private readonly ILogger _logger;
-        private readonly MathTransform _mathTransform;
-
         /// <summary>
         /// Service's constructor
         /// </summary>
@@ -48,8 +43,6 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="latestFileFetcherExecutor"></param>
         /// <param name="graphHopperGateway"></param>
         /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
-        /// <param name="elevationDataStorage"></param>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="logger"></param>
         public DatabasesUpdaterService(IClientsFactory clinetsFactory,
             IElasticSearchGateway elasticSearchGateway,
@@ -60,8 +53,6 @@ namespace IsraelHiking.API.Services.Osm
             IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
             IGraphHopperGateway graphHopperGateway,
             IPointsOfInterestFilesCreatorExecutor pointsOfInterestFilesCreatorExecutor,
-            IElevationDataStorage elevationDataStorage,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             ILogger logger)
         {
             _elasticSearchGateway = elasticSearchGateway;
@@ -74,9 +65,7 @@ namespace IsraelHiking.API.Services.Osm
             _latestFileFetcherExecutor = latestFileFetcherExecutor;
             _graphHopperGateway = graphHopperGateway;
             _osmGateway = clinetsFactory.CreateNonAuthClient();
-            _elevationDataStorage = elevationDataStorage;
             _logger = logger;
-            _mathTransform = itmWgs84MathTransfromFactory.CreateInverse();
         }
 
         /// <inheritdoc />
@@ -205,16 +194,6 @@ namespace IsraelHiking.API.Services.Osm
             var otherTasks = sources.Select(s => _elasticSearchGateway.GetExternalPoisBySource(s));
             await Task.WhenAll(new Task[] { osmFeaturesTask }.Concat(otherTasks));
             var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result.Concat(otherTasks.SelectMany(t => t.Result)).ToList());
-            foreach (var feature in features)
-            {
-                var geoLocation = feature.Attributes[FeatureAttributes.POI_GEOLOCATION] as AttributesTable;
-                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ALT, await _elevationDataStorage.GetElevation(
-                    new Coordinate((double)geoLocation[FeatureAttributes.LON], (double)geoLocation[FeatureAttributes.LAT]))
-                );
-                var northEast = _mathTransform.Transform((double)geoLocation[FeatureAttributes.LON], (double)geoLocation[FeatureAttributes.LAT]);
-                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_EAST, (int)northEast.x);
-                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_NORTH, (int)northEast.y);
-            }
             await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features);
             _logger.LogInformation("Finished rebuilding POIs database.");
         }

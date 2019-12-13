@@ -2,6 +2,7 @@
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
+using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -9,6 +10,7 @@ using NetTopologySuite.Operation.Valid;
 using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.Tags;
+using ProjNet.CoordinateSystems.Transformations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +22,8 @@ namespace IsraelHiking.API.Executors
     {
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
+        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly MathTransform _wgs84ItmConverter;
         private readonly ITagsHelper _tagsHelper;
 
         private class TagKeyComparer : IEqualityComparer<Tag>
@@ -39,14 +43,20 @@ namespace IsraelHiking.API.Executors
         /// Constructor
         /// </summary>
         /// <param name="logger"></param>
+        /// <param name="elevationDataStorage"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="osmGeoJsonConverter"></param>
         /// <param name="tagsHelper"></param>
         public OsmGeoJsonPreprocessorExecutor(ILogger logger,
+            IElevationDataStorage elevationDataStorage,
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IOsmGeoJsonConverter osmGeoJsonConverter,
             ITagsHelper tagsHelper)
         {
             _logger = logger;
             _osmGeoJsonConverter = osmGeoJsonConverter;
+            _elevationDataStorage = elevationDataStorage;
+            _wgs84ItmConverter = itmWgs84MathTransfromFactory.CreateInverse();
             _tagsHelper = tagsHelper;
         }
 
@@ -247,6 +257,7 @@ namespace IsraelHiking.API.Executors
             foreach (var highwayFeature in highwayFeatures)
             {
                 highwayFeature.Attributes.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
+                highwayFeature.SetId();
             }
             return highwayFeatures;
         }
@@ -255,28 +266,31 @@ namespace IsraelHiking.API.Executors
         /// This is a static function to update the geolocation of a feature for search capabilities
         /// </summary>
         /// <param name="feature"></param>
-        public static void UpdateLocation(Feature feature)
+        private void UpdateLocation(Feature feature)
         {
+            Coordinate geoLocation;
             if ((feature.Geometry is LineString || feature.Geometry is MultiLineString) && feature.Geometry.Coordinate != null)
             {
-                var geoLocationTable = new AttributesTable
-                {
-                    {FeatureAttributes.LAT, feature.Geometry.Coordinate.Y},
-                    {FeatureAttributes.LON, feature.Geometry.Coordinate.X}
-                };
-                feature.Attributes.Add(FeatureAttributes.POI_GEOLOCATION, geoLocationTable);
-                return;
+                geoLocation = feature.Geometry.Coordinate;
             }
-            if (feature.Geometry.Centroid == null || feature.Geometry.Centroid.IsEmpty)
+            else if (feature.Geometry.Centroid == null || feature.Geometry.Centroid.IsEmpty)
             {
                 return;
             }
-            var table = new AttributesTable
+            else
             {
-                {FeatureAttributes.LAT, feature.Geometry.Centroid.Y},
-                {FeatureAttributes.LON, feature.Geometry.Centroid.X}
-            };
-            feature.Attributes.Add(FeatureAttributes.POI_GEOLOCATION, table);
+                geoLocation = feature.Geometry.Centroid.Coordinate;
+            }
+            feature.Attributes.Add(FeatureAttributes.POI_GEOLOCATION, new AttributesTable
+            {
+                { FeatureAttributes.LAT, geoLocation.Y },
+                { FeatureAttributes.LON, geoLocation.X }
+            });
+            feature.Attributes.Add(FeatureAttributes.POI_ALT, _elevationDataStorage.GetElevation(geoLocation).Result);
+            var northEast = _wgs84ItmConverter.Transform(geoLocation.X, geoLocation.Y);
+            feature.Attributes.Add(FeatureAttributes.POI_ITM_EAST, northEast.x);
+            feature.Attributes.Add(FeatureAttributes.POI_ITM_NORTH, northEast.y);
+
         }
     }
 }

@@ -132,7 +132,7 @@ namespace IsraelHiking.DataAccess
             var attributes = GetAttributes(coordinate, page.Title, page.Id.ToString(), language);
             attributes.Add(FeatureAttributes.DESCRIPTION + ":" + language, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
             var imageUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url ?? string.Empty;
-            if (!string.IsNullOrWhiteSpace(imageUrl) && 
+            if (!string.IsNullOrWhiteSpace(imageUrl) &&
                 (imageUrl.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                 imageUrl.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
                 imageUrl.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
@@ -171,7 +171,8 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                 {FeatureAttributes.POI_GEOLOCATION, geoLocation},
                 {FeatureAttributes.WEBSITE, _wikiSites[language].SiteInfo.MakeArticleUrl(title)},
-                {FeatureAttributes.POI_SOURCE_IMAGE_URL, WIKI_LOGO }
+                {FeatureAttributes.POI_SOURCE_IMAGE_URL, WIKI_LOGO}
+
             };
             return attributes;
         }

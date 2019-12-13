@@ -92,12 +92,12 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
             var features = await _elasticSearchGateway.GetPointsOfInterest(northEast, southWest, categories, language);
-            var points = features.Where(f => f.IsProperPoi(language)).Select(f => ConvertToPoiItem<PointOfInterest>(f, language));
+            var points = features.Where(f => f.IsProperPoi(language)).Select(f => ConvertToPoiItem<PointOfInterest>(f, language)).ToArray();
             foreach (var pointOfInterest in points.Where(p => string.IsNullOrWhiteSpace(p.Icon)))
             {
                 pointOfInterest.Icon = SEARCH_ICON;
             }
-            return points.ToArray();
+            return points;
         }
 
         /// <inheritdoc />
@@ -196,6 +196,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], 
                     (double)geoLocation[FeatureAttributes.LON],
+                    // HM TODO: fix failing test due to this
                     (double)feature.Attributes[FeatureAttributes.POI_ALT]);
             }
             poiItem.Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString();

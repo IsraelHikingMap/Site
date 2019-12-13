@@ -44,6 +44,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     {FeatureAttributes.POI_SOURCE, source},
                     {FeatureAttributes.POI_ICON, FeatureAttributes.POI_ICON},
                     {FeatureAttributes.POI_ICON_COLOR, FeatureAttributes.POI_ICON_COLOR},
+                    {FeatureAttributes.POI_ALT, 11.1},
                     {
                         FeatureAttributes.POI_GEOLOCATION, new AttributesTable
                         {
