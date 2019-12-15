@@ -20,7 +20,7 @@ export class TracesComponent extends BaseMapComponent {
     public readonly TRACE_CONFIG = "traceConfig";
 
     public visibleTrace: Trace;
-    public selectedTrace: GeoJSON.FeatureCollection<GeoJSON.LineString>;
+    public selectedTrace: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public selectedTraceStart: LatLngAlt;
     public selectedFeature: GeoJSON.Feature<GeoJSON.LineString>;
     public missingCoordinates: LatLngAlt;
@@ -48,6 +48,7 @@ export class TracesComponent extends BaseMapComponent {
         this.visibleTraceId$.subscribe((id) => {
             this.visibleTrace = this.ngRedux.getState().tracesState.traces.find(t => t.id === id);
             let traceCoordinates = [];
+            let points: GeoJSON.Feature<GeoJSON.Point>[] = [];
             if (this.visibleTrace == null) {
                 this.clearTraceSource();
                 return;
@@ -55,6 +56,18 @@ export class TracesComponent extends BaseMapComponent {
             for (let route of this.visibleTrace.dataContainer.routes) {
                 for (let segment of route.segments) {
                     traceCoordinates = traceCoordinates.concat(segment.latlngs.map(l => SpatialService.toCoordinate(l)));
+                }
+                for (let marker of route.markers) {
+                    points.push({
+                        type: "Feature",
+                        properties: {
+                            title: marker.title
+                        },
+                        geometry: {
+                            type: "Point",
+                            coordinates: SpatialService.toCoordinate(marker.latlng)
+                        }
+                    })
                 }
             }
             if (traceCoordinates.length === 0) {
@@ -71,7 +84,7 @@ export class TracesComponent extends BaseMapComponent {
                         type: "LineString",
                         coordinates: traceCoordinates
                     }
-                }]
+                }, ...points]
             };
 
             this.selectedTraceStart = { lat: traceCoordinates[0][1], lng: traceCoordinates[0][0] };

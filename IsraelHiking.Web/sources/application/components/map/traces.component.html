@@ -2,11 +2,38 @@
 <mgl-layer id="selected-trace-line"
            type="line"
            source="selected-trace"
+           [filter]="['==', '$type', 'LineString']"
            [paint]="{
             'line-color': 'blue',
             'line-width': 3
            }">
 </mgl-layer>
+<mgl-layer id="selected-trace-points-circle"
+           type="circle"
+           source="selected-trace"
+           [filter]="['==', '$type', 'Point']"
+           [paint]="{
+            'circle-color': 'blue',
+            'circle-radius': 10
+           }">
+</mgl-layer>
+<mgl-layer id="selected-trace-points-text"
+           type="symbol"
+           source="selected-trace"
+           [filter]="['==', '$type', 'Point']"
+           [layout]="{
+            'text-field': ['get', 'title'],
+            'text-font': ['Open Sans Regular'],
+            'text-anchor': 'bottom'
+           }"
+           [paint]="{
+            'text-color': 'white',
+            'text-halo-width': 2,
+            'text-halo-color': 'black'
+           }">
+</mgl-layer>
+
+
 <div *ngIf="selectedTraceStart">
     <mgl-marker [lngLat]="selectedTraceStart" #tracesConfigMarker>
         <span class='fa-stack fa-lg'>
