@@ -40,6 +40,12 @@ export class FitBoundsService {
 
     public async flyTo(latLng: LatLngAlt, zoom: number) {
         await this.mapService.initializationPromise;
+        if (SpatialService.getDistance(this.mapService.map.getCenter(), latLng) < 0.0001 &&
+            Math.abs(zoom - this.mapService.map.getZoom()) < 0.01) {
+            // ignoring flyto for small coordinates change:
+            // this happens due to route percision reduce which causes another map move.
+            return;
+        }
         this.mapService.map.flyTo({ center: latLng, zoom });
     }
 }

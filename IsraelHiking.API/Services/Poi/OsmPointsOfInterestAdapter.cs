@@ -196,7 +196,6 @@ namespace IsraelHiking.API.Services.Poi
             {
                 poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], 
                     (double)geoLocation[FeatureAttributes.LON],
-                    // HM TODO: fix failing test due to this
                     (double)feature.Attributes[FeatureAttributes.POI_ALT]);
             }
             poiItem.Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString();

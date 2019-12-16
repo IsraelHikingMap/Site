@@ -1,6 +1,8 @@
 import { Subject } from "rxjs";
 import { NgRedux } from "@angular-redux/store";
 import { every } from "lodash";
+import { fromEvent } from "rxjs";
+import { throttleTime } from "rxjs/operators";
 
 import { ResourcesService } from "../resources.service";
 import { PoiService, CategoriesType, ICategory } from "../poi.service";
@@ -41,10 +43,11 @@ export class CategoriesLayer extends BaseMapComponent {
             }
             await this.mapService.initializationPromise;
             this.updateMarkers();
-            this.mapService.map.on("moveend", () => {
-                // HM TODO: throttle - as this is called twice for some reason...
-                this.updateMarkers();
-            });
+            fromEvent(this.mapService.map, "moveend")
+                .pipe(throttleTime(1000))
+                .subscribe(() => {
+                    this.updateMarkers();
+                });
         });
 
         this.resources.languageChanged.subscribe(() => {
