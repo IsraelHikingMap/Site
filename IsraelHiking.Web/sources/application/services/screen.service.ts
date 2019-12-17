@@ -22,6 +22,11 @@ export class ScreenService {
         brightness.setKeepScreenOn(true);
         document.addEventListener("resume", () => {
             brightness.setKeepScreenOn(true);
+        }, false);
+        if (this.runningContextService.isIos) {
+            return;
+        }
+        document.addEventListener("resume", () => {
             brightness.setBrightness(-1);
             this.userIdleService.watch();
         }, false);
