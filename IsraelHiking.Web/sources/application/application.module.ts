@@ -160,9 +160,9 @@ export function initializeApplication(injector: Injector) {
             injector.get<ApplicationExitService>(ApplicationExitService).initialize();
             injector.get<OpenWithService>(OpenWithService).initialize();
             await loggingService.info("Finished IHM Application Initialization");
-        } catch (error) {
-            alert(`Sorrrrrrrrrrrrrrrrrry.... Failed to initialize IHM due to the following error: \n${error.toString()}`);
-            loggingService.error(`Failed IHM Application Initialization: ${error.toString()}`);
+        } catch (ex) {
+            alert(`alert("Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com? \nInit failed: ${ex.toString()}`);
+            loggingService.error(`Failed IHM Application Initialization: ${ex.toString()}`);
 
         }
     };
