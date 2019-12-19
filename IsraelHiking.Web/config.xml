@@ -131,6 +131,15 @@
   <platform name="ios">
     <allow-intent href="itms:*" />
     <allow-intent href="itms-apps:*" />
+    <edit-config target="NSCameraUsageDescription" file="*-Info.plist" mode="merge">
+        <string>We need the camera in order to take a picture</string>
+    </edit-config>
+    <edit-config target="NSPhotoLibraryUsageDescription" file="*-Info.plist" mode="merge">
+        <string>We need access to the photo library to get pictures from there</string>
+    </edit-config>
+    <edit-config target="NSPhotoLibraryAddUsageDescription" file="*-Info.plist" mode="merge">
+        <string>We need access to the photo library to save pictures there</string>
+    </edit-config>
     <preference name="WKSuspendInBackground" value="false" />
     <preference name="StatusBarOverlaysWebView" value="false" />
     <preference name="StatusBarBackgroundColor" value="#0a42bb" />
