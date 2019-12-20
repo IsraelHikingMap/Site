@@ -63,7 +63,9 @@ namespace IsraelHiking.API.Services.Poi
                 return feature;
             }
             var featureBytes = await _dataContainerConverterService.ToAnyFormat(share.DataContainer, FlowFormats.GEOJSON);
-            return featureBytes.ToFeatureCollection().FirstOrDefault(f => f.Geometry is LineString) as Feature;
+            var lineFeature = featureBytes.ToFeatureCollection().FirstOrDefault(f => f.Geometry is LineString) as Feature;
+            feature.Geometry = lineFeature?.Geometry ?? feature.Geometry;
+            return feature;
         }
     }
 }

@@ -102,7 +102,7 @@ namespace IsraelHiking.API.Controllers
                     } 
                     catch (Exception ex)
                     {
-                        _logger.LogError($"failed to index point with index: {index} for {currentSource} with exception: {ex.ToString()}, {points[index].ToString()}");
+                        _logger.LogError($"failed to index point with title: {points[index].GetTitle(Languages.ALL)} for {currentSource} with exception: {ex.ToString()}");
                     }
                     
                 });
