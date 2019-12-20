@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using ProjNet.CoordinateSystems.Transformations;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,19 +84,27 @@ namespace IsraelHiking.API.Controllers
                 var counter = 0;
                 Parallel.For(0, points.Count, new ParallelOptions { MaxDegreeOfParallelism = 10 }, (index) =>
                 {
-                    var feature = adapter.GetRawPointOfInterestById(points[index].Attributes[FeatureAttributes.ID].ToString()).Result;
-                    var geoLocation = feature.Attributes[FeatureAttributes.POI_GEOLOCATION] as AttributesTable;
-                    var geoLocationCoordinate = new Coordinate((double)geoLocation[FeatureAttributes.LON], (double)geoLocation[FeatureAttributes.LAT]);
-                    feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ALT, _elevationDataStorage.GetElevation(geoLocationCoordinate).Result);
-                    var northEast = _wgs84ItmTransform.Transform(geoLocationCoordinate.X, geoLocationCoordinate.Y);
-                    feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_EAST, (int)northEast.x);
-                    feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_NORTH, (int)northEast.y);
-                    _elasticSearchGateway.AddExternalPoi(feature);
-                    Interlocked.Increment(ref counter);
-                    if (counter % 100 == 0)
+                    try
                     {
-                        _logger.LogInformation($"Indexed {counter} points of {points.Count} for {currentSource}");
+                        var feature = adapter.GetRawPointOfInterestById(points[index].Attributes[FeatureAttributes.ID].ToString()).Result;
+                        var geoLocation = feature.Attributes[FeatureAttributes.POI_GEOLOCATION] as AttributesTable;
+                        var geoLocationCoordinate = new Coordinate((double)geoLocation[FeatureAttributes.LON], (double)geoLocation[FeatureAttributes.LAT]);
+                        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ALT, _elevationDataStorage.GetElevation(geoLocationCoordinate).Result);
+                        var northEast = _wgs84ItmTransform.Transform(geoLocationCoordinate.X, geoLocationCoordinate.Y);
+                        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_EAST, (int)northEast.x);
+                        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_NORTH, (int)northEast.y);
+                        _elasticSearchGateway.AddExternalPoi(feature);
+                        Interlocked.Increment(ref counter);
+                        if (counter % 100 == 0)
+                        {
+                            _logger.LogInformation($"Indexed {counter} points of {points.Count} for {currentSource}");
+                        }
+                    } 
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"failed to index point with index: {index} for {currentSource} with exception: {ex.ToString()}, {points[index].ToString()}");
                     }
+                    
                 });
                 _logger.LogInformation($"Finished rebuilding {currentSource}, indexed {points.Count} points.");
                 // HM TODO: set rebuild date for source somehow...
