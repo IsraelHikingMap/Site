@@ -21,6 +21,10 @@
     <NoWarn>1701;1702;NU1608</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>               
+    <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Compile Remove="coverage\**" />
     <Compile Remove="Logs\**" />
