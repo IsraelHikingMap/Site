@@ -104,7 +104,7 @@ namespace IsraelHiking.Web
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Israel Hiking API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Israel Hiking API", Version = GetType().Assembly.GetName().Version.ToString() });
                 c.SchemaFilter<FeatureExampleFilter>();
                 c.SchemaFilter<FeatureCollectionExampleFilter>();
                 c.AddSecurityDefinition("Bearer",
