@@ -19,6 +19,17 @@
                     <div fxFlex [innerHtml]="resources.infoOsmWikiLink"></div>
                 </div>
                 <br />
+                <div *ngIf="!isApp()" fxLayout="row" fxLayoutAlign="center center">
+                    <a href="https://play.google.com/store/apps/details?id=il.org.osm.israelhiking&hl=en" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from google play store">
+                        <img src="content/google-play-badge.png" width="200"/>
+                    </a>
+                </div>
+                <div *ngIf="!isApp()" fxLayout="row" fxLayoutAlign="center center">
+                    <a href="https://apps.apple.com/us/app/israel-hiking-map/id1451300509" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from app store">
+                        <img src="content/app-store-badge.png" width="200"/>
+                    </a>
+                </div>
+                <br />
                 <div fxLayout="row" *ngIf="showDownloadDialog()">
                     <button mat-raised-button color="primary" fxFill (click)="openDownloadDialog()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download open"><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
                 </div>

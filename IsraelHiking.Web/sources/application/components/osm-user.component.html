@@ -55,6 +55,9 @@
                     <button mat-menu-item *ngIf="isApp()" (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user report an issue">
                         <span><i class="fa fa-lg icon-envelope"></i> {{resources.reportAnIssue}}</span>
                     </button>
+                    <a mat-menu-item *ngIf="!isApp()" href="https://github.com/IsraelHikingMap/Site/issues/new" target="_blank" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user report an issue github">
+                        <span><i class="fa fa-lg icon-envelope"></i> {{resources.reportAnIssue}}</span>
+                    </a>
                     <button mat-menu-item (click)="logout()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM logout">
                         <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
                     </button>

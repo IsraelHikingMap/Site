@@ -42,7 +42,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     public showDownloadDialog(): boolean {
-        return !this.runningContext.isCordova;
+        return !this.runningContext.isCordova && !this.runningContext.isIos;
     }
 
     public openDownloadDialog = () => {
@@ -65,6 +65,10 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
     public isSectionOpen(section: ILegendSection) {
         return this.selectedSection != null && this.selectedSection.id === section.id;
+    }
+
+    public isApp(): boolean {
+        return this.runningContext.isCordova;
     }
 
     private initalizeLegendSections() {

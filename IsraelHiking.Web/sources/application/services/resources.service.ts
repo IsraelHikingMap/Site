@@ -827,7 +827,7 @@ export class ResourcesService {
             .replace("{{linkend}}", "</a>");
         this.infoFacebookLink = this.gettextCatalog
             .getString("Interact with other users in our {{link}}Facebook group{{linkend}}")
-            .replace("{{link}}", "<a href='https://www.facebook.com/groups/994960670559126/' target='_blank'>")
+            .replace("{{link}}", "<a href='https://www.facebook.com/groups/israelhikingmap/' target='_blank'>")
             .replace("{{linkend}}", "</a>");
         this.infoGithubLink = this.gettextCatalog
             .getString("Request features and report bugs on our {{link}}Github project{{linkend}} page")
