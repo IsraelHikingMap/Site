@@ -15,11 +15,14 @@ if (!$env:APPVEYOR_BUILD_VERSION) {
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
 
+Write-Host "dotnet publish"
+dotnet publish
+
 $binFolder = get-ChildItem netcore* -recurse | Select-Object -first 1 | select -expand FullName
 
 $artifactsFileName = "IsraelHiking_$env:APPVEYOR_BUILD_VERSION.zip"
 
-7z a $artifactsFileName $binFolder\IsraelHiking*.*
+7z a $artifactsFileName $binFolder\publish\IsraelHiking*.*
 7z a $artifactsFileName wwwroot
 Push-AppveyorArtifact $artifactsFileName
 
