@@ -474,5 +474,19 @@
 		"x": 270,
 		"y": 722,
 		"pixelRatio": 1
+	},
+	"light_forest": {
+		"width": 64,
+		"height": 64,
+		"x": 386,
+		"y": 634,
+		"pixelRatio": 1
+	},
+	"field": {
+		"width": 64,
+		"height": 64,
+		"x": 386,
+		"y": 704,
+		"pixelRatio": 1
 	}
 }
