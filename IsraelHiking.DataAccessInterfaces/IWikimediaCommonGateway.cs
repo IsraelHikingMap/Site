@@ -1,4 +1,5 @@
-﻿using NetTopologySuite.Geometries;
+﻿using GeoAPI.Geometries;
+using NetTopologySuite.Geometries;
 using System.IO;
 using System.Threading.Tasks;
 

@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestInitialize]
         public void TestInitialize()
         {
-            _executor = new GpxProlongerExecutor(GeometryFactory.Default);
+            _executor = new GpxProlongerExecutor(new GeometryFactory());
         }
 
         /// <summary>

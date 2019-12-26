@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
@@ -15,6 +16,7 @@ using OsmSharp.IO.API;
 using ProjNet.CoordinateSystems.Transformations;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -224,8 +226,8 @@ namespace IsraelHiking.API.Controllers
 
         private LineString ToItmLineString(IEnumerable<GpxWaypoint> waypoints)
         {
-            var coordinates = waypoints.Select(waypoint => _wgs84ItmMathTransform.Transform(waypoint.Longitude, waypoint.Latitude))
-                .Select(c => new Coordinate(Math.Round(c.x, 1), Math.Round(c.y, 1)));
+            var coordinates = waypoints.Select(waypoint => _wgs84ItmMathTransform.Transform(new Coordinate(waypoint.Longitude, waypoint.Latitude)))
+                .Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1)));
             var nonDuplicates = new List<Coordinate>();
             foreach (var coordinate in coordinates)
             {
@@ -234,12 +236,12 @@ namespace IsraelHiking.API.Controllers
                     nonDuplicates.Add(coordinate);
                 }
             }
-            return _geometryFactory.CreateLineString(nonDuplicates.ToArray());
+            return _geometryFactory.CreateLineString(nonDuplicates.ToArray()) as LineString;
         }
 
         private LineString ToWgs84LineString(IEnumerable<Coordinate> coordinates)
         {
-            var wgs84Coordinates = coordinates.Select(c => _itmWgs84MathTransform.Transform(c.X, c.Y)).Select(c => new Coordinate(c.x, c.y));
+            var wgs84Coordinates = coordinates.Select(c => _itmWgs84MathTransform.Transform(c));
             var nonDuplicates = new List<Coordinate>();
             foreach (var coordinate in wgs84Coordinates)
             {
@@ -248,7 +250,7 @@ namespace IsraelHiking.API.Controllers
                     nonDuplicates.Add(coordinate);
                 }
             }
-            return _geometryFactory.CreateLineString(nonDuplicates.ToArray());
+            return _geometryFactory.CreateLineString(nonDuplicates.ToArray()) as LineString;
         }
 
         private List<LineString> GpxToItmLineStrings(GpxFile gpx)

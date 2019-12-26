@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
@@ -208,24 +209,24 @@ namespace IsraelHiking.API.Services.Osm
 
         private async Task<List<Feature>> GetHighwaysInArea(LineString line)
         {
-            var northEast = _wgs84ItmMathTransform.Transform(line.Coordinates.Max(c => c.X), line.Coordinates.Max(c => c.Y));
-            var southWest = _wgs84ItmMathTransform.Transform(line.Coordinates.Min(c => c.X), line.Coordinates.Min(c => c.Y));
+            var northEast = _wgs84ItmMathTransform.Transform(new Coordinate(line.Coordinates.Max(c => c.X), line.Coordinates.Max(c => c.Y)));
+            var southWest = _wgs84ItmMathTransform.Transform(new Coordinate(line.Coordinates.Min(c => c.X), line.Coordinates.Min(c => c.Y)));
             // adding tolerance perimiter to find ways.
-            northEast.y += _options.MinimalDistanceToClosestPoint;
-            northEast.x += _options.MinimalDistanceToClosestPoint;
-            southWest.y -= _options.MinimalDistanceToClosestPoint;
-            southWest.x -= _options.MinimalDistanceToClosestPoint;
-            var northEastLatLon = _itmWgs84MathTransform.Transform(northEast.x, northEast.y);
-            var southWestLatLon = _itmWgs84MathTransform.Transform(southWest.x, southWest.y);
+            northEast.Y += _options.MinimalDistanceToClosestPoint;
+            northEast.X += _options.MinimalDistanceToClosestPoint;
+            southWest.Y -= _options.MinimalDistanceToClosestPoint;
+            southWest.X -= _options.MinimalDistanceToClosestPoint;
+            var northEastLatLon = _itmWgs84MathTransform.Transform(northEast);
+            var southWestLatLon = _itmWgs84MathTransform.Transform(southWest);
 
-            var highways = await _elasticSearchGateway.GetHighways(new Coordinate(northEastLatLon.x, northEastLatLon.y), new Coordinate(southWestLatLon.x, southWestLatLon.y));
+            var highways = await _elasticSearchGateway.GetHighways(northEastLatLon, southWestLatLon);
             return highways.ToList();
         }
 
         private Point GetItmCoordinate(Coordinate coordinate)
         {
-            var northEast = _wgs84ItmMathTransform.Transform(coordinate.X, coordinate.Y);
-            return new Point(northEast.x, northEast.y);
+            var northEast = _wgs84ItmMathTransform.Transform(coordinate);
+            return new Point(northEast);
         }
 
         private Feature GetClosetHighway(Coordinate coordinate, List<LineString> itmHighways, List<Feature> highways)
@@ -247,7 +248,7 @@ namespace IsraelHiking.API.Services.Osm
 
         private LineString ToItmLineString(Feature feature)
         {
-            var itmCoordinates = feature.Geometry.Coordinates.Select(c => _wgs84ItmMathTransform.Transform(c.X, c.Y)).Select(c => new Coordinate(c.x, c.y)).ToArray();
+            var itmCoordinates = feature.Geometry.Coordinates.Select(c => _wgs84ItmMathTransform.Transform(c)).ToArray();
             var lineString = new LineString(itmCoordinates);
             lineString.SetOsmId(feature.GetOsmId());
             return lineString;

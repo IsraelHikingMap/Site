@@ -1,4 +1,5 @@
-﻿using NetTopologySuite.Geometries;
+﻿using GeoAPI.Geometries;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.LinearReferencing;
 using NetTopologySuite.Operation.Distance;
 using System.Collections.Generic;
@@ -181,7 +182,7 @@ namespace IsraelHiking.API.Executors
                         .Concat(segment.OriginalCoordinates)
                         .Concat(segment.End.Line.Coordinates)
                         .Distinct()
-                        .ToArray()));
+                        .ToArray()) as LineString);
             }
             else if (!AddSegmentToLine(segment.Start.Line, segment, linesToProlong, input.MinimalDistance))
             {
@@ -255,7 +256,7 @@ namespace IsraelHiking.API.Executors
             {
                 list.Add(nextCoordinate);
             }
-            return _geometryFactory.CreateLineString(list.ToArray());
+            return _geometryFactory.CreateLineString(list.ToArray()) as LineString;
         }
 
         private SegmentWithLines CreateSegmentWithLines(Coordinate[] segment, LineAndCoordinate current, LineAndCoordinate next)

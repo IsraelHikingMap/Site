@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Tests.Services
     public class NonApiMiddlewareTests
     {
         private NonApiMiddleware _middleware;
-        private IWebHostEnvironment _hostingEnvironment;
+        private IHostingEnvironment _hostingEnvironment;
         private IServiceProvider _serviceProvider;
         private IRepository _repository;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
@@ -27,7 +27,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestInitialize]
         public void TestInitialize()
         {
-            _hostingEnvironment = Substitute.For<IWebHostEnvironment>();
+            _hostingEnvironment = Substitute.For<IHostingEnvironment>();
             _serviceProvider = Substitute.For<IServiceProvider>();
             var browserResolver = Substitute.For<IBrowserResolver>();
             var browser = Substitute.For<IBrowser>();

@@ -1,4 +1,5 @@
-﻿using IsraelHiking.Common;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
@@ -67,11 +68,11 @@ namespace IsraelHiking.DataAccess
                         BoundingRectangle = GeoCoordinateRectangle.FromBoundingCoordinates(sourthWest.X, sourthWest.Y, northEast.X, northEast.Y),
                         PaginationSize = 500
                     };
-                    var results = await geoSearchGenerator.EnumItemsAsync().ToListAsync();
+                    var results = await geoSearchGenerator.EnumItemsAsync().ToList();
                     var features = new List<Feature>();
                     foreach (var geoSearchResultItem in results)
                     {
-                        var coordinate = new CoordinateZ(geoSearchResultItem.Coordinate.Longitude, geoSearchResultItem.Coordinate.Latitude);
+                        var coordinate = new Coordinate(geoSearchResultItem.Coordinate.Longitude, geoSearchResultItem.Coordinate.Latitude, double.NaN);
                         var attributes = GetAttributes(coordinate, geoSearchResultItem.Page.Title,
                             geoSearchResultItem.Page.Id.ToString(), language);
                         features.Add(new Feature(new Point(coordinate), attributes));
@@ -102,7 +103,7 @@ namespace IsraelHiking.DataAccess
             var language = splitId.First();
             var pageId = splitId.Last();
             var site = _wikiSites[language];
-            var stub = await WikiPageStub.FromPageIds(site, new[] { int.Parse(pageId) }).FirstAsync();
+            var stub = await WikiPageStub.FromPageIds(site, new[] { int.Parse(pageId) }).First();
             var page = new WikiPage(site, stub.Title);
             return await ConvertPageToFeature(page, language);
         }
@@ -128,7 +129,7 @@ namespace IsraelHiking.DataAccess
             {
                 return null;
             }
-            var coordinate = new CoordinateZ(geoCoordinate.Longitude, geoCoordinate.Latitude, double.NaN);
+            var coordinate = new Coordinate(geoCoordinate.Longitude, geoCoordinate.Latitude, double.NaN);
             var attributes = GetAttributes(coordinate, page.Title, page.Id.ToString(), language);
             attributes.Add(FeatureAttributes.DESCRIPTION + ":" + language, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
             var imageUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url ?? string.Empty;

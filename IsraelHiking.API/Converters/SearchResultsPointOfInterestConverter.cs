@@ -4,6 +4,7 @@ using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace IsraelHiking.API.Converters
@@ -45,7 +46,7 @@ namespace IsraelHiking.API.Converters
                 References = new Reference[0],
                 DataContainer = new DataContainer(),
                 // HN TODO: add elevation?
-                FeatureCollection = new FeatureCollection { new Feature(new Point(latLng.ToCoordinate()), new AttributesTable()) }
+                FeatureCollection = new FeatureCollection(new Collection<IFeature> { new Feature(new Point(latLng.ToCoordinate()), new AttributesTable()) })
             };
         }
         

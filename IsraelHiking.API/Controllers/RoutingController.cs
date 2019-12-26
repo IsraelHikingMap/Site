@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using ProjNet.CoordinateSystems.Transformations;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -74,7 +76,7 @@ namespace IsraelHiking.API.Controllers
                 });
                 if (!lineString.Coordinates.Any())
                 {
-                    lineString = _geometryFactory.CreateLineString(new[] { pointFrom, pointTo });
+                    lineString = _geometryFactory.CreateLineString(new[] { pointFrom, pointTo }) as LineString;
                 }
             }
             foreach (var coordinate in lineString.Coordinates)
@@ -87,7 +89,7 @@ namespace IsraelHiking.API.Controllers
                 {"Creator", "IsraelHikingMap"}
             };
             var feature = new Feature(lineString, table);
-            return Ok(new FeatureCollection { feature });
+            return Ok(new FeatureCollection(new Collection<IFeature> { feature }));
         }
 
         private static ProfileType ConvertProfile(string type)
@@ -122,7 +124,7 @@ namespace IsraelHiking.API.Controllers
             var lat = double.Parse(splitted.First());
             var lng = double.Parse(splitted.Last());
             var elevation = await _elevationDataStorage.GetElevation(position.ToCoordinate());
-            return new CoordinateZ(lng, lat, elevation);
+            return new Coordinate(lng, lat, elevation);
         }
 
         /// <summary>
@@ -135,19 +137,19 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         private LineString GetDenseStraightLine(Coordinate from, Coordinate to)
         {
-            var itmFrom = _wgs84ItmMathTransform.Transform(from.X, from.Y);
-            var itmTo = _wgs84ItmMathTransform.Transform(to.X, to.Y);
-            var samples = (int)Math.Min(new CoordinateZ(itmFrom.x, itmFrom.y, 0).Distance(new CoordinateZ(itmTo.x, itmTo.y, 0)) / 30, 30);
+            var itmFrom = _wgs84ItmMathTransform.Transform(from);
+            var itmTo = _wgs84ItmMathTransform.Transform(to);
+            var samples = (int)Math.Min((itmFrom).Distance(itmTo) / 30, 30);
             if (samples == 0)
             {
-                return _geometryFactory.CreateLineString(new[] {from, to});
+                return _geometryFactory.CreateLineString(new[] {from, to}) as LineString;
             }
-            var coordinates = Enumerable.Range(0, samples + 1).Select(s => new CoordinateZ(
+            var coordinates = Enumerable.Range(0, samples + 1).Select(s => new Coordinate(
                 (to.X - from.X) * s / samples + from.X,
                 (to.Y - from.Y) * s / samples + from.Y,
                 0)
             );
-            return _geometryFactory.CreateLineString(coordinates.ToArray());
+            return _geometryFactory.CreateLineString(coordinates.ToArray()) as LineString;
         }
     }
 }

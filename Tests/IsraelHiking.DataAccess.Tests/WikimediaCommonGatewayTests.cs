@@ -1,4 +1,5 @@
-﻿using IsraelHiking.Common;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

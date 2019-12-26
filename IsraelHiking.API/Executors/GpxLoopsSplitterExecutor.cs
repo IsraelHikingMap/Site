@@ -1,4 +1,5 @@
-﻿using NetTopologySuite.Geometries;
+﻿using GeoAPI.Geometries;
+using NetTopologySuite.Geometries;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -60,7 +61,7 @@ namespace IsraelHiking.API.Executors
                 }
                 AddLineString(lines, reversedGpxLine.Coordinates.Take(indexOfClosingLine).ToArray());
                 var reminingPoints = reversedGpxLine.Coordinates.Skip(indexOfClosingLine).ToArray();
-                reversedGpxLine = reminingPoints.Length > 1 ? _geometryFactory.CreateLineString(reminingPoints) : _geometryFactory.CreateLineString(new Coordinate[0]);
+                reversedGpxLine = reminingPoints.Length > 1 ? _geometryFactory.CreateLineString(reminingPoints) as LineString : _geometryFactory.CreateLineString(new Coordinate[0]) as LineString;
                 coordinateIndex = 0;
             }
             AddLineString(lines, reversedGpxLine.Coordinates);
@@ -99,7 +100,7 @@ namespace IsraelHiking.API.Executors
             {
                 return;
             }
-            gpxSplit.Add(_geometryFactory.CreateLineString(coordinates));
+            gpxSplit.Add(_geometryFactory.CreateLineString(coordinates) as LineString);
         }
 
         private bool IsCloseToALine(Coordinate coordinate, IReadOnlyList<LineString> lineStrings, double minimalDistanceToClosestPoint)

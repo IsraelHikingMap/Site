@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Controllers;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Converters.CoordinatesParsers;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;

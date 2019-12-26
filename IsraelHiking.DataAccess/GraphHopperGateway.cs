@@ -1,4 +1,5 @@
-﻿using IsraelHiking.Common;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
@@ -47,15 +48,15 @@ namespace IsraelHiking.DataAccess
             var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
             if (jsonResponse?.paths == null || !jsonResponse.paths.Any())
             {
-                return new LineString(new CoordinateZ[0]);
+                return new LineString(new Coordinate[0]); // CoordinateZ
             }
             if (jsonResponse.paths.First().points.coordinates.Count == 1)
             {
                 var jsonCoordinates = jsonResponse.paths.First().points.coordinates.First();
-                var convertedCoordiates = new CoordinateZ(jsonCoordinates[0], jsonCoordinates[1], jsonCoordinates.Count > 2 ? jsonCoordinates[2] : 0.0);
+                var convertedCoordiates = new Coordinate(jsonCoordinates[0], jsonCoordinates[1], jsonCoordinates.Count > 2 ? jsonCoordinates[2] : 0.0);
                 return new LineString(new[] { convertedCoordiates, convertedCoordiates });
             }
-            return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new CoordinateZ(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());
+            return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new Coordinate(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());
         }
 
         public async Task Rebuild(MemoryStream osmFileStream)

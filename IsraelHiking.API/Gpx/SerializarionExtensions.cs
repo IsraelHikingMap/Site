@@ -81,8 +81,7 @@ namespace IsraelHiking.API.Gpx
             {
                 var writer = new StreamWriter(outputStream);
                 var jsonWriter = new JsonTextWriter(writer);
-                var factory = new GeometryFactory();
-                var serializer = GeoJsonSerializer.Create(factory, 3);
+                var serializer = GeoJsonSerializer.Create();
                 serializer.Serialize(jsonWriter, featureCollection);
                 jsonWriter.Flush();
                 return outputStream.ToArray();
@@ -98,7 +97,7 @@ namespace IsraelHiking.API.Gpx
         {
             using (var stream = new MemoryStream(featureCollectionContent))
             {
-                var serializer = GeoJsonSerializer.Create(new GeometryFactory(), 3);
+                var serializer = GeoJsonSerializer.Create();
                 using (var streamReader = new StreamReader(stream))
                 using (var jsonTextReader = new JsonTextReader(streamReader))
                 {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿/* HM TODO: make it work again
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Generic;
@@ -49,3 +50,4 @@ namespace IsraelHiking.API.Swagger
         }
     }
 }
+*/

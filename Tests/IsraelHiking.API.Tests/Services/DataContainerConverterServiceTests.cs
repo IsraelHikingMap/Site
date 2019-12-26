@@ -1,4 +1,5 @@
-﻿using ICSharpCode.SharpZipLib.BZip2;
+﻿using GeoAPI.Geometries;
+using ICSharpCode.SharpZipLib.BZip2;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Zip;
 using IsraelHiking.API.Converters;
@@ -15,6 +16,7 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -286,7 +288,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertGeoJsonToDataContainer_ShouldConvertToDataContainer()
         {
-            var collection = new FeatureCollection { new Feature(new Point(new CoordinateZ(1, 2, 3)), new AttributesTable()) };
+            var collection = new FeatureCollection(new Collection<IFeature> { new Feature(new Point(new Coordinate(1, 2, 3)), new AttributesTable()) });
 
             var dataContainer = _converterService.ToDataContainer(collection.ToBytes(), FlowFormats.GEOJSON).Result;
 

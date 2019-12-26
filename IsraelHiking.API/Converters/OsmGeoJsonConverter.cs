@@ -1,4 +1,5 @@
-﻿using IsraelHiking.Common;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.Common;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
@@ -48,7 +49,7 @@ namespace IsraelHiking.API.Converters
                         return null;
                     }
                     var properties = ConvertTags(way);
-                    properties.Add(FeatureAttributes.POI_OSM_NODES, way.Nodes.Select(n => n.Id).ToArray());
+                    properties.AddAttribute(FeatureAttributes.POI_OSM_NODES, way.Nodes.Select(n => n.Id).ToArray());
                     var geometry = GetGeometryFromNodes(way.Nodes);
                     return new Feature(geometry, properties);
                 case OsmGeoType.Relation:
@@ -78,7 +79,7 @@ namespace IsraelHiking.API.Converters
 
         private Coordinate ConvertNode(Node node)
         {
-            return new CoordinateZ(node.Longitude ?? 0, node.Latitude ?? 0);
+            return new Coordinate(node.Longitude ?? 0, node.Latitude ?? 0, double.NaN);
         }
 
         private List<Geometry> GetGeometriesFromWays(IEnumerable<CompleteWay> ways)
@@ -170,7 +171,7 @@ namespace IsraelHiking.API.Converters
             }
             try
             {
-                var merged = UnaryUnionOp.Union(polygons.Cast<Geometry>().ToList());
+                var merged = UnaryUnionOp.Union(polygons.Cast<IGeometry>().ToList());
                 if (merged is MultiPolygon multipolygon)
                 {
                     return multipolygon.Geometries.Cast<Polygon>().ToList();
@@ -191,7 +192,7 @@ namespace IsraelHiking.API.Converters
                 var currentInnerPolygons = innerPolygons.Where(p => p.Within(outerPolygon)).ToArray();
                 var holes = currentInnerPolygons.Select(p => _geometryFactory.CreateLinearRing(p.Coordinates)).ToArray();
                 innerPolygons = innerPolygons.Except(currentInnerPolygons).ToList();
-                newOuterPolygons.Add(_geometryFactory.CreatePolygon(_geometryFactory.CreateLinearRing(outerPolygon.Coordinates), holes));
+                newOuterPolygons.Add(_geometryFactory.CreatePolygon(_geometryFactory.CreateLinearRing(outerPolygon.Coordinates), holes) as Polygon);
             }
             outerPolygons = newOuterPolygons;
         }
@@ -248,7 +249,7 @@ namespace IsraelHiking.API.Converters
             var coordinates = nodes.Select(ConvertNode).ToArray();
             return nodes.First().Id == nodes.Last().Id && nodes.Length >= 4
                         ? _geometryFactory.CreatePolygon(_geometryFactory.CreateLinearRing(coordinates)) as Geometry
-                        : _geometryFactory.CreateLineString(coordinates);
+                        : _geometryFactory.CreateLineString(coordinates) as Geometry;
         }
     }
 }

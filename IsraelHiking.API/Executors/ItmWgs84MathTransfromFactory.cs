@@ -1,4 +1,5 @@
-﻿using ProjNet.CoordinateSystems;
+﻿using GeoAPI.CoordinateSystems;
+using ProjNet.CoordinateSystems;
 using ProjNet.CoordinateSystems.Transformations;
 using System.Collections.Generic;
 
@@ -32,21 +33,21 @@ namespace IsraelHiking.API.Executors
 
             var itmProjection = coordinateSystemFactory.CreateProjection("Transverse_Mercator", "Transverse_Mercator", itmParameters);
             _itm = coordinateSystemFactory.CreateProjectedCoordinateSystem("ITM", itmGeo, itmProjection, LinearUnit.Metre,
-                new AxisInfo("East", AxisOrientationEnum.East), new AxisInfo("North", AxisOrientationEnum.North));
+                new AxisInfo("East", AxisOrientationEnum.East), new AxisInfo("North", AxisOrientationEnum.North)) as ProjectedCoordinateSystem;
         }
 
         /// <inheritdoc />
         public MathTransform Create()
         {
             var coordinateTransformFactory = new CoordinateTransformationFactory();
-            return coordinateTransformFactory.CreateFromCoordinateSystems(_itm, GeographicCoordinateSystem.WGS84).MathTransform;
+            return coordinateTransformFactory.CreateFromCoordinateSystems(_itm, GeographicCoordinateSystem.WGS84).MathTransform as MathTransform;
         }
 
         /// <inheritdoc />
         public MathTransform CreateInverse()
         {
             var coordinateTransformFactory = new CoordinateTransformationFactory();
-            return coordinateTransformFactory.CreateFromCoordinateSystems(GeographicCoordinateSystem.WGS84, _itm).MathTransform;
+            return coordinateTransformFactory.CreateFromCoordinateSystems(GeographicCoordinateSystem.WGS84, _itm).MathTransform as MathTransform;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Gpx;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.API.Gpx;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
@@ -47,21 +48,21 @@ namespace IsraelHiking.API.Converters
         {
             var gpx = new GpxFile
             {
-                Metadata = new GpxMetadata(collection.FirstOrDefault(f => f.Attributes.Exists(CREATOR))
+                Metadata = new GpxMetadata(collection.Features.FirstOrDefault(f => f.Attributes.Exists(CREATOR))
                                                ?.Attributes[CREATOR]?.ToString() ?? GpxDataContainerConverter.ISRAEL_HIKING_MAP + "_geojson")
             };
-            gpx.Waypoints.AddRange(collection.Where(f => f.Geometry is Point)
+            gpx.Waypoints.AddRange(collection.Features.Where(f => f.Geometry is Point)
                 .Select(CreateWaypoint)
-                .Union(collection.Where(f => f.Geometry is MultiPoint)
+                .Union(collection.Features.Where(f => f.Geometry is MultiPoint)
                     .SelectMany(CreateWayPointsFromMultiPoint))
                 .ToList());
-            gpx.Routes.AddRange(collection.Where(f => f.Geometry is LineString)
+            gpx.Routes.AddRange(collection.Features.Where(f => f.Geometry is LineString)
                 .Select(CreateRouteFromLineString)
-                .Union(collection.Where(f => f.Geometry is Polygon).Select(CreateRouteFromPolygon))
-                .Union(collection.Where(f => f.Geometry is MultiPolygon)
+                .Union(collection.Features.Where(f => f.Geometry is Polygon).Select(CreateRouteFromPolygon))
+                .Union(collection.Features.Where(f => f.Geometry is MultiPolygon)
                     .SelectMany(CreateRoutesFromMultiPolygon))
                 .ToList());
-            gpx.Tracks.AddRange(collection.Where(f => f.Geometry is MultiLineString)
+            gpx.Tracks.AddRange(collection.Features.Where(f => f.Geometry is MultiLineString)
                 .SelectMany(CreateTracksFromMultiLineString)
                 .ToList());
             gpx.UpdateBounds();
@@ -73,8 +74,8 @@ namespace IsraelHiking.API.Converters
             double lat = waypoint.Latitude;
             double lon = waypoint.Longitude;
             return waypoint.ElevationInMeters.HasValue 
-                ? new CoordinateZ(lon, lat, (double)waypoint.ElevationInMeters)
-                : new CoordinateZ(lon, lat);
+                ? new Coordinate(lon, lat, (double)waypoint.ElevationInMeters)
+                : new Coordinate(lon, lat, double.NaN);
         }
 
         private GpxWaypoint CreateWaypoint(IFeature pointFeature)
@@ -224,7 +225,7 @@ namespace IsraelHiking.API.Converters
         private IAttributesTable CreateMultiLineProperties(string name, string creator, string description)
         {
             var table = CreateProperties(name, description);
-            table.Add(CREATOR, creator);
+            table.AddAttribute(CREATOR, creator);
             return table;
         }
 

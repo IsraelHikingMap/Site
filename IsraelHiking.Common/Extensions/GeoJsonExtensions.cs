@@ -13,7 +13,7 @@ namespace IsraelHiking.Common.Extensions
         {
             if (!attributes.Exists(key))
             {
-                attributes.Add(key, value);
+                attributes.AddAttribute(key, value);
             }
             else
             {

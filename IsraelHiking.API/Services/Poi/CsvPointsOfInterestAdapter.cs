@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using GeoAPI.Geometries;
 using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
@@ -183,7 +184,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 var content = await _remoteFileFetcherGateway.GetFileContent(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
                 var convertedBytes = await _dataContainerConverterService.Convert(content.Content, content.FileName, FlowFormats.GEOJSON);
-                feature.Geometry = convertedBytes.ToFeatureCollection().FirstOrDefault()?.Geometry ?? feature.Geometry;
+                feature.Geometry = convertedBytes.ToFeatureCollection().Features.FirstOrDefault()?.Geometry ?? feature.Geometry;
             }
             return feature;
         }

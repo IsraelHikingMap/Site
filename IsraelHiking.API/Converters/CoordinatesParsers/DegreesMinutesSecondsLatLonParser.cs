@@ -1,4 +1,5 @@
-﻿using NetTopologySuite.Geometries;
+﻿using GeoAPI.Geometries;
+using NetTopologySuite.Geometries;
 using System.Text.RegularExpressions;
 
 namespace IsraelHiking.API.Converters.CoordinatesParsers

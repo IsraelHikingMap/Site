@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
@@ -16,6 +17,7 @@ using OsmSharp.Tags;
 using ProjNet.CoordinateSystems.Transformations;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -131,8 +133,8 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.Description = feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
             poiItem.IsEditable = false;
             poiItem.Contribution = GetContribution(feature.Attributes);
-            var itmCoordinate = _wgs84ItmMathTransform.Transform(poiItem.Location.Lng, poiItem.Location.Lat);
-            poiItem.ItmCoordinates = new NorthEast { East = (int)itmCoordinate.x, North = (int)itmCoordinate.y };
+            var itmCoordinate = _wgs84ItmMathTransform.Transform(poiItem.Location.ToCoordinate());
+            poiItem.ItmCoordinates = new NorthEast { East = (int)itmCoordinate.X, North = (int)itmCoordinate.Y };
             return poiItem;
         }
 
@@ -160,7 +162,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
             }
-            poiItem.FeatureCollection = new FeatureCollection { feature };
+            poiItem.FeatureCollection = new FeatureCollection(new Collection<IFeature> { feature });
             poiItem.DataContainer = await _dataContainerConverterService.ToDataContainer(
                 poiItem.FeatureCollection.ToBytes(), poiItem.Title + ".geojson");
             foreach (var coordinate in poiItem.DataContainer.Routes

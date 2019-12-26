@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Geometries;
@@ -71,7 +72,7 @@ namespace IsraelHiking.API.Services
 
         private Coordinate[] ToWgs84Coordinates(IEnumerable<LatLng> latLngs)
         {
-            return latLngs.Select(latLng => _wgs84ItmMathTransform.Transform(latLng.Lng, latLng.Lat)).Select(c => new Coordinate(c.x, c.y)).ToArray();
+            return latLngs.Select(latLng => _wgs84ItmMathTransform.Transform(latLng.ToCoordinate())).ToArray();
         }
     }
 }

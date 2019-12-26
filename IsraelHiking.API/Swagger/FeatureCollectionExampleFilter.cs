@@ -1,4 +1,5 @@
-﻿using Microsoft.OpenApi.Any;
+﻿/* HM TODO: make it work again
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -49,3 +50,4 @@ namespace IsraelHiking.API.Swagger
         }
     }
 }
+*/

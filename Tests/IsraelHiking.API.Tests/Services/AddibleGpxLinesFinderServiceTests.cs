@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -24,14 +25,13 @@ namespace IsraelHiking.API.Tests.Services
         {
             lineStrings = lineStrings ?? new List<LineString>();
             var conveter = new ItmWgs84MathTransfromFactory().Create();
-            var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(c => conveter.Transform(c.X, c.Y))
-                .Select(c => new Coordinate(c.x, c.y))
+            var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(c => conveter.Transform(c))
                 .ToArray()),
                 new AttributesTable())).ToList();
             int id = 1;
             foreach (var highway in highways)
             {
-                highway.Attributes.Add(FeatureAttributes.ID, id.ToString());
+                highway.Attributes.AddAttribute(FeatureAttributes.ID, id.ToString());
                 id++;
             }
             _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(highways);
@@ -44,7 +44,7 @@ namespace IsraelHiking.API.Tests.Services
             _options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(_options);
-            var geometryFactory = GeometryFactory.Default;
+            var geometryFactory = new GeometryFactory();
             _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(geometryFactory), new GpxProlongerExecutor(geometryFactory), new ItmWgs84MathTransfromFactory(), _elasticSearchGateway, optionsProvider, geometryFactory, Substitute.For<ILogger>());
         }
 

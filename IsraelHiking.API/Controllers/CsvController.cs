@@ -70,7 +70,7 @@ namespace IsraelHiking.API.Controllers
                         var geojsonBytes = await _dataContainerConverterService.Convert(response.Content,
                             response.FileName, FlowFormats.GEOJSON);
                         var geoJson = geojsonBytes.ToFeatureCollection();
-                        var coordinate = geoJson.First().Geometry.Coordinate;
+                        var coordinate = geoJson.Features.First().Geometry.Coordinate;
                         csvRow.Latitude = coordinate.Y;
                         csvRow.Longitude = coordinate.X;
                     }

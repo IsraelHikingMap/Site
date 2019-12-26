@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Converters;
+﻿using GeoAPI.Geometries;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -102,13 +103,13 @@ namespace IsraelHiking.API.Executors
             foreach (var feature in features)
             {
                 (var searchFactor, var iconColorCategory) = _tagsHelper.GetInfo(feature.Attributes);
-                feature.Attributes.Add(FeatureAttributes.POI_SEARCH_FACTOR, searchFactor);
-                feature.Attributes.Add(FeatureAttributes.POI_ICON, iconColorCategory.Icon);
-                feature.Attributes.Add(FeatureAttributes.POI_ICON_COLOR, iconColorCategory.Color);
-                feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
-                feature.Attributes.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
-                feature.Attributes.Add(FeatureAttributes.POI_LANGUAGE, Languages.ALL);
-                feature.Attributes.Add(FeatureAttributes.POI_CONTAINER, feature.IsValidContainer());
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_SEARCH_FACTOR, searchFactor);
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_ICON, iconColorCategory.Icon);
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_ICON_COLOR, iconColorCategory.Color);
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_LANGUAGE, Languages.ALL);
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_CONTAINER, feature.IsValidContainer());
                 feature.SetTitles();
                 feature.SetId();
                 UpdateLocation(feature);
@@ -256,7 +257,7 @@ namespace IsraelHiking.API.Executors
             var highwayFeatures = highways.Select(_osmGeoJsonConverter.ToGeoJson).Where(h => h != null).ToList();
             foreach (var highwayFeature in highwayFeatures)
             {
-                highwayFeature.Attributes.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
+                highwayFeature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
                 highwayFeature.SetId();
             }
             return highwayFeatures;
@@ -281,15 +282,15 @@ namespace IsraelHiking.API.Executors
             {
                 geoLocation = feature.Geometry.Centroid.Coordinate;
             }
-            feature.Attributes.Add(FeatureAttributes.POI_GEOLOCATION, new AttributesTable
+            feature.Attributes.AddAttribute(FeatureAttributes.POI_GEOLOCATION, new AttributesTable
             {
                 { FeatureAttributes.LAT, geoLocation.Y },
                 { FeatureAttributes.LON, geoLocation.X }
             });
-            feature.Attributes.Add(FeatureAttributes.POI_ALT, _elevationDataStorage.GetElevation(geoLocation).Result);
-            var northEast = _wgs84ItmConverter.Transform(geoLocation.X, geoLocation.Y);
-            feature.Attributes.Add(FeatureAttributes.POI_ITM_EAST, northEast.x);
-            feature.Attributes.Add(FeatureAttributes.POI_ITM_NORTH, northEast.y);
+            feature.Attributes.AddAttribute(FeatureAttributes.POI_ALT, _elevationDataStorage.GetElevation(geoLocation).Result);
+            var northEast = _wgs84ItmConverter.Transform(geoLocation);
+            feature.Attributes.AddAttribute(FeatureAttributes.POI_ITM_EAST, northEast.X);
+            feature.Attributes.AddAttribute(FeatureAttributes.POI_ITM_NORTH, northEast.Y);
 
         }
     }
