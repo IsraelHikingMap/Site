@@ -4,7 +4,7 @@ import { Idle, DEFAULT_INTERRUPTSOURCES } from "@ng-idle/core";
 
 import { RunningContextService } from "./running-context.service";
 import { ApplicationState } from "../models/models";
-import { LoggingService } from './logging.service';
+import { LoggingService } from "./logging.service";
 
 declare var cordova: any;
 

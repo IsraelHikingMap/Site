@@ -67,7 +67,7 @@ export class TracesComponent extends BaseMapComponent {
                             type: "Point",
                             coordinates: SpatialService.toCoordinate(marker.latlng)
                         }
-                    })
+                    });
                 }
             }
             if (traceCoordinates.length === 0) {

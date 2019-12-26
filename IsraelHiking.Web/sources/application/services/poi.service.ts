@@ -7,7 +7,7 @@ import { HashService, IPoiRouterData } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
 import { RunningContextService } from "./running-context.service";
-import { SpatialService } from './spatial.service';
+import { SpatialService } from "./spatial.service";
 import { Urls } from "../urls";
 import { MarkerData, LatLngAlt, PointOfInterestExtended, PointOfInterest } from "../models/models";
 

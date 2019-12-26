@@ -57,7 +57,9 @@
     <Content Remove="angular.json" />
     <Content Remove="package-lock.json" />
     <Content Remove="package.json" />
+    <Content Remove="tsconfig.app.json" />
     <Content Remove="tsconfig.json" />
+    <Content Remove="tsconfig.spec.json" />
     <Content Remove="tslint.json" />
   </ItemGroup>
 

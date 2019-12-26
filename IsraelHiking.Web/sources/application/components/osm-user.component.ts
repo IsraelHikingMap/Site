@@ -163,9 +163,10 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
                 attachments: ["base64:log.txt//" + logBase64]
             });
         } catch (ex) {
-            alert(`Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com? \nSend issue failed: ${ex.toString()}`);
+            alert(`Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?` +
+                `\nSend issue failed: ${ex.toString()}`);
         }
-        
+
     }
 
     public toggleIsAdvanced() {

@@ -7,7 +7,6 @@ import { ElevationProvider } from "../services/elevation.provider";
 import { Urls } from "../urls";
 import { LatLngAlt, NorthEast } from "../models/models";
 
-
 @Component({
     selector: "coordinates",
     templateUrl: "./coordinates.component.html"
