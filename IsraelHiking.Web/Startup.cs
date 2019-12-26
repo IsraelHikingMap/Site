@@ -2,7 +2,7 @@
 using IsraelHiking.API;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
-//using IsraelHiking.API.Swagger;
+using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccess;
@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -37,7 +38,7 @@ namespace IsraelHiking.Web
         private readonly bool _isDevelopment;
         private readonly IConfigurationRoot _nonPublicConfiguration;
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             _isDevelopment = env.IsDevelopment();
             var builder = new ConfigurationBuilder();
@@ -69,18 +70,21 @@ namespace IsraelHiking.Web
             var geometryFactory = new GeometryFactory(new PrecisionModel(100000000));
             services.AddSingleton<GeometryFactory, GeometryFactory>(serviceProvider => geometryFactory);
             services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerOptionsValidatorConfigureOptions>();
-            services.AddMvc(options =>
+            services.AddControllers(options =>
             {
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(PointOfInterestExtended)));
-            }).AddJsonOptions(options =>
+            }).AddNewtonsoftJson(options =>
             {
-                foreach (var converter in GeoJsonSerializer.Create().Converters)
+                foreach (var converter in GeoJsonSerializer.Create(geometryFactory).Converters)
                 {
                     options.SerializerSettings.Converters.Add(converter);
                 }
             });
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+            services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer();
             services.AddCors();
             services.AddOptions();
 
@@ -101,8 +105,8 @@ namespace IsraelHiking.Web
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Israel Hiking API", Version = GetType().Assembly.GetName().Version.ToString() });
-                //c.SchemaFilter<FeatureExampleFilter>();
-                //c.SchemaFilter<FeatureCollectionExampleFilter>();
+                c.SchemaFilter<FeatureExampleFilter>();
+                c.SchemaFilter<FeatureCollectionExampleFilter>();
                 c.AddSecurityDefinition("Bearer",
                     new OpenApiSecurityScheme
                     {
@@ -112,14 +116,14 @@ namespace IsraelHiking.Web
                         In = ParameterLocation.Header
                     }
                 );
-                //c.OperationFilter<AssignOAuthSecurityRequirements>();
+                c.OperationFilter<AssignOAuthSecurityRequirements>();
                 c.IncludeXmlComments(Path.Combine(binariesFolder, "IsraelHiking.API.xml"));
             });
             services.AddDirectoryBrowser();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             var rewriteOptions = new RewriteOptions();
             rewriteOptions.Rules.Add(new RewriteWithQueryRule(".*_escaped_fragment_=%2F%3Fs%3D(.*)", "api/opengraph/$1", false));
@@ -133,10 +137,15 @@ namespace IsraelHiking.Web
 
             app.UseCors(builder =>
             {
-                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();//.AllowCredentials();
             });
+            app.UseRouting();
             app.UseAuthentication();
-            app.UseMvc();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
             SetupStaticFilesAndProxies(app);
 
             app.UseSwagger();

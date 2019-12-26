@@ -68,7 +68,7 @@ namespace IsraelHiking.DataAccess
                         BoundingRectangle = GeoCoordinateRectangle.FromBoundingCoordinates(sourthWest.X, sourthWest.Y, northEast.X, northEast.Y),
                         PaginationSize = 500
                     };
-                    var results = await geoSearchGenerator.EnumItemsAsync().ToList();
+                    var results = await geoSearchGenerator.EnumItemsAsync().ToListAsync();
                     var features = new List<Feature>();
                     foreach (var geoSearchResultItem in results)
                     {
@@ -103,7 +103,7 @@ namespace IsraelHiking.DataAccess
             var language = splitId.First();
             var pageId = splitId.Last();
             var site = _wikiSites[language];
-            var stub = await WikiPageStub.FromPageIds(site, new[] { int.Parse(pageId) }).First();
+            var stub = await WikiPageStub.FromPageIds(site, new[] { int.Parse(pageId) }).FirstAsync();
             var page = new WikiPage(site, stub.Title);
             return await ConvertPageToFeature(page, language);
         }

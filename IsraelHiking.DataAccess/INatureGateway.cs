@@ -46,7 +46,7 @@ namespace IsraelHiking.DataAccess
             {
                 PaginationSize = 500
             };
-            var results = await allpagesGenerator.EnumItemsAsync().ToList().ConfigureAwait(false);
+            var results = await allpagesGenerator.EnumItemsAsync().ToListAsync().ConfigureAwait(false);
             _logger.LogInformation($"Got {results.Count} pages from iNature, fetching their content and images");
             var features = new ConcurrentBag<Feature>();
             await Task.Run(() =>

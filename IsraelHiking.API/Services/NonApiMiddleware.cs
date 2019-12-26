@@ -21,7 +21,7 @@ namespace IsraelHiking.API.Services
     /// </summary>
     public class NonApiMiddleware
     {
-        private readonly IHostingEnvironment _environment;
+        private readonly IWebHostEnvironment _environment;
         private readonly IServiceProvider _serviceProvider;
         private readonly IRepository _repository;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
@@ -36,7 +36,7 @@ namespace IsraelHiking.API.Services
         /// <param name="repository"></param>
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="options"></param>
-        public NonApiMiddleware(RequestDelegate next, IHostingEnvironment environment,
+        public NonApiMiddleware(RequestDelegate next, IWebHostEnvironment environment,
             IServiceProvider serviceProvider,
             IRepository repository,
             IPointsOfInterestProvider pointsOfInterestProvider,

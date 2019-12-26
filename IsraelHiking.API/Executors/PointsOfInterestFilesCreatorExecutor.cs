@@ -31,7 +31,7 @@ namespace IsraelHiking.API.Executors
     {
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private readonly IFileSystemHelper _fileSystemHelper;
-        private readonly IHostingEnvironment _environment;
+        private readonly IWebHostEnvironment _environment;
         private readonly ILogger _logger;
         /// <summary>
         /// Constructor
@@ -42,7 +42,7 @@ namespace IsraelHiking.API.Executors
         /// <param name="logger"></param>
         public PointsOfInterestFilesCreatorExecutor(IFileSystemHelper fileSystemHelper,
             IRemoteFileFetcherGateway remoteFileFetcherGateway,
-            IHostingEnvironment environment,
+            IWebHostEnvironment environment,
             ILogger logger)
         {
             _fileSystemHelper = fileSystemHelper;
