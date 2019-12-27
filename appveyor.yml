@@ -8,6 +8,7 @@ environment:
     - PRODUCT: android
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
+      ANDROID_SDK_ROOT: C:\Program Files (x86)\Android\android-sdk
       GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       STORE_PASSWORD:
         secure: ZF3GiQxQ98B1HGKZOwlnmris5yN68mvx3UF6TVsnpws=
@@ -96,6 +97,12 @@ for:
         - PRODUCT: ios
     build: off
     test: off
+    after_test:
+    - ps: >-
+      Write-Host "iOS build start"
+      npm run build:cordova -- --no-progress
+      npm run add-ios
+      npm run build-ipa
 
 deploy:
 - provider: GitHub
