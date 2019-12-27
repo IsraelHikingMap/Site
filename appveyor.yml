@@ -1,17 +1,20 @@
 version: 8.5.{build}
 clone_depth: 3
-image: Visual Studio 2019
+image: 
+  - Visual Studio 2019
+  - macos
 configuration: Release
 environment:
-    ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
-    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-    STORE_PASSWORD:
-        secure: ZF3GiQxQ98B1HGKZOwlnmris5yN68mvx3UF6TVsnpws=
-    PASSWORD:
-        secure: mqbXr4+cn3l9YNyKhOezbA==
-    matrix:
-        - PRODUCT: web
-        - PRODUCT: android
+  ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  STORE_PASSWORD:
+    secure: ZF3GiQxQ98B1HGKZOwlnmris5yN68mvx3UF6TVsnpws=
+  PASSWORD:
+    secure: mqbXr4+cn3l9YNyKhOezbA==
+  matrix:
+    - PRODUCT: web
+    - PRODUCT: android
+    - PRODUCT: ios
 install:
 - ps: >-
     Install-Product node 10.15
@@ -40,45 +43,60 @@ install:
 
         Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
     }
-before_build:
-- ps: dotnet restore
-dotnet_csproj:
-  patch: true
-  file: '**\*.csproj'
-  version: $(appveyor_build_version)
-  package_version: $(appveyor_build_version)
-  assembly_version: $(appveyor_build_version)
-  file_version: $(appveyor_build_version)
-  informational_version: $(appveyor_build_version)
-build:
-  project: IsraelHiking.sln
-  parallel: true
-  verbosity: minimal
-after_test:
-- ps: >-
-    if ($env:PRODUCT -eq "web")
-    {
-        $PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildTests.ps1"
+for:
+  -
+    matrix:
+      only:
+        - image: Visual Studio 2019
+          PRODUCT: web
+    before_build:
+      - ps: dotnet restore
+    dotnet_csproj:
+      patch: true
+      file: '**\*.csproj'
+      version: $(appveyor_build_version)
+      package_version: $(appveyor_build_version)
+      assembly_version: $(appveyor_build_version)
+      file_version: $(appveyor_build_version)
+      informational_version: $(appveyor_build_version)
+    build:
+      project: IsraelHiking.sln
+      parallel: true
+      verbosity: minimal
+    after_test:
+      - ps: >-
+            $PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildTests.ps1"
 
-        Write-Host $PostBuildTests
+            Write-Host $PostBuildTests
 
-        & "$PostBuildTests"
+            & "$PostBuildTests"
 
-        $PostBuildPackArtifacts = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildPackArtifacts.ps1"
+            $PostBuildPackArtifacts = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildPackArtifacts.ps1"
 
-        Write-Host $PostBuildPackArtifacts
+            Write-Host $PostBuildPackArtifacts
 
-        & "$PostBuildPackArtifacts"
-    }
+            & "$PostBuildPackArtifacts"
 
-    if ($env:PRODUCT -eq "android")
-    {
+  -
+    matrix:
+      only:
+        - image: Visual Studio 2019
+          PRODUCT: android
+    build: off
+    after_test:
+    - ps: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
 
         Write-Host $BuildAndPublishAndroid
 
         & "$BuildAndPublishAndroid"
-    }
+
+  -
+    matrix:
+      only:
+        - image: macos
+          PRODUCT: ios
+    build: off
 
 deploy:
 - provider: GitHub
