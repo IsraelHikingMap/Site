@@ -99,10 +99,10 @@ for:
     test: off
     after_test:
     - ps: >-
-      Write-Host "iOS build start"
-      npm run build:cordova -- --no-progress
-      npm run add-ios
-      npm run build-ipa
+        Write-Host "iOS build start"
+        npm run build:cordova -- --no-progress
+        npm run add-ios
+        npm run build-ipa
 
 deploy:
 - provider: GitHub
