@@ -67,7 +67,7 @@ export class ConnectionService implements OnDestroy {
     private stateChangeEventEmitter = new EventEmitter<ConnectionState>();
 
     private currentState: ConnectionState = {
-        hasInternetAccess: false,
+        hasInternetAccess: true,
         hasNetworkConnection: window.navigator.onLine
     };
     private offlineSubscription: Subscription;
