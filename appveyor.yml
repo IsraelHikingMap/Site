@@ -82,7 +82,6 @@ for:
         Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
 
     build: off
-    test: off
     after_test:
     - ps: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
@@ -96,7 +95,6 @@ for:
       only:
         - PRODUCT: ios
     build: off
-    test: off
     after_test:
     - ps: >-
         Write-Host "iOS build start"
