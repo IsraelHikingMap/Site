@@ -65,7 +65,10 @@ for:
     matrix:
       only:
         - PRODUCT: android
-    before_build:
+        
+
+    build: off
+    after_test:
     - ps: >-
         choco install gradle --version 4.9 --no-progress
 
@@ -81,9 +84,6 @@ for:
 
         Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
 
-    build: off
-    after_test:
-    - ps: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
 
         Write-Host $BuildAndPublishAndroid
