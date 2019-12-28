@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.Web", "IsraelHiking.Web\IsraelHiking.Web.csproj", "{69BFA742-B354-4493-8C9B-794C8CD14214}"
 EndProject
@@ -32,10 +32,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{3585
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		Scripts\BuildAndPublishAndroid.ps1 = Scripts\BuildAndPublishAndroid.ps1
+		Scripts\BuildAndPublishIOS.ps1 = Scripts\BuildAndPublishIOS.ps1
 		Scripts\CleanLogs.cmd = Scripts\CleanLogs.cmd
 		Scripts\Deploy.ps1 = Scripts\Deploy.ps1
-		Scripts\PostBuildPackArtifacts.ps1 = Scripts\PostBuildPackArtifacts.ps1
-		Scripts\PostBuildTests.ps1 = Scripts\PostBuildTests.ps1
+		Scripts\TestAndPublishWeb.ps1 = Scripts\TestAndPublishWeb.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{3E9EFE32-6A08-4960-AD00-83AC5FEAB259}"
