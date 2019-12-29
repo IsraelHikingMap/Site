@@ -130,7 +130,7 @@
     "add-android": "cordova platform add android",
     "run-android": "cordova run android",
     "build-apk": "cordova build android --release --no-telemetry",
-    "add-ios": "cordova plugin rm cc.fovea.cordova.openwith && cordova platform add ios",
+    "add-ios": "npm uninstall cc.fovea.cordova.openwith && cordova platform add ios",
     "run-ios": "cordova run ios --buildFlag=\"-UseModernBuildSystem=0\"",
     "build-ipa": "cordova build ios --release --no-telemetry --buildFlag=\"-UseModernBuildSystem=0\"",
     "1-upload": "node extract-and-upload.js",
