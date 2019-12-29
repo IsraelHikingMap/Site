@@ -173,5 +173,4 @@
     <variable name="ALWAYS_USAGE_DESCRIPTION" value="App requires background tracking " />
     <variable name="MOTION_USAGE_DESCRIPTION" value="App requires motion detection" />
   </plugin>
-  <engine name="ios" spec="^4.5.5" />
 </widget>
