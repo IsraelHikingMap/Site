@@ -29,7 +29,7 @@ security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
 Write-Host "Add certificates to keychain and allow codesign to access them"
 security import ./certificates/apple.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
 security import ./certificates/ihm-dist.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
-security import ./certificates/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain -P $KEY_PASSWORD -T /usr/bin/codesign
+security import ./certificates/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain -P $env:STORE_PASSWORD -T /usr/bin/codesign
 
 New-Item -ItemType "directory" -Path "~/Library/MobileDevice/Provisioning Profiles" -Verbose
 Copy-Item "./certificates/appveyor.mobileprovision" -Destination "~/Library/MobileDevice/Provisioning Profiles/" -Verbose
@@ -41,9 +41,6 @@ npm install --loglevel=error
 Write-Host "increase-memory-limit"
 increase-memory-limit
 
-Write-Host "npm run add-ios"
-npm run add-ios
-
 Write-Host "npm run build:cordova -- --no-progress"
 npm run build:cordova -- --no-progress
 
@@ -51,6 +48,9 @@ if ($lastexitcode)
 {
 	throw $lastexitcode
 }
+
+Write-Host "npm run add-ios"
+npm run add-ios
 
 Write-Host "npm run build-ipa"
 npm run build-ipa
