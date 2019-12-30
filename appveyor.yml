@@ -32,7 +32,7 @@ for:
     matrix:
       only:
         - PRODUCT: ios
-    fast_finish: true
+      fast_finish: true
     build_script: 
     - ps: >-
         $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishIOS.ps1"
