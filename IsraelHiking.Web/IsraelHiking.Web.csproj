@@ -117,4 +117,7 @@
     <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="certificates\" />
+  </ItemGroup>
 </Project>

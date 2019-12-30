@@ -132,7 +132,7 @@
     "build-apk": "cordova build android --release --no-telemetry",
     "add-ios": "npm uninstall cc.fovea.cordova.openwith && cordova platform add ios",
     "run-ios": "cordova run ios",
-    "build-ipa": "cordova build ios --release --no-telemetry --device --developmentTeam=\"2KT88923M5\" --codeSignIdentity=\"iPhone Developer\" --packageType=\"app-store\"",
+    "build-ipa": "cordova build ios --release --no-telemetry --device --developmentTeam=\"2KT88923M5\" --codeSignIdentity=\"iPhone Distribution\" --packageType=\"app-store\" --provisioningProfile=\"9b478ac7-66cf-44cb-a485-395589ad2e2a\"",
     "1-upload": "node extract-and-upload.js",
     "2-download": "node download-and-compile.js",
     "postinstall": "patch-package"
