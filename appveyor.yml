@@ -7,6 +7,8 @@ environment:
   PASSWORD:
     secure: mqbXr4+cn3l9YNyKhOezbA==
   matrix:
+    - PRODUCT: ios
+      APPVEYOR_BUILD_WORKER_IMAGE: macOS
     - PRODUCT: web
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     - PRODUCT: android
@@ -14,8 +16,7 @@ environment:
       ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
       ANDROID_SDK_ROOT: C:\Program Files (x86)\Android\android-sdk
       GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-    - PRODUCT: ios
-      APPVEYOR_BUILD_WORKER_IMAGE: macOS
+    
 install:
 - ps: >-
     Install-Product node 10.15
@@ -28,19 +29,6 @@ install:
 
     npm --version
 for:
-  -
-    matrix:
-      only:
-        - PRODUCT: ios
-      fast_finish: true
-    build_script: 
-    - ps: >-
-        $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishIOS.ps1"
-
-        Write-Host $BuildAndPublishIOS
-
-        & "$BuildAndPublishIOS"
-
   -
     matrix:
       only: 
@@ -72,8 +60,6 @@ for:
     matrix:
       only:
         - PRODUCT: android
-        
-
     build_script:
     - ps: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
@@ -82,8 +68,19 @@ for:
 
         & "$BuildAndPublishAndroid"
 
-  
+  -
+    matrix:
+      only:
+        - PRODUCT: ios
+      fast_finish: true
+    build_script: 
+    - ps: >-
+        $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishIOS.ps1"
 
+        Write-Host $BuildAndPublishIOS
+
+        & "$BuildAndPublishIOS"
+        
 deploy:
 - provider: GitHub
   auth_token:
