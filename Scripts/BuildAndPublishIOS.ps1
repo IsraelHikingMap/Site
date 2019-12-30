@@ -9,9 +9,9 @@ $xml.widget.version = $env:APPVEYOR_BUILD_VERSION
 $xml.Save($filePath)
 
 Write-Host "Decripting files"
-Invoke-Expression "& openssl aes-256-cbc -k ""pass:$env:PASSWORD"" -in ./certificates/appveyor.mobileprovision.enc -d -a -out ./certificates/appveyor.mobileprovision.enc"
-Invoke-Expression "& openssl aes-256-cbc -k ""pass:$env:PASSWORD"" -in ./certificates/ihm-dist.cer.enc -d -a -out ./certificates/dist.cer"
-Invoke-Expression "& openssl aes-256-cbc -k ""pass:$env:PASSWORD"" -in ./certificates/ihm-dist.p12.enc -d -a -out ./certificates/dist.p12"
+Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./certificates/appveyor.mobileprovision.enc -d -a -out ./certificates/appveyor.mobileprovision.enc"
+Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./certificates/ihm-dist.cer.enc -d -a -out ./certificates/dist.cer"
+Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./certificates/ihm-dist.p12.enc -d -a -out ./certificates/dist.p12"
 
 Write-Host "Create a custom keychain"
 security create-keychain -p appveyor ios-build.keychain
