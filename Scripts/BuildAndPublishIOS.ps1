@@ -26,6 +26,10 @@ security unlock-keychain -p appveyor ios-build.keychain
 # see http://www.egeek.me/2013/02/23/jenkins-and-xcode-user-interaction-is-not-allowed/
 security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
 
+# Avoid popup for keychain password
+# https://medium.com/@ceyhunkeklik/how-to-fix-ios-application-code-signing-error-4818bd331327
+security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k appveyor ~/Library/Keychains/ios-build.keychain
+
 Write-Host "Add certificates to keychain and allow codesign to access them"
 security import ./signing/apple.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
 security import ./signing/ihm-dist.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
@@ -55,13 +59,15 @@ npm run add-ios
 Write-Host "npm run build-ipa"
 npm run build-ipa
 
-$ipaVersioned = ".\IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
-#$preSignIpaLocation = ".\platforms\ios\app\build\outputs\ipa\release\app-release-unsigned.apk";
+$preVersionIpaLocation = ".\platforms\ios\build\device\Israel Hiking Map.ipa";
+$ipaVersioned = ".\platforms\ios\build\device\IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
-#if (-not (Test-Path -Path $preSignIpaLocation)) {
-#	throw "Failed to create ios apk file"
-#}
+if (-not (Test-Path -Path $preVersionIpaLocation)) {
+	throw "Failed to create ios ipa file"
+}
 
-#Push-AppveyorArtifact $apkVersioned
+Rename-Item -Path $preVersionIpaLocation -NewName $ipaVersioned
+
+Push-AppveyorArtifact $ipaVersioned
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
