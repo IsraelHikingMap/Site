@@ -130,7 +130,7 @@
     "add-android": "cordova platform add android",
     "run-android": "cordova run android",
     "build-apk": "cordova build android --release --no-telemetry",
-    "add-ios": "npm uninstall cc.fovea.cordova.openwith && cordova platform add ios",
+    "add-ios": "cordova platform add ios",
     "run-ios": "cordova run ios",
     "build-ipa": "cordova build ios --release --no-telemetry --device --developmentTeam=\"2KT88923M5\" --codeSignIdentity=\"iPhone Distribution\" --packageType=\"app-store\" --provisioningProfile=\"9b478ac7-66cf-44cb-a485-395589ad2e2a\"",
     "1-upload": "node extract-and-upload.js",
@@ -147,6 +147,8 @@
         "ANDROID_MIME_TYPE": "application/gpx",
         "IOS_URL_SCHEME": "israelhikingmap",
         "IOS_UNIFORM_TYPE_IDENTIFIER": "public.data",
+        "SHAREEXT_PROVISIONING_PROFILE": "9b478ac7-66cf-44cb-a485-395589ad2e2a",
+        "SHAREEXT_DEVELOPMENT_TEAM": "2KT88923M5",
         "ANDROID_EXTRA_ACTIONS": " "
       },
       "cordova-plugin-device": {},
