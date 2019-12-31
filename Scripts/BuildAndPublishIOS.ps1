@@ -67,7 +67,7 @@ if (-not (Test-Path -Path $preVersionIpaLocation)) {
 	throw "Failed to create ios ipa file"
 }
 
-Rename-Item -Path $preVersionIpaLocation -NewName $ipaVersioned
+Rename-Item -Path $preVersionIpaLocation -NewName "IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
 Push-AppveyorArtifact $ipaVersioned
 
