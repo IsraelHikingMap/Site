@@ -26,17 +26,18 @@ security unlock-keychain -p appveyor ios-build.keychain
 # see http://www.egeek.me/2013/02/23/jenkins-and-xcode-user-interaction-is-not-allowed/
 security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
 
-# Avoid popup for keychain password
-# https://medium.com/@ceyhunkeklik/how-to-fix-ios-application-code-signing-error-4818bd331327
-security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k appveyor ~/Library/Keychains/ios-build.keychain
-
 Write-Host "Add certificates to keychain and allow codesign to access them"
 security import ./signing/apple.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
 security import ./signing/ihm-dist.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
 security import ./signing/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain -P $env:STORE_PASSWORD -T /usr/bin/codesign
 
-New-Item -ItemType "directory" -Path "~/Library/MobileDevice/Provisioning Profiles" -Verbose
-Copy-Item "./signing/appveyor.mobileprovision" -Destination "~/Library/MobileDevice/Provisioning Profiles/" -Verbose
+Write-Host "Avoid popup for keychain password by setting partition list"
+# https://medium.com/@ceyhunkeklik/how-to-fix-ios-application-code-signing-error-4818bd331327
+security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k appveyor ~/Library/Keychains/ios-build.keychain
+
+Write-Host "Copy provisioning file"
+New-Item -ItemType "directory" -Path "~/Library/MobileDevice/Provisioning Profiles"
+Copy-Item "./signing/appveyor.mobileprovision" -Destination "~/Library/MobileDevice/Provisioning Profiles/"
 
 # Building ios:
 Write-Host "npm install --loglevel=error"
