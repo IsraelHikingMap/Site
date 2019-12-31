@@ -52,7 +52,7 @@ if (-not (Test-Path -Path $preSignApkLocation)) {
 }
 
 Write-Host "Signing apk"
-Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\IHM.jks --ks-pass pass:$env:STORE_PASSWORD --key-pass pass:$env:PASSWORD --out $apkVersioned $preSignApkLocation"
+Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\signing\IHM.jks --ks-pass pass:$env:STORE_PASSWORD --key-pass pass:$env:PASSWORD --out $apkVersioned $preSignApkLocation"
 
 Push-AppveyorArtifact $apkVersioned
 

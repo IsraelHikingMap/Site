@@ -9,9 +9,9 @@ $xml.widget.version = $env:APPVEYOR_BUILD_VERSION
 $xml.Save($filePath)
 
 Write-Host "Decripting files"
-Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./certificates/appveyor.mobileprovision.enc -d -a -out ./certificates/appveyor.mobileprovision"
-Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./certificates/ihm-dist.cer.enc -d -a -out ./certificates/ihm-dist.cer"
-Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./certificates/ihm-dist.p12.enc -d -a -out ./certificates/ihm-dist.p12"
+Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/appveyor.mobileprovision.enc -d -a -out ./signing/appveyor.mobileprovision"
+Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer"
+Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/ihm-dist.p12.enc -d -a -out ./signing/ihm-dist.p12"
 
 Write-Host "Create a custom keychain"
 security create-keychain -p appveyor ios-build.keychain
@@ -27,12 +27,12 @@ security unlock-keychain -p appveyor ios-build.keychain
 security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
 
 Write-Host "Add certificates to keychain and allow codesign to access them"
-security import ./certificates/apple.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
-security import ./certificates/ihm-dist.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
-security import ./certificates/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain -P $env:STORE_PASSWORD -T /usr/bin/codesign
+security import ./signing/apple.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
+security import ./signing/ihm-dist.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
+security import ./signing/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain -P $env:STORE_PASSWORD -T /usr/bin/codesign
 
 New-Item -ItemType "directory" -Path "~/Library/MobileDevice/Provisioning Profiles" -Verbose
-Copy-Item "./certificates/appveyor.mobileprovision" -Destination "~/Library/MobileDevice/Provisioning Profiles/" -Verbose
+Copy-Item "./signing/appveyor.mobileprovision" -Destination "~/Library/MobileDevice/Provisioning Profiles/" -Verbose
 
 # Building ios:
 Write-Host "npm install --loglevel=error"
