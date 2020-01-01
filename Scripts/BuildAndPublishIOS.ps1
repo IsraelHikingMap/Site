@@ -1,4 +1,4 @@
-Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 
 #Replace version in config.xml file
@@ -61,21 +61,13 @@ npm run add-ios
 Write-Host "npm run build-ipa"
 npm run build-ipa
 
-$preVersionIpaLocation = ".\platforms\ios\build\device\Israel Hiking Map.ipa";
-$ipaVersioned = ".\platforms\ios\build\device\IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
+$preVersionIpaLocation = "./platforms/ios/build/device/Israel Hiking Map.ipa";
+$ipaVersioned = "./platforms/ios/build/device/IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
-if (-not (Test-Path -Path $preVersionIpaLocation)) {
-	throw "Failed to create ios ipa file"
-}
-
-Get-ChildItem -Path  ".\platforms\ios\build\device\" -Name
-
-Rename-Item -Path $preVersionIpaLocation -NewName "IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa" -Verbose
-
-Get-ChildItem -Path  ".\platforms\ios\build\device\" -Name
+Rename-Item -Path $preVersionIpaLocation -NewName "IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
 if (-not (Test-Path -Path $ipaVersioned)) {
-	throw "Failed to rename ios ipa file"
+	throw "Failed to create ios ipa file"
 }
 
 Push-AppveyorArtifact $ipaVersioned
