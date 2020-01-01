@@ -22,7 +22,7 @@ security default-keychain -s ios-build.keychain
 Write-Host "Unlock the keychain"
 security unlock-keychain -p appveyor ios-build.keychain
 
-# Set keychain timeout to 1 hour for long builds
+Write-Host "Set keychain timeout to 1 hour to allow signing later in the build process"
 # see http://www.egeek.me/2013/02/23/jenkins-and-xcode-user-interaction-is-not-allowed/
 security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
 
@@ -33,6 +33,7 @@ security import ./signing/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain
 
 Write-Host "Avoid popup for keychain password by setting partition list"
 # https://medium.com/@ceyhunkeklik/how-to-fix-ios-application-code-signing-error-4818bd331327
+# Must be after the import process
 security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k appveyor ~/Library/Keychains/ios-build.keychain
 
 Write-Host "Copy provisioning file"
@@ -67,7 +68,15 @@ if (-not (Test-Path -Path $preVersionIpaLocation)) {
 	throw "Failed to create ios ipa file"
 }
 
-Rename-Item -Path $preVersionIpaLocation -NewName "IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
+Get-ChildItem -Path  ".\platforms\ios\build\device\" -Name
+
+Rename-Item -Path $preVersionIpaLocation -NewName "IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa" -Verbose
+
+Get-ChildItem -Path  ".\platforms\ios\build\device\" -Name
+
+if (-not (Test-Path -Path $ipaVersioned)) {
+	throw "Failed to rename ios ipa file"
+}
 
 Push-AppveyorArtifact $ipaVersioned
 
