@@ -6,6 +6,8 @@ import { NonAngularObjectsFactory } from "../services/non-angular-objects.factor
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
 
+declare var StatusBar: any;
+
 @Directive({
     selector: "[imageCapture]",
 })
@@ -46,6 +48,8 @@ export class ImageCaptureDirective implements OnDestroy {
     private getPicture(sourceType: number, saveToPhotoAlbum: boolean) {
         navigator.camera.getPicture(
             (imageUri: string) => {
+                StatusBar.overlaysWebView(true);
+                StatusBar.overlaysWebView(false);
                 let blob = this.nonAngularObjectsFactory.b64ToBlob("data:image/jpeg;base64," + imageUri);
                 let changeEvent = {
                     dataTransfer: {

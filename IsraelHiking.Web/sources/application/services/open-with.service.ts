@@ -33,7 +33,7 @@ export class OpenWithService {
                 private readonly ngZone: NgZone) { }
 
     public initialize() {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCordova || !cordova.openwith || !cordova.openwith.init) {
             return;
         }
         cordova.openwith.init(() => { }, (error) => console.error(`init failed with error: ${error}`));
