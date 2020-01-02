@@ -163,11 +163,12 @@
         "MOTION_USAGE_DESCRIPTION": "App requires motion detection"
       },
       "cordova-plugin-statusbar": {},
-      "cordova-plugin-brightness": {}
+      "cordova-plugin-brightness": {},
+      "cordova-plugin-splashscreen": {}
     },
     "platforms": [
-      "android",
-      "ios"
+      "ios",
+      "android"
     ]
   },
   "version": "8.5.0"
