@@ -145,6 +145,7 @@ import { LayersViewComponent } from "./components/map/layers-view.component";
 import { RoutesComponent } from "./components/map/routes.component";
 import { TracesComponent } from "./components/map/traces.component";
 import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
+import { SecuredImageComponent } from "./components/secured-image.component";
 // variables and functions
 import { routes } from "./routes";
 
@@ -348,6 +349,7 @@ NgModule({
         RoutesComponent,
         TracesComponent,
         AutomaticLayerPresentationComponent,
+        SecuredImageComponent,
         NameInUseValidatorDirective,
         ImageCaptureDirective,
         OfflineImagePipe

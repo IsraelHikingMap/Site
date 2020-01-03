@@ -23,7 +23,7 @@
         <div *ngFor="let trace of filteredTraces" class="item">
             <div fxLayout="row" [ngClass]="{'active': selectedTrace === trace}" (click)="toggleSelectedTrace(trace)">
                 <div class="item-image">
-                    <img [src]="trace.imageUrl" alt="" fxFill />
+                    <secured-image [src]="trace.imageUrl" alt="" fxFill></secured-image>
                 </div>
                 <div class="margin-10" >
                     <div *ngIf="!trace.isInEditMode">
