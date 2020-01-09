@@ -141,6 +141,7 @@
     <edit-config target="NSPhotoLibraryAddUsageDescription" file="*-Info.plist" mode="merge">
         <string>We need access to the photo library to save pictures there</string>
     </edit-config>
+    <preference name="WKWebViewOnly" value="true" />
     <preference name="WKSuspendInBackground" value="false" />
     <preference name="StatusBarOverlaysWebView" value="false" />
     <preference name="StatusBarBackgroundColor" value="#0a42bb" />
