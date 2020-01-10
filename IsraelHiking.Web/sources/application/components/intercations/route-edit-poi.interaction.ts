@@ -8,6 +8,7 @@ import { SelectedRouteService } from "../../services/layers/routelayers/selected
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { SnappingService, ISnappingPointResponse } from "../../services/snapping.service";
+import { PoiService } from "../../services/poi.service";
 import { ApplicationState, MarkerData, LatLngAlt } from "../../models/models";
 
 @Injectable()
@@ -18,6 +19,7 @@ export class RouteEditPoiInteraction {
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly geoLocationService: GeoLocationService,
                 private readonly snappingService: SnappingService,
+                private readonly poiService: PoiService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
@@ -53,8 +55,8 @@ export class RouteEditPoiInteraction {
         }));
     }
 
-    private addPrivatePoi(latlng: LatLngAlt) {
-        let snapping = this.getSnappingForPoint(latlng);
+    private async addPrivatePoi(latlng: LatLngAlt) {
+        let snapping = await this.getSnappingForPoint(latlng);
         let markerData = (snapping.markerData != null)
             ? { ...snapping.markerData }
             : {
@@ -73,25 +75,24 @@ export class RouteEditPoiInteraction {
         PrivatePoiEditDialogComponent.openDialog(this.matDialog, selectedRoute.markers[index], selectedRoute.id, index);
     }
 
-    private getSnappingForPoint(latlng: LatLngAlt): ISnappingPointResponse {
+    private async getSnappingForPoint(latlng: LatLngAlt): Promise<ISnappingPointResponse> {
         if (this.geoLocationService.getState() === "tracking") {
             let snappingPointResponse = this.snappingService.snapToPoint(latlng,
-                {
-                    points: [
-                        {
-                            latlng: this.geoLocationService.currentLocation,
-                            type: "star",
-                            urls: [],
-                            title: "",
-                            description: "",
-                        } as MarkerData
-                    ],
-                    sensitivity: 30
-                });
+                [
+                    {
+                        latlng: this.geoLocationService.currentLocation,
+                        type: "star",
+                        urls: [],
+                        title: "",
+                        description: "",
+                    } as MarkerData
+                ]);
             if (snappingPointResponse.markerData != null) {
                 return snappingPointResponse;
             }
         }
-        return this.snappingService.snapToPoint(latlng);
+
+        let markerData = await this.poiService.getClosestPoint(latlng);
+        return this.snappingService.snapToPoint(latlng, markerData ? [markerData] : []);
     }
 }

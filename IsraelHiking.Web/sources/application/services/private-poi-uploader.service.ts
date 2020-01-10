@@ -4,7 +4,6 @@ import { NgRedux } from "@angular-redux/store";
 import { chain, flatten, map } from "lodash";
 
 import { ResourcesService } from "./resources.service";
-import { SnappingService } from "./snapping.service";
 import { PoiService } from "./poi.service";
 import { ToastService } from "./toast.service";
 import { RouteStrings } from "./hash.service";
@@ -16,7 +15,6 @@ export class PrivatePoiUploaderService {
     constructor(private readonly router: Router,
                 private readonly resources: ResourcesService,
                 private readonly poiService: PoiService,
-                private readonly snappingService: SnappingService,
                 private readonly toastService: ToastService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
     }
@@ -28,7 +26,7 @@ export class PrivatePoiUploaderService {
         description: string,
         markerType: string
     ) {
-        let results = await this.snappingService.getClosestPoint(latLng);
+        let results = await this.poiService.getClosestPoint(latLng, "OSM");
         let urls = [];
         if (imageLink) {
             urls = [imageLink];

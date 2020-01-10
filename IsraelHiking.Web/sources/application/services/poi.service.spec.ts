@@ -12,6 +12,7 @@ import { HashService } from "./hash.service";
 import { DatabaseService } from "./database.service";
 import { LoggingService } from "./logging.service";
 import { ConnectionService } from "./connection.service";
+import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
 import { PointOfInterestExtended } from "../models/models";
 
@@ -36,6 +37,7 @@ describe("Poi Service", () => {
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: HashService, useValue: hashService },
                 { provide: ConnectionService, useValue: connectionService },
+                GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,
                 PoiService,

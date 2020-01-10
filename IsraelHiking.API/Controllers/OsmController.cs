@@ -93,7 +93,8 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Gets the closest point to a given location that is from OSM database in order to be able to update it if needed.
+        /// Deprecated! Gets the closest point to a given location that is from OSM database in order to be able to update it if needed.
+        /// HM TODO: remove this next release
         /// </summary>
         /// <param name="location"></param>
         /// <returns></returns>

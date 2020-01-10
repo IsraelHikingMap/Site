@@ -8,6 +8,7 @@ import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
+import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
 import { MarkerData, LatLngAlt, PointOfInterestExtended, PointOfInterest } from "../models/models";
 
@@ -50,7 +51,8 @@ export class PoiService {
                 private readonly whatsappService: WhatsAppService,
                 private readonly hashService: HashService,
                 private readonly databaseService: DatabaseService,
-                private readonly runningContextService: RunningContextService
+                private readonly runningContextService: RunningContextService,
+                private readonly geoJsonParser: GeoJsonParser,
     ) {
         this.poiCache = [];
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
@@ -218,5 +220,26 @@ export class PoiService {
             return null;
         }
         return poi;
+    }
+
+    public async getClosestPoint(location: LatLngAlt, source?: string): Promise<MarkerData> {
+        if (!this.runningContextService.isOnline) {
+            return null;
+        }
+        let params = new HttpParams()
+            .set("location", location.lat + "," + location.lng);
+        if (source) {
+            params = params.set("source", source);
+        }
+        let feature = await this.httpClient.get(Urls.poiClosest, { params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>;
+        if (feature == null) {
+            return null;
+        }
+        let dataContainer = this.geoJsonParser.toDataContainer({
+            features: [feature],
+            type: "FeatureCollection"
+        }, this.resources.getCurrentLanguageCodeSimplified());
+        let markerData = dataContainer.routes[0].markers[0];
+        return markerData;
     }
 }

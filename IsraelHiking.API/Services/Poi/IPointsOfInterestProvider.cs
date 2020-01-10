@@ -1,6 +1,7 @@
 ﻿using GeoAPI.Geometries;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Poi;
+using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using System.Threading.Tasks;
 
@@ -47,5 +48,13 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="language">The relevant language</param>
         /// <returns></returns>
         Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language);
+
+        /// <summary>
+        /// Get the closest point to the given location, only for the given source
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="source">Source is optional</param>
+        /// <returns></returns>
+        public Task<Feature> GetClosestPoint(Coordinate location, string source);
     }
 }

@@ -20,11 +20,11 @@ export class Urls {
     public static readonly osm = Urls.apiBase + "osm/";
     public static readonly osmConfiguration = Urls.osm + "configuration";
     public static readonly osmTrace = Urls.osm + "trace/";
-    public static readonly osmClosest = Urls.osm + "closest/";
     public static readonly osmUser = Urls.osm + "details/";
     public static readonly userLayers = Urls.apiBase + "userLayers/";
     public static readonly poi = Urls.apiBase + "poi/";
     public static readonly poiCategories = Urls.poi + "categories/";
+    public static readonly poiClosest = Urls.poi + "closest/";
 
     public static readonly facebook = "http://www.facebook.com/sharer/sharer.php?u=";
 

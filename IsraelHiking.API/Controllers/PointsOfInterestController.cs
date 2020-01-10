@@ -7,6 +7,7 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using NetTopologySuite.Features;
 using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
@@ -163,6 +164,19 @@ namespace IsraelHiking.API.Controllers
                 return Ok(await _pointsOfInterestProvider.AddPointOfInterest(pointOfInterest, tokenAndSecret, language));
             }
             return Ok(await _pointsOfInterestProvider.UpdatePointOfInterest(pointOfInterest, tokenAndSecret, language));
+        }
+
+        /// <summary>
+        /// Gets the closest point to a given location.
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="source">Optional, if given this is the only source this methosd will use</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("closest")]
+        public Task<Feature> GetClosestPoint(string location, string source)
+        {
+            return _pointsOfInterestProvider.GetClosestPoint(location.ToCoordinate(), source);
         }
     }
 }

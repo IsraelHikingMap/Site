@@ -30,7 +30,6 @@ declare type EditMouseState = "none" | "down" | "dragging" | "canceled";
 export class RouteEditRouteInteraction {
 
     public onRoutePointClick: EventEmitter<number>;
-    public onPointerMove: EventEmitter<LatLngAlt>;
 
     private state: EditMouseState;
     private mouseDownPoint: Point;
@@ -51,7 +50,6 @@ export class RouteEditRouteInteraction {
         this.geoJsonData = null;
         this.selectedRouteSegments = [];
         this.selectedRoutePoint = null;
-        this.onPointerMove = new EventEmitter();
         this.onRoutePointClick = new EventEmitter();
         this.state = "none";
         this.mouseDownPoint = null;
@@ -115,7 +113,7 @@ export class RouteEditRouteInteraction {
             return;
         }
         this.state = "down";
-        let latLng = this.getSnappingForRoute(event.lngLat);
+        let latLng = event.lngLat;
         let point = event.target.project(latLng);
         let th = 10;
         let routePoints = event.target.queryRenderedFeatures([[point.x - th, point.y - th], [point.x + th, point.y + th]],
@@ -146,8 +144,6 @@ export class RouteEditRouteInteraction {
         }
         if (this.selectedRoutePoint == null) {
             this.raiseRoutePointClick(null);
-        } else {
-            this.raisePointerMove(null);
         }
         if (this.isUpdating()) {
             event.preventDefault();
@@ -170,21 +166,16 @@ export class RouteEditRouteInteraction {
         }
         if (this.state === "dragging") {
             this.raiseRoutePointClick(null);
-            this.raisePointerMove(null);
             if (this.selectedRoutePoint != null) {
                 this.handleRoutePointDrag(event);
             } else if (this.selectedRouteSegments.length > 0) {
                 this.handleRouteMiddleSegmentDrag(event);
             }
-        } else {
-            // let latLng = this.getSnappingForRoute(event.lngLat);
-            // this.raisePointerMove(latLng);
         }
     }
 
     private handleRoutePointDrag(event: MapMouseEvent) {
-        let snappingLatLng = this.getSnappingForRoute(event.lngLat);
-        let coordinate = SpatialService.toCoordinate(snappingLatLng);
+        let coordinate = SpatialService.toCoordinate(event.lngLat);
         this.selectedRoutePoint.geometry.coordinates = coordinate;
         this.updateData(this.selectedRoutePoint);
         let index = this.getPointIndex();
@@ -208,8 +199,7 @@ export class RouteEditRouteInteraction {
     }
 
     private handleRouteMiddleSegmentDrag(event: MapMouseEvent) {
-        let snapping = this.getSnappingForRoute(event.lngLat);
-        let coordinate = SpatialService.toCoordinate(snapping);
+        let coordinate = SpatialService.toCoordinate(event.lngLat);
         let segment = this.selectedRouteSegments[0];
         let coordinates = segment.geometry.coordinates;
         segment.geometry.coordinates = [coordinates[0], coordinate, coordinates[coordinates.length - 1]];
@@ -245,7 +235,7 @@ export class RouteEditRouteInteraction {
             // regular map pan
             return;
         }
-        let latlng = this.getSnappingForRoute(event.lngLat);
+        let latlng = event.lngLat;
         if (!isUpdating && !isDragging) {
             // new point
             this.addPointToEndOfRoute(latlng);
@@ -279,8 +269,7 @@ export class RouteEditRouteInteraction {
         } else {
             let endPointSegmentIndex = selectedRoute.segments.length - 1;
             let startLatLng = selectedRoute.segments[endPointSegmentIndex].routePoint;
-            let routingType = this.ngRedux.getState().routeEditingState.routingType;
-            newSegment.latlngs = await this.runRouting(startLatLng, latlng, routingType);
+            await this.runRouting(startLatLng, newSegment);
         }
         this.ngRedux.dispatch(new AddSegmentAction({
             routeId: selectedRoute.id,
@@ -297,11 +286,14 @@ export class RouteEditRouteInteraction {
         return routeSegment;
     }
 
-    private runRouting = async (startLatLng: LatLngAlt, endLatLng: LatLngAlt, routingType: RoutingType): Promise<any> => {
-        let data = await this.routerService.getRoute(startLatLng, endLatLng, routingType);
+    private runRouting = async (startLatLng: LatLngAlt, segment: RouteSegmentData): Promise<void> => {
+        segment.routePoint = this.getSnappingForRoute(segment.routePoint, []);
+        let data = await this.routerService.getRoute(startLatLng, segment.routePoint, segment.routingType);
         let latLngs = data[data.length - 1].latlngs;
         latLngs = await this.elevationProvider.updateHeights(latLngs) as ILatLngTime[];
-        return latLngs;
+        segment.latlngs = latLngs;
+        let last = latLngs[latLngs.length - 1];
+        segment.routePoint = this.getSnappingForRoute(segment.routePoint, [last]);
     }
 
     private async updateRoutePoint(latlng: LatLngAlt) {
@@ -310,11 +302,13 @@ export class RouteEditRouteInteraction {
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
         let segment = { ...routeData.segments[index] };
         if (index === 0) {
-            segment.latlngs = await this.elevationProvider.updateHeights([latlng, latlng]) as ILatLngTime[];
-            segment.routePoint = latlng;
-            segment.routingType = routingType;
             let nextSegment = routeData.segments[index + 1];
-            nextSegment.latlngs = await this.runRouting(segment.routePoint, nextSegment.routePoint, routingType);
+            await this.runRouting(latlng, nextSegment);
+            let snappedLatLng = this.getSnappingForRoute(latlng, [nextSegment.latlngs[0]]);
+            segment.latlngs = await this.elevationProvider.updateHeights([snappedLatLng, snappedLatLng]) as ILatLngTime[];
+            segment.routePoint = snappedLatLng;
+            segment.routingType = routingType;
+
             this.ngRedux.dispatch(new UpdateSegmentsAction({
                 routeId: routeData.id,
                 indices: [index, index + 1],
@@ -324,7 +318,7 @@ export class RouteEditRouteInteraction {
             segment.routePoint = latlng;
             segment.routingType = routingType;
             let previousSegment = { ...routeData.segments[index - 1] };
-            segment.latlngs = await this.runRouting(previousSegment.routePoint, segment.routePoint, routingType);
+            await this.runRouting(previousSegment.routePoint, segment);
             this.ngRedux.dispatch(new UpdateSegmentsAction({
                 routeId: routeData.id,
                 indices: [index],
@@ -334,9 +328,9 @@ export class RouteEditRouteInteraction {
             let previousSegment = routeData.segments[index - 1];
             segment.routePoint = latlng;
             segment.routingType = routingType;
-            segment.latlngs = await this.runRouting(previousSegment.routePoint, segment.routePoint, routingType);
+            await this.runRouting(previousSegment.routePoint, segment);
             let nextSegment = routeData.segments[index + 1];
-            nextSegment.latlngs = await this.runRouting(segment.routePoint, nextSegment.routePoint, nextSegment.routingType);
+            await this.runRouting(segment.routePoint, nextSegment);
             this.ngRedux.dispatch(new UpdateSegmentsAction({
                 routeId: routeData.id,
                 indices: [index, index + 1],
@@ -349,10 +343,10 @@ export class RouteEditRouteInteraction {
         let index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         let routeData = this.selectedRouteService.getSelectedRoute();
         let segment = { ...routeData.segments[index] };
-        let latlngStart = await this.runRouting(segment.latlngs[0], latlng, this.ngRedux.getState().routeEditingState.routingType);
-        let latlngEnd = await this.runRouting(latlng, segment.routePoint, segment.routingType);
-        segment.latlngs = latlngEnd;
-        let middleSegment = this.createRouteSegment(latlng, latlngStart);
+        let middleSegment = this.createRouteSegment(latlng, []);
+        await this.runRouting(segment.latlngs[0], middleSegment);
+        await this.runRouting(middleSegment.routePoint, segment);
+
         this.ngRedux.dispatch(new UpdateSegmentsAction({
             routeId: routeData.id,
             indices: [index],
@@ -393,44 +387,20 @@ export class RouteEditRouteInteraction {
         return +splitStr[1];
     }
 
-    private getSnappingForRoute(latlng: LatLngAlt): LatLngAlt {
-        let geoLocationPoint = [] as MarkerData[];
+    private getSnappingForRoute(latlng: LatLngAlt, additionalLatlngs: LatLngAlt[]): LatLngAlt {
         if (this.geoLocationService.getState() === "tracking") {
-            geoLocationPoint.push({
-                latlng: this.geoLocationService.currentLocation,
-                type: "star",
-                urls: [],
-                title: "",
-                description: "",
-            } as MarkerData);
+            additionalLatlngs.push(this.geoLocationService.currentLocation);
         }
-        // private POIs + Geo Location
-        let snappingPointResponse = this.snappingService.snapToPoint(latlng,
-            {
-                points: geoLocationPoint.concat(this.selectedRouteService.getSelectedRoute().markers),
-                sensitivity: 30
-            });
-        if (snappingPointResponse.markerData != null) {
-            return snappingPointResponse.latlng;
-        }
-
-        // public POIs
-        snappingPointResponse = this.snappingService.snapToPoint(latlng);
-        if (snappingPointResponse.markerData != null) {
-            return snappingPointResponse.latlng;
-        }
-
-        let snappingRouteResponse = this.snappingService.snapToRoute(latlng);
-        if (snappingRouteResponse.line != null) {
-            return snappingRouteResponse.latlng;
-        }
-        return latlng;
-    }
-
-    private raisePointerMove(latLng: LatLngAlt) {
-        // this.ngZone.run(() => {
-        //    this.onPointerMove.emit(latLng);
-        // });
+        // private POIs + Geo Location + Additional Point:
+        let points = additionalLatlngs.map(l => ({
+            latlng: l,
+            type: "star",
+            urls: [],
+            title: "",
+            description: "",
+        } as MarkerData)).concat(this.selectedRouteService.getSelectedRoute().markers);
+        let snappingPointResponse = this.snappingService.snapToPoint(latlng, points);
+        return snappingPointResponse.latlng;
     }
 
     private raiseRoutePointClick(index: number) {

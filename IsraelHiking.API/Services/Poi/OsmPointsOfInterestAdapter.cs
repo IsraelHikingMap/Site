@@ -529,5 +529,18 @@ namespace IsraelHiking.API.Services.Poi
             // This should not return anything
             throw new NotImplementedException();
         }
+
+        /// <inheritdoc/>
+        public async Task<Feature> GetClosestPoint(Coordinate location, string source)
+        {
+            var distance = _options.MergePointsOfInterestThreshold;
+            var results = await _elasticSearchGateway.GetPointsOfInterest(
+                new Coordinate(location.X + distance, location.Y + distance),
+                new Coordinate(location.X - distance, location.Y - distance),
+                Categories.Points.Concat(new[] { Categories.NONE }).ToArray(), Languages.ALL);
+            return results.Where(r => r.Geometry is Point && ((source != null && r.Attributes[FeatureAttributes.POI_SOURCE].Equals(source)) || source == null))
+                .OrderBy(f => f.Geometry.Coordinate.Distance(location))
+                .FirstOrDefault();
+        }
     }
 }

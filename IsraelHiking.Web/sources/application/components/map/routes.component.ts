@@ -8,7 +8,6 @@ import { SelectedRouteService } from "../../services/layers/routelayers/selected
 import { SpatialService } from "../../services/spatial.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
-import { SnappingService } from "../../services/snapping.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { LoggingService } from "../../services/logging.service";
@@ -37,7 +36,6 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     @select((state: ApplicationState) => state.routeEditingState.recordingRouteId)
     public routeRecordingId$: Observable<string>;
 
-    public hoverFeature: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public routePointPopupData: RoutePointViewData;
 
     public editingRoute: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
@@ -49,7 +47,6 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
                 private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
-                private readonly snappingService: SnappingService,
                 private readonly fileService: FileService,
                 private readonly loggingService: LoggingService,
                 private readonly host: MapComponent
@@ -64,9 +61,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             features: []
         };
         this.routes = [];
-        this.setHoverFeature(null);
         this.routeEditRouteInteraction.onRoutePointClick.subscribe(this.handleRoutePointClick);
-        this.routeEditRouteInteraction.onPointerMove.subscribe(this.setHoverFeature);
         this.routes$.subscribe(this.handleRoutesChanges);
         this.routeRecordingId$.subscribe(this.buildFeatureCollections);
 
@@ -75,10 +70,6 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     private handleRoutesChanges = (routes: RouteData[]) => {
         this.loggingService.debug("handling route change - this is where the UI gets updated.");
         this.routes = routes;
-        this.snappingService.enable(this.isEditMode());
-        if (!this.isEditMode()) {
-            this.setHoverFeature(null);
-        }
         this.setInteractionAccordingToState();
         this.buildFeatureCollections();
     }
@@ -125,28 +116,6 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
 
     public closeRoutePointPopup() {
         this.routePointPopupData = null;
-    }
-
-    private setHoverFeature = (latLng: LatLngAlt) => {
-        if (!latLng) {
-            this.hoverFeature = {
-                type: "FeatureCollection",
-                features: []
-            };
-            return;
-        }
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        this.hoverFeature = {
-            type: "FeatureCollection",
-            features: [{
-                type: "Feature",
-                properties: { color: selectedRoute.color, opacity: selectedRoute.opacity || 1.0 },
-                geometry: {
-                    type: "Point",
-                    coordinates: [latLng.lng, latLng.lat]
-                }
-            }]
-        };
     }
 
     private createFeaturesForEditingRoute(route: RouteData): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
