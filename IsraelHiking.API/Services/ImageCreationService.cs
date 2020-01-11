@@ -26,7 +26,8 @@ namespace IsraelHiking.API.Services
         public AddressAndOpacity[] AddressesTemplates { get; set; }
     }
 
-    internal class ImageWithOffset {
+    internal class ImageWithOffset
+    {
         public Image Image { get; set; }
         public Point Offset { get; set; }
     }
@@ -238,19 +239,20 @@ namespace IsraelHiking.API.Services
                         new Rectangle(0, 0, imageWithOffset.Image.Width, imageWithOffset.Image.Height),
                         GraphicsUnit.Pixel);
                 }
-                
+
             }
             return bitmap;
         }
 
         private static string FixAdrressTemplate(string addressTemplate)
         {
-            var address = addressTemplate.Trim().ToLower();
-            if (address.StartsWith("http") == false && address.StartsWith("www") == false)
+            addressTemplate = addressTemplate.Trim();
+            var lowerAddress = addressTemplate.ToLower();
+            if (lowerAddress.StartsWith("http") == false && lowerAddress.StartsWith("www") == false)
             {
-                address = "https://israelhiking.osm.org.il" + address;
+                return "https://israelhiking.osm.org.il" + lowerAddress;
             }
-            return address;
+            return addressTemplate;
         }
 
         /// <summary>
@@ -281,7 +283,7 @@ namespace IsraelHiking.API.Services
                         lineColor = FromColorString(route.Color, route.Opacity);
                     }
 
-                    using (var linePen = new Pen(lineColor, penWidth) {LineJoin = LineJoin.Bevel})
+                    using (var linePen = new Pen(lineColor, penWidth) { LineJoin = LineJoin.Bevel })
                     {
                         if (points.Any())
                         {
@@ -293,7 +295,7 @@ namespace IsraelHiking.API.Services
                             graphics.FillEllipse(circleFillBrush, points.Last().X - circleSize / 2, points.Last().Y - circleSize / 2, circleSize, circleSize);
                             graphics.DrawEllipse(endRoutePen, points.Last().X - circleSize / 2, points.Last().Y - circleSize / 2, circleSize, circleSize);
                         }
-                    
+
                         foreach (var markerPoint in markerPoints)
                         {
                             graphics.FillEllipse(circleFillBrush, markerPoint.X - circleSize / 2, markerPoint.Y - circleSize / 2, circleSize, circleSize);
@@ -366,7 +368,6 @@ namespace IsraelHiking.API.Services
                     Offset = offset
                 };
             }
-
             var image = Image.FromStream(new MemoryStream(fileResponse.Content), true);
             if (addressTemplate.Opacity < 1.0)
             {
@@ -421,7 +422,8 @@ namespace IsraelHiking.API.Services
         private Bitmap ChangeOpacity(Image image, double opacityValue)
         {
             Bitmap bmp = new Bitmap(image.Width, image.Height); // Determining Width and Height of Source Image
-            using (Graphics graphics = Graphics.FromImage(bmp)) { 
+            using (Graphics graphics = Graphics.FromImage(bmp))
+            {
                 ColorMatrix colormatrix = new ColorMatrix { Matrix33 = (float)opacityValue };
                 ImageAttributes imgAttribute = new ImageAttributes();
                 imgAttribute.SetColorMatrix(colormatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
