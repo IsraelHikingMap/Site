@@ -16,8 +16,7 @@ import {
     LatLngAlt,
     RouteSegmentData,
     ILatLngTime,
-    MarkerData,
-    RoutingType
+    MarkerData
 } from "../../models/models";
 
 const SEGMENT = "_segment_";
