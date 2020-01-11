@@ -179,11 +179,6 @@ namespace IsraelHiking.Web
                 });
             }
 
-            app.UseProxy("proxy/{*x}", (context, args) =>
-            {
-                return args[args.Keys.First()].ToString().Replace("https:/", "https://").Replace("http:/", "http://");
-            });
-
             foreach (var directory in configurationData.ListingDictionary)
             {
                 var fileServerOptions = new FileServerOptions
