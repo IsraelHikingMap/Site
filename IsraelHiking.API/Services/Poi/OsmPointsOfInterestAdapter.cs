@@ -470,13 +470,17 @@ namespace IsraelHiking.API.Services.Poi
                     SourceImageUrl = sourceImageUrl
                 });
             }
+            // HM TODO: is this needed after the merge is taking into account wikipedia too?
             var title = feature.Attributes.GetWikipediaTitle(language);
-            if (string.IsNullOrWhiteSpace(title))
+            if (!string.IsNullOrWhiteSpace(title))
             {
-                return references.ToArray();
+                var wikipediaReference = _wikipediaGateway.GetReference(title, language);    
+                references.Add(wikipediaReference);
             }
-            var wikipediaReference = _wikipediaGateway.GetReference(title, language);
-            return references.Concat(new[] { wikipediaReference }).ToArray();
+            // unique by url
+            return references.GroupBy(r => r.Url)
+                        .Select(r => r.FirstOrDefault())
+                        .ToArray();
         }
 
         private void SetWebsiteUrl(TagsCollectionBase tags, PointOfInterestExtended pointOfInterest)
