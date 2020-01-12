@@ -6,8 +6,6 @@ import { ApplicationModule } from "./application/application.module";
 import { environment } from "./environments/environment";
 import "hammerjs";
 
-declare var StatusBar: any;
-
 if (environment.production) {
     enableProdMode();
 }
@@ -15,8 +13,6 @@ if (environment.production) {
 if (environment.isCordova) {
     let onDeviceReady = () => {
         window.open = cordova.InAppBrowser.open;
-        StatusBar.overlaysWebView(true);
-        StatusBar.overlaysWebView(false);
         bootstrapInitializationFunction();
     };
     document.addEventListener("deviceready", onDeviceReady, false);

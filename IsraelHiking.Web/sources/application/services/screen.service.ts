@@ -7,6 +7,8 @@ import { ApplicationState } from "../models/models";
 import { LoggingService } from "./logging.service";
 
 declare var cordova: any;
+declare var StatusBar: any;
+declare var MobileAccessibility: any;
 
 @Injectable()
 export class ScreenService {
@@ -22,6 +24,11 @@ export class ScreenService {
         if (!this.runningContextService.isCordova) {
             return;
         }
+        if (this.runningContextService.isIos) {
+            StatusBar.overlaysWebView(true);
+            StatusBar.overlaysWebView(false);
+        }
+        MobileAccessibility.usePreferredTextZoom(false);
         let brightness = cordova.plugins.brightness;
         brightness.setKeepScreenOn(true);
         brightness.getBrightness((currentBrightness) => this.originalBrightness = currentBrightness);
