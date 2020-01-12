@@ -80,4 +80,8 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
     public trackByIndex(index) {
         return index;
     }
+
+    public isPoint(): boolean {
+        return this.info != null && !this.info.isArea && !this.info.isRoute;
+    }
 }

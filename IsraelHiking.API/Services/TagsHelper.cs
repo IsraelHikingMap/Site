@@ -212,9 +212,9 @@ namespace IsraelHiking.API.Services
             otherCategory.Items.Add(new IconAndTags(natureReserveIcon,
                 new List<KeyValuePair<string, string>>
                 {
+                    new KeyValuePair<string, string>("boundary", "protected_area"),
                     new KeyValuePair<string, string>("leisure", "nature_reserve"),
-                    new KeyValuePair<string, string>("boundary", "national_park"),
-                    new KeyValuePair<string, string>("boundary", "protected_area")
+                    new KeyValuePair<string, string>("boundary", "national_park")
                 }));
 
             return otherCategory;

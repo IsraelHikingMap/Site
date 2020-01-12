@@ -1,13 +1,16 @@
 ﻿<div [dir]="resources.direction">
     <mat-card class="mat-elevation-z0">
+        <mat-card-header *ngIf="!isPoint()">
+            <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
+                <span class="text-large" [dir]="resources.getDirection(info.title)">{{info.title}}</span>
+            </mat-card-title>
+        </mat-card-header>
         <div fxLayout="row">
-            <mat-form-field fxFill>
-                <input matInput #titleInput type="text" [dir]="resources.getDirection(info.title)" [(ngModel)]="info.title" placeholder="{{resources.nameInLanguage}}" fxFill />
+            <mat-form-field fxFill *ngIf="isPoint()">
+                <input matInput type="text" [dir]="resources.getDirection(info.title)" [(ngModel)]="info.title" placeholder="{{resources.nameInLanguage}}" fxFill />
             </mat-form-field>
         </div>
-
         <image-scroller [images]="info.imagesUrls" [canEdit]="true"></image-scroller>
-
         <div fxLayout="row">
             <mat-form-field fxFill>
                 <textarea rows="4" maxlength="255" matInput [dir]="resources.getDirection(info.description)" [(ngModel)]="info.description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
@@ -32,21 +35,23 @@
                 <button mat-button fxFill><i class="fa icon-plus"></i></button>
             </div>
         </div>
-        <div fxLayout="row">
-            <mat-form-field fxFill>
-                <mat-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (selectionChange)="selectCategory($event)" fxFill>
-                    <mat-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{resources.translate(category.label)}}</mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
-        <br />
-        <br />
-        <div fxLayout="row wrap" *ngIf="selectedCategory">
-            <button mat-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" fxFlex [ngClass]="{active: icon == selectedCategory.selectedIcon}">
-                <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
-                <br />
-                <span class="chrome-wordwrap-fix category-button-text">{{resources.translate(icon.label)}}</span>
-            </button>
+        <div *ngIf="isPoint()">
+            <div fxLayout="row">
+                <mat-form-field fxFill>
+                    <mat-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (selectionChange)="selectCategory($event)" fxFill>
+                        <mat-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{resources.translate(category.label)}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <br />
+            <br />
+            <div fxLayout="row wrap" *ngIf="selectedCategory">
+                <button mat-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" fxFlex [ngClass]="{active: icon == selectedCategory.selectedIcon}">
+                    <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
+                    <br />
+                    <span class="chrome-wordwrap-fix category-button-text">{{resources.translate(icon.label)}}</span>
+                </button>
+            </div>
         </div>
     </mat-card>
 </div>
