@@ -257,6 +257,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
             _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
+            _wikipediaGateway.GetReference(Arg.Any<string>(), language).Returns(new Reference { Url = "Some-Url" });
 
             var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, new TokenAndSecret("", ""), language).Result;
 
@@ -349,7 +350,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 }
             });
             _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
-
+            _wikipediaGateway.GetReference(Arg.Any<string>(), language).Returns(new Reference { Url = "Some-Url" });
+            
             _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Wait();
 
             gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA + ":en") && x.Tags.Contains(FeatureAttributes.WIKIPEDIA, "en:Literary Hall")));
