@@ -1,10 +1,16 @@
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
+$anyFailures = $FLASE
+
 # Run dotnet tests with coverage
 
 $DotnetTestsCmd = "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude=`"[IsraelHiking.Common]*`" --logger trx"
 Write-Host $DotnetTestsCmd
 Invoke-Expression $DotnetTestsCmd
+
+if ($LastExitCode) {
+	$anyFailures = $TRUE
+}
 
 # Run tests using Karma and export results as JUnit and Lcov format
 
@@ -31,7 +37,6 @@ Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.DataAccess.
 $DataAccessResultsFile = Get-ChildItem *.trx -recurse | select-object -first 1 | select -expand FullName
 
 # Upload test resutls
-$anyFailures = $FLASE
 
 $wc = New-Object 'System.Net.WebClient'
 $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $APIResultsFile)
@@ -79,13 +84,8 @@ npm run build -- --prod --no-progress
 
 if ($lastexitcode)
 {
+	Write-Host "Failing build due to web client build failing"
 	throw $lastexitcode
-}
-
-
-if ($anyFailures -eq $TRUE){
-    write-host "Failing build as there are broken tests"
-    $host.SetShouldExit(1)
 }
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
@@ -100,5 +100,10 @@ $artifactsFileName = "IsraelHiking_$env:APPVEYOR_BUILD_VERSION.zip"
 7z a $artifactsFileName $binFolder\publish\IsraelHiking*.*
 7z a $artifactsFileName wwwroot
 Push-AppveyorArtifact $artifactsFileName
+
+if ($anyFailures -eq $TRUE){
+    Write-Host "Failing build as there are broken tests"
+    $host.SetShouldExit(1)
+}
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
