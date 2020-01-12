@@ -104,10 +104,11 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     }
 
     private getDataFiltered(): DataContainer {
-        let filteredData = this.dataContainerService.getData();
+        // clone:
+        let filteredData = JSON.parse(JSON.stringify(this.dataContainerService.getData()));
         for (let routeIndex = filteredData.routes.length - 1; routeIndex >= 0; routeIndex--) {
             let route = filteredData.routes[routeIndex];
-            if (route.segments.length === 0 && route.markers.length === 0) {
+            if (route.segments.length === 0 && route.markers.length === 0 || route.state == "Hidden") {
                 filteredData.routes.splice(routeIndex, 1);
             }
         }
