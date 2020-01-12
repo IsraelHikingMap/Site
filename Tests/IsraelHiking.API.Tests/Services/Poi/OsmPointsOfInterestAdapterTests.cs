@@ -350,7 +350,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 }
             });
             _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
-            _wikipediaGateway.GetReference(Arg.Any<string>(), language).Returns(new Reference { Url = "Some-Url" });
+            _wikipediaGateway.GetReference(Arg.Any<string>(), "en").Returns(new Reference { Url = "Some-Url" });
             
             _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Wait();
 
