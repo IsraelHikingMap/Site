@@ -94,7 +94,7 @@ export class PoiService {
                 icon: category.icon,
                 color: category.color,
                 icons: category.items
-                    .filter(i => i.iconColorCategory.icon != "icon-nature-reserve")
+                    .filter(i => i.iconColorCategory.icon !== "icon-nature-reserve")
                     .map(i => i.iconColorCategory)
             } as ISelectableCategory);
         }
