@@ -44,7 +44,7 @@ export class CategoriesLayer extends BaseMapComponent {
             await this.mapService.initializationPromise;
             this.updateMarkers();
             fromEvent(this.mapService.map, "moveend")
-                .pipe(throttleTime(1000))
+                .pipe(throttleTime(1000, undefined, { trailing: true }))
                 .subscribe(() => {
                     this.updateMarkers();
                 });
@@ -103,13 +103,19 @@ export class CategoriesLayer extends BaseMapComponent {
             // layer is not ready yet...
             return;
         }
-        if (this.mapService.map.getZoom() <= 8 || !this.isVisible()) {
+        if (this.mapService.map.getZoom() <= 9 || !this.isVisible()) {
             this.pointsOfInterest.splice(0);
             this.markersLoaded.next();
             return;
         }
-        // HM TODO: pad bounds
+        
         let bounds = SpatialService.getMapBounds(this.mapService.map);
+        // Adding half a screen padding:
+        bounds.northEast.lng += (bounds.northEast.lng - bounds.southWest.lng) / 2.0;
+        bounds.northEast.lat += (bounds.northEast.lat - bounds.southWest.lat) / 2.0;
+        bounds.southWest.lng -= (bounds.northEast.lng - bounds.southWest.lng) / 2.0;
+        bounds.southWest.lat -= (bounds.northEast.lat - bounds.southWest.lat) / 2.0;
+
         this.requestsNumber++;
         this.poiService
             .getPoints(bounds.northEast, bounds.southWest,

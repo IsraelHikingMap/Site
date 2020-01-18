@@ -16,23 +16,28 @@
     </auto-layer>
 </div>
 <div *ngFor="let categoriesType of categoriesTypes">
-    <mgl-marker-cluster *ngIf="isVisible(categoriesType)"
+    <mgl-geojson-source #clusterSource
+                        [id]="poiSourceName[categoriesType]"
                         [data]="poiGeoJsonData[categoriesType]"
-                        [radius]="100"
-                        (load)="superCluster[categoriesType] = $event">
+                        [cluster]="true"
+                        [clusterRadius]="100">
+    </mgl-geojson-source>
+    <mgl-markers-for-clusters *ngIf="isVisible(categoriesType)"
+                              [source]="poiSourceName[categoriesType]"
+                              #cluster>
         <ng-template mglPoint let-feature>
-            <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="openPoi(feature.id)" (mouseover)="hoverFeature = feature" (mouseout)="hoverFeature = null">
+            <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="openPoi(feature.properties.id)" (mouseover)="hoverFeature = feature" (mouseout)="hoverFeature = null">
                 <span *ngIf="feature.properties.hasExtraData" class="has-extra-data" [style.background]="feature.properties.iconColor"></span>
                 <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
                 <i class="fa {{feature.properties.icon}} fa-stack-1x stack-icon-top stack-icon-large" [style.color]="feature.properties.iconColor"></i>
             </span>
         </ng-template>
         <ng-template mglClusterPoint let-feature>
-            <div class="marker-cluster" (click)="toggleClusterPopup($event, feature, categoriesType)">
+            <div class="marker-cluster" (click)="toggleClusterPopup($event, feature, clusterSource)">
                 {{ feature.properties?.point_count }}
             </div>
         </ng-template>
-    </mgl-marker-cluster>
+    </mgl-markers-for-clusters>
 </div>
 <mgl-popup *ngIf="selectedCluster" [lngLat]="selectedCluster.geometry.coordinates" (close)="clearSelectedClusterPopup()" [closeOnClick]="true">
     <cluster-overlay [points]="clusterPoints" (closed)="clearSelectedClusterPopup()"></cluster-overlay>
@@ -41,7 +46,7 @@
     <span [dir]="resources.getDirection(hoverFeature.properties.title)">{{hoverFeature.properties.title}}</span>
 </mgl-popup>
 <mgl-marker *ngIf="selectedPoiFeature" [lngLat]="selectedPoiFeature.geometry.coordinates" anchor="bottom">
-    <span class="fa-stack fa-lg cursor-pointer" (click)="openPoi(selectedPoiFeature.id)" (mouseover)="hoverFeature = selectedPoiFeature" (mouseout)="hoverFeature = null">
+    <span class="fa-stack fa-lg cursor-pointer" (click)="openPoi(selectedPoiFeature.properties.id)" (mouseover)="hoverFeature = selectedPoiFeature" (mouseout)="hoverFeature = null">
         <span *ngIf="selectedPoiFeature.properties.hasExtraData" class="has-extra-data" [style.background]="selectedPoiFeature.properties.iconColor"></span>
         <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
         <i class="fa {{selectedPoiFeature.properties.icon}} fa-stack-1x stack-icon-top stack-icon-large" [style.color]="selectedPoiFeature.properties.iconColor"></i>
