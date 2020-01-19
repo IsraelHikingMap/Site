@@ -535,13 +535,14 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public async Task<Feature> GetClosestPoint(Coordinate location, string source)
+        public async Task<Feature> GetClosestPoint(Coordinate location, string source, string language = "")
         {
             var distance = _options.MergePointsOfInterestThreshold;
             var results = await _elasticSearchGateway.GetPointsOfInterest(
                 new Coordinate(location.X + distance, location.Y + distance),
                 new Coordinate(location.X - distance, location.Y - distance),
-                Categories.Points.Concat(new[] { Categories.NONE }).ToArray(), Languages.ALL);
+                Categories.Points.Concat(new[] { Categories.NONE }).ToArray(), 
+                string.IsNullOrEmpty(language) ? Languages.ALL : language);
             return results.Where(r => r.Geometry is Point && ((source != null && r.Attributes[FeatureAttributes.POI_SOURCE].Equals(source)) || source == null))
                 .OrderBy(f => f.Geometry.Coordinate.Distance(location))
                 .FirstOrDefault();

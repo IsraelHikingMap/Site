@@ -9,6 +9,7 @@ import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialo
 import { GeoLocationService } from "../../services/geo-location.service";
 import { SnappingService, ISnappingPointResponse } from "../../services/snapping.service";
 import { PoiService } from "../../services/poi.service";
+import { ResourcesService } from "../../services/resources.service";
 import { ApplicationState, MarkerData, LatLngAlt } from "../../models/models";
 
 @Injectable()
@@ -20,6 +21,7 @@ export class RouteEditPoiInteraction {
                 private readonly geoLocationService: GeoLocationService,
                 private readonly snappingService: SnappingService,
                 private readonly poiService: PoiService,
+                private readonly resources: ResourcesService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
@@ -92,7 +94,7 @@ export class RouteEditPoiInteraction {
             }
         }
 
-        let markerData = await this.poiService.getClosestPoint(latlng);
+        let markerData = await this.poiService.getClosestPoint(latlng, "", this.resources.getCurrentLanguageCodeSimplified());
         return this.snappingService.snapToPoint(latlng, markerData ? [markerData] : []);
     }
 }

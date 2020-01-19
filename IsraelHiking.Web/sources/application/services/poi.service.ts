@@ -224,15 +224,14 @@ export class PoiService {
         return poi;
     }
 
-    public async getClosestPoint(location: LatLngAlt, source?: string): Promise<MarkerData> {
+    public async getClosestPoint(location: LatLngAlt, source?: string, language?: string): Promise<MarkerData> {
         if (!this.runningContextService.isOnline) {
             return null;
         }
         let params = new HttpParams()
-            .set("location", location.lat + "," + location.lng);
-        if (source) {
-            params = params.set("source", source);
-        }
+            .set("location", location.lat + "," + location.lng)
+            .set("source", source)
+            .set("language", language);
         let feature = await this.httpClient.get(Urls.poiClosest, { params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>;
         if (feature == null) {
             return null;

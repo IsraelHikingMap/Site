@@ -54,7 +54,8 @@ namespace IsraelHiking.API.Services.Poi
         /// </summary>
         /// <param name="location"></param>
         /// <param name="source">Source is optional</param>
+        /// <param name="language"></param>
         /// <returns></returns>
-        public Task<Feature> GetClosestPoint(Coordinate location, string source);
+        public Task<Feature> GetClosestPoint(Coordinate location, string source, string language = "");
     }
 }
