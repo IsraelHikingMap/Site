@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, ViewChildren, QueryList } from "@angu
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { GeoJSONSourceComponent, MapComponent } from "ngx-mapbox-gl";
+import { MarkersForClustersComponent } from "ngx-mapbox-gl/lib/markers-for-clusters/markers-for-clusters.component";
 import { MapSourceDataEvent } from "mapbox-gl";
 import { select } from "@angular-redux/store";
 import { filter, map, throttleTime } from "rxjs/operators";
@@ -14,7 +15,6 @@ import { RouteStrings } from "../../services/hash.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ApplicationState, Overlay, PointOfInterest, PointOfInterestExtended } from "../../models/models";
-import { MarkersForClustersComponent } from 'ngx-mapbox-gl/lib/markers-for-clusters/markers-for-clusters.component';
 
 @Component({
     selector: "layers-view",
@@ -43,11 +43,11 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     public selectedPoi$: Observable<PointOfInterestExtended>;
 
     constructor(resources: ResourcesService,
-        private readonly router: Router,
-        private readonly layersService: LayersService,
-        private readonly categoriesLayerFactory: CategoriesLayerFactory,
-        private readonly poiService: PoiService,
-        private readonly mapComponent: MapComponent
+                private readonly router: Router,
+                private readonly layersService: LayersService,
+                private readonly categoriesLayerFactory: CategoriesLayerFactory,
+                private readonly poiService: PoiService,
+                private readonly mapComponent: MapComponent
     ) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
@@ -98,10 +98,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                 let sourceId = this.poiSourceName[categoriesType];
                 fromEvent<MapSourceDataEvent>(this.mapComponent.mapInstance, "data").pipe(
                     filter((e) => e.sourceId === sourceId && e.sourceDataType !== "metadata"),
-                    map((e) => this.clustersComponents.find(c => c.source == sourceId)),
+                    map((e) => this.clustersComponents.find(c => c.source === sourceId)),
                     filter((c) => c != null),
                     throttleTime(300, undefined, { trailing: true })
-                ).subscribe((cluster : any) => {
+                ).subscribe((cluster: any) => {
                     cluster.updateCluster();
                 });
             }

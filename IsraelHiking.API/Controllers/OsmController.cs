@@ -93,27 +93,6 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Deprecated! Gets the closest point to a given location that is from OSM database in order to be able to update it if needed.
-        /// HM TODO: remove this next release
-        /// </summary>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("closest")]
-        public async Task<Feature> GetClosestPoint(string location)
-        {
-            var locationCoordinates = location.ToCoordinate();
-            var distance = _options.MergePointsOfInterestThreshold;
-            var results = await _elasticSearchGateway.GetPointsOfInterest(
-                new Coordinate(locationCoordinates.X + distance, locationCoordinates.Y + distance), 
-                new Coordinate(locationCoordinates.X - distance, locationCoordinates.Y - distance), 
-                Categories.Points.Concat(new[] { Categories.NONE }).ToArray(), Languages.ALL);
-            return results.Where(r => r.Geometry is Point && r.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM))
-                .OrderBy(f => f.Geometry.Coordinate.Distance(locationCoordinates))
-                .FirstOrDefault();
-        }
-
-        /// <summary>
         /// Get the OSM server configuration
         /// </summary>
         /// <returns>The OSM server configurations</returns>

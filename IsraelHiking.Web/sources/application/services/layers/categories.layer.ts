@@ -108,7 +108,7 @@ export class CategoriesLayer extends BaseMapComponent {
             this.markersLoaded.next();
             return;
         }
-        
+
         let bounds = SpatialService.getMapBounds(this.mapService.map);
         // Adding half a screen padding:
         bounds.northEast.lng += (bounds.northEast.lng - bounds.southWest.lng) / 2.0;

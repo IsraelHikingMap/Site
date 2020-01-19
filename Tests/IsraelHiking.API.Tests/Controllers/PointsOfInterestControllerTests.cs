@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp.API;
@@ -162,6 +163,16 @@ namespace IsraelHiking.API.Tests.Controllers
 
             _wikimediaCommonGateway.Received(1).UploadImage(poi.Title, poi.Description, user.DisplayName, "title.png", Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
+        }
+
+        [TestMethod]
+        public void GetClosestPoint_ShouldGetTheClosesOsmPoint()
+        {
+            _pointsOfInterestProvider.GetClosestPoint(Arg.Any<Coordinate>(), Arg.Any<string>(), Arg.Any<string>()).Returns(new Feature(new Point(0,0), new AttributesTable()));
+
+            var results = _controller.GetClosestPoint("0,0", Sources.OSM, "he").Result;
+
+            Assert.IsNotNull(results);
         }
     }
 }
