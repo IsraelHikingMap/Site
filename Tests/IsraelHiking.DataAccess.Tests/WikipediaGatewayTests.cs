@@ -1,6 +1,7 @@
 ﻿using GeoAPI.Geometries;
+using IsraelHiking.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Geometries;
+using System.Linq;
 
 namespace IsraelHiking.DataAccess.Tests
 {
@@ -33,6 +34,18 @@ namespace IsraelHiking.DataAccess.Tests
             var delta = 0.15;
             var results = _gateway.GetByBoundingBox(new Coordinate(35, 32), new Coordinate(35 + delta, 32 + delta), "he").Result;
             Assert.IsTrue(results.Count > 0);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void GetWikiPageByBoundingBox_ShouldGetMoreThan500()
+        {
+            _gateway.Initialize().Wait();
+            var delta = 0.15;
+
+            var results = _gateway.GetByBoundingBox(new Coordinate(34.75, 32), new Coordinate(34.75 + delta, 32 + delta), "he").Result;
+            Assert.IsTrue(results.Count > 500);
+            Assert.IsTrue(results.Where(r => r.Attributes[FeatureAttributes.ID].ToString() == "he_8772").Any());
         }
 
         [TestMethod]

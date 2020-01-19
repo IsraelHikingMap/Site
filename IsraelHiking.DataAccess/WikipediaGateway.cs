@@ -57,6 +57,17 @@ namespace IsraelHiking.DataAccess
             return ConvertPageToFeature(page, language);
         }
 
+        /// <summary>
+        /// This recursive method is used to get wikipedia features by bounding box.
+        /// Since boundingbox can't scroll diue to a wikimedia implementiaion issue the workaround is
+        /// to recursivly split each bounding box to 4 rectangles until there's no overflow of results.
+        /// A rectangle that is not overflowing will not be split.
+        /// See here: https://github.com/CXuesong/WikiClientLibrary/issues/64
+        /// </summary>
+        /// <param name="sourthWest">Bottom left corner of the rectangle</param>
+        /// <param name="northEast">Top right corner of the rectangle</param>
+        /// <param name="language">The relevant language</param>
+        /// <returns>A list of features inside this rectangle</returns>
         public async Task<List<Feature>> GetByBoundingBox(Coordinate sourthWest, Coordinate northEast, string language)
         {
             for (int retryIndex = 0; retryIndex < 3; retryIndex++)
@@ -70,13 +81,23 @@ namespace IsraelHiking.DataAccess
                     };
                     var results = await geoSearchGenerator.EnumItemsAsync().ToListAsync();
                     var features = new List<Feature>();
-                    foreach (var geoSearchResultItem in results)
+                    if (results.Count < 500) // recursive stop condition
                     {
-                        var coordinate = new Coordinate(geoSearchResultItem.Coordinate.Longitude, geoSearchResultItem.Coordinate.Latitude, double.NaN);
-                        var attributes = GetAttributes(coordinate, geoSearchResultItem.Page.Title,
-                            geoSearchResultItem.Page.Id.ToString(), language);
-                        features.Add(new Feature(new Point(coordinate), attributes));
+                        foreach (var geoSearchResultItem in results)
+                        {
+                            var coordinate = new Coordinate(geoSearchResultItem.Coordinate.Longitude, geoSearchResultItem.Coordinate.Latitude, double.NaN);
+                            var attributes = GetAttributes(coordinate, geoSearchResultItem.Page.Title,
+                                geoSearchResultItem.Page.Id.ToString(), language);
+                            features.Add(new Feature(new Point(coordinate), attributes));
+                        }
+                        return features;
                     }
+                    var diffX = (northEast.X - sourthWest.X) / 2.0;
+                    var diffY = (northEast.Y - sourthWest.Y) / 2.0;
+                    features.AddRange(await GetByBoundingBox(sourthWest, new Coordinate(sourthWest.X + diffX, sourthWest.Y + diffY), language));
+                    features.AddRange(await GetByBoundingBox(new Coordinate(sourthWest.X + diffX, sourthWest.Y), new Coordinate(northEast.X, sourthWest.Y + diffY), language));
+                    features.AddRange(await GetByBoundingBox(new Coordinate(sourthWest.X, sourthWest.Y + diffY), new Coordinate(sourthWest.X + diffX, northEast.Y), language));
+                    features.AddRange(await GetByBoundingBox(new Coordinate(sourthWest.X + diffX, sourthWest.Y + diffY), northEast, language));
                     return features;
                 }
                 catch
