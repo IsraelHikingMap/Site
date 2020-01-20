@@ -64,11 +64,11 @@ namespace IsraelHiking.DataAccess
         /// A rectangle that is not overflowing will not be split.
         /// See here: https://github.com/CXuesong/WikiClientLibrary/issues/64
         /// </summary>
-        /// <param name="sourthWest">Bottom left corner of the rectangle</param>
+        /// <param name="southWest">Bottom left corner of the rectangle</param>
         /// <param name="northEast">Top right corner of the rectangle</param>
         /// <param name="language">The relevant language</param>
         /// <returns>A list of features inside this rectangle</returns>
-        public async Task<List<Feature>> GetByBoundingBox(Coordinate sourthWest, Coordinate northEast, string language)
+        public async Task<List<Feature>> GetByBoundingBox(Coordinate southWest, Coordinate northEast, string language)
         {
             for (int retryIndex = 0; retryIndex < 3; retryIndex++)
             {
@@ -76,7 +76,7 @@ namespace IsraelHiking.DataAccess
                 {
                     var geoSearchGenerator = new GeoSearchGenerator(_wikiSites[language])
                     {
-                        BoundingRectangle = GeoCoordinateRectangle.FromBoundingCoordinates(sourthWest.X, sourthWest.Y, northEast.X, northEast.Y),
+                        BoundingRectangle = GeoCoordinateRectangle.FromBoundingCoordinates(southWest.X, southWest.Y, northEast.X, northEast.Y),
                         PaginationSize = 500
                     };
                     var results = await geoSearchGenerator.EnumItemsAsync().ToListAsync();
@@ -92,12 +92,11 @@ namespace IsraelHiking.DataAccess
                         }
                         return features;
                     }
-                    var diffX = (northEast.X - sourthWest.X) / 2.0;
-                    var diffY = (northEast.Y - sourthWest.Y) / 2.0;
-                    features.AddRange(await GetByBoundingBox(sourthWest, new Coordinate(sourthWest.X + diffX, sourthWest.Y + diffY), language));
-                    features.AddRange(await GetByBoundingBox(new Coordinate(sourthWest.X + diffX, sourthWest.Y), new Coordinate(northEast.X, sourthWest.Y + diffY), language));
-                    features.AddRange(await GetByBoundingBox(new Coordinate(sourthWest.X, sourthWest.Y + diffY), new Coordinate(sourthWest.X + diffX, northEast.Y), language));
-                    features.AddRange(await GetByBoundingBox(new Coordinate(sourthWest.X + diffX, sourthWest.Y + diffY), northEast, language));
+                    var mid = new Coordinate(southWest.X + (northEast.X - southWest.X) / 2.0, southWest.Y + (northEast.Y - southWest.Y) / 2.0);
+                    features.AddRange(await GetByBoundingBox(southWest, mid, language));
+                    features.AddRange(await GetByBoundingBox(new Coordinate(mid.X, southWest.Y), new Coordinate(northEast.X, mid.Y), language));
+                    features.AddRange(await GetByBoundingBox(new Coordinate(southWest.X, mid.Y), new Coordinate(mid.X, northEast.Y), language));
+                    features.AddRange(await GetByBoundingBox(mid, northEast, language));
                     return features;
                 }
                 catch
