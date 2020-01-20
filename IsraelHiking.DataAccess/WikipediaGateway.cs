@@ -92,7 +92,7 @@ namespace IsraelHiking.DataAccess
                         }
                         return features;
                     }
-                    var mid = new Coordinate((northEast.X + southWest.X) / 2.0, (northEast.Y - southWest.Y) / 2.0);
+                    var mid = new Coordinate((northEast.X + southWest.X) / 2.0, (northEast.Y + southWest.Y) / 2.0);
                     features.AddRange(await GetByBoundingBox(southWest, mid, language));
                     features.AddRange(await GetByBoundingBox(new Coordinate(mid.X, southWest.Y), new Coordinate(northEast.X, mid.Y), language));
                     features.AddRange(await GetByBoundingBox(new Coordinate(southWest.X, mid.Y), new Coordinate(mid.X, northEast.Y), language));
