@@ -25,6 +25,7 @@ export class GeoLocationService {
     private wasInitialized: boolean;
 
     public positionChanged: EventEmitter<Position>;
+    public bulkPositionChanged: EventEmitter<Position[]>;
     public currentLocation: ILatLngTime;
 
     constructor(private readonly resources: ResourcesService,
@@ -33,11 +34,13 @@ export class GeoLocationService {
                 private readonly ngZone: NgZone) {
         this.watchNumber = -1;
         this.positionChanged = new EventEmitter<Position>();
+        this.bulkPositionChanged = new EventEmitter<Position[]>();
         this.state = "disabled";
         this.isBackground = false;
         this.currentLocation = null;
         this.rejectedPosition = null;
         this.wasInitialized = false;
+        this.isBackground = false;
     }
 
     public getState(): GeoLocationServiceState {
@@ -125,17 +128,7 @@ export class GeoLocationService {
         });
 
         BackgroundGeolocation.on("location", (location: Location) => {
-            let position = {
-                coords: {
-                    accuracy: location.accuracy,
-                    altitude: location.altitude,
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    speed: location.speed,
-                    heading: location.bearing
-                },
-                timestamp: location.time
-            } as Position;
+            let position = this.locationToPosition(location);
             this.handlePoistionChange(position);
         });
 
@@ -165,12 +158,22 @@ export class GeoLocationService {
             () => {
                 this.isBackground = true;
                 this.loggingService.debug("Geo-location now in background");
+                BackgroundGeolocation.deleteAllLocations();
             });
 
         BackgroundGeolocation.on("foreground",
             () => {
                 this.isBackground = false;
                 this.loggingService.debug("Geo-location now in foreground");
+                if (this.currentLocation) {
+                    this.loggingService.debug("Sending bulk location update");
+                    BackgroundGeolocation.getValidLocations((locations) => {
+                        let positions = locations.map(l => this.locationToPosition(l)).filter(p => this.validateRecordingAndUpdateState(p));
+                        if (positions.length > 0) {
+                            this.bulkPositionChanged.next(positions);
+                        }
+                    });
+                }
             });
         BackgroundGeolocation.start();
     }
@@ -199,6 +202,9 @@ export class GeoLocationService {
     }
 
     private handlePoistionChange(position: Position): void {
+        if (this.isBackground) {
+            return;
+        }
         this.ngZone.run(() => {
             this.loggingService.debug("Geo-location received position: " + JSON.stringify(this.positionToLatLngTime(position)));
             if (this.state === "searching") {
@@ -207,35 +213,38 @@ export class GeoLocationService {
             if (this.state !== "tracking") {
                 return;
             }
-            this.validRecordingAndUpdate(position);
+            if (this.validateRecordingAndUpdateState(position)) {
+                this.positionChanged.next(position);
+            }
         });
     }
 
-    private validRecordingAndUpdate(position: Position) {
+    private validateRecordingAndUpdateState(position: Position): boolean {
         if (this.currentLocation == null) {
             this.loggingService.debug("Adding the first position: " + JSON.stringify(this.positionToLatLngTime(position)));
-            this.updatePositionAndRaiseEvent(position);
-            return;
+            this.updatePosition(position);
+            return true;
         }
         let nonValidReason = this.isValid(this.currentLocation, position);
         if (nonValidReason === "") {
-            this.updatePositionAndRaiseEvent(position);
-            return;
+            this.updatePosition(position);
+            return true;
         }
         if (this.rejectedPosition == null) {
             this.rejectedPosition = this.positionToLatLngTime(position);
             this.loggingService.debug("Rejecting position: " + JSON.stringify(this.positionToLatLngTime(position)) +
                 " reason:" + nonValidReason);
-            return;
+            return false;
         }
         nonValidReason = this.isValid(this.rejectedPosition, position);
         if (nonValidReason === "") {
             this.loggingService.debug("Validating a rejected position: " + JSON.stringify(this.positionToLatLngTime(position)));
-            this.updatePositionAndRaiseEvent(position);
-            return;
+            this.updatePosition(position);
+            return true;
         }
         this.rejectedPosition = this.positionToLatLngTime(position);
         this.loggingService.debug("Rejecting position for rejected: " + JSON.stringify(position) + " reason: " + nonValidReason);
+        return false;
     }
 
     private isValid(test: ILatLngTime, position: Position): string {
@@ -256,19 +265,32 @@ export class GeoLocationService {
         return "";
     }
 
-    private updatePositionAndRaiseEvent(position: Position) {
+    private updatePosition(position: Position) {
         this.currentLocation = this.positionToLatLngTime(position);
         this.rejectedPosition = null;
-        this.positionChanged.next(position);
         this.loggingService.debug("Valid position, updating: (" + position.coords.latitude + ", " + position.coords.longitude + ")");
     }
 
-    private positionToLatLngTime(position: Position): ILatLngTime {
+    public positionToLatLngTime(position: Position): ILatLngTime {
         return {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
             alt: position.coords.altitude,
             timestamp: new Date(position.timestamp)
         };
+    }
+
+    private locationToPosition(location: Location): Position {
+        return {
+            coords: {
+                accuracy: location.accuracy,
+                altitude: location.altitude,
+                latitude: location.latitude,
+                longitude: location.longitude,
+                speed: location.speed,
+                heading: location.bearing
+            },
+            timestamp: location.time
+        } as Position;
     }
 }
