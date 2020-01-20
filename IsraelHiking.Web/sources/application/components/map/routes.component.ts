@@ -68,7 +68,6 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     private handleRoutesChanges = (routes: RouteData[]) => {
-        this.loggingService.debug("handling route change - this is where the UI gets updated.");
         this.routes = routes;
         this.setInteractionAccordingToState();
         this.buildFeatureCollections();
