@@ -32,7 +32,7 @@ export class PrivatePoiUploaderService {
             urls = [imageLink];
         }
         let markerData = {
-            description,
+            description: description.substr(0, 255),
             title,
             latlng: latLng,
             type: markerType,

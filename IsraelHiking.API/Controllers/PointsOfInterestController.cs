@@ -133,6 +133,14 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest("OSM is the only supported source for this action...");
             }
+            if (pointOfInterest.Description.Length > 255)
+            {
+                return BadRequest("Description must not be more than 255 characters...");
+            }
+            if (pointOfInterest.Title.Length > 255)
+            {
+                return BadRequest("Title must not be more than 255 characters...");
+            }
             var tokenAndSecret = _cache.Get(User.Identity.Name);
             var osmGateway = _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
             var user = await osmGateway.GetUserDetails();
