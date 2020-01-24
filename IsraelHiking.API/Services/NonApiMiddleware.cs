@@ -82,19 +82,18 @@ namespace IsraelHiking.API.Services
                 var split = context.Request.Path.Value.Split("/");
                 context.Request.Query.TryGetValue("language", out var language);
                 var point = await _pointsOfInterestProvider.GetPointOfInterestById(split[split.Length - 2], split.Last(), language.FirstOrDefault());
+                if (point == null)
+                {
+                    var invalidPoi = _environment.WebRootFileProvider.GetFileInfo("/index.html");
+                    await SendFile(context, invalidPoi);
+                    return;
+                }
                 var thumbnailUrl = point.ImagesUrls.FirstOrDefault() ?? string.Empty;
                 if (isWhatsApp)
                 {
                     thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/200px-$3");
                 }
                 await Write(context, GetPage(point.Title, thumbnailUrl, point.Description));
-                return;
-            }
-
-            if (context.Request.Path.StartsWithSegments("/beta"))
-            {
-                var betaSite = _environment.WebRootFileProvider.GetFileInfo("/beta/index.html");
-                await SendFile(context, betaSite);
                 return;
             }
 

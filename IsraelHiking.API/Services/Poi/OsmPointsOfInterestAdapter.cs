@@ -106,6 +106,10 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<PointOfInterestExtended> GetPointOfInterestById(string source, string id, string language)
         {
             var feature = await _elasticSearchGateway.GetPointOfInterestById(id, source);
+            if (feature == null)
+            {
+                return null;
+            }
             var poiItem = await FeatureToExtendedPoi(feature, language);
             poiItem.IsRoute = feature.Geometry is LineString || feature.Geometry is MultiLineString;
             poiItem.IsArea = feature.Geometry is Polygon || feature.Geometry is MultiPolygon;
