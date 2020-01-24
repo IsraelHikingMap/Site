@@ -133,11 +133,11 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest("OSM is the only supported source for this action...");
             }
-            if (pointOfInterest.Description.Length > 255)
+            if ((pointOfInterest.Description?.Length ?? 0) > 255)
             {
                 return BadRequest("Description must not be more than 255 characters...");
             }
-            if (pointOfInterest.Title.Length > 255)
+            if ((pointOfInterest.Title?.Length ?? 0) > 255)
             {
                 return BadRequest("Title must not be more than 255 characters...");
             }
