@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -89,7 +88,7 @@ namespace IsraelHiking.API.Controllers
                 {"Creator", "IsraelHikingMap"}
             };
             var feature = new Feature(lineString, table);
-            return Ok(new FeatureCollection(new Collection<IFeature> { feature }));
+            return Ok(new FeatureCollection{ feature });
         }
 
         private static ProfileType ConvertProfile(string type)
@@ -124,7 +123,7 @@ namespace IsraelHiking.API.Controllers
             var lat = double.Parse(splitted.First());
             var lng = double.Parse(splitted.Last());
             var elevation = await _elevationDataStorage.GetElevation(position.ToCoordinate());
-            return new Coordinate(lng, lat, elevation);
+            return new CoordinateZ(lng, lat, elevation);
         }
 
         /// <summary>
@@ -137,14 +136,14 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         private LineString GetDenseStraightLine(Coordinate from, Coordinate to)
         {
-            var itmFrom = _wgs84ItmMathTransform.Transform(from);
-            var itmTo = _wgs84ItmMathTransform.Transform(to);
-            var samples = (int)Math.Min((itmFrom).Distance(itmTo) / 30, 30);
+            var itmFrom = _wgs84ItmMathTransform.Transform(from.X, from.Y);
+            var itmTo = _wgs84ItmMathTransform.Transform(to.X, to.Y);
+            var samples = (int)Math.Min(new Point(itmFrom.x, itmFrom.y).Distance(new Point(itmTo.x, itmTo.y)) / 30, 30);
             if (samples == 0)
             {
                 return _geometryFactory.CreateLineString(new[] {from, to}) as LineString;
             }
-            var coordinates = Enumerable.Range(0, samples + 1).Select(s => new Coordinate(
+            var coordinates = Enumerable.Range(0, samples + 1).Select(s => new CoordinateZ(
                 (to.X - from.X) * s / samples + from.X,
                 (to.Y - from.Y) * s / samples + from.Y,
                 0)

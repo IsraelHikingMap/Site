@@ -11,7 +11,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using GeoAPI.Geometries;
 
 namespace IsraelHiking.DataAccess
 {
@@ -116,9 +115,9 @@ namespace IsraelHiking.DataAccess
             {
                 return array[(int)lat, (int)lng];
             }
-            var coordinate1 = new Coordinate((int)lng, (int)lat, array[(int)lat, (int)lng]);
-            var coordinate2 = new Coordinate((int)lng + 1, (int)lat, array[(int)lat, (int)lng + 1]);
-            var coordinate3 = new Coordinate((int)lng, (int)lat + 1, array[(int)lat + 1, (int)lng]);
+            var coordinate1 = new CoordinateZ((int)lng, (int)lat, array[(int)lat, (int)lng]);
+            var coordinate2 = new CoordinateZ((int)lng + 1, (int)lat, array[(int)lat, (int)lng + 1]);
+            var coordinate3 = new CoordinateZ((int)lng, (int)lat + 1, array[(int)lat + 1, (int)lng]);
             return Vertex.InterpolateZ(new Coordinate(lng, lat), coordinate1, coordinate2, coordinate3);
         }
 

@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
@@ -287,16 +286,16 @@ namespace IsraelHiking.API.Services
 
         private async Task<List<LineString>> GetLineStringsInArea(LineString gpxItmLine, double tolerance)
         {
-            var northEast = _itmWgs84MathTransform.Transform(new Coordinate(gpxItmLine.Coordinates.Max(c => c.X) + tolerance, gpxItmLine.Coordinates.Max(c => c.Y) + tolerance));
-            var southWest = _itmWgs84MathTransform.Transform(new Coordinate(gpxItmLine.Coordinates.Min(c => c.X) - tolerance, gpxItmLine.Coordinates.Min(c => c.Y) - tolerance));
-            var highways = await _elasticSearchGateway.GetHighways(northEast, southWest);
+            var northEast = _itmWgs84MathTransform.Transform(gpxItmLine.Coordinates.Max(c => c.X) + tolerance, gpxItmLine.Coordinates.Max(c => c.Y) + tolerance);
+            var southWest = _itmWgs84MathTransform.Transform(gpxItmLine.Coordinates.Min(c => c.X) - tolerance, gpxItmLine.Coordinates.Min(c => c.Y) - tolerance);
+            var highways = await _elasticSearchGateway.GetHighways(new Coordinate(northEast.x, northEast.y), new Coordinate(southWest.x, southWest.y));
             return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates, highway.GetOsmId())).ToList();
         }
 
         private LineString ToItmLineString(IEnumerable<Coordinate> coordinates, long id)
         {
-            var itmCoordinates = coordinates.Select(c => _wgs84ItmMathTransform.Transform(c))
-                .Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1)))
+            var itmCoordinates = coordinates.Select(c => _wgs84ItmMathTransform.Transform(c.X, c.Y))
+                .Select(c => new Coordinate(Math.Round(c.x, 1), Math.Round(c.y, 1)))
                 .ToArray();
             var line = _geometryFactory.CreateLineString(itmCoordinates) as LineString;
             line.SetOsmId(id);

@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -25,13 +24,14 @@ namespace IsraelHiking.API.Tests.Services
         {
             lineStrings = lineStrings ?? new List<LineString>();
             var conveter = new ItmWgs84MathTransfromFactory().Create();
-            var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(c => conveter.Transform(c))
+            var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(c => conveter.Transform(c.X, c.Y))
+                .Select(c => new Coordinate(c.x, c.y))
                 .ToArray()),
                 new AttributesTable())).ToList();
             int id = 1;
             foreach (var highway in highways)
             {
-                highway.Attributes.AddAttribute(FeatureAttributes.ID, id.ToString());
+                highway.Attributes.Add(FeatureAttributes.ID, id.ToString());
                 id++;
             }
             _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(highways);

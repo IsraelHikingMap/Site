@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
@@ -75,7 +74,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var name = "English name";
             var feature = GetValidFeature("poiId", _adapter.Source);
             feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
-            feature.Attributes.AddAttribute("name:en", name);
+            feature.Attributes.Add("name:en", name);
             _elasticSearchGateway.GetPointsOfInterest(null, null, null, "en").Returns(new List<Feature> { feature });
 
             var result = _adapter.GetPointsOfInterest(null, null, null, "en").Result;
@@ -89,8 +88,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             var feature = GetValidFeature("poiId", _adapter.Source);
             feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
-            feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
-            feature.Attributes.AddAttribute(FeatureAttributes.WIKIPEDIA, FeatureAttributes.DESCRIPTION);
+            feature.Attributes.Add(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
+            feature.Attributes.Add(FeatureAttributes.WIKIPEDIA, FeatureAttributes.DESCRIPTION);
             _elasticSearchGateway.GetPointsOfInterest(null, null, null, "he").Returns(new List<Feature> { feature });
 
             var result = _adapter.GetPointsOfInterest(null, null, null, "he").Result;
@@ -118,10 +117,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var poiId = "poiId";
             var feature = GetValidFeature(poiId, _adapter.Source);
             feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
-            feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
-            feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL + "1", FeatureAttributes.IMAGE_URL + "1");
-            feature.Attributes.AddAttribute(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
-            feature.Attributes.AddAttribute(FeatureAttributes.WIKIPEDIA + ":en", "page with space");
+            feature.Attributes.Add(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
+            feature.Attributes.Add(FeatureAttributes.IMAGE_URL + "1", FeatureAttributes.IMAGE_URL + "1");
+            feature.Attributes.Add(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
+            feature.Attributes.Add(FeatureAttributes.WIKIPEDIA + ":en", "page with space");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
             _wikipediaGateway.GetReference("page with space", "en").Returns(new Reference { Url = "page_with_space" });
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
@@ -164,8 +163,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             var poiId = "poiId";
             var feature = GetValidFeature(poiId, _adapter.Source);
-            feature.Attributes.AddAttribute(FeatureAttributes.WIKIPEDIA, string.Empty);
-            feature.Attributes.AddAttribute(FeatureAttributes.WEBSITE, "website");
+            feature.Attributes.Add(FeatureAttributes.WIKIPEDIA, string.Empty);
+            feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer { Routes = new List<RouteData>() });
@@ -183,8 +182,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             var poiId = "poiId";
             var feature = GetValidFeature(poiId, _adapter.Source);
-            feature.Attributes.AddAttribute(FeatureAttributes.WIKIPEDIA, "en:en:page");
-            feature.Attributes.AddAttribute(FeatureAttributes.WEBSITE, "website");
+            feature.Attributes.Add(FeatureAttributes.WIKIPEDIA, "en:en:page");
+            feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer { Routes = new List<RouteData>() });
@@ -201,8 +200,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var poiId = "poiId";
             var language = "he";
             var feature = GetValidFeature(poiId, _adapter.Source);
-            feature.Attributes.AddAttribute(FeatureAttributes.WIKIPEDIA + ":" + language, "page");
-            feature.Attributes.AddAttribute(FeatureAttributes.WEBSITE, "website");
+            feature.Attributes.Add(FeatureAttributes.WIKIPEDIA + ":" + language, "page");
+            feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer { Routes = new List<RouteData>() });
@@ -222,11 +221,11 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var poiId = "poiId";
             var language = "he";
             var feature = GetValidFeature(poiId, _adapter.Source);
-            feature.Attributes.AddAttribute(FeatureAttributes.WEBSITE, "website");
-            feature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE_IMAGE_URL, "sourceimage");
-            feature.Attributes.AddAttribute(FeatureAttributes.WEBSITE + "1", "website1");
-            feature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE_IMAGE_URL + "1", "sourceimage1");
-            feature.Attributes.AddAttribute(FeatureAttributes.WEBSITE + "2", "website2");
+            feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
+            feature.Attributes.Add(FeatureAttributes.POI_SOURCE_IMAGE_URL, "sourceimage");
+            feature.Attributes.Add(FeatureAttributes.WEBSITE + "1", "website1");
+            feature.Attributes.Add(FeatureAttributes.POI_SOURCE_IMAGE_URL + "1", "sourceimage1");
+            feature.Attributes.Add(FeatureAttributes.WEBSITE + "2", "website2");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer { Routes = new List<RouteData>() });

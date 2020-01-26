@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.LinearReferencing;
 using NetTopologySuite.Operation.Distance;
 using System.Collections.Generic;

@@ -192,22 +192,22 @@ namespace IsraelHiking.DataAccess
             var image = await GetPageImageUrl(page).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(image))
             {
-                feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL, image);
+                feature.Attributes.Add(FeatureAttributes.IMAGE_URL, image);
             }
             if (shareMatch.Success)
             {
                 feature.Attributes[FeatureAttributes.NAME] += " - טבע ונופים";
                 feature.Attributes[FeatureAttributes.NAME + ":" + Languages.HEBREW] += " - טבע ונופים";
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE);
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_ICON, "icon-hike");
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_ICON_COLOR, "black");
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_SHARE_REFERENCE, shareMatch.Groups[1].Value);
+                feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE);
+                feature.Attributes.Add(FeatureAttributes.POI_ICON, "icon-hike");
+                feature.Attributes.Add(FeatureAttributes.POI_ICON_COLOR, "black");
+                feature.Attributes.Add(FeatureAttributes.POI_SHARE_REFERENCE, shareMatch.Groups[1].Value);
             }
             else
             {
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_ICON, "icon-inature");
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_ICON_COLOR, "#116C00");
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, Categories.INATURE);
+                feature.Attributes.Add(FeatureAttributes.POI_ICON, "icon-inature");
+                feature.Attributes.Add(FeatureAttributes.POI_ICON_COLOR, "#116C00");
+                feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, Categories.INATURE);
             }
             feature.SetTitles();
             feature.SetId();

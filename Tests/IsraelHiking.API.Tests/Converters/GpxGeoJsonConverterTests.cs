@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;

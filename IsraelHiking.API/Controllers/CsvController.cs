@@ -7,6 +7,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -50,7 +51,7 @@ namespace IsraelHiking.API.Controllers
         public async Task<IActionResult> UploadCsv(IFormFile file, [FromQuery]string idRegExPattern, [FromQuery]string sourceImageUrl, [FromQuery]string icon = "icon-bike", [FromQuery]string iconColor = "black", [FromQuery]string category = Categories.ROUTE_BIKE)
         {
             var reader = new StreamReader(file.OpenReadStream());
-            var csvReader = new CsvReader(reader);
+            var csvReader = new CsvReader(reader, CultureInfo.InvariantCulture);
             csvReader.Configuration.HeaderValidated = null;
             csvReader.Configuration.MissingFieldFound = null;
             var pointsOfInterest = csvReader.GetRecords<CsvPointOfInterestRow>().ToList();
@@ -58,7 +59,7 @@ namespace IsraelHiking.API.Controllers
             var stream = new MemoryStream();
             using (TextWriter writer = new StreamWriter(stream, Encoding.UTF8, 1024, true))
             {
-                var csvWriter = new CsvWriter(writer);
+                var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
                 csvWriter.Configuration.HasHeaderRecord = true;
                 csvWriter.WriteHeader<CsvPointOfInterestRow>();
                 csvWriter.NextRecord();
@@ -70,7 +71,7 @@ namespace IsraelHiking.API.Controllers
                         var geojsonBytes = await _dataContainerConverterService.Convert(response.Content,
                             response.FileName, FlowFormats.GEOJSON);
                         var geoJson = geojsonBytes.ToFeatureCollection();
-                        var coordinate = geoJson.Features.First().Geometry.Coordinate;
+                        var coordinate = geoJson.First().Geometry.Coordinate;
                         csvRow.Latitude = coordinate.Y;
                         csvRow.Longitude = coordinate.X;
                     }

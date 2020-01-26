@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using Microsoft.Extensions.Logging;

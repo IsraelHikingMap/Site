@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;

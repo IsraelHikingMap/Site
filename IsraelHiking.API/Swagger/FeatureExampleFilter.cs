@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using Microsoft.OpenApi.Any;
+﻿using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -27,7 +26,7 @@ namespace IsraelHiking.API.Swagger
             {
                 return;
             }
-            if (context.ApiModel.Type != typeof(Feature))
+            if (context.Type != typeof(Feature))
             {
                 return;
             }
