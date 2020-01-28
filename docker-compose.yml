@@ -1,10 +1,40 @@
 version: '3.4'
 
 services:
-  website:
-    image: israel-hiking
-    build: .
+  #website:
+  #  image: israel-hiking
+  #  build: .
+  #  environment:
+  #    - ASPNETCORE_ENVIRONMENT=Development
+  #  ports:
+  #    - "5000:5000"
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.16
+    container_name: elasticsearch
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data:rw
+     #- //D/elasticsearch/data:/usr/share/elasticsearch/data:rw
     ports:
-      - "5000:5000"
+      - 9200:9200
+      - 9300:9300
+  graphhopper:
+    image: graphhopper/graphhopper
+    container_name: graphhopper
+    volumes:
+      - ghdata:/data:rw
+      - ./gh-config.yml:/data/gh-config.yml
+      - ./israel-and-palestine-latest.osm.pbf:/data/israel-and-palestine-latest.osm.pbf
+
+    ports:
+      - 8989:8989
+    command: /data/israel-and-palestine-latest.osm.pbf -c /data/gh-config.yml -fd
+
+volumes:
+  esdata:
+    driver: local
+  ghdata:
+    driver: local
