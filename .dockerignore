@@ -1,6 +1,7 @@
 .git/
 .github/
 .idea/
+.vs/
 docs/
 **/bin/
 **/obj/

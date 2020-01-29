@@ -1,22 +1,26 @@
 FROM node:latest as build-node
 
-WORKDIR /tmp
-COPY ./IsraelHiking.Web/package.json ./IsraelHiking.Web/package-lock.json ./
+WORKDIR /angular
+COPY ./IsraelHiking.Web/ ./
 
-RUN npm i 
+RUN npm i && npm run build -- --no-progress
 
-COPY /IsraelHiking.Web/ ./
-RUN npm run build -- --no-progress
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as build-net
 
-FROM mcr.microsoft.com/dotnet/core/sdk:3.0 as release
-
-WORKDIR /usr/app
+WORKDIR /net
 COPY . .
 
 RUN dotnet restore && dotnet build
 
-COPY --from=build-node /tmp/wwwroot ./IsraelHiking.Web/wwwroot
+WORKDIR /net/IsraelHiking.Web
 
-WORKDIR /usr/app/IsraelHiking.Web
+RUN dotnet publish
 
-CMD dotnet run --no-build --no-restore
+From mcr.microsoft.com/dotnet/core/aspnet:3.1 as release
+
+WORKDIR /israelhiking
+
+COPY --from=build-net /net/IsraelHiking.Web/bin/Debug/netcoreapp3.1/publish ./
+COPY --from=build-node /angular/wwwroot ./wwwroot
+
+ENTRYPOINT ["dotnet", "IsraelHiking.Web.dll"]

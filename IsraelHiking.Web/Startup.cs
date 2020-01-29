@@ -128,11 +128,14 @@ namespace IsraelHiking.Web
             var rewriteOptions = new RewriteOptions();
             rewriteOptions.Rules.Add(new RewriteWithQueryRule(".*_escaped_fragment_=%2F%3Fs%3D(.*)", "api/opengraph/$1", false));
 
-            if (env.IsDevelopment())
+            if (_isDevelopment)
             {
                 app.UseDeveloperExceptionPage();
             }
-            rewriteOptions.AddRedirectToHttps();
+            else
+            {
+                rewriteOptions.AddRedirectToHttps();
+            }
             app.UseRewriter(rewriteOptions);
 
             app.UseCors(builder =>

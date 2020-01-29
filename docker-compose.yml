@@ -1,13 +1,15 @@
 version: '3.4'
 
 services:
-  #website:
-  #  image: israel-hiking
-  #  build: .
-  #  environment:
-  #    - ASPNETCORE_ENVIRONMENT=Development
-  #  ports:
-  #    - "5000:5000"
+  website:
+    image: israel-hiking
+    build: .
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./IsraelHiking.Web/appsettings.Docker.json:/israelhiking/appsettings.json
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.6.16
     container_name: elasticsearch
