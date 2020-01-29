@@ -17,22 +17,20 @@ services:
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
     volumes:
       - esdata:/usr/share/elasticsearch/data:rw
-     #- //D/elasticsearch/data:/usr/share/elasticsearch/data:rw
     ports:
       - 9200:9200
       - 9300:9300
+    restart: always
   graphhopper:
     image: graphhopper/graphhopper
     container_name: graphhopper
     volumes:
       - ghdata:/data:rw
       - ./gh-config.yml:/data/gh-config.yml
-      - ./israel-and-palestine-latest.osm.pbf:/data/israel-and-palestine-latest.osm.pbf
-
     ports:
       - 8989:8989
-    command: /data/israel-and-palestine-latest.osm.pbf -c /data/gh-config.yml -fd
-
+    command: asia_israel-and-palestine.pbf -c /data/gh-config.yml -fd
+    restart: always
 volumes:
   esdata:
     driver: local
