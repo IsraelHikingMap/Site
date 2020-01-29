@@ -1,7 +1,9 @@
 ﻿using GeoAPI.Geometries;
 using IsraelHiking.Common;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
+using NSubstitute;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,7 +17,9 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [TestInitialize]
         public void TestInitialize()
         {
-            _gateway = new ElasticSearchGateway(new TraceLogger(), new GeometryFactory());
+            var options = Substitute.For<IOptions<ConfigurationData>>();
+            options.Value.Returns(new ConfigurationData());
+            _gateway = new ElasticSearchGateway(options, new TraceLogger(), new GeometryFactory());
         }
 
         [TestMethod]

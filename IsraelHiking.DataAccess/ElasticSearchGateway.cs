@@ -4,6 +4,7 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Nest;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -48,16 +49,19 @@ namespace IsraelHiking.DataAccess
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
         private readonly GeometryFactory _geometryFactory;
+        private readonly ConfigurationData _options;
         private IElasticClient _elasticClient;
 
-        public ElasticSearchGateway(ILogger logger, GeometryFactory geometryFactory)
+        public ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger logger, GeometryFactory geometryFactory)
         {
+            _options = options.Value;
             _logger = logger;
             _geometryFactory = geometryFactory;
         }
 
-        public void Initialize(string uri = "http://localhost:9200/")
+        public void Initialize()
         {
+            var uri = _options.ElasticsearchServerAddress;
             _logger.LogInformation("Initialing elastic search with uri: " + uri);
             var pool = new SingleNodeConnectionPool(new Uri(uri));
             var connectionString = new ConnectionSettings(

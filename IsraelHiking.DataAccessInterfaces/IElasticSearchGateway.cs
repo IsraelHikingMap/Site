@@ -8,7 +8,7 @@ namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IElasticSearchGateway : IRepository
     {
-        void Initialize(string uri = "http://localhost:9200/");
+        void Initialize();
         Task<List<Feature>> Search(string searchTerm, string language);
         Task<List<Feature>> SearchPlaces(string place, string language);
         Task<List<Feature>> SearchByLocation(Coordinate nortEast, Coordinate southWest, string searchTerm, string language);

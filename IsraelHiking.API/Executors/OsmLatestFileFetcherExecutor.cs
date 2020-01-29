@@ -14,9 +14,6 @@ namespace IsraelHiking.API.Executors
     public class OsmLatestFileFetcherExecutor : IOsmLatestFileFetcherExecutor
     {
         private const string OSM_C_TOOLS_FOLDER = "OsmCTools";
-        private const string OSM_FILE_ADDRESS = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine-latest.osm.pbf";
-        private const string OSM_FILE_TIMESTAMP = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine.state.txt";
-        private const string MINUTES_FILES_BASE_ADDRESS = "http://download.openstreetmap.fr/replication/asia/israel_and_palestine";
         private const string UPDATES_FILE_NAME = "israel-and-palestine-updates.osc";
         private const string OSM_UPDATE_EXE = "osmup.exe";
         private const string OSM_CONVERT_EXE = "osmconvert.exe";
@@ -80,20 +77,23 @@ namespace IsraelHiking.API.Executors
 
         private async Task DownloadDailyOsmFile(string workingDirectory)
         {
-            var response = await _remoteFileFetcherGateway.GetFileContent(OSM_FILE_ADDRESS);
+            var response = await _remoteFileFetcherGateway.GetFileContent(_options.OsmFileAddress);
             _fileSystemHelper.WriteAllBytes(Path.Combine(workingDirectory, Sources.OSM_FILE_NAME), response.Content);
             
-            // Update timestamp to match the one from the server.
-            var file = await _remoteFileFetcherGateway.GetFileContent(OSM_FILE_TIMESTAMP);
-            var stringContent = Encoding.UTF8.GetString(file.Content);
-            var lastLine = stringContent.Split('\n').Last(s => !string.IsNullOrWhiteSpace(s));
-            var timeStamp = lastLine.Split('=').Last().Replace("\\", "");
-            RunOsmConvert($"--timestamp={timeStamp} {Sources.OSM_FILE_NAME}", workingDirectory);
+            if (!string.IsNullOrWhiteSpace(_options.OsmFileTimeStampAddress))
+            {
+                // Update timestamp to match the one from the server.
+                var file = await _remoteFileFetcherGateway.GetFileContent(_options.OsmFileTimeStampAddress);
+                var stringContent = Encoding.UTF8.GetString(file.Content);
+                var lastLine = stringContent.Split('\n').Last(s => !string.IsNullOrWhiteSpace(s));
+                var timeStamp = lastLine.Split('=').Last().Replace("\\", "");
+                RunOsmConvert($"--timestamp={timeStamp} {Sources.OSM_FILE_NAME}", workingDirectory);
+            }
         }
 
         private void UpdateFileToLatestVersion(string workingDirectory)
         {
-            _processHelper.Start(OSM_UPDATE_EXE, $"{Sources.OSM_FILE_NAME} {UPDATES_FILE_NAME} --base-url={MINUTES_FILES_BASE_ADDRESS} --minute", workingDirectory);
+            _processHelper.Start(OSM_UPDATE_EXE, $"{Sources.OSM_FILE_NAME} {UPDATES_FILE_NAME} --base-url={_options.OsmMinutsFileBaseAddress} --minute", workingDirectory);
             RunOsmConvert($"{Sources.OSM_FILE_NAME} {UPDATES_FILE_NAME}", workingDirectory);
         }
         /// <inheritdoc />

@@ -2,6 +2,7 @@
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 using System;
@@ -14,15 +15,14 @@ namespace IsraelHiking.DataAccess
 {
     public class GraphHopperGateway : IGraphHopperGateway
     {
-        private const string BASE_ADDRESS = "http://localhost:8989/";
-
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger _logger;
+        private readonly ConfigurationData _options;
 
-
-        public GraphHopperGateway(IHttpClientFactory httpClientFactory, ILogger logger)
+        public GraphHopperGateway(IHttpClientFactory httpClientFactory, IOptions<ConfigurationData> options, ILogger logger)
         {
             _httpClientFactory = httpClientFactory;
+            _options = options.Value;
             _logger = logger;
         }
 
@@ -42,7 +42,7 @@ namespace IsraelHiking.DataAccess
                     vehicle = "car4wd";
                     break;
             }
-            var requestAddress = $"{BASE_ADDRESS}route?instructions=false&points_encoded=false&elevation=true&point={request.From}&point={request.To}&vehicle={vehicle}";
+            var requestAddress = $"{_options.GraphhopperServerAddress}route?instructions=false&points_encoded=false&elevation=true&point={request.From}&point={request.To}&vehicle={vehicle}";
             var response = await httpClient.GetAsync(requestAddress);
             var content = await response.Content.ReadAsStringAsync();
             var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
@@ -64,7 +64,7 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation($"Starting creating graph hopper cache based on latest pbf file: {Sources.OSM_FILE_NAME}");
             var httpClient = _httpClientFactory.CreateClient();
             httpClient.Timeout = TimeSpan.FromMinutes(30);
-            var requestAddress = $"{BASE_ADDRESS}rebuild";
+            var requestAddress = $"{_options.GraphhopperServerAddress}rebuild";
             ByteArrayContent bytes = new ByteArrayContent(osmFileStream.ToArray());
             MultipartFormDataContent multiContent = new MultipartFormDataContent();
             multiContent.Add(bytes, "file", Sources.OSM_FILE_NAME);

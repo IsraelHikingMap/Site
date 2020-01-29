@@ -81,6 +81,26 @@ namespace IsraelHiking.Common
         /// </summary>
         public string BinariesFolder { get; set; }
         /// <summary>
+        /// GraphHopper server address
+        /// </summary>
+        public string GraphhopperServerAddress { get; set; }
+        /// <summary>
+        /// Elasticsearch server address
+        /// </summary>
+        public string ElasticsearchServerAddress { get; set; }
+        /// <summary>
+        /// The address of the OSM file to download for daily rebuild
+        /// </summary>
+        public string OsmFileAddress { get; set; }
+        /// <summary>
+        /// The address of the OSM file time stamp to update the osm file regarding its modification day and time 
+        /// </summary>
+        public string OsmFileTimeStampAddress { get; set; }
+        /// <summary>
+        /// The base address to fetch minutes updates for OSM. used by osm-c-tools
+        /// </summary>
+        public string OsmMinutsFileBaseAddress { get; set; }
+        /// <summary>
         /// An object that describe how to connect to OSM
         /// </summary>
         public OsmConfiguraionData OsmConfiguration { get; set; }
@@ -118,6 +138,11 @@ namespace IsraelHiking.Common
             SearchFactor = 0.5;
             MergePointsOfInterestThreshold = 1 / 60.0; // 1 minute
             BinariesFolder = string.Empty;
+            GraphhopperServerAddress = "http://localhost:8989/";
+            ElasticsearchServerAddress = "http://localhost:9200/";
+            OsmFileAddress = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine-latest.osm.pbf";
+            OsmFileTimeStampAddress = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine.state.txt";
+            OsmMinutsFileBaseAddress = "http://download.openstreetmap.fr/replication/asia/israel_and_palestine";
             OsmConfiguration = new OsmConfiguraionData
             {
                 ConsumerKey = "E8p0RX0rnQPxDaj3IijgpMNeK8lRTyy6rlKxQ8IF",
