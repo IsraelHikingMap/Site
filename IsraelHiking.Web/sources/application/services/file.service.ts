@@ -209,37 +209,31 @@ export class FileService {
     ): Promise<any> {
         let zip = new JSZip();
         await zip.loadAsync(file);
-        let styleFileName = Object.keys(zip.files).find(name => name.endsWith(".json") && name.indexOf("/") === -1);
-        if (styleFileName != null) {
+        let styles = Object.keys(zip.files).filter(name => name.startsWith("styles/"));
+        for (let styleFileName of styles) {
             let styleText = (await zip.file(styleFileName).async("text")).trim();
-            let styleJson = JSON.parse(styleText) as Style;
             this.saveStyleJson(styleFileName, styleText);
-            for (let sourceName of Object.keys(styleJson.sources)) {
-                let source = styleJson.sources[sourceName] as VectorSource | RasterDemSource | RasterSource;
-                if (source.tiles && source.tiles[0].startsWith("custom://")) {
-                    let parts = Object.keys(zip.files).filter(name => name.startsWith(sourceName + "/" + sourceName));
-                    this.loggingService.info(`Loading ${sourceName}, it has: ${parts.length} parts.`);
-                    let partIndex = 1;
-                    for (let sourceFile of parts) {
-                        this.loggingService.debug("Adding: " + sourceFile);
-                        notificationCallback(`${partIndex++}/${parts.length}`);
-                        await tilesCallback(source.tiles[0], await zip.file(sourceFile).async("text") as string);
-                        this.loggingService.debug("Added: " + sourceFile);
-                    }
-                }
-            }
         }
-        let poisFileName = Object.keys(zip.files).find(name => name.endsWith(".geojson") && name.indexOf("/") === -1);
+        let sources = Object.keys(zip.files).filter(name => name.startsWith("sources/"));
+        for (let sourceFileIndex = 0; sourceFileIndex < sources.length; sourceFileIndex++) {
+            let sourceFile = sources[sourceFileIndex];
+            let sourceName = sourceFile.split("/")[0];
+            this.loggingService.debug("Adding: " + sourceFile);
+            notificationCallback(`${sourceFileIndex + 1}/${sources.length}`);
+            await tilesCallback(sourceName, await zip.file(sourceFile).async("text") as string);
+            this.loggingService.debug("Added: " + sourceFile);
+        }
+        let poisFileName = Object.keys(zip.files).find(name => name.startsWith("pois/") && name.endsWith(".geojson"));
         if (poisFileName != null) {
             let poisText = (await zip.file(poisFileName).async("text")).trim();
             await poisCallback(poisText);
             this.loggingService.debug("Added pois.");
         }
-        let imagesParts = Object.keys(zip.files).filter(name => name.startsWith("images/images"));
-        let imagespartIndex = 1;
-        for (let imagesFile of imagesParts) {
+        let images = Object.keys(zip.files).filter(name => name.startsWith("images/"));
+        for (let imagesFileIndex = 0; imagesFileIndex < images.length; imagesFileIndex++) {
+            let imagesFile = images[imagesFileIndex];
             this.loggingService.debug("Adding images: " + imagesFile);
-            notificationCallback(`${imagespartIndex++}/${imagesParts.length}`);
+            notificationCallback(`${imagesFileIndex + 1}/${images.length}`);
             await imagesCallback(await zip.file(imagesFile).async("text") as string);
             this.loggingService.debug("Added images: " + imagesFile);
         }

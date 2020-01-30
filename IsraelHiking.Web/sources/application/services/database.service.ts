@@ -136,7 +136,7 @@ export class DatabaseService {
         this.updating = false;
     }
 
-    public getDbNameFromUrl(url: string) {
+    private getSourceNameFromUrl(url: string) {
         let splitUrl = url.replace("custom://", "").split("/");
         splitUrl.pop();
         splitUrl.pop();
@@ -145,7 +145,7 @@ export class DatabaseService {
     }
 
     public async getTile(url: string): Promise<ArrayBuffer> {
-        let dbName = this.getDbNameFromUrl(url);
+        let dbName = this.getSourceNameFromUrl(url);
         let db = this.getDatabase(dbName);
         let splitUrl = url.split("/");
         let id = splitUrl[splitUrl.length - 3] + "_" + splitUrl[splitUrl.length - 2] +
@@ -157,9 +157,9 @@ export class DatabaseService {
         return decode(tile.data);
     }
 
-    public async saveTilesContent(dbName: string, sourceText: string): Promise<void> {
+    public async saveTilesContent(sourceName: string, sourceText: string): Promise<void> {
         let objectToSave = JSON.parse(sourceText.trim());
-        await this.getDatabase(dbName).table(DatabaseService.TILES_TABLE_NAME).bulkPut(objectToSave);
+        await this.getDatabase(sourceName).table(DatabaseService.TILES_TABLE_NAME).bulkPut(objectToSave);
     }
 
     private getDatabase(dbName: string): Dexie {

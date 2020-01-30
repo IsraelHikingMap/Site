@@ -55,10 +55,9 @@ export class FileComponent extends BaseMapComponent {
         }
     }
 
-    private tilesStoreCallback = async (address: string, content: string) => {
+    private tilesStoreCallback = async (sourceName: string, content: string) => {
         try {
-            let dbName = this.databaseService.getDbNameFromUrl(address);
-            await this.databaseService.saveTilesContent(dbName, content);
+            await this.databaseService.saveTilesContent(sourceName, content);
         } catch (ex) {
             this.toastService.error(ex.toString());
         }
