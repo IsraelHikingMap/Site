@@ -19,7 +19,7 @@ const CHANGE_VISIBILITY = "CHANGE_VISIBILITY";
 const REVERSE_ROUTE = "REVERSE_ROUTE";
 const SPLIT_ROUTE = "SPLIT_ROUTE";
 const MERGE_ROUTES = "MERGE_ROUTES";
-const ADD_RECORDING_POINT = "ADD_RECORDING_POINT";
+const ADD_RECORDING_POINTS = "ADD_RECORDING_POINTS";
 const CLEAR_POIS = "CLEAR_POIS";
 const CLEAR_POIS_AND_ROUTE = "CLEAR_POIS_AND_ROUTE";
 const DELETE_ALL_ROUTES = "DELETE_ALL_ROUTES";
@@ -89,8 +89,8 @@ export interface MergeRoutesPayload extends RoutePayload {
     mergedRouteData: RouteData;
 }
 
-export interface AddRecordingPointPayload extends RoutePayload {
-    latlng: ILatLngTime;
+export interface AddRecordingPointsPayload extends RoutePayload {
+    latlngs: ILatLngTime[];
 }
 
 export interface BulkReplaceRoutesPayload {
@@ -187,9 +187,9 @@ export class MergeRoutesAction extends BaseAction<MergeRoutesPayload> {
     }
 }
 
-export class AddRecordingPointAction extends BaseAction<AddRecordingPointPayload> {
-    constructor(payload: AddRecordingPointPayload) {
-        super(ADD_RECORDING_POINT, payload);
+export class AddRecordingPointsAction extends BaseAction<AddRecordingPointsPayload> {
+    constructor(payload: AddRecordingPointsPayload) {
+        super(ADD_RECORDING_POINTS, payload);
     }
 }
 
@@ -397,15 +397,15 @@ class RoutesReducer {
         return routes;
     }
 
-    @ReduxAction(ADD_RECORDING_POINT)
-    public addRecordingPoint(lastState: RouteData[], action: AddRecordingPointAction): RouteData[] {
+    @ReduxAction(ADD_RECORDING_POINTS)
+    public addRecordingPoint(lastState: RouteData[], action: AddRecordingPointsAction): RouteData[] {
         return this.doForRoute(lastState,
             action.payload.routeId,
             (route) => {
                 let segments = [...route.segments];
                 let lastSegment = { ...segments[segments.length - 1] };
-                lastSegment.latlngs = [...lastSegment.latlngs, action.payload.latlng];
-                lastSegment.routePoint = action.payload.latlng;
+                lastSegment.latlngs = [...lastSegment.latlngs, ...action.payload.latlngs];
+                lastSegment.routePoint = action.payload.latlngs[action.payload.latlngs.length - 1];
                 segments.splice(segments.length - 1, 1, lastSegment);
                 return {
                     ...route,
@@ -466,9 +466,9 @@ export const routesReducer = undoable(createReducerFromClass(RoutesReducer, init
             CLEAR_POIS,
             CLEAR_POIS_AND_ROUTE,
             DELETE_ALL_ROUTES,
-            ADD_RECORDING_POINT,
+            ADD_RECORDING_POINTS,
             BULK_REPLACE_ROUTES
         ]),
-        groupBy: groupByActionTypes(ADD_RECORDING_POINT),
+        groupBy: groupByActionTypes(ADD_RECORDING_POINTS),
         limit: 20
     } as UndoableOptions);

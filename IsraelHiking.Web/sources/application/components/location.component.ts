@@ -15,10 +15,10 @@ import { SelectedRouteService } from "../services/layers/routelayers/selected-ro
 import { SpatialService } from "../services/spatial.service";
 import { FileService } from "../services/file.service";
 import { LoggingService } from "../services/logging.service";
-import { AddRouteAction, AddRecordingPointAction } from "../reducres/routes.reducer";
+import { AddRouteAction, AddRecordingPointsAction } from "../reducres/routes.reducer";
 import { AddTraceAction } from "../reducres/traces.reducer";
 import { StopRecordingAction, StartRecordingAction } from "../reducres/route-editing-state.reducer";
-import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility } from "../models/models";
+import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility, ILatLngTime } from "../models/models";
 
 @Component({
     selector: "location",
@@ -87,7 +87,14 @@ export class LocationComponent extends BaseMapComponent {
                     this.toastService.warning(this.resources.unableToFindYourLocation);
                 } else {
                     this.handlePositionChange(position);
+                    this.updateRecordingRouteIfNeeded([this.geoLocationService.currentLocation]);
                 }
+            });
+        this.geoLocationService.bulkPositionChanged.subscribe(
+            (positions: Position[]) => {
+                this.handlePositionChange(positions[positions.length - 1]);
+                let latlngs = positions.map(p => this.geoLocationService.positionToLatLngTime(p));
+                this.updateRecordingRouteIfNeeded(latlngs);
             });
 
         let lastRecordedRoute = this.selectedRouteService.getRecordingRoute();
@@ -279,13 +286,15 @@ export class LocationComponent extends BaseMapComponent {
                 this.setLocation();
             }
         }
+    }
 
+    private updateRecordingRouteIfNeeded(locations: ILatLngTime[]) {
         let recordingRoute = this.selectedRouteService.getRecordingRoute();
         if (recordingRoute != null) {
-            this.loggingService.debug("Adding a new point to the recording route.");
-            this.ngRedux.dispatch(new AddRecordingPointAction({
+            this.loggingService.debug("Adding a new point/s to the recording route.");
+            this.ngRedux.dispatch(new AddRecordingPointsAction({
                 routeId: recordingRoute.id,
-                latlng: this.geoLocationService.currentLocation
+                latlngs: locations
             }));
         }
     }
