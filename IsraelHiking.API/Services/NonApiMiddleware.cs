@@ -12,7 +12,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Wangkanai.Detection;
+using Wangkanai.Detection.Services;
 
 namespace IsraelHiking.API.Services
 {
@@ -63,8 +63,9 @@ namespace IsraelHiking.API.Services
                 await SendFile(context, file);
                 return;
             }
-            var isCrawler = IsCrawler();
-            var isWhatsApp = IsWhatsApp();
+            var detectionService = _serviceProvider.GetRequiredService<IDetectionService>();
+            var isCrawler = detectionService.Crawler.IsCrawler;
+            var isWhatsApp = detectionService.Crawler.Type == Wangkanai.Detection.Models.Crawler.WhatsApp;
             if (isCrawler && context.Request.Path.StartsWithSegments("/share"))
             {
                 var url = await _repository.GetUrlById(context.Request.Path.Value.Split("/").Last());
@@ -160,18 +161,6 @@ namespace IsraelHiking.API.Services
                 </body>
                 </html>
             ";
-        }
-
-        private bool IsCrawler()
-        {
-            var browserResolver = _serviceProvider.GetRequiredService<IBrowserResolver>();
-            return browserResolver.Browser == null || browserResolver.Browser.Type == BrowserType.Generic;
-        }
-
-        private bool IsWhatsApp()
-        {
-            var userAgent = _serviceProvider.GetRequiredService<IUserAgentService>();
-            return userAgent.UserAgent.ToString().ToLowerInvariant().Contains("whatsapp");
         }
     }
 }

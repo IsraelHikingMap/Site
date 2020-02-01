@@ -11,7 +11,7 @@ using NSubstitute;
 using System;
 using System.IO;
 using System.Text;
-using Wangkanai.Detection;
+using Wangkanai.Detection.Services;
 
 namespace IsraelHiking.API.Tests.Services
 {
@@ -29,16 +29,12 @@ namespace IsraelHiking.API.Tests.Services
         {
             _hostingEnvironment = Substitute.For<IWebHostEnvironment>();
             _serviceProvider = Substitute.For<IServiceProvider>();
-            var browserResolver = Substitute.For<IBrowserResolver>();
-            var browser = Substitute.For<IBrowser>();
-            browser.Type.Returns(BrowserType.Generic);
-            browserResolver.Browser.Returns(browser);
-            var userAgentService = Substitute.For<IUserAgentService>();
-            var userAgent = Substitute.For<IUserAgent>();
-            userAgent.ToString().Returns("WhatsApp1.2.3");
-            userAgentService.UserAgent.Returns(userAgent);
-            _serviceProvider.GetService(typeof(IBrowserResolver)).Returns(browserResolver);
-            _serviceProvider.GetService(typeof(IUserAgentService)).Returns(userAgentService);
+            var detectionService = Substitute.For<IDetectionService>();
+            var crawlerService = Substitute.For<ICrawlerService>();
+            crawlerService.IsCrawler.Returns(true);
+            crawlerService.Type.Returns(Wangkanai.Detection.Models.Crawler.WhatsApp);
+            detectionService.Crawler.Returns(crawlerService);
+            _serviceProvider.GetService(typeof(IDetectionService)).Returns(detectionService);
             _repository = Substitute.For<IRepository>();
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
             var config = new ConfigurationData();
