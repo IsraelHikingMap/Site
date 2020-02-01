@@ -5,7 +5,7 @@ import { NgRedux } from "@angular-redux/store";
 
 import { Urls } from "../urls";
 import { LatLngAlt, ApplicationState } from "../models/models";
-import { MapService } from './map.service';
+import { MapService } from "./map.service";
 
 export interface IPoiRouterData {
     source: string;
@@ -50,9 +50,9 @@ export class HashService {
     private readonly window: Window;
 
     constructor(private readonly router: Router,
-        @Inject("Window") window: any, // bug in angular aot
-        private readonly mapService: MapService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                @Inject("Window") window: any, // bug in angular aot
+                private readonly mapService: MapService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.window = window;
         this.backwardCompatibilitySupport();

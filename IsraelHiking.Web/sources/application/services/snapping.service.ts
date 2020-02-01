@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 
 import { SpatialService } from "./spatial.service";
 import { LatLngAlt, MarkerData } from "../models/models";
-import { MapService } from './map.service';
+import { MapService } from "./map.service";
 
 export interface ISnappingPointResponse {
     latlng: LatLngAlt;
