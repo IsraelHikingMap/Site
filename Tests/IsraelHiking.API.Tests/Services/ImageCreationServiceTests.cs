@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using IsraelHiking.API.Services;
@@ -10,6 +8,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace IsraelHiking.API.Tests.Services
 {
@@ -31,9 +31,9 @@ namespace IsraelHiking.API.Tests.Services
 
         private void SetupRemoteFileFetcherWithBlankTile()
         {
-            var bitmap = new Bitmap(256, 256);
+            var bitmap = new Image<Rgba32>(256, 256);
             var stream = new MemoryStream();
-            bitmap.Save(stream, ImageFormat.Png);
+            bitmap.SaveAsPng(stream);
             _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>())
                 .Returns(new RemoteFileFetcherGatewayResponse
                 {

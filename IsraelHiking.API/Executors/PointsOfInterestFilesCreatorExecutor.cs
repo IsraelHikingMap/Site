@@ -9,11 +9,12 @@ using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -156,8 +157,7 @@ namespace IsraelHiking.API.Executors
                             _logger.LogWarning("The following image does not exist: " + url + " feature: " + feature.GetId());
                             continue;
                         }
-                        var image = Image.FromStream(new MemoryStream(content));
-                        var format = image.RawFormat.ToString().ToLowerInvariant();
+                        var image = Image.Load(content, out var format);
                         if (!needResize)
                         {
                             items.Add(new ImageItem { ImageUrl = url, Data = $"data:image/{format};base64," + Convert.ToBase64String(content) });
@@ -199,22 +199,15 @@ namespace IsraelHiking.API.Executors
 
         private byte[] ResizeImage(Image originalImage, int newSizeInPixels)
         {
-            Bitmap srcBmp = new Bitmap(originalImage);
-            var ratio = srcBmp.Width > srcBmp.Height 
-                ? newSizeInPixels * 1.0 / srcBmp.Width 
-                : newSizeInPixels * 1.0 / srcBmp.Height;
-            var newSize = new Size((int)(srcBmp.Width * ratio), (int)(srcBmp.Height * ratio));
-            var target = new Bitmap(newSize.Width, newSize.Height);
+            var ratio = originalImage.Width > originalImage.Height 
+                ? newSizeInPixels * 1.0 / originalImage.Width 
+                : newSizeInPixels * 1.0 / originalImage.Height;
+            var newSize = new Size((int)(originalImage.Width * ratio), (int)(originalImage.Height * ratio));
+            originalImage.Mutate(x => x.Resize(newSize));
 
-            using (Graphics graphics = Graphics.FromImage(target))
-            {
-                graphics.DrawImage(srcBmp, 0, 0, newSize.Width, newSize.Height);
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    target.Save(memoryStream, ImageFormat.Jpeg);
-                    return memoryStream.ToArray();
-                }
-            }
+            var memoryStream = new MemoryStream();
+            originalImage.SaveAsJpeg(memoryStream);
+            return memoryStream.ToArray();
         }
     }
 }

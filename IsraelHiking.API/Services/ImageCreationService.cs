@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +7,11 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
+using SixLabors.Shapes;
 
 namespace IsraelHiking.API.Services
 {
@@ -42,8 +44,10 @@ namespace IsraelHiking.API.Services
     public class ImageCreationService : IImageCreationService
     {
         private const int TILE_SIZE = 256; // pixels
-        private const float CIRCLE_SIZE = 24; // pixels
+        private const int PEN_WIDTH_OFFSET = 8; // pixels
+        private const float CIRCLE_RADIUS = 12; // pixels
         private const float PEN_WIDTH = 13; // pixels
+        private const float CIRCLE_OUTLINE_WIDTH = 7; // pixels
         private const int MAX_ZOOM = 16;
 
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
@@ -80,7 +84,7 @@ namespace IsraelHiking.API.Services
             DrawRoutesOnImage(context);
             CropAndResizeImage(context);
             var imageStream = new MemoryStream();
-            context.Image.Save(imageStream, ImageFormat.Png);
+            context.Image.SaveAsPng(imageStream);
             _logger.LogDebug("Creating image for thumbnail completed.");
             return imageStream.ToArray();
         }
@@ -214,8 +218,6 @@ namespace IsraelHiking.API.Services
         {
             var horizontalTiles = context.BottomRight.X - context.TopLeft.X + 1;
             var verticalTiles = context.BottomRight.Y - context.TopLeft.Y + 1;
-            var bitmap = new Bitmap(horizontalTiles * TILE_SIZE, verticalTiles * TILE_SIZE);
-
             var tasks = new List<Task<ImageWithOffset>>();
             foreach (var addressTemplate in context.AddressesTemplates)
             {
@@ -230,18 +232,14 @@ namespace IsraelHiking.API.Services
             }
 
             var imagesWithOffsets = await Task.WhenAll(tasks);
-            using (var graphics = Graphics.FromImage(bitmap))
+            var image = new Image<Rgba32>(horizontalTiles * TILE_SIZE, verticalTiles * TILE_SIZE);
+            foreach (var imageWithOffset in imagesWithOffsets)
             {
-                foreach (var imageWithOffset in imagesWithOffsets)
-                {
-                    graphics.DrawImage(imageWithOffset.Image,
-                        new Rectangle(imageWithOffset.Offset.X * TILE_SIZE, imageWithOffset.Offset.Y * TILE_SIZE, TILE_SIZE, TILE_SIZE),
-                        new Rectangle(0, 0, imageWithOffset.Image.Width, imageWithOffset.Image.Height),
-                        GraphicsUnit.Pixel);
-                }
-
+                image.Mutate(x => x.DrawImage(imageWithOffset.Image,
+                    new Point(imageWithOffset.Offset.X * TILE_SIZE, imageWithOffset.Offset.Y * TILE_SIZE), 
+                    1.0f));
             }
-            return bitmap;
+            return image;
         }
 
         private static string FixAdrressTemplate(string addressTemplate)
@@ -261,15 +259,7 @@ namespace IsraelHiking.API.Services
         /// <param name="context"></param>
         private void DrawRoutesOnImage(ImageCreationContext context)
         {
-            var penWidth = PEN_WIDTH;
-            var penWidthOffset = 8;
-            var circleOutlineWidth = 7f;
-            var circleSize = CIRCLE_SIZE;
-            using (var graphics = Graphics.FromImage(context.Image))
-            using (var outLinerPen = new Pen(Color.White, penWidth + penWidthOffset) { LineJoin = LineJoin.Bevel })
-            using (var circleFillBrush = new SolidBrush(Color.White))
-            using (var startRoutePen = new Pen(Color.Green, circleOutlineWidth))
-            using (var endRoutePen = new Pen(Color.Red, circleOutlineWidth))
+            context.Image.Mutate(ctx =>
             {
                 var routeColorIndex = 0;
                 foreach (var route in context.DataContainer.Routes)
@@ -283,27 +273,27 @@ namespace IsraelHiking.API.Services
                         lineColor = FromColorString(route.Color, route.Opacity);
                     }
 
-                    using (var linePen = new Pen(lineColor, penWidth) { LineJoin = LineJoin.Bevel })
+                    if (points.Any())
                     {
-                        if (points.Any())
-                        {
-                            graphics.DrawLines(outLinerPen, points);
-                            graphics.DrawLines(linePen, points);
-
-                            graphics.FillEllipse(circleFillBrush, points.First().X - circleSize / 2, points.First().Y - circleSize / 2, circleSize, circleSize);
-                            graphics.DrawEllipse(startRoutePen, points.First().X - circleSize / 2, points.First().Y - circleSize / 2, circleSize, circleSize);
-                            graphics.FillEllipse(circleFillBrush, points.Last().X - circleSize / 2, points.Last().Y - circleSize / 2, circleSize, circleSize);
-                            graphics.DrawEllipse(endRoutePen, points.Last().X - circleSize / 2, points.Last().Y - circleSize / 2, circleSize, circleSize);
-                        }
-
-                        foreach (var markerPoint in markerPoints)
-                        {
-                            graphics.FillEllipse(circleFillBrush, markerPoint.X - circleSize / 2, markerPoint.Y - circleSize / 2, circleSize, circleSize);
-                            graphics.DrawEllipse(linePen, markerPoint.X - circleSize / 2, markerPoint.Y - circleSize / 2, circleSize, circleSize);
-                        }
+                        var path = new SixLabors.Shapes.Path(new LinearLineSegment(points));
+                        ctx.Draw(Color.White, PEN_WIDTH + PEN_WIDTH_OFFSET, path);
+                        ctx.Draw(lineColor, PEN_WIDTH, path);
+                        var startCircle = new EllipsePolygon(points.First(), CIRCLE_RADIUS);
+                        ctx.Fill(Color.White, startCircle);
+                        ctx.Draw(Color.Green, CIRCLE_OUTLINE_WIDTH, startCircle);
+                        var endCircle = new EllipsePolygon(points.Last(), CIRCLE_RADIUS);
+                        ctx.Fill(Color.White, endCircle);
+                        ctx.Draw(Color.Red, CIRCLE_OUTLINE_WIDTH, endCircle);
+                    }
+        
+                    foreach (var markerPoint in markerPoints)
+                    {
+                        var markerEllipse = new EllipsePolygon(markerPoint, CIRCLE_RADIUS);
+                        ctx.Fill(Color.White, markerEllipse);
+                        ctx.Draw(lineColor, PEN_WIDTH, markerEllipse);
                     }
                 }
-            }
+            });
         }
 
         #region Coordinates Conversion
@@ -364,18 +354,18 @@ namespace IsraelHiking.API.Services
             {
                 return new ImageWithOffset
                 {
-                    Image = new Bitmap(TILE_SIZE, TILE_SIZE),
+                    Image = new Image<Rgba32>(TILE_SIZE, TILE_SIZE),
                     Offset = offset
                 };
             }
-            var image = Image.FromStream(new MemoryStream(fileResponse.Content), true);
+            var image = Image.Load(fileResponse.Content);
             if (addressTemplate.Opacity < 1.0)
             {
-                image = ChangeOpacity(image, addressTemplate.Opacity);
+                image.Mutate(x => x.Opacity((float)addressTemplate.Opacity));
             }
             if (zoomDifference > 1)
             {
-                image = MagnifyImagePart(image, zoomDifference, xY, translatedXy);
+                MagnifyImagePart(image, zoomDifference, xY, translatedXy);
             }
             return new ImageWithOffset
             {
@@ -405,31 +395,29 @@ namespace IsraelHiking.API.Services
         /// <returns></returns>
         private Color FromColorString(string colorString, double? opacity = null)
         {
-            var color = ColorTranslator.FromHtml(colorString);
-            if (color.A == 255 && opacity.HasValue)
+            Color color = Color.Blue;
+            if (colorString.StartsWith("#"))
             {
-                color = Color.FromArgb((int)(opacity * 255), color.R, color.G, color.B);
+                color = Color.FromHex(colorString);
+            } 
+            else
+            {
+                foreach (var currentColor in Color.WebSafePalette.ToArray())
+                {
+                    if (currentColor.ToString().Equals(colorString, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        color = currentColor;
+                        break;
+                    }
+                }
+
+            }
+            if (color.ToPixel<Rgba32>().A == 255 && opacity.HasValue)
+            {
+                var pixelColor = color.ToPixel<Rgba32>();
+                color = Color.FromRgba(pixelColor.R, pixelColor.G, pixelColor.B, (byte)(opacity * 255));
             }
             return color;
-        }
-
-        /// <summary>
-        /// Changes the opacity of an image
-        /// </summary>
-        /// <param name="image">The iamge to use</param>
-        /// <param name="opacityValue">The opacity to change to</param>
-        /// <returns>A new image with updated opacity</returns>
-        private Bitmap ChangeOpacity(Image image, double opacityValue)
-        {
-            Bitmap bmp = new Bitmap(image.Width, image.Height); // Determining Width and Height of Source Image
-            using (Graphics graphics = Graphics.FromImage(bmp))
-            {
-                ColorMatrix colormatrix = new ColorMatrix { Matrix33 = (float)opacityValue };
-                ImageAttributes imgAttribute = new ImageAttributes();
-                imgAttribute.SetColorMatrix(colormatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-                graphics.DrawImage(image, new Rectangle(0, 0, bmp.Width, bmp.Height), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, imgAttribute);
-            }
-            return bmp;
         }
 
         /// <summary>
@@ -440,16 +428,13 @@ namespace IsraelHiking.API.Services
         /// <param name="xY"></param>
         /// <param name="translatedXy"></param>
         /// <returns></returns>
-        private Image MagnifyImagePart(Image image, double zoomDifference, Point xY, Point translatedXy)
+        private void MagnifyImagePart(Image image, double zoomDifference, Point xY, Point translatedXy)
         {
-            Bitmap bmp = new Bitmap(TILE_SIZE, TILE_SIZE);
-            using (Graphics graphics = Graphics.FromImage(bmp))
-            {
-                var x = xY.X / zoomDifference - translatedXy.X;
-                var y = xY.Y / zoomDifference - translatedXy.Y;
-                graphics.DrawImage(image, new Rectangle(0, 0, bmp.Width, bmp.Height), (int)(x * image.Width), (int)(y * image.Height), (int)(image.Width / zoomDifference), (int)(image.Height / zoomDifference), GraphicsUnit.Pixel);
-            }
-            return bmp;
+            var x = xY.X / zoomDifference - translatedXy.X;
+            var y = xY.Y / zoomDifference - translatedXy.Y;
+            image.Mutate(ctx => ctx.Crop(new Rectangle((int)(x * image.Width), (int)(y * image.Height), (int)(image.Width / zoomDifference), (int)(image.Height / zoomDifference)))
+                .Resize(TILE_SIZE, TILE_SIZE)
+            );
         }
 
         /// <summary>
@@ -458,15 +443,12 @@ namespace IsraelHiking.API.Services
         /// <param name="context"></param>
         private void CropAndResizeImage(ImageCreationContext context)
         {
-            Bitmap bmp = new Bitmap(context.Width, context.Height);
-            using (Graphics graphics = Graphics.FromImage(bmp))
-            {
-                var topLeft = ConvertLatLngToPoint(context.DataContainer.SouthWest, context);
-                var bottomRight = ConvertLatLngToPoint(context.DataContainer.NorthEast, context);
-                graphics.DrawImage(context.Image, new Rectangle(0, 0, bmp.Width, bmp.Height), topLeft.X, bottomRight.Y, bottomRight.X - topLeft.X, topLeft.Y - bottomRight.Y, GraphicsUnit.Pixel);
-
-            }
-            context.Image = bmp;
+            var topLeft = ConvertLatLngToPoint(context.DataContainer.SouthWest, context);
+            var bottomRight = ConvertLatLngToPoint(context.DataContainer.NorthEast, context);
+            context.Image.Mutate(x =>
+                x.Crop(new Rectangle((int)topLeft.X, (int)bottomRight.Y, (int)(bottomRight.X - topLeft.X), (int)(topLeft.Y - bottomRight.Y)))
+                .Resize(context.Width, context.Height)
+            );
         }
     }
 }
