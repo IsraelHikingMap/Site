@@ -42,7 +42,7 @@ describe("HashService", () => {
 
                 windowMock.location.hash = "#!/1/2.2/3";
 
-                hashService = new HashService(router, windowMock, ngRedux);
+                hashService = new HashService(router, windowMock, null, ngRedux);
 
                 expect(router.navigate).toHaveBeenCalledWith([RouteStrings.ROUTE_MAP, 1, 2.2, 3], { replaceUrl: true });
             }));
@@ -53,7 +53,7 @@ describe("HashService", () => {
 
                 windowMock.location.hash = "#!/";
 
-                hashService = new HashService(router, windowMock, ngRedux);
+                hashService = new HashService(router, windowMock, null, ngRedux);
 
                 expect(router.navigate).toHaveBeenCalledWith(["/"], { replaceUrl: true });
             }));
@@ -64,7 +64,7 @@ describe("HashService", () => {
 
                 windowMock.location.hash = "#!/?s=shareUrl";
 
-                hashService = new HashService(router, windowMock, ngRedux);
+                hashService = new HashService(router, windowMock, null, ngRedux);
 
                 expect(router.navigate).toHaveBeenCalledWith([RouteStrings.ROUTE_SHARE, "shareUrl"], { replaceUrl: true });
             }));
@@ -75,7 +75,7 @@ describe("HashService", () => {
 
                 windowMock.location.hash = "#!/?url=external.file&baselayer=www.layer.com";
 
-                hashService = new HashService(router, windowMock, ngRedux);
+                hashService = new HashService(router, windowMock, null, ngRedux);
 
                 expect(router.navigate).toHaveBeenCalledWith([RouteStrings.ROUTE_URL, "external.file"],
                     { queryParams: { baselayer: "www.layer.com" }, replaceUrl: true });
@@ -87,7 +87,7 @@ describe("HashService", () => {
 
                 windowMock.location.hash = "#!/?download";
 
-                hashService = new HashService(router, windowMock, ngRedux);
+                hashService = new HashService(router, windowMock, null, ngRedux);
 
                 expect(router.navigate).toHaveBeenCalledWith([RouteStrings.ROUTE_DOWNLOAD], { replaceUrl: true });
             }));
@@ -100,7 +100,7 @@ describe("HashService", () => {
                 MockNgRedux.getInstance().getState = () => ({
                     inMemoryState: {}
                 });
-                hashService = new HashService(router, windowMock, MockNgRedux.getInstance());
+                hashService = new HashService(router, windowMock, null, MockNgRedux.getInstance());
 
                 let href = hashService.getHref();
 
@@ -118,7 +118,7 @@ describe("HashService", () => {
                         shareUrl: { id: "1" }
                     }
                 });
-                hashService = new HashService(router, windowMock, MockNgRedux.getInstance());
+                hashService = new HashService(router, windowMock, null, MockNgRedux.getInstance());
 
                 let href = hashService.getHref();
 
@@ -136,7 +136,7 @@ describe("HashService", () => {
                         fileUrl: "fileUrl"
                     }
                 });
-                hashService = new HashService(router, windowMock, MockNgRedux.getInstance());
+                hashService = new HashService(router, windowMock, null, MockNgRedux.getInstance());
                 let href = hashService.getHref();
 
                 expect(href).toBe(Urls.baseAddress + "file-address");

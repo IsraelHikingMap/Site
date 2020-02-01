@@ -5,6 +5,7 @@ import { NgRedux } from "@angular-redux/store";
 
 import { Urls } from "../urls";
 import { LatLngAlt, ApplicationState } from "../models/models";
+import { MapService } from './map.service';
 
 export interface IPoiRouterData {
     source: string;
@@ -49,8 +50,9 @@ export class HashService {
     private readonly window: Window;
 
     constructor(private readonly router: Router,
-                @Inject("Window") window: any, // bug in angular aot
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+        @Inject("Window") window: any, // bug in angular aot
+        private readonly mapService: MapService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.window = window;
         this.backwardCompatibilitySupport();
@@ -75,13 +77,16 @@ export class HashService {
                 { queryParams, replaceUrl: true });
             return;
         }
+        if (this.mapService.map && this.mapService.map.isMoving()) {
+            return;
+        }
         let location = this.ngRedux.getState().location;
         this.router.navigate([
-                RouteStrings.ROUTE_MAP,
-                (location.zoom + 1).toFixed(2),
-                location.latitude.toFixed(HashService.PERSICION),
-                location.longitude.toFixed(HashService.PERSICION)
-            ],
+            RouteStrings.ROUTE_MAP,
+            (location.zoom + 1).toFixed(2),
+            location.latitude.toFixed(HashService.PERSICION),
+            location.longitude.toFixed(HashService.PERSICION)
+        ],
             { replaceUrl: true });
     }
 

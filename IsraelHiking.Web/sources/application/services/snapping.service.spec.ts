@@ -2,23 +2,25 @@ import { TestBed, inject } from "@angular/core/testing";
 
 import { SnappingService } from "./snapping.service";
 import { LatLngAlt } from "../models/models";
+import { MapService } from './map.service';
 
 describe("SnappingService", () => {
 
-    let mapMock: any;
-
     beforeEach(() => {
-        mapMock = {
-            project: (lngLat) => ({ x: lngLat.lng, y: lngLat.lat })
+        let mapServiceMock = {
+            map: {
+                project: (lngLat) => ({ x: lngLat.lng, y: lngLat.lat })
+            }
         };
         TestBed.configureTestingModule({
-            providers: [SnappingService]
+            providers: [
+                { provide: MapService, useValue: mapServiceMock },
+                SnappingService
+            ]
         });
     });
 
     it("Should snap to a given point", inject([SnappingService], (snappingService: SnappingService) => {
-
-            snappingService.setMap(mapMock);
 
             let snap = snappingService.snapToPoint({ lat: 2, lng: 1 }, [{
                 title: "title",

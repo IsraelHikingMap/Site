@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
-import { Map } from "mapbox-gl";
 
 import { SpatialService } from "./spatial.service";
 import { LatLngAlt, MarkerData } from "../models/models";
+import { MapService } from './map.service';
 
 export interface ISnappingPointResponse {
     latlng: LatLngAlt;
@@ -13,11 +13,7 @@ export interface ISnappingPointResponse {
 export class SnappingService {
     private static readonly SENSITIVITY = 30;
 
-    private map: Map;
-
-    public setMap(map: Map) {
-        this.map = map;
-    }
+    constructor(private readonly mapService: MapService) { }
 
     /**
      * This method will snap to the nearest point. markerData will be null in case there were no points near by.
@@ -28,9 +24,9 @@ export class SnappingService {
             markerData: null,
             id: null
         } as ISnappingPointResponse;
-        let pointOnScreen = this.map.project(latlng);
+        let pointOnScreen = this.mapService.map.project(latlng);
         for (let markerData of points) {
-            let markerPointOnScreen = this.map.project(markerData.latlng);
+            let markerPointOnScreen = this.mapService.map.project(markerData.latlng);
             if (SpatialService.getDistanceForCoordinates([markerPointOnScreen.x, markerPointOnScreen.y],
                 [pointOnScreen.x, pointOnScreen.y]) < SnappingService.SENSITIVITY &&
                 response.markerData == null) {

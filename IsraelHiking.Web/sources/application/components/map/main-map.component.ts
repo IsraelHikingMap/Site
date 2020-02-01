@@ -117,7 +117,6 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         setRTLTextPlugin("./mapbox-gl-rtl-text.js", () => {});
 
         this.mapService.setMap(this.mapComponent.mapInstance);
-        this.snappingService.setMap(this.mapComponent.mapInstance);
 
         this.topLeftControls.forEach(c => {
             this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "top-left");
