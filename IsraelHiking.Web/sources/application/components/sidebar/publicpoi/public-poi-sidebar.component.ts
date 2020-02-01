@@ -86,12 +86,15 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
                 return;
             }
-            this.editMode = params[RouteStrings.EDIT] === "true";
+            let editMode = params[RouteStrings.EDIT] === "true";
             let snapshot = this.route.snapshot;
             let poiSourceAndId = this.getDataFromRoute(snapshot.paramMap, snapshot.queryParamMap);
-            if (this.editMode && poiSourceAndId.source !== "new") {
+            if (editMode && poiSourceAndId.source !== "new") {
                 await this.getExtendedData(poiSourceAndId);
             }
+            // change this only after we get the full data
+            // so that the edit dialog will have all the necessary data to decide
+            this.editMode = editMode;
         }));
     }
 

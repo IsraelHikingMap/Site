@@ -34,25 +34,32 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
 
     public async ngOnInit(): Promise<void> {
         await this.initializeCategories();
-        for (let category of this.categories) {
-            let icon = category.icons.find(iconToFind => iconToFind.icon === this.info.icon);
-            if (icon) {
-                this.selectCategory({ value: category } as MatSelectChange);
-                this.selectIcon(icon);
-            }
-        }
-
-        if (this.selectedCategory == null) {
-            let category = this.categories.find(categoryToFind => categoryToFind.name === "Other");
-            let icon = { icon: this.info.icon, color: "black", label: this.resources.other } as IIconColorLabel;
-            category.icons.push(icon);
-            this.selectCategory({ value: category } as MatSelectChange);
-            this.selectIcon(icon);
-        }
-
         if (this.info.references.length === 0) {
             this.addEmptyUrl();
         }
+        let selectedIcon = null;
+        let selectedCategory = null;
+        for (let category of this.categories) {
+            let icon = category.icons.find(iconToFind => iconToFind.icon === this.info.icon);
+            if (icon) {
+                selectedCategory = category;
+                selectedIcon = icon;
+                break;
+            }
+        }
+
+        if (selectedCategory == null) {
+            selectedCategory = this.categories.find(categoryToFind => categoryToFind.name === "Other");
+        }
+
+        if (this.info.id && selectedIcon == null) {
+            selectedIcon = { icon: this.info.icon, color: "black", label: this.resources.other } as IIconColorLabel;
+            selectedCategory.icons.push(selectedIcon);
+        } else if (!this.info.id && selectedIcon == null) {
+            selectedIcon = selectedCategory.icons[0];
+        }
+        this.selectCategory({ value: selectedCategory } as MatSelectChange);
+        this.selectIcon(selectedIcon);
     }
 
     public selectCategory(e: MatSelectChange) {
