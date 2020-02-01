@@ -3,7 +3,8 @@ import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { some } from "lodash";
 
-import { SetSelectedRouteAction } from "../../../reducres/route-editing-state.reducer";
+import { SetSelectedRouteAction, StopRecordingAction } from "../../../reducres/route-editing-state.reducer";
+import { AddTraceAction } from "../../../reducres/traces.reducer";
 import {
     AddRouteAction,
     SplitRouteAction,
@@ -17,9 +18,17 @@ import {
 } from "../../../reducres/routes.reducer";
 import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "../../resources.service";
-import { RouteData, ApplicationState, RouteSegmentData, ILatLngTime, LatLngAlt } from "../../../models/models";
 import { SpatialService } from "../../spatial.service";
 import { RouterService } from "../../routers/router.service";
+import {
+    RouteData,
+    ApplicationState,
+    RouteSegmentData,
+    ILatLngTime,
+    LatLngAlt,
+    DataContainer,
+    TraceVisibility
+} from "../../../models/models";
 
 @Injectable()
 export class SelectedRouteService {
@@ -72,6 +81,42 @@ export class SelectedRouteService {
     public getRecordingRoute(): RouteData {
         return this.getRouteById(this.recordingRouteId);
     }
+
+    public stopRecording() {
+        let recordingRoute = this.getRecordingRoute();
+        this.ngRedux.dispatch(new StopRecordingAction({
+            routeId: recordingRoute.id
+        }));
+        this.addRecordingToTraces(recordingRoute);
+    }
+
+    private addRecordingToTraces(routeData: RouteData) {
+    let latLngs = routeData.segments[0].latlngs;
+    let northEast = { lat: Math.max(...latLngs.map(l => l.lat)), lng: Math.max(...latLngs.map(l => l.lng)) };
+    let southWest = { lat: Math.min(...latLngs.map(l => l.lat)), lng: Math.min(...latLngs.map(l => l.lng)) };
+    let container = {
+        routes: [routeData],
+        northEast,
+        southWest
+    } as DataContainer;
+
+    let trace = {
+        name: routeData.name,
+        description: routeData.description,
+        id: routeData.id,
+        timeStamp: routeData.segments[0].latlngs[0].timestamp,
+        dataContainer: container,
+        tags: [],
+        tagsString: "",
+        visibility: "local" as TraceVisibility,
+        isInEditMode: false,
+        url: "",
+        imageUrl: "",
+        dataUrl: "",
+        user: ""
+    };
+    this.ngRedux.dispatch(new AddTraceAction({ trace }));
+}
 
     public getOrCreateSelectedRoute(): RouteData {
         if (this.selectedRouteId === null && this.routes.length > 0) {

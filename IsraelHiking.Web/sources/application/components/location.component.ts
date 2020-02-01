@@ -16,9 +16,8 @@ import { SpatialService } from "../services/spatial.service";
 import { FileService } from "../services/file.service";
 import { LoggingService } from "../services/logging.service";
 import { AddRouteAction, AddRecordingPointsAction } from "../reducres/routes.reducer";
-import { AddTraceAction } from "../reducres/traces.reducer";
-import { StopRecordingAction, StartRecordingAction } from "../reducres/route-editing-state.reducer";
-import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility, ILatLngTime } from "../models/models";
+import { StartRecordingAction } from "../reducres/route-editing-state.reducer";
+import { ApplicationState, LatLngAlt, ILatLngTime } from "../models/models";
 
 @Component({
     selector: "location",
@@ -99,16 +98,19 @@ export class LocationComponent extends BaseMapComponent {
 
         let lastRecordedRoute = this.selectedRouteService.getRecordingRoute();
         if (lastRecordedRoute != null) {
+            this.loggingService.info("Recording was interrupted");
             this.resources.languageChanged.pipe(first()).toPromise().then(() => {
                 // let resources service get the strings
                 this.toastService.confirm({
                     message: this.resources.continueRecording,
                     type: "YesNo",
                     confirmAction: () => {
+                        this.loggingService.info("User choose to continue recording");
                         this.toggleTracking();
                         this.selectedRouteService.setSelectedRoute(lastRecordedRoute.id);
                     },
                     declineAction: () => {
+                        this.loggingService.info("User choose to stop recording");
                         this.stopRecording();
                     },
                 });
@@ -212,11 +214,7 @@ export class LocationComponent extends BaseMapComponent {
 
     private stopRecording() {
         this.loggingService.debug("Stop recording");
-        let recordingRoute = this.selectedRouteService.getRecordingRoute();
-        this.ngRedux.dispatch(new StopRecordingAction({
-            routeId: recordingRoute.id
-        }));
-        this.addRecordingToTraces(recordingRoute);
+        this.selectedRouteService.stopRecording();
     }
 
     private createRecordingRoute() {
@@ -318,34 +316,6 @@ export class LocationComponent extends BaseMapComponent {
                 this.fitBoundsService.flyTo(center, this.host.mapInstance.getZoom());
             }
         }
-    }
-
-    private addRecordingToTraces(routeData: RouteData) {
-        let latLngs = routeData.segments[0].latlngs;
-        let northEast = { lat: Math.max(...latLngs.map(l => l.lat)), lng: Math.max(...latLngs.map(l => l.lng)) };
-        let southWest = { lat: Math.min(...latLngs.map(l => l.lat)), lng: Math.min(...latLngs.map(l => l.lng)) };
-        let container = {
-            routes: [routeData],
-            northEast,
-            southWest
-        } as DataContainer;
-
-        let trace = {
-            name: routeData.name,
-            description: routeData.description,
-            id: routeData.id,
-            timeStamp: routeData.segments[0].latlngs[0].timestamp,
-            dataContainer: container,
-            tags: [],
-            tagsString: "",
-            visibility: "local" as TraceVisibility,
-            isInEditMode: false,
-            url: "",
-            imageUrl: "",
-            dataUrl: "",
-            user: ""
-        };
-        this.ngRedux.dispatch(new AddTraceAction({ trace }));
     }
 
     private updateLocationFeatureCollection(center: LatLngAlt, radius?: number, heading?: number) {

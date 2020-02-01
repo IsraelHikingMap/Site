@@ -10,8 +10,9 @@ import { DatabaseService } from "./database.service";
 import { ToastService } from "./toast.service";
 import { MatDialog } from "@angular/material";
 import { SidebarService } from "./sidebar.service";
-import { ApplicationState } from "../models/models";
 import { SetSidebarAction } from "../reducres/poi.reducer";
+import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
+import { ApplicationState } from "../models/models";
 
 declare var navigator: Navigator;
 
@@ -31,6 +32,7 @@ export class ApplicationExitService {
                 private readonly ngZone: NgZone,
                 private readonly databaseService: DatabaseService,
                 private readonly runningContext: RunningContextService,
+                private readonly selectedRouteService: SelectedRouteService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 private readonly loggingService: LoggingService,
                 private readonly toastService: ToastService) {
@@ -58,6 +60,17 @@ export class ApplicationExitService {
                         isOpen: false
                     }));
                     return;
+                }
+                if (this.selectedRouteService.getRecordingRoute() != null) {
+                    this.toastService.confirm({
+                        message: this.resources.areYouSureYouWantToStopRecording,
+                        type: "YesNo",
+                        confirmAction: () => {
+                            this.loggingService.info("Stop recording using the back button");
+                            this.selectedRouteService.stopRecording();
+                        },
+                        declineAction: () => { }
+                    });
                 }
                 setTimeout(() => { this.state = "None"; }, 5000);
                 if (this.state === "FirstClick") {
