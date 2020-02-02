@@ -209,15 +209,15 @@ export class FileService {
     ): Promise<any> {
         let zip = new JSZip();
         await zip.loadAsync(file);
-        let styles = Object.keys(zip.files).filter(name => name.startsWith("styles/"));
+        let styles = Object.keys(zip.files).filter(name => name.startsWith("styles/") && name.endsWith(".json"));
         for (let styleFileName of styles) {
             let styleText = (await zip.file(styleFileName).async("text")).trim();
             this.saveStyleJson(styleFileName, styleText);
         }
-        let sources = Object.keys(zip.files).filter(name => name.startsWith("sources/"));
+        let sources = Object.keys(zip.files).filter(name => name.startsWith("sources/") && name.endsWith(".json"));
         for (let sourceFileIndex = 0; sourceFileIndex < sources.length; sourceFileIndex++) {
             let sourceFile = sources[sourceFileIndex];
-            let sourceName = sourceFile.split("/")[0];
+            let sourceName = sourceFile.split("/")[1];
             this.loggingService.debug("Adding: " + sourceFile);
             notificationCallback(`${sourceFileIndex + 1}/${sources.length}`);
             await tilesCallback(sourceName, await zip.file(sourceFile).async("text") as string);
@@ -229,7 +229,7 @@ export class FileService {
             await poisCallback(poisText);
             this.loggingService.debug("Added pois.");
         }
-        let images = Object.keys(zip.files).filter(name => name.startsWith("images/"));
+        let images = Object.keys(zip.files).filter(name => name.startsWith("images/") && name.endsWith(".json"));
         for (let imagesFileIndex = 0; imagesFileIndex < images.length; imagesFileIndex++) {
             let imagesFile = images[imagesFileIndex];
             this.loggingService.debug("Adding images: " + imagesFile);
