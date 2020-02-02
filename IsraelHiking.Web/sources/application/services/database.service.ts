@@ -2,7 +2,6 @@ import { Injectable } from "@angular/core";
 import { debounceTime } from "rxjs/operators";
 import { decode } from "base64-arraybuffer";
 import { NgRedux } from "@angular-redux/store";
-import PouchDB from "pouchdb";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
 import * as mapboxgl from "mapbox-gl";
@@ -66,19 +65,6 @@ export class DatabaseService {
         }
         let storedState = initialState;
         let dbState = await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).get(DatabaseService.STATE_DOC_ID);
-        try {
-            let oldDb = new PouchDB("IHM", { auto_compaction: true });
-            let state = await oldDb.get("state") as any;
-            this.loggingService.debug("State exists in pouch db: " + (state != null).toString());
-            await oldDb.remove(state);
-            dbState = {
-                id: DatabaseService.STATE_DOC_ID,
-                state: state.state
-            };
-        } catch {
-            // don't do anything - this is for a transition phase...
-            this.loggingService.debug("State does not exists in pouch db");
-        }
         if (dbState != null) {
             storedState = deepmerge(initialState, dbState.state, {
                 arrayMerge: (destinationArray, sourceArray) => {

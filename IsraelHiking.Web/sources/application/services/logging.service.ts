@@ -35,7 +35,7 @@ export class LoggingService {
         // remove older than 3 days
         await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
             .where("date").between(new Date(0), threeDaysAgo).delete();
-        
+
         while (this.queue.length > 0) {
             this.writeToStorage(this.queue[0]);
             this.queue.splice(0, 1);
