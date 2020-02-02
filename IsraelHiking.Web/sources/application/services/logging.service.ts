@@ -31,11 +31,11 @@ export class LoggingService {
         this.loggingDatabase.version(1).stores({
             logging: "date"
         });
-        let threeDaysAgo = new Date((new Date()).getTime() - (3 * 60 * 60 * 24 * 1000));
-        let logsToRemove = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
-            .where("date").between(new Date(0), threeDaysAgo).toArray() as LogLine[];
-        this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).bulkDelete(logsToRemove.map(l => l.date));
+        let threeDaysAgo = new Date((new Date()).getTime() - (3 * 24 * 60 * 60 * 1000));
         // remove older than 3 days
+        await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
+            .where("date").between(new Date(0), threeDaysAgo).delete();
+        
         while (this.queue.length > 0) {
             this.writeToStorage(this.queue[0]);
             this.queue.splice(0, 1);
