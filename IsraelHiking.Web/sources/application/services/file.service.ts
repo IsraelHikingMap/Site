@@ -212,7 +212,7 @@ export class FileService {
         let styles = Object.keys(zip.files).filter(name => name.startsWith("styles/") && name.endsWith(".json"));
         for (let styleFileName of styles) {
             let styleText = (await zip.file(styleFileName).async("text")).trim();
-            this.saveStyleJson(styleFileName, styleText);
+            this.saveStyleJson(styleFileName.replace("styles/", ""), styleText);
         }
         let sources = Object.keys(zip.files).filter(name => name.startsWith("sources/") && name.endsWith(".json"));
         for (let sourceFileIndex = 0; sourceFileIndex < sources.length; sourceFileIndex++) {
