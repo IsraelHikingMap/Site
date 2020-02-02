@@ -29,18 +29,23 @@ namespace IsraelHiking.API.Tests.Services
         {
             _hostingEnvironment = Substitute.For<IWebHostEnvironment>();
             _serviceProvider = Substitute.For<IServiceProvider>();
+            _repository = Substitute.For<IRepository>();
+            _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
+            var config = new ConfigurationData();
+            var options = Substitute.For<IOptions<ConfigurationData>>();
+            options.Value.Returns(config);
+            _middleware = new NonApiMiddleware(null, _hostingEnvironment, _repository, _pointsOfInterestProvider, options);
+        }
+
+        private IDetectionService SetupDetectionService()
+        {
             var detectionService = Substitute.For<IDetectionService>();
             var crawlerService = Substitute.For<ICrawlerService>();
             crawlerService.IsCrawler.Returns(true);
             crawlerService.Type.Returns(Wangkanai.Detection.Models.Crawler.WhatsApp);
             detectionService.Crawler.Returns(crawlerService);
             _serviceProvider.GetService(typeof(IDetectionService)).Returns(detectionService);
-            _repository = Substitute.For<IRepository>();
-            _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
-            var config = new ConfigurationData();
-            var options = Substitute.For<IOptions<ConfigurationData>>();
-            options.Value.Returns(config);
-            _middleware = new NonApiMiddleware(null, _hostingEnvironment, _serviceProvider, _repository, _pointsOfInterestProvider, options);
+            return detectionService;
         }
 
         [TestMethod]
@@ -56,8 +61,9 @@ namespace IsraelHiking.API.Tests.Services
             {
                 ImagesUrls = new [] { "https://upload.wikimedia.org/wikipedia/commons/archive/1/17/Israel_Hiking_Map.jpeg" }
             });
+            var detectionService = SetupDetectionService();
 
-            _middleware.InvokeAsync(context).Wait();
+            _middleware.InvokeAsync(context, detectionService).Wait();
             var bodyString = Encoding.UTF8.GetString(stream.ToArray());
 
             Assert.IsTrue(bodyString.Contains("200px"));
@@ -76,8 +82,9 @@ namespace IsraelHiking.API.Tests.Services
             context.Request.PathBase = PathString.Empty;
             context.Request.Scheme = "http";
             _repository.GetUrlById(id).Returns(new ShareUrl());
+            var detectionService = SetupDetectionService();
 
-            _middleware.InvokeAsync(context).Wait();
+            _middleware.InvokeAsync(context, detectionService).Wait();
             var bodyString = Encoding.UTF8.GetString(stream.ToArray());
 
             Assert.IsTrue(bodyString.Contains("?width=256&height=256"));

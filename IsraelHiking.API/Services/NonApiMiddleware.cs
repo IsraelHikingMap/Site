@@ -22,7 +22,6 @@ namespace IsraelHiking.API.Services
     public class NonApiMiddleware
     {
         private readonly IWebHostEnvironment _environment;
-        private readonly IServiceProvider _serviceProvider;
         private readonly IRepository _repository;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly ConfigurationData _options;
@@ -32,18 +31,15 @@ namespace IsraelHiking.API.Services
         /// </summary>
         /// <param name="next"></param>
         /// <param name="environment"></param>
-        /// <param name="serviceProvider"></param>
         /// <param name="repository"></param>
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="options"></param>
         public NonApiMiddleware(RequestDelegate next, IWebHostEnvironment environment,
-            IServiceProvider serviceProvider,
             IRepository repository,
             IPointsOfInterestProvider pointsOfInterestProvider,
             IOptions<ConfigurationData> options)
         {
             _environment = environment;
-            _serviceProvider = serviceProvider;
             _repository = repository;
             _options = options.Value;
             _pointsOfInterestProvider = pointsOfInterestProvider;
@@ -53,8 +49,9 @@ namespace IsraelHiking.API.Services
         /// Main middleware method required for asp.net
         /// </summary>
         /// <param name="context"></param>
+        /// <param name="detectionService"></param>
         /// <returns></returns>
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, IDetectionService detectionService)
         {
             if (_options.ListingDictionary.Keys.Any(k => context.Request.Path.StartsWithSegments("/" + k)))
             {
@@ -63,7 +60,6 @@ namespace IsraelHiking.API.Services
                 await SendFile(context, file);
                 return;
             }
-            var detectionService = _serviceProvider.GetRequiredService<IDetectionService>();
             var isCrawler = detectionService.Crawler.IsCrawler;
             var isWhatsApp = detectionService.Crawler.Type == Wangkanai.Detection.Models.Crawler.WhatsApp;
             if (isCrawler && context.Request.Path.StartsWithSegments("/share"))
