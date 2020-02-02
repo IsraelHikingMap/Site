@@ -251,6 +251,7 @@ export class ResourcesService {
     public reportAnIssue: string;
     public reportAnIssueInstructions: string;
     public batteryOptimization: string;
+    public addPointToActiveRoute: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -501,7 +502,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1575657437211");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1580673422076");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -732,6 +733,7 @@ export class ResourcesService {
         this.reportAnIssue = this.gettextCatalog.getString("Report an issue");
         this.reportAnIssueInstructions = this.gettextCatalog.getString("Report an issue instructions");
         this.batteryOptimization = this.gettextCatalog.getString("Battery optimization");
+        this.addPointToActiveRoute = this.gettextCatalog.getString("Add point to active route");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

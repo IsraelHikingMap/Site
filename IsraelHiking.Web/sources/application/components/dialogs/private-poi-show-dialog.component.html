@@ -15,7 +15,7 @@
             <img fxFill *ngIf="imageLink"
                  [src]="resources.getResizedImageUrl(imageLink.url, 300)"
                  class="img-responsive cursor-pointer"
-                 (click)="showImage()"/>
+                 (click)="showImage()" />
         </div>
         <div flexLayout="row">
             <p [dir]="resources.getDirection(description)" class="{{resources.getTextAlignment(description)}}">{{description}}</p>
@@ -33,6 +33,9 @@
         </div>
         <div fxFlex>
             <button mat-button type="button" matDialogClose (click)="edit()" matTooltip="{{resources.edit}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Edit" fxFill><i class="fa icon-pencil"></i></button>
+        </div>
+        <div fxFlex *ngIf="isShowAddToActiveRoute()">
+            <button mat-button type="button" matDialogClose (click)="addToActiveRoute()" matTooltip="{{resources.addPointToActiveRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Add to active route" fxFill><i class="fa icon-plus"></i></button>
         </div>
     </div>
 </div>

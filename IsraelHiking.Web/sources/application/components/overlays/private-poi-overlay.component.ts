@@ -43,13 +43,18 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
     public overlayClick(event: Event) {
         event.stopPropagation();
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        if (selectedRoute == null || selectedRoute.id !== this.routeId) {
+        if (selectedRoute == null) {
+            return;
+        }
+        if (selectedRoute.state === "Route") {
+            return;
+        }
+        if (selectedRoute.id !== this.routeId || selectedRoute.state === "ReadOnly") {
+            PrivatePoiShowDialogComponent.openDialog(this.matDialog, this.marker, this.routeId, this.index);
             return;
         }
         if (selectedRoute.state === "Poi") {
             PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker, this.routeId, this.index);
-        } else if (selectedRoute.state === "ReadOnly") {
-            PrivatePoiShowDialogComponent.openDialog(this.matDialog, this.marker, this.routeId, this.index);
         }
     }
 }

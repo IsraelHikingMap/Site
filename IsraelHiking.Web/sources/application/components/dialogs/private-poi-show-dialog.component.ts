@@ -1,12 +1,15 @@
 import { Component, Inject } from "@angular/core";
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from "@angular/material";
+import { NgRedux } from "@angular-redux/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { PrivatePoiEditDialogComponent } from "./private-poi-edit-dialog.component";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
-import { MarkerData, LinkData } from "../../models/models";
+import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { AddPrivatePoiAction } from "../../reducres/routes.reducer";
+import { ApplicationState, MarkerData, LinkData } from "../../models/models";
 
 @Component({
     selector: "private-poi-show-dialog",
@@ -26,26 +29,27 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
 
     public static openDialog(matDialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
         setTimeout(() => {
-                // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
-                matDialog.open(PrivatePoiShowDialogComponent,
-                    {
-                        maxWidth: "378px",
-                        data: {
-                            marker,
-                            routeId,
-                            index
-                        }
-                    });
-            },
-            100);
+            // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
+            matDialog.open(PrivatePoiShowDialogComponent,
+                {
+                    maxWidth: "378px",
+                    data: {
+                        marker,
+                        routeId,
+                        index
+                    }
+                });
+        }, 100);
     }
 
     constructor(resources: ResourcesService,
-                private readonly matDialog: MatDialog,
-                private readonly imageGalleryService: ImageGalleryService,
-                private readonly privatePoiUploaderService: PrivatePoiUploaderService,
-                private readonly dialogRef: MatDialogRef<PrivatePoiShowDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data) {
+        private readonly matDialog: MatDialog,
+        private readonly imageGalleryService: ImageGalleryService,
+        private readonly privatePoiUploaderService: PrivatePoiUploaderService,
+        private readonly selectedRouteService: SelectedRouteService,
+        private readonly ngRedux: NgRedux<ApplicationState>,
+        private readonly dialogRef: MatDialogRef<PrivatePoiShowDialogComponent>,
+        @Inject(MAT_DIALOG_DATA) data) {
         super(resources);
 
         this.marker = data.marker;
@@ -78,5 +82,17 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
             this.description,
             this.marker.type);
         this.dialogRef.close();
+    }
+
+    public addToActiveRoute() {
+        this.ngRedux.dispatch(new AddPrivatePoiAction({
+            routeId: this.selectedRouteService.getSelectedRoute().id,
+            markerData: JSON.parse(JSON.stringify(this.marker))
+        }));
+    }
+
+    public isShowAddToActiveRoute(): boolean {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        return selectedRoute != null && this.routeId != selectedRoute.id;
     }
 }
