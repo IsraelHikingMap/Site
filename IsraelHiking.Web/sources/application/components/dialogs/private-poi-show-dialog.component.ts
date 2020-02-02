@@ -43,13 +43,13 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     }
 
     constructor(resources: ResourcesService,
-        private readonly matDialog: MatDialog,
-        private readonly imageGalleryService: ImageGalleryService,
-        private readonly privatePoiUploaderService: PrivatePoiUploaderService,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly ngRedux: NgRedux<ApplicationState>,
-        private readonly dialogRef: MatDialogRef<PrivatePoiShowDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data) {
+                private readonly matDialog: MatDialog,
+                private readonly imageGalleryService: ImageGalleryService,
+                private readonly privatePoiUploaderService: PrivatePoiUploaderService,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly dialogRef: MatDialogRef<PrivatePoiShowDialogComponent>,
+                @Inject(MAT_DIALOG_DATA) data) {
         super(resources);
 
         this.marker = data.marker;
@@ -93,6 +93,6 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
 
     public isShowAddToActiveRoute(): boolean {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        return selectedRoute != null && this.routeId != selectedRoute.id;
+        return selectedRoute != null && this.routeId !== selectedRoute.id;
     }
 }
