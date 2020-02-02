@@ -109,12 +109,26 @@ export class LayersService {
                 if (layer.isOverlay) {
                     let existingOverlay = this.overlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layer.key));
                     if (existingOverlay) {
+                        this.ngRedux.dispatch(new UpdateOverlayAction({
+                            key: layer.key,
+                            layerData: {
+                                ...existingOverlay,
+                                ...layer // override
+                            }
+                        }));
                         continue;
                     }
                     this.addOverlayFromData(layer, false);
                 } else {
                     let existingBaselayer = this.baseLayers.find((baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
                     if (existingBaselayer) {
+                        this.ngRedux.dispatch(new UpdateBaseLayerAction({
+                            key: layer.key,
+                            layerData: {
+                                ...existingBaselayer,
+                                ...layer // override
+                            }
+                        }));
                         continue;
                     }
                     this.addBaseLayerFromData(layer);
