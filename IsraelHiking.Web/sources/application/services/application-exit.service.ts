@@ -71,6 +71,7 @@ export class ApplicationExitService {
                         },
                         declineAction: () => { }
                     });
+                    return;
                 }
                 setTimeout(() => { this.state = "None"; }, 5000);
                 if (this.state === "FirstClick") {
