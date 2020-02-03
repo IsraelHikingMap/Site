@@ -146,6 +146,7 @@ import { RoutesComponent } from "./components/map/routes.component";
 import { TracesComponent } from "./components/map/traces.component";
 import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
 import { SecuredImageComponent } from "./components/secured-image.component";
+import { ConfigurationDialogComponent } from "./components/dialogs/configuration-dialog.component";
 // variables and functions
 import { routes } from "./routes";
 
@@ -247,7 +248,8 @@ NgModule({
         ApplicationStateComponent,
         PrivatePoiEditDialogComponent,
         PrivatePoiShowDialogComponent,
-        AutomaticLayerPresentationComponent
+        AutomaticLayerPresentationComponent,
+        ConfigurationDialogComponent,
     ],
     providers: [
         GestureConfig,
@@ -350,6 +352,7 @@ NgModule({
         TracesComponent,
         AutomaticLayerPresentationComponent,
         SecuredImageComponent,
+        ConfigurationDialogComponent,
         NameInUseValidatorDirective,
         ImageCaptureDirective,
         OfflineImagePipe

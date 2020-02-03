@@ -5,7 +5,6 @@ import { MatDialog, MatDialogConfig } from "@angular/material";
 import { select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
 import { Observable, Subscription } from "rxjs";
-import { NgRedux } from "@angular-redux/store";
 import { Base64 } from "js-base64";
 
 import { ResourcesService } from "../services/resources.service";
@@ -17,7 +16,7 @@ import { BaseMapComponent } from "./base-map.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
-import { ConfigurationActions } from "../reducres/configuration.reducer";
+import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { UserInfo, ApplicationState } from "../models/models";
 
 interface IRank {
@@ -40,12 +39,6 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
     @select((state: ApplicationState) => state.userState.userInfo)
     public userInfo$: Observable<UserInfo>;
 
-    @select((state: ApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;
-
-    @select((state: ApplicationState) => state.configuration.isBatteryOptimization)
-    public isBatteryOptimization: Observable<boolean>;
-
     @LocalStorage()
     public agreedToTheTermsOfService = false;
 
@@ -54,8 +47,7 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
                 private readonly dialog: MatDialog,
                 private readonly runningContextService: RunningContextService,
                 private readonly toastService: ToastService,
-                private readonly loggingService: LoggingService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly loggingService: LoggingService) {
         super(resources);
         this.initializeRanks();
         resources.languageChanged.subscribe(() => this.initializeRanks());
@@ -118,6 +110,10 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
         this.dialog.open(SharesDialogComponent, { width: "480px" } as MatDialogConfig);
     }
 
+    public openAdvancedSettings() {
+        this.dialog.open(ConfigurationDialogComponent, { width: "480px" } as MatDialogConfig);
+    }
+
     public getRank() {
         let rankIndex = 0;
         while (this.authorizationService.getUserInfo().changeSets > this.ranks[rankIndex].points) {
@@ -166,15 +162,6 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
             alert(`Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?` +
                 `\nSend issue failed: ${ex.toString()}`);
         }
-
-    }
-
-    public toggleIsAdvanced() {
-        this.ngRedux.dispatch(ConfigurationActions.toggleIsAdvanceAction);
-    }
-
-    public toggleBatteryOprimization() {
-        this.ngRedux.dispatch(ConfigurationActions.toggleIsBatteryOptimizationAction);
     }
 
     public isOnline(): boolean {

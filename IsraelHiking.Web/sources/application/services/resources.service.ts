@@ -51,7 +51,6 @@ export class ResourcesService {
     public print: string;
     public deleteLayer: string;
     public layers: string;
-    public toggleAdvancedSettings: string;
     public baseLayerProperties: string;
     public addBaseLayer: string;
     public overlayProperties: string;
@@ -250,8 +249,15 @@ export class ResourcesService {
     public kmPerHourUnit: string;
     public reportAnIssue: string;
     public reportAnIssueInstructions: string;
-    public batteryOptimization: string;
     public addPointToActiveRoute: string;
+    public advancedSettings: string;
+    public advancedSettingsHint: string;
+    public batteryOptimization: string;
+    public batteryOptimizationHint: string;
+    public automaticRecordingUpload: string;
+    public automaticRecordingUploadHint: string;
+    public findMissingRoutesAfterUpload: string;
+    public findMissingRoutesAfterUploadHint: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -502,7 +508,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1580673422076");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1580765629209");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -523,7 +529,6 @@ export class ResourcesService {
         this.print = this.gettextCatalog.getString("Print");
         this.deleteLayer = this.gettextCatalog.getString("Delete Layer");
         this.layers = this.gettextCatalog.getString("Layers");
-        this.toggleAdvancedSettings = this.gettextCatalog.getString("Toggle Advanced Settings");
         this.baseLayerProperties = this.gettextCatalog.getString("Base Layer Properties");
         this.addBaseLayer = this.gettextCatalog.getString("Add Base Layer");
         this.overlayProperties = this.gettextCatalog.getString("Overlay Properties");
@@ -732,8 +737,15 @@ export class ResourcesService {
         this.kmPerHourUnit = this.gettextCatalog.getString("km per hour");
         this.reportAnIssue = this.gettextCatalog.getString("Report an issue");
         this.reportAnIssueInstructions = this.gettextCatalog.getString("Report an issue instructions");
-        this.batteryOptimization = this.gettextCatalog.getString("Battery optimization");
         this.addPointToActiveRoute = this.gettextCatalog.getString("Add point to active route");
+        this.advancedSettings = this.gettextCatalog.getString("Advanced Settings");
+        this.advancedSettingsHint = this.gettextCatalog.getString("Shows more options and feature that are normally hidden");
+        this.batteryOptimization = this.gettextCatalog.getString("Battery optimization");
+        this.batteryOptimizationHint = this.gettextCatalog.getString("Dims display when there's no user interaction");
+        this.automaticRecordingUpload = this.gettextCatalog.getString("Automatic upload of recording");
+        this.automaticRecordingUploadHint = this.gettextCatalog.getString("Allows you to automatically upload a recorded route when you finish recording");
+        this.findMissingRoutesAfterUpload = this.gettextCatalog.getString("Find missing routes after upload");
+        this.findMissingRoutesAfterUploadHint = this.gettextCatalog.getString("Asks you to classify missing routes on the map after you upload a recording");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
