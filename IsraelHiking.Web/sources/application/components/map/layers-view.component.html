@@ -26,7 +26,7 @@
                               [source]="poiSourceName[categoriesType]"
                               #cluster>
         <ng-template mglPoint let-feature>
-            <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="openPoi(feature.properties.id)" (mouseover)="hoverFeature = feature" (mouseout)="hoverFeature = null">
+            <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="openPoi(feature.properties.id, $event)" (mouseover)="hoverFeature = feature" (mouseout)="hoverFeature = null">
                 <span *ngIf="feature.properties.hasExtraData" class="has-extra-data" [style.background]="feature.properties.iconColor"></span>
                 <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
                 <i class="fa {{feature.properties.icon}} fa-stack-1x stack-icon-top stack-icon-large" [style.color]="feature.properties.iconColor"></i>
@@ -46,7 +46,7 @@
     <span [dir]="resources.getDirection(hoverFeature.properties.title)">{{hoverFeature.properties.title}}</span>
 </mgl-popup>
 <mgl-marker *ngIf="selectedPoiFeature" [lngLat]="selectedPoiFeature.geometry.coordinates" anchor="bottom">
-    <span class="fa-stack fa-lg cursor-pointer" (click)="openPoi(selectedPoiFeature.properties.id)" (mouseover)="hoverFeature = selectedPoiFeature" (mouseout)="hoverFeature = null">
+    <span class="fa-stack fa-lg cursor-pointer" (click)="openPoi(selectedPoiFeature.properties.id, $event)" (mouseover)="hoverFeature = selectedPoiFeature" (mouseout)="hoverFeature = null">
         <span *ngIf="selectedPoiFeature.properties.hasExtraData" class="has-extra-data" [style.background]="selectedPoiFeature.properties.iconColor"></span>
         <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
         <i class="fa {{selectedPoiFeature.properties.icon}} fa-stack-1x stack-icon-top stack-icon-large" [style.color]="selectedPoiFeature.properties.iconColor"></i>

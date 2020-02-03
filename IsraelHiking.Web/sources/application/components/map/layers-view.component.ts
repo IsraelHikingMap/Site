@@ -140,11 +140,13 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         };
     }
 
-    public openPoi(id) {
+    public openPoi(id, e: Event) {
+        e.stopPropagation();
         this.selectedCluster = null;
         let sourceAndId = this.getSourceAndId(id);
         this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+
     }
 
     public async toggleClusterPopup(event: MouseEvent, feature, sourceComponent: GeoJSONSourceComponent) {
