@@ -309,6 +309,7 @@ export class ResourcesService {
     public openingAFilePleaseWait: string;
     public finishedOpeningTheFile: string;
     public areYouSureYouWantToStopRecording: string;
+    public youNeedToLoginToSeeYourTraces: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -509,7 +510,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1580845671428");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1580854475904");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -810,6 +811,8 @@ export class ResourcesService {
         this.openingAFilePleaseWait = this.gettextCatalog.getString("Opening file, this might take a while, please don't close the app...");
         this.finishedOpeningTheFile = this.gettextCatalog.getString("Finished opening file! :-)");
         this.areYouSureYouWantToStopRecording = this.gettextCatalog.getString("Are you sure you want to stop the current recording?");
+        this.youNeedToLoginToSeeYourTraces = this.gettextCatalog.getString("You need to login in order to see your traces, " +
+            "click the frowning face at the top");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

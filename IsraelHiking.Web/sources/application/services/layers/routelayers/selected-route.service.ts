@@ -21,6 +21,7 @@ import { ResourcesService } from "../../resources.service";
 import { SpatialService } from "../../spatial.service";
 import { RouterService } from "../../routers/router.service";
 import { TracesService } from "../../traces.service";
+import { ToastService } from "../../toast.service";
 import {
     RouteData,
     ApplicationState,
@@ -50,10 +51,11 @@ export class SelectedRouteService {
 
     public selectedRouteHover: EventEmitter<LatLngAlt>;
 
-    constructor(private readonly resourcesService: ResourcesService,
+    constructor(private readonly resources: ResourcesService,
                 private readonly routesFactory: RoutesFactory,
                 private readonly routerService: RouterService,
                 private readonly tracesService: TracesService,
+                private readonly toastService: ToastService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.routes = [];
         this.selectedRouteHover = new EventEmitter();
@@ -117,14 +119,20 @@ export class SelectedRouteService {
             dataUrl: "",
             user: ""
         };
-        if (this.ngRedux.getState().configuration.isAutomaticRecordingUpload) {
+        let state = this.ngRedux.getState();
+        if (state.configuration.isAutomaticRecordingUpload &&
+            state.userState.userInfo != null) {
             try {
                 await this.tracesService.uploadRouteAsTrace(routeData);
+                this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
             } catch {
                 this.ngRedux.dispatch(new AddTraceAction({ trace }));
             }
         } else {
             this.ngRedux.dispatch(new AddTraceAction({ trace }));
+        }
+        if (state.userState.userInfo == null) {
+            this.toastService.warning(this.resources.youNeedToLoginToSeeYourTraces);
         }
     }
 
@@ -152,7 +160,7 @@ export class SelectedRouteService {
         }
     }
 
-    public createRouteName = (routeName: string = this.resourcesService.route) => {
+    public createRouteName = (routeName: string = this.resources.route) => {
         let index = 1;
         routeName = routeName.replace(/(.*) \d+/, "$1");
         let availableRouteName = `${routeName} ${index}`;
@@ -226,7 +234,7 @@ export class SelectedRouteService {
             } as RouteSegmentData);
         let splitRouteData =
             this.routesFactory.createRouteData(
-                this.createRouteName(selectedRoute.name + " " + this.resourcesService.split),
+                this.createRouteName(selectedRoute.name + " " + this.resources.split),
                 this.getLeastUsedColor());
         splitRouteData.segments = postfixSegments;
         let routeData = {
