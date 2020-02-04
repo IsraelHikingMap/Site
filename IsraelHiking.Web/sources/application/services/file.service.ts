@@ -3,18 +3,18 @@
 /// <reference types="cordova-plugin-file"/>
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Style, VectorSource, RasterDemSource, RasterSource } from "mapbox-gl";
+import { Style } from "mapbox-gl";
 import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { Urls } from "../urls";
-import { DataContainer, RouteData } from "../models/models";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
+import { DataContainer } from "../models/models";
 
 export interface IFormatViewModel {
     label: string;
