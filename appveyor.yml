@@ -1,4 +1,4 @@
-version: 8.5.{build}
+version: 8.6.{build}
 clone_depth: 3
 configuration: Release
 environment:
