@@ -32,6 +32,7 @@ export interface IPoiSocialLinks {
     poiLink: string;
     facebook: string;
     whatsapp: string;
+    waze: string;
 }
 
 export interface ISelectableCategory extends ICategory {
@@ -153,6 +154,7 @@ export class PoiService {
             poiLink,
             facebook: `${Urls.facebook}${escaped}`,
             whatsapp: this.whatsappService.getUrl(poiExtended.title, escaped) as string,
+            waze: `${Urls.waze}${poiExtended.location.lat},${poiExtended.location.lng}`
         };
     }
 

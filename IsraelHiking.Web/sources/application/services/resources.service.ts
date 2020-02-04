@@ -258,6 +258,7 @@ export class ResourcesService {
     public automaticRecordingUploadHint: string;
     public findMissingRoutesAfterUpload: string;
     public findMissingRoutesAfterUploadHint: string;
+    public navigateWithWaze: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -508,7 +509,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1580765629209");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1580845671428");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -746,6 +747,7 @@ export class ResourcesService {
         this.automaticRecordingUploadHint = this.gettextCatalog.getString("Allows you to automatically upload a recorded route when you finish recording");
         this.findMissingRoutesAfterUpload = this.gettextCatalog.getString("Find missing routes after upload");
         this.findMissingRoutesAfterUploadHint = this.gettextCatalog.getString("Asks you to classify missing routes on the map after you upload a recording");
+        this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
