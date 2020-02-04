@@ -152,7 +152,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             return;
         }
         try {
-            await this.fileService.uploadTrace(file);
+            await this.tracesService.uploadTrace(file);
             this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
             this.tracesService.syncTraces();
         } catch (ex) {
@@ -224,7 +224,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         let route = this.selectedTrace.dataContainer.routes[0];
         this.selectedTrace = null;
         try {
-            await this.fileService.uploadRouteAsTrace(route);
+            await this.tracesService.uploadRouteAsTrace(route);
             await this.tracesService.deleteTrace(trace);
             await this.tracesService.syncTraces();
             this.toastService.info(this.resources.fileUploadedSuccessfullyItWillTakeTime);

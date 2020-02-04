@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { Observable } from "rxjs";
 import { select, NgRedux } from "@angular-redux/store";
 
@@ -27,8 +27,8 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
     public isFindMissingRoutesAfterUpload: Observable<boolean>;
 
     constructor(resources: ResourcesService,
-        private readonly runningContextService: RunningContextService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly runningContextService: RunningContextService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
     }
 

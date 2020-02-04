@@ -20,6 +20,7 @@ import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "../../resources.service";
 import { SpatialService } from "../../spatial.service";
 import { RouterService } from "../../routers/router.service";
+import { TracesService } from "../../traces.service";
 import {
     RouteData,
     ApplicationState,
@@ -52,6 +53,7 @@ export class SelectedRouteService {
     constructor(private readonly resourcesService: ResourcesService,
                 private readonly routesFactory: RoutesFactory,
                 private readonly routerService: RouterService,
+                private readonly tracesService: TracesService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.routes = [];
         this.selectedRouteHover = new EventEmitter();
@@ -90,33 +92,41 @@ export class SelectedRouteService {
         this.addRecordingToTraces(recordingRoute);
     }
 
-    private addRecordingToTraces(routeData: RouteData) {
-    let latLngs = routeData.segments[0].latlngs;
-    let northEast = { lat: Math.max(...latLngs.map(l => l.lat)), lng: Math.max(...latLngs.map(l => l.lng)) };
-    let southWest = { lat: Math.min(...latLngs.map(l => l.lat)), lng: Math.min(...latLngs.map(l => l.lng)) };
-    let container = {
-        routes: [routeData],
-        northEast,
-        southWest
-    } as DataContainer;
+    private async addRecordingToTraces(routeData: RouteData) {
+        let latLngs = routeData.segments[0].latlngs;
+        let northEast = { lat: Math.max(...latLngs.map(l => l.lat)), lng: Math.max(...latLngs.map(l => l.lng)) };
+        let southWest = { lat: Math.min(...latLngs.map(l => l.lat)), lng: Math.min(...latLngs.map(l => l.lng)) };
+        let container = {
+            routes: [routeData],
+            northEast,
+            southWest
+        } as DataContainer;
 
-    let trace = {
-        name: routeData.name,
-        description: routeData.description,
-        id: routeData.id,
-        timeStamp: routeData.segments[0].latlngs[0].timestamp,
-        dataContainer: container,
-        tags: [],
-        tagsString: "",
-        visibility: "local" as TraceVisibility,
-        isInEditMode: false,
-        url: "",
-        imageUrl: "",
-        dataUrl: "",
-        user: ""
-    };
-    this.ngRedux.dispatch(new AddTraceAction({ trace }));
-}
+        let trace = {
+            name: routeData.name,
+            description: routeData.description,
+            id: routeData.id,
+            timeStamp: routeData.segments[0].latlngs[0].timestamp,
+            dataContainer: container,
+            tags: [],
+            tagsString: "",
+            visibility: "local" as TraceVisibility,
+            isInEditMode: false,
+            url: "",
+            imageUrl: "",
+            dataUrl: "",
+            user: ""
+        };
+        if (this.ngRedux.getState().configuration.isAutomaticRecordingUpload) {
+            try {
+                await this.tracesService.uploadRouteAsTrace(routeData);
+            } catch {
+                this.ngRedux.dispatch(new AddTraceAction({ trace }));
+            }
+        } else {
+            this.ngRedux.dispatch(new AddTraceAction({ trace }));
+        }
+    }
 
     public getOrCreateSelectedRoute(): RouteData {
         if (this.selectedRouteId === null && this.routes.length > 0) {

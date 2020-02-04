@@ -4,6 +4,7 @@ import { HttpClientTestingModule, HttpTestingController } from "@angular/common/
 import { NgRedux } from "@angular-redux/store";
 
 import { TracesService } from "./traces.service";
+import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { Urls } from "../urls";
 import { Trace } from "../models/models";
 
@@ -16,7 +17,8 @@ describe("Traces Service", () => {
             ],
             providers: [
                 NgRedux,
-                TracesService
+                TracesService,
+                { provide: NonAngularObjectsFactory, useValue: null }
             ]
         });
     });

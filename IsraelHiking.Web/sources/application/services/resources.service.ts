@@ -744,9 +744,11 @@ export class ResourcesService {
         this.batteryOptimization = this.gettextCatalog.getString("Battery optimization");
         this.batteryOptimizationHint = this.gettextCatalog.getString("Dims display when there's no user interaction");
         this.automaticRecordingUpload = this.gettextCatalog.getString("Automatic upload of recording");
-        this.automaticRecordingUploadHint = this.gettextCatalog.getString("Allows you to automatically upload a recorded route when you finish recording");
+        this.automaticRecordingUploadHint = this.gettextCatalog.getString("Allows you to automatically upload a recorded " +
+            "route when you finish recording");
         this.findMissingRoutesAfterUpload = this.gettextCatalog.getString("Find missing routes after upload");
-        this.findMissingRoutesAfterUploadHint = this.gettextCatalog.getString("Asks you to classify missing routes on the map after you upload a recording");
+        this.findMissingRoutesAfterUploadHint = this.gettextCatalog.getString("Asks you to classify missing routes " +
+            "on the map after you upload a recording");
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");

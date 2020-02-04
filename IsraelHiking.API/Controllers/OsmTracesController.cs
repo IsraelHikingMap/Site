@@ -124,7 +124,7 @@ namespace IsraelHiking.API.Controllers
                 {
                     Name = file.FileName,
                     Description = Path.GetFileNameWithoutExtension(file.FileName),
-                    Visibility = Visibility.Public
+                    Visibility = Visibility.Private
                 }, memoryStream);
             }
             return Ok();

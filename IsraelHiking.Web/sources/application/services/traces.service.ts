@@ -2,14 +2,16 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { NgRedux } from "@angular-redux/store";
 
-import { Trace, ApplicationState, DataContainer } from "../models/models";
 import { Urls } from "../urls";
 import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducres/traces.reducer";
+import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
+import { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
 
 @Injectable()
 export class TracesService {
 
     constructor(private readonly httpClient: HttpClient,
+                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
@@ -50,6 +52,23 @@ export class TracesService {
 
     public getTraceById(trace: Trace): Promise<DataContainer> {
         return this.httpClient.get(Urls.osmTrace + trace.id).toPromise() as Promise<DataContainer>;
+    }
+
+    public uploadTrace(file: File): Promise<any> {
+        let formData = new FormData();
+        formData.append("file", file, file.name);
+        return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
+    }
+
+    public async uploadRouteAsTrace(route: RouteData): Promise<any> {
+        let data = {
+            routes: [route]
+        } as DataContainer;
+        let responseData = await this.httpClient.post(Urls.files + "?format=gpx", data).toPromise() as string;
+        let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
+        let formData = new FormData();
+        formData.append("file", blobToSave, route.name + ".gpx");
+        return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
     }
 
     public updateTrace = async (trace: Trace): Promise<any> => {

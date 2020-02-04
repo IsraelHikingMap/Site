@@ -117,23 +117,6 @@ export class FileService {
         this.addRoutesFromContainer(fileContainer);
     }
 
-    public uploadTrace(file: File): Promise<any> {
-        let formData = new FormData();
-        formData.append("file", file, file.name);
-        return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
-    }
-
-    public async uploadRouteAsTrace(route: RouteData): Promise<any> {
-        let data = {
-            routes: [route]
-        } as DataContainer;
-        let responseData = await this.httpClient.post(Urls.files + "?format=gpx", data).toPromise() as string;
-        let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
-        let formData = new FormData();
-        formData.append("file", blobToSave, route.name + ".gpx");
-        return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
-    }
-
     public openFromUrl = (url: string): Promise<DataContainer> => {
         return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<DataContainer>;
     }
