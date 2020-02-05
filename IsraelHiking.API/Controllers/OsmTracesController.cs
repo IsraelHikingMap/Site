@@ -189,7 +189,7 @@ namespace IsraelHiking.API.Controllers
                 Id = int.Parse(trace.Id),
                 Name = trace.Name,
                 Description = trace.Description,
-                Tags = trace.TagsString?.Split(",").ToArray() ?? new string[0],
+                Tags = trace.TagsString?.Split(",", StringSplitOptions.RemoveEmptyEntries).ToArray() ?? new string[0],
                 TimeStamp = trace.TimeStamp,
                 Visibility = Enum.Parse<Visibility>(trace.Visibility, true)
             };
