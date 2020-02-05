@@ -16,28 +16,28 @@
                 <span class="text-small">{{resources.advancedSettingsHint}}</span>
             </div>
         </div>
-        <div fxLayout="row">
-            <!--*ngIf="isApp()"-->
+        <div fxLayout="row" *ngIf="isApp()">
             <div fxFlex>
                 <mat-checkbox [checked]="isBatteryOptimization | async" (change)="toggleBatteryOprimization()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle battery optimization">{{resources.batteryOptimization}}</mat-checkbox>
                 <br />
                 <span class="text-small">{{resources.batteryOptimizationHint}}</span>
             </div>
         </div>
-        <div fxLayout="row">
-            <!--*ngIf="isApp()"-->
+        <div fxLayout="row" *ngIf="isApp()">
             <div fxFlex>
                 <mat-checkbox [checked]="isAutomaticRecordingUpload | async" (change)="toggleAutomaticRecordingUpload()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle automatic upload">{{resources.automaticRecordingUpload}}</mat-checkbox>
                 <br />
                 <span class="text-small">{{resources.automaticRecordingUploadHint}}</span>
             </div>
         </div>
-        <div fxLayout="row">
-            <div fxFlex>
-                <mat-checkbox [checked]="isFindMissingRoutesAfterUpload | async" (change)="toggleFindMissingRoutesAfterUpload()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle find missing routes after upload button">{{resources.findMissingRoutesAfterUpload}}</mat-checkbox>
-                <br />
-                <span class="text-small">{{resources.findMissingRoutesAfterUploadHint}}</span>
-            </div>
+        <!--
+    <div fxLayout="row">
+        <div fxFlex>
+            <mat-checkbox [checked]="isFindMissingRoutesAfterUpload | async" (change)="toggleFindMissingRoutesAfterUpload()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle find missing routes after upload button">{{resources.findMissingRoutesAfterUpload}}</mat-checkbox>
+            <br />
+            <span class="text-small">{{resources.findMissingRoutesAfterUploadHint}}</span>
         </div>
+    </div>
+        -->
         <br />
     </div>

@@ -2,6 +2,6 @@
     isAdvanced: boolean;
     isBatteryOptimization: boolean;
     isAutomaticRecordingUpload: boolean;
-    isFindMissingRoutesAfterUpload: boolean;
+    //isFindMissingRoutesAfterUpload: boolean;
     version: string;
 }

@@ -13,7 +13,7 @@ export class ConfigurationActions {
     public static readonly toggleIsAdvanceAction: Action = { type: IS_ADVANCED_TOGGLE };
     public static readonly toggleIsBatteryOptimizationAction: Action = { type: IS_BATTERY_OPTIMIZATION_TOGGLE };
     public static readonly toggleIsAutomaticRecordingUploadAction: Action = { type: IS_AUTOMATIC_RECORDING_UPLOAD };
-    public static readonly toggleFindMissingRoutesAfterUploadAction: Action = { type: IS_FIND_MISSING_ROUTES_AFTER_UPLOAD };
+    //public static readonly toggleFindMissingRoutesAfterUploadAction: Action = { type: IS_FIND_MISSING_ROUTES_AFTER_UPLOAD };
 }
 
 class ConfigurationReducer {
@@ -41,13 +41,13 @@ class ConfigurationReducer {
         };
     }
 
-    @ReduxAction(IS_FIND_MISSING_ROUTES_AFTER_UPLOAD)
-    public toggleFindMissingRoutesAfterUpload(lastState: Configuration, _: Action): Configuration {
-        return {
-            ...lastState,
-            isFindMissingRoutesAfterUpload: !lastState.isFindMissingRoutesAfterUpload
-        };
-    }
+    //@ReduxAction(IS_FIND_MISSING_ROUTES_AFTER_UPLOAD)
+    //public toggleFindMissingRoutesAfterUpload(lastState: Configuration, _: Action): Configuration {
+    //    return {
+    //        ...lastState,
+    //        isFindMissingRoutesAfterUpload: !lastState.isFindMissingRoutesAfterUpload
+    //    };
+    //}
 }
 
 export const configurationReducer = createReducerFromClass(ConfigurationReducer, initialState.configuration);
