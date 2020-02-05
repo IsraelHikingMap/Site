@@ -5,13 +5,14 @@ import { MatDialog, MatDialogConfig } from "@angular/material";
 import { select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
 import { Observable, Subscription } from "rxjs";
-import { Base64 } from "js-base64";
 
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { ToastService } from "../services/toast.service";
 import { LoggingService } from "../services/logging.service";
 import { RunningContextService } from "../services/running-context.service";
+import { FileService } from "../services/file.service";
+import { GeoLocationService } from "../services/geo-location.service";
 import { BaseMapComponent } from "./base-map.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
@@ -47,6 +48,8 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
                 private readonly dialog: MatDialog,
                 private readonly runningContextService: RunningContextService,
                 private readonly toastService: ToastService,
+                private readonly fileService: FileService,
+                private readonly geoLocationService: GeoLocationService,
                 private readonly loggingService: LoggingService) {
         super(resources);
         this.initializeRanks();
@@ -151,12 +154,17 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
         this.toastService.info(this.resources.preparingDataForIssueReport);
         try {
             let logs = await this.loggingService.getLog();
-            let logBase64 = Base64.encode(logs);
+            let logBase64zipped = await this.fileService.zipAndStoreFile(logs);
+            logs = await this.geoLocationService.getLog();
+            let logBase64zippedGeoLocation = await this.fileService.zipAndStoreFile(logs);
             cordova.plugins.email.open({
                 to: ["israelhikingmap@gmail.com"],
                 subject: "Issue reported by " + this.userInfo.displayName,
                 body: this.resources.reportAnIssueInstructions,
-                attachments: ["base64:log.txt//" + logBase64]
+                attachments: [
+                    "base64:log.zip//" + logBase64zipped,
+                    "base64:geolocation-log.zip//" + logBase64zippedGeoLocation,
+                ]
             });
         } catch (ex) {
             alert(`Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?` +

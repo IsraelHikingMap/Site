@@ -244,4 +244,28 @@ export class FileService {
                     }, (err) => this.loggingService.error("File: " + err.code.toString()));
             }, (err) => this.loggingService.error("Folder: " + err.code.toString()));
     }
+
+    public async zipAndStoreFile(content: string): Promise<string> {
+        let zip = new JSZip();
+        zip.file("log.txt", content);
+        try {
+            let blob = await zip.generateAsync({ type: "blob" });
+            let dir = await this.getIHMDirectory();
+            let fullFileName = "Report_" + new Date().toISOString().split(":").join("-").replace("T", "_").replace("Z", "_") + ".zip";
+            await new Promise((resolve, reject) => {
+                dir.getFile(fullFileName,
+                    { create: true },
+                    fileEntry => {
+                        fileEntry.createWriter(fileWriter => {
+                            fileWriter.write(blob);
+                            resolve(true);
+                        });
+                    },
+                    reject);
+            });
+        } catch {
+            // no need to do anything
+        }
+        return zip.generateAsync({ type: "base64" });
+    }
 }

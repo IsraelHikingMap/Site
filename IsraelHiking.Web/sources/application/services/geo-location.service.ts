@@ -6,6 +6,7 @@ import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { ILatLngTime } from "../models/models";
+import { LogEntry } from "../../../plugins/cordova-plugin-mauron85-background-geolocation/www/BackgroundGeolocation";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
 
@@ -292,5 +293,16 @@ export class GeoLocationService {
             },
             timestamp: location.time
         } as Position;
+    }
+
+    public async getLog(): Promise<string> {
+        let logEntries = await new Promise<LogEntry[]>((resolve, reject) => {
+            BackgroundGeolocation.getLogEntries(10000, 0, "TRACE", resolve, reject);
+        });
+        return logEntries.map(logLine => {
+            let dateString = new Date(logLine.timestamp - new Date().getTimezoneOffset() * 60 * 1000)
+                .toISOString().replace(/T/, " ").replace(/\..+/, "");
+            return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;
+        }).join("\n");
     }
 }
