@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Geometries;
 using System.Linq;
 
 namespace IsraelHiking.Common
@@ -14,7 +13,7 @@ namespace IsraelHiking.Common
 
         public static Coordinate ToCoordinate(this LatLng latLng)
         {
-            return new Coordinate(latLng.Lng, latLng.Lat, double.NaN);
+            return new CoordinateZ(latLng.Lng, latLng.Lat, double.NaN);
         }
 
         public static double[] ToDoubleArray(this Coordinate coordinate)

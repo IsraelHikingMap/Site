@@ -1,5 +1,4 @@
-﻿using GeoAPI.CoordinateSystems;
-using ProjNet.CoordinateSystems;
+﻿using ProjNet.CoordinateSystems;
 using ProjNet.CoordinateSystems.Transformations;
 using System.Collections.Generic;
 

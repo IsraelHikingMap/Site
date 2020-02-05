@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;

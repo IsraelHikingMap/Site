@@ -1,5 +1,4 @@
 ﻿using Elasticsearch.Net;
-using GeoAPI.Geometries;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
@@ -23,7 +22,7 @@ namespace IsraelHiking.DataAccess
         {
             OverwriteDefaultSerializers((s, cvs) =>
             {
-                foreach (var converter in GeoJsonSerializer.Create(geometryFactory).Converters)
+                foreach (var converter in GeoJsonSerializer.Create(geometryFactory, 3).Converters)
                 {
                     s.Converters.Add(converter);
                 }

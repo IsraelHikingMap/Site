@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using NetTopologySuite.Geometries;
 using ProjNet.CoordinateSystems.Transformations;
 using System.Text.RegularExpressions;
@@ -46,8 +45,8 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
             }
             if (easting >= 100000 && easting <= 300000)
             {
-                var transformed = _itmWgs84MathTransform.Transform(new Coordinate(easting, northing));
-                return transformed;
+                var transformed = _itmWgs84MathTransform.Transform(easting, northing);
+                return new Coordinate(transformed.x, transformed.y);
             }
             return null;
         }

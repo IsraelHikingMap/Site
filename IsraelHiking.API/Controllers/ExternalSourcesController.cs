@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -91,9 +90,9 @@ namespace IsraelHiking.API.Controllers
                         var geoLocation = feature.Attributes[FeatureAttributes.POI_GEOLOCATION] as AttributesTable;
                         var geoLocationCoordinate = new Coordinate((double)geoLocation[FeatureAttributes.LON], (double)geoLocation[FeatureAttributes.LAT]);
                         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ALT, _elevationDataStorage.GetElevation(geoLocationCoordinate).Result);
-                        var northEast = _wgs84ItmTransform.Transform(geoLocationCoordinate);
-                        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_EAST, (int)northEast.X);
-                        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_NORTH, (int)northEast.Y);
+                        var northEast = _wgs84ItmTransform.Transform(geoLocationCoordinate.X, geoLocationCoordinate.Y);
+                        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_EAST, (int)northEast.x);
+                        feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_NORTH, (int)northEast.y);
                         _elasticSearchGateway.AddExternalPoi(feature);
                         Interlocked.Increment(ref counter);
                         if (counter % 100 == 0)

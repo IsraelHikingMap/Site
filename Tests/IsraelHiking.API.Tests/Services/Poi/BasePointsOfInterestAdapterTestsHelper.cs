@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -34,8 +33,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             {
                 Geometry = new LineString(new[]
                 {
-                    new Coordinate(0, 0, double.NaN),
-                    new Coordinate(1, 1, double.NaN),
+                    new CoordinateZ(0, 0, double.NaN),
+                    new CoordinateZ(1, 1, double.NaN),
                 }),
                 Attributes = new AttributesTable
                 {

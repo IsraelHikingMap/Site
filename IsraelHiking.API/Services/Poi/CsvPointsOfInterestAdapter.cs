@@ -1,5 +1,4 @@
 ﻿using CsvHelper;
-using GeoAPI.Geometries;
 using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
@@ -10,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -170,7 +170,7 @@ namespace IsraelHiking.API.Services.Poi
             var fileInfo = _fileProvider.GetFileInfo(Path.Combine(CSV_DIRECTORY, FileName));
             var stream = fileInfo.CreateReadStream();
             var reader = new StreamReader(stream);
-            var csv = new CsvReader(reader);
+            var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
             csv.Configuration.MissingFieldFound = null;
             return csv.GetRecords<CsvPointOfInterestRow>();
         }
@@ -184,7 +184,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 var content = await _remoteFileFetcherGateway.GetFileContent(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
                 var convertedBytes = await _dataContainerConverterService.Convert(content.Content, content.FileName, FlowFormats.GEOJSON);
-                feature.Geometry = convertedBytes.ToFeatureCollection().Features.FirstOrDefault()?.Geometry ?? feature.Geometry;
+                feature.Geometry = convertedBytes.ToFeatureCollection().FirstOrDefault()?.Geometry ?? feature.Geometry;
             }
             return feature;
         }

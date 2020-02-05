@@ -75,7 +75,7 @@ namespace IsraelHiking.Web
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(PointOfInterestExtended)));
             }).AddNewtonsoftJson(options =>
             {
-                foreach (var converter in GeoJsonSerializer.Create(geometryFactory).Converters)
+                foreach (var converter in GeoJsonSerializer.Create(geometryFactory, 3).Converters)
                 {
                     options.SerializerSettings.Converters.Add(converter);
                 }

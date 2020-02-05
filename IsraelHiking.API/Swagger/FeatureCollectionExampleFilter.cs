@@ -1,12 +1,10 @@
-﻿using GeoAPI.Geometries;
-using Microsoft.OpenApi.Any;
+﻿using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace IsraelHiking.API.Swagger
@@ -28,7 +26,7 @@ namespace IsraelHiking.API.Swagger
             {
                 return;
             }
-            if (context.ApiModel.Type != typeof(FeatureCollection))
+            if (context.Type != typeof(FeatureCollection))
             {
                 return;
             }
@@ -37,7 +35,7 @@ namespace IsraelHiking.API.Swagger
                 SerializerSettings = new JsonSerializerSettings { Formatting = Formatting.Indented }
             };
             var exampleFeatureCollectionString = writer.Write(
-                new FeatureCollection(new Collection<IFeature>
+                new FeatureCollection
                 {
                     new Feature(new LineString(new[]
                         {
@@ -45,7 +43,7 @@ namespace IsraelHiking.API.Swagger
                             new Coordinate(3, 4),
                         }),
                         new AttributesTable { {"key", "value" } })
-                }));
+                });
             schema.Example = new OpenApiString(exampleFeatureCollectionString);
             schema.Default = new OpenApiString(exampleFeatureCollectionString);
         }

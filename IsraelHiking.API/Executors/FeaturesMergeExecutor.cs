@@ -488,7 +488,7 @@ namespace IsraelHiking.API.Executors
                     {
                         index++;
                     } while (natureReserveFeature.Attributes.Exists(FeatureAttributes.NAME + ":he" + index));
-                    natureReserveFeature.Attributes.AddAttribute(FeatureAttributes.NAME + ":he" + index, alternativeTitle);
+                    natureReserveFeature.Attributes.Add(FeatureAttributes.NAME + ":he" + index, alternativeTitle);
                 }
                 natureReserveFeature.SetTitles();
             }

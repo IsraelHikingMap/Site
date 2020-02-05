@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
@@ -49,7 +48,7 @@ namespace IsraelHiking.API.Converters
                         return null;
                     }
                     var properties = ConvertTags(way);
-                    properties.AddAttribute(FeatureAttributes.POI_OSM_NODES, way.Nodes.Select(n => n.Id).ToArray());
+                    properties.Add(FeatureAttributes.POI_OSM_NODES, way.Nodes.Select(n => n.Id).ToArray());
                     var geometry = GetGeometryFromNodes(way.Nodes);
                     return new Feature(geometry, properties);
                 case OsmGeoType.Relation:
@@ -79,7 +78,7 @@ namespace IsraelHiking.API.Converters
 
         private Coordinate ConvertNode(Node node)
         {
-            return new Coordinate(node.Longitude ?? 0, node.Latitude ?? 0, double.NaN);
+            return new CoordinateZ(node.Longitude ?? 0, node.Latitude ?? 0, double.NaN);
         }
 
         private List<Geometry> GetGeometriesFromWays(IEnumerable<CompleteWay> ways)
@@ -171,7 +170,7 @@ namespace IsraelHiking.API.Converters
             }
             try
             {
-                var merged = UnaryUnionOp.Union(polygons.Cast<IGeometry>().ToList());
+                var merged = UnaryUnionOp.Union(polygons.Cast<Geometry>().ToList());
                 if (merged is MultiPolygon multipolygon)
                 {
                     return multipolygon.Geometries.Cast<Polygon>().ToList();

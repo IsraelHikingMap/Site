@@ -1,6 +1,6 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Geometries;
 using System.Linq;
 
 namespace IsraelHiking.DataAccess.Tests

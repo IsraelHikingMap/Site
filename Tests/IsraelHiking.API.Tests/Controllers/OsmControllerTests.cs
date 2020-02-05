@@ -1,5 +1,4 @@
-﻿using GeoAPI.Geometries;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
@@ -165,7 +164,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var featureCollection = results.Value as FeatureCollection;
             Assert.IsNotNull(featureCollection);
             Assert.AreEqual(1, featureCollection.Count);
-            Assert.IsTrue(featureCollection.Features.First().Attributes.GetValues().Contains("cycleway"));
+            Assert.IsTrue(featureCollection.First().Attributes.GetValues().Contains("cycleway"));
         }
 
         [TestMethod]
@@ -190,7 +189,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var featureCollection = results.Value as FeatureCollection;
             Assert.IsNotNull(featureCollection);
             Assert.AreEqual(1, featureCollection.Count);
-            Assert.IsTrue(featureCollection.Features.First().Attributes.GetValues().Contains("track"));
+            Assert.IsTrue(featureCollection.First().Attributes.GetValues().Contains("track"));
         }
     }
 }
