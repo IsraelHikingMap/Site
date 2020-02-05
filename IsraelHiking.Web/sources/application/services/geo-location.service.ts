@@ -1,12 +1,11 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { BackgroundGeolocationPlugin, Location } from "@mauron85/cordova-plugin-background-geolocation";
+import { BackgroundGeolocationPlugin, Location, LogEntry } from "@mauron85/cordova-plugin-background-geolocation";
 
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { ILatLngTime } from "../models/models";
-import { LogEntry } from "../../../plugins/cordova-plugin-mauron85-background-geolocation/www/BackgroundGeolocation";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
 
