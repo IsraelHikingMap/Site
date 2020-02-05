@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using IsraelHiking.API.Gpx;
@@ -152,7 +151,7 @@ namespace IsraelHiking.API.Converters
                 Title = point.Name,
                 Type = point.Classification,
                 Description = point.Description,
-                Urls = point.Links.Select(l => new LinkData {MimeType = l.ContentType, Url = l.Href.ToString(), Text = l.Text})
+                Urls = point.Links.Select(l => new LinkData { MimeType = l.ContentType, Url = l.HrefString, Text = l.Text })
                     .ToList()
             };
         }
@@ -165,7 +164,7 @@ namespace IsraelHiking.API.Converters
                 .WithName(marker.Title)
                 .WithDescription(marker.Description)
                 .WithLinks((marker.Urls ?? new List<LinkData>())
-                    .Select(l => new GpxWebLink(new Uri(l.Url), l.Text, l.MimeType)).ToImmutableArray())
+                    .Select(l => new GpxWebLink(l.Url, l.Text, l.MimeType)).ToImmutableArray())
                 .WithClassification(marker.Type);
         }
 

@@ -112,7 +112,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             _controller.SetupIdentity(_cache);
             var fetcher = Substitute.For<IAuthClient>();
-            fetcher.GetTraceData(Arg.Any<int>()).Returns((TypedStream)null);
+            fetcher.GetTraceData(Arg.Any<long>()).Returns((TypedStream)null);
             _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(fetcher);
 
             var results = _controller.PostFindUnmappedPartsFromGpsTrace(-1).Result as BadRequestObjectResult;

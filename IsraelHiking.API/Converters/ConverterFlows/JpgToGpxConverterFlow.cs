@@ -51,7 +51,7 @@ namespace IsraelHiking.API.Converters.ConverterFlows
                 };
                 gpxObject.Waypoints.Add(
                     new GpxWaypoint(wayPoint.Longitude, wayPoint.Latitude)
-                        .WithLinks(new[] {new GpxWebLink(new Uri(link), "", "image/jpeg")}.ToImmutableArray())
+                        .WithLinks(new[] {new GpxWebLink(link, "", "image/jpeg")}.ToImmutableArray())
                 );
                 return gpxObject.ToBytes();
             }
