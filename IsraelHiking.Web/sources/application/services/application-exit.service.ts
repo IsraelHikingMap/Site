@@ -12,6 +12,7 @@ import { MatDialog } from "@angular/material";
 import { SidebarService } from "./sidebar.service";
 import { SetSidebarAction } from "../reducres/poi.reducer";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
+import { GeoLocationService } from "./geo-location.service";
 import { ApplicationState } from "../models/models";
 
 declare var navigator: Navigator;
@@ -27,15 +28,16 @@ export class ApplicationExitService {
     private state: ExitState;
 
     constructor(private readonly resources: ResourcesService,
-                private readonly matDialog: MatDialog,
-                private readonly sidebarService: SidebarService,
-                private readonly ngZone: NgZone,
-                private readonly databaseService: DatabaseService,
-                private readonly runningContext: RunningContextService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly ngRedux: NgRedux<ApplicationState>,
-                private readonly loggingService: LoggingService,
-                private readonly toastService: ToastService) {
+        private readonly matDialog: MatDialog,
+        private readonly sidebarService: SidebarService,
+        private readonly ngZone: NgZone,
+        private readonly databaseService: DatabaseService,
+        private readonly runningContext: RunningContextService,
+        private readonly selectedRouteService: SelectedRouteService,
+        private readonly geoLocationService: GeoLocationService,
+        private readonly ngRedux: NgRedux<ApplicationState>,
+        private readonly loggingService: LoggingService,
+        private readonly toastService: ToastService) {
 
         this.state = "None";
     }
@@ -79,6 +81,7 @@ export class ApplicationExitService {
                     this.toastService.info(this.resources.wrappingThingsUp);
                     this.loggingService.debug("Starting IHM Application Exit");
                     await this.databaseService.close();
+                    this.geoLocationService.disable();
                     this.loggingService.debug("Finished IHM Application Exit");
                     await this.loggingService.close();
                     navigator.app.exitApp();
