@@ -279,7 +279,7 @@ export class LocationComponent extends BaseMapComponent {
             if (this.isFollowingLocation() && this.isKeepNorthUp) {
                 this.setLocation();
             } else if (this.isFollowingLocation() && !this.isKeepNorthUp && needToUpdateHeading) {
-                this.setLocation(position.coords.heading);
+                this.setLocation(heading);
             } else if (this.isFollowingLocation() && !this.isKeepNorthUp && !needToUpdateHeading) {
                 this.setLocation();
             }
@@ -310,11 +310,7 @@ export class LocationComponent extends BaseMapComponent {
             let coordinates = pointGeometry.coordinates as [number, number];
             let center = SpatialService.toLatLng(coordinates);
             let zoom = this.host.mapInstance.getZoom();
-            if (bearing) {
-                this.host.mapInstance.easeTo({ bearing, center, zoom });
-            } else {
-                this.fitBoundsService.flyTo(center, this.host.mapInstance.getZoom());
-            }
+            this.fitBoundsService.moveTo(center, zoom, bearing);
         }
     }
 

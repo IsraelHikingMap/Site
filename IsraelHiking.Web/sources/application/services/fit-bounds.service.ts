@@ -48,4 +48,20 @@ export class FitBoundsService {
         }
         this.mapService.map.flyTo({ center: latLng, zoom });
     }
+
+    public async moveTo(latLng: LatLngAlt, zoom: number, bearing?: number) {
+        await this.mapService.initializationPromise;
+        if (bearing) {
+            this.mapService.map.easeTo({
+                bearing,
+                center: latLng,
+                zoom,
+                animate: true,
+                easing: (x) => x,
+                offset: [0, 100]
+            });
+        } else {
+            this.flyTo(latLng, zoom);
+        }
+    }
 }
