@@ -249,7 +249,7 @@ export class FileService {
         let zip = new JSZip();
         zip.file("log.txt", content);
         try {
-            let blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 });
+            let blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
             let dir = await this.getIHMDirectory();
             let fullFileName = "Report_" + new Date().toISOString().split(":").join("-").replace("T", "_").replace("Z", "_") + ".zip";
             await new Promise((resolve, reject) => {
