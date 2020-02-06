@@ -23,8 +23,8 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
     @select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload)
     public isAutomaticRecordingUpload: Observable<boolean>;
 
-    //@select((state: ApplicationState) => state.configuration.isFindMissingRoutesAfterUpload)
-    //public isFindMissingRoutesAfterUpload: Observable<boolean>;
+    // @select((state: ApplicationState) => state.configuration.isFindMissingRoutesAfterUpload)
+    // public isFindMissingRoutesAfterUpload: Observable<boolean>;
 
     constructor(resources: ResourcesService,
                 private readonly runningContextService: RunningContextService,
@@ -48,7 +48,7 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
         this.ngRedux.dispatch(ConfigurationActions.toggleIsAutomaticRecordingUploadAction);
     }
 
-    //public toggleFindMissingRoutesAfterUpload() {
+    // public toggleFindMissingRoutesAfterUpload() {
     //    this.ngRedux.dispatch(ConfigurationActions.toggleFindMissingRoutesAfterUploadAction);
-    //}
+    // }
 }
