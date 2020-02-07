@@ -1,5 +1,5 @@
 ﻿<div class="legend-item" [ngClass]="{'legend-route': item.type === 'Way', 'legend-poi' : item.type === 'POI'}">
-    <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer">
+    <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer" dir="ltr">
         <mgl-map [zoom]="[item.zoom - 1]"
                  [center]="[item.latlng.lng, item.latlng.lat]" 
                  [style]="defaultStyle" 
