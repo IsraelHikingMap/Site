@@ -28,16 +28,16 @@ export class ApplicationExitService {
     private state: ExitState;
 
     constructor(private readonly resources: ResourcesService,
-        private readonly matDialog: MatDialog,
-        private readonly sidebarService: SidebarService,
-        private readonly ngZone: NgZone,
-        private readonly databaseService: DatabaseService,
-        private readonly runningContext: RunningContextService,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly geoLocationService: GeoLocationService,
-        private readonly ngRedux: NgRedux<ApplicationState>,
-        private readonly loggingService: LoggingService,
-        private readonly toastService: ToastService) {
+                private readonly matDialog: MatDialog,
+                private readonly sidebarService: SidebarService,
+                private readonly ngZone: NgZone,
+                private readonly databaseService: DatabaseService,
+                private readonly runningContext: RunningContextService,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly geoLocationService: GeoLocationService,
+                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly loggingService: LoggingService,
+                private readonly toastService: ToastService) {
 
         this.state = "None";
     }
