@@ -15,7 +15,6 @@
   <preference name="AutoHideSplashScreen" value="true" />
   <preference name="SplashScreenDelay" value="0" />
   <preference name="FadeSplashScreenDuration" value="0" />
-  <preference name="OverrideUserAgent" value="Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36" />
   <platform name="android">
     <allow-intent href="market:*" />
     <preference name="android-targetSdkVersion" value="28" />
