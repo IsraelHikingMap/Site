@@ -1,5 +1,6 @@
 import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
+import { MatDialog } from "@angular/material";
 
 import { RunningContextService } from "./running-context.service";
 import { FileService } from "./file.service";
@@ -25,12 +26,13 @@ export class OpenWithService {
     private static readonly POI = "/poi/";
 
     constructor(private readonly resources: ResourcesService,
-                private readonly runningContextService: RunningContextService,
-                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
-                private readonly fileService: FileService,
-                private readonly toastService: ToastService,
-                private readonly router: Router,
-                private readonly ngZone: NgZone) { }
+        private readonly runningContextService: RunningContextService,
+        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+        private readonly fileService: FileService,
+        private readonly toastService: ToastService,
+        private readonly matDialog: MatDialog,
+        private readonly router: Router,
+        private readonly ngZone: NgZone) { }
 
     public initialize() {
         if (!this.runningContextService.isCordova || !cordova.openwith || !cordova.openwith.init) {
@@ -58,6 +60,9 @@ export class OpenWithService {
         if (item.uri.indexOf(OpenWithService.SHARE) !== -1 ||
             item.uri.indexOf(OpenWithService.POI) !== -1 ||
             item.uri.indexOf(OpenWithService.URL) !== -1) {
+            if (this.matDialog.openDialogs.length > 0) {
+                this.matDialog.closeAll();
+            }
             let escapedString = Urls.baseAddress.toLocaleLowerCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
             let regexpToUse = new RegExp(escapedString, "ig");
             this.router.navigateByUrl(item.uri.replace(regexpToUse, ""));
