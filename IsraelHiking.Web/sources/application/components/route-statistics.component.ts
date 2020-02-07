@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
-import { Subscription, Observable } from "rxjs";
+import { Subscription, Observable, interval } from "rxjs";
 import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "@katze/ngx-d3";
 import { select } from "@angular-redux/store";
 
@@ -145,8 +145,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.length = 0;
             this.gain = 0;
             this.loss = 0;
-            this.duration = "--:--";
-            this.durationUnits = "";
+            this.updateDurationString(null);
             this.currentSpeed = null;
             this.averageSpeed = null;
         } else {
@@ -154,21 +153,27 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.gain = statistics.gain;
             this.loss = statistics.loss;
             this.averageSpeed = statistics.averageSpeed;
-            if (!statistics.duration) {
-                this.duration = "--:--";
-                this.durationUnits = "";
+            this.updateDurationString(statistics.duration);
+        }
+    }
+
+    private updateDurationString(duration: number) {
+        if (!duration) {
+            this.duration = "--:--";
+            this.durationUnits = "";
+        } else {
+            const HOUR = 60 * 60;
+            const MINUTE = 60;
+            if (duration > HOUR) {
+                let hours = Math.floor(duration / (HOUR));
+                let minutes = Math.floor((duration % (HOUR)) / MINUTE);
+                this.duration = this.toTwoDigits(hours) + ":" + this.toTwoDigits(minutes);
+                this.durationUnits = this.resources.hourUnit;
             } else {
-                if (statistics.duration > 60 * 60) {
-                    let hours = Math.floor(statistics.duration / (60 * 60));
-                    let minutes = Math.floor((statistics.duration % (60 * 60)) / 60);
-                    this.duration = this.toTwoDigits(hours) + ":" + this.toTwoDigits(minutes);
-                    this.durationUnits = this.resources.hourUnit;
-                } else {
-                    let minutes = Math.floor(statistics.duration / 60);
-                    let seconds = Math.floor(statistics.duration % 60);
-                    this.duration = this.toTwoDigits(minutes) + ":" + this.toTwoDigits(seconds);
-                    this.durationUnits = this.resources.minuteUnit;
-                }
+                let minutes = Math.floor(duration / MINUTE);
+                let seconds = Math.floor(duration % MINUTE);
+                this.duration = this.toTwoDigits(minutes) + ":" + this.toTwoDigits(seconds);
+                this.durationUnits = this.resources.minuteUnit;
             }
         }
     }
@@ -193,8 +198,20 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }));
         this.componentSubscriptions.push(this.geoLocationService.positionChanged.subscribe(p => {
             this.currentSpeed = (p == null) ? null : p.coords.speed * 3.6;
+            const currentSpeedTimeout = "currentSpeedTimeout";
+            this.cancelableTimeoutService.clearTimeoutByGroup(currentSpeedTimeout);
+            this.cancelableTimeoutService.setTimeoutByGroup(() => {
+                // if there are no location updates reset speed.
+                this.currentSpeed = null;
+            }, 5000, currentSpeedTimeout);
         }));
         this.routeChanged();
+        this.componentSubscriptions.push(interval(1000).subscribe(() => {
+            let recordingRoute = this.selectedRouteService.getRecordingRoute();
+            if (recordingRoute) {
+                this.updateDurationString((new Date().getTime() - recordingRoute.segments[0].latlngs[0].timestamp.getTime()) / 1000);
+            }
+        }));
     }
 
     public ngOnDestroy() {
