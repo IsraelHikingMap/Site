@@ -161,10 +161,7 @@ namespace IsraelHiking.API.Services.Poi
 
         private async Task SetDataContainerAndLength(PointOfInterestExtended poiItem, Feature feature)
         {
-            foreach (var coordinate in feature.Geometry.Coordinates)
-            {
-                coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
-            }
+            ElevationSetterHelper.SetElevation(feature.Geometry, _elevationDataStorage);
             poiItem.FeatureCollection = new FeatureCollection { feature };
             poiItem.DataContainer = await _dataContainerConverterService.ToDataContainer(
                 poiItem.FeatureCollection.ToBytes(), poiItem.Title + ".geojson");

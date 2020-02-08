@@ -78,10 +78,7 @@ namespace IsraelHiking.API.Controllers
                     lineString = _geometryFactory.CreateLineString(new[] { pointFrom, pointTo }) as LineString;
                 }
             }
-            foreach (var coordinate in lineString.Coordinates)
-            {
-                coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
-            }
+            ElevationSetterHelper.SetElevation(lineString, _elevationDataStorage);
             var table = new AttributesTable
             {
                 {"Name", "Routing from " + @from + " to " + to + " profile type: " + profile},
