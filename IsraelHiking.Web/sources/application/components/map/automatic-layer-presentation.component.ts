@@ -1,16 +1,18 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
 import { MapComponent } from "ngx-mapbox-gl";
-import { RasterSource, RasterLayout, Layer } from "mapbox-gl";
+import { RasterSource, RasterLayout, Layer, Style } from "mapbox-gl";
 import { Subscription } from "rxjs";
 
+import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
+import { BaseMapComponent } from "../base-map.component";
 import { Urls } from "../../urls";
 
 @Component({
     selector: "auto-layer",
     templateUrl: "./automatic-layer-presentation.component.html"
 })
-export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, OnDestroy {
+export class AutomaticLayerPresentationComponent extends BaseMapComponent implements OnInit, OnChanges, OnDestroy {
     private static indexNumber = 0;
 
     @Input()
@@ -31,35 +33,44 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
     private rasterSourceId;
     private rasterLayerId;
     private sourceAdded: boolean;
-    private subscription: Subscription;
+    private subscriptions: Subscription[];
     private jsonSourcesIds: string[];
     private jsonLayersIds: string[];
 
-    constructor(private readonly host: MapComponent,
+    constructor(resources: ResourcesService,
+                private readonly host: MapComponent,
                 private readonly fileService: FileService) {
+        super(resources);
         let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
         this.rasterSourceId = `raster-source-${layerIndex}`;
         this.sourceAdded = false;
         this.jsonSourcesIds = [];
         this.jsonLayersIds = [];
+        this.subscriptions = [];
     }
 
     public ngOnInit() {
         if (this.host.mapInstance == null) {
-            this.subscription = this.host.load.subscribe(() => {
+            this.subscriptions.push(this.host.load.subscribe(() => {
                 this.createLayer();
                 this.sourceAdded = true;
-            });
+            }));
         } else {
             this.createLayer();
             this.sourceAdded = true;
         }
+        this.subscriptions.push(this.resources.languageChanged.subscribe(() => {
+            if (this.sourceAdded) {
+                this.removeLayer(this.address);
+                this.createLayer();
+            }
+        }));
     }
 
     public ngOnDestroy() {
-        if (this.subscription != null) {
-            this.subscription.unsubscribe();
+        for (let subscription of this.subscriptions) {
+            subscription.unsubscribe();
         }
         if (this.sourceAdded) {
             this.removeLayer(this.address);
@@ -120,13 +131,15 @@ export class AutomaticLayerPresentationComponent implements OnInit, OnChanges, O
 
     private async createJsonLayer() {
         let response = await this.fileService.getStyleJsonContent(this.fixNonHttpsAddress(this.address));
-        for (let source in response.sources) {
-            if (response.sources.hasOwnProperty(source)) {
+        let language = this.resources.getCurrentLanguageCodeSimplified();
+        let styleJson = JSON.parse(JSON.stringify(response).replace(/name_he/g, `name_${language}`)) as Style;
+        for (let source in styleJson.sources) {
+            if (styleJson.sources.hasOwnProperty(source)) {
                 this.jsonSourcesIds.push(source);
-                this.host.mapInstance.addSource(source, response.sources[source]);
+                this.host.mapInstance.addSource(source, styleJson.sources[source]);
             }
         }
-        for (let layer of response.layers) {
+        for (let layer of styleJson.layers) {
             this.jsonLayersIds.push(layer.id);
             this.host.mapInstance.addLayer(layer, this.before);
         }

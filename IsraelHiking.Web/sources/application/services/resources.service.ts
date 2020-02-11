@@ -1019,7 +1019,7 @@ export class ResourcesService {
         return this.getDirection(text) === "rtl" ? "left" : "right";
     }
 
-    public getCurrentLanguageCodeSimplified = () => {
+    public getCurrentLanguageCodeSimplified = (): string => {
         return this.currentLanguage.code.split("-")[0];
     }
 
