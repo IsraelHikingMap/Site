@@ -1,3 +1,4 @@
+import { NgZone } from "@angular/core";
 import { Subject } from "rxjs";
 import { NgRedux } from "@angular-redux/store";
 import { every } from "lodash";
@@ -29,6 +30,7 @@ export class CategoriesLayer extends BaseMapComponent {
                 private readonly poiService: PoiService,
                 private readonly runningContextService: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly ngZone: NgZone,
                 private readonly categoriesType: CategoriesType) {
         super(resources);
         this.categories = [];
@@ -44,9 +46,11 @@ export class CategoriesLayer extends BaseMapComponent {
             await this.mapService.initializationPromise;
             this.updateMarkers();
             fromEvent(this.mapService.map, "moveend")
-                .pipe(throttleTime(1000, undefined, { trailing: true }))
+                .pipe(throttleTime(500, undefined, { trailing: true }))
                 .subscribe(() => {
-                    this.updateMarkers();
+                    this.ngZone.run(() => {
+                        this.updateMarkers();
+                    });
                 });
         });
 

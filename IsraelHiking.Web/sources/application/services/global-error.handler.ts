@@ -9,7 +9,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     constructor(private readonly loggingService: LoggingService) {
     }
 
-    public handleError(error) {
-        this.loggingService.error(error);
+    public handleError(error: Error) {
+        this.loggingService.error(error.stack ? error.stack.toString() : error.toString());
     }
 }

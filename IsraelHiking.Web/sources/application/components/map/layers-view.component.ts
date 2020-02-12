@@ -1,12 +1,9 @@
 import { Component, OnInit, AfterViewInit, ViewChildren, QueryList } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
-import { GeoJSONSourceComponent, MapComponent } from "ngx-mapbox-gl";
+import { GeoJSONSourceComponent } from "ngx-mapbox-gl";
 import { MarkersForClustersComponent } from "ngx-mapbox-gl/lib/markers-for-clusters/markers-for-clusters.component";
-import { MapSourceDataEvent } from "mapbox-gl";
 import { select } from "@angular-redux/store";
-import { filter, map, throttleTime } from "rxjs/operators";
-import { fromEvent } from "rxjs";
 
 import { PoiService, CategoriesType } from "../../services/poi.service";
 import { LayersService } from "../../services/layers/layers.service";
@@ -46,9 +43,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                 private readonly router: Router,
                 private readonly layersService: LayersService,
                 private readonly categoriesLayerFactory: CategoriesLayerFactory,
-                private readonly poiService: PoiService,
-                private readonly mapComponent: MapComponent
-    ) {
+                private readonly poiService: PoiService) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
         this.selectedCluster = null;
@@ -92,20 +87,6 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
 
     public ngAfterViewInit() {
         this.selectedPoi$.subscribe((poi) => this.onSelectedPoiChanged(poi));
-        // This is a worksround for https://github.com/Wykks/ngx-mapbox-gl/issues/206
-        this.mapComponent.load.subscribe(() => {
-            for (let categoriesType of this.categoriesTypes) {
-                let sourceId = this.poiSourceName[categoriesType];
-                fromEvent<MapSourceDataEvent>(this.mapComponent.mapInstance, "data").pipe(
-                    filter((e) => e.sourceId === sourceId && e.sourceDataType !== "metadata"),
-                    map((e) => this.clustersComponents.find(c => c.source === sourceId)),
-                    filter((c) => c != null),
-                    throttleTime(300, undefined, { trailing: true })
-                ).subscribe((cluster: any) => {
-                    cluster.updateCluster();
-                });
-            }
-        });
     }
 
     private onSelectedPoiChanged = (poi: PointOfInterestExtended) => {

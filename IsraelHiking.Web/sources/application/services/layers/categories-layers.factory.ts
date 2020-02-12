@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, NgZone } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 
 import { CategoriesLayer } from "./categories.layer";
@@ -16,7 +16,8 @@ export class CategoriesLayerFactory {
                 private readonly resources: ResourcesService,
                 private readonly poiService: PoiService,
                 private readonly runningContextService: RunningContextService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly ngZone: NgZone) {
         this.categoryLayers = new Map<CategoriesType, CategoriesLayer>();
         for (let category of this.poiService.getCategoriesTypes()) {
             let layer = new CategoriesLayer(
@@ -25,6 +26,7 @@ export class CategoriesLayerFactory {
                 this.poiService,
                 this.runningContextService,
                 this.ngRedux,
+                this.ngZone,
                 category);
             this.categoryLayers.set(category, layer);
         }
