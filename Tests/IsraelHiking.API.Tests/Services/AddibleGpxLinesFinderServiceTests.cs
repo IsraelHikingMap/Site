@@ -42,6 +42,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _options = new ConfigurationData();
+            _options.MinimalProlongLineLength = 0;
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(_options);
             var geometryFactory = new GeometryFactory();

@@ -46,6 +46,11 @@ namespace IsraelHiking.API.Executors
         /// The minimal area that is considered to be a valid area to allow prolonging a line
         /// </summary>
         public double MinimalAreaSize { get; set; }
+
+        /// <summary>
+        /// The minimal line length in meters that is considered a valid line
+        /// </summary>
+        public double MinimalLength { get; set; }
     }
 
     /// <inheritdoc/>
@@ -102,7 +107,7 @@ namespace IsraelHiking.API.Executors
                 current.Coordinate = next.Coordinate;
                 current.Line = next.Line;
             }
-            return linesToProlong.Select(l => l.Reverse() as LineString).Reverse().ToList();
+            return linesToProlong.Select(l => l.Reverse() as LineString).Where(l => l.Length > input.MinimalLength).Reverse().ToList();
         }
 
         private void HandleSelfClosingCase(GpxProlongerExecutorInput input, SegmentWithLines segment, List<LineString> linesToProlong)

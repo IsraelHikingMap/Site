@@ -65,6 +65,10 @@ namespace IsraelHiking.Common
         /// </summary>
         public double MinimalDistanceToClosestPoint { get; set; }
         /// <summary>
+        /// The minimal line length in meters that should be added when prolonging missing lines according to recorded GPX
+        /// </summary>
+        public double MinimalProlongLineLength { get; set; }
+        /// <summary>
         /// The minimal area required for a prolong line that closes an area to have in meters^2
         /// </summary>
         public double MinimalAreaSize { get; set; }
@@ -128,6 +132,7 @@ namespace IsraelHiking.Common
             MaxDistanceBetweenGpsRecordings = 50;
             MinimalSegmentLength = 500;
             MinimalDistanceToClosestPoint = 30;
+            MinimalProlongLineLength = 10;
             MinimalAreaSize = 1000;
             SimplificationDistanceTolerance = 3;
             MinimalMissingPartLength = 200; 

@@ -16,15 +16,13 @@ import { Trace, ApplicationState, LatLngAlt } from "../../models/models";
 })
 export class TracesComponent extends BaseMapComponent {
 
-    public readonly MISSING_PART = "missingPart";
-    public readonly TRACE_CONFIG = "traceConfig";
-
     public visibleTrace: Trace;
     public selectedTrace: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public selectedTraceStart: LatLngAlt;
     public selectedFeature: GeoJSON.Feature<GeoJSON.LineString>;
     public missingCoordinates: LatLngAlt;
     public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>;
+    public selectedFeatureSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public isConfigOpen: boolean;
 
     @select((state: ApplicationState) => state.tracesState.visibleTraceId)
@@ -91,9 +89,6 @@ export class TracesComponent extends BaseMapComponent {
         });
         this.missingParts$.subscribe(m => {
             if (m != null) {
-                for (let missingIndex = 0; missingIndex < m.features.length; missingIndex++) {
-                    m.features[missingIndex].properties.index = missingIndex;
-                }
                 this.missingParts = m;
             } else {
                 this.missingParts = {
@@ -122,6 +117,10 @@ export class TracesComponent extends BaseMapComponent {
     public clearSelection() {
         this.selectedFeature = null;
         this.missingCoordinates = null;
+        this.selectedFeatureSource = {
+            type: "FeatureCollection",
+            features: []
+        };
     }
 
     public clearTrace() {
@@ -149,9 +148,13 @@ export class TracesComponent extends BaseMapComponent {
         return SpatialService.toLatLng(feautre.geometry.coordinates[0] as [number, number]);
     }
 
-    public setSelectedFeature(feature, event: Event) {
+    public setSelectedFeature(feature: GeoJSON.Feature<GeoJSON.LineString>, event: Event) {
         this.selectedFeature = feature;
         this.missingCoordinates = this.getLatLngForFeature(this.selectedFeature);
+        this.selectedFeatureSource = {
+            type: "FeatureCollection",
+            features: [this.selectedFeature]
+        }
         event.stopPropagation();
     }
 }

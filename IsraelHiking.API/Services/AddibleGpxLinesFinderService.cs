@@ -64,7 +64,7 @@ namespace IsraelHiking.API.Services
             var linesToReturn = new List<LineString>();
             foreach (var gpxItmLine in gpxItmLines)
             {
-                var currentLines = await FindMissingLines(gpxItmLine);
+                var currentLines = await FindMissingLines(gpxItmLine, linesToReturn);
                 currentLines = SplitSelfLoopsAndRemoveDuplication(currentLines);
                 currentLines = SimplifyLines(currentLines);
                 currentLines = await ProlongLinesAccordingToOriginalGpx(currentLines, gpxItmLine);
@@ -125,7 +125,7 @@ namespace IsraelHiking.API.Services
                         coordinates.Insert(coordinateIndex + 1, middle);
                     }
                 }
-                denseGpxLines.Add(_geometryFactory.CreateLineString(coordinates.ToArray()) as LineString);
+                denseGpxLines.Add(_geometryFactory.CreateLineString(coordinates.Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1))).ToArray()) as LineString);
             }
             return denseGpxLines;
         }
@@ -184,13 +184,14 @@ namespace IsraelHiking.API.Services
             return existingLines.GroupBy(l => l.GetOsmId()).Select(g => g.First()).ToList();
         }
 
-        private async Task<List<LineString>> FindMissingLines(LineString gpxItmLine)
+        private async Task<List<LineString>> FindMissingLines(LineString gpxItmLine, List<LineString> missingLinesThatWereFound)
         {
             var missingLinesSplit = new List<LineString>();
             var splitItmLines = SplitLine(gpxItmLine);
             foreach (var itmLine in splitItmLines)
             {
                 var lineStringsInArea = await GetLineStringsInArea(itmLine, _options.MinimalDistanceToClosestPoint);
+                lineStringsInArea.AddRange(missingLinesThatWereFound);
                 var currentMissingLines = _gpxLoopsSplitterExecutor.GetMissingLines(itmLine, lineStringsInArea, _options.MinimalMissingPartLength, _options.MinimalDistanceToClosestPoint);
                 missingLinesSplit.AddRange(currentMissingLines);
             }
@@ -327,7 +328,8 @@ namespace IsraelHiking.API.Services
                     OriginalCoordinates = coordinates,
                     ExistingItmHighways = await GetExistingCloseLines(_geometryFactory.CreateLineString(coordinates) as LineString),
                     MinimalDistance = _options.MaxDistanceToExisitngLineForMerge,
-                    MinimalAreaSize = _options.MinimalAreaSize
+                    MinimalAreaSize = _options.MinimalAreaSize,
+                    MinimalLength = _options.MinimalProlongLineLength
                 });
                 filteredOriginalCoordinates.Clear();
             }
@@ -336,7 +338,7 @@ namespace IsraelHiking.API.Services
                 input.LinesToProlong = linesToProlong;
                 linesToProlong = _gpxProlongerExecutor.Prolong(input);
             }
-            return linesToProlong;
+            return linesToProlong.Select(l => _geometryFactory.CreateLineString(l.Coordinates.Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1))).ToArray()) as LineString).ToList();
         }
         
         private List<LineString> AdjustIntersections(List<LineString> gpxItmLines)
