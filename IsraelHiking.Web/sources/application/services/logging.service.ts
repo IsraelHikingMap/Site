@@ -86,9 +86,7 @@ export class LoggingService {
             level: "error",
             message
         } as LogLine;
-        if (!this.runningContextService.isProduction) {
-            console.error(this.logLineToString(logLine));
-        }
+        console.error(this.logLineToString(logLine));
         this.writeToStorage(logLine);
     }
 
