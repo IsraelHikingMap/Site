@@ -6,7 +6,6 @@ import { Subscription } from "rxjs";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { BaseMapComponent } from "../base-map.component";
-import { Urls } from "../../urls";
 
 @Component({
     selector: "auto-layer",
@@ -38,8 +37,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private jsonLayersIds: string[];
 
     constructor(resources: ResourcesService,
-                private readonly host: MapComponent,
-                private readonly fileService: FileService) {
+        private readonly host: MapComponent,
+        private readonly fileService: FileService) {
         super(resources);
         let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
@@ -98,7 +97,6 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             address = address.replace("{-y}", "{y}");
             scheme = "tms";
         }
-        address = this.fixNonHttpsAddress(address);
         let source = {
             type: "raster",
             tiles: [address],
@@ -130,26 +128,37 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     private async createJsonLayer() {
-        let response = await this.fileService.getStyleJsonContent(this.fixNonHttpsAddress(this.address));
+        let response = await this.fileService.getStyleJsonContent(this.address);
         let language = this.resources.getCurrentLanguageCodeSimplified();
         let styleJson = JSON.parse(JSON.stringify(response).replace(/name_he/g, `name_${language}`)) as Style;
-        for (let source in styleJson.sources) {
-            if (styleJson.sources.hasOwnProperty(source)) {
-                this.jsonSourcesIds.push(source);
-                this.host.mapInstance.addSource(source, styleJson.sources[source]);
-            }
-        }
-        for (let layer of styleJson.layers) {
-            this.jsonLayersIds.push(layer.id);
-            this.host.mapInstance.addLayer(layer, this.before);
+        let sources = styleJson.sources;
+        let layers = styleJson.layers;
+        let currentStyle = this.host.mapInstance.getStyle();
+        styleJson.sources = currentStyle.sources;
+        styleJson.layers = currentStyle.layers;
+        styleJson.glyphs = this.fileService.getDataUrl(styleJson.glyphs);
+        styleJson.sprite = this.fileService.getDataUrl(styleJson.sprite);
+        this.host.mapInstance.setStyle(styleJson);
+        if (this.host.mapInstance.isStyleLoaded()) {
+            this.updateSourcesAndLayers(sources, layers);
+        } else {
+            this.host.mapInstance.once("style.load", () => {
+                this.updateSourcesAndLayers(sources, layers);
+            });
         }
     }
 
-    private fixNonHttpsAddress(address: string) {
-        if (address.startsWith("http://")) {
-            return Urls.proxy + address;
+    private updateSourcesAndLayers(sources: {}, layers: Layer[]) {
+        for (let source in sources) {
+            if (sources.hasOwnProperty(source)) {
+                this.jsonSourcesIds.push(source);
+                this.host.mapInstance.addSource(source, sources[source]);
+            }
         }
-        return address;
+        for (let layer of layers) {
+            this.jsonLayersIds.push(layer.id);
+            this.host.mapInstance.addLayer(layer, this.before);
+        }
     }
 
     private removeJsonLayer() {

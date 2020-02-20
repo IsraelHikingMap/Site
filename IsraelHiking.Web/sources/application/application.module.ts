@@ -45,6 +45,7 @@ import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule } from "@angular-redux/store";
 import { NgxMapboxGLModule } from "ngx-mapbox-gl";
 import { NgIdleModule } from "@ng-idle/core";
+import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -161,6 +162,7 @@ export function initializeApplication(injector: Injector) {
             await injector.get<DatabaseService>(DatabaseService).initialize();
             injector.get<ApplicationExitService>(ApplicationExitService).initialize();
             injector.get<OpenWithService>(OpenWithService).initialize();
+            injector.get<FileService>(FileService).initialize();
             await loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
             alert(`alert("Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?` +
@@ -299,6 +301,7 @@ NgModule({
         ApplicationExitService,
         ConnectionService,
         ScreenService,
+        FileSystemWrapper,
         RouteEditPoiInteraction,
         RouteEditRouteInteraction
     ],

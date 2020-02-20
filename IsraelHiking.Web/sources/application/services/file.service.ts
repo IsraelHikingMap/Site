@@ -1,10 +1,8 @@
-/// <reference types="cordova" />
-/// <reference types="cordova-plugin-device"/>
-/// <reference types="cordova-plugin-file"/>
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Style } from "mapbox-gl";
 import JSZip from "jszip";
+import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 
 import { ImageResizeService } from "./image-resize.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
@@ -14,6 +12,7 @@ import { SelectedRouteService } from "./layers/routelayers/selected-route.servic
 import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
+import { ToastService } from "./toast.service";
 import { DataContainer } from "../models/models";
 
 export interface IFormatViewModel {
@@ -27,28 +26,38 @@ export class FileService {
     public formats: IFormatViewModel[];
 
     constructor(private readonly httpClient: HttpClient,
-                private readonly runningContextService: RunningContextService,
-                private readonly imageResizeService: ImageResizeService,
-                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly loggingService: LoggingService) {
+        private readonly fileSystemWrapper: FileSystemWrapper,
+        private readonly runningContextService: RunningContextService,
+        private readonly imageResizeService: ImageResizeService,
+        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+        private readonly selectedRouteService: SelectedRouteService,
+        private readonly fitBoundsService: FitBoundsService,
+        private readonly loggingService: LoggingService,
+        private readonly toastService: ToastService) {
         this.formats = [];
-        this.httpClient.get(Urls.fileFormats).toPromise().then((response: IFormatViewModel[]) => {
-            this.formats.splice(0);
-            for (let format of response) {
-                this.formats.push(format);
-            }
-            this.formats.push({
-                label: "All routes to a single Track GPX",
-                extension: "gpx",
-                outputFormat: "all_gpx_single_track"
-            } as IFormatViewModel);
+    }
 
-            for (let format of this.formats) {
-                format.label += ` (.${format.extension})`;
-            }
-        });
+    public async initialize() {
+        let response = await this.httpClient.get(Urls.fileFormats).toPromise() as IFormatViewModel[];
+        this.formats.splice(0);
+        for (let format of response) {
+            this.formats.push(format);
+        }
+        this.formats.push({
+            label: "All routes to a single Track GPX",
+            extension: "gpx",
+            outputFormat: "all_gpx_single_track"
+        } as IFormatViewModel);
+
+        for (let format of this.formats) {
+            format.label += ` (.${format.extension})`;
+        }
+        if (this.runningContextService.isCordova) {
+            let folder = this.runningContextService.isIos
+                ? this.fileSystemWrapper.documentsDirectory
+                : this.fileSystemWrapper.externalRootDirectory;
+            await this.fileSystemWrapper.createDir(folder, "IsraelHikingMap", true);
+        }
     }
 
     public getFileFromEvent(e: any): File {
@@ -76,13 +85,13 @@ export class FileService {
         return filesToReturn;
     }
 
-    public getFullFilePath(relativePath: string) {
+    public getFullFilePath(relativePath: string): string {
         if (!this.runningContextService.isCordova) {
             return (window.origin || window.location.origin) + "/" + relativePath;
         }
         let path = relativePath;
         if (this.runningContextService.isIos) {
-            path = cordova.file.applicationDirectory + "www/" + relativePath;
+            path = this.fileSystemWrapper.applicationDirectory + "www/" + relativePath;
             path = (window as any).Ionic.WebView.convertFileSrc(path);
         } else {
             path = "http://localhost/" + relativePath;
@@ -90,11 +99,16 @@ export class FileService {
         return path;
     }
 
-    public getStyleJsonContent(url: string): Promise<Style> {
+    public getDataUrl(url: string): string {
         if (!url.startsWith("https://") && this.runningContextService.isCordova) {
-            url = (window as any).Ionic.WebView.convertFileSrc(cordova.file.dataDirectory + url);
+
+            url = (window as any).Ionic.WebView.convertFileSrc(this.fileSystemWrapper.dataDirectory + url.replace("custom://", ""));
         }
-        return this.httpClient.get(url).toPromise() as Promise<Style>;
+        return url;
+    }
+
+    public getStyleJsonContent(url: string): Promise<Style> {
+        return this.httpClient.get(this.getDataUrl(url)).toPromise() as Promise<Style>;
     }
 
     public saveToFile = async (fileName: string, format: string, dataContainer: DataContainer): Promise<boolean> => {
@@ -144,105 +158,108 @@ export class FileService {
      * @param blob - the file to save
      * @param fileName - the file name
      */
-    private saveAsWorkAround(blob: Blob, fileName: string): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            if (!this.runningContextService.isCordova) {
-                this.nonAngularObjectsFactory.saveAsWrapper(blob, fileName, { autoBom: false });
-                resolve(false);
-                return;
-            }
-            this.getIHMDirectory().then((dir) => {
-                let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
-                    .replace("Z", "_") +
-                    fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
-                dir.getFile(fullFileName,
-                    { create: true },
-                    fileEntry => {
-                        fileEntry.createWriter(fileWriter => {
-                            fileWriter.write(blob);
-                            resolve(true);
-                        });
-                    },
-                    reject);
-            }, reject);
-        });
+    private async saveAsWorkAround(blob: Blob, fileName: string): Promise<boolean> {
+        if (!this.runningContextService.isCordova) {
+            this.nonAngularObjectsFactory.saveAsWrapper(blob, fileName, { autoBom: false });
+            return false;
+        }
+        let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
+            .replace("Z", "_") +
+            fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
+        await this.fileSystemWrapper.writeFile(this.getStorageBasePath(), "IsraelHikingMap/" + fullFileName, blob);
+        return true;
     }
 
-    private getIHMDirectory(): Promise<DirectoryEntry> {
-        return new Promise((resolve, reject) => {
-            let folder = device.platform.toUpperCase().indexOf("OS") !== -1
-                ? cordova.file.documentsDirectory
-                : cordova.file.externalRootDirectory;
-            window.resolveLocalFileSystemURL(folder,
-                (directoryEntry: DirectoryEntry) => {
-                    directoryEntry.getDirectory("IsraelHikingMap",
-                        { create: true },
-                        dir => {
-                            resolve(dir);
-                        }, reject);
-                }, reject);
-        });
+    private getStorageBasePath(): string {
+        return this.runningContextService.isIos
+            ? this.fileSystemWrapper.documentsDirectory
+            : this.fileSystemWrapper.externalRootDirectory;
     }
 
     public async openIHMfile(file: File,
-                             tilesCallback: (address: string, content: string) => Promise<void>,
-                             poisCallback: (content: string) => Promise<void>,
-                             imagesCallback: (content: string) => Promise<void>,
-                             notificationCallback: (message: string) => void
-    ): Promise<any> {
+        tilesCallback: (address: string, content: string) => Promise<void>,
+        poisCallback: (content: string) => Promise<void>,
+        imagesCallback: (content: string) => Promise<void>): Promise<any> {
         let zip = new JSZip();
         await zip.loadAsync(file);
-        let styles = Object.keys(zip.files).filter(name => name.startsWith("styles/") && name.endsWith(".json"));
-        for (let styleFileName of styles) {
-            let styleText = (await zip.file(styleFileName).async("text")).trim();
-            this.saveStyleJson(styleFileName.replace("styles/", ""), styleText);
+        await this.writeSources(zip, tilesCallback);
+        await this.writePois(zip, poisCallback);
+        await this.writeImages(zip, imagesCallback);
+
+        if (!this.runningContextService.isCordova) {
+            return;
         }
+        await this.writeStyles(zip);
+        await this.writeGlyphs(zip);
+        await this.writeSprite(zip)
+    }
+
+    private async writeSources(zip: JSZip, tilesCallback: (address: string, content: string) => Promise<void>) {
         let sources = Object.keys(zip.files).filter(name => name.startsWith("sources/") && name.endsWith(".json"));
         for (let sourceFileIndex = 0; sourceFileIndex < sources.length; sourceFileIndex++) {
             let sourceFile = sources[sourceFileIndex];
             let sourceName = sourceFile.split("/")[1];
-            this.loggingService.debug("Adding: " + sourceFile);
-            notificationCallback(`${sourceFileIndex + 1}/${sources.length}`);
+            this.toastService.info((sourceFileIndex / sources.length * 100).toFixed(2) + "%");
             await tilesCallback(sourceName, await zip.file(sourceFile).async("text") as string);
             this.loggingService.debug("Added: " + sourceFile);
         }
+    }
+
+    private async writePois(zip: JSZip, poisCallback: (content: string) => Promise<void>) {
         let poisFileName = Object.keys(zip.files).find(name => name.startsWith("pois/") && name.endsWith(".geojson"));
         if (poisFileName != null) {
             let poisText = (await zip.file(poisFileName).async("text")).trim();
             await poisCallback(poisText);
             this.loggingService.debug("Added pois.");
         }
+    }
+
+    private async writeImages(zip: JSZip, imagesCallback: (content: string) => Promise<void>) {
         let images = Object.keys(zip.files).filter(name => name.startsWith("images/") && name.endsWith(".json"));
         for (let imagesFileIndex = 0; imagesFileIndex < images.length; imagesFileIndex++) {
             let imagesFile = images[imagesFileIndex];
-            this.loggingService.debug("Adding images: " + imagesFile);
-            notificationCallback(`${imagesFileIndex + 1}/${images.length}`);
+            this.toastService.info((imagesFileIndex / images.length * 100).toFixed(2) + "%");
             await imagesCallback(await zip.file(imagesFile).async("text") as string);
             this.loggingService.debug("Added images: " + imagesFile);
         }
     }
 
-    private saveStyleJson(styleFileName: string, styleJsonText: string) {
-        if (!this.runningContextService.isCordova) {
-            return;
+    private async writeGlyphs(zip: JSZip) {
+        let fonts = Object.keys(zip.files).filter(name => name.startsWith("glyphs/") && name.endsWith(".pbf"));
+        for (let fontFileIndex = 0; fontFileIndex < fonts.length; fontFileIndex++) {
+            let fontFile = fonts[fontFileIndex];
+            let folderSplit = fontFile.split("/");
+            if (folderSplit.length != 3) {
+                continue;
+            }
+            this.toastService.info((fontFileIndex / fonts.length).toFixed(2) + "%");
+            await this.fileSystemWrapper.createDir(this.fileSystemWrapper.dataDirectory, folderSplit[0], true);
+            await this.fileSystemWrapper.createDir(this.fileSystemWrapper.dataDirectory, folderSplit[0] + "/" + folderSplit[1], true);
+            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, fontFile, await zip.file(fontFile).async("blob") as Blob, { append: false, replace: true, truncate: 0 });
         }
-        window.resolveLocalFileSystemURL(cordova.file.dataDirectory,
-            (directoryEntry: DirectoryEntry) => {
-                directoryEntry.getFile(styleFileName,
-                    { create: true },
-                    fileEntry => {
-                        fileEntry.createWriter(fileWriter => {
-                            fileWriter.onwriteend = () => {
-                                fileWriter.seek(0);
-                                fileWriter.onwriteend = () => {
-                                    this.loggingService.info("Style Json File was written!");
-                                };
-                                fileWriter.write(styleJsonText as any);
-                            };
-                            fileWriter.truncate(0);
-                        });
-                    }, (err) => this.loggingService.error("File: " + err.code.toString()));
-            }, (err) => this.loggingService.error("Folder: " + err.code.toString()));
+        this.loggingService.debug("Write glyphs finished succefully!");
+    }
+
+    private async writeStyles(zip: JSZip) {
+        let styles = Object.keys(zip.files).filter(name => name.startsWith("styles/") && name.endsWith(".json"));
+        for (let styleFileName of styles) {
+            let styleText = (await zip.file(styleFileName).async("text")).trim();
+            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName.replace("styles/", ""), styleText, { append: false, replace: true, truncate: 0 });
+            this.loggingService.debug("Write style finished succefully!");
+        }
+    }
+
+    private async writeSprite(zip: JSZip) {
+        let sprites = Object.keys(zip.files).filter(name => name.startsWith("sprite/") && (name.endsWith(".json") || name.endsWith(".png")));
+        for (let spriteFile of sprites) {
+            let folderSplit = spriteFile.split("/");
+            if (folderSplit.length != 2) {
+                continue;
+            }
+            await this.fileSystemWrapper.createDir(this.fileSystemWrapper.dataDirectory, folderSplit[0], true);
+            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, spriteFile, await zip.file(spriteFile).async("blob") as Blob, { append: false, replace: true, truncate: 0 });
+        }
+        this.loggingService.debug("Write sprite finished succefully!");
     }
 
     public async zipAndStoreFile(content: string): Promise<string> {
@@ -250,19 +267,8 @@ export class FileService {
         zip.file("log.txt", content);
         try {
             let blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
-            let dir = await this.getIHMDirectory();
             let fullFileName = "Report_" + new Date().toISOString().split(":").join("-").replace("T", "_").replace("Z", "_") + ".zip";
-            await new Promise((resolve, reject) => {
-                dir.getFile(fullFileName,
-                    { create: true },
-                    fileEntry => {
-                        fileEntry.createWriter(fileWriter => {
-                            fileWriter.write(blob);
-                            resolve(true);
-                        });
-                    },
-                    reject);
-            });
+            await this.fileSystemWrapper.writeFile(this.getStorageBasePath(), "IsraelHikingMap/" + fullFileName, blob);
         } catch {
             // no need to do anything
         }

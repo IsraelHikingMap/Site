@@ -40,8 +40,7 @@ export class FileComponent extends BaseMapComponent {
                 await this.fileService.openIHMfile(file,
                     this.tilesStoreCallback,
                     this.poisStoreCallback,
-                    this.imagesStoreCallback,
-                    (message) => this.toastService.info(message));
+                    this.imagesStoreCallback);
                 this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             } catch (ex) {
                 this.toastService.error(ex.message);

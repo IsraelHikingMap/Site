@@ -13,6 +13,8 @@
     "@angular/platform-browser-dynamic": "8.2.14",
     "@angular/router": "8.2.14",
     "@beyerleinf/ngx-dnd": "8.0.3",
+    "@ionic-native/core": "^5.21.5",
+    "@ionic-native/file": "^5.21.5",
     "@katze/ngx-d3": "0.2.0",
     "@mapbox/mapbox-gl-rtl-text": "0.2.3",
     "@mauron85/cordova-plugin-background-geolocation": "^3.0.6",
