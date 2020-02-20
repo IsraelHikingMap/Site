@@ -1,4 +1,3 @@
-/// <reference types="cordova-plugin-device"/>
 import { TestBed, inject, fakeAsync } from "@angular/core/testing";
 import { HttpClientModule, HttpClient } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
@@ -47,17 +46,14 @@ describe("FileService", () => {
                     useFactory: fakeAsync((http, mockBackend: HttpTestingController,
                                            runningContextService: RunningContextService, loggingService: LoggingService) => {
                         let fileService = new FileService(http,
+                            null,
                             runningContextService,
                             imageResizeService,
                             nonAngularObjectsFactory,
                             selectedRouteService,
                             fitBoundsService,
-                            loggingService);
-                        mockBackend.expectOne(Urls.fileFormats).flush([{
-                            extension: "ex",
-                            label: "label",
-                            outputFormat: "output"
-                        } as IFormatViewModel]);
+                            loggingService,
+                            null);
                         return fileService;
                     }),
                     deps: [HttpClient, HttpTestingController, RunningContextService, LoggingService]
@@ -66,9 +62,18 @@ describe("FileService", () => {
         });
     });
 
-    it("Should Initialize with file formats", inject([FileService], (fileService: FileService) => {
-        expect(fileService.formats.length).toBe(2);
-    }));
+    it("Should Initialize with file formats", inject([FileService, HttpTestingController],
+        (fileService: FileService, mockBackend: HttpTestingController) => {
+            fileService.initialize().then(() => {
+                expect(fileService.formats.length).toBe(2);
+            });
+            mockBackend.expectOne(Urls.fileFormats).flush([{
+                extension: "ex",
+                label: "label",
+                outputFormat: "output"
+            } as IFormatViewModel]);
+
+        }));
 
     it("Should save to file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {

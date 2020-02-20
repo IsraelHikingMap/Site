@@ -1,5 +1,12 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { BackgroundGeolocationPlugin, Location, LogEntry } from "@mauron85/cordova-plugin-background-geolocation";
+import {
+    BackgroundGeolocation,
+    BackgroundGeolocationEvents,
+    BackgroundGeolocationResponse,
+    BackgroundGeolocationLocationProvider,
+    // BackgroundGeolocationAccuracy,
+    BackgroundGeolocationLogLevel
+} from "@ionic-native/background-geolocation/ngx";
 
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
@@ -8,8 +15,6 @@ import { LoggingService } from "./logging.service";
 import { ILatLngTime } from "../models/models";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
-
-declare var BackgroundGeolocation: BackgroundGeolocationPlugin;
 
 @Injectable()
 export class GeoLocationService {
@@ -29,6 +34,7 @@ export class GeoLocationService {
     public currentLocation: ILatLngTime;
 
     constructor(private readonly resources: ResourcesService,
+                private readonly backgroundGeolocation: BackgroundGeolocation,
                 private readonly runningContextService: RunningContextService,
                 private readonly loggingService: LoggingService,
                 private readonly ngZone: NgZone) {
@@ -110,13 +116,13 @@ export class GeoLocationService {
 
     private startBackgroundGeolocation() {
         if (this.wasInitialized) {
-            BackgroundGeolocation.start();
+            this.backgroundGeolocation.start();
             return;
         }
         this.wasInitialized = true;
-        BackgroundGeolocation.configure({
-            locationProvider: BackgroundGeolocation.RAW_PROVIDER,
-            desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
+        this.backgroundGeolocation.configure({
+            locationProvider: BackgroundGeolocationLocationProvider.RAW_PROVIDER,
+            desiredAccuracy: 0, // BackgroundGeolocationAccuracy.HIGH,
             stationaryRadius: 10,
             distanceFilter: 5,
             notificationTitle: this.resources.israelHikingMap,
@@ -127,55 +133,42 @@ export class GeoLocationService {
             startForeground: true
         });
 
-        BackgroundGeolocation.on("location", (location: Location) => {
+        this.backgroundGeolocation.on(BackgroundGeolocationEvents.location).subscribe((location: BackgroundGeolocationResponse) => {
             let position = this.locationToPosition(location);
             this.handlePoistionChange(position);
         });
 
-        BackgroundGeolocation.on("authorization", status => {
-            if (status !== BackgroundGeolocation.AUTHORIZED) {
-                // we need to set delay or otherwise alert may not be shown
-                setTimeout(() => {
-                    let showSettings = confirm("App requires location tracking permission. Would you like to open app settings?");
-                    if (showSettings) {
-                        return BackgroundGeolocation.showAppSettings();
-                    }
-                }, 1000);
-            }
-        });
-
-        BackgroundGeolocation.on("start",
+        this.backgroundGeolocation.on(BackgroundGeolocationEvents.start).subscribe(
             () => {
                 this.loggingService.debug("Start geo-location service");
             });
 
-        BackgroundGeolocation.on("stop",
+        this.backgroundGeolocation.on(BackgroundGeolocationEvents.stop).subscribe(
             () => {
                 this.loggingService.debug("Stop geo-location service");
             });
 
-        BackgroundGeolocation.on("background",
+        this.backgroundGeolocation.on(BackgroundGeolocationEvents.background).subscribe(
             () => {
                 this.isBackground = true;
                 this.loggingService.debug("Geo-location now in background");
-                BackgroundGeolocation.deleteAllLocations();
+                this.backgroundGeolocation.deleteAllLocations();
             });
 
-        BackgroundGeolocation.on("foreground",
-            () => {
+        this.backgroundGeolocation.on(BackgroundGeolocationEvents.foreground).subscribe(
+            async () => {
                 this.isBackground = false;
                 this.loggingService.debug("Geo-location now in foreground");
                 if (this.currentLocation) {
                     this.loggingService.debug("Sending bulk location update");
-                    BackgroundGeolocation.getValidLocations((locations) => {
-                        let positions = locations.map(l => this.locationToPosition(l)).filter(p => this.validateRecordingAndUpdateState(p));
-                        if (positions.length > 0) {
-                            this.bulkPositionChanged.next(positions);
-                        }
-                    });
+                    let locations = await this.backgroundGeolocation.getValidLocations();
+                    let positions = locations.map(l => this.locationToPosition(l)).filter(p => this.validateRecordingAndUpdateState(p));
+                    if (positions.length > 0) {
+                        this.bulkPositionChanged.next(positions);
+                    }
                 }
             });
-        BackgroundGeolocation.start();
+        this.backgroundGeolocation.start();
     }
 
     private stopWatching() {
@@ -198,7 +191,7 @@ export class GeoLocationService {
 
     private stopBackgroundGeolocation() {
         this.loggingService.debug("Stopping background geo-location");
-        BackgroundGeolocation.stop();
+        this.backgroundGeolocation.stop();
     }
 
     private handlePoistionChange(position: Position): void {
@@ -280,7 +273,7 @@ export class GeoLocationService {
         };
     }
 
-    private locationToPosition(location: Location): Position {
+    private locationToPosition(location: BackgroundGeolocationResponse): Position {
         return {
             coords: {
                 accuracy: location.accuracy,
@@ -295,9 +288,7 @@ export class GeoLocationService {
     }
 
     public async getLog(): Promise<string> {
-        let logEntries = await new Promise<LogEntry[]>((resolve, reject) => {
-            BackgroundGeolocation.getLogEntries(10000, 0, "TRACE", resolve, reject);
-        });
+        let logEntries = await this.backgroundGeolocation.getLogEntries(10000, 0, BackgroundGeolocationLogLevel.TRACE);
         return logEntries.map(logLine => {
             let dateString = new Date(logLine.timestamp - new Date().getTimezoneOffset() * 60 * 1000)
                 .toISOString().replace(/T/, " ").replace(/\..+/, "");

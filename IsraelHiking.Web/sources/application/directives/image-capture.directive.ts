@@ -1,12 +1,11 @@
-/// <reference types="cordova-plugin-camera" />
 import { Directive, Output, ElementRef, Renderer2, OnDestroy, EventEmitter, NgZone } from "@angular/core";
+import { Camera } from "@ionic-native/camera/ngx";
+import { StatusBar } from "@ionic-native/status-bar/ngx";
 
 import { environment } from "../../environments/environment";
 import { NonAngularObjectsFactory } from "../services/non-angular-objects.factory";
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
-
-declare var StatusBar: any;
 
 @Directive({
     selector: "[imageCapture]",
@@ -19,6 +18,8 @@ export class ImageCaptureDirective implements OnDestroy {
     private listenFunction: () => void;
 
     constructor(elementRef: ElementRef,
+                private readonly camera: Camera,
+                private readonly statusBar: StatusBar,
                 private readonly renderer: Renderer2,
                 private readonly ngZone: NgZone,
                 private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
@@ -39,35 +40,29 @@ export class ImageCaptureDirective implements OnDestroy {
                 customDeclineText: this.resources.gallery,
                 confirmIcon: "camera",
                 declineIcon: "image",
-                confirmAction: () => this.getPicture(Camera.PictureSourceType.CAMERA, true),
-                declineAction: () => this.getPicture(Camera.PictureSourceType.PHOTOLIBRARY, false),
+                confirmAction: () => this.getPicture(this.camera.PictureSourceType.CAMERA, true),
+                declineAction: () => this.getPicture(this.camera.PictureSourceType.PHOTOLIBRARY, false),
             });
         });
     }
 
-    private getPicture(sourceType: number, saveToPhotoAlbum: boolean) {
-        navigator.camera.getPicture(
-            (imageUri: string) => {
-                StatusBar.overlaysWebView(true);
-                StatusBar.overlaysWebView(false);
-                let blob = this.nonAngularObjectsFactory.b64ToBlob("data:image/jpeg;base64," + imageUri);
-                let changeEvent = {
-                    dataTransfer: {
-                        files: [blob]
-                    },
-                    target: {}
-                };
-                this.ngZone.run(() => this.changed.next(changeEvent));
+    private async getPicture(sourceType: number, saveToPhotoAlbum: boolean) {
+        let base64ImageData = await this.camera.getPicture({
+            destinationType: this.camera.DestinationType.DATA_URL,
+            sourceType,
+            saveToPhotoAlbum,
+            correctOrientation: true
+        });
+        this.statusBar.overlaysWebView(true);
+        this.statusBar.overlaysWebView(false);
+        let blob = this.nonAngularObjectsFactory.b64ToBlob("data:image/jpeg;base64," + base64ImageData);
+        let changeEvent = {
+            dataTransfer: {
+                files: [blob]
             },
-            (err) => {
-                console.error(err);
-            },
-            {
-                destinationType: Camera.DestinationType.DATA_URL,
-                sourceType,
-                saveToPhotoAlbum,
-                correctOrientation: true
-            });
+            target: {}
+        };
+        this.ngZone.run(() => this.changed.next(changeEvent));
     }
 
     ngOnDestroy(): void {

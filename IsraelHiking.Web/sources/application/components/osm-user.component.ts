@@ -1,10 +1,9 @@
-/// <reference types="cordova" />
-/// <reference types="cordova-plugin-email-composer" />
 import { Component, OnDestroy } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material";
 import { select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
 import { Observable, Subscription } from "rxjs";
+import { EmailComposer } from "@ionic-native/email-composer/ngx";
 
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
@@ -44,6 +43,7 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
     public agreedToTheTermsOfService = false;
 
     constructor(resources: ResourcesService,
+                private readonly emailComposer: EmailComposer,
                 private readonly authorizationService: AuthorizationService,
                 private readonly dialog: MatDialog,
                 private readonly runningContextService: RunningContextService,
@@ -157,7 +157,7 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
             let logBase64zipped = await this.fileService.zipAndStoreFile(logs);
             logs = await this.geoLocationService.getLog();
             let logBase64zippedGeoLocation = await this.fileService.zipAndStoreFile(logs);
-            cordova.plugins.email.open({
+            this.emailComposer.open({
                 to: ["israelhikingmap@gmail.com"],
                 subject: "Issue reported by " + this.userInfo.displayName,
                 body: this.resources.reportAnIssueInstructions,

@@ -1,5 +1,3 @@
-/// <reference types="cordova" />
-/// <reference types="cordova-plugin-file" />
 import { Injectable, NgZone } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 

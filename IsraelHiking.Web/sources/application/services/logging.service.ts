@@ -110,7 +110,7 @@ export class LoggingService {
 
     public async getLog(): Promise<string> {
         let logLines = [] as string[];
-        await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).each((l) => { logLines.push(this.logLineToString(l)) });
+        await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).each((l) => { logLines.push(this.logLineToString(l)); });
         return logLines.join("\n");
     }
 

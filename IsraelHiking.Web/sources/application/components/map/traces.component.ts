@@ -154,7 +154,7 @@ export class TracesComponent extends BaseMapComponent {
         this.selectedFeatureSource = {
             type: "FeatureCollection",
             features: [this.selectedFeature]
-        }
+        };
         event.stopPropagation();
     }
 }

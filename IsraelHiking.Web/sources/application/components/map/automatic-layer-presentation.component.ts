@@ -37,8 +37,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private jsonLayersIds: string[];
 
     constructor(resources: ResourcesService,
-        private readonly host: MapComponent,
-        private readonly fileService: FileService) {
+                private readonly host: MapComponent,
+                private readonly fileService: FileService) {
         super(resources);
         let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;

@@ -26,14 +26,14 @@ export class FileService {
     public formats: IFormatViewModel[];
 
     constructor(private readonly httpClient: HttpClient,
-        private readonly fileSystemWrapper: FileSystemWrapper,
-        private readonly runningContextService: RunningContextService,
-        private readonly imageResizeService: ImageResizeService,
-        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly fitBoundsService: FitBoundsService,
-        private readonly loggingService: LoggingService,
-        private readonly toastService: ToastService) {
+                private readonly fileSystemWrapper: FileSystemWrapper,
+                private readonly runningContextService: RunningContextService,
+                private readonly imageResizeService: ImageResizeService,
+                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly fitBoundsService: FitBoundsService,
+                private readonly loggingService: LoggingService,
+                private readonly toastService: ToastService) {
         this.formats = [];
     }
 
@@ -52,6 +52,7 @@ export class FileService {
         for (let format of this.formats) {
             format.label += ` (.${format.extension})`;
         }
+        // HM TODO: move this to required function to avoid permission on startup?
         if (this.runningContextService.isCordova) {
             let folder = this.runningContextService.isIos
                 ? this.fileSystemWrapper.documentsDirectory
@@ -177,9 +178,9 @@ export class FileService {
     }
 
     public async openIHMfile(file: File,
-        tilesCallback: (address: string, content: string) => Promise<void>,
-        poisCallback: (content: string) => Promise<void>,
-        imagesCallback: (content: string) => Promise<void>): Promise<any> {
+                             tilesCallback: (address: string, content: string) => Promise<void>,
+                             poisCallback: (content: string) => Promise<void>,
+                             imagesCallback: (content: string) => Promise<void>): Promise<any> {
         let zip = new JSZip();
         await zip.loadAsync(file);
         await this.writeSources(zip, tilesCallback);
@@ -191,7 +192,7 @@ export class FileService {
         }
         await this.writeStyles(zip);
         await this.writeGlyphs(zip);
-        await this.writeSprite(zip)
+        await this.writeSprite(zip);
     }
 
     private async writeSources(zip: JSZip, tilesCallback: (address: string, content: string) => Promise<void>) {
@@ -229,13 +230,14 @@ export class FileService {
         for (let fontFileIndex = 0; fontFileIndex < fonts.length; fontFileIndex++) {
             let fontFile = fonts[fontFileIndex];
             let folderSplit = fontFile.split("/");
-            if (folderSplit.length != 3) {
+            if (folderSplit.length !== 3) {
                 continue;
             }
             this.toastService.info((fontFileIndex / fonts.length).toFixed(2) + "%");
             await this.fileSystemWrapper.createDir(this.fileSystemWrapper.dataDirectory, folderSplit[0], true);
             await this.fileSystemWrapper.createDir(this.fileSystemWrapper.dataDirectory, folderSplit[0] + "/" + folderSplit[1], true);
-            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, fontFile, await zip.file(fontFile).async("blob") as Blob, { append: false, replace: true, truncate: 0 });
+            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, fontFile,
+                await zip.file(fontFile).async("blob") as Blob, { append: false, replace: true, truncate: 0 });
         }
         this.loggingService.debug("Write glyphs finished succefully!");
     }
@@ -244,20 +246,23 @@ export class FileService {
         let styles = Object.keys(zip.files).filter(name => name.startsWith("styles/") && name.endsWith(".json"));
         for (let styleFileName of styles) {
             let styleText = (await zip.file(styleFileName).async("text")).trim();
-            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName.replace("styles/", ""), styleText, { append: false, replace: true, truncate: 0 });
+            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName.replace("styles/", ""), styleText,
+                { append: false, replace: true, truncate: 0 });
             this.loggingService.debug("Write style finished succefully!");
         }
     }
 
     private async writeSprite(zip: JSZip) {
-        let sprites = Object.keys(zip.files).filter(name => name.startsWith("sprite/") && (name.endsWith(".json") || name.endsWith(".png")));
+        let sprites = Object.keys(zip.files)
+            .filter(name => name.startsWith("sprite/") && (name.endsWith(".json") || name.endsWith(".png")));
         for (let spriteFile of sprites) {
             let folderSplit = spriteFile.split("/");
-            if (folderSplit.length != 2) {
+            if (folderSplit.length !== 2) {
                 continue;
             }
             await this.fileSystemWrapper.createDir(this.fileSystemWrapper.dataDirectory, folderSplit[0], true);
-            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, spriteFile, await zip.file(spriteFile).async("blob") as Blob, { append: false, replace: true, truncate: 0 });
+            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, spriteFile,
+                await zip.file(spriteFile).async("blob") as Blob, { append: false, replace: true, truncate: 0 });
         }
         this.loggingService.debug("Write sprite finished succefully!");
     }
