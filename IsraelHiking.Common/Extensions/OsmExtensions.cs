@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using OsmSharp;
+using OsmSharp.Complete;
 using OsmSharp.Tags;
 
 namespace IsraelHiking.Common.Extensions
@@ -26,6 +28,16 @@ namespace IsraelHiking.Common.Extensions
         {
             return tags.Any(t => myTags.ContainsKey(t.Key) &&
                                  myTags[t.Key].Equals(t.Value));
+        }
+
+        public static string GetId(this ICompleteOsmGeo osmObject)
+        {
+            return osmObject.Type.ToString().ToLower() + "_" + osmObject.Id;
+        }
+
+        public static string GetId(this OsmGeo osmObject)
+        {
+            return osmObject.Type.ToString().ToLower() + "_" + osmObject.Id;
         }
     }
 }

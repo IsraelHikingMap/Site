@@ -82,7 +82,7 @@ namespace IsraelHiking.API.Services.Osm
             var deleteTasks = new List<Task>();
             foreach (var highwaysToRemove in changes.Delete.OfType<Way>())
             {
-                var task = _elasticSearchGateway.DeleteHighwaysById(highwaysToRemove.Id.ToString());
+                var task = _elasticSearchGateway.DeleteHighwaysById(highwaysToRemove.GetId());
                 deleteTasks.Add(task);
             }
             await Task.WhenAll(deleteTasks);
@@ -106,7 +106,7 @@ namespace IsraelHiking.API.Services.Osm
             var relevantTagsDictionary = _tagsHelper.GetAllTags();
             foreach (var poiToRemove in changes.Delete)
             {
-                var task = _elasticSearchGateway.DeleteOsmPointOfInterestById(poiToRemove.Type.ToString().ToLower() + "_" + poiToRemove.Id);
+                var task = _elasticSearchGateway.DeleteOsmPointOfInterestById(poiToRemove.GetId());
                 deleteTasks.Add(task);
             }
             await Task.WhenAll(deleteTasks);
@@ -125,7 +125,7 @@ namespace IsraelHiking.API.Services.Osm
             foreach (var poiToUpdate in changes.Modify
                 .Where(o => IsRelevantPointOfInterest(o, relevantTagsDictionary)))
             {
-                var featureFromDb = await _elasticSearchGateway.GetPointOfInterestById(poiToUpdate.Type.ToString().ToLower() + "_" + poiToUpdate.Id, Sources.OSM);
+                var featureFromDb = await _elasticSearchGateway.GetPointOfInterestById(poiToUpdate.GetId(), Sources.OSM);
                 if (featureFromDb == null)
                 {
                     continue;

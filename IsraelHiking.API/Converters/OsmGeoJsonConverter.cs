@@ -1,4 +1,5 @@
 ﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
@@ -62,7 +63,7 @@ namespace IsraelHiking.API.Converters
         {
             var table = new AttributesTable(osmObject.Tags.ToDictionary(t => t.Key, t => t.Value as object))
             {
-                {FeatureAttributes.ID, osmObject.Type.ToString().ToLower() + "_" + osmObject.Id}
+                {FeatureAttributes.ID, osmObject.GetId()}
             };
             if (osmObject.TimeStamp.HasValue)
             {
