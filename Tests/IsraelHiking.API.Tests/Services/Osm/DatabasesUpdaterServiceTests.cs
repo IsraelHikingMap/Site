@@ -118,7 +118,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
             _service.Update(changes).Wait();
 
-            _elasticSearchGateway.Received(1).DeleteHighwaysById("1");
+            _elasticSearchGateway.Received(1).DeleteHighwaysById("way_1");
             _elasticSearchGateway.Received(1).DeleteOsmPointOfInterestById("way_1");
         }
 
