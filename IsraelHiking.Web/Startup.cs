@@ -243,6 +243,7 @@ namespace IsraelHiking.Web
             serviceProvider.GetRequiredService<IWikimediaCommonGateway>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading wikimedia gateway."));
             serviceProvider.GetRequiredService<IWikipediaGateway>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading wikipedia gateway."));
             serviceProvider.GetRequiredService<IINatureGateway>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading iNature gateway."));
+            serviceProvider.GetRequiredService<IDropboxGateway>().Initialize();
         }
 
         private string GetBinariesFolder(IServiceProvider serviceProvider)

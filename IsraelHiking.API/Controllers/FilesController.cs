@@ -4,6 +4,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private readonly IDataContainerConverterService _dataContainerConverterService;
+        private readonly IDropboxGateway _dropboxGateway;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
         /// <summary>
@@ -28,15 +30,18 @@ namespace IsraelHiking.API.Controllers
         /// <param name="elevationDataStorage"></param>
         /// <param name="remoteFileFetcherGateway"></param>
         /// <param name="dataContainerConverterService"></param>
+        /// <param name="dropboxGateway"></param>
         /// <param name="cache"></param>
         public FilesController(IElevationDataStorage elevationDataStorage,
             IRemoteFileFetcherGateway remoteFileFetcherGateway,
             IDataContainerConverterService dataContainerConverterService,
+            IDropboxGateway dropboxGateway,
             LruCache<string, TokenAndSecret> cache)
         {
             _elevationDataStorage = elevationDataStorage;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
             _dataContainerConverterService = dataContainerConverterService;
+            _dropboxGateway = dropboxGateway;
             _cache = cache;
         }
 
@@ -146,6 +151,33 @@ namespace IsraelHiking.API.Controllers
                 latLng.Alt = await _elevationDataStorage.GetElevation(latLng.ToCoordinate());
             }
             return dataContainer;
+        }
+
+        /// <summary>
+        /// Get a list of files that need to be downloaded since they are out dated
+        /// </summary>
+        /// <param name="lastModified"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("offline")]
+        public Task<List<string>> GetOfflineFiles([FromQuery] DateTime lastModified)
+        {
+            // HM TODO: add receipt validation?
+            return _dropboxGateway.GetUpdatedFilesList(lastModified);
+        }
+
+        /// <summary>
+        /// Get a specific file
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("offline/{id}")]
+        public async Task<IActionResult> GetOfflineFile(string id)
+        {
+            // HM TODO: add receipt validation?
+            var file = await _dropboxGateway.GetFileContent(id);
+            return File(file.Content, "application/zip", file.FileName);
         }
     }
 }

@@ -7,5 +7,6 @@
         public string ZanataUserName { get; set; }
         public string ZanataApiKey { get; set; }
         public string ImgurClientId { get; set; }
+        public string DropboxApiToken { get; set; }
     }
 }
