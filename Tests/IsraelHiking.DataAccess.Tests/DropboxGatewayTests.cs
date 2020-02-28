@@ -4,8 +4,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace IsraelHiking.DataAccess.Tests
 {
@@ -18,8 +16,7 @@ namespace IsraelHiking.DataAccess.Tests
         public void TestInitialize()
         {
             var nonPublic = new NonPublicConfigurationData();
-            // HM TODO: remove this!!
-            nonPublic.DropboxApiToken = "5uK8xFbtxoAAAAAAAAAAELWSYAjVOqEhuVxfo7M5Hpa3NZuRlXxfKRk1iz13uYbm";
+            nonPublic.DropboxApiToken = "some-access-token";
             var options = Substitute.For<IOptions<NonPublicConfigurationData>>();
             options.Value.Returns(nonPublic);
             _gateway = new DropboxGateway(Substitute.For<ILogger>(), options);
@@ -27,12 +24,14 @@ namespace IsraelHiking.DataAccess.Tests
         }
 
         [TestMethod]
+        [Ignore]
         public void GetFilesList()
         {
             Assert.IsTrue(_gateway.GetUpdatedFilesList(DateTime.UnixEpoch).Result.Count > 0);
         }
 
         [TestMethod]
+        [Ignore]
         public void GetFile()
         {
             Assert.IsNotNull(_gateway.GetFileContent("glyphs.ihm").Result);
