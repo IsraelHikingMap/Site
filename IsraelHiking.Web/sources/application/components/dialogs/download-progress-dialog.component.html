@@ -1,0 +1,29 @@
+﻿<div [dir]="resources.direction">
+    <div matDialogTitle>
+        <div>
+            {{resources.infoDownloadMapForOfflineUse}}
+        </div>
+        <div>
+            <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+        </div>
+    </div>
+    <div mat-dialog-content>
+        <p class="text-center">{{resources.downloadWifiInstruction}}</p>
+        <br />
+        <div fxLayout="row">
+            <mat-progress-bar color="primary" [mode]="progressPersentage > 0 ? 'buffer' : 'determinate'" [value]="progressPersentage"></mat-progress-bar>
+        </div>
+        <div fxLayout="row">
+            <span class="text-small">{{progressPersentage | number: '1.1-1' }}%</span>
+        </div>
+        <br />
+        <br />
+    </div>
+    <div mat-dialog-actions>
+        <div fxLayout="row" fxFlex>
+            <div fxFlex>
+                <button mat-raised-button fxFill color="primary" (click)="startDownload()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download paid offline map"><i class="fa icon-download fa-lg"></i> {{resources.startDownload}}</button>
+            </div>
+        </div>
+    </div>
+</div>

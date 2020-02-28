@@ -56,6 +56,7 @@ import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
 import { StatusBar } from "@ionic-native/status-bar/ngx";
+import { Zip } from "@ionic-native/zip/ngx";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -97,6 +98,7 @@ import { DatabaseService } from "./services/database.service";
 import { ApplicationExitService } from "./services/application-exit.service";
 import { ConnectionService } from "./services/connection.service";
 import { ScreenService } from "./services/screen.service";
+import { PurchaseService } from "./services/purchase.service";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
@@ -158,6 +160,7 @@ import { TracesComponent } from "./components/map/traces.component";
 import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
 import { SecuredImageComponent } from "./components/secured-image.component";
 import { ConfigurationDialogComponent } from "./components/dialogs/configuration-dialog.component";
+import { DownloadProgressDialogComponent } from "./components/dialogs/download-progress-dialog.component";
 // variables and functions
 import { routes } from "./routes";
 
@@ -173,6 +176,7 @@ export function initializeApplication(injector: Injector) {
             injector.get<ApplicationExitService>(ApplicationExitService).initialize();
             injector.get<OpenWithService>(OpenWithService).initialize();
             injector.get<FileService>(FileService).initialize();
+            injector.get<PurchaseService>(PurchaseService).initialize();
             await loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
             alert(`alert("Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?` +
@@ -262,6 +266,7 @@ export function getWindow() { return window; }
             PrivatePoiShowDialogComponent,
             AutomaticLayerPresentationComponent,
             ConfigurationDialogComponent,
+            DownloadProgressDialogComponent
         ],
         providers: [
             GestureConfig,
@@ -311,6 +316,7 @@ export function getWindow() { return window; }
             ApplicationExitService,
             ConnectionService,
             ScreenService,
+            PurchaseService,
             BackgroundGeolocation,
             Brightness,
             Camera,
@@ -321,6 +327,7 @@ export function getWindow() { return window; }
             WebView,
             MobileAccessibility,
             StatusBar,
+            Zip,
             RouteEditPoiInteraction,
             RouteEditRouteInteraction
         ],
@@ -375,6 +382,7 @@ export function getWindow() { return window; }
             AutomaticLayerPresentationComponent,
             SecuredImageComponent,
             ConfigurationDialogComponent,
+            DownloadProgressDialogComponent,
             NameInUseValidatorDirective,
             ImageCaptureDirective,
             OfflineImagePipe

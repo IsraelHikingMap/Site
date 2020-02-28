@@ -1,13 +1,17 @@
 import { Component } from "@angular/core";
 import { Router } from "@angular/router";
 import { remove } from "lodash";
+import { NgRedux } from "@angular-redux/store";
 
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
+import { ToastService } from "../../services/toast.service";
+import { PurchaseService } from "../../services/purchase.service";
 import { BaseMapComponent } from "../base-map.component";
 import { LegendItemComponent, ILegendItem } from "./legend-item.component";
+import { ApplicationState } from "../../models/models";
 import { RouteStrings } from "../../services/hash.service";
 
 export interface ILegendSection {
@@ -27,9 +31,12 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
                 private readonly router: Router,
+                private readonly purchaseService: PurchaseService,
                 private readonly sidebarService: SidebarService,
                 private readonly layersService: LayersService,
-                private readonly runningContext: RunningContextService) {
+                private readonly runningContext: RunningContextService,
+                private readonly toastService: ToastService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
 
         this.selectedTabIndex = 0;
@@ -49,7 +56,16 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.router.navigate([RouteStrings.DOWNLOAD]);
     }
 
-    public isActive = (): boolean => {
+    public orderOfflineMaps() {
+        let userInfo = this.ngRedux.getState().userState.userInfo;
+        if (userInfo == null || !userInfo.id) {
+            this.toastService.warning(this.resources.loginRequired);
+            return;
+        }
+        this.purchaseService.order(userInfo.id);
+    }
+
+    public isActive(): boolean {
         return this.sidebarService.viewName === "info";
     }
 

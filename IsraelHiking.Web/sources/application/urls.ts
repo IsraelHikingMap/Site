@@ -12,7 +12,8 @@ export class Urls {
     public static readonly itmGrid = Urls.apiBase + "itmGrid";
     public static readonly files = Urls.apiBase + "files";
     public static readonly fileFormats = Urls.files + "/formats";
-    public static readonly openFile = Urls.apiBase + "files/open";
+    public static readonly openFile = Urls.files + "/open";
+    public static readonly offlineFiles = Urls.files + "/offline";
     public static readonly search = Urls.apiBase + "search/";
     public static readonly images = Urls.apiBase + "images/";
     public static readonly colors = Urls.images + "colors/";

@@ -40,7 +40,8 @@ export class FileComponent extends BaseMapComponent {
                 await this.fileService.openIHMfile(file,
                     this.tilesStoreCallback,
                     this.poisStoreCallback,
-                    this.imagesStoreCallback);
+                    this.imagesStoreCallback,
+                    this.glyphsCallback);
                 this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             } catch (ex) {
                 this.toastService.error(ex.message);
@@ -54,9 +55,10 @@ export class FileComponent extends BaseMapComponent {
         }
     }
 
-    private tilesStoreCallback = async (sourceName: string, content: string) => {
+    private tilesStoreCallback = async (sourceName: string, content: string, percentage: number) => {
         try {
             await this.databaseService.saveTilesContent(sourceName, content);
+            this.toastService.info(percentage.toFixed(1) + "%");
         } catch (ex) {
             this.toastService.error(ex.toString());
         }
@@ -70,12 +72,17 @@ export class FileComponent extends BaseMapComponent {
         }
     }
 
-    private imagesStoreCallback = async (content: string) => {
+    private imagesStoreCallback = async (content: string, percentage: number) => {
         try {
             await this.databaseService.storeImages(JSON.parse(content));
+            this.toastService.info(percentage.toFixed(1) + "%");
         } catch (ex) {
             this.toastService.error(ex.toString());
         }
+    }
+
+    private glyphsCallback = (percentage) => {
+        this.toastService.info(percentage.toFixed(1) + "%");
     }
 
     public async save() {

@@ -25,6 +25,7 @@
     "@ionic-native/mobile-accessibility": "^5.21.5",
     "@ionic-native/network": "^5.21.5",
     "@ionic-native/status-bar": "^5.21.5",
+    "@ionic-native/zip": "^5.21.6",
     "@katze/ngx-d3": "0.2.0",
     "@mapbox/mapbox-gl-rtl-text": "0.2.3",
     "@mauron85/cordova-plugin-background-geolocation": "^3.0.6",
@@ -56,6 +57,7 @@
     "cordova-plugin-purchase": "^10.0.1",
     "cordova-plugin-statusbar": "^2.4.3",
     "cordova-plugin-whitelist": "^1.3.4",
+    "cordova-plugin-zip": "^3.1.0",
     "core-js": "^3.1.4",
     "deepmerge": "3.3.0",
     "dexie": "^2.0.4",
@@ -172,8 +174,9 @@
       "cordova-plugin-statusbar": {},
       "cordova-plugin-brightness": {},
       "phonegap-plugin-mobile-accessibility": {},
+      "cordova-plugin-network-information": {},
       "cordova-plugin-purchase": {},
-      "cordova-plugin-network-information": {}
+      "cordova-plugin-zip": {}
     },
     "platforms": [
       "ios",

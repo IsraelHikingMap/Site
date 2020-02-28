@@ -1,8 +1,10 @@
-import { Injectable } from "@angular/core";
+import { Injectable, NgZone } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Style } from "mapbox-gl";
-import JSZip from "jszip";
 import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
+import { Zip } from "@ionic-native/zip/ngx";
+import { Subject } from "rxjs";
+import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
@@ -12,8 +14,8 @@ import { SelectedRouteService } from "./layers/routelayers/selected-route.servic
 import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
-import { ToastService } from "./toast.service";
 import { DataContainer } from "../models/models";
+import { throttleTime } from "rxjs/operators";
 
 export interface IFormatViewModel {
     label: string;
@@ -26,14 +28,15 @@ export class FileService {
     public formats: IFormatViewModel[];
 
     constructor(private readonly httpClient: HttpClient,
-                private readonly fileSystemWrapper: FileSystemWrapper,
-                private readonly runningContextService: RunningContextService,
-                private readonly imageResizeService: ImageResizeService,
-                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly fitBoundsService: FitBoundsService,
-                private readonly loggingService: LoggingService,
-                private readonly toastService: ToastService) {
+        private readonly fileSystemWrapper: FileSystemWrapper,
+        private readonly zip: Zip,
+        private readonly runningContextService: RunningContextService,
+        private readonly imageResizeService: ImageResizeService,
+        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+        private readonly selectedRouteService: SelectedRouteService,
+        private readonly fitBoundsService: FitBoundsService,
+        private readonly loggingService: LoggingService,
+        private readonly ngZone: NgZone) {
         this.formats = [];
     }
 
@@ -177,12 +180,14 @@ export class FileService {
             : this.fileSystemWrapper.externalRootDirectory;
     }
 
-    public async openIHMfile(file: File,
-                             tilesCallback: (address: string, content: string) => Promise<void>,
-                             poisCallback: (content: string) => Promise<void>,
-                             imagesCallback: (content: string) => Promise<void>): Promise<any> {
+    public async openIHMfile(blob: Blob,
+        tilesCallback: (address: string, content: string, percentage: number) => Promise<void>,
+        poisCallback: (content: string) => Promise<void>,
+        imagesCallback: (content: string, percentage: number) => Promise<void>,
+        glyphsCallback: (percentage: number) => void
+    ): Promise<void> {
         let zip = new JSZip();
-        await zip.loadAsync(file);
+        await zip.loadAsync(blob);
         await this.writeSources(zip, tilesCallback);
         await this.writePois(zip, poisCallback);
         await this.writeImages(zip, imagesCallback);
@@ -191,17 +196,17 @@ export class FileService {
             return;
         }
         await this.writeStyles(zip);
-        await this.writeGlyphs(zip);
+        await this.writeGlyphs(blob, zip, glyphsCallback);
         await this.writeSprite(zip);
     }
 
-    private async writeSources(zip: JSZip, tilesCallback: (address: string, content: string) => Promise<void>) {
+    private async writeSources(zip: JSZip, tilesCallback: (address: string, content: string, percentage: number) => Promise<void>) {
         let sources = Object.keys(zip.files).filter(name => name.startsWith("sources/") && name.endsWith(".json"));
         for (let sourceFileIndex = 0; sourceFileIndex < sources.length; sourceFileIndex++) {
             let sourceFile = sources[sourceFileIndex];
             let sourceName = sourceFile.split("/")[1];
-            this.toastService.info((sourceFileIndex / sources.length * 100).toFixed(2) + "%");
-            await tilesCallback(sourceName, await zip.file(sourceFile).async("text") as string);
+            await tilesCallback(sourceName, await zip.file(sourceFile).async("text") as string,
+                ((sourceFileIndex + 1) / sources.length * 100));
             this.loggingService.debug("Added: " + sourceFile);
         }
     }
@@ -215,30 +220,28 @@ export class FileService {
         }
     }
 
-    private async writeImages(zip: JSZip, imagesCallback: (content: string) => Promise<void>) {
+    private async writeImages(zip: JSZip, imagesCallback: (content: string, percentage: number) => Promise<void>) {
         let images = Object.keys(zip.files).filter(name => name.startsWith("images/") && name.endsWith(".json"));
         for (let imagesFileIndex = 0; imagesFileIndex < images.length; imagesFileIndex++) {
             let imagesFile = images[imagesFileIndex];
-            this.toastService.info((imagesFileIndex / images.length * 100).toFixed(2) + "%");
-            await imagesCallback(await zip.file(imagesFile).async("text") as string);
+            await imagesCallback(await zip.file(imagesFile).async("text") as string, (imagesFileIndex + 1) / images.length * 100);
             this.loggingService.debug("Added images: " + imagesFile);
         }
     }
 
-    private async writeGlyphs(zip: JSZip) {
-        let fonts = Object.keys(zip.files).filter(name => name.startsWith("glyphs/") && name.endsWith(".pbf"));
-        for (let fontFileIndex = 0; fontFileIndex < fonts.length; fontFileIndex++) {
-            let fontFile = fonts[fontFileIndex];
-            let folderSplit = fontFile.split("/");
-            if (folderSplit.length !== 3) {
-                continue;
-            }
-            this.toastService.info((fontFileIndex / fonts.length).toFixed(2) + "%");
-            await this.fileSystemWrapper.createDir(this.fileSystemWrapper.dataDirectory, folderSplit[0], true);
-            await this.fileSystemWrapper.createDir(this.fileSystemWrapper.dataDirectory, folderSplit[0] + "/" + folderSplit[1], true);
-            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, fontFile,
-                await zip.file(fontFile).async("blob") as Blob, { append: false, replace: true, truncate: 0 });
+    private async writeGlyphs(blob: Blob, zip: JSZip, progressCallback: (percentage: number) => void) {
+        let fonts = Object.keys(zip.files).filter(name => name.startsWith("glyphs/"));
+        if (fonts.length !== Object.keys(zip.files).length) {
+            this.loggingService.error("Invalid glyph file - there are files outside the glyph folder that are not allowed");
+            return;
         }
+        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, "fonts.zip", blob,
+            { truncate: 0, replace: true, append: false });
+
+        let subject = new Subject<{ loaded: number, total: number }>();
+        subject.pipe(throttleTime(500)).subscribe((p) => this.ngZone.run(() => progressCallback((p.loaded / p.total) * 100)));
+        await this.zip.unzip(this.fileSystemWrapper.cacheDirectory + "fonts.zip",
+            this.fileSystemWrapper.dataDirectory, (p) => subject.next(p));
         this.loggingService.debug("Write glyphs finished succefully!");
     }
 

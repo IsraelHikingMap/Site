@@ -259,6 +259,7 @@ export class ResourcesService {
     public findMissingRoutesAfterUpload: string;
     public findMissingRoutesAfterUploadHint: string;
     public navigateWithWaze: string;
+    public downloadWifiInstruction: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -751,6 +752,8 @@ export class ResourcesService {
         this.findMissingRoutesAfterUploadHint = this.gettextCatalog.getString("Asks you to classify missing routes " +
             "on the map after you upload a recording");
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
+        this.downloadWifiInstruction = this.gettextCatalog
+            .getString("Press the download button to start downloading, switch to wifi if needed");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

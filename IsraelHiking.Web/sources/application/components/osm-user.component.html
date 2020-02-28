@@ -35,7 +35,7 @@
                         </div>
                     </div>
                     <div fxLayout="row" class="margin-top margin-sides">
-                        <mat-progress-bar [color]="getProgressbarType()" [mode]="'determinate'" [value]="getRankPercentage()"></mat-progress-bar>
+                        <mat-progress-bar [color]="getProgressbarType()" mode="determinate" [value]="getRankPercentage()"></mat-progress-bar>
                     </div>
                     <div fxLayout="row" class="margin-sides">
                         <span class="text-small">{{userInfo.changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</span>
