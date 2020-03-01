@@ -12,6 +12,7 @@ const SELECT_BASE_LAYER = "SELECT_BASE_LAYER";
 const EXPAND_GROUP = "EXPAND_GROUP";
 const COLLAPSE_GROUP = "COLLAPSE_GROUP";
 const SET_ITEM_VISIBILITY = "SET_ITEM_VISIBILITY";
+const TOGGLE_OFFLINE = "TOGGLE_OFFLINE";
 
 export interface AddBaseLayerPayload {
     layerData: EditableLayer;
@@ -46,6 +47,11 @@ export interface ToggleGroupPayload {
 export interface SetItemVisibilityPayload {
     name: string;
     visible: boolean;
+}
+
+export interface ToggleOfflinePayload {
+    key: string;
+    isOverlay: boolean;
 }
 
 export class AddBaseLayerAction extends BaseAction<AddBaseLayerPayload> {
@@ -105,6 +111,12 @@ export class CollapseGroupAction extends BaseAction<ToggleGroupPayload> {
 export class SetItemVisibilityAction extends BaseAction<SetItemVisibilityPayload> {
     constructor(payload: SetItemVisibilityPayload) {
         super(SET_ITEM_VISIBILITY, payload);
+    }
+}
+
+export class ToggleOfflineAction extends BaseAction<ToggleOfflinePayload> {
+    constructor(payload: ToggleOfflinePayload) {
+        super(TOGGLE_OFFLINE, payload);
     }
 }
 
@@ -216,6 +228,36 @@ class LayersReducer {
             ...lastState,
             visible
         };
+    }
+
+    @ReduxAction(TOGGLE_OFFLINE)
+    public toggleOffline(lastState: LayersState, action: ToggleOfflineAction): LayersState {
+        if (action.payload.isOverlay) {
+            let overlays = [...lastState.overlays];
+            let layer = overlays.find(b => b.key === action.payload.key);
+            let layerData = {
+                ...layer,
+                isOfflineOn: !layer.isOfflineOn
+            } as Overlay
+            overlays.splice(overlays.indexOf(layer), 1, layerData);
+            return {
+                ...lastState,
+                overlays
+            };
+        } else {
+            let baseLayers = [...lastState.baseLayers];
+            let layer = baseLayers.find(b => b.key === action.payload.key);
+            let layerData = {
+                ...layer,
+                isOfflineOn: !layer.isOfflineOn
+            } as EditableLayer
+            baseLayers.splice(baseLayers.indexOf(layer), 1, layerData);
+            return {
+                ...lastState,
+                baseLayers
+            };
+        }
+
     }
 }
 

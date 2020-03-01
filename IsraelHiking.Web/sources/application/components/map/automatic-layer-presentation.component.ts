@@ -28,6 +28,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     public before: string;
     @Input()
     public isBaselayer: string;
+    @Input()
+    public isOffline: boolean;
 
     private rasterSourceId;
     private rasterLayerId;
@@ -79,7 +81,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
 
     async ngOnChanges(changes: SimpleChanges) {
         if (this.sourceAdded) {
-            await this.removeLayer(changes.address.previousValue);
+            let addressToRemove = changes.address ? changes.address.previousValue : this.address;
+            await this.removeLayer(addressToRemove);
             this.createLayer();
         }
     }
@@ -128,7 +131,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     private async createJsonLayer() {
-        let response = await this.fileService.getStyleJsonContent(this.address);
+        let response = await this.fileService.getStyleJsonContent(this.address, this.isOffline);
         let language = this.resources.getCurrentLanguageCodeSimplified();
         let styleJson = JSON.parse(JSON.stringify(response).replace(/name_he/g, `name_${language}`)) as Style;
         let sources = styleJson.sources;

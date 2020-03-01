@@ -8,6 +8,8 @@
 
 export interface EditableLayer extends LayerData {
     isEditable: boolean;
+    isOfflineAvailable: boolean;
+    isOfflineOn: boolean;
     id: string;
 }
 

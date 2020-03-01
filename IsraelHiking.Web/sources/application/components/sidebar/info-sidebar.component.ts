@@ -1,7 +1,8 @@
 import { Component } from "@angular/core";
+import { MatDialog } from "@angular/material";
 import { Router } from "@angular/router";
-import { remove } from "lodash";
 import { NgRedux } from "@angular-redux/store";
+import { remove } from "lodash";
 
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -11,8 +12,10 @@ import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
 import { BaseMapComponent } from "../base-map.component";
 import { LegendItemComponent, ILegendItem } from "./legend-item.component";
+import { DownloadProgressDialogComponent } from "../dialogs/download-progress-dialog.component";
 import { ApplicationState } from "../../models/models";
 import { RouteStrings } from "../../services/hash.service";
+import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP, SATELLITE } from "../../reducres/initial-state";
 
 export interface ILegendSection {
     items: ILegendItem[];
@@ -30,13 +33,14 @@ export class InfoSidebarComponent extends BaseMapComponent {
     private selectedSection: ILegendSection;
 
     constructor(resources: ResourcesService,
-                private readonly router: Router,
-                private readonly purchaseService: PurchaseService,
-                private readonly sidebarService: SidebarService,
-                private readonly layersService: LayersService,
-                private readonly runningContext: RunningContextService,
-                private readonly toastService: ToastService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+        private readonly matDialog: MatDialog,
+        private readonly router: Router,
+        private readonly purchaseService: PurchaseService,
+        private readonly sidebarService: SidebarService,
+        private readonly layersService: LayersService,
+        private readonly runningContext: RunningContextService,
+        private readonly toastService: ToastService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
 
         this.selectedTabIndex = 0;
@@ -49,7 +53,14 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     public showDownloadDialog(): boolean {
-        return !this.runningContext.isCordova && !this.runningContext.isIos;
+        return !this.runningContext.isCordova && !this.runningContext.isIos; // HM TODO: make this available for iOS as well
+    }
+
+    public getOfflinePurchaseGraditudeText(): string {
+        if (this.runningContext.isCordova && this.purchaseService.isOfflineAvailable) {
+            return this.resources.offlinePurchaseGraditude;
+        }
+        return "";
     }
 
     public openDownloadDialog = () => {
@@ -57,6 +68,19 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     public orderOfflineMaps() {
+        if (this.purchaseService.isOfflineAvailable) {
+            this.sidebarService.hide();
+            this.matDialog.open(DownloadProgressDialogComponent, {
+                hasBackdrop: false,
+                closeOnNavigation: false,
+                disableClose: true,
+                position: {
+                    top: "5px",
+                },
+                width: "80%"
+            });
+            return;
+        }
         let userInfo = this.ngRedux.getState().userState.userInfo;
         if (userInfo == null || !userInfo.id) {
             this.toastService.warning(this.resources.loginRequired);
@@ -1083,11 +1107,11 @@ export class InfoSidebarComponent extends BaseMapComponent {
         ];
         // End Of Legend content definition //
 
-        if (this.layersService.getSelectedBaseLayer().key === LayersService.ISRAEL_MTB_MAP) {
+        if (this.layersService.getSelectedBaseLayer().key === ISRAEL_MTB_MAP) {
             this.removeMtbUnwantedLegend();
-        } else if (this.layersService.getSelectedBaseLayer().key === LayersService.ISRAEL_HIKING_MAP) {
+        } else if (this.layersService.getSelectedBaseLayer().key === ISRAEL_HIKING_MAP) {
             this.removeIhmUnwantedLegend();
-        } else if (this.layersService.getSelectedBaseLayer().key === LayersService.ESRI) {
+        } else if (this.layersService.getSelectedBaseLayer().key === SATELLITE) {
             this.legendSections = [];
         }
     }

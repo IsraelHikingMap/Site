@@ -65,10 +65,6 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         return this.layersService.getSelectedBaseLayer();
     }
 
-    public getBaseLayerAddress() {
-        return this.layersService.getSelectedBaseLayerAddress();
-    }
-
     public isVisible(categoriesType: CategoriesType) {
         return this.categoriesLayerFactory.get(categoriesType).isVisible();
     }

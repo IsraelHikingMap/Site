@@ -47,7 +47,7 @@ export class LegendItemComponent extends BaseMapComponent {
     }
 
     public getUrl() {
-        return this.layersService.getSelectedBaseLayerAddress();
+        return this.layersService.getSelectedBaseLayer().address;
     }
 
     public moveToLocation(item: ILegendItem) {

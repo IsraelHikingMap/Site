@@ -19,9 +19,10 @@ import { PoiService, CategoriesType, ICategory } from "../../services/poi.servic
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SetSelectedRouteAction } from "../../reducres/route-editing-state.reducer";
 import { ApplicationState, RouteData, EditableLayer, Overlay } from "../../models/models";
-import { ChangeRoutePropertiesAction, DeleteAllRoutesAction } from "../../reducres/routes.reducer";
-import { ToastService } from "../../services/toast.service";
+import { ChangeRoutePropertiesAction } from "../../reducres/routes.reducer";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducres/layers.reducer";
+import { RunningContextService } from "../../services/running-context.service";
+import { PurchaseService } from "../../services/purchase.service";
 
 @Component({
     selector: "layers-sidebar",
@@ -46,13 +47,15 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public isAdvanced: Observable<boolean>;
 
     constructor(resources: ResourcesService,
-                private readonly dialog: MatDialog,
-                private readonly layersService: LayersService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly categoriesLayerFactory: CategoriesLayerFactory,
-                private readonly sidebarService: SidebarService,
-                private readonly poiService: PoiService,
-                private ngRedux: NgRedux<ApplicationState>) {
+        private readonly dialog: MatDialog,
+        private readonly layersService: LayersService,
+        private readonly selectedRouteService: SelectedRouteService,
+        private readonly categoriesLayerFactory: CategoriesLayerFactory,
+        private readonly sidebarService: SidebarService,
+        private readonly poiService: PoiService,
+        private readonly runningContextService: RunningContextService,
+        private readonly purchaseService: PurchaseService,
+        private ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
     }
@@ -146,6 +149,17 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public toggleVisibility(overlay: Overlay) {
         this.layersService.toggleOverlay(overlay);
+    }
+
+    public showOfflineButton(layer: EditableLayer) {
+        return layer.isOfflineAvailable &&
+            this.runningContextService.isCordova &&
+            this.purchaseService.isOfflineAvailable;
+    }
+
+    public toggleOffline(event: Event, layer: EditableLayer, isOverlay: boolean) {
+        event.stopPropagation();
+        this.layersService.toggleOffline(layer, isOverlay);
     }
 
     public toggleRoute(routeData: RouteData) {

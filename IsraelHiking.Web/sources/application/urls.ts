@@ -29,8 +29,8 @@ export class Urls {
     public static readonly facebook = "http://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";
 
-    public static readonly DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";
-    public static readonly MTB_TILES_ADDRESS = "/mtbTiles/{z}/{x}/{y}.png";
-    public static readonly OVERLAY_TILES_ADDRESS = "/OverlayTiles/{z}/{x}/{y}.png";
-    public static readonly OVERLAY_MTB_ADDRESS = "/OverlayMTB/{z}/{x}/{y}.png";
+    public static readonly DEFAULT_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json";
+    public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB.json";
+    public static readonly OVERLAY_TILES_ADDRESS = Urls.baseTilesAddress + "/OverlayTiles/{z}/{x}/{y}.png";
+    public static readonly OVERLAY_MTB_ADDRESS = Urls.baseTilesAddress + "/OverlayMTB/{z}/{x}/{y}.png";
 }

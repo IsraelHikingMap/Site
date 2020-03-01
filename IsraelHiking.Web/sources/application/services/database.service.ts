@@ -8,7 +8,7 @@ import * as mapboxgl from "mapbox-gl";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import { initialState } from "../reducres/initial-state";
+import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, ESRI } from "../reducres/initial-state";
 import { classToActionMiddleware } from "../reducres/reducer-action-decorator";
 import { rootReducer } from "../reducres/root.reducer";
 import { ApplicationState, LatLngAlt } from "../models/models";
@@ -66,15 +66,7 @@ export class DatabaseService {
         let storedState = initialState;
         let dbState = await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).get(DatabaseService.STATE_DOC_ID);
         if (dbState != null) {
-            storedState = deepmerge(initialState, dbState.state, {
-                arrayMerge: (destinationArray, sourceArray) => {
-                    return sourceArray == null ? destinationArray : sourceArray;
-                }
-            });
-            storedState.inMemoryState = initialState.inMemoryState;
-            if (!this.runningContext.isCordova) {
-                storedState.routes = initialState.routes;
-            }
+            storedState = this.initialStateUpgrade(dbState.state, initialState);
         } else {
             this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).put({
                 id: DatabaseService.STATE_DOC_ID,
@@ -186,5 +178,34 @@ export class DatabaseService {
             return imageAndData.data;
         }
         return null;
+    }
+
+    private initialStateUpgrade(dbState: ApplicationState, initialState: ApplicationState): ApplicationState {
+        let storedState = deepmerge(initialState, dbState, {
+            arrayMerge: (destinationArray, sourceArray) => {
+                return sourceArray == null ? destinationArray : sourceArray;
+            }
+        });
+        storedState.inMemoryState = initialState.inMemoryState;
+        if (!this.runningContext.isCordova) {
+            storedState.routes = initialState.routes;
+        }
+        if (storedState.configuration.version === "8.0") {
+            this.loggingService.info("Upgrading state from version 8.0 to 9.0");
+            // HM TODO: bring this back!
+            //storedState.configuration.version = "9.0";
+            for (let key of [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP]) {
+                let layer = storedState.layersState.baseLayers.find(l => l.key === key);
+                let layerToReplaceWith = initialState.layersState.baseLayers.find(l => l.key === key);
+                storedState.layersState.baseLayers.splice(storedState.layersState.baseLayers.indexOf(layer), 1, layerToReplaceWith);
+            }
+            let layer = storedState.layersState.baseLayers.find(l => l.key === ESRI);
+            storedState.layersState.baseLayers.splice(storedState.layersState.baseLayers.indexOf(layer), 1);
+            if (storedState.layersState.baseLayers.find(l => l.key === SATELLITE) == null) {
+                storedState.layersState.baseLayers.splice(2, 0, initialState.layersState.baseLayers.find(l => l.key === SATELLITE));
+            }
+            // HM TODO: overlays?
+        }
+        return storedState;
     }
 }

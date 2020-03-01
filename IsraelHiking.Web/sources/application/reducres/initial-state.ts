@@ -1,4 +1,4 @@
-import { StateWithHistory } from "redux-undo";
+﻿import { StateWithHistory } from "redux-undo";
 
 import {
     ApplicationState,
@@ -14,6 +14,7 @@ import { Urls } from "../urls";
 export const ISRAEL_HIKING_MAP = "Israel Hiking Map";
 export const ISRAEL_MTB_MAP = "Israel MTB Map";
 export const ESRI = "ESRI";
+export const SATELLITE = "Satellite Imagery";
 export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
 
@@ -24,7 +25,7 @@ export const initialState =
             isBatteryOptimization: false,
             isAutomaticRecordingUpload: true,
             // isFindMissingRoutesAfterUpload: false,
-            version: "8.0"
+            version: "9.0"
         } as Configuration,
         location: {
             longitude: 35.12,
@@ -54,6 +55,8 @@ export const initialState =
                     key: ISRAEL_HIKING_MAP,
                     address: Urls.DEFAULT_TILES_ADDRESS,
                     isEditable: false,
+                    isOfflineAvailable: true,
+                    isOfflineOn: false,
                     minZoom: 7,
                     maxZoom: 16
                 },
@@ -61,31 +64,39 @@ export const initialState =
                     key: ISRAEL_MTB_MAP,
                     address: Urls.MTB_TILES_ADDRESS,
                     isEditable: false,
+                    isOfflineAvailable: true,
+                    isOfflineOn: false,
                     minZoom: 7,
                     maxZoom: 16
                 },
                 {
-                    key: ESRI,
-                    address: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                    key: SATELLITE,
+                    address: "https://tiles.arcgis.com/tiles/JcXY3lLZni6BK4El/arcgis/rest/services/תצלום_אוויר_2015/MapServer/tile/{z}/{y}/{x}",
                     isEditable: false,
-                    minZoom: 0,
-                    maxZoom: 16
+                    isOfflineAvailable: false,
+                    isOfflineOn: false,
+                    minZoom: 7,
+                    maxZoom: 17
                 }
             ],
             overlays: [
                 {
                     key: HIKING_TRAILS,
-                    address: Urls.baseTilesAddress + Urls.OVERLAY_TILES_ADDRESS,
+                    address: Urls.OVERLAY_TILES_ADDRESS,
                     minZoom: 7,
                     maxZoom: 16,
+                    isOfflineAvailable: true,
+                    isOfflineOn: false,
                     visible: false,
                     isEditable: false
                 },
                 {
                     key: BICYCLE_TRAILS,
-                    address: Urls.baseTilesAddress + Urls.OVERLAY_MTB_ADDRESS,
+                    address: Urls.OVERLAY_MTB_ADDRESS,
                     minZoom: 7,
                     maxZoom: 16,
+                    isOfflineAvailable: true,
+                    isOfflineOn: false,
                     visible: false,
                     isEditable: false
                 }

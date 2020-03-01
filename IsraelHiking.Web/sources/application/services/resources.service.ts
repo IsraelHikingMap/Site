@@ -210,6 +210,7 @@ export class ResourcesService {
     public iHaveReadAndAgree: string;
     public submit: string;
     public esri: string;
+    public satelliteImagery: string;
     public suggestAsPublicTrack: string;
     public createNakebHike: string;
     public flowers: string;
@@ -259,7 +260,7 @@ export class ResourcesService {
     public findMissingRoutesAfterUpload: string;
     public findMissingRoutesAfterUploadHint: string;
     public navigateWithWaze: string;
-    public downloadWifiInstruction: string;
+    public offlinePurchaseGraditude: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -511,7 +512,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1581966112275");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1583097098043");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -701,6 +702,7 @@ export class ResourcesService {
         this.iHaveReadAndAgree = this.gettextCatalog.getString("I have read and agree to the terms");
         this.submit = this.gettextCatalog.getString("Submit");
         this.esri = this.gettextCatalog.getString("ESRI");
+        this.satelliteImagery = this.gettextCatalog.getString("Satellite Imagery");
         this.suggestAsPublicTrack = this.gettextCatalog.getString("Suggest as public track");
         this.createNakebHike = this.gettextCatalog.getString("Create new hike in Nakeb");
         this.flowers = this.gettextCatalog.getString("Flowers");
@@ -752,8 +754,7 @@ export class ResourcesService {
         this.findMissingRoutesAfterUploadHint = this.gettextCatalog.getString("Asks you to classify missing routes " +
             "on the map after you upload a recording");
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
-        this.downloadWifiInstruction = this.gettextCatalog
-            .getString("Press the download button to start downloading, switch to wifi if needed");
+        this.offlinePurchaseGraditude = this.gettextCatalog.getString("Thanks for purchasing! download instructions here...");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

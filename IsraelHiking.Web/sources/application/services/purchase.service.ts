@@ -1,16 +1,16 @@
 import { Injectable } from "@angular/core";
 import { InAppPurchase2, IAPProduct } from "@ionic-native/in-app-purchase-2/ngx";
-import { HttpClient } from "@angular/common/http";
-import { MatDialog } from "@angular/material";
 
 import { RunningContextService } from "./running-context.service";
-import { DownloadProgressDialogComponent } from "../components/dialogs/download-progress-dialog.component";
 
 @Injectable()
 export class PurchaseService {
+    public isOfflineAvailable: boolean;
+
     constructor(private readonly store: InAppPurchase2,
-                private readonly runningContextService: RunningContextService,
-                private readonly matDialog: MatDialog) {
+        private readonly runningContextService: RunningContextService) {
+        // HM TODO: change this to false
+        this.isOfflineAvailable = true;
     }
 
     public initialize() {
@@ -26,7 +26,7 @@ export class PurchaseService {
         });
         this.store.when("product").updated((p: IAPProduct) => {
             if (p.owned) {
-                this.openDialogIfNeeded();
+                this.isOfflineAvailable = true;
                 return;
             }
         });
@@ -36,16 +36,6 @@ export class PurchaseService {
     }
 
     public order(applicationUsername: string) {
-        // HM TODO: switch back
-        // this.store.order("offline_map", { applicationUsername });
-        this.openDialogIfNeeded();
-    }
-
-    private openDialogIfNeeded() {
-        // HM TODO: check what needs to be updated
-        let needUpdate = true;
-        if (needUpdate) {
-            this.matDialog.open(DownloadProgressDialogComponent);
-        }
+        this.store.order("offline_map", { applicationUsername });
     }
 }

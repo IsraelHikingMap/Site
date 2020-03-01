@@ -22,8 +22,17 @@ import {
     SelectBaseLayerAction,
     RemoveOverlayAction,
     RemoveBaseLayerAction,
-    AddOverlayAction
+    AddOverlayAction,
+    ToggleOfflineAction,
 } from "../../reducres/layers.reducer";
+import {
+    ISRAEL_HIKING_MAP,
+    ISRAEL_MTB_MAP,
+    SATELLITE,
+    ESRI,
+    HIKING_TRAILS,
+    BICYCLE_TRAILS
+} from "../../reducres/initial-state";
 
 interface IUserLayer extends LayerData {
     isOverlay: boolean;
@@ -35,12 +44,7 @@ interface IUserLayer extends LayerData {
 export class LayersService {
     public static readonly MIN_ZOOM = 7;
     public static readonly MAX_NATIVE_ZOOM = 16;
-    public static readonly ISRAEL_MTB_MAP = "Israel MTB Map";
-    public static readonly ISRAEL_HIKING_MAP = "Israel Hiking Map";
-    public static readonly ESRI = "ESRI";
 
-    private static readonly HIKING_TRAILS = "Hiking Trails";
-    private static readonly BICYCLE_TRAILS = "Bicycle Trails";
     private static CUSTOM_LAYER = "Custom Layer";
 
     private baseLayers: EditableLayer[];
@@ -81,19 +85,6 @@ export class LayersService {
 
     public getSelectedBaseLayer(): EditableLayer {
         return this.baseLayers.find(bl => this.compareKeys(bl.key, this.selectedBaseLayerKey)) || this.baseLayers[0];
-    }
-
-    public getSelectedBaseLayerAddress() {
-        let selectedBaseLayer = this.getSelectedBaseLayer();
-        let address = selectedBaseLayer.address;
-        if (selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP || selectedBaseLayer.key === LayersService.ISRAEL_MTB_MAP) {
-            address = this.getTileAddressForCurrentLanguage(address);
-        }
-        return address;
-    }
-
-    private getTileAddressForCurrentLanguage(addressPostfix: string): string {
-        return Urls.baseTilesAddress + this.resourcesService.currentLanguage.tilesFolder + addressPostfix;
     }
 
     private getUserLayers = async (): Promise<any> => {
@@ -174,7 +165,9 @@ export class LayersService {
     private addBaseLayerFromData(layerData: LayerData): EditableLayer {
         let baseLayer = {
             ...layerData,
-            isEditable: true
+            isEditable: true,
+            isOfflineAvailable: false,
+            isOfflineOn: false
         } as EditableLayer;
         this.ngRedux.dispatch(new AddBaseLayerAction({
             layerData: baseLayer
@@ -183,9 +176,10 @@ export class LayersService {
     }
 
     private async addBaseLayerToDatabase(layer: EditableLayer) {
-        if (layer.key === LayersService.ISRAEL_HIKING_MAP ||
-            layer.key === LayersService.ISRAEL_MTB_MAP ||
-            layer.key === LayersService.ESRI) {
+        if (layer.key === ISRAEL_HIKING_MAP ||
+            layer.key === ISRAEL_MTB_MAP ||
+            layer.key === ESRI ||
+            layer.key === SATELLITE) {
             return;
         }
         if (!this.authorizationService.isLoggedIn()) {
@@ -234,7 +228,9 @@ export class LayersService {
         let overlay = {
             ...layerData,
             visible,
-            isEditable: true
+            isEditable: true,
+            isOfflineAvailable: false,
+            isOfflineOn: false,
         } as Overlay;
         this.ngRedux.dispatch(new AddOverlayAction({
             layerData: overlay
@@ -243,8 +239,8 @@ export class LayersService {
     }
 
     private async addOverlayToDatabase(layer: Overlay) {
-        if (layer.key === LayersService.HIKING_TRAILS ||
-            layer.key === LayersService.BICYCLE_TRAILS) {
+        if (layer.key === HIKING_TRAILS ||
+            layer.key === BICYCLE_TRAILS) {
             return;
         }
         if (!this.authorizationService.isLoggedIn()) {
@@ -326,10 +322,10 @@ export class LayersService {
             }
         }));
         if (newVisibility) {
-            if ((overlay.key === LayersService.HIKING_TRAILS &&
-                this.selectedBaseLayerKey === LayersService.ISRAEL_HIKING_MAP) ||
-                (overlay.key === LayersService.BICYCLE_TRAILS &&
-                this.selectedBaseLayerKey === LayersService.ISRAEL_MTB_MAP)) {
+            if ((overlay.key === HIKING_TRAILS &&
+                this.selectedBaseLayerKey === ISRAEL_HIKING_MAP) ||
+                (overlay.key === BICYCLE_TRAILS &&
+                this.selectedBaseLayerKey === ISRAEL_MTB_MAP)) {
                 this.toastService.warning(this.resourcesService.baseLayerAndOverlayAreOverlapping);
             }
         }
@@ -367,7 +363,9 @@ export class LayersService {
             address: layerData.address,
             minZoom: layerData.minZoom,
             maxZoom: layerData.maxZoom,
-            isEditable: true
+            isEditable: true,
+            isOfflineAvailable: false,
+            isOfflineOn: false,
         } as EditableLayer);
     }
 
@@ -406,5 +404,12 @@ export class LayersService {
 
     private compareKeys(key1: string, key2: string): boolean {
         return key1.trim().toLowerCase() === key2.trim().toLowerCase();
+    }
+
+    public toggleOffline(layer: EditableLayer, isOverlay) {
+        this.ngRedux.dispatch(new ToggleOfflineAction({
+            key: layer.key,
+            isOverlay
+        }));
     }
 }

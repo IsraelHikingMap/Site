@@ -3,7 +3,9 @@ import { HttpClient } from "@angular/common/http";
 import { Style } from "mapbox-gl";
 import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 import { Zip } from "@ionic-native/zip/ngx";
+import { WebView } from "@ionic-native/ionic-webview/ngx"
 import { Subject } from "rxjs";
+import { last } from "lodash";
 import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -30,6 +32,7 @@ export class FileService {
     constructor(private readonly httpClient: HttpClient,
         private readonly fileSystemWrapper: FileSystemWrapper,
         private readonly zip: Zip,
+        private readonly webView: WebView,
         private readonly runningContextService: RunningContextService,
         private readonly imageResizeService: ImageResizeService,
         private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
@@ -96,7 +99,7 @@ export class FileService {
         let path = relativePath;
         if (this.runningContextService.isIos) {
             path = this.fileSystemWrapper.applicationDirectory + "www/" + relativePath;
-            path = (window as any).Ionic.WebView.convertFileSrc(path);
+            path = this.webView.convertFileSrc(path);
         } else {
             path = "http://localhost/" + relativePath;
         }
@@ -106,12 +109,15 @@ export class FileService {
     public getDataUrl(url: string): string {
         if (!url.startsWith("https://") && this.runningContextService.isCordova) {
 
-            url = (window as any).Ionic.WebView.convertFileSrc(this.fileSystemWrapper.dataDirectory + url.replace("custom://", ""));
+            url = this.webView.convertFileSrc(this.fileSystemWrapper.dataDirectory + url.replace("custom://", ""));
         }
         return url;
     }
 
-    public getStyleJsonContent(url: string): Promise<Style> {
+    public getStyleJsonContent(url: string, isOffline: boolean): Promise<Style> {
+        if (isOffline) {
+            url = last(url.split("/"));
+        }
         return this.httpClient.get(this.getDataUrl(url)).toPromise() as Promise<Style>;
     }
 
