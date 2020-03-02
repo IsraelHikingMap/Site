@@ -71,7 +71,8 @@ export const initialState =
                 },
                 {
                     key: SATELLITE,
-                    address: "https://tiles.arcgis.com/tiles/JcXY3lLZni6BK4El/arcgis/rest/services/תצלום_אוויר_2015/MapServer/tile/{z}/{y}/{x}",
+                    address: "https://tiles.arcgis.com/tiles/JcXY3lLZni6BK4El/arcgis/rest/services/" +
+                        "תצלום_אוויר_2015/MapServer/tile/{z}/{y}/{x}",
                     isEditable: false,
                     isOfflineAvailable: false,
                     isOfflineOn: false,

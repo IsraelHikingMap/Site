@@ -17,10 +17,10 @@ export class DownloadProgressDialogComponent extends BaseMapComponent {
     public errorText: string;
 
     constructor(resources: ResourcesService,
-        private readonly matDialogRef: MatDialogRef<DownloadProgressDialogComponent>,
-        private readonly httpClient: HttpClient,
-        private readonly fileService: FileService,
-        private readonly databaseService: DatabaseService) {
+                private readonly matDialogRef: MatDialogRef<DownloadProgressDialogComponent>,
+                private readonly httpClient: HttpClient,
+                private readonly fileService: FileService,
+                private readonly databaseService: DatabaseService) {
         super(resources);
         this.progressPersentage = 0;
         this.startDownload();

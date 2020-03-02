@@ -33,14 +33,14 @@ export class InfoSidebarComponent extends BaseMapComponent {
     private selectedSection: ILegendSection;
 
     constructor(resources: ResourcesService,
-        private readonly matDialog: MatDialog,
-        private readonly router: Router,
-        private readonly purchaseService: PurchaseService,
-        private readonly sidebarService: SidebarService,
-        private readonly layersService: LayersService,
-        private readonly runningContext: RunningContextService,
-        private readonly toastService: ToastService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly matDialog: MatDialog,
+                private readonly router: Router,
+                private readonly purchaseService: PurchaseService,
+                private readonly sidebarService: SidebarService,
+                private readonly layersService: LayersService,
+                private readonly runningContext: RunningContextService,
+                private readonly toastService: ToastService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
 
         this.selectedTabIndex = 0;

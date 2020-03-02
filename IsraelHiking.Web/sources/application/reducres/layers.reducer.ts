@@ -238,7 +238,7 @@ class LayersReducer {
             let layerData = {
                 ...layer,
                 isOfflineOn: !layer.isOfflineOn
-            } as Overlay
+            } as Overlay;
             overlays.splice(overlays.indexOf(layer), 1, layerData);
             return {
                 ...lastState,
@@ -250,7 +250,7 @@ class LayersReducer {
             let layerData = {
                 ...layer,
                 isOfflineOn: !layer.isOfflineOn
-            } as EditableLayer
+            } as EditableLayer;
             baseLayers.splice(baseLayers.indexOf(layer), 1, layerData);
             return {
                 ...lastState,

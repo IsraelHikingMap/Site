@@ -48,6 +48,7 @@ describe("FileService", () => {
                         let fileService = new FileService(http,
                             null,
                             null,
+                            null,
                             runningContextService,
                             imageResizeService,
                             nonAngularObjectsFactory,

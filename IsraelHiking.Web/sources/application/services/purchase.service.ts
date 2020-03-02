@@ -8,7 +8,7 @@ export class PurchaseService {
     public isOfflineAvailable: boolean;
 
     constructor(private readonly store: InAppPurchase2,
-        private readonly runningContextService: RunningContextService) {
+                private readonly runningContextService: RunningContextService) {
         // HM TODO: change this to false
         this.isOfflineAvailable = true;
     }

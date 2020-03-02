@@ -47,15 +47,15 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public isAdvanced: Observable<boolean>;
 
     constructor(resources: ResourcesService,
-        private readonly dialog: MatDialog,
-        private readonly layersService: LayersService,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly categoriesLayerFactory: CategoriesLayerFactory,
-        private readonly sidebarService: SidebarService,
-        private readonly poiService: PoiService,
-        private readonly runningContextService: RunningContextService,
-        private readonly purchaseService: PurchaseService,
-        private ngRedux: NgRedux<ApplicationState>) {
+                private readonly dialog: MatDialog,
+                private readonly layersService: LayersService,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly categoriesLayerFactory: CategoriesLayerFactory,
+                private readonly sidebarService: SidebarService,
+                private readonly poiService: PoiService,
+                private readonly runningContextService: RunningContextService,
+                private readonly purchaseService: PurchaseService,
+                private ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
     }

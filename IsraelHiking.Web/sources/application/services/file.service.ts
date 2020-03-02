@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { Style } from "mapbox-gl";
 import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 import { Zip } from "@ionic-native/zip/ngx";
-import { WebView } from "@ionic-native/ionic-webview/ngx"
+import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { Subject } from "rxjs";
 import { last } from "lodash";
 import JSZip from "jszip";
@@ -30,16 +30,16 @@ export class FileService {
     public formats: IFormatViewModel[];
 
     constructor(private readonly httpClient: HttpClient,
-        private readonly fileSystemWrapper: FileSystemWrapper,
-        private readonly zip: Zip,
-        private readonly webView: WebView,
-        private readonly runningContextService: RunningContextService,
-        private readonly imageResizeService: ImageResizeService,
-        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
-        private readonly selectedRouteService: SelectedRouteService,
-        private readonly fitBoundsService: FitBoundsService,
-        private readonly loggingService: LoggingService,
-        private readonly ngZone: NgZone) {
+                private readonly fileSystemWrapper: FileSystemWrapper,
+                private readonly zip: Zip,
+                private readonly webView: WebView,
+                private readonly runningContextService: RunningContextService,
+                private readonly imageResizeService: ImageResizeService,
+                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly fitBoundsService: FitBoundsService,
+                private readonly loggingService: LoggingService,
+                private readonly ngZone: NgZone) {
         this.formats = [];
     }
 
@@ -187,10 +187,10 @@ export class FileService {
     }
 
     public async openIHMfile(blob: Blob,
-        tilesCallback: (address: string, content: string, percentage: number) => Promise<void>,
-        poisCallback: (content: string) => Promise<void>,
-        imagesCallback: (content: string, percentage: number) => Promise<void>,
-        glyphsCallback: (percentage: number) => void
+                             tilesCallback: (address: string, content: string, percentage: number) => Promise<void>,
+                             poisCallback: (content: string) => Promise<void>,
+                             imagesCallback: (content: string, percentage: number) => Promise<void>,
+                             glyphsCallback: (percentage: number) => void
     ): Promise<void> {
         let zip = new JSZip();
         await zip.loadAsync(blob);

@@ -66,7 +66,7 @@ export class DatabaseService {
         let storedState = initialState;
         let dbState = await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).get(DatabaseService.STATE_DOC_ID);
         if (dbState != null) {
-            storedState = this.initialStateUpgrade(dbState.state, initialState);
+            storedState = this.initialStateUpgrade(dbState.state);
         } else {
             this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).put({
                 id: DatabaseService.STATE_DOC_ID,
@@ -180,7 +180,7 @@ export class DatabaseService {
         return null;
     }
 
-    private initialStateUpgrade(dbState: ApplicationState, initialState: ApplicationState): ApplicationState {
+    private initialStateUpgrade(dbState: ApplicationState): ApplicationState {
         let storedState = deepmerge(initialState, dbState, {
             arrayMerge: (destinationArray, sourceArray) => {
                 return sourceArray == null ? destinationArray : sourceArray;
@@ -193,14 +193,14 @@ export class DatabaseService {
         if (storedState.configuration.version === "8.0") {
             this.loggingService.info("Upgrading state from version 8.0 to 9.0");
             // HM TODO: bring this back!
-            //storedState.configuration.version = "9.0";
+            // storedState.configuration.version = "9.0";
             for (let key of [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP]) {
                 let layer = storedState.layersState.baseLayers.find(l => l.key === key);
                 let layerToReplaceWith = initialState.layersState.baseLayers.find(l => l.key === key);
                 storedState.layersState.baseLayers.splice(storedState.layersState.baseLayers.indexOf(layer), 1, layerToReplaceWith);
             }
-            let layer = storedState.layersState.baseLayers.find(l => l.key === ESRI);
-            storedState.layersState.baseLayers.splice(storedState.layersState.baseLayers.indexOf(layer), 1);
+            let esriLayer = storedState.layersState.baseLayers.find(l => l.key === ESRI);
+            storedState.layersState.baseLayers.splice(storedState.layersState.baseLayers.indexOf(esriLayer), 1);
             if (storedState.layersState.baseLayers.find(l => l.key === SATELLITE) == null) {
                 storedState.layersState.baseLayers.splice(2, 0, initialState.layersState.baseLayers.find(l => l.key === SATELLITE));
             }
