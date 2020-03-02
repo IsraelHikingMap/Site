@@ -7,6 +7,7 @@ import { LayersService } from "../services/layers/layers.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { BaseMapComponent } from "./base-map.component";
 import { ApplicationState } from "../models/models";
+import { Urls } from "../urls";
 
 @Component({
     selector: "edit-osm",
@@ -27,6 +28,10 @@ export class EditOSMComponent extends BaseMapComponent {
     public getOsmAddress() {
         let poiState = this.ngRedux.getState().poiState;
         let baseLayerAddress = this.layersService.getSelectedBaseLayer().address;
+        if (baseLayerAddress.indexOf("{x}") === -1) {
+            // using the same logic that the server is using in ImageCreationService
+            baseLayerAddress = Urls.baseTilesAddress + "/Hebrew/tiles/{z}/{x}/{y}.png";
+        }
         if (poiState.isSidebarOpen &&
             poiState.selectedPointOfInterest != null &&
             poiState.selectedPointOfInterest.source.toLocaleLowerCase() === "osm") {
