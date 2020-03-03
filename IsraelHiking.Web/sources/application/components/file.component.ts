@@ -6,9 +6,10 @@ import { ResourcesService } from "../services/resources.service";
 import { FileService } from "../services/file.service";
 import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
-import { DataContainer } from "../models/models";
 import { RunningContextService } from "../services/running-context.service";
 import { DatabaseService } from "../services/database.service";
+import { PurchaseService } from "../services/purchase.service";
+import { DataContainer } from "../models/models";
 
 @Component({
     selector: "file",
@@ -20,11 +21,12 @@ export class FileComponent extends BaseMapComponent {
     public openFileElement: ElementRef;
 
     constructor(resources: ResourcesService,
-                private readonly dataContainerService: DataContainerService,
-                private readonly fileService: FileService,
-                private readonly toastService: ToastService,
-                private readonly runningContextService: RunningContextService,
-                private readonly databaseService: DatabaseService
+        private readonly dataContainerService: DataContainerService,
+        private readonly fileService: FileService,
+        private readonly toastService: ToastService,
+        private readonly runningContextService: RunningContextService,
+        private readonly databaseService: DatabaseService,
+        private readonly purchaseService: PurchaseService
     ) {
         super(resources);
     }
@@ -34,7 +36,7 @@ export class FileComponent extends BaseMapComponent {
         if (!file) {
             return;
         }
-        if (file.name.endsWith(".ihm")) {
+        if (file.name.endsWith(".ihm") && this.purchaseService.isOfflineAvailable) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             try {
                 await this.fileService.openIHMfile(file,

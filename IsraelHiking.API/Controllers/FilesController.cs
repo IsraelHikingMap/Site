@@ -21,8 +21,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private readonly IDataContainerConverterService _dataContainerConverterService;
-        private readonly IDropboxGateway _dropboxGateway;
-        private readonly LruCache<string, TokenAndSecret> _cache;
+        private readonly IOfflineFilesService _offlineFilesService;
 
         /// <summary>
         /// Controller's constructor
@@ -30,19 +29,16 @@ namespace IsraelHiking.API.Controllers
         /// <param name="elevationDataStorage"></param>
         /// <param name="remoteFileFetcherGateway"></param>
         /// <param name="dataContainerConverterService"></param>
-        /// <param name="dropboxGateway"></param>
-        /// <param name="cache"></param>
+        /// <param name="offlineFilesService"></param>
         public FilesController(IElevationDataStorage elevationDataStorage,
             IRemoteFileFetcherGateway remoteFileFetcherGateway,
             IDataContainerConverterService dataContainerConverterService,
-            IDropboxGateway dropboxGateway,
-            LruCache<string, TokenAndSecret> cache)
+            IOfflineFilesService offlineFilesService)
         {
             _elevationDataStorage = elevationDataStorage;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
             _dataContainerConverterService = dataContainerConverterService;
-            _dropboxGateway = dropboxGateway;
-            _cache = cache;
+            _offlineFilesService = offlineFilesService;
         }
 
         /// <summary>
@@ -160,10 +156,11 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("offline")]
-        public Task<List<string>> GetOfflineFiles([FromQuery] DateTime lastModified)
+        public List<string> GetOfflineFiles([FromQuery] DateTime lastModified)
         {
             // HM TODO: add receipt validation?
-            return _dropboxGateway.GetUpdatedFilesList(lastModified);
+            // User.Identity.Name
+            return _offlineFilesService.GetUpdatedFilesList(lastModified);
         }
 
         /// <summary>
@@ -173,11 +170,11 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("offline/{id}")]
-        public async Task<IActionResult> GetOfflineFile(string id)
+        public IActionResult GetOfflineFile(string id)
         {
             // HM TODO: add receipt validation?
-            var file = await _dropboxGateway.GetFileContent(id);
-            return File(file.Content, "application/zip", file.FileName);
+            var file = _offlineFilesService.GetFileContent(id);
+            return File(file, "application/zip", id);
         }
     }
 }

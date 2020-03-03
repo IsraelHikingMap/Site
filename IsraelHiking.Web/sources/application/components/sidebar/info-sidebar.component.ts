@@ -52,10 +52,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
         });
     }
 
-    public showDownloadDialog(): boolean {
-        return !this.runningContext.isCordova && !this.runningContext.isIos; // HM TODO: make this available for iOS as well
-    }
-
     public getOfflinePurchaseGraditudeText(): string {
         if (this.runningContext.isCordova && this.purchaseService.isOfflineAvailable) {
             return this.resources.offlinePurchaseGraditude;
