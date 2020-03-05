@@ -2,15 +2,17 @@ import { Injectable } from "@angular/core";
 import { InAppPurchase2, IAPProduct } from "@ionic-native/in-app-purchase-2/ngx";
 
 import { RunningContextService } from "./running-context.service";
+import { LoggingService } from "./logging.service";
 
 @Injectable()
 export class PurchaseService {
     public isOfflineAvailable: boolean;
 
     constructor(private readonly store: InAppPurchase2,
-                private readonly runningContextService: RunningContextService) {
-        // HM TODO: change this to false
-        this.isOfflineAvailable = true;
+        private readonly runningContextService: RunningContextService,
+        private readonly loggingService: LoggingService
+    ) {
+        this.isOfflineAvailable = false;
     }
 
     public initialize() {
@@ -24,18 +26,31 @@ export class PurchaseService {
             alias: "offline map",
             type: this.store.PAID_SUBSCRIPTION
         });
-        this.store.when("product").updated((p: IAPProduct) => {
-            if (p.owned) {
+        this.store.when("product").updated((product: IAPProduct) => {
+            this.loggingService.debug("Product updated: " + JSON.stringify(product));
+            if (product.owned) {
+                this.loggingService.debug("Product owned!");
                 this.isOfflineAvailable = true;
                 return;
             }
         });
-        this.store.when("product").approved(product => product.verify());
-        this.store.when("product").verified(product => product.finish());
+        this.store.when("product").approved(product => {
+            try {
+                this.loggingService.debug("Product approved: " + JSON.stringify(product));
+            } catch { }
+            return product.verify();
+        });
+        this.store.when("product").verified(product => {
+            try {
+                this.loggingService.debug("Product verified: " + JSON.stringify(product));
+            } catch { }
+            return product.finish();
+        });
         this.store.refresh();
     }
 
     public order(applicationUsername: string) {
+        this.loggingService.debug("Ordering product for: " + applicationUsername);
         this.store.order("offline_map", { applicationUsername });
     }
 }
