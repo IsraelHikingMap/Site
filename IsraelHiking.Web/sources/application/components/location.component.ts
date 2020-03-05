@@ -58,10 +58,6 @@ export class LocationComponent extends BaseMapComponent {
         this.updateLocationFeatureCollection(null);
 
         this.host.load.subscribe(() => {
-            let fullFilePath = this.fileService.getFullFilePath("content/gps-direction.png");
-            this.host.mapInstance.loadImage(fullFilePath, (_, img) => {
-                this.host.mapInstance.addImage("gps-direction", img);
-            });
             this.host.mapInstance.on("dragstart",
                 () => {
                     if (!this.isActive()) {

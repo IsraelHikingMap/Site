@@ -8,7 +8,7 @@ import * as mapboxgl from "mapbox-gl";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, ESRI } from "../reducres/initial-state";
+import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, ESRI, HIKING_TRAILS, BICYCLE_TRAILS } from "../reducres/initial-state";
 import { classToActionMiddleware } from "../reducres/reducer-action-decorator";
 import { rootReducer } from "../reducres/root.reducer";
 import { ApplicationState, LatLngAlt } from "../models/models";
@@ -204,7 +204,12 @@ export class DatabaseService {
             if (storedState.layersState.baseLayers.find(l => l.key === SATELLITE) == null) {
                 storedState.layersState.baseLayers.splice(2, 0, initialState.layersState.baseLayers.find(l => l.key === SATELLITE));
             }
-            // HM TODO: overlays?
+            for (let key of [HIKING_TRAILS, BICYCLE_TRAILS]) {
+                let layer = storedState.layersState.overlays.find(l => l.key === key);
+                let layerToReplaceWith = initialState.layersState.overlays.find(l => l.key === key);
+                layerToReplaceWith.visible = layer.visible;
+                storedState.layersState.overlays.splice(storedState.layersState.overlays.indexOf(layer), 1, layerToReplaceWith);
+            }
         }
         return storedState;
     }

@@ -27,7 +27,9 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     @Input()
     public before: string;
     @Input()
-    public isBaselayer: string;
+    public key: string;
+    @Input()
+    public isBaselayer: boolean;
     @Input()
     public isOffline: boolean;
 
@@ -51,20 +53,20 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         this.subscriptions = [];
     }
 
-    public ngOnInit() {
+    public async ngOnInit() {
         if (this.host.mapInstance == null) {
-            this.subscriptions.push(this.host.load.subscribe(() => {
-                this.createLayer();
+            this.subscriptions.push(this.host.load.subscribe(async () => {
+                await this.createLayer();
                 this.sourceAdded = true;
             }));
         } else {
-            this.createLayer();
+            await this.createLayer();
             this.sourceAdded = true;
         }
-        this.subscriptions.push(this.resources.languageChanged.subscribe(() => {
+        this.subscriptions.push(this.resources.languageChanged.subscribe(async () => {
             if (this.sourceAdded) {
                 this.removeLayer(this.address);
-                this.createLayer();
+                await this.createLayer();
             }
         }));
     }
@@ -82,8 +84,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     async ngOnChanges(changes: SimpleChanges) {
         if (this.sourceAdded) {
             let addressToRemove = changes.address ? changes.address.previousValue : this.address;
-            await this.removeLayer(addressToRemove);
-            this.createLayer();
+            this.removeLayer(addressToRemove);
+            await this.createLayer();
         }
     }
 
@@ -134,33 +136,29 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         let response = await this.fileService.getStyleJsonContent(this.address, this.isOffline);
         let language = this.resources.getCurrentLanguageCodeSimplified();
         let styleJson = JSON.parse(JSON.stringify(response).replace(/name_he/g, `name_${language}`)) as Style;
-        let sources = styleJson.sources;
-        let layers = styleJson.layers;
-        let currentStyle = this.host.mapInstance.getStyle();
-        styleJson.sources = currentStyle.sources;
-        styleJson.layers = currentStyle.layers;
-        styleJson.glyphs = this.fileService.getDataUrl(styleJson.glyphs);
-        styleJson.sprite = this.fileService.getDataUrl(styleJson.sprite);
-        this.host.mapInstance.setStyle(styleJson);
-        if (this.host.mapInstance.isStyleLoaded()) {
-            this.updateSourcesAndLayers(sources, layers);
-        } else {
-            this.host.mapInstance.once("style.load", () => {
-                this.updateSourcesAndLayers(sources, layers);
-            });
-        }
+        this.updateSourcesAndLayers(styleJson.sources, styleJson.layers);
     }
 
     private updateSourcesAndLayers(sources: {}, layers: Layer[]) {
-        for (let source in sources) {
-            if (sources.hasOwnProperty(source)) {
-                this.jsonSourcesIds.push(source);
-                this.host.mapInstance.addSource(source, sources[source]);
+        for (let sourceKey in sources) {
+            if (sources.hasOwnProperty(sourceKey) && this.visible) {
+                let source = sources[sourceKey];
+                if (!this.isBaselayer) {
+                    sourceKey = this.key + "_" + sourceKey;
+                }
+                this.jsonSourcesIds.push(sourceKey);
+                this.host.mapInstance.addSource(sourceKey, source);
             }
         }
         for (let layer of layers) {
-            this.jsonLayersIds.push(layer.id);
-            this.host.mapInstance.addLayer(layer, this.before);
+            if (this.isBaselayer || (this.visible && layer.metadata && layer.metadata["IHM:overlay"])) {
+                if (!this.isBaselayer) {
+                    layer.id = this.key + "_" + layer.id;
+                    layer.source = this.key + "_" + layer.source;
+                }
+                this.jsonLayersIds.push(layer.id);
+                this.host.mapInstance.addLayer(layer, this.before);    
+            }
         }
     }
 
@@ -182,15 +180,15 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             await this.createJsonLayer();
         }
         if (this.isBaselayer) {
-            this.host.mapInstance.setMinZoom(this.minZoom - 1);
+            this.host.mapInstance.setMinZoom(Math.max(this.minZoom - 1, 0));
         }
     }
 
-    private async removeLayer(address) {
+    private removeLayer(address) {
         if (this.isRaster(address)) {
             this.removeRasterLayer();
         } else {
-            await this.removeJsonLayer();
+            this.removeJsonLayer();
         }
     }
 }

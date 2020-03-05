@@ -14,7 +14,8 @@
                 [opacity]="overlay.opacity"
                 [visible]="overlay.visible"
                 [isOffline]="overlay.isOfflineOn"
-                [before]="resources.endOfOverlays">
+                [before]="resources.endOfOverlays"
+                [key]="overlay.key">
     </auto-layer>
 </div>
 <div *ngFor="let categoriesType of categoriesTypes">

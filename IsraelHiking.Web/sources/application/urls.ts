@@ -31,6 +31,4 @@ export class Urls {
 
     public static readonly DEFAULT_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json";
     public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB.json";
-    public static readonly OVERLAY_TILES_ADDRESS = Urls.baseTilesAddress + "/OverlayTiles/{z}/{x}/{y}.png";
-    public static readonly OVERLAY_MTB_ADDRESS = Urls.baseTilesAddress + "/OverlayMTB/{z}/{x}/{y}.png";
 }

@@ -83,7 +83,7 @@ export const initialState =
             overlays: [
                 {
                     key: HIKING_TRAILS,
-                    address: Urls.OVERLAY_TILES_ADDRESS,
+                    address: Urls.DEFAULT_TILES_ADDRESS,
                     minZoom: 7,
                     maxZoom: 16,
                     isOfflineAvailable: true,
@@ -93,7 +93,7 @@ export const initialState =
                 },
                 {
                     key: BICYCLE_TRAILS,
-                    address: Urls.OVERLAY_MTB_ADDRESS,
+                    address: Urls.MTB_TILES_ADDRESS,
                     minZoom: 7,
                     maxZoom: 16,
                     isOfflineAvailable: true,
