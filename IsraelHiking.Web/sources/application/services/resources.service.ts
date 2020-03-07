@@ -312,6 +312,7 @@ export class ResourcesService {
     public finishedOpeningTheFile: string;
     public areYouSureYouWantToStopRecording: string;
     public youNeedToLoginToSeeYourTraces: string;
+    public downloadFinishedSuccessfully: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -512,7 +513,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1583097098043");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1583608526905");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -817,6 +818,7 @@ export class ResourcesService {
         this.areYouSureYouWantToStopRecording = this.gettextCatalog.getString("Are you sure you want to stop the current recording?");
         this.youNeedToLoginToSeeYourTraces = this.gettextCatalog.getString("You need to login in order to see your traces, " +
             "click the frowning face at the top");
+        this.downloadFinishedSuccessfully = this.gettextCatalog.getString("Download finished successfully!");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

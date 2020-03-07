@@ -4,10 +4,7 @@ import {
     ApplicationState,
     Location,
     Configuration,
-    RouteData,
-    RouteEditingState,
-    TracesState,
-    LayersState
+    RouteData
 } from "../models/models";
 import { Urls } from "../urls";
 
@@ -43,12 +40,12 @@ export const initialState =
             recordingRouteId: null,
             opacity: 0.4,
             weight: 9
-        } as RouteEditingState,
+        },
         tracesState: {
             visibleTraceId: null,
             traces: [],
             missingParts: null,
-        } as TracesState,
+        },
         layersState: {
             baseLayers: [
                 {
@@ -71,13 +68,12 @@ export const initialState =
                 },
                 {
                     key: SATELLITE,
-                    address: "https://tiles.arcgis.com/tiles/JcXY3lLZni6BK4El/arcgis/rest/services/" +
-                        "תצלום_אוויר_2015/MapServer/tile/{z}/{y}/{x}",
+                    address: "https://israelhiking.osm.org.il/Ortho2015/{z}/{y}/{x}.jpg",
                     isEditable: false,
                     isOfflineAvailable: false,
                     isOfflineOn: false,
                     minZoom: 7,
-                    maxZoom: 17
+                    maxZoom: 16
                 }
             ],
             overlays: [
@@ -105,7 +101,7 @@ export const initialState =
             selectedBaseLayerKey: ISRAEL_HIKING_MAP,
             expanded: ["Base Layers", "Overlays", "Private Routes"],
             visible: []
-        } as LayersState,
+        },
         userState: {
             userInfo: null,
             token: null
@@ -120,5 +116,9 @@ export const initialState =
             shareUrl: null,
             fileUrl: null,
             baseLayer: null
+        },
+        offlineState: {
+            isOfflineAvailable: false,
+            lastModifiedDate: null
         }
     } as ApplicationState;

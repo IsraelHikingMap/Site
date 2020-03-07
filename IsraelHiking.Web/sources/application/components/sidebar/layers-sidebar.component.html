@@ -27,7 +27,7 @@
                         <button fxFill mat-button class="short-button" (click)="editBaseLayer($event, baseLayer)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-ellipsis-v"></i></button>
                     </div>
                     <div *ngIf="showOfflineButton(baseLayer)" fxFlex="10">
-                        <button fxFill mat-button class="short-button" [class.active]="baseLayer.isOfflineOn" (click)="toggleOffline($event, baseLayer, false)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle base layer offline"><i class="fa icon-offline"></i></button>
+                        <button fxFill mat-button class="short-button" [class.active]="baseLayer.isOfflineOn" (click)="toggleOffline($event, baseLayer, false)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle base layer offline"><i class="fa icon-{{baseLayer.isOfflineOn ? 'offline' : 'online'}}"></i></button>
                     </div>
                 </div>
             </div>

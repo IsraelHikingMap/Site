@@ -22,3 +22,4 @@ export { LayersState } from "./state/layers-state";
 export { UserState } from "./state/user-state";
 export { PointsOfInterestState } from "./state/poi-state";
 export { InMemoryState } from "./state/in-memory-state";
+export { OfflineState } from "./state/offline-state";

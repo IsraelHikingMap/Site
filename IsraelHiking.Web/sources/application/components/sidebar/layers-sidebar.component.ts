@@ -18,11 +18,10 @@ import { CategoriesLayerFactory } from "../../services/layers/categories-layers.
 import { PoiService, CategoriesType, ICategory } from "../../services/poi.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SetSelectedRouteAction } from "../../reducres/route-editing-state.reducer";
-import { ApplicationState, RouteData, EditableLayer, Overlay } from "../../models/models";
 import { ChangeRoutePropertiesAction } from "../../reducres/routes.reducer";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducres/layers.reducer";
 import { RunningContextService } from "../../services/running-context.service";
-import { PurchaseService } from "../../services/purchase.service";
+import { ApplicationState, RouteData, EditableLayer, Overlay } from "../../models/models";
 
 @Component({
     selector: "layers-sidebar",
@@ -54,7 +53,6 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 private readonly sidebarService: SidebarService,
                 private readonly poiService: PoiService,
                 private readonly runningContextService: RunningContextService,
-                private readonly purchaseService: PurchaseService,
                 private ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
@@ -154,7 +152,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public showOfflineButton(layer: EditableLayer) {
         return layer.isOfflineAvailable &&
             this.runningContextService.isCordova &&
-            this.purchaseService.isOfflineAvailable;
+            this.ngRedux.getState().offlineState.isOfflineAvailable;
     }
 
     public toggleOffline(event: Event, layer: EditableLayer, isOverlay: boolean) {

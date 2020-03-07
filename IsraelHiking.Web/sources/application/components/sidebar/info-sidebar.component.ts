@@ -53,7 +53,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     public getOfflinePurchaseGraditudeText(): string {
-        if (this.runningContext.isCordova && this.purchaseService.isOfflineAvailable) {
+        if (this.runningContext.isCordova && this.ngRedux.getState().offlineState.isOfflineAvailable) {
             return this.resources.offlinePurchaseGraditude;
         }
         return "";
@@ -64,7 +64,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     public orderOfflineMaps() {
-        if (this.purchaseService.isOfflineAvailable) {
+        if (this.ngRedux.getState().offlineState.isOfflineAvailable) {
             this.sidebarService.hide();
             this.matDialog.open(DownloadProgressDialogComponent, {
                 hasBackdrop: false,

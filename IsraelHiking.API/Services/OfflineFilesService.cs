@@ -1,6 +1,7 @@
 ﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace IsraelHiking.API.Services
         private readonly PhysicalFileProvider _fileProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IReceiptValidationGateway _receiptValidationGateway;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Constructor
@@ -22,13 +24,16 @@ namespace IsraelHiking.API.Services
         /// <param name="fileSystemHelper"></param>
         /// <param name="receiptValidationGateway"></param>
         /// <param name="options"></param>
+        /// <param name="logger"></param>
         public OfflineFilesService(IFileSystemHelper fileSystemHelper,
             IReceiptValidationGateway receiptValidationGateway,
-            IOptions<NonPublicConfigurationData> options)
+            IOptions<NonPublicConfigurationData> options,
+            ILogger logger)
         {
             _fileProvider = new PhysicalFileProvider(options.Value.OfflineFilesFolder);
             _fileSystemHelper = fileSystemHelper;
             _receiptValidationGateway = receiptValidationGateway;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -57,6 +62,7 @@ namespace IsraelHiking.API.Services
         /// <inheritdoc/>
         public async Task<Stream> GetFileContent(string userId, string fileName)
         {
+            _logger.LogDebug($"Getting offline file: {fileName} for user: {userId}");
             if (!await _receiptValidationGateway.IsEntitled(userId))
             {
                 return null;

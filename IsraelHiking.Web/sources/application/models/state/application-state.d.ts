@@ -9,7 +9,8 @@ import {
     LayersState,
     UserState,
     PointsOfInterestState,
-    InMemoryState
+    InMemoryState,
+    OfflineState
 } from "../models";
 
 export interface ApplicationState {
@@ -22,4 +23,5 @@ export interface ApplicationState {
     userState: UserState;
     poiState: PointsOfInterestState;
     inMemoryState: InMemoryState;
+    offlineState: OfflineState;
 }

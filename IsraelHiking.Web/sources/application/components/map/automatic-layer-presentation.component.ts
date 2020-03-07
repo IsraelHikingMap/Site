@@ -157,7 +157,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                     layer.source = this.key + "_" + layer.source;
                 }
                 this.jsonLayersIds.push(layer.id);
-                this.host.mapInstance.addLayer(layer, this.before);    
+                this.host.mapInstance.addLayer(layer, this.before);
             }
         }
     }

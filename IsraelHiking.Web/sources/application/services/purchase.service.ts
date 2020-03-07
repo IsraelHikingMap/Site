@@ -1,19 +1,19 @@
 import { Injectable } from "@angular/core";
+import { NgRedux } from "@angular-redux/store";
 import { InAppPurchase2, IAPProduct } from "@ionic-native/in-app-purchase-2/ngx";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
+import { SetOfflineAvailableAction } from "../reducres/offline.reducer";
+import { ApplicationState } from "../models/models";
 
 @Injectable()
 export class PurchaseService {
-    // HM TODO: move this to state for offline usage
-    public isOfflineAvailable: boolean;
 
     constructor(private readonly store: InAppPurchase2,
-        private readonly runningContextService: RunningContextService,
-        private readonly loggingService: LoggingService
-    ) {
-        this.isOfflineAvailable = false;
+                private readonly runningContextService: RunningContextService,
+                private readonly loggingService: LoggingService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
     public initialize() {
@@ -30,7 +30,7 @@ export class PurchaseService {
         this.store.when("product").updated((product: IAPProduct) => {
             if (product.owned) {
                 this.loggingService.debug("Product owned!");
-                this.isOfflineAvailable = true;
+                this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: true }));
                 return;
             }
         });
