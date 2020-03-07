@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services
 {
@@ -12,15 +13,17 @@ namespace IsraelHiking.API.Services
         /// <summary>
         /// Get the file's content 
         /// </summary>
+        /// <param name="userId">The user id to check against</param>
         /// <param name="fileName">The file to get</param>
         /// <returns>a read stream of the file</returns>
-        Stream GetFileContent(string fileName);
+        Task<Stream> GetFileContent(string userId, string fileName);
 
         /// <summary>
         /// Get a list of files that have been updated since a given date
         /// </summary>
+        /// <param name="userId">The user id to check against</param>
         /// <param name="lastModifiedDate">The date to check against</param>
         /// <returns>A list of file names</returns>
-        List<string> GetUpdatedFilesList(DateTime lastModifiedDate);
+        Task<List<string>> GetUpdatedFilesList(string userId, DateTime lastModifiedDate);
     }
 }

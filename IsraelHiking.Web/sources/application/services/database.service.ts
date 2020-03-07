@@ -73,7 +73,6 @@ export class DatabaseService {
                 state: initialState
             });
         }
-        this.loggingService.debug(JSON.stringify(storedState));
         this.ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
         this.ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state: ApplicationState) => {
             this.updateState(state);
@@ -82,10 +81,8 @@ export class DatabaseService {
 
     private initCustomTileLoadFunction() {
         (mapboxgl as any).loadTilesFunction = (params, callback) => {
-            this.loggingService.debug("Getting tile: " + params.url);
             this.getTile(params.url).then((tileBuffer) => {
                 if (tileBuffer) {
-                    this.loggingService.debug("Got tile: " + params.url);
                     callback(null, tileBuffer, null, null);
                 } else {
                     let message = `Tile is not in DB: ${params.url}`;
@@ -99,6 +96,9 @@ export class DatabaseService {
 
     public async close() {
         let finalState = this.ngRedux.getState();
+        // reduce database size and memory foor print
+        finalState.routes.past = [];
+        finalState.routes.future = [];
         await this.updateState(finalState);
     }
 

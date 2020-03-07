@@ -6,6 +6,7 @@ import { LoggingService } from "./logging.service";
 
 @Injectable()
 export class PurchaseService {
+    // HM TODO: move this to state for offline usage
     public isOfflineAvailable: boolean;
 
     constructor(private readonly store: InAppPurchase2,
@@ -27,25 +28,14 @@ export class PurchaseService {
             type: this.store.PAID_SUBSCRIPTION
         });
         this.store.when("product").updated((product: IAPProduct) => {
-            this.loggingService.debug("Product updated: " + JSON.stringify(product));
             if (product.owned) {
                 this.loggingService.debug("Product owned!");
                 this.isOfflineAvailable = true;
                 return;
             }
         });
-        this.store.when("product").approved(product => {
-            try {
-                this.loggingService.debug("Product approved: " + JSON.stringify(product));
-            } catch { }
-            return product.verify();
-        });
-        this.store.when("product").verified(product => {
-            try {
-                this.loggingService.debug("Product verified: " + JSON.stringify(product));
-            } catch { }
-            return product.finish();
-        });
+        this.store.when("product").approved(product => product.verify());
+        this.store.when("product").verified(product => product.finish());
         this.store.refresh();
     }
 

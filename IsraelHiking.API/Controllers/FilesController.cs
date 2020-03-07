@@ -156,11 +156,9 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("offline")]
-        public List<string> GetOfflineFiles([FromQuery] DateTime lastModified)
+        public Task<List<string>> GetOfflineFiles([FromQuery] DateTime lastModified)
         {
-            // HM TODO: add receipt validation?
-            // User.Identity.Name
-            return _offlineFilesService.GetUpdatedFilesList(lastModified);
+            return _offlineFilesService.GetUpdatedFilesList(User.Identity.Name ?? "", lastModified);
         }
 
         /// <summary>
@@ -170,10 +168,9 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("offline/{id}")]
-        public IActionResult GetOfflineFile(string id)
+        public async Task<IActionResult> GetOfflineFile(string id)
         {
-            // HM TODO: add receipt validation?
-            var file = _offlineFilesService.GetFileContent(id);
+            var file = await _offlineFilesService.GetFileContent(User.Identity.Name ?? "", id);
             return File(file, "application/zip", id);
         }
     }

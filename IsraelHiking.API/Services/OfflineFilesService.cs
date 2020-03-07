@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services
 {
@@ -13,23 +14,31 @@ namespace IsraelHiking.API.Services
     {
         private readonly PhysicalFileProvider _fileProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
+        private readonly IReceiptValidationGateway _receiptValidationGateway;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="fileSystemHelper"></param>
+        /// <param name="receiptValidationGateway"></param>
         /// <param name="options"></param>
         public OfflineFilesService(IFileSystemHelper fileSystemHelper,
+            IReceiptValidationGateway receiptValidationGateway,
             IOptions<NonPublicConfigurationData> options)
         {
             _fileProvider = new PhysicalFileProvider(options.Value.OfflineFilesFolder);
             _fileSystemHelper = fileSystemHelper;
+            _receiptValidationGateway = receiptValidationGateway;
         }
 
         /// <inheritdoc/>
-        public List<string> GetUpdatedFilesList(DateTime lastModifiedDate)
+        public async Task<List<string>> GetUpdatedFilesList(string userId, DateTime lastModifiedDate)
         {
             var filesList = new List<string>();
+            if (!await _receiptValidationGateway.IsEntitled(userId))
+            {
+                return new List<string>();
+            }
             var contents = _fileProvider.GetDirectoryContents(string.Empty);
             foreach (var content in contents)
             {
@@ -46,8 +55,12 @@ namespace IsraelHiking.API.Services
         }
 
         /// <inheritdoc/>
-        public Stream GetFileContent(string fileName)
+        public async Task<Stream> GetFileContent(string userId, string fileName)
         {
+            if (!await _receiptValidationGateway.IsEntitled(userId))
+            {
+                return null;
+            }
             return _fileProvider.GetFileInfo(fileName).CreateReadStream();
         }
     }
