@@ -34,10 +34,11 @@ export class DownloadProgressDialogComponent extends BaseMapComponent {
     }
 
     private async startDownload() {
-        let lastModified = this.ngRedux.getState().offlineState.lastModifiedDate.toUTCString();
-        this.progressPersentage = 0;
+        let lastModified = this.ngRedux.getState().offlineState.lastModifiedDate; 
         try {
-            let fileNames = await this.httpClient.get(Urls.offlineFiles, { params: { lastModified } }).toPromise() as string[];
+            let fileNames = await this.httpClient.get(Urls.offlineFiles, { params: { 
+                lastModified: lastModified ? lastModified.toUTCString() : null 
+            } }).toPromise() as string[];
             for (let fileNameIndex = 0; fileNameIndex < fileNames.length; fileNameIndex++) {
                 let fileName = fileNames[fileNameIndex];
                 let fileContent = await new Promise((resolve, reject) => {
