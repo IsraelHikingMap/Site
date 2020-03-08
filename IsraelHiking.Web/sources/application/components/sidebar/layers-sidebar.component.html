@@ -50,7 +50,7 @@
                         <button mat-button fxFill class="short-button" (click)="editOverlay($event, overlay)" matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-ellipsis-v"></i></button>
                     </div>
                     <div *ngIf="showOfflineButton(overlay)" fxFlex="10">
-                        <button fxFill mat-button class="short-button" [class.active]="overlay.isOfflineOn" (click)="toggleOffline($event, overlay, true)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay offline"><i class="fa icon-offline"></i></button>
+                        <button fxFill mat-button class="short-button" [class.active]="overlay.isOfflineOn" (click)="toggleOffline($event, overlay, true)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay offline"><i class="fa icon-{{overlay.isOfflineOn ? 'offline' : 'online'}}"></i></button>
                     </div>
                 </div>
             </div>
