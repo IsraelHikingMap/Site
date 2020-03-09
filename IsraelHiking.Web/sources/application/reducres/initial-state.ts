@@ -68,7 +68,7 @@ export const initialState =
                 },
                 {
                     key: SATELLITE,
-                    address: "https://israelhiking.osm.org.il/Ortho2015/{z}/{y}/{x}.jpg",
+                    address: "https://israelhiking.osm.org.il/Ortho/{z}/{y}/{x}.jpg",
                     isEditable: false,
                     isOfflineAvailable: false,
                     isOfflineOn: false,
