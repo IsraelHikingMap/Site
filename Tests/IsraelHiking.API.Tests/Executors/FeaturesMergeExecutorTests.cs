@@ -62,6 +62,23 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
+        public void MergeFeatures_HasSameTitleButNotTheSameCategoryFamily_ShouldNotMerge()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.POI_CATEGORY, Categories.ROUTE_4X4);
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_CATEGORY, Categories.HISTORIC);
+            feature2.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { feature1, feature2 });
+
+            Assert.AreEqual(2, results.Count);
+        }
+
+        [TestMethod]
         public void MergeFeatures_HasSameTitleDifferentSource_ShouldMergeWithLink()
         {
             var feature1 = CreateFeature("1", 0, 0);

@@ -392,6 +392,11 @@ namespace IsraelHiking.API.Executors
                 return false;
             }
 
+            if (Categories.Routes.Contains(source.Attributes[FeatureAttributes.POI_CATEGORY].ToString()) != Categories.Routes.Contains(target.Attributes[FeatureAttributes.POI_CATEGORY].ToString()))
+            {
+                return false;
+            }
+
             if (!source.Attributes[FeatureAttributes.POI_SOURCE].Equals(target.Attributes[FeatureAttributes.POI_SOURCE]))
             {
                 return true;
