@@ -87,6 +87,10 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public login() {
+        if (!this.runningContextService.isOnline) {
+            this.toastService.warning(this.resources.unableToLogin);
+            return;
+        }
         if (!this.agreedToTheTermsOfService) {
             let component = this.dialog.open(TermsOfServiceDialogComponent);
             component.afterClosed().subscribe((results: string) => {
