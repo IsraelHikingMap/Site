@@ -179,8 +179,12 @@ export function initializeApplication(injector: Injector) {
             injector.get<PurchaseService>(PurchaseService).initialize();
             await loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
-            alert(`alert("Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?` +
-                `\nInit failed: ${ex.toString()}`);
+            if (ex.toString().indexOf("A mutation operation was attempted on a database that did not allow mutations") != -1) {
+                alert("Sorry, this site does not support running FireFox in private mode...");
+            } else {
+                alert(`alert("Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?` +
+                    `\nInit failed: ${ex.toString()}`);
+            }
             loggingService.error(`Failed IHM Application Initialization: ${ex.toString()}`);
 
         }
