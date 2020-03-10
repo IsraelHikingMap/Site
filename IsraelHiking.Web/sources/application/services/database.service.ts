@@ -192,8 +192,7 @@ export class DatabaseService {
         }
         if (storedState.configuration.version === "8.0") {
             this.loggingService.info("Upgrading state from version 8.0 to 9.0");
-            // HM TODO: bring this back!
-            // storedState.configuration.version = "9.0";
+            storedState.configuration.version = "9.0";
             for (let key of [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP]) {
                 let layer = storedState.layersState.baseLayers.find(l => l.key === key);
                 let layerToReplaceWith = initialState.layersState.baseLayers.find(l => l.key === key);
