@@ -37,12 +37,12 @@ namespace IsraelHiking.API.Services
         }
 
         /// <inheritdoc/>
-        public async Task<List<string>> GetUpdatedFilesList(string userId, DateTime lastModifiedDate)
+        public async Task<Dictionary<string, DateTime>> GetUpdatedFilesList(string userId, DateTime lastModifiedDate)
         {
-            var filesList = new List<string>();
+            var filesDictionary = new Dictionary<string, DateTime>();
             if (!await _receiptValidationGateway.IsEntitled(userId))
             {
-                return new List<string>();
+                return new Dictionary<string, DateTime>();
             }
             var contents = _fileProvider.GetDirectoryContents(string.Empty);
             foreach (var content in contents)
@@ -51,12 +51,12 @@ namespace IsraelHiking.API.Services
                 {
                     continue;
                 }
-                if (lastModifiedDate == DateTime.MinValue || content.LastModified > lastModifiedDate)
+                if (lastModifiedDate == DateTime.MinValue || content.LastModified.DateTime - lastModifiedDate > new TimeSpan(0,0,1))
                 {
-                    filesList.Add(content.Name);
+                    filesDictionary[content.Name] = content.LastModified.DateTime;
                 }
             }
-            return filesList;
+            return filesDictionary;
         }
 
         /// <inheritdoc/>

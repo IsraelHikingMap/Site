@@ -156,7 +156,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("offline")]
-        public Task<List<string>> GetOfflineFiles([FromQuery] DateTime lastModified)
+        public Task<Dictionary<string, DateTime>> GetOfflineFiles([FromQuery] DateTime lastModified)
         {
             return _offlineFilesService.GetUpdatedFilesList(User.Identity.Name ?? "", lastModified);
         }
