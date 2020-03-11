@@ -14,6 +14,7 @@ import { OverlayAddDialogComponent } from "../dialogs/layers/overlay-add-dialog.
 import { OverlayEditDialogComponent } from "../dialogs/layers/overlay-edit-dialog-component";
 import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
+import { DownloadProgressDialogComponent } from "../dialogs/download-progress-dialog.component";
 import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
 import { PoiService, CategoriesType, ICategory } from "../../services/poi.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
@@ -21,6 +22,8 @@ import { SetSelectedRouteAction } from "../../reducres/route-editing-state.reduc
 import { ChangeRoutePropertiesAction } from "../../reducres/routes.reducer";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducres/layers.reducer";
 import { RunningContextService } from "../../services/running-context.service";
+import { ToastService } from "../../services/toast.service";
+import { PurchaseService } from "../../services/purchase.service";
 import { ApplicationState, RouteData, EditableLayer, Overlay } from "../../models/models";
 
 @Component({
@@ -46,14 +49,16 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public isAdvanced: Observable<boolean>;
 
     constructor(resources: ResourcesService,
-                private readonly dialog: MatDialog,
-                private readonly layersService: LayersService,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly categoriesLayerFactory: CategoriesLayerFactory,
-                private readonly sidebarService: SidebarService,
-                private readonly poiService: PoiService,
-                private readonly runningContextService: RunningContextService,
-                private ngRedux: NgRedux<ApplicationState>) {
+        private readonly dialog: MatDialog,
+        private readonly purchaseService: PurchaseService,
+        private readonly layersService: LayersService,
+        private readonly selectedRouteService: SelectedRouteService,
+        private readonly categoriesLayerFactory: CategoriesLayerFactory,
+        private readonly sidebarService: SidebarService,
+        private readonly poiService: PoiService,
+        private readonly runningContextService: RunningContextService,
+        private readonly toastService: ToastService,
+        private ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
     }
@@ -150,13 +155,47 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public showOfflineButton(layer: EditableLayer) {
-        return layer.isOfflineAvailable &&
-            this.runningContextService.isCordova &&
+        return layer.isOfflineAvailable && this.isOfflineDownloadAvailable();
+    }
+
+    public isOfflineDownloadAvailable() {
+        return this.runningContextService.isCordova &&
             this.ngRedux.getState().offlineState.isOfflineAvailable;
+    }
+
+    public isPurchaseAvailable() {
+        return this.runningContextService.isCordova &&
+            !this.ngRedux.getState().offlineState.isOfflineAvailable;
+    }
+
+    public orderOfflineMaps() {
+        let userInfo = this.ngRedux.getState().userState.userInfo;
+        if (userInfo == null || !userInfo.id) {
+            this.toastService.warning(this.resources.loginRequired);
+            return;
+        }
+        this.purchaseService.order(userInfo.id);
+    }
+
+    public downloadOfflineMaps() {
+        this.sidebarService.hide();
+        this.dialog.open(DownloadProgressDialogComponent, {
+            hasBackdrop: false,
+            closeOnNavigation: false,
+            disableClose: true,
+            position: {
+                top: "5px",
+            },
+            width: "80%"
+        });
     }
 
     public toggleOffline(event: Event, layer: EditableLayer, isOverlay: boolean) {
         event.stopPropagation();
+        if (this.ngRedux.getState().offlineState.lastModifiedDate == null) {
+            this.toastService.warning(this.resources.noOfflineFilesPleaseDownload);
+            return;
+        }
         this.layersService.toggleOffline(layer, isOverlay);
     }
 

@@ -79,7 +79,11 @@ export class DownloadProgressDialogComponent extends BaseMapComponent {
             }
             this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: new Date() }));
             this.matDialogRef.close();
-            this.toastService.info(this.resources.downloadFinishedSuccessfully);
+            if (fileNames.length === 0) {
+                this.toastService.success(this.resources.allFilesAreUpToDate);
+            } else {
+                this.toastService.success(this.resources.downloadFinishedSuccessfully);
+            }
         } catch (ex) {
             this.errorText = ex.message;
         }

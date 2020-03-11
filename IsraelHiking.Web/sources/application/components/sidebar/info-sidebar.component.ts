@@ -1,19 +1,13 @@
 import { Component } from "@angular/core";
-import { MatDialog } from "@angular/material";
 import { Router } from "@angular/router";
-import { NgRedux } from "@angular-redux/store";
 import { remove } from "lodash";
 
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { ToastService } from "../../services/toast.service";
-import { PurchaseService } from "../../services/purchase.service";
 import { BaseMapComponent } from "../base-map.component";
 import { LegendItemComponent, ILegendItem } from "./legend-item.component";
-import { DownloadProgressDialogComponent } from "../dialogs/download-progress-dialog.component";
-import { ApplicationState } from "../../models/models";
 import { RouteStrings } from "../../services/hash.service";
 import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP, SATELLITE } from "../../reducres/initial-state";
 
@@ -33,14 +27,10 @@ export class InfoSidebarComponent extends BaseMapComponent {
     private selectedSection: ILegendSection;
 
     constructor(resources: ResourcesService,
-                private readonly matDialog: MatDialog,
-                private readonly router: Router,
-                private readonly purchaseService: PurchaseService,
-                private readonly sidebarService: SidebarService,
-                private readonly layersService: LayersService,
-                private readonly runningContext: RunningContextService,
-                private readonly toastService: ToastService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+        private readonly router: Router,
+        private readonly sidebarService: SidebarService,
+        private readonly layersService: LayersService,
+        private readonly runningContext: RunningContextService) {
         super(resources);
 
         this.selectedTabIndex = 0;
@@ -52,37 +42,8 @@ export class InfoSidebarComponent extends BaseMapComponent {
         });
     }
 
-    public getOfflinePurchaseGraditudeText(): string {
-        if (this.runningContext.isCordova && this.ngRedux.getState().offlineState.isOfflineAvailable) {
-            return this.resources.offlinePurchaseGraditude;
-        }
-        return "";
-    }
-
     public openDownloadDialog = () => {
         this.router.navigate([RouteStrings.DOWNLOAD]);
-    }
-
-    public orderOfflineMaps() {
-        if (this.ngRedux.getState().offlineState.isOfflineAvailable) {
-            this.sidebarService.hide();
-            this.matDialog.open(DownloadProgressDialogComponent, {
-                hasBackdrop: false,
-                closeOnNavigation: false,
-                disableClose: true,
-                position: {
-                    top: "5px",
-                },
-                width: "80%"
-            });
-            return;
-        }
-        let userInfo = this.ngRedux.getState().userState.userInfo;
-        if (userInfo == null || !userInfo.id) {
-            this.toastService.warning(this.resources.loginRequired);
-            return;
-        }
-        this.purchaseService.order(userInfo.id);
     }
 
     public isActive(): boolean {

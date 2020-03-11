@@ -261,6 +261,7 @@ export class ResourcesService {
     public findMissingRoutesAfterUploadHint: string;
     public navigateWithWaze: string;
     public offlinePurchaseGraditude: string;
+    public purchaseOfflineMaps: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -313,6 +314,8 @@ export class ResourcesService {
     public areYouSureYouWantToStopRecording: string;
     public youNeedToLoginToSeeYourTraces: string;
     public downloadFinishedSuccessfully: string;
+    public noOfflineFilesPleaseDownload: string;
+    public allFilesAreUpToDate: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -513,7 +516,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1583608526905");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1583956856644");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -756,6 +759,7 @@ export class ResourcesService {
             "on the map after you upload a recording");
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
         this.offlinePurchaseGraditude = this.gettextCatalog.getString("Thanks for purchasing! download instructions here...");
+        this.purchaseOfflineMaps = this.gettextCatalog.getString("Purchase maps for offline use");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -819,6 +823,8 @@ export class ResourcesService {
         this.youNeedToLoginToSeeYourTraces = this.gettextCatalog.getString("You need to login in order to see your traces, " +
             "click the frowning face at the top");
         this.downloadFinishedSuccessfully = this.gettextCatalog.getString("Download finished successfully!");
+        this.noOfflineFilesPleaseDownload = this.gettextCatalog.getString("No offline files available, please press the download button below.");
+        this.allFilesAreUpToDate = this.gettextCatalog.getString("All files are up-to-date :-)");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");
