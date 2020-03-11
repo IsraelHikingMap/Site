@@ -16,7 +16,7 @@
         <div class="pull-right">
             <div class="control-container-item gutters cursor-pointer" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.myProfile}}">
                 <div class="table-cell button-height">
-                    <img *ngIf="userInfo.imageUrl" class="pull-right space-after" [src]="userInfo.imageUrl" alt="" width="16" height="16" />
+                    <img *ngIf="userInfo.imageUrl" class="pull-right space-after" [src]="userInfo.imageUrl | offlineImage:'true' | async" alt="" width="16" height="16" />
                     <span class="pull-right space-after" *ngIf="!userInfo.imageUrl"><i class="fa icon-user fa-lg"></i> </span>
                     <span class="pull-right hidden-xs"> {{userInfo.displayName}}</span>
                 </div>
@@ -27,7 +27,7 @@
                 <div [dir]="resources.direction">
                     <div fxLayout="row" class="margin-sides">
                         <div class="table">
-                            <img *ngIf="userInfo.imageUrl" class="pull-right space-after" [src]="userInfo.imageUrl" alt="" width="64" height="64" />
+                            <img *ngIf="userInfo.imageUrl" class="pull-right space-after" [src]="userInfo.imageUrl | offlineImage | async" alt="" width="64" height="64" />
                             <div class="table-cell">
                                 <span class="text-large">{{userInfo.displayName}}</span><br />
                                 {{getRank().name}}
