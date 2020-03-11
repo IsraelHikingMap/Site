@@ -58,7 +58,7 @@ export class DownloadProgressDialogComponent extends BaseMapComponent {
                                 reject(new Error(event.statusText));
                             }
                         }
-                    });
+                    }, error => reject(error));
                 });
                 await this.fileService.openIHMfile(fileContent as Blob,
                     async (sourceName, content, percentage) => {
