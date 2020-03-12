@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { uniq, uniqWith } from "lodash";
+import { timeout } from "rxjs/operators";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, IPoiRouterData } from "./hash.service";
@@ -114,7 +115,7 @@ export class PoiService {
             .set("southWest", southWest.lat + "," + southWest.lng)
             .set("categories", categoriesTypes.join(","))
             .set("language", language);
-        return this.httpClient.get(Urls.poi, { params }).toPromise() as Promise<PointOfInterest[]>;
+        return this.httpClient.get(Urls.poi, { params }).pipe(timeout(10000)).toPromise() as Promise<PointOfInterest[]>;
     }
 
     public async getPoint(id: string, source: string, language?: string): Promise<PointOfInterestExtended> {

@@ -102,7 +102,7 @@ export class CategoriesLayer extends BaseMapComponent {
         category.visible = newState;
     }
 
-    protected updateMarkers(): void {
+    private async updateMarkers(): Promise<void> {
         if (this.categories.length === 0) {
             // layer is not ready yet...
             return;
@@ -121,19 +121,18 @@ export class CategoriesLayer extends BaseMapComponent {
         bounds.southWest.lat -= (bounds.northEast.lat - bounds.southWest.lat) / 2.0;
 
         this.requestsNumber++;
-        this.poiService
-            .getPoints(bounds.northEast, bounds.southWest,
-                this.categories.filter(f => f.visible).map(f => f.name))
-            .then((pointsOfInterest) => {
-                this.requestArrived();
-                if (this.requestsNumber !== 0) {
-                    return;
-                }
-                this.pointsOfInterest.splice(0, this.pointsOfInterest.length, ...pointsOfInterest);
-                this.markersLoaded.next();
-            }, () => {
-                this.requestArrived();
-            });
+        try {
+            let pointsOfInterest = await this.poiService.getPoints(bounds.northEast, bounds.southWest,
+                this.categories.filter(f => f.visible).map(f => f.name));
+            this.requestArrived();
+            if (this.requestsNumber !== 0) {
+                return;
+            }
+            this.pointsOfInterest.splice(0, this.pointsOfInterest.length, ...pointsOfInterest);
+            this.markersLoaded.next();
+        } catch {
+            this.requestArrived();
+        }
     }
 
     private requestArrived() {
