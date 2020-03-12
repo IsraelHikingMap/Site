@@ -279,13 +279,14 @@ export class FileService {
     public async zipAndStoreFile(content: string): Promise<string> {
         let zip = new JSZip();
         zip.file("log.txt", content);
+        let data = await zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });
         try {
-            let blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
+            let blob = this.nonAngularObjectsFactory.b64ToBlob(data, "application/zip");
             let fullFileName = "Report_" + new Date().toISOString().split(":").join("-").replace("T", "_").replace("Z", "_") + ".zip";
             await this.fileSystemWrapper.writeFile(this.getStorageBasePath(), "IsraelHikingMap/" + fullFileName, blob);
         } catch {
             // no need to do anything
         }
-        return zip.generateAsync({ type: "base64" });
+        return data;
     }
 }
