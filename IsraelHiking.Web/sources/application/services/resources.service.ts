@@ -346,6 +346,7 @@ export class ResourcesService {
     public infoFacebookLink: string;
     public infoGithubLink: string;
     public infoDownloadMapForOfflineUse: string;
+    public infoDownloadOldMapsForOfflineUse: string;
     public infoOsmWikiLink: string;
     public infoFooterThanks: string;
     public infoFooterAuthors: string;
@@ -516,7 +517,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1583956856644");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1584047621906");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -873,6 +874,7 @@ export class ResourcesService {
             .replace("{{linkend}}", "</a>");
         // end
         this.infoDownloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
+        this.infoDownloadOldMapsForOfflineUse = this.gettextCatalog.getString("Download old raster maps for offline use in OruxMaps and Locus");
         this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
         this.infoFooterAuthors = this.gettextCatalog.getString("Harel, Zeev and Guy");
         // Legend

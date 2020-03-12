@@ -42,10 +42,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
         });
     }
 
-    public openDownloadDialog = () => {
-        this.router.navigate([RouteStrings.DOWNLOAD]);
-    }
-
     public isActive(): boolean {
         return this.sidebarService.viewName === "info";
     }
