@@ -22,13 +22,13 @@ export class DownloadProgressDialogComponent extends BaseMapComponent {
     public errorText: string;
 
     constructor(resources: ResourcesService,
-        private readonly matDialogRef: MatDialogRef<DownloadProgressDialogComponent>,
-        private readonly httpClient: HttpClient,
-        private readonly fileService: FileService,
-        private readonly databaseService: DatabaseService,
-        private readonly toastService: ToastService,
-        private readonly loggingService: LoggingService,
-        private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly matDialogRef: MatDialogRef<DownloadProgressDialogComponent>,
+                private readonly httpClient: HttpClient,
+                private readonly fileService: FileService,
+                private readonly databaseService: DatabaseService,
+                private readonly toastService: ToastService,
+                private readonly loggingService: LoggingService,
+                private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
         this.progressPersentage = 0;

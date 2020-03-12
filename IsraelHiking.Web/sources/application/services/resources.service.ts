@@ -823,7 +823,8 @@ export class ResourcesService {
         this.youNeedToLoginToSeeYourTraces = this.gettextCatalog.getString("You need to login in order to see your traces, " +
             "click the frowning face at the top");
         this.downloadFinishedSuccessfully = this.gettextCatalog.getString("Download finished successfully!");
-        this.noOfflineFilesPleaseDownload = this.gettextCatalog.getString("No offline files available, please press the download button below.");
+        this.noOfflineFilesPleaseDownload = this.gettextCatalog
+            .getString("No offline files available, please press the download button below.");
         this.allFilesAreUpToDate = this.gettextCatalog.getString("All files are up-to-date :-)");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");

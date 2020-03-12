@@ -27,10 +27,10 @@ export class InfoSidebarComponent extends BaseMapComponent {
     private selectedSection: ILegendSection;
 
     constructor(resources: ResourcesService,
-        private readonly router: Router,
-        private readonly sidebarService: SidebarService,
-        private readonly layersService: LayersService,
-        private readonly runningContext: RunningContextService) {
+                private readonly router: Router,
+                private readonly sidebarService: SidebarService,
+                private readonly layersService: LayersService,
+                private readonly runningContext: RunningContextService) {
         super(resources);
 
         this.selectedTabIndex = 0;

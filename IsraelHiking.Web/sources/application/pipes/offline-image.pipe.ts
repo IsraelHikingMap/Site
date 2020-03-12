@@ -8,8 +8,8 @@ import { DatabaseService } from "../services/database.service";
 @Pipe({ name: "offlineImage" })
 export class OfflineImagePipe implements PipeTransform {
     constructor(private readonly http: HttpClient,
-        private readonly runningContextService: RunningContextService,
-        private readonly databaseService: DatabaseService) {
+                private readonly runningContextService: RunningContextService,
+                private readonly databaseService: DatabaseService) {
     }
 
     public async transform(value: string, cache: boolean): Promise<string> {
