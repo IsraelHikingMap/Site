@@ -21,10 +21,6 @@ interface Item {
 
 @Injectable()
 export class OpenWithService {
-    private static readonly SHARE = "/share/";
-    private static readonly URL = "/url/";
-    private static readonly POI = "/poi/";
-
     constructor(private readonly resources: ResourcesService,
                 private readonly runningContextService: RunningContextService,
                 private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
@@ -57,9 +53,11 @@ export class OpenWithService {
     }
 
     private handleExternalUrl(item: Item) {
-        if (item.uri.indexOf(OpenWithService.SHARE) !== -1 ||
-            item.uri.indexOf(OpenWithService.POI) !== -1 ||
-            item.uri.indexOf(OpenWithService.URL) !== -1) {
+        if (item.uri.indexOf(RouteStrings.ROUTE_SHARE + "/") !== -1 ||
+            item.uri.indexOf(RouteStrings.ROUTE_POI + "/") !== -1 ||
+            item.uri.indexOf(RouteStrings.ROUTE_URL + "/") !== -1 ||
+            item.uri.indexOf(RouteStrings.ROUTE_MAP + "/") !== -1 ||
+            item.uri.replace(/\//g, "").endsWith("israelhiking.osm.org.il")) {
             if (this.matDialog.openDialogs.length > 0) {
                 this.matDialog.closeAll();
             }
@@ -69,7 +67,6 @@ export class OpenWithService {
             return;
         }
         if (item.uri.indexOf("maps?q=") !== -1) {
-            console.log("maps:" + decodeURIComponent(item.uri));
             let coordsRegExp = /q=(\d+\.\d+),(\d+\.\d+)&z=/;
             let coords = coordsRegExp.exec(decodeURIComponent(item.uri));
             this.moveToCoordinates(coords);

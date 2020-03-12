@@ -107,6 +107,8 @@
         <data android:host="israelhiking.osm.org.il" android:pathPattern="/share/.*" android:scheme="https" />
         <data android:host="israelhiking.osm.org.il" android:pathPattern="/poi/.*" android:scheme="https" />
         <data android:host="israelhiking.osm.org.il" android:pathPattern="/url/.*" android:scheme="https" />
+        <data android:host="israelhiking.osm.org.il" android:pathPattern="/map/.*" android:scheme="https" />
+        <data android:host="israelhiking.osm.org.il" android:pathPattern="/" android:scheme="https" />
       </intent-filter>
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
