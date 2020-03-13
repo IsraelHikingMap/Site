@@ -316,6 +316,7 @@ export class ResourcesService {
     public downloadFinishedSuccessfully: string;
     public noOfflineFilesPleaseDownload: string;
     public allFilesAreUpToDate: string;
+    public thereSoMuchMoreYouCanDoWithOurApp: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -517,7 +518,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1584047621906");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1584079611624");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -827,6 +828,7 @@ export class ResourcesService {
         this.noOfflineFilesPleaseDownload = this.gettextCatalog
             .getString("No offline files available, please press the download button below.");
         this.allFilesAreUpToDate = this.gettextCatalog.getString("All files are up-to-date :-)");
+        this.thereSoMuchMoreYouCanDoWithOurApp = this.gettextCatalog.getString("There's so much more you can do with our app");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");
@@ -874,7 +876,8 @@ export class ResourcesService {
             .replace("{{linkend}}", "</a>");
         // end
         this.infoDownloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
-        this.infoDownloadOldMapsForOfflineUse = this.gettextCatalog.getString("Download old raster maps for offline use in OruxMaps and Locus");
+        this.infoDownloadOldMapsForOfflineUse = this.gettextCatalog
+            .getString("Download old raster maps for offline use in OruxMaps and Locus");
         this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
         this.infoFooterAuthors = this.gettextCatalog.getString("Harel, Zeev and Guy");
         // Legend

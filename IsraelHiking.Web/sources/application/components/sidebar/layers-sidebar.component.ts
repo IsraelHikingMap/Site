@@ -179,15 +179,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public downloadOfflineMaps() {
         this.sidebarService.hide();
-        this.dialog.open(DownloadProgressDialogComponent, {
-            hasBackdrop: false,
-            closeOnNavigation: false,
-            disableClose: true,
-            position: {
-                top: "5px",
-            },
-            width: "80%"
-        });
+        DownloadProgressDialogComponent.openDialog(this.dialog);
     }
 
     public toggleOffline(event: Event, layer: EditableLayer, isOverlay: boolean) {

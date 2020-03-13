@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { MatDialogRef } from "@angular/material";
+import { MatDialogRef, MatDialog } from "@angular/material";
 import { HttpClient, HttpEventType } from "@angular/common/http";
 import { NgRedux } from "@angular-redux/store";
 
@@ -33,6 +33,18 @@ export class DownloadProgressDialogComponent extends BaseMapComponent {
         super(resources);
         this.progressPersentage = 0;
         this.startDownload();
+    }
+
+    public static openDialog(dialog: MatDialog) {
+        dialog.open(DownloadProgressDialogComponent, {
+            hasBackdrop: false,
+            closeOnNavigation: false,
+            disableClose: true,
+            position: {
+                top: "5px",
+            },
+            width: "80%"
+        });
     }
 
     private async startDownload() {

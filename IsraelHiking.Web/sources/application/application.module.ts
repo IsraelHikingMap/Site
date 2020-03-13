@@ -99,6 +99,7 @@ import { ApplicationExitService } from "./services/application-exit.service";
 import { ConnectionService } from "./services/connection.service";
 import { ScreenService } from "./services/screen.service";
 import { PurchaseService } from "./services/purchase.service";
+import { ApplicationInitializeService } from "./services/application-initialize.service";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
@@ -161,33 +162,13 @@ import { AutomaticLayerPresentationComponent } from "./components/map/automatic-
 import { SecuredImageComponent } from "./components/secured-image.component";
 import { ConfigurationDialogComponent } from "./components/dialogs/configuration-dialog.component";
 import { DownloadProgressDialogComponent } from "./components/dialogs/download-progress-dialog.component";
+import { UseAppDialogComponent } from "./components/dialogs/use-app-dialog.component";
 // variables and functions
 import { routes } from "./routes";
 
 export function initializeApplication(injector: Injector) {
     return async () => {
-        let loggingService = null;
-        try {
-            loggingService = injector.get<LoggingService>(LoggingService);
-            await loggingService.initialize();
-            await loggingService.info("Starting IHM Application Initialization");
-            injector.get<ScreenService>(ScreenService).initialize();
-            await injector.get<DatabaseService>(DatabaseService).initialize();
-            injector.get<ApplicationExitService>(ApplicationExitService).initialize();
-            injector.get<OpenWithService>(OpenWithService).initialize();
-            injector.get<FileService>(FileService).initialize();
-            injector.get<PurchaseService>(PurchaseService).initialize();
-            await loggingService.info("Finished IHM Application Initialization");
-        } catch (ex) {
-            if (ex.toString().indexOf("A mutation operation was attempted on a database that did not allow mutations") !== -1) {
-                alert("Sorry, this site does not support running FireFox in private mode...");
-            } else {
-                alert(`alert("Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?` +
-                    `\nInit failed: ${ex.toString()}`);
-            }
-            loggingService.error(`Failed IHM Application Initialization: ${ex.toString()}`);
-
-        }
+        await injector.get<ApplicationInitializeService>(ApplicationInitializeService).initialize();
     };
 }
 
@@ -270,7 +251,8 @@ export function getWindow() { return window; }
             PrivatePoiShowDialogComponent,
             AutomaticLayerPresentationComponent,
             ConfigurationDialogComponent,
-            DownloadProgressDialogComponent
+            DownloadProgressDialogComponent,
+            UseAppDialogComponent
         ],
         providers: [
             GestureConfig,
@@ -321,6 +303,7 @@ export function getWindow() { return window; }
             ConnectionService,
             ScreenService,
             PurchaseService,
+            ApplicationInitializeService,
             BackgroundGeolocation,
             Brightness,
             Camera,
@@ -387,6 +370,7 @@ export function getWindow() { return window; }
             SecuredImageComponent,
             ConfigurationDialogComponent,
             DownloadProgressDialogComponent,
+            UseAppDialogComponent,
             NameInUseValidatorDirective,
             ImageCaptureDirective,
             OfflineImagePipe
