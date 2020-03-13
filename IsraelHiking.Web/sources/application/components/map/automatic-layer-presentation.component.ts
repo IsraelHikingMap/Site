@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
 import { MapComponent } from "ngx-mapbox-gl";
-import { RasterSource, RasterLayout, Layer, Style } from "mapbox-gl";
+import { RasterSource, RasterLayout, Layer, Style, Sources } from "mapbox-gl";
 import { Subscription } from "rxjs";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -13,6 +13,9 @@ import { BaseMapComponent } from "../base-map.component";
 })
 export class AutomaticLayerPresentationComponent extends BaseMapComponent implements OnInit, OnChanges, OnDestroy {
     private static indexNumber = 0;
+
+    private static readonly ATTRIBUTION = "<a href='https://github.com/IsraelHikingMap/Site/wiki/Attribution' target='_blank'>" +
+        "Click me to see attribution</a>"
 
     @Input()
     public address: string;
@@ -109,8 +112,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             maxzoom: this.maxZoom,
             scheme,
             tileSize: 256,
-            attribution: "<a href='https://github.com/IsraelHikingMap/Site/wiki/Attribution' target='_blank'>" +
-                "Click me to see attribution</a>"
+            attribution: AutomaticLayerPresentationComponent.ATTRIBUTION
         } as RasterSource;
         this.host.mapInstance.addSource(this.rasterSourceId, source);
         let layer = {
@@ -139,12 +141,17 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         this.updateSourcesAndLayers(styleJson.sources, styleJson.layers);
     }
 
-    private updateSourcesAndLayers(sources: {}, layers: Layer[]) {
-        for (let sourceKey in sources) {
+    private updateSourcesAndLayers(sources: Sources, layers: Layer[]) {
+        let attributiuonUpdated = false;
+        for (let sourceKey of Object.keys(sources)) {
             if (sources.hasOwnProperty(sourceKey) && this.visible) {
                 let source = sources[sourceKey];
                 if (!this.isBaselayer) {
                     sourceKey = this.key + "_" + sourceKey;
+                }
+                if (source.type === "vector") {
+                    source.attribution = attributiuonUpdated == false ? AutomaticLayerPresentationComponent.ATTRIBUTION : "";
+                    attributiuonUpdated = true;
                 }
                 this.jsonSourcesIds.push(sourceKey);
                 this.host.mapInstance.addSource(sourceKey, source);
