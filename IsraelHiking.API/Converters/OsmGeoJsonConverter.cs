@@ -79,7 +79,9 @@ namespace IsraelHiking.API.Converters
 
         private Coordinate ConvertNode(Node node)
         {
-            return new CoordinateZ(node.Longitude ?? 0, node.Latitude ?? 0, double.NaN);
+            return new CoordinateZ(_geometryFactory.PrecisionModel.MakePrecise(node.Longitude ?? 0),
+                _geometryFactory.PrecisionModel.MakePrecise(node.Latitude ?? 0),
+                double.NaN);
         }
 
         private List<Geometry> GetGeometriesFromWays(IEnumerable<CompleteWay> ways)
@@ -113,7 +115,7 @@ namespace IsraelHiking.API.Converters
                 currentNodes.Remove(currentNodes.Last());
                 group.InsertRange(0, currentNodes);
             }
-            return nodesGroups.Select(g => GetGeometryFromNodes(g.ToArray())).ToList();
+            return nodesGroups.Select(g => SplitListByLoops(g).Select(g => GetGeometryFromNodes(g.ToArray()))).SelectMany(g => g).ToList();
         }
 
         private bool CanBeLinked(Node[] nodes1, Node[] nodes2)
@@ -151,16 +153,22 @@ namespace IsraelHiking.API.Converters
 
         private Feature ConvertToMultipolygon(CompleteRelation relation)
         {
-            var allWaysInRelationByRole = GetAllWaysGroupedByRole(relation);
-            var outerWays = allWaysInRelationByRole.Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
-            var outerPolygons = GetGeometriesFromWays(outerWays).OfType<Polygon>().ToList();
-            outerPolygons = MergePolygons(outerPolygons);
-            var innerWays = allWaysInRelationByRole.Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
-            var innerPolygons = GetGeometriesFromWays(innerWays).OfType<Polygon>().ToList();
-            innerPolygons = MergePolygons(innerPolygons);
-            MergeInnerIntoOuterPolygon(ref outerPolygons, ref innerPolygons);
-            var multiPolygon = _geometryFactory.CreateMultiPolygon(outerPolygons.Union(innerPolygons).ToArray());
-            return new Feature(multiPolygon, ConvertTags(relation));
+            try
+            {
+                var allWaysInRelationByRole = GetAllWaysGroupedByRole(relation);
+                var outerWays = allWaysInRelationByRole.Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
+                var outerPolygons = GetGeometriesFromWays(outerWays).OfType<Polygon>().ToList();
+                outerPolygons = MergePolygons(outerPolygons);
+                var innerWays = allWaysInRelationByRole.Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
+                var innerPolygons = GetGeometriesFromWays(innerWays).OfType<Polygon>().ToList();
+                innerPolygons = MergePolygons(innerPolygons);
+                MergeInnerIntoOuterPolygon(ref outerPolygons, ref innerPolygons);
+                var multiPolygon = _geometryFactory.CreateMultiPolygon(outerPolygons.Union(innerPolygons).ToArray());
+                return new Feature(multiPolygon, ConvertTags(relation));
+            } 
+            catch { }
+            return null;
+            
         }
 
         private List<Polygon> MergePolygons(List<Polygon> polygons)
@@ -250,6 +258,60 @@ namespace IsraelHiking.API.Converters
             return nodes.First().Id == nodes.Last().Id && nodes.Length >= 4
                         ? _geometryFactory.CreatePolygon(_geometryFactory.CreateLinearRing(coordinates)) as Geometry
                         : _geometryFactory.CreateLineString(coordinates) as Geometry;
+        }
+
+        /// <summary>
+        /// This split by loop algorithm looks for duplicate ids inside a list of nodes
+        /// Remove the shortest list between two duplicate ids and recusivly adds these loops to a list
+        /// </summary>
+        /// <param name="nodes"></param>
+        /// <returns>A list of list with valid polygons or lines</returns>
+        private List<List<Node>> SplitListByLoops(List<Node> nodes)
+        {
+            var groups = nodes.GroupBy(n => n.Id);
+            if (groups.All(g => g.Count() == 1) || groups.Count(g => g.Count() == 2) == 1 && nodes.First().Id == nodes.Last().Id)
+            {
+                return new List<List<Node>> { nodes };
+            }
+            var duplicateIdentifiers = groups.Select(g => g.First().Id);
+            var minimalIndexStart = -1;
+            var minimalIndexEnd = -1;
+            // find shortest loop:
+            foreach (var duplicateIdentifier in duplicateIdentifiers)
+            {
+                var firstIndex = -1;
+                var lastIndex = -1;
+                for (int nodeIndex = 0; nodeIndex < nodes.Count; nodeIndex++)
+                {
+                    if (nodes[nodeIndex].Id == duplicateIdentifier)
+                    {
+                        if (firstIndex == -1)
+                        {
+                            firstIndex = nodeIndex;
+                        }
+                        else
+                        {
+                            lastIndex = nodeIndex;
+                        }
+                        if (lastIndex == -1 || firstIndex == -1)
+                        {
+                            continue;
+                        }
+                        if (minimalIndexStart == -1 || lastIndex - firstIndex < minimalIndexEnd - minimalIndexStart)
+                        {
+                            minimalIndexStart = firstIndex;
+                            minimalIndexEnd = lastIndex;
+                        }
+                    }
+                }
+            }
+            // remove the loop:
+            var list = new List<List<Node>>();
+            var loop = nodes.Skip(minimalIndexStart).Take(minimalIndexEnd - minimalIndexStart + 1).ToList();
+            list.Add(loop);
+            var leftNodes = nodes.Take(minimalIndexStart).Concat(nodes.Skip(minimalIndexEnd)).ToList();
+            // run this again on the nodes without the above loop
+            return list.Concat(SplitListByLoops(leftNodes)).ToList();
         }
     }
 }

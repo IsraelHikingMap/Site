@@ -68,7 +68,15 @@ namespace IsraelHiking.API.Executors
             foreach (var pair in osmNamesDictionary)
             {
                 var features = MergeOsmElements(pair.Value)
-                        .Select(e => _osmGeoJsonConverter.ToGeoJson(e))
+                        .Select(e =>
+                        {
+                            var feature = _osmGeoJsonConverter.ToGeoJson(e);
+                            if (feature == null)
+                            {
+                                _logger.LogError("Unable to convert " + e.ToString());
+                            }
+                            return feature;
+                        })
                         .Where(f => f != null)
                         .ToList();
                 if (!features.Any())

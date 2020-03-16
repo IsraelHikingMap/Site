@@ -433,5 +433,39 @@ namespace IsraelHiking.API.Tests.Converters
             var isValidOp = new IsValidOp(multiPolygon);
             Assert.IsTrue(isValidOp.IsValid);
         }
+
+        [TestMethod]
+        public void Convert8Shape_ShouldConvertToMultipolygon()
+        {
+            int id = 1;
+            var node1 = CreateNode(id++, 0, 0);
+            var node2 = CreateNode(id++, 0, 1);
+            var node3 = CreateNode(id++, 1, 1);
+
+            var node4 = CreateNode(id++, 1, 0);
+            var node5 = CreateNode(id++, 0, -1);
+            var node6 = CreateNode(id++, -1, -1);
+
+            var node7 = CreateNode(id++, -1, 0);
+            var way1 = new CompleteWay { Id = id++, Nodes = new[] { node1, node2, node3 } };
+            var way2 = new CompleteWay { Id = id++, Nodes = new[] { node3, node4, node1, node5, node6 } };
+            var way3 = new CompleteWay { Id = id++, Nodes = new[] { node6, node7, node1 } };
+
+            var relation = new CompleteRelation { Id = id++, Tags = new TagsCollection() };
+            relation.Tags.Add(NAME, NAME);
+            relation.Tags.Add("type", "multipolygon");
+            relation.Members = new[] {
+                new CompleteRelationMember { Member = way1, Role = "outer" },
+                new CompleteRelationMember { Member = way2, Role = "outer" },
+                new CompleteRelationMember { Member = way3, Role = "outer" }
+            };
+
+            var feature = _converter.ToGeoJson(relation);
+            var multiPolygon = feature.Geometry as MultiPolygon;
+
+            Assert.IsNotNull(multiPolygon);
+            var isValidOp = new IsValidOp(multiPolygon);
+            Assert.IsTrue(isValidOp.IsValid);
+        }
     }
 }
