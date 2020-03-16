@@ -164,26 +164,35 @@ namespace IsraelHiking.API.Tests.Converters
         [TestMethod]
         public void ToGeoJson_RelationWithTwoSubRelationsWithInnerRole_ShouldReturnMultiPolygon()
         {
-            var node1 = CreateNode(1);
-            var node2 = CreateNode(2);
-            var node3 = CreateNode(3);
-            var node4 = CreateNode(1);
-            var way = new CompleteWay
+            int id = 1;
+            var node1 = CreateNode(id++);
+            var node2 = CreateNode(id++);
+            var node3 = CreateNode(id++);
+           
+            var way1 = new CompleteWay
             {
                 Id = 4,
-                Nodes = new[] {node1, node2, node3, node4}
+                Nodes = new[] {node1, node2, node3, node1}
+            };
+            var node4 = CreateNode(id++);
+            var node5 = CreateNode(id++);
+            var node6 = CreateNode(id++);
+            var way2 = new CompleteWay
+            {
+                Id = id++,
+                Nodes = new[] { node4, node5, node6, node4 }
             };
             var subRelation1 = new CompleteRelation
             {
-                Id = 5,
-                Members = new[] {new CompleteRelationMember {Member = way, Role = "outer"}}
+                Id = id++,
+                Members = new[] {new CompleteRelationMember {Member = way1, Role = "outer"}}
             };
             var subRelation2 = new CompleteRelation
             {
-                Id = 5,
-                Members = new[] {new CompleteRelationMember {Member = way, Role = "outer"}}
+                Id = id++,
+                Members = new[] {new CompleteRelationMember {Member = way2, Role = "outer"}}
             };
-            var relation = new CompleteRelation { Id = 5, Tags = new TagsCollection() };
+            var relation = new CompleteRelation { Id = id++, Tags = new TagsCollection() };
             relation.Tags.Add("type", "multipolygon");
             relation.Members = new[] {
                 new CompleteRelationMember { Member = subRelation1 },
@@ -194,7 +203,7 @@ namespace IsraelHiking.API.Tests.Converters
             var multiPolygon = feature.Geometry as MultiPolygon;
 
             Assert.IsNotNull(multiPolygon);
-            Assert.AreEqual(7, multiPolygon.Coordinates.Length);
+            Assert.AreEqual(8, multiPolygon.Coordinates.Length);
             Assert.AreEqual(node1.Latitude, multiPolygon.Coordinates.First().Y);
             Assert.AreEqual(node4.Longitude, multiPolygon.Coordinates.Last().X);
         }

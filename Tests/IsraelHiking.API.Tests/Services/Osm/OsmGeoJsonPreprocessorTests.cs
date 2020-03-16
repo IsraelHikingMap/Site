@@ -124,7 +124,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         {
             var node1 = CreateNode(1, 0, 0);
             var node2 = CreateNode(2, 1, 1);
-            var node3 = CreateNode(2, 1, 0);
+            var node3 = CreateNode(3, 1, 0);
             var way1 = new CompleteWay
             {
                 Nodes = new[] { node1, node2, node3 },
