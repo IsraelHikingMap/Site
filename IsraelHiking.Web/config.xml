@@ -146,6 +146,18 @@
     <edit-config target="NSPhotoLibraryAddUsageDescription" file="*-Info.plist" mode="merge">
         <string>We need access to the photo library to save pictures there</string>
     </edit-config>
+    <edit-config target="NSPhotoLibraryAddUsageDescription" file="*-Info.plist" mode="merge">
+      <string>We need access to the photo library to save pictures there</string>
+    </edit-config>
+    <edit-config target="NSLocationAlwaysUsageDescription" file="*-Info.plist" mode="merge">
+      <string>We need to access your location in order to be able to show it on the map while navigating</string>
+    </edit-config>
+    <edit-config target="NSLocationWhenInUseUsageDescription" file="*-Info.plist" mode="merge">
+      <string>We need to access your location in order to be able to show it on the map while navigating</string>
+    </edit-config>
+    <edit-config target="NSMotionUsageDescription" file="*-Info.plist" mode="merge">
+      <string>We need to access your motion detection in order to be able to show it on the map while navigating</string>
+    </edit-config>
     <preference name="WKWebViewOnly" value="true" />
     <preference name="WKSuspendInBackground" value="false" />
     <preference name="StatusBarOverlaysWebView" value="false" />
