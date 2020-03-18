@@ -351,6 +351,7 @@ export class ResourcesService {
     public infoOsmWikiLink: string;
     public infoFooterThanks: string;
     public infoFooterAuthors: string;
+    public infoPrivacyPolicyTermsOfService: string;
     // Legend
     public legendMarkedTrails: string;
     public legendRedMarkedTrail: string;
@@ -518,7 +519,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1584079611624");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1584540374246");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -880,6 +881,7 @@ export class ResourcesService {
             .getString("Download old raster maps for offline use in OruxMaps and Locus");
         this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
         this.infoFooterAuthors = this.gettextCatalog.getString("Harel, Zeev and Guy");
+        this.infoPrivacyPolicyTermsOfService = this.gettextCatalog.getString("Privacy Policy and Terms of Service");
         // Legend
         this.legendMarkedTrails = this.gettextCatalog.getString("Marked Trails");
         this.legendRedMarkedTrail = this.gettextCatalog.getString("Red Marked Trail");
