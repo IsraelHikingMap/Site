@@ -14,9 +14,6 @@ import { ApplicationState } from "../../models/models";
 })
 export class ConfigurationDialogComponent extends BaseMapComponent {
 
-    @select((state: ApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;
-
     @select((state: ApplicationState) => state.configuration.isBatteryOptimization)
     public isBatteryOptimization: Observable<boolean>;
 
@@ -34,10 +31,6 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
 
     public isApp() {
         return this.runningContextService.isCordova;
-    }
-
-    public toggleIsAdvanced() {
-        this.ngRedux.dispatch(ConfigurationActions.toggleIsAdvanceAction);
     }
 
     public toggleBatteryOprimization() {

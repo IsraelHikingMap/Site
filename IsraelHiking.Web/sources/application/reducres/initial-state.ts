@@ -18,7 +18,6 @@ export const BICYCLE_TRAILS = "Bicycle Trails";
 export const initialState =
     {
         configuration: {
-            isAdvanced: false,
             isBatteryOptimization: false,
             isAutomaticRecordingUpload: true,
             // isFindMissingRoutesAfterUpload: false,

@@ -27,7 +27,7 @@
                     </div>
                 </div>
             </div>
-            <div fxFlex="50" fxFlex.xs="100" *ngIf="isAdvanced | async">
+            <div fxFlex="50" fxFlex.xs="100">
                 <div fxLayout="column" fxFill>
                     <label class="text-center">{{resources.width}}</label>
                     <mat-slider [(ngModel)]="routeData.weight" min="4" max="20" step="2" color="primary"></mat-slider>
@@ -47,7 +47,7 @@
                 <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="reverseRoute()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Reverse route"><i class="fa fa-lg icon-arrows-h"></i>{{resources.reverseRoute}}</button>
             </mat-menu>
             <div fxFlex>
-                <button mat-button *ngIf="!isNew && (isAdvanced | async)" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Route" angularticsAction="Toggle advance options"><i class="fa icon-ellipsis-v fa-lg"></i></button>
+                <button mat-button *ngIf="!isNew" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Route" angularticsAction="Toggle advance options"><i class="fa icon-ellipsis-v fa-lg"></i></button>
             </div>
             <div fxFlex>
                 <button matDialogClose type="button" mat-button *ngIf="!isNew" (click)="deleteRoute()" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Delete route" fxFill><i class="fa fa-lg icon-trash"></i></button>

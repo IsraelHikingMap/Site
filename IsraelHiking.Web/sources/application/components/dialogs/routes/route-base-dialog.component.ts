@@ -1,5 +1,4 @@
-import { NgRedux, select } from "@angular-redux/store";
-import { Observable } from "rxjs";
+import { NgRedux } from "@angular-redux/store";
 import invert from "invert-color";
 
 import { ResourcesService } from "../../../services/resources.service";
@@ -17,9 +16,6 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     public isReversed: boolean;
 
     public routeData: RouteData;
-
-    @select((state: ApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;
 
     constructor(resources: ResourcesService,
                 protected readonly selectedRouteService: SelectedRouteService,

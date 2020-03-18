@@ -1,10 +1,10 @@
 import { Component } from "@angular/core";
-import { NgRedux, select } from "@angular-redux/store";
-import { Observable } from "rxjs";
+import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../services/resources.service";
 import { LayersService } from "../services/layers/layers.service";
 import { AuthorizationService } from "../services/authorization.service";
+import { RunningContextService } from "../services/running-context.service";
 import { BaseMapComponent } from "./base-map.component";
 import { ApplicationState } from "../models/models";
 import { Urls } from "../urls";
@@ -15,14 +15,18 @@ import { Urls } from "../urls";
 })
 export class EditOSMComponent extends BaseMapComponent {
 
-    @select((state: ApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;
-
     constructor(resources: ResourcesService,
                 private readonly layersService: LayersService,
                 private readonly authorizationService: AuthorizationService,
+                private readonly runningContextService: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
+    }
+
+    public isShowButton() {
+        return !this.runningContextService.isCordova &&
+            !this.runningContextService.isMobile &&
+            !this.runningContextService.isIFrame;
     }
 
     public getOsmAddress() {

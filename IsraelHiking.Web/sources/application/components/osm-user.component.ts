@@ -117,7 +117,7 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
         this.dialog.open(SharesDialogComponent, { width: "480px" } as MatDialogConfig);
     }
 
-    public openAdvancedSettings() {
+    public openConfigurationDialog() {
         this.dialog.open(ConfigurationDialogComponent, { width: "480px" } as MatDialogConfig);
     }
 

@@ -9,13 +9,6 @@
     </div>
     <div mat-dialog-content>
         <br />
-        <div fxLayout="row">
-            <div fxFlex>
-                <mat-checkbox [checked]="isAdvanced | async" (change)="toggleIsAdvanced()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle advanced button">{{resources.advancedSettings}}</mat-checkbox>
-                <br />
-                <span class="text-small">{{resources.advancedSettingsHint}}</span>
-            </div>
-        </div>
         <div fxLayout="row" *ngIf="isApp()">
             <div fxFlex>
                 <mat-checkbox [checked]="isBatteryOptimization | async" (change)="toggleBatteryOprimization()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle battery optimization">{{resources.batteryOptimization}}</mat-checkbox>

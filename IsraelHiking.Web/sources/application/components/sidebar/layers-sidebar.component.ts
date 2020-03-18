@@ -45,9 +45,6 @@ export class LayersSidebarComponent extends BaseMapComponent {
     @select((state: ApplicationState) => state.routes.present)
     public routes: Observable<RouteData[]>;
 
-    @select((state: ApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;
-
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
                 private readonly purchaseService: PurchaseService,

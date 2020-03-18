@@ -15,7 +15,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private static indexNumber = 0;
 
     private static readonly ATTRIBUTION = "<a href='https://github.com/IsraelHikingMap/Site/wiki/Attribution' target='_blank'>" +
-        "Click me to see attribution</a>"
+        "Click me to see attribution</a>";
 
     @Input()
     public address: string;
@@ -150,7 +150,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                     sourceKey = this.key + "_" + sourceKey;
                 }
                 if (source.type === "vector") {
-                    source.attribution = attributiuonUpdated == false ? AutomaticLayerPresentationComponent.ATTRIBUTION : "";
+                    source.attribution = attributiuonUpdated === false ? AutomaticLayerPresentationComponent.ATTRIBUTION : "";
                     attributiuonUpdated = true;
                 }
                 this.jsonSourcesIds.push(sourceKey);
