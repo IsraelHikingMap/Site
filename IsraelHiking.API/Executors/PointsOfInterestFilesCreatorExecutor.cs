@@ -58,10 +58,10 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc/>
         public void Create(List<Feature> features)
         {
-            _logger.LogInformation($"Starting points of interterest files creation: {features.Count}.");
+            _logger.LogInformation($"Starting points of interest files creation: {features.Count}.");
             CreateSitemapXmlFile(features);
             CreateOfflinePoisFile(features);
-            _logger.LogInformation($"Finished points of interterest files creation: {features.Count}.");
+            _logger.LogInformation($"Finished points of interest files creation: {features.Count}.");
         }
 
         private void CreateSitemapXmlFile(List<Feature> features)
@@ -120,7 +120,7 @@ namespace IsraelHiking.API.Executors
                 StreamUtils.Copy(new MemoryStream(collection.ToBytes()), zipStream, new byte[4096]);
                 zipStream.CloseEntry();
 
-                //CreateImagesJsonFiles(features, zipStream);
+                CreateImagesJsonFiles(features, zipStream);
                 zipStream.Finish();
                 outputMemStream.Position = 0;
                 
@@ -183,7 +183,6 @@ namespace IsraelHiking.API.Executors
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 });
-                //_fileSystemHelper.WriteAllText($"images{index.ToString("000")}.json", imageItemsString);
                 var newEntry = new ZipEntry($"images/images{ index.ToString("000") }.json")
                 {
                     DateTime = DateTime.Now
