@@ -27,12 +27,12 @@ export class PurchaseService {
             alias: "offline map",
             type: this.store.PAID_SUBSCRIPTION
         });
-        this.store.when("product").owned(() => {
+        this.store.when("offline_map").owned(() => {
             this.loggingService.debug("Product owned!");
             this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: true }));
             return;
         });
-        this.store.when("product").expired(() => {
+        this.store.when("offline_map").expired(() => {
             this.loggingService.debug("Product expired...");
             this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: false }));
             return;
