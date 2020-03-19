@@ -114,5 +114,8 @@
     <div fxLayout="row" *ngIf="isOfflineDownloadAvailable()">
         <button mat-raised-button color="primary" fxFill (click)="downloadOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download offline maps"><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
     </div>
-    <p *ngIf="isOfflineDownloadAvailable()">{{resources.offlinePurchaseGraditude}}</p>
+    <div fxLayout="row" *ngIf="isOfflineDownloadAvailable() && (lastModified | async)">
+        <div fxFill class="margin-10">{{resources.lastUpdatedOn}} {{lastModified | async | date:'dd/MM/yyyy'}}</div> 
+    </div>
+    <p class="margin-10" *ngIf="isOfflineDownloadAvailable()">{{resources.offlinePurchaseGraditude}}</p>
 </div>

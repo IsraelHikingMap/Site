@@ -45,6 +45,9 @@ export class LayersSidebarComponent extends BaseMapComponent {
     @select((state: ApplicationState) => state.routes.present)
     public routes: Observable<RouteData[]>;
 
+    @select((state: ApplicationState) => state.offlineState.lastModifiedDate)
+    public lastModified: Observable<Date>;
+
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
                 private readonly purchaseService: PurchaseService,
