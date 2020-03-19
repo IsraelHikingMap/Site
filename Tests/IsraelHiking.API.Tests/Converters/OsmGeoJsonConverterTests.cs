@@ -278,9 +278,9 @@ namespace IsraelHiking.API.Tests.Converters
             Assert.AreEqual(2, multiLineString.Geometries.Length);
             var lineString = multiLineString.Geometries.First();
             Assert.AreEqual(3, lineString.Coordinates.Length);
-            var polygon = multiLineString.Geometries.Last();
-            Assert.AreEqual(5, polygon.Coordinates.Length);
-            Assert.AreEqual(polygon.Coordinates.First(), polygon.Coordinates.Last());
+            var lineString2 = multiLineString.Geometries.Last();
+            Assert.AreEqual(5, lineString2.Coordinates.Length);
+            Assert.AreEqual(lineString2.Coordinates.First(), lineString2.Coordinates.Last());
         }
 
         [TestMethod]
@@ -331,9 +331,10 @@ namespace IsraelHiking.API.Tests.Converters
             Assert.AreEqual(8, multiLineString.Coordinates.Length);
             var lineString = multiLineString.Geometries.First();
             Assert.AreEqual(3, lineString.Coordinates.Length);
-            var polygon = multiLineString.Geometries.Last();
-            Assert.AreEqual(5, polygon.Coordinates.Length);
-            Assert.AreEqual(polygon.Coordinates.First(), polygon.Coordinates.Last());
+            var lineString2 = multiLineString.Geometries.Last();
+            Assert.AreEqual(5, lineString2.Coordinates.Length);
+            Assert.AreEqual(lineString2.Coordinates.First(), lineString2.Coordinates.Last());
+
         }
 
 
