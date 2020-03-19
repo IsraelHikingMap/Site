@@ -115,11 +115,11 @@ namespace IsraelHiking.API.Converters
                 }
                 if (currentNodes.First().Id == group.Last().Id)
                 {
-                    currentNodes.Remove(currentNodes.First());
+                    currentNodes.RemoveAt(0);
                     group.AddRange(currentNodes);
                     continue;
                 }
-                currentNodes.Remove(currentNodes.Last());
+                currentNodes.RemoveAt(currentNodes.Count - 1); // must use indexes since the same reference can be used at the start and end
                 group.InsertRange(0, currentNodes);
             }
             return nodesGroups.Select(g => SplitListByLoops(g).Select(g => GetGeometryFromNodes(g.ToArray()))).SelectMany(g => g).ToList();
@@ -153,7 +153,7 @@ namespace IsraelHiking.API.Converters
                 return null;
             }
             var jointLines = geometries.OfType<LineString>().ToList();
-            jointLines.AddRange(geometries.OfType<Polygon>().Select(p => _geometryFactory.CreateLineString(p.Coordinates) as LineString));
+            jointLines.AddRange(geometries.OfType<Polygon>().Select(p => _geometryFactory.CreateLineString(p.ExteriorRing.Coordinates.Skip(1).ToArray()) as LineString));
             var multiLineString = _geometryFactory.CreateMultiLineString(jointLines.ToArray());
             return new Feature(multiLineString, ConvertTags(relation));
         }
@@ -274,7 +274,7 @@ namespace IsraelHiking.API.Converters
             {
                 return new List<List<Node>> { nodes };
             }
-            var duplicateIdentifiers = groups.Select(g => g.First().Id);
+            var duplicateIdentifiers = groups.Where(g => g.Count() > 1).Select(g => g.First().Id);
             var minimalIndexStart = -1;
             var minimalIndexEnd = -1;
             // find shortest loop:
