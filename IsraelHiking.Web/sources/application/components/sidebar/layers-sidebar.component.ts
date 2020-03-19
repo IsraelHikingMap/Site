@@ -159,7 +159,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
         return layer.isOfflineAvailable &&
             this.runningContextService.isCordova &&
             (offlineState.lastModifiedDate != null ||
-            offlineState.isOfflineAvailable)
+            offlineState.isOfflineAvailable);
     }
 
     public isOfflineDownloadAvailable() {
