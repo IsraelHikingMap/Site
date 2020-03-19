@@ -27,12 +27,15 @@ export class PurchaseService {
             alias: "offline map",
             type: this.store.PAID_SUBSCRIPTION
         });
-        this.store.when("product").updated((product: IAPProduct) => {
-            if (product.owned) {
-                this.loggingService.debug("Product owned!");
-                this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: true }));
-                return;
-            }
+        this.store.when("product").owned(() => {
+            this.loggingService.debug("Product owned!");
+            this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: true }));
+            return;
+        });
+        this.store.when("product").expired(() => {
+            this.loggingService.debug("Product expired...");
+            this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: false }));
+            return;
         });
         this.store.when("product").approved(product => product.verify());
         this.store.when("product").verified(product => product.finish());

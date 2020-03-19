@@ -135,8 +135,11 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public editRoute(routeData: RouteData, event: Event) {
         event.stopPropagation();
-        let dialogRef = this.dialog.open(RouteEditDialogComponent);
-        dialogRef.componentInstance.setRouteData(routeData);
+        this.dialog.open(RouteEditDialogComponent, {
+            data: {
+                ...routeData
+            }
+        });
     }
 
     public isBaseLayerSelected(baseLayer: EditableLayer): boolean {
@@ -152,7 +155,11 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public showOfflineButton(layer: EditableLayer) {
-        return layer.isOfflineAvailable && this.isOfflineDownloadAvailable();
+        let offlineState = this.ngRedux.getState().offlineState;
+        return layer.isOfflineAvailable &&
+            this.runningContextService.isCordova &&
+            (offlineState.lastModifiedDate != null ||
+            offlineState.isOfflineAvailable)
     }
 
     public isOfflineDownloadAvailable() {

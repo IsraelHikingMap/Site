@@ -1,5 +1,6 @@
-import { Component, ViewEncapsulation } from "@angular/core";
+import { Component, ViewEncapsulation, Inject } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
+import { MAT_DIALOG_DATA } from "@angular/material";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
@@ -27,12 +28,15 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
                 toastService: ToastService,
                 ngRedux: NgRedux<ApplicationState>,
                 private readonly fileService: FileService,
-                private readonly fitBoundsService: FitBoundsService
+                private readonly fitBoundsService: FitBoundsService,
+                @Inject(MAT_DIALOG_DATA) data: RouteData
     ) {
         super(resources, selectedRouteService, routesFactory, toastService, ngRedux);
 
         this.isNew = false;
         this.title = this.resources.routeProperties;
+        this.routeData = data;
+        this.originalName = data.name;
     }
 
     protected saveImplementation() {
@@ -40,11 +44,6 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
             routeId: this.routeData.id,
             routeData: this.routeData
         }));
-    }
-
-    public setRouteData(routeData: RouteData): void {
-        this.routeData = { ...routeData };
-        this.originalName = routeData.name;
     }
 
     protected isRouteNameAlreadyInUse() {
