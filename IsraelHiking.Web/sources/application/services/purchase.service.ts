@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
-import { InAppPurchase2, IAPProduct } from "@ionic-native/in-app-purchase-2/ngx";
+import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -39,6 +39,12 @@ export class PurchaseService {
         });
         this.store.when("product").approved(product => product.verify());
         this.store.when("product").verified(product => product.finish());
+        if (this.runningContextService.isIos && this.runningContextService.isCordova) {
+            this.store.when("product").updated(p => {
+                this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: false }));
+                this.loggingService.debug(JSON.stringify(p));
+            });
+        }
         this.store.refresh();
     }
 

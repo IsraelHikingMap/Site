@@ -172,6 +172,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public isPurchaseAvailable() {
         return this.runningContextService.isCordova &&
+            !this.runningContextService.isIos &&
             !this.ngRedux.getState().offlineState.isOfflineAvailable;
     }
 
