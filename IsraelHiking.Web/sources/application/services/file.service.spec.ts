@@ -1,6 +1,7 @@
 import { TestBed, inject, fakeAsync } from "@angular/core/testing";
 import { HttpClientModule, HttpClient } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { Device } from "@ionic-native/device/ngx";
 
 import { FileService, IFormatViewModel } from "./file.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
@@ -40,6 +41,7 @@ describe("FileService", () => {
             ],
             providers: [
                 RunningContextService,
+                Device,
                 LoggingService,
                 {
                     provide: FileService,
