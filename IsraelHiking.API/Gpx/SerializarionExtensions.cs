@@ -186,5 +186,20 @@ namespace IsraelHiking.API.Gpx
                 : new GpxMetadata(gpx.Metadata.Creator, gpx.Metadata.Name, gpx.Metadata.Description, gpx.Metadata.Author, gpx.Metadata.Copyright, gpx.Metadata.Links, gpx.Metadata.CreationTimeUtc, gpx.Metadata.Keywords, boundingBox, gpx.Metadata.Extensions);
             return gpx;
         }
+
+        /// <summary>
+        /// Get a byte array and converts it to string
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <returns></returns>
+        public static string ToHashString(this byte[] hash)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hash.Length; i++)
+            {
+                sb.Append(hash[i].ToString("X2"));
+            }
+            return sb.ToString();
+        }
     }
 }

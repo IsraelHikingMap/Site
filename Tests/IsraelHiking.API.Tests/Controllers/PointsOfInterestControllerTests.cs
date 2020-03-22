@@ -1,5 +1,6 @@
 ﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Converters;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -15,6 +16,7 @@ using NSubstitute;
 using OsmSharp.API;
 using OsmSharp.IO.API;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -26,6 +28,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IAuthClient _osmGateway;
         private ITagsHelper _tagHelper;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
+        private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private LruCache<string, TokenAndSecret> _cache;
 
         [TestInitialize]
@@ -35,12 +38,20 @@ namespace IsraelHiking.API.Tests.Controllers
             _tagHelper = Substitute.For<ITagsHelper>();
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
             _osmGateway = Substitute.For<IAuthClient>();
+            _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
             _cache = new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>());
             var factory = Substitute.For<IClientsFactory>();
             factory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(_osmGateway);
-            _controller = new PointsOfInterestController(factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, new Base64ImageStringToFileConverter(), optionsProvider, _cache);
+            _controller = new PointsOfInterestController(factory, 
+                _tagHelper, 
+                _wikimediaCommonGateway, 
+                _pointsOfInterestProvider, 
+                new Base64ImageStringToFileConverter(), 
+                _imagesUrlsStorageExecutor, 
+                optionsProvider, 
+                _cache);
         }
 
         [TestMethod]
@@ -158,10 +169,36 @@ namespace IsraelHiking.API.Tests.Controllers
                 ImagesUrls = new [] { "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
                                       "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==", "http://link.com"}
             };
+            _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
+
             _controller.UploadPointOfInterest(poi, "he").Wait();
 
             _wikimediaCommonGateway.Received(1).UploadImage(poi.Title, poi.Description, user.DisplayName, "title.png", Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
+            _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
+        }
+
+        [TestMethod]
+        public void UploadPointOfInterest_WithImageInRepository_ShouldNotUploadImage()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            _controller.SetupIdentity(_cache);
+            _osmGateway.GetUserDetails().Returns(user);
+            var poi = new PointOfInterestExtended
+            {
+                Title = "title",
+                Source = Sources.OSM,
+                Id = "1",
+                Location = new LatLng(5, 6),
+                ImagesUrls = new[] { "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                                      "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==", "http://link.com"}
+            };
+            _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns("some-url");
+
+            _controller.UploadPointOfInterest(poi, "he").Wait();
+
+            _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());
         }
 
         [TestMethod]

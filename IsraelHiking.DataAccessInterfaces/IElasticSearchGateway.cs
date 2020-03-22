@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
-    public interface IElasticSearchGateway : IRepository
+    public interface IElasticSearchGateway : IRepository, IImagesRepository
     {
         void Initialize();
         Task<List<Feature>> Search(string searchTerm, string language);

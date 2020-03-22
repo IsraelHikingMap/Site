@@ -51,7 +51,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc />
-        public async Task Update(bool updateFile = true)
+        public async Task Update(bool downloadFile = true, bool updateFile = true)
         {
             _logger.LogInformation("Starting updating to latest OSM file.");
             var workingDirectory = Path.Combine(_options.BinariesFolder, OSM_C_TOOLS_FOLDER);
@@ -60,7 +60,10 @@ namespace IsraelHiking.API.Executors
             {
                 _fileSystemHelper.CreateDirectory(workingDirectory);
             }
-            await DownloadDailyOsmFile(workingDirectory);
+            if (downloadFile || updateFile)
+            {
+                await DownloadDailyOsmFile(workingDirectory);
+            }
             if (updateFile)
             {
                 UpdateFileToLatestVersion(workingDirectory);

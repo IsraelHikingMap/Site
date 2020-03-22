@@ -45,7 +45,7 @@ export class ImageResizeService {
 
     private resizeImageAndConvertToAny<TReturn>(file: File,
                                                 convertMethod: (data: string, name: string, geoLocation: LatLngAlt) => TReturn,
-                                                throwIfNoLocation = true) {
+                                                throwIfNoLocation = true): Promise<TReturn> {
         return new Promise<TReturn>((resolve, reject) => {
             let reader = new FileReader();
             reader.onload = (event: any) => {

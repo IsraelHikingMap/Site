@@ -63,6 +63,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 _osmLatestFileFetcherExecutor, 
                 _graphHopperGateway,
                 _pointsOfInterestFilesCreatorExecutor,
+                null,
                 Substitute.For<ILogger>());
         }
 

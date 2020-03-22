@@ -29,6 +29,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private readonly IGraphHopperGateway _graphHopperGateway;
         private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
+        private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private readonly ILogger _logger;
         /// <summary>
         /// Service's constructor
@@ -43,6 +44,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="latestFileFetcherExecutor"></param>
         /// <param name="graphHopperGateway"></param>
         /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
+        /// <param name="imagesUrlsStorageExecutor"></param>
         /// <param name="logger"></param>
         public DatabasesUpdaterService(IClientsFactory clinetsFactory,
             IElasticSearchGateway elasticSearchGateway,
@@ -53,6 +55,7 @@ namespace IsraelHiking.API.Services.Osm
             IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
             IGraphHopperGateway graphHopperGateway,
             IPointsOfInterestFilesCreatorExecutor pointsOfInterestFilesCreatorExecutor,
+            IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
             ILogger logger)
         {
             _elasticSearchGateway = elasticSearchGateway;
@@ -65,6 +68,7 @@ namespace IsraelHiking.API.Services.Osm
             _latestFileFetcherExecutor = latestFileFetcherExecutor;
             _graphHopperGateway = graphHopperGateway;
             _osmGateway = clinetsFactory.CreateNonAuthClient();
+            _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
             _logger = logger;
         }
 
@@ -165,6 +169,10 @@ namespace IsraelHiking.API.Services.Osm
             {
                 await RebuildPointsOfInterest();
             }
+            if (request.Images)
+            {
+                await RebuildImages();
+            }
             if (request.SiteMap)
             {
                 await RebuildSiteMap();
@@ -184,13 +192,12 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation("Finished rebuilding routing database.");
         }
 
-
         private async Task RebuildPointsOfInterest()
         {
             _logger.LogInformation("Starting rebuilding POIs database.");
             var osmSource = _pointsOfInterestAdapterFactory.GetBySource(Sources.OSM);
             var osmFeaturesTask = osmSource.GetPointsForIndexing();
-            var sources = _pointsOfInterestAdapterFactory.GetAll().Where(s=> s.Source != Sources.OSM).Select(s => s.Source);
+            var sources = _pointsOfInterestAdapterFactory.GetAll().Where(s => s.Source != Sources.OSM).Select(s => s.Source);
             var otherTasks = sources.Select(s => _elasticSearchGateway.GetExternalPoisBySource(s)).ToArray();
             await Task.WhenAll(new Task[] { osmFeaturesTask }.Concat(otherTasks));
             var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result.Concat(otherTasks.SelectMany(t => t.Result)).ToList());
@@ -209,6 +216,23 @@ namespace IsraelHiking.API.Services.Osm
             }
 
             _logger.LogInformation("Finished rebuilding highways database.");
+        }
+
+        private async Task RebuildImages()
+        {
+            _logger.LogInformation("Starting rebuilding images database.");
+            using (var stream = _latestFileFetcherExecutor.Get())
+            {
+                var features = await _elasticSearchGateway.GetAllPointsOfInterest();
+                var featuresUrls = features.SelectMany(f =>
+                    f.Attributes.GetNames()
+                    .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                    .Select(k => f.Attributes[k].ToString())
+                );
+                var urls = await _osmRepository.GetImagesUrls(stream);
+                await _imagesUrlsStorageExecutor.DownloadAndStoreUrls(urls.Union(featuresUrls).ToList());
+            }
+            _logger.LogInformation("Finished rebuilding images database.");
         }
 
         private async Task RebuildSiteMap()

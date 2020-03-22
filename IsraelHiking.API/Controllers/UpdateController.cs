@@ -67,7 +67,9 @@ namespace IsraelHiking.API.Controllers
                     request.Routing == false &&
                     request.Highways == false &&
                     request.PointsOfInterest == false &&
-                    request.OsmFile == false &&
+                    request.UpdateOsmFile == false &&
+                    request.DownloadOsmFile == false &&
+                    request.Images == false &&
                     request.SiteMap == false)
                 {
                     request = new UpdateRequest
@@ -75,13 +77,15 @@ namespace IsraelHiking.API.Controllers
                         Routing = true,
                         Highways = true,
                         PointsOfInterest = true,
-                        OsmFile = true,
-                        SiteMap = true
+                        UpdateOsmFile = true,
+                        DownloadOsmFile = true,
+                        SiteMap = true,
+                        Images = true
                     };
                     _logger.LogInformation("No specific filters were applied, updating all databases.");
                 }
                 _logger.LogInformation("Starting updating site's databases according to request: " + JsonConvert.SerializeObject(request));
-                await _osmLatestFileFetcherExecutor.Update(request.OsmFile);
+                await _osmLatestFileFetcherExecutor.Update(request.DownloadOsmFile, request.UpdateOsmFile);
                 _logger.LogInformation("Update OSM file completed.");
 
                 await _databasesUpdaterService.Rebuild(request);

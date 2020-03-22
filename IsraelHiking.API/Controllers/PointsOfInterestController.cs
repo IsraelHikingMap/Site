@@ -1,4 +1,5 @@
 ﻿using IsraelHiking.API.Converters;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -13,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
@@ -28,6 +30,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
+        private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
         private readonly ConfigurationData _options;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
@@ -39,6 +42,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="wikimediaCommonGateway"></param>
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="base64ImageConverter"></param>
+        /// <param name="imageUrlStoreExecutor"></param>
         /// <param name="options"></param>
         /// <param name="cache"></param>
         public PointsOfInterestController(IClientsFactory clientsFactory,
@@ -46,6 +50,7 @@ namespace IsraelHiking.API.Controllers
             IWikimediaCommonGateway wikimediaCommonGateway,
             IPointsOfInterestProvider pointsOfInterestProvider,
             IBase64ImageStringToFileConverter base64ImageConverter,
+            IImagesUrlsStorageExecutor imageUrlStoreExecutor,
             IOptions<ConfigurationData> options,
             LruCache<string, TokenAndSecret> cache)
         {
@@ -53,6 +58,7 @@ namespace IsraelHiking.API.Controllers
             _tagsHelper = tagsHelper;
             _cache = cache;
             _base64ImageConverter = base64ImageConverter;
+            _imageUrlStoreExecutor = imageUrlStoreExecutor;
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _wikimediaCommonGateway = wikimediaCommonGateway;
             _options = options.Value;
@@ -147,24 +153,31 @@ namespace IsraelHiking.API.Controllers
             var imageUrls = pointOfInterest.ImagesUrls ?? new string[0];
             for (var urlIndex = 0; urlIndex < imageUrls.Length; urlIndex++)
             {
-                var url = imageUrls[urlIndex];
                 var fileName = string.IsNullOrWhiteSpace(pointOfInterest.Title)
                     ? pointOfInterest.Icon.Replace("icon-", "")
                     : pointOfInterest.Title;
-                var file = _base64ImageConverter.ConvertToFile(url, fileName);
+                var file = _base64ImageConverter.ConvertToFile(imageUrls[urlIndex], fileName);
                 if (file == null)
                 {
                     continue;
                 }
-                using (var memoryStream = new MemoryStream(file.Content))
+                using (var md5 = MD5.Create())
                 {
-                    var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title,
-                        pointOfInterest.Description, user.DisplayName, file.FileName, memoryStream,
-                        pointOfInterest.Location.ToCoordinate());
-                    url = await _wikimediaCommonGateway.GetImageUrl(imageName);
-                    imageUrls[urlIndex] = url;
+                    var imageUrl = await _imageUrlStoreExecutor.GetImageUrlIfExists(md5, file.Content);
+                    if (imageUrl != null)
+                    {
+                        imageUrls[urlIndex] = imageUrl;
+                        continue;
+                    }
+                    using (var memoryStream = new MemoryStream(file.Content))
+                    {
+                        var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title,
+                            pointOfInterest.Description, user.DisplayName, file.FileName, memoryStream,
+                            pointOfInterest.Location.ToCoordinate());
+                        imageUrls[urlIndex] = await _wikimediaCommonGateway.GetImageUrl(imageName);
+                        await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrls[urlIndex]);
+                    }
                 }
-                    
             }
 
             if (string.IsNullOrWhiteSpace(pointOfInterest.Id))

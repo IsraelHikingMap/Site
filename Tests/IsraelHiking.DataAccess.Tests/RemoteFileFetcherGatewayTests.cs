@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Microsoft.Extensions.Logging;
 using IsraelHiking.DataAccessInterfaces;
 using System.Net.Http;
 
@@ -17,7 +16,7 @@ namespace IsraelHiking.DataAccess.Tests
         {
             var factory = Substitute.For<IHttpClientFactory>();
             factory.CreateClient().Returns(new HttpClient());
-            _gateway = new RemoteFileFetcherGateway(factory, Substitute.For<ILogger>());
+            _gateway = new RemoteFileFetcherGateway(factory, new TraceLogger());
         }
 
 
@@ -40,9 +39,19 @@ namespace IsraelHiking.DataAccess.Tests
         }
 
         [TestMethod]
+        [Ignore]
         public void TestGateway_InvalidFile()
         {
             var response = _gateway.GetFileContent("http://israelhiking.osm.org.il/Hebrew/Tiles/11/1228/826.png").Result;
+
+            Assert.IsFalse(response.Content.Any());
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void TestGateway_ImageFile()
+        {
+            var response = _gateway.GetFileContent("https://upload.wikimedia.org/wikipedia/commons/2/2a/Israel_Hiking_Map_%D7%97%D7%95%D7%A8%D7%91%D7%AA_%D7%9C%D7%95%D7%96%D7%94.jpeg").Result;
 
             Assert.IsFalse(response.Content.Any());
         }

@@ -11,9 +11,10 @@ namespace IsraelHiking.API.Executors
         /// <summary>
         /// Updates the osm file to latest version
         /// </summary>
+        /// <param name="downloadFile">Should the operation download the daily OSM file</param>
         /// <param name="updateFile">Should the operation download updates for daily OSM file</param>
         /// <returns></returns>
-        Task Update(bool updateFile = true);
+        Task Update(bool downloadFile = true, bool updateFile = true);
 
         /// <summary>
         /// Gets a stream to the OSM file

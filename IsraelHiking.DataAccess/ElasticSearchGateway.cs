@@ -44,6 +44,7 @@ namespace IsraelHiking.DataAccess
         private const string SHARES = "shares";
         private const string CUSTOM_USER_LAYERS = "custom_user_layers";
         private const string EXTERNAL_POIS = "external_pois";
+        private const string IMAGES = "images";
 
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
@@ -98,6 +99,10 @@ namespace IsraelHiking.DataAccess
             if (_elasticClient.IndexExists(CUSTOM_USER_LAYERS).Exists == false)
             {
                 _elasticClient.CreateIndex(CUSTOM_USER_LAYERS);
+            }
+            if (_elasticClient.IndexExists(IMAGES).Exists == false)
+            {
+                CreateImagesIndex();
             }
             _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
         }
@@ -459,6 +464,21 @@ namespace IsraelHiking.DataAccess
             );
         }
 
+        private Task CreateImagesIndex()
+        {
+            return _elasticClient.CreateIndexAsync(IMAGES, c =>
+                c.Mappings(ms =>
+                    ms.Map<ImageItem>(m =>
+                        m.Properties(p =>
+                            p.Keyword(k => k.Name(ii => ii.Hash))
+                             .Keyword(s => s.Name(n => n.ImageUrl))
+                             .Binary(a => a.Name(i => i.Data))
+                        )
+                    )
+                )
+            );
+        }
+
         private async Task UpdateUsingPaging(List<Feature> features, string alias)
         {
             _logger.LogInformation($"Starting indexing {features.Count} records");
@@ -586,5 +606,56 @@ namespace IsraelHiking.DataAccess
         {
             return _elasticClient.DeleteAsync<MapLayerData>(layerData.Id, d => d.Index(CUSTOM_USER_LAYERS));
         }
+
+        public async Task<ImageItem> GetImageByUrl(string url)
+        {
+            var response = await _elasticClient.SearchAsync<ImageItem>(s =>
+                s.Index(IMAGES)
+                .Query(q => q.Match(m => m.Field(i => i.ImageUrl).Query(url)))
+            );
+            return response.Documents.FirstOrDefault();
+        }
+
+        public async Task<ImageItem> GetImageByHash(string hash)
+        {
+            var response = await _elasticClient.GetAsync<ImageItem>(hash, r => r.Index(IMAGES));
+            return response.Source;
+        }
+        public async Task<List<string>> GetAllUrls()
+        {
+            var list = new List<string>();
+            var response = await _elasticClient.SearchAsync<ImageItem>(
+                s => s.Index(IMAGES)
+                    .Size(10000)
+                    .Scroll("10s")
+                    .Source(sf => sf
+                    .Includes(i => i.Fields(f => f.ImageUrl, f => f.Hash))
+                ).Query(q => q.MatchAll())
+            );
+            list.AddRange(response.Documents.Select(i => i.ImageUrl).ToList());
+            var results = _elasticClient.Scroll<ImageItem>("10s", response.ScrollId);
+            list.AddRange(results.Documents.Select(i => i.ImageUrl).ToList());
+            while (results.Documents.Any())
+            {
+                results = _elasticClient.Scroll<ImageItem>("10s", results.ScrollId);
+                list.AddRange(results.Documents.Select(i => i.ImageUrl).ToList());
+            }
+            return list;
+        }
+
+        public Task StoreImage(ImageItem imageItem)
+        {
+            return _elasticClient.IndexAsync(imageItem, r => r.Index(IMAGES).Id(imageItem.Hash));
+        }
+
+        public async Task DeleteImageByUrl(string url)
+        {
+            var imageItem = await GetImageByUrl(url);
+            if (imageItem != null)
+            {
+                await _elasticClient.DeleteAsync<Feature>(imageItem.Hash, d => d.Index(IMAGES));
+            }
+        }
+
     }
 }
