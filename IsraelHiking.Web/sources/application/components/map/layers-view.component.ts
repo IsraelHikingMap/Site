@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChildren, QueryList } from "@angular/core";
+import { Component, OnInit, ViewChildren, QueryList } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { GeoJSONSourceComponent } from "ngx-mapbox-gl";
@@ -18,7 +18,7 @@ import { ApplicationState, Overlay, PointOfInterest, PointOfInterestExtended } f
     templateUrl: "layers-view.component.html",
     styleUrls: ["layers-view.component.scss"]
 })
-export class LayersViewComponent extends BaseMapComponent implements OnInit, AfterViewInit {
+export class LayersViewComponent extends BaseMapComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 7;
 
     @ViewChildren("cluster")
@@ -69,7 +69,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         return this.categoriesLayerFactory.get(categoriesType).isVisible();
     }
 
-    ngOnInit() {
+    public ngOnInit() {
         for (let categoriesType of this.categoriesTypes) {
             this.categoriesLayerFactory.get(categoriesType).markersLoaded.subscribe(() => {
                 let features = this.categoriesLayerFactory.get(categoriesType).pointsOfInterest.map(p => this.poiToFeature(p));
@@ -79,9 +79,6 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                 };
             });
         }
-    }
-
-    public ngAfterViewInit() {
         this.selectedPoi$.subscribe((poi) => this.onSelectedPoiChanged(poi));
     }
 

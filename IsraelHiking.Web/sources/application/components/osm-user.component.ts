@@ -4,6 +4,7 @@ import { select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
 import { Observable, Subscription } from "rxjs";
 import { EmailComposer } from "@ionic-native/email-composer/ngx";
+import { Device } from "@ionic-native/device/ngx";
 
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
@@ -44,6 +45,7 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
 
     constructor(resources: ResourcesService,
                 private readonly emailComposer: EmailComposer,
+                private readonly device: Device,
                 private readonly authorizationService: AuthorizationService,
                 private readonly dialog: MatDialog,
                 private readonly runningContextService: RunningContextService,
@@ -161,10 +163,15 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
             let logBase64zipped = await this.fileService.zipAndStoreFile(logs);
             logs = await this.geoLocationService.getLog();
             let logBase64zippedGeoLocation = await this.fileService.zipAndStoreFile(logs);
+            let deviceString = ["----------",
+                this.device.manufacturer,
+                this.device.model,
+                this.device.platform,
+                this.device.version].join("\n");
             this.emailComposer.open({
                 to: ["israelhikingmap@gmail.com"],
                 subject: "Issue reported by " + this.userInfo.displayName,
-                body: this.resources.reportAnIssueInstructions,
+                body: this.resources.reportAnIssueInstructions + "\n\n\n" + deviceString,
                 attachments: [
                     "base64:log.zip//" + logBase64zipped,
                     "base64:geolocation-log.zip//" + logBase64zippedGeoLocation,

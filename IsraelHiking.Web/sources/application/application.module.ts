@@ -57,6 +57,7 @@ import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
 import { StatusBar } from "@ionic-native/status-bar/ngx";
 import { Zip } from "@ionic-native/zip/ngx";
+import { Device } from "@ionic-native/device/ngx";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -315,6 +316,7 @@ export function getWindow() { return window; }
             MobileAccessibility,
             StatusBar,
             Zip,
+            Device,
             RouteEditPoiInteraction,
             RouteEditRouteInteraction
         ],

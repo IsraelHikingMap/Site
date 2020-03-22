@@ -17,6 +17,7 @@
     "@ionic-native/brightness": "^5.21.5",
     "@ionic-native/camera": "^5.21.5",
     "@ionic-native/core": "^5.21.5",
+    "@ionic-native/device": "^5.23.0",
     "@ionic-native/email-composer": "^5.21.5",
     "@ionic-native/file": "^5.21.5",
     "@ionic-native/in-app-browser": "^5.21.5",

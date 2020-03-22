@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { Device } from "@ionic-native/device/ngx";
 
 import { environment } from "../../environments/environment";
 import { ConnectionService } from "./connection.service";
@@ -12,12 +13,13 @@ export class RunningContextService {
     public readonly isEdge: boolean;
     public readonly isProduction: boolean;
     public isOnline: boolean;
-    constructor(private readonly connectionService: ConnectionService) {
+    constructor(private readonly connectionService: ConnectionService,
+                private readonly device: Device) {
         this.isIFrame = window.self !== window.top;
         this.isMobile = false;
         this.isProduction = environment.production;
         this.isCordova = environment.isCordova;
-        this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform);
+        this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform) || (this.isCordova && this.device.platform === "iOS");
         this.isEdge = /Edge/.test(navigator.userAgent);
         this.isOnline = true;
         let agent = navigator.userAgent || navigator.vendor || (window as any).opera;
