@@ -9,6 +9,7 @@ import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
 import { RunningContextService } from "../services/running-context.service";
 import { DatabaseService } from "../services/database.service";
+import { SetOfflineLastModifiedAction } from "../reducres/offline.reducer";
 import { DataContainer, ApplicationState } from "../models/models";
 
 @Component({
@@ -47,6 +48,15 @@ export class FileComponent extends BaseMapComponent {
             } catch (ex) {
                 this.toastService.error(ex.message);
             }
+            return;
+        }
+        if (file.name.endsWith(".mbtiles")) {
+            // HM TODO:
+            // && this.ngRedux.getState().offlineState.isOfflineAvailable
+            this.toastService.info(this.resources.openingAFilePleaseWait);
+            await this.fileService.saveToDatabasesFolder(file);
+            this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
+            this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: new Date(file.lastModified) }));
             return;
         }
         try {

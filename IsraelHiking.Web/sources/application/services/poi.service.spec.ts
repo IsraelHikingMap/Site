@@ -16,6 +16,7 @@ import { ConnectionService } from "./connection.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
 import { PointOfInterestExtended } from "../models/models";
+import { SQLite } from "@ionic-native/sqlite/ngx";
 
 describe("Poi Service", () => {
 
@@ -45,7 +46,8 @@ describe("Poi Service", () => {
                 DatabaseService,
                 LoggingService,
                 NgRedux,
-                Device
+                Device,
+                SQLite
             ]
         });
     });

@@ -25,6 +25,7 @@
     "@ionic-native/ionic-webview": "^5.21.5",
     "@ionic-native/mobile-accessibility": "^5.21.5",
     "@ionic-native/network": "^5.21.5",
+    "@ionic-native/sqlite": "^5.23.0",
     "@ionic-native/status-bar": "^5.21.5",
     "@ionic-native/zip": "^5.21.6",
     "@katze/ngx-d3": "0.2.0",
@@ -59,6 +60,7 @@
     "cordova-plugin-statusbar": "^2.4.3",
     "cordova-plugin-whitelist": "^1.3.4",
     "cordova-plugin-zip": "^3.1.0",
+    "cordova-sqlite-ext": "^5.0.0",
     "core-js": "^3.1.4",
     "deepmerge": "3.3.0",
     "dexie": "^2.0.4",
@@ -177,7 +179,8 @@
       "phonegap-plugin-mobile-accessibility": {},
       "cordova-plugin-network-information": {},
       "cordova-plugin-purchase": {},
-      "cordova-plugin-zip": {}
+      "cordova-plugin-zip": {},
+      "cordova-sqlite-ext": {}
     },
     "platforms": [
       "ios",

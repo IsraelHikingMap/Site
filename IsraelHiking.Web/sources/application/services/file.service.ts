@@ -289,4 +289,11 @@ export class FileService {
         }
         return data;
     }
+
+    public async saveToDatabasesFolder(file: File) {
+        let path = this.runningContextService.isIos
+            ? this.fileSystemWrapper.documentsDirectory
+            : this.fileSystemWrapper.applicationStorageDirectory + "/databases";
+        await this.fileSystemWrapper.writeFile(path, file.name, file, { append: false, replace: true, truncate: 0 });
+    }
 }

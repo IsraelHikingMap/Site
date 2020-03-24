@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 import { NgRedux } from "@angular-redux/store";
 import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 
@@ -11,6 +12,7 @@ import { ApplicationState } from "../models/models";
 export class PurchaseService {
 
     constructor(private readonly store: InAppPurchase2,
+                private readonly http: HttpClient,
                 private readonly runningContextService: RunningContextService,
                 private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {

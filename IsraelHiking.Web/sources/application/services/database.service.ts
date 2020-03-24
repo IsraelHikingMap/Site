@@ -2,9 +2,11 @@ import { Injectable } from "@angular/core";
 import { debounceTime } from "rxjs/operators";
 import { decode } from "base64-arraybuffer";
 import { NgRedux } from "@angular-redux/store";
+import { SQLite, SQLiteDatabaseConfig, SQLiteObject } from "@ionic-native/sqlite/ngx";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
 import * as mapboxgl from "mapbox-gl";
+import * as pako from "pako";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
@@ -36,13 +38,16 @@ export class DatabaseService {
     private poisDatabase: Dexie;
     private imagesDatabase: Dexie;
     private sourcesDatabases: Map<string, Dexie>;
+    private sourcesMbTiles: Map<string, SQLiteObject>;
     private updating: boolean;
 
     constructor(private readonly loggingService: LoggingService,
                 private readonly runningContext: RunningContextService,
+                private readonly sqlite: SQLite,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.updating = false;
         this.sourcesDatabases = new Map<string, Dexie>();
+        this.sourcesMbTiles = new Map<string, SQLiteObject>();
     }
 
     public async initialize() {
@@ -96,7 +101,7 @@ export class DatabaseService {
 
     public async close() {
         let finalState = this.ngRedux.getState();
-        // reduce database size and memory foor print
+        // reduce database size and memory footprint
         finalState.routes.past = [];
         finalState.routes.future = [];
         await this.updateState(finalState);
@@ -115,20 +120,56 @@ export class DatabaseService {
     }
 
     private getSourceNameFromUrl(url: string) {
-        let splitUrl = url.replace("custom://", "").split("/");
-        splitUrl.pop();
-        splitUrl.pop();
-        splitUrl.pop();
-        return splitUrl.join("_");
+        return url.replace("custom://", "").split("/")[0];
     }
 
     public async getTile(url: string): Promise<ArrayBuffer> {
-        let dbName = this.getSourceNameFromUrl(url);
-        let db = this.getDatabase(dbName);
         let splitUrl = url.split("/");
-        let id = splitUrl[splitUrl.length - 3] + "_" + splitUrl[splitUrl.length - 2] +
-            "_" + splitUrl[splitUrl.length - 1].split(".")[0];
-        let tile = await db.table(DatabaseService.TILES_TABLE_NAME).get(id);
+        let dbName = this.getSourceNameFromUrl(url);
+        let z = +splitUrl[splitUrl.length - 3];
+        let x = +splitUrl[splitUrl.length - 2];
+        let y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
+
+        return this.getMbTile(dbName, z, x, y);
+        // this.getIndexDbTile(dbName, z, x, y)
+    }
+
+    private async getMbTile(dbName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
+        let db = await this.getMbTilesDatabase(dbName);
+        let params = [
+            z,
+            x,
+            Math.pow(2, z) - y - 1
+        ];
+        return new Promise<ArrayBuffer>((resolve, reject) => {
+            db.transaction((tx) => {
+                tx.executeSql("SELECT BASE64(tile_data) AS base64_tile_data FROM tiles " +
+                    "WHERE zoom_level = ? AND tile_column = ? AND tile_row = ? limit 1",
+                    params,
+                    (_, res) => {
+                        if (res.rows.length !== 1) {
+                            reject(new Error("No tile..."));
+                            return;
+                        }
+                        const base64Data = res.rows.item(0).base64_tile_data;
+                        let binData = new Uint8Array(decode(base64Data));
+                        let isGzipped = binData[0] === 0x1f && binData[1] === 0x8b;
+                        if (isGzipped) {
+                            binData = pako.inflate(binData);
+                        }
+                        resolve(binData.buffer);
+                    },
+                    (error) => {
+                        reject(error);
+                    }
+                );
+            });
+        });
+    }
+
+    private async getIndexDbTile(dbName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
+        let db = this.getDatabase(dbName);
+        let tile = await db.table(DatabaseService.TILES_TABLE_NAME).get(z + "_" + x + "_" + y);
         if (tile == null) {
             return null;
         }
@@ -149,6 +190,23 @@ export class DatabaseService {
             this.sourcesDatabases.set(dbName, db);
         }
         return this.sourcesDatabases.get(dbName);
+    }
+
+    private async getMbTilesDatabase(dbName: string): Promise<SQLiteObject> {
+        if (!this.sourcesMbTiles.has(dbName)) {
+            let config: SQLiteDatabaseConfig = {
+                createFromLocation: 1,
+                name: dbName + ".mbtiles"
+            };
+            if (this.runningContext.isIos) {
+                config.iosDatabaseLocation = "Documents";
+            } else {
+                config.location = "default";
+            }
+            let db = await this.sqlite.create(config);
+            this.sourcesMbTiles.set(dbName, db);
+        }
+        return this.sourcesMbTiles.get(dbName);
     }
 
     public storePois(pois: GeoJSON.Feature[]): Promise<any> {
