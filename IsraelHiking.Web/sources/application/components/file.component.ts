@@ -36,7 +36,9 @@ export class FileComponent extends BaseMapComponent {
         if (!file) {
             return;
         }
-        if (file.name.endsWith(".ihm") && this.ngRedux.getState().offlineState.isOfflineAvailable) {
+        if (file.name.endsWith(".ihm")) {
+            // HM TODO:
+            // && this.ngRedux.getState().offlineState.isOfflineAvailable
             this.toastService.info(this.resources.openingAFilePleaseWait);
             try {
                 await this.fileService.openIHMfile(file,
