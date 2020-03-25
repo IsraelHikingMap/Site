@@ -128,6 +128,7 @@ namespace IsraelHiking.API.Executors
         {
             _logger.LogInformation("Staring Image file creation: " + features.Count + " features");
             var items = new ConcurrentBag<ImageItem>();
+            var downloadedUrls = _imagesRepository.GetAllUrls().Result.ToHashSet();
             Parallel.ForEach(features, new ParallelOptions { MaxDegreeOfParallelism = 10 }, (feature) =>
             {
                 var urls = feature.Attributes.GetNames()
@@ -135,20 +136,12 @@ namespace IsraelHiking.API.Executors
                     .Where(u => !string.IsNullOrWhiteSpace(u));
                 foreach (var url in urls)
                 {
-                    try
+                    if (!downloadedUrls.Contains(url))
                     {
-                        var imageItem = _imagesRepository.GetImageByUrl(url).Result;
-                        if (imageItem == null)
-                        {
-                            _logger.LogWarning("The following image does not exist: " + url + " feature: " + feature.GetId());
-                            continue;
-                        }
-                        items.Add(imageItem);
+                        _logger.LogWarning("The following image does not exist in database: " + url + " feature: " + feature.GetId());
+                        continue;
                     }
-                    catch (Exception)
-                    {
-                        _logger.LogWarning("The following image is not an image: " + url + " feature: " + feature.GetId());
-                    }
+                    items.Add(_imagesRepository.GetImageByUrl(url).Result);
                 }
             });
 

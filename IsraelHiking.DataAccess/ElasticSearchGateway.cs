@@ -624,6 +624,7 @@ namespace IsraelHiking.DataAccess
         public async Task<List<string>> GetAllUrls()
         {
             var list = new List<string>();
+            _elasticClient.Refresh(IMAGES);
             var response = await _elasticClient.SearchAsync<ImageItem>(
                 s => s.Index(IMAGES)
                     .Size(10000)
