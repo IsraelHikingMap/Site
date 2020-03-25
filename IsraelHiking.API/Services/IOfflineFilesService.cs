@@ -23,7 +23,8 @@ namespace IsraelHiking.API.Services
         /// </summary>
         /// <param name="userId">The user id to check against</param>
         /// <param name="lastModifiedDate">The date to check against</param>
+        /// <param name="mbTiles">Return MBTiles related files</param>
         /// <returns>A list of file names</returns>
-        Task<Dictionary<string, DateTime>> GetUpdatedFilesList(string userId, DateTime lastModifiedDate);
+        Task<Dictionary<string, DateTime>> GetUpdatedFilesList(string userId, DateTime lastModifiedDate, bool mbTiles);
     }
 }

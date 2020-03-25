@@ -37,8 +37,9 @@ namespace IsraelHiking.API.Services
         }
 
         /// <inheritdoc/>
-        public async Task<Dictionary<string, DateTime>> GetUpdatedFilesList(string userId, DateTime lastModifiedDate)
+        public async Task<Dictionary<string, DateTime>> GetUpdatedFilesList(string userId, DateTime lastModifiedDate, bool mbTiles)
         {
+            _logger.LogDebug($"Getting the list of offline files for user: {userId}, mbtiles: {mbTiles}");
             var filesDictionary = new Dictionary<string, DateTime>();
             if (!await _receiptValidationGateway.IsEntitled(userId))
             {
@@ -51,7 +52,13 @@ namespace IsraelHiking.API.Services
                 {
                     continue;
                 }
-                if (lastModifiedDate == DateTime.MinValue || content.LastModified.DateTime - lastModifiedDate > new TimeSpan(0,0,1))
+                if (lastModifiedDate != DateTime.MinValue && content.LastModified.DateTime - lastModifiedDate <= new TimeSpan(0, 0, 1))
+                {
+                    continue;
+                }
+                // HM TODO: 03.2020 - remove this when all requests are sending mbtiles true
+                if ((mbTiles && (content.Name.EndsWith(".mbtiles") || content.Name.StartsWith("style"))) ||
+                    !mbTiles && content.Name.EndsWith(".ihm"))
                 {
                     filesDictionary[content.Name] = content.LastModified.DateTime;
                 }
