@@ -47,7 +47,7 @@ namespace IsraelHiking.API.Executors
             {
                 await _imagesRepository.DeleteImageByUrl(imageUrlToRemove);
             }
-            _logger.LogInformation($"Finished removing images");
+            _logger.LogInformation($"Finished removing images, starting downloading and index: {imagesUrls.Count}");
             using (var md5 = MD5.Create())
             {
                 var counter = 0;
@@ -110,12 +110,17 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc/>
-        public Task StoreImage(MD5 md5, byte[] content, string imageUrl)
+        public async Task StoreImage(MD5 md5, byte[] content, string imageUrl)
         {
             var hash = md5.ComputeHash(content).ToHashString();
             var image = Image.Load(content, out var _);
             content = ResizeImage(image, 200);
-            return _imagesRepository.StoreImage(new ImageItem
+            var imageItemInDatabase = await _imagesRepository.GetImageByHash(hash);
+            if (imageItemInDatabase != null && imageItemInDatabase.ImageUrl != imageUrl)
+            {
+                _logger.LogWarning($"The following urls have the same image:\n{imageItemInDatabase.ImageUrl}\n{imageUrl}");
+            }
+            await _imagesRepository.StoreImage(new ImageItem
             {
                 ImageUrl = imageUrl,
                 Data = $"data:image/jpeg;base64," + Convert.ToBase64String(content),

@@ -126,9 +126,9 @@ namespace IsraelHiking.API.Executors
 
         private void CreateImagesJsonFiles(List<Feature> features, ZipOutputStream zipStream)
         {
-            _logger.LogInformation("Staring Image file creation: " + features.Count + " features");
             var items = new ConcurrentBag<ImageItem>();
             var downloadedUrls = _imagesRepository.GetAllUrls().Result.ToHashSet();
+            _logger.LogInformation($"Staring Image file creation: {features.Count} features, exiting images: {downloadedUrls.Count}");
             Parallel.ForEach(features, new ParallelOptions { MaxDegreeOfParallelism = 10 }, (feature) =>
             {
                 var urls = feature.Attributes.GetNames()
