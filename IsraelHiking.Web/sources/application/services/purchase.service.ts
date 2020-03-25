@@ -39,14 +39,8 @@ export class PurchaseService {
             this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: false }));
             return;
         });
-        this.store.when("product").approved(product => product.verify());
-        this.store.when("product").verified(product => product.finish());
-        if (this.runningContextService.isIos && this.runningContextService.isCordova) {
-            this.store.when("product").updated(p => {
-                this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: false }));
-                this.loggingService.debug(JSON.stringify(p));
-            });
-        }
+        this.store.when("offline_map").approved(product => product.verify());
+        this.store.when("offline_map").verified(product => product.finish());
         this.store.refresh();
     }
 
