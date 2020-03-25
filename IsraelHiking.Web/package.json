@@ -141,7 +141,7 @@
     "update": "ng update",
     "add-android": "cordova plugin add cc.fovea.cordova.openwith --variable ANDROID_EXTRA_ACTIONS=\" \" --variable ANDROID_MIME_TYPE=\"application/gpx\" && cordova platform add android",
     "run-android": "cordova run android",
-    "build-apk": "cordova build android --release --no-telemetry",
+    "build-apk": "cordova build android --release --no-telemetry -- --packageType=bundle",
     "add-ios": "cordova plugin add cordova-plugin-splashscreen && cordova platform add ios",
     "run-ios": "cordova run ios",
     "build-ipa": "cordova build ios --release --no-telemetry --device --developmentTeam=\"2KT88923M5\" --codeSignIdentity=\"iPhone Distribution\" --packageType=\"app-store\" --provisioningProfile=\"9b478ac7-66cf-44cb-a485-395589ad2e2a\"",
