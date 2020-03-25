@@ -14,5 +14,5 @@
 * Operating System and version:
 * Web Browser and version:
 
-## Thing I think the developers should know, images, links etc.
+## Things I think the developers should know, images, links etc.
 
