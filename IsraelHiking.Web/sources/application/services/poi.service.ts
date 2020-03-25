@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { uniq, uniqWith } from "lodash";
+import { uniq } from "lodash";
 import { timeout } from "rxjs/operators";
 
 import { ResourcesService } from "./resources.service";

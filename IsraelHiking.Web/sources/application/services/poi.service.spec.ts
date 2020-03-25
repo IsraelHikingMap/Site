@@ -17,6 +17,7 @@ import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
 import { PointOfInterestExtended } from "../models/models";
 import { SQLite } from "@ionic-native/sqlite/ngx";
+import { ToastService } from "./toast.service";
 
 describe("Poi Service", () => {
 
@@ -39,6 +40,7 @@ describe("Poi Service", () => {
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: HashService, useValue: hashService },
                 { provide: ConnectionService, useValue: connectionService },
+                { provide: ToastService, useValue: null },
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,
