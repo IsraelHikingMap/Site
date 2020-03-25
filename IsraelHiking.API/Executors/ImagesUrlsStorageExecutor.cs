@@ -90,7 +90,7 @@ namespace IsraelHiking.API.Executors
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning("There was a problem with the following image url: " + imageUrl + " " + ex.ToString());
+                        _logger.LogWarning(ex, "There was a problem with the following image url: " + imageUrl + " ");
                     }
                 });
             }
