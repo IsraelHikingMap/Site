@@ -70,7 +70,6 @@ namespace IsraelHiking.API.Services
         ///<inheritdoc />
         public async Task<byte[]> Create(DataContainer dataContainer, int width, int height)
         {
-            _logger.LogDebug("Creating image for thumbnail started.");
             var context = new ImageCreationContext
             {
                 Width = width,
@@ -85,7 +84,6 @@ namespace IsraelHiking.API.Services
             CropAndResizeImage(context);
             var imageStream = new MemoryStream();
             context.Image.SaveAsPng(imageStream);
-            _logger.LogDebug("Creating image for thumbnail completed.");
             return imageStream.ToArray();
         }
 

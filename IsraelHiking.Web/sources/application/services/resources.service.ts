@@ -318,6 +318,7 @@ export class ResourcesService {
     public noOfflineFilesPleaseDownload: string;
     public allFilesAreUpToDate: string;
     public thereSoMuchMoreYouCanDoWithOurApp: string;
+    public databaseUpgrade: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -832,6 +833,7 @@ export class ResourcesService {
             .getString("No offline files available, please press the download button below.");
         this.allFilesAreUpToDate = this.gettextCatalog.getString("All files are up-to-date :-)");
         this.thereSoMuchMoreYouCanDoWithOurApp = this.gettextCatalog.getString("There's so much more you can do with our app");
+        this.databaseUpgrade = this.gettextCatalog.getString("The offline database has been upgraded message...");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

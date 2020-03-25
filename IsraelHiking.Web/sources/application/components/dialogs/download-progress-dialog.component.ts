@@ -52,7 +52,8 @@ export class DownloadProgressDialogComponent extends BaseMapComponent {
         try {
             let fileNames = await this.httpClient.get(Urls.offlineFiles, {
                 params: {
-                    lastModified: lastModified ? lastModified.toUTCString() : null
+                    lastModified: lastModified ? lastModified.toUTCString() : null,
+                    mbTiles: "true"
                 }
             }).toPromise() as {};
             length = Object.keys(fileNames).length;
@@ -80,21 +81,19 @@ export class DownloadProgressDialogComponent extends BaseMapComponent {
                         }
                     }, error => reject(error));
                 });
-                await this.fileService.openIHMfile(fileContent as Blob,
-                    async (sourceName, content, percentage) => {
-                        await this.databaseService.saveTilesContent(sourceName, content);
-                        this.updateCounter(length, fileNameIndex, percentage);
-                    },
-                    async (content: string) => {
-                        await this.databaseService.storePois(JSON.parse(content).features);
-                    },
-                    async (content, percentage) => {
-                        await this.databaseService.storeImages(JSON.parse(content));
-                        this.updateCounter(length, fileNameIndex, percentage);
-                    },
-                    (percentage) => {
-                        this.updateCounter(length, fileNameIndex, percentage);
-                    });
+                if (fileName.endsWith(".mbtiles")) {
+                    await this.fileService.saveToDatabasesFolder(fileContent as Blob, fileName);
+                } else {
+                    await this.fileService.openIHMfile(fileContent as Blob,
+                        async (content: string) => {
+                            await this.databaseService.storePois(JSON.parse(content).features);
+                        },
+                        async (content, percentage) => {
+                            await this.databaseService.storeImages(JSON.parse(content));
+                            this.updateCounter(length, fileNameIndex, percentage);
+                        }
+                    );
+                }
                 this.updateCounter(length, fileNameIndex, 100);
             }
             if (length === 0) {

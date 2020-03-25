@@ -14,6 +14,8 @@ import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, ESRI, HIKIN
 import { classToActionMiddleware } from "../reducres/reducer-action-decorator";
 import { rootReducer } from "../reducres/root.reducer";
 import { ApplicationState, LatLngAlt } from "../models/models";
+import { ToastService } from "./toast.service";
+import { ResourcesService } from "./resources.service";
 
 export interface ImageUrlAndData {
     imageUrl: string;
@@ -25,7 +27,6 @@ export class DatabaseService {
     private static readonly STATE_DB_NAME = "State";
     private static readonly STATE_TABLE_NAME = "state";
     private static readonly STATE_DOC_ID = "state";
-    private static readonly TILES_TABLE_NAME = "tiles";
     private static readonly POIS_DB_NAME = "PointsOfInterest";
     private static readonly POIS_TABLE_NAME = "pois";
     private static readonly POIS_ID_COLUMN = "properties.poiId";
@@ -37,17 +38,17 @@ export class DatabaseService {
     // HM TODO: only for cordova?
     private poisDatabase: Dexie;
     private imagesDatabase: Dexie;
-    private sourcesDatabases: Map<string, Dexie>;
-    private sourcesMbTiles: Map<string, SQLiteObject>;
+    private sourceDatabases: Map<string, SQLiteObject>;
     private updating: boolean;
 
     constructor(private readonly loggingService: LoggingService,
                 private readonly runningContext: RunningContextService,
                 private readonly sqlite: SQLite,
+                private readonly toastService: ToastService,
+                private readonly resources: ResourcesService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.updating = false;
-        this.sourcesDatabases = new Map<string, Dexie>();
-        this.sourcesMbTiles = new Map<string, SQLiteObject>();
+        this.sourceDatabases = new Map<string, SQLiteObject>();
     }
 
     public async initialize() {
@@ -78,6 +79,16 @@ export class DatabaseService {
                 state: initialState
             });
         }
+        if (storedState.offlineState.lastModifiedDate !== null) {
+            if (await Dexie.exists("IHM")) {
+                await Dexie.delete("IHM");
+                await Dexie.delete("Contour");
+                await Dexie.delete("TerrainRGB");
+                storedState.offlineState.lastModifiedDate = null;
+                this.toastService.confirm({ type: "Ok", message: this.resources.databaseUpgrade })
+            }
+        }
+
         this.ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
         this.ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state: ApplicationState) => {
             this.updateState(state);
@@ -105,6 +116,9 @@ export class DatabaseService {
         finalState.routes.past = [];
         finalState.routes.future = [];
         await this.updateState(finalState);
+        for (let dbKey of this.sourceDatabases.keys()) {
+            await this.sourceDatabases.get(dbKey).close();
+        }
     }
 
     private async updateState(state: ApplicationState) {
@@ -130,12 +144,11 @@ export class DatabaseService {
         let x = +splitUrl[splitUrl.length - 2];
         let y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
 
-        return this.getMbTile(dbName, z, x, y);
-        // this.getIndexDbTile(dbName, z, x, y)
+        return this.getTileFromDatabase(dbName, z, x, y);
     }
 
-    private async getMbTile(dbName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
-        let db = await this.getMbTilesDatabase(dbName);
+    private async getTileFromDatabase(dbName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
+        let db = await this.getDatabase(dbName);
         let params = [
             z,
             x,
@@ -167,33 +180,8 @@ export class DatabaseService {
         });
     }
 
-    private async getIndexDbTile(dbName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
-        let db = this.getDatabase(dbName);
-        let tile = await db.table(DatabaseService.TILES_TABLE_NAME).get(z + "_" + x + "_" + y);
-        if (tile == null) {
-            return null;
-        }
-        return decode(tile.data);
-    }
-
-    public async saveTilesContent(sourceName: string, sourceText: string): Promise<void> {
-        let objectToSave = JSON.parse(sourceText.trim());
-        await this.getDatabase(sourceName).table(DatabaseService.TILES_TABLE_NAME).bulkPut(objectToSave);
-    }
-
-    private getDatabase(dbName: string): Dexie {
-        if (!this.sourcesDatabases.has(dbName)) {
-            let db = new Dexie(dbName);
-            db.version(1).stores({
-                tiles: "id, x, y"
-            });
-            this.sourcesDatabases.set(dbName, db);
-        }
-        return this.sourcesDatabases.get(dbName);
-    }
-
-    private async getMbTilesDatabase(dbName: string): Promise<SQLiteObject> {
-        if (!this.sourcesMbTiles.has(dbName)) {
+    private async getDatabase(dbName: string): Promise<SQLiteObject> {
+        if (!this.sourceDatabases.has(dbName)) {
             let config: SQLiteDatabaseConfig = {
                 createFromLocation: 1,
                 name: dbName + ".mbtiles"
@@ -204,9 +192,9 @@ export class DatabaseService {
                 config.location = "default";
             }
             let db = await this.sqlite.create(config);
-            this.sourcesMbTiles.set(dbName, db);
+            this.sourceDatabases.set(dbName, db);
         }
-        return this.sourcesMbTiles.get(dbName);
+        return this.sourceDatabases.get(dbName);
     }
 
     public storePois(pois: GeoJSON.Feature[]): Promise<any> {

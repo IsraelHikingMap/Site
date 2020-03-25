@@ -88,7 +88,7 @@ namespace IsraelHiking.DataAccess
 
             if (retry >= 10)
             {
-                _logger.LogDebug("Failed to get image file for page after 10 retries: " + imagePage.Title);
+                _logger.LogWarning("Failed to get image file for page after 10 retries: " + imagePage.Title);
             }
 
             return imagePage.LastFileRevision?.Url;
@@ -114,7 +114,7 @@ namespace IsraelHiking.DataAccess
 
             if (retry >= 10)
             {
-                _logger.LogDebug("Failed to get content for page after 10 retries: " + pageStub.Title);
+                _logger.LogWarning("Failed to get content for page after 10 retries: " + pageStub.Title);
             }
             return page;
         }

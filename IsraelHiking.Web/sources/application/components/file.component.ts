@@ -36,27 +36,21 @@ export class FileComponent extends BaseMapComponent {
         if (!file) {
             return;
         }
-        if (file.name.endsWith(".ihm")) {
-            // HM TODO:
-            // && this.ngRedux.getState().offlineState.isOfflineAvailable
+        if (file.name.endsWith(".ihm") && this.ngRedux.getState().offlineState.isOfflineAvailable) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             try {
                 await this.fileService.openIHMfile(file,
-                    this.tilesStoreCallback,
                     this.poisStoreCallback,
-                    this.imagesStoreCallback,
-                    this.glyphsCallback);
+                    this.imagesStoreCallback);
                 this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             } catch (ex) {
                 this.toastService.error(ex.message);
             }
             return;
         }
-        if (file.name.endsWith(".mbtiles")) {
-            // HM TODO:
-            // && this.ngRedux.getState().offlineState.isOfflineAvailable
+        if (file.name.endsWith(".mbtiles") && this.ngRedux.getState().offlineState.isOfflineAvailable) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
-            await this.fileService.saveToDatabasesFolder(file);
+            await this.fileService.saveToDatabasesFolder(file, file.name);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: new Date(file.lastModified) }));
             return;
@@ -65,15 +59,6 @@ export class FileComponent extends BaseMapComponent {
             await this.fileService.addRoutesFromFile(file);
         } catch (ex) {
             this.toastService.error(this.resources.unableToLoadFromFile);
-        }
-    }
-
-    private tilesStoreCallback = async (sourceName: string, content: string, percentage: number) => {
-        try {
-            await this.databaseService.saveTilesContent(sourceName, content);
-            this.toastService.info(percentage.toFixed(1) + "%");
-        } catch (ex) {
-            this.toastService.error(ex.toString());
         }
     }
 
@@ -92,10 +77,6 @@ export class FileComponent extends BaseMapComponent {
         } catch (ex) {
             this.toastService.error(ex.toString());
         }
-    }
-
-    private glyphsCallback = (percentage) => {
-        this.toastService.info(percentage.toFixed(1) + "%");
     }
 
     public async save() {

@@ -187,14 +187,11 @@ export class FileService {
     }
 
     public async openIHMfile(blob: Blob,
-                             tilesCallback: (address: string, content: string, percentage: number) => Promise<void>,
                              poisCallback: (content: string) => Promise<void>,
                              imagesCallback: (content: string, percentage: number) => Promise<void>,
-                             glyphsCallback: (percentage: number) => void
     ): Promise<void> {
         let zip = new JSZip();
         await zip.loadAsync(blob);
-        await this.writeSources(zip, tilesCallback);
         await this.writePois(zip, poisCallback);
         await this.writeImages(zip, imagesCallback);
 
@@ -202,19 +199,6 @@ export class FileService {
             return;
         }
         await this.writeStyles(zip);
-        await this.writeGlyphs(blob, zip, glyphsCallback);
-        await this.writeSprite(zip);
-    }
-
-    private async writeSources(zip: JSZip, tilesCallback: (address: string, content: string, percentage: number) => Promise<void>) {
-        let sources = Object.keys(zip.files).filter(name => name.startsWith("sources/") && name.endsWith(".json"));
-        for (let sourceFileIndex = 0; sourceFileIndex < sources.length; sourceFileIndex++) {
-            let sourceFile = sources[sourceFileIndex];
-            let sourceName = sourceFile.split("/")[1];
-            await tilesCallback(sourceName, await zip.file(sourceFile).async("text") as string,
-                ((sourceFileIndex + 1) / sources.length * 100));
-            this.loggingService.debug("Added: " + sourceFile);
-        }
     }
 
     private async writePois(zip: JSZip, poisCallback: (content: string) => Promise<void>) {
@@ -235,22 +219,6 @@ export class FileService {
         }
     }
 
-    private async writeGlyphs(blob: Blob, zip: JSZip, progressCallback: (percentage: number) => void) {
-        let fonts = Object.keys(zip.files).filter(name => name.startsWith("glyphs/"));
-        if (fonts.length !== Object.keys(zip.files).length) {
-            this.loggingService.error("Invalid glyph file - there are files outside the glyph folder that are not allowed");
-            return;
-        }
-        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, "fonts.zip", blob,
-            { truncate: 0, replace: true, append: false });
-
-        let subject = new Subject<{ loaded: number, total: number }>();
-        subject.pipe(throttleTime(500)).subscribe((p) => this.ngZone.run(() => progressCallback((p.loaded / p.total) * 100)));
-        await this.zip.unzip(this.fileSystemWrapper.cacheDirectory + "fonts.zip",
-            this.fileSystemWrapper.dataDirectory, (p) => subject.next(p));
-        this.loggingService.debug("Write glyphs finished succefully!");
-    }
-
     private async writeStyles(zip: JSZip) {
         let styles = Object.keys(zip.files).filter(name => name.startsWith("styles/") && name.endsWith(".json"));
         for (let styleFileName of styles) {
@@ -259,21 +227,6 @@ export class FileService {
                 { append: false, replace: true, truncate: 0 });
             this.loggingService.debug("Write style finished succefully!");
         }
-    }
-
-    private async writeSprite(zip: JSZip) {
-        let sprites = Object.keys(zip.files)
-            .filter(name => name.startsWith("sprite/") && (name.endsWith(".json") || name.endsWith(".png")));
-        for (let spriteFile of sprites) {
-            let folderSplit = spriteFile.split("/");
-            if (folderSplit.length !== 2) {
-                continue;
-            }
-            await this.fileSystemWrapper.createDir(this.fileSystemWrapper.dataDirectory, folderSplit[0], true);
-            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, spriteFile,
-                await zip.file(spriteFile).async("blob") as Blob, { append: false, replace: true, truncate: 0 });
-        }
-        this.loggingService.debug("Write sprite finished succefully!");
     }
 
     public async zipAndStoreFile(content: string): Promise<string> {
@@ -290,10 +243,10 @@ export class FileService {
         return data;
     }
 
-    public async saveToDatabasesFolder(file: File) {
+    public async saveToDatabasesFolder(blob: Blob, fileName: string) {
         let path = this.runningContextService.isIos
             ? this.fileSystemWrapper.documentsDirectory
             : this.fileSystemWrapper.applicationStorageDirectory + "/databases";
-        await this.fileSystemWrapper.writeFile(path, file.name, file, { append: false, replace: true, truncate: 0 });
+        await this.fileSystemWrapper.writeFile(path, fileName, blob, { append: false, replace: true, truncate: 0 });
     }
 }

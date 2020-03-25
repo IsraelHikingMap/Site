@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using NLog.Web;
 using System.IO;
@@ -14,6 +15,7 @@ namespace IsraelHiking.Web
                 .ConfigureLogging((hostingContext, logging) => {
                     NLog.LogManager.LoadConfiguration("IsraelHiking.Web.nlog");
                     logging.AddNLog();
+                    logging.SetMinimumLevel(LogLevel.Trace);
                 })
                 .UseStartup<Startup>()
                 .UseContentRoot(Directory.GetCurrentDirectory())

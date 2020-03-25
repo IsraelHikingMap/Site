@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Services
         /// <inheritdoc/>
         public async Task<Dictionary<string, DateTime>> GetUpdatedFilesList(string userId, DateTime lastModifiedDate, bool mbTiles)
         {
-            _logger.LogDebug($"Getting the list of offline files for user: {userId}, mbtiles: {mbTiles}");
+            _logger.LogInformation($"Getting the list of offline files for user: {userId}, mbtiles: {mbTiles}");
             var filesDictionary = new Dictionary<string, DateTime>();
             if (!await _receiptValidationGateway.IsEntitled(userId))
             {
@@ -69,7 +69,7 @@ namespace IsraelHiking.API.Services
         /// <inheritdoc/>
         public async Task<Stream> GetFileContent(string userId, string fileName)
         {
-            _logger.LogDebug($"Getting offline file: {fileName} for user: {userId}");
+            _logger.LogInformation($"Getting offline file: {fileName} for user: {userId}");
             if (!await _receiptValidationGateway.IsEntitled(userId))
             {
                 return null;

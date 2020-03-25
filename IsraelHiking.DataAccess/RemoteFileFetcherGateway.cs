@@ -22,7 +22,6 @@ namespace IsraelHiking.DataAccess
         public async Task<RemoteFileFetcherGatewayResponse> GetFileContent(string url)
         {
             var client = _httpClientFactory.CreateClient();
-            _logger.LogDebug("Getting file from: " + url);
             client.Timeout = TimeSpan.FromMinutes(20);
             var response = await client.GetAsync(url);
             var fileName = response.Content.Headers.ContentDisposition?.FileName?.Trim('"') ??
@@ -32,7 +31,6 @@ namespace IsraelHiking.DataAccess
             if (response.IsSuccessStatusCode)
             {
                 content = await response.Content.ReadAsByteArrayAsync();
-                _logger.LogDebug("File was retrieved successfully from: " + url);
             }
             else
             {
