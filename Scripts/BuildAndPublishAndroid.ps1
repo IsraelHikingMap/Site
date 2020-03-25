@@ -44,15 +44,16 @@ $xml.Save($filePath)
 Write-Host "npm run build-apk"
 npm run build-apk
 
-$preVersionAabLocation = ".\platforms\android\app\build\outputs\bundle\release\app.aab";
-$aabVersioned = ".\platforms\android\app\build\outputs\bundle\release\IHM_signed_$env:APPVEYOR_BUILD_VERSION.aab"
+$apkVersioned = ".\IHM_signed_$env:APPVEYOR_BUILD_VERSION.apk"
+$preSignApkLocation = ".\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk";
 
-Rename-Item -Path $preVersionAabLocation -NewName "IHM_signed_$env:APPVEYOR_BUILD_VERSION.aab"
-
-if (-not (Test-Path -Path $aabVersioned)) {
-	throw "Failed to create Android aab file"
+if (-not (Test-Path -Path $preSignApkLocation)) {
+	throw "Failed to create android apk file"
 }
 
-Push-AppveyorArtifact $aabVersioned
+Write-Host "Signing apk"
+Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\signing\IHM.jks --ks-pass pass:$env:STORE_PASSWORD --key-pass pass:$env:PASSWORD --out $apkVersioned $preSignApkLocation"
+
+Push-AppveyorArtifact $apkVersioned
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
