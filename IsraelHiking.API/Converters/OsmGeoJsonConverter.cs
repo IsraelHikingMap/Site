@@ -163,12 +163,9 @@ namespace IsraelHiking.API.Converters
             var allWaysInRelationByRole = GetAllWaysGroupedByRole(relation);
             var outerWays = allWaysInRelationByRole.Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
             var outerPolygons = GetGeometriesFromWays(outerWays).OfType<Polygon>().ToList();
-            outerPolygons = MergePolygons(outerPolygons);
             var innerWays = allWaysInRelationByRole.Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
             var innerPolygons = GetGeometriesFromWays(innerWays).OfType<Polygon>().ToList();
-            innerPolygons = MergePolygons(innerPolygons);
-            MergeInnerIntoOuterPolygon(ref outerPolygons, ref innerPolygons);
-            var multiPolygon = _geometryFactory.CreateMultiPolygon(outerPolygons.Union(innerPolygons).ToArray());
+            var multiPolygon = MergeInnerIntoOuterPolygon(outerPolygons, innerPolygons);
             return new Feature(multiPolygon, ConvertTags(relation));
         }
 
@@ -180,7 +177,7 @@ namespace IsraelHiking.API.Converters
             }
             try
             {
-                var merged = UnaryUnionOp.Union(polygons.Cast<Geometry>().ToList());
+                var merged = CascadedPolygonUnion.Union(polygons.ToArray());
                 if (merged is MultiPolygon multipolygon)
                 {
                     return multipolygon.Geometries.Cast<Polygon>().ToList();
@@ -193,17 +190,29 @@ namespace IsraelHiking.API.Converters
             }
         }
 
-        private void MergeInnerIntoOuterPolygon(ref List<Polygon> outerPolygons, ref List<Polygon> innerPolygons)
+        private MultiPolygon MergeInnerIntoOuterPolygon(List<Polygon> outerPolygons, List<Polygon> innerPolygons)
         {
             var newOuterPolygons = new List<Polygon>();
+            outerPolygons = MergePolygons(outerPolygons);
             foreach (var outerPolygon in outerPolygons)
             {
-                var currentInnerPolygons = innerPolygons.Where(p => p.Within(outerPolygon)).ToArray();
-                var holes = currentInnerPolygons.Select(p => _geometryFactory.CreateLinearRing(p.ExteriorRing.Coordinates)).ToArray();
+                // remove all inner holes from outer polygon
+                var newOuterPolygon = _geometryFactory.CreatePolygon((LinearRing)outerPolygon.ExteriorRing.Copy());
+                // get inner polygons
+                var currentInnerPolygons = innerPolygons.Where(p => p.Within(newOuterPolygon)).ToArray();
+                if (!currentInnerPolygons.Any())
+                {
+                    newOuterPolygons.Add(newOuterPolygon);
+                    continue;
+                }
+                var holesPolygons = currentInnerPolygons.Select(p => _geometryFactory.CreatePolygon(p.ExteriorRing.Copy() as LinearRing)).ToArray();
+                var holesUnifiedGeometry = CascadedPolygonUnion.Union(holesPolygons);
+                // adding the difference between the outer polygon and all the holes inside it
+                newOuterPolygons.Add(newOuterPolygon.Difference(holesUnifiedGeometry) as Polygon);
+                // update list for next loop cycle
                 innerPolygons = innerPolygons.Except(currentInnerPolygons).ToList();
-                newOuterPolygons.Add(_geometryFactory.CreatePolygon(_geometryFactory.CreateLinearRing(outerPolygon.ExteriorRing.Coordinates), holes) as Polygon);
             }
-            outerPolygons = newOuterPolygons;
+            return _geometryFactory.CreateMultiPolygon(newOuterPolygons.Union(innerPolygons).ToArray());
         }
 
         /// <summary>
@@ -270,7 +279,10 @@ namespace IsraelHiking.API.Converters
         private List<List<Node>> SplitListByLoops(List<Node> nodes)
         {
             var groups = nodes.GroupBy(n => n.Id);
-            if (groups.All(g => g.Count() == 1) || groups.Count(g => g.Count() == 2) == 1 && nodes.First().Id == nodes.Last().Id)
+            var isSimplePolygon = nodes.First().Id == nodes.Last().Id &&
+                groups.Count(g => g.Count() == 2) == 1 &&
+                groups.Count(g => g.Count() > 2) == 0;
+            if (groups.All(g => g.Count() == 1) || isSimplePolygon)
             {
                 return new List<List<Node>> { nodes };
             }

@@ -380,6 +380,111 @@ namespace IsraelHiking.API.Tests.Converters
         }
 
         [TestMethod]
+        public void ToGeoJson_MultiPolygonWithTwoHoles_ShouldReturnMultiPlygonWithSinglePolygon()
+        {
+            var id = 1;
+            var node1 = CreateNode(id++, 0, 0);
+            var node2 = CreateNode(id++, 1, 0);
+            var node3 = CreateNode(id++, 1, 1);
+            var node4 = CreateNode(id++, 0, 1);
+            var node5 = CreateNode(id++, 0.5, 0.5);
+            var node6 = CreateNode(id++, 0.5, 0.6);
+            var node7 = CreateNode(id++, 0.6, 0.6);
+            var node8 = CreateNode(id++, 0.6, 0.5);
+            var node9 = CreateNode(id++, 0.3, 0.3);
+            var node10 = CreateNode(id++, 0.3, 0.4);
+            var node11 = CreateNode(id++, 0.4, 0.4);
+            var node12 = CreateNode(id++, 0.4, 0.3);
+
+            var wayOuter = new CompleteWay
+            {
+                Id = id++,
+                Nodes = new[] { node1, node2, node3, node4, node1 }
+            };
+            var wayInner1 = new CompleteWay
+            {
+                Id = id++,
+                Nodes = new[] { node5, node6, node7, node8, node5 }
+            };
+            var wayInner2 = new CompleteWay
+            {
+                Id = id++,
+                Nodes = new[] { node9, node10, node11, node12, node9 }
+            };
+            var relation = new CompleteRelation
+            {
+                Id = id++,
+                Tags = new TagsCollection(),
+                Members = new[]
+                {
+                    new CompleteRelationMember {Member = wayInner1, Role = "inner"},
+                    new CompleteRelationMember {Member = wayInner2, Role = "inner"},
+                    new CompleteRelationMember {Member = wayOuter, Role = "outer"}
+                }
+            };
+            relation.Tags.Add("type", "boundary");
+
+            var geoJson = _converter.ToGeoJson(relation);
+
+            var multiPlygon = geoJson.Geometry as MultiPolygon;
+            Assert.IsNotNull(multiPlygon);
+            Assert.IsTrue(multiPlygon.IsValid);
+            Assert.AreEqual(1, multiPlygon.Geometries.Length);
+        }
+
+        [TestMethod]
+        public void ToGeoJson_MultiPolygonWithTwoTouchingHoles_ShouldReturnMultiPlygonWithSinglePolygon()
+        {
+            var id = 1;
+            var node1 = CreateNode(id++, 0, 0);
+            var node2 = CreateNode(id++, 1, 0);
+            var node3 = CreateNode(id++, 1, 1);
+            var node4 = CreateNode(id++, 0, 1);
+            var node5 = CreateNode(id++, 0.5, 0.5);
+            var node6 = CreateNode(id++, 0.5, 0.6);
+            var node7 = CreateNode(id++, 0.6, 0.6);
+            var node8 = CreateNode(id++, 0.6, 0.5);
+            var node9 = CreateNode(id++, 0.4, 0.6);
+            var node10 = CreateNode(id++, 0.4, 0.5);
+
+            var wayOuter = new CompleteWay
+            {
+                Id = id++,
+                Nodes = new[] { node1, node2, node3, node4, node1 }
+            };
+            var wayInner1 = new CompleteWay
+            {
+                Id = id++,
+                Nodes = new[] { node5, node6, node7, node8, node5 }
+            };
+            var wayInner2 = new CompleteWay
+            {
+                Id = id++,
+                Nodes = new[] { node5, node6, node9, node10, node5 }
+            };
+            var relation = new CompleteRelation
+            {
+                Id = id++,
+                Tags = new TagsCollection(),
+                Members = new[]
+                {
+                    new CompleteRelationMember {Member = wayInner1, Role = "inner"},
+                    new CompleteRelationMember {Member = wayInner2, Role = "inner"},
+                    new CompleteRelationMember {Member = wayOuter, Role = "outer"}
+                }
+            };
+            relation.Tags.Add("type", "boundary");
+
+            var geoJson = _converter.ToGeoJson(relation);
+
+            var multiPlygon = geoJson.Geometry as MultiPolygon;
+            Assert.IsNotNull(multiPlygon);
+            Assert.IsTrue(multiPlygon.IsValid);
+            Assert.AreEqual(1, multiPlygon.Geometries.Length);
+        }
+
+
+        [TestMethod]
         public void ToGeoJson_UnsortedRelation_ShouldReturnMultiLineStringAfterGrouping()
         {
             var node1 = CreateNode(1);
@@ -445,7 +550,7 @@ namespace IsraelHiking.API.Tests.Converters
         }
 
         [TestMethod]
-        public void Convert8Shape_ShouldConvertToMultipolygon()
+        public void ToGeoJson_Convert8Shape_ShouldConvertToMultipolygon()
         {
             int id = 1;
             var node1 = CreateNode(id++, 0, 0);
@@ -479,7 +584,7 @@ namespace IsraelHiking.API.Tests.Converters
         }
 
         [TestMethod]
-        public void ConvertLoopAndLines_ShouldCreateValidMultiLine()
+        public void ToGeoJson_ConvertLoopAndLines_ShouldCreateValidMultiLine()
         {
             int id = 1;
             var node1 = CreateNode(id++, 0, 0);
