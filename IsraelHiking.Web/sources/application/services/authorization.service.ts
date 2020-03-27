@@ -31,14 +31,15 @@ interface IOsmConfiguration {
     consumerSecret: string;
 }
 
+interface IOAuthResponse {
+    oauth_token: string;
+    oauth_token_secret: string;
+}
+
 @Injectable()
 export class AuthorizationService {
 
-    private baseUrl: string;
-
     private options: IAuthorizationServiceOptions;
-    private oauthRequestTokenSecret: string;
-    private authorizeUrl: string;
     private ohauth: any;
 
     @select((state: ApplicationState) => state.userState)
@@ -51,20 +52,8 @@ export class AuthorizationService {
                 private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.ohauth = this.nonAngularObjectsFactory.createOhAuth();
-        this.oauthRequestTokenSecret = "";
         this.setOptions({});
-
         this.userState$.subscribe(us => this.userState = us);
-
-        this.httpClient.get(Urls.osmConfiguration).toPromise().then((data: IOsmConfiguration) => {
-            this.baseUrl = data.baseAddress;
-            this.setOptions({
-                oauthConsumerKey: data.consumerKey,
-                oauthSecret: data.consumerSecret,
-                landing: Urls.emptyHtml,
-                url: data.baseAddress
-            } as IAuthorizationServiceOptions);
-        });
     }
 
     public isLoggedIn(): boolean {
@@ -84,22 +73,35 @@ export class AuthorizationService {
         this.ngRedux.dispatch(new SetUserInfoAction({ userInfo: null }));
     }
 
-    public login = async (): Promise<any> => {
+    public async login(): Promise<void> {
         if (this.isLoggedIn()) {
-            return new Promise((resolve) => { resolve(); });
+            return;
         }
 
         this.logout();
-        try {
-            let url = this.runningContextService.isCordova
-                ? await this.openCordovaDialog()
-                : await this.openBrowserDialog();
-            let oauthToken = this.ohauth.stringQs(url.split("?")[1]);
-            await this.updateAccessToken(oauthToken.oauth_token);
-            await this.updateUserDetails();
-        } finally {
-            this.refreshAuthorizeUrl();
-        }
+        let data = await this.httpClient.get(Urls.osmConfiguration).toPromise() as IOsmConfiguration;
+        await this.setOptions({
+            oauthConsumerKey: data.consumerKey,
+            oauthSecret: data.consumerSecret,
+            landing: Urls.emptyHtml,
+            url: data.baseAddress
+        } as IAuthorizationServiceOptions);
+
+        let requestTokenResponse = await this.getRequestToken();
+        let authorizeUrl = this.options.url + "/oauth/authorize?" + this.ohauth.qsString({
+            oauth_token: requestTokenResponse.oauth_token,
+            oauth_callback: this.options.landing
+        });
+
+        let urlWhenWindowsCloses = this.runningContextService.isCordova
+            ? await this.openCordovaDialog(authorizeUrl)
+            : await this.openBrowserDialog(authorizeUrl);
+        let oauthToken = this.ohauth.stringQs(urlWhenWindowsCloses.split("?")[1]) as IOAuthResponse;
+        let accessToken = await this.getAccessToken(oauthToken.oauth_token, requestTokenResponse.oauth_token_secret);
+        this.ngRedux.dispatch(new SetTokenAction({
+            token: accessToken.oauth_token + ";" + accessToken.oauth_token_secret
+        }));
+        await this.updateUserDetails();
     }
 
     private updateUserDetails = async () => {
@@ -115,35 +117,26 @@ export class AuthorizationService {
         }));
     }
 
-    private updateAccessToken = async (oauthToken) => {
+    private async getAccessToken(oauthToken: string, oauthRequestTokenSecret:string): Promise<IOAuthResponse> {
         let accessTokenUrl = this.options.url + "/oauth/access_token";
         let params = this.getParams();
         params.oauth_token = oauthToken;
         params.oauth_signature = this.ohauth.signature(
             this.options.oauthSecret,
-            this.oauthRequestTokenSecret,
+            oauthRequestTokenSecret,
             this.ohauth.baseString("POST", accessTokenUrl, params));
 
         let response = await this.xhrPromise(accessTokenUrl, params);
-        let accessToken = this.ohauth.stringQs(response);
-        let token = accessToken.oauth_token + ";" + accessToken.oauth_token_secret;
-        this.ngRedux.dispatch(new SetTokenAction({
-            token
-        }));
+        return this.ohauth.stringQs(response) as IOAuthResponse;
     }
 
-    public async setOptions(options) {
+    private async setOptions(options) {
         this.options = options;
         this.options.url = this.options.url || "https://www.openstreetmap.org";
         this.options.landing = this.options.landing || "land.html";
-
-        if (!this.options.oauthConsumerKey) {
-            return;
-        }
-        this.refreshAuthorizeUrl();
     }
 
-    private refreshAuthorizeUrl = async () => {
+    private async getRequestToken(): Promise<IOAuthResponse> {
         let params = this.getParams();
         let requestTokenUrl = this.options.url + "/oauth/request_token";
 
@@ -152,12 +145,7 @@ export class AuthorizationService {
             this.ohauth.baseString("POST", requestTokenUrl, params));
 
         let response = await this.xhrPromise(requestTokenUrl, params);
-        let responseObject = this.ohauth.stringQs(response);
-        this.oauthRequestTokenSecret = responseObject.oauth_token_secret;
-        this.authorizeUrl = this.options.url + "/oauth/authorize?" + this.ohauth.qsString({
-            oauth_token: responseObject.oauth_token,
-            oauth_callback: this.options.landing
-        });
+        return this.ohauth.stringQs(response) as IOAuthResponse;
     }
 
     private getParams(): IOAuthParams {
@@ -181,7 +169,7 @@ export class AuthorizationService {
         });
     }
 
-    private openBrowserDialog(): Promise<any> {
+    private openBrowserDialog(authorizeUrl: string): Promise<any> {
         // Create a 600x550 popup window in the center of the screen
         let w = 600;
         let h = 550;
@@ -193,7 +181,7 @@ export class AuthorizationService {
             return x.join("=");
         }).join(",");
 
-        let popup = window.open(this.authorizeUrl, "Authorization", settings);
+        let popup = window.open(authorizeUrl, "Authorization", settings);
 
         return new Promise((resolve, reject) => {
             if (typeof popup.focus === "function") {
@@ -219,9 +207,9 @@ export class AuthorizationService {
         setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
     }
 
-    protected openCordovaDialog() {
+    protected openCordovaDialog(authorizeUrl: string) {
         return new Promise((resolve, reject) => {
-            let browserRef = window.open(this.authorizeUrl, "_blank");
+            let browserRef = window.open(authorizeUrl, "_blank");
             let exitListener = () => reject(new Error("The OSM sign in flow was canceled"));
 
             browserRef.addEventListener("loaderror",
@@ -246,25 +234,25 @@ export class AuthorizationService {
 
     public getEditOsmLocationAddress(baseLayerAddress: string, zoom: number, latitude: number, longitude: number): string {
         let background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
-        return `${this.baseUrl}/edit#${background}&map=${zoom}/${latitude}/${longitude}`;
+        return `${this.options.url}/edit#${background}&map=${zoom}/${latitude}/${longitude}`;
     }
 
     public getEditOsmGpxAddress(baseLayerAddress: string, gpxId: string) {
         let background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
-        return `${this.baseUrl}/edit?gpx=${gpxId}#${background}`;
+        return `${this.options.url}/edit?gpx=${gpxId}#${background}`;
     }
 
     public getEditElementOsmAddress(baseLayerAddress: string, id: string) {
         let elementType = id.split("_")[0];
         let elementId = id.split("_")[1];
         let background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
-        return `${this.baseUrl}/edit?${elementType}=${elementId}#${background}`;
+        return `${this.options.url}/edit?${elementType}=${elementId}#${background}`;
     }
 
     public getElementOsmAddress(id: string) {
         let elementType = id.split("_")[0];
         let elementId = id.split("_")[1];
-        return `${this.baseUrl}/${elementType}/${elementId}`;
+        return `${this.options.url}/${elementType}/${elementId}`;
     }
 
     private getBackgroundStringForOsmAddress(baseLayerAddress: string): string {
