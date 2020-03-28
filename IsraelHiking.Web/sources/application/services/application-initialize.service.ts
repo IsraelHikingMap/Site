@@ -6,7 +6,6 @@ import { ScreenService } from "./screen.service";
 import { DatabaseService } from "./database.service";
 import { ApplicationExitService } from "./application-exit.service";
 import { OpenWithService } from "./open-with.service";
-import { FileService } from "./file.service";
 import { PurchaseService } from "./purchase.service";
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { RunningContextService } from "./running-context.service";
@@ -19,7 +18,6 @@ export class ApplicationInitializeService {
                 private readonly databaseService: DatabaseService,
                 private readonly applicationExitService: ApplicationExitService,
                 private readonly openWithService: OpenWithService,
-                private readonly fileService: FileService,
                 private readonly purchaseService: PurchaseService,
                 private readonly runnincContextService: RunningContextService) {
     }
@@ -32,7 +30,6 @@ export class ApplicationInitializeService {
             await this.databaseService.initialize();
             this.applicationExitService.initialize();
             this.openWithService.initialize();
-            this.fileService.initialize();
             this.purchaseService.initialize();
             if (this.runnincContextService.isMobile
                 && !this.runnincContextService.isCordova

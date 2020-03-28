@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -105,6 +106,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("colors")]
+        [Obsolete("This will no longer be used in later versions")]
         public List<string> GetColors()
         {
             return _options.Colors;

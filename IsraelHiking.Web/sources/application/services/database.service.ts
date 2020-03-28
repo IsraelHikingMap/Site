@@ -85,7 +85,7 @@ export class DatabaseService {
                 await Dexie.delete("Contour");
                 await Dexie.delete("TerrainRGB");
                 storedState.offlineState.lastModifiedDate = null;
-                this.toastService.confirm({ type: "Ok", message: this.resources.databaseUpgrade })
+                this.toastService.confirm({ type: "Ok", message: this.resources.databaseUpgrade });
             }
         }
 

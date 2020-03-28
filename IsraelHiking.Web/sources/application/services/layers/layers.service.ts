@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
+import { timeout } from "rxjs/operators";
 
 import { ResourcesService } from "../resources.service";
 import { AuthorizationService } from "../authorization.service";
@@ -33,6 +34,7 @@ import {
     HIKING_TRAILS,
     BICYCLE_TRAILS
 } from "../../reducres/initial-state";
+import { LoggingService } from "../logging.service";
 
 interface IUserLayer extends LayerData {
     isOverlay: boolean;
@@ -67,6 +69,7 @@ export class LayersService {
                 private readonly authorizationService: AuthorizationService,
                 private readonly httpClient: HttpClient,
                 private readonly toastService: ToastService,
+                private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         this.baseLayers = [];
@@ -92,7 +95,7 @@ export class LayersService {
             return;
         }
         try {
-            let data = await this.httpClient.get(Urls.userLayers).toPromise() as IUserLayer[];
+            let data = await this.httpClient.get(Urls.userLayers).pipe(timeout(10000)).toPromise() as IUserLayer[];
             if (data == null) {
                 return;
             }
@@ -148,7 +151,7 @@ export class LayersService {
                 }));
             }
         } catch (error) {
-            console.error(error);
+            this.loggingService.warning("Unable to sync user layer from server - using local layers");
         }
     }
 

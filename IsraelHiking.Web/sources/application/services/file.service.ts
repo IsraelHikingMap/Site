@@ -1,11 +1,10 @@
-import { Injectable, NgZone } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Style } from "mapbox-gl";
 import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
-import { Zip } from "@ionic-native/zip/ngx";
 import { WebView } from "@ionic-native/ionic-webview/ngx";
-import { Subject } from "rxjs";
 import { last } from "lodash";
+import { timeout } from "rxjs/operators";
 import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -17,7 +16,6 @@ import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { DataContainer } from "../models/models";
-import { throttleTime } from "rxjs/operators";
 
 export interface IFormatViewModel {
     label: string;
@@ -31,39 +29,59 @@ export class FileService {
 
     constructor(private readonly httpClient: HttpClient,
                 private readonly fileSystemWrapper: FileSystemWrapper,
-                private readonly zip: Zip,
                 private readonly webView: WebView,
                 private readonly runningContextService: RunningContextService,
                 private readonly imageResizeService: ImageResizeService,
                 private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly fitBoundsService: FitBoundsService,
-                private readonly loggingService: LoggingService,
-                private readonly ngZone: NgZone) {
-        this.formats = [];
+                private readonly loggingService: LoggingService) {
+        this.formats = [
+            {
+                label: "GPX version 1.1 (.gpx)",
+                extension: "gpx",
+                outputFormat: "gpx"
+            },
+            {
+                label: "Single track GPX (.gpx)",
+                extension: "gpx",
+                outputFormat: "gpx_single_track"
+            },
+            {
+                label: "Single route GPX (.gpx)",
+                extension: "gpx",
+                outputFormat: "gpx_route"
+            },
+            {
+                label: "Keyhole markup language (.kml)",
+                extension: "kml",
+                outputFormat: "kml"
+            },
+            {
+                label: "Comma-separated values (.csv)",
+                extension: "csv",
+                outputFormat: "csv"
+            },
+            {
+                label: "Naviguide binary route file (.twl)",
+                extension: "twl",
+                outputFormat: "twl",
+            },
+            {
+                label: "All routes to a single Track GPX (.gpx)",
+                extension: "gpx",
+                outputFormat: "all_gpx_single_track"
+            }
+        ];
     }
 
-    public async initialize() {
-        let response = await this.httpClient.get(Urls.fileFormats).toPromise() as IFormatViewModel[];
-        this.formats.splice(0);
-        for (let format of response) {
-            this.formats.push(format);
-        }
-        this.formats.push({
-            label: "All routes to a single Track GPX",
-            extension: "gpx",
-            outputFormat: "all_gpx_single_track"
-        } as IFormatViewModel);
-
-        for (let format of this.formats) {
-            format.label += ` (.${format.extension})`;
-        }
-        // HM TODO: move this to required function to avoid permission on startup?
+    private async createIHMDirectoryIfNeeded(): Promise<string> {
         if (this.runningContextService.isCordova) {
             let folder = this.runningContextService.isIos
                 ? this.fileSystemWrapper.documentsDirectory
                 : this.fileSystemWrapper.externalRootDirectory;
             await this.fileSystemWrapper.createDir(folder, "IsraelHikingMap", true);
+            return `${folder}/IsraelHikingMap`;
         }
     }
 
@@ -176,14 +194,9 @@ export class FileService {
         let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
             .replace("Z", "_") +
             fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
-        await this.fileSystemWrapper.writeFile(this.getStorageBasePath(), "IsraelHikingMap/" + fullFileName, blob);
+        let path = await this.createIHMDirectoryIfNeeded();
+        await this.fileSystemWrapper.writeFile(path, fullFileName, blob);
         return true;
-    }
-
-    private getStorageBasePath(): string {
-        return this.runningContextService.isIos
-            ? this.fileSystemWrapper.documentsDirectory
-            : this.fileSystemWrapper.externalRootDirectory;
     }
 
     public async openIHMfile(blob: Blob,
@@ -236,7 +249,8 @@ export class FileService {
         try {
             let blob = this.nonAngularObjectsFactory.b64ToBlob(data, "application/zip");
             let fullFileName = "Report_" + new Date().toISOString().split(":").join("-").replace("T", "_").replace("Z", "_") + ".zip";
-            await this.fileSystemWrapper.writeFile(this.getStorageBasePath(), "IsraelHikingMap/" + fullFileName, blob);
+            let path = await this.createIHMDirectoryIfNeeded();
+            await this.fileSystemWrapper.writeFile(path, fullFileName, blob);
         } catch {
             // no need to do anything
         }

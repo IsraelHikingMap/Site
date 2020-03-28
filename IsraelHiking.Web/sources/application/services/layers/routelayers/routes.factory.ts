@@ -1,9 +1,6 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 import { NgRedux } from "@angular-redux/store";
-import { timeout } from "rxjs/operators";
 
-import { Urls } from "../../../urls";
 import { RouteData, ApplicationState } from "../../../models/models";
 
 @Injectable()
@@ -27,12 +24,7 @@ export class RoutesFactory {
 
     private nextColorIndex = 0;
 
-    constructor(private readonly httpClient: HttpClient,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
-        this.httpClient.get(Urls.colors).pipe(timeout(10000)).toPromise().then((colors: string[]) => {
-            this.colors.splice(0, this.colors.length, ...colors);
-        });
-    }
+    constructor(private readonly ngRedux: NgRedux<ApplicationState>) { }
 
     public createRouteData(name: string, color?: string): RouteData {
         let routeEditingState = this.ngRedux.getState().routeEditingState;

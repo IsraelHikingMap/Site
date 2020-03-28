@@ -50,14 +50,12 @@ describe("FileService", () => {
                         let fileService = new FileService(http,
                             null,
                             null,
-                            null,
                             runningContextService,
                             imageResizeService,
                             nonAngularObjectsFactory,
                             selectedRouteService,
                             fitBoundsService,
-                            loggingService,
-                            null);
+                            loggingService);
                         return fileService;
                     }),
                     deps: [HttpClient, HttpTestingController, RunningContextService, LoggingService]
@@ -65,19 +63,6 @@ describe("FileService", () => {
             ]
         });
     });
-
-    it("Should Initialize with file formats", inject([FileService, HttpTestingController],
-        (fileService: FileService, mockBackend: HttpTestingController) => {
-            fileService.initialize().then(() => {
-                expect(fileService.formats.length).toBe(2);
-            });
-            mockBackend.expectOne(Urls.fileFormats).flush([{
-                extension: "ex",
-                label: "label",
-                outputFormat: "output"
-            } as IFormatViewModel]);
-
-        }));
 
     it("Should save to file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {

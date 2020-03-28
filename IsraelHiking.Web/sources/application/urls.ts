@@ -11,12 +11,10 @@ export class Urls {
     public static readonly routing = Urls.apiBase + "routing";
     public static readonly itmGrid = Urls.apiBase + "itmGrid";
     public static readonly files = Urls.apiBase + "files";
-    public static readonly fileFormats = Urls.files + "/formats";
     public static readonly openFile = Urls.files + "/open";
     public static readonly offlineFiles = Urls.files + "/offline";
     public static readonly search = Urls.apiBase + "search/";
     public static readonly images = Urls.apiBase + "images/";
-    public static readonly colors = Urls.images + "colors/";
     public static readonly osm = Urls.apiBase + "osm/";
     public static readonly osmConfiguration = Urls.osm + "configuration";
     public static readonly osmTrace = Urls.osm + "trace/";

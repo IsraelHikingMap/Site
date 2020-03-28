@@ -3,7 +3,7 @@ import Dexie from "dexie";
 
 import { RunningContextService } from "./running-context.service";
 
-type LogLevel = "debug" | "info" | "error" | "warning";
+type LogLevel = "debug" | "info" | "error" | "warn";
 
 interface LogLine {
     date: Date;
@@ -87,6 +87,16 @@ export class LoggingService {
             message
         } as LogLine;
         console.error(this.logLineToString(logLine));
+        this.writeToStorage(logLine);
+    }
+
+    public warning(message: string) {
+        let logLine = {
+            date: new Date(),
+            level: "warn",
+            message
+        } as LogLine;
+        console.warn(this.logLineToString(logLine));
         this.writeToStorage(logLine);
     }
 

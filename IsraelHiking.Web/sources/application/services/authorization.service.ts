@@ -103,7 +103,7 @@ export class AuthorizationService {
         }));
     }
 
-    private async getAccessToken(oauthToken: string, oauthRequestTokenSecret:string): Promise<IOAuthResponse> {
+    private async getAccessToken(oauthToken: string, oauthRequestTokenSecret: string): Promise<IOAuthResponse> {
         let accessTokenUrl = this.options.url + "/oauth/access_token";
         let params = this.getParams();
         params.oauth_token = oauthToken;

@@ -25,8 +25,8 @@ export interface IOhAuth {
      */
     qsString: (obj: {}) => string;
     /**
-    * generate an object from a querystring
-    */
+     * generate an object from a querystring
+     */
     stringQs: (str: string) => IOAuthResponse;
     timestamp: () => number;
     nonce: () => string;

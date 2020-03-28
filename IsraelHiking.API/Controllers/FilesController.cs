@@ -47,6 +47,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("formats")]
+        [Obsolete("This will no longer be used in later versions")]
         // GET api/files/fromats
         public List<FileFormatViewModel> GetSupportedFileTypes()
         {
