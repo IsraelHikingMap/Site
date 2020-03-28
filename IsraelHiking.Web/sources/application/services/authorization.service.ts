@@ -3,20 +3,11 @@ import { HttpClient } from "@angular/common/http";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 
-import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
+import { NonAngularObjectsFactory, IOhAuth, IOAuthResponse, IOAuthParams } from "./non-angular-objects.factory";
 import { ApplicationState, OsmUserDetails, UserState, UserInfo } from "../models/models";
 import { Urls } from "../urls";
 import { SetTokenAction, SetUserInfoAction } from "../reducres/user.reducer";
 import { RunningContextService } from "./running-context.service";
-
-interface IOAuthParams {
-    oauth_consumer_key: string;
-    oauth_signature_method: string;
-    oauth_timestamp: number;
-    oauth_nonce: string;
-    oauth_token: string;
-    oauth_signature: string;
-}
 
 export interface IAuthorizationServiceOptions {
     url: string;
@@ -31,16 +22,11 @@ interface IOsmConfiguration {
     consumerSecret: string;
 }
 
-interface IOAuthResponse {
-    oauth_token: string;
-    oauth_token_secret: string;
-}
-
 @Injectable()
 export class AuthorizationService {
 
     private options: IAuthorizationServiceOptions;
-    private ohauth: any;
+    private ohauth: IOhAuth;
 
     @select((state: ApplicationState) => state.userState)
     private userState$: Observable<UserState>;
@@ -96,7 +82,7 @@ export class AuthorizationService {
         let urlWhenWindowsCloses = this.runningContextService.isCordova
             ? await this.openCordovaDialog(authorizeUrl)
             : await this.openBrowserDialog(authorizeUrl);
-        let oauthToken = this.ohauth.stringQs(urlWhenWindowsCloses.split("?")[1]) as IOAuthResponse;
+        let oauthToken = this.ohauth.stringQs(urlWhenWindowsCloses.split("?")[1]);
         let accessToken = await this.getAccessToken(oauthToken.oauth_token, requestTokenResponse.oauth_token_secret);
         this.ngRedux.dispatch(new SetTokenAction({
             token: accessToken.oauth_token + ";" + accessToken.oauth_token_secret
@@ -127,7 +113,7 @@ export class AuthorizationService {
             this.ohauth.baseString("POST", accessTokenUrl, params));
 
         let response = await this.xhrPromise(accessTokenUrl, params);
-        return this.ohauth.stringQs(response) as IOAuthResponse;
+        return this.ohauth.stringQs(response);
     }
 
     private async setOptions(options) {
@@ -141,7 +127,8 @@ export class AuthorizationService {
         let requestTokenUrl = this.options.url + "/oauth/request_token";
 
         params.oauth_signature = this.ohauth.signature(
-            this.options.oauthSecret, "",
+            this.options.oauthSecret,
+            "",
             this.ohauth.baseString("POST", requestTokenUrl, params));
 
         let response = await this.xhrPromise(requestTokenUrl, params);
