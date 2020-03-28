@@ -163,15 +163,18 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
             let logBase64zipped = await this.fileService.zipAndStoreFile(logs);
             logs = await this.geoLocationService.getLog();
             let logBase64zippedGeoLocation = await this.fileService.zipAndStoreFile(logs);
-            let deviceString = ["----------",
-                this.device.manufacturer,
-                this.device.model,
-                this.device.platform,
-                this.device.version].join("\n");
+            let infoString = ["----------------------------------------------------",
+                `id: ${this.userInfo.id}`,
+                `name: ${this.userInfo.displayName}`,
+                `manufacture: ${this.device.manufacturer}`,
+                `model: ${this.device.model}`,
+                `platform: ${this.device.platform}`,
+                `OS version: ${this.device.version}`
+            ].join("\n");
             this.emailComposer.open({
                 to: ["israelhikingmap@gmail.com"],
                 subject: "Issue reported by " + this.userInfo.displayName,
-                body: this.resources.reportAnIssueInstructions + "\n\n\n" + deviceString,
+                body: this.resources.reportAnIssueInstructions + "\n\n" + infoString,
                 attachments: [
                     "base64:log.zip//" + logBase64zipped,
                     "base64:geolocation-log.zip//" + logBase64zippedGeoLocation,
