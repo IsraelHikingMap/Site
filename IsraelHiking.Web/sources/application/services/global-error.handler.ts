@@ -10,6 +10,10 @@ export class GlobalErrorHandler implements ErrorHandler {
     }
 
     public handleError(error: Error) {
-        this.loggingService.error(error.stack ? error.stack.toString() : error.toString());
+        let message = error.message || error.toString();
+        if (error.stack) {
+            message += `\n${error.stack}`;
+        }
+        this.loggingService.error(message);
     }
 }
