@@ -33,15 +33,17 @@ export class ScreenService {
         this.mobileAccesibility.usePreferredTextZoom(false);
         this.brightness.setKeepScreenOn(true);
         this.originalBrightness = await this.brightness.getBrightness();
+        this.logger.debug(`Original brightness is: ${this.originalBrightness}`);
         document.addEventListener("resume", () => {
             this.logger.debug(`Resume app, setting brightness to original: ${this.originalBrightness}`);
             this.brightness.setKeepScreenOn(true);
-            this.brightness.setBrightness(this.originalBrightness);
+            this.brightness.setBrightness(this.originalBrightness); // this is just to be on the safe side...
             this.userIdleService.watch();
         }, false);
         document.addEventListener("pause", () => {
-            this.logger.debug("Pausing app, stopping user idle service.");
+            this.brightness.setBrightness(this.originalBrightness);
             this.userIdleService.stop();
+            this.logger.debug("Pausing app, stopping user idle service, restoring brightness");
         }, false);
         this.userIdleService.setInterrupts(DEFAULT_INTERRUPTSOURCES);
         this.userIdleService.setIdle(30);
