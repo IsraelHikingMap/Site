@@ -50,6 +50,10 @@ export class LegendItemComponent extends BaseMapComponent {
         return this.layersService.getSelectedBaseLayer().address;
     }
 
+    public isOffline() {
+        return this.layersService.getSelectedBaseLayer().isOfflineOn;
+    }
+
     public moveToLocation(item: ILegendItem) {
         this.fitBoundsService.flyTo(item.latlng, item.zoom);
     }

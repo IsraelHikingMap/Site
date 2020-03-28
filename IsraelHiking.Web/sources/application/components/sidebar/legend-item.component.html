@@ -9,7 +9,9 @@
                         [minZoom]="item.zoom - 1"
                         [maxZoom]="item.zoom + 1"
                         [opacity]="1.0"
-                        [visible]="true">
+                        [visible]="true"
+                        [isBaselayer]="true"
+                        [isOffline]="isOffline()">
             </auto-layer>
         </mgl-map>
     </div>
