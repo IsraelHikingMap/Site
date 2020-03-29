@@ -40,6 +40,10 @@ export class ScreenService {
             this.brightness.setBrightness(this.originalBrightness); // this is just to be on the safe side...
             this.userIdleService.watch();
         }, false);
+        document.addEventListener("resign", () => {
+            this.logger.debug(`Resigning the app, setting brightness to original: ${this.originalBrightness}`);
+            this.brightness.setBrightness(this.originalBrightness); // this is just to be on the safe side...
+        }, false);
         document.addEventListener("pause", () => {
             this.brightness.setBrightness(this.originalBrightness);
             this.userIdleService.stop();
