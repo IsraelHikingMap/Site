@@ -41,13 +41,12 @@ export class ScreenService {
             this.userIdleService.watch();
         }, false);
         document.addEventListener("resign", () => {
-            this.logger.debug(`Resigning the app, setting brightness to original: ${this.originalBrightness}`);
+            this.logger.debug(`Resigning app, setting brightness to original: ${this.originalBrightness}`);
             this.brightness.setBrightness(this.originalBrightness); // this is just to be on the safe side...
         }, false);
         document.addEventListener("pause", () => {
-            this.brightness.setBrightness(this.originalBrightness);
             this.userIdleService.stop();
-            this.logger.debug("Pausing app, stopping user idle service, restoring brightness");
+            this.logger.debug("Pausing app, stopping user idle service");
         }, false);
         this.userIdleService.setInterrupts(DEFAULT_INTERRUPTSOURCES);
         this.userIdleService.setIdle(30);
