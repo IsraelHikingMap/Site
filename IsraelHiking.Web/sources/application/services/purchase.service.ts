@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { NgRedux } from "@angular-redux/store";
-import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
+import { InAppPurchase2, IAPProduct } from "@ionic-native/in-app-purchase-2/ngx";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -41,6 +41,15 @@ export class PurchaseService {
         });
         this.store.when("offline_map").approved(product => product.verify());
         this.store.when("offline_map").verified(product => product.finish());
+        this.store.when("product").updated((p: IAPProduct) => {
+            this.loggingService.debug(`updated: ${p.id}\n${JSON.stringify(p.id, null, 4)}`);
+            if (p.owned) {
+                this.loggingService.debug(`owned: ${p.id}`);
+            }
+            if (p.expiryDate < new Date()) {
+                this.loggingService.debug(`expired: ${p.id}`);
+            }
+        })
         this.store.refresh();
     }
 
