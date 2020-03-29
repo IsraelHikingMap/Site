@@ -39,10 +39,16 @@ export class PurchaseService {
             this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: false }));
             return;
         });
-        this.store.when("offline_map").approved(product => product.verify());
-        this.store.when("offline_map").verified(product => product.finish());
+        this.store.when("offline_map").approved(product => {
+            this.loggingService.debug(`Approved, verifing: ${product.id}`);
+            return product.verify()
+        });
+        this.store.when("offline_map").verified(product => {
+            this.loggingService.debug(`Verified, Finishing: ${product.id}`);
+            product.finish()
+        });
         this.store.when("product").updated((p: IAPProduct) => {
-            this.loggingService.debug(`updated: ${p.id}\n${JSON.stringify(p.id, null, 4)}`);
+            this.loggingService.debug(`Updated: ${p.id}\n${JSON.stringify(p, null, 4)}`);
             if (p.owned) {
                 this.loggingService.debug(`owned: ${p.id}`);
             }
