@@ -75,6 +75,7 @@ export class PoiService {
         for (let category of categoriesArray) {
             categories.push(category);
         }
+        // HM TODO: store response somewhere and only refresh it at startup
         return categories;
     }
 

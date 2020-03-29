@@ -191,7 +191,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public toggleOffline(event: Event, layer: EditableLayer, isOverlay: boolean) {
         event.stopPropagation();
-        if (this.ngRedux.getState().offlineState.lastModifiedDate == null) {
+        if (this.ngRedux.getState().offlineState.lastModifiedDate == null && !layer.isOfflineOn) {
             this.toastService.warning(this.resources.noOfflineFilesPleaseDownload);
             return;
         }
