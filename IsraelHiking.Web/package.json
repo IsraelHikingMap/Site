@@ -12,7 +12,6 @@
     "@angular/platform-browser": "8.2.14",
     "@angular/platform-browser-dynamic": "8.2.14",
     "@angular/router": "8.2.14",
-    "@beyerleinf/ngx-dnd": "8.0.3",
     "@ionic-native/background-geolocation": "^5.21.5",
     "@ionic-native/brightness": "^5.21.5",
     "@ionic-native/camera": "^5.21.5",

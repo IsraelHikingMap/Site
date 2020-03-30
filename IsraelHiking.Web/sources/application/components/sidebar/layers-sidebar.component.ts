@@ -1,5 +1,6 @@
 import { Component, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material";
+import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { select, NgRedux } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { every, some } from "lodash";
@@ -19,7 +20,7 @@ import { CategoriesLayerFactory } from "../../services/layers/categories-layers.
 import { PoiService, CategoriesType, ICategory } from "../../services/poi.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SetSelectedRouteAction } from "../../reducres/route-editing-state.reducer";
-import { ChangeRoutePropertiesAction } from "../../reducres/routes.reducer";
+import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction } from "../../reducres/routes.reducer";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducres/layers.reducer";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
@@ -228,5 +229,11 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public isRouteSelected(routeData: RouteData) {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && selectedRoute.id === routeData.id;
+    }
+
+    public dropRoute(event: CdkDragDrop<RouteData[]>) {
+        let currentRoutes = [...this.ngRedux.getState().routes.present];
+        moveItemInArray(currentRoutes, event.previousIndex, event.currentIndex);
+        this.ngRedux.dispatch(new BulkReplaceRoutesAction({ routesData: currentRoutes }));
     }
 }

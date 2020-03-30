@@ -85,10 +85,8 @@
                 <button mat-button (click)="addRoute($event)" matTooltip="{{resources.addRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add route"><i class="fa fa-lg icon-plus"></i></button>
                 <p>{{resources.privateRoutes}}</p>
             </mat-expansion-panel-header>
-            <div>
-                <!--HM TODO: sortable: dnd-sortable-container [sortableData]="routes"-->
-                <div *ngFor="let route of (routes | async); let i = index">
-                    <!-- dnd-sortable [sortableIndex]="i"-->
+            <div cdkDropList (cdkDropListDropped)="dropRoute($event)">
+                <div *ngFor="let route of (routes | async); let i = index" cdkDrag>
                     <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleRoute(route)">
                         <div fxFlex="10"></div>
                         <div fxFlex="15">
@@ -96,8 +94,7 @@
                                 <i class="fa" [ngClass]="{'icon-pencil': isRouteSelected(route), 'icon-eye': isRouteVisible(route) && !isRouteSelected(route), 'icon-eye-slash': !isRouteVisible(route) }"></i>
                             </span>
                         </div>
-                        <div fxFlex matTooltip="{{route.description}}" matTooltipPosition="below">
-                            <!--class="cursor-move"-->
+                        <div fxFlex matTooltip="{{route.description}}" matTooltipPosition="below" class="cursor-move">
                             <span [style.color]="route.color">{{route.name}}</span>
                         </div>
                         <div fxFlex="10">

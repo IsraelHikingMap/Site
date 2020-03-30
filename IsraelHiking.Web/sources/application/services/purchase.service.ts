@@ -28,7 +28,7 @@ export class PurchaseService {
         };
         this.store.validator = "https://validator.fovea.cc/v1/validate?appName=il.org.osm.israelhiking" +
             "&apiKey=1245b587-4bbc-4fbd-a3f1-d51169a53063";
-        this.store.error((e: { code: number, message: string }) => {
+        this.store.error((e: { code: number; message: string }) => {
             this.loggingService.error(`[Store] error handler: ${e.message} (${e.code})`);
         });
 
