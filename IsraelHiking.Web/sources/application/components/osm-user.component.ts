@@ -5,6 +5,7 @@ import { LocalStorage } from "ngx-store";
 import { Observable, Subscription } from "rxjs";
 import { EmailComposer } from "@ionic-native/email-composer/ngx";
 import { Device } from "@ionic-native/device/ngx";
+import { AppVersion } from '@ionic-native/app-version/ngx';
 
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
@@ -46,6 +47,7 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
     constructor(resources: ResourcesService,
                 private readonly emailComposer: EmailComposer,
                 private readonly device: Device,
+                private readonly appVersion: AppVersion,
                 private readonly authorizationService: AuthorizationService,
                 private readonly dialog: MatDialog,
                 private readonly runningContextService: RunningContextService,
@@ -164,12 +166,13 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
             logs = await this.geoLocationService.getLog();
             let logBase64zippedGeoLocation = await this.fileService.zipAndStoreFile(logs);
             let infoString = ["----------------------------------------------------",
-                `id: ${this.userInfo.id}`,
-                `name: ${this.userInfo.displayName}`,
-                `manufacture: ${this.device.manufacturer}`,
-                `model: ${this.device.model}`,
-                `platform: ${this.device.platform}`,
-                `OS version: ${this.device.version}`
+                `User ID: ${this.userInfo.id}`,
+                `Username: ${this.userInfo.displayName}`,
+                `Manufacture: ${this.device.manufacturer}`,
+                `Model: ${this.device.model}`,
+                `Platform: ${this.device.platform}`,
+                `OS version: ${this.device.version}`,
+                `App version: ${await this.appVersion.getVersionNumber()}`
             ].join("\n");
             this.emailComposer.open({
                 to: ["israelhikingmap@gmail.com"],

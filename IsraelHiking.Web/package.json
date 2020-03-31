@@ -12,6 +12,7 @@
     "@angular/platform-browser": "8.2.14",
     "@angular/platform-browser-dynamic": "8.2.14",
     "@angular/router": "8.2.14",
+    "@ionic-native/app-version": "^5.23.0",
     "@ionic-native/background-geolocation": "^5.21.5",
     "@ionic-native/brightness": "^5.21.5",
     "@ionic-native/camera": "^5.21.5",
@@ -47,6 +48,7 @@
     "base64-arraybuffer": "^0.2.0",
     "cordova-android": "^8.1.0",
     "cordova-ios": "^5.1.1",
+    "cordova-plugin-app-version": "^0.1.9",
     "cordova-plugin-brightness": "^0.2.0",
     "cordova-plugin-camera": "^4.0.3",
     "cordova-plugin-device": "^2.0.3",
@@ -179,7 +181,8 @@
       "cordova-plugin-network-information": {},
       "cordova-plugin-purchase": {},
       "cordova-plugin-zip": {},
-      "cordova-sqlite-ext": {}
+      "cordova-sqlite-ext": {},
+      "cordova-plugin-app-version": {}
     },
     "platforms": [
       "ios",
