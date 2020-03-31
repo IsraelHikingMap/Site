@@ -23,6 +23,7 @@
                         [id]="poiSourceName[categoriesType]"
                         [data]="poiGeoJsonData[categoriesType]"
                         [cluster]="true"
+                        [clusterMaxZoom]="13"
                         [clusterRadius]="100">
     </mgl-geojson-source>
     <mgl-markers-for-clusters *ngIf="isVisible(categoriesType)"
