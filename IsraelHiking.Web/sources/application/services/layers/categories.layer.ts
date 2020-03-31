@@ -107,7 +107,7 @@ export class CategoriesLayer extends BaseMapComponent {
             // layer is not ready yet...
             return;
         }
-        if (this.mapService.map.getZoom() <= 9 || !this.isVisible()) {
+        if (this.mapService.map.getZoom() <= 10 || !this.isVisible()) {
             this.pointsOfInterest.splice(0);
             this.markersLoaded.next();
             return;
