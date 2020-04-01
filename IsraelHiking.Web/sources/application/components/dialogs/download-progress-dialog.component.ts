@@ -9,9 +9,11 @@ import { FileService } from "../../services/file.service";
 import { DatabaseService } from "../../services/database.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
+import { LayersService } from "../../services/layers/layers.service";
 import { Urls } from "../../urls";
 import { SetOfflineLastModifiedAction } from "../../reducres/offline.reducer";
 import { ApplicationState } from "../../models/models";
+import { ToggleOfflineAction } from "../../reducres/layers.reducer";
 
 @Component({
     selector: "download-progress-dialog",
@@ -28,6 +30,7 @@ export class DownloadProgressDialogComponent extends BaseMapComponent {
                 private readonly databaseService: DatabaseService,
                 private readonly toastService: ToastService,
                 private readonly loggingService: LoggingService,
+                private readonly layersService: LayersService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
@@ -48,40 +51,22 @@ export class DownloadProgressDialogComponent extends BaseMapComponent {
     }
 
     private async startDownload() {
-        let lastModified = this.ngRedux.getState().offlineState.lastModifiedDate;
+        let setBackToOffline = false;
+        if (this.layersService.getSelectedBaseLayer().isOfflineOn) {
+            this.ngRedux.dispatch(new ToggleOfflineAction({ key: this.layersService.getSelectedBaseLayer().key, isOverlay: false }));
+            setBackToOffline = true;
+        }
         try {
-            let fileNames = await this.httpClient.get(Urls.offlineFiles, {
-                params: {
-                    lastModified: lastModified ? lastModified.toUTCString() : null,
-                    mbTiles: "true"
-                }
-            }).toPromise() as {};
+            let fileNames = await this.getFilesDictionary();
             length = Object.keys(fileNames).length;
             let newestFileDate = new Date(0);
             for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
                 let fileName = Object.keys(fileNames)[fileNameIndex];
                 let fileDate = new Date(fileNames[fileName]);
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
-                let fileContent = await new Promise((resolve, reject) => {
-                    this.httpClient.get(`${Urls.offlineFiles}/${fileName}`, {
-                        observe: "events",
-                        responseType: "blob",
-                        reportProgress: true
-                    }).subscribe(event => {
-                        if (event.type === HttpEventType.DownloadProgress) {
-                            this.progressPersentage = (50.0 / length) * (event.loaded / event.total) +
-                                fileNameIndex * 100.0 / length;
-                        }
-                        if (event.type === HttpEventType.Response) {
-                            if (event.ok) {
-                                resolve(event.body);
-                            } else {
-                                reject(new Error(event.statusText));
-                            }
-                        }
-                    }, error => reject(error));
-                });
+                let fileContent = await this.getFileContent(fileName, fileNameIndex);
                 if (fileName.endsWith(".mbtiles")) {
+                    await this.databaseService.closeDatabase(fileName.replace(".mbtiles", ""));
                     await this.fileService.saveToDatabasesFolder(fileContent as Blob, fileName);
                 } else {
                     await this.fileService.openIHMfile(fileContent as Blob,
@@ -108,11 +93,47 @@ export class DownloadProgressDialogComponent extends BaseMapComponent {
             }
         } catch (ex) {
             this.errorText = ex.message;
+        } finally {
+            if (setBackToOffline) {
+                this.ngRedux.dispatch(new ToggleOfflineAction({ key: this.layersService.getSelectedBaseLayer().key, isOverlay: false }));
+            }
         }
     }
 
     private updateCounter(numberOfFile: number, fileNameIndex: number, percentage: number) {
         this.progressPersentage = (0.5 / numberOfFile) * (percentage) +
             (fileNameIndex * 2 + 1) * 50.0 / numberOfFile;
+    }
+
+    private async getFilesDictionary(): Promise<{}> {
+        let lastModified = this.ngRedux.getState().offlineState.lastModifiedDate;
+        return await this.httpClient.get(Urls.offlineFiles, {
+            params: {
+                lastModified: lastModified ? lastModified.toUTCString() : null,
+                mbTiles: "true"
+            }
+        }).toPromise() as {};
+    }
+
+    private async getFileContent(fileName: string, fileNameIndex: number) {
+        return new Promise((resolve, reject) => {
+            this.httpClient.get(`${Urls.offlineFiles}/${fileName}`, {
+                observe: "events",
+                responseType: "blob",
+                reportProgress: true
+            }).subscribe(event => {
+                if (event.type === HttpEventType.DownloadProgress) {
+                    this.progressPersentage = (50.0 / length) * (event.loaded / event.total) +
+                        fileNameIndex * 100.0 / length;
+                }
+                if (event.type === HttpEventType.Response) {
+                    if (event.ok) {
+                        resolve(event.body);
+                    } else {
+                        reject(new Error(event.statusText));
+                    }
+                }
+            }, error => reject(error));
+        });
     }
 }

@@ -117,7 +117,18 @@ export class DatabaseService {
         finalState.routes.future = [];
         await this.updateState(finalState);
         for (let dbKey of this.sourceDatabases.keys()) {
-            await this.sourceDatabases.get(dbKey).close();
+            await this.closeDatabase(dbKey);
+        }
+    }
+
+    public async closeDatabase(dbKey: string) {
+        this.loggingService.info("Closing database: " + dbKey);
+        let db = this.sourceDatabases.get(dbKey);
+        if (db != null) {
+            await db.close();
+            this.sourceDatabases.delete(dbKey);
+        } else if (this.sourceDatabases.keys.length > 0) {
+            this.loggingService.warning("Unable to close database: " + dbKey);
         }
     }
 

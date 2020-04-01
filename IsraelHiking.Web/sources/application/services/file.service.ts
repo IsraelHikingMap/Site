@@ -4,7 +4,6 @@ import { Style } from "mapbox-gl";
 import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { last } from "lodash";
-import { timeout } from "rxjs/operators";
 import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";

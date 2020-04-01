@@ -59,7 +59,7 @@ import { StatusBar } from "@ionic-native/status-bar/ngx";
 import { Zip } from "@ionic-native/zip/ngx";
 import { Device } from "@ionic-native/device/ngx";
 import { SQLite } from "@ionic-native/sqlite/ngx";
-import { AppVersion } from '@ionic-native/app-version/ngx';
+import { AppVersion } from "@ionic-native/app-version/ngx";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";

@@ -5,7 +5,7 @@ import { LocalStorage } from "ngx-store";
 import { Observable, Subscription } from "rxjs";
 import { EmailComposer } from "@ionic-native/email-composer/ngx";
 import { Device } from "@ionic-native/device/ngx";
-import { AppVersion } from '@ionic-native/app-version/ngx';
+import { AppVersion } from "@ionic-native/app-version/ngx";
 
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
