@@ -1,12 +1,11 @@
-import { Component, ViewChild, ElementRef, Input } from "@angular/core";
-import { Style } from "mapbox-gl";
+import { Component, Input } from "@angular/core";
 
 import { LayersService } from "../../services/layers/layers.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
-import { DefaultStyleService } from "../../services/default-style.service";
 import { LatLngAlt } from "../../models/models";
+import { Urls } from "../../urls";
 
 type LegendItemType = "POI" | "Way";
 
@@ -29,30 +28,15 @@ export class LegendItemComponent extends BaseMapComponent {
     public static readonly OSM_TAG_LINK = "osm-tag-link";
     public static readonly OSM_KEY_LINK = "osm-key-link";
 
-    @ViewChild("mapContainer", { static: false })
-    public mapContainer: ElementRef;
 
     @Input()
     public item: ILegendItem;
-
-    public defaultStyle: Style;
-
     constructor(resources: ResourcesService,
                 private readonly fitBoundsService: FitBoundsService,
-                private readonly layersService: LayersService,
-                private readonly defaultStyleService: DefaultStyleService) {
+                private readonly layersService: LayersService) {
         super(resources);
-
-        this.defaultStyle = this.defaultStyleService.style;
     }
 
-    public getUrl() {
-        return this.layersService.getSelectedBaseLayer().address;
-    }
-
-    public isOffline() {
-        return this.layersService.getSelectedBaseLayer().isOfflineOn;
-    }
 
     public moveToLocation(item: ILegendItem) {
         this.fitBoundsService.flyTo(item.latlng, item.zoom);
@@ -66,5 +50,11 @@ export class LegendItemComponent extends BaseMapComponent {
             return `https://wiki.openstreetmap.org/wiki/Tag:${item.osmTags[0]}`;
         }
         return item.link;
+    }
+
+    public getImageAddress(item: ILegendItem) {
+        let width = item.type === "POI" ? 50 : 200;
+        let styleKey = this.layersService.getSelectedBaseLayer().address.replace(".json", "").split("/").splice(-1)[0];
+        return `${Urls.images}?lat=${item.latlng.lat}&lon=${item.latlng.lng}&zoom=${item.zoom}&width=${width}&height=50&style=${styleKey}`;
     }
 }

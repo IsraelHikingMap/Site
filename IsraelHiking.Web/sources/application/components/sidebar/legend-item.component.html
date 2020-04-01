@@ -1,19 +1,6 @@
 ﻿<div class="legend-item" [ngClass]="{'legend-route': item.type === 'Way', 'legend-poi' : item.type === 'POI'}">
     <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer" dir="ltr">
-        <mgl-map [zoom]="[item.zoom - 1]"
-                 [center]="[item.latlng.lng, item.latlng.lat]" 
-                 [style]="defaultStyle" 
-                 [interactive]="false"
-                 [attributionControl]="false">
-            <auto-layer [address]="getUrl()"
-                        [minZoom]="item.zoom - 1"
-                        [maxZoom]="item.zoom + 1"
-                        [opacity]="1.0"
-                        [visible]="true"
-                        [isBaselayer]="true"
-                        [isOffline]="isOffline()">
-            </auto-layer>
-        </mgl-map>
+        <img [src]="getImageAddress(item)" />
     </div>
     <div class="legend-item-text-container" matTooltip="{{item.osmTags.join(', ')}}" matTooltipPosition="{{item.type === 'Way' ? 'above' : 'right'}}">
         <a *ngIf="item.link" [href]="item.link" [target]="'_blank'" class="legend-item-text">{{item.title}}</a>

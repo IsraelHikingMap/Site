@@ -51,27 +51,31 @@ namespace IsraelHiking.API.Controllers
         /// <returns>An image</returns>
         [HttpGet]
         [Route("")]
-        public async Task<IActionResult> GetImage([FromQuery] double lat, [FromQuery] double lon, [FromQuery] int? width = null, [FromQuery] int? height = null)
+        public async Task<IActionResult> GetImage(
+            [FromQuery] double lat,
+            [FromQuery] double lon,
+            [FromQuery] int? zoom = null,
+            [FromQuery] int? width = null,
+            [FromQuery] int? height = null,
+            [FromQuery] string? style = ""
+            )
         {
             var center = new LatLng(lat, lon);
-            var distance = 0.002;
+            var distance = 0.001;
             var container = new DataContainer
             {
                 NorthEast = new LatLng(center.Lat + distance, center.Lng + distance),
                 SouthWest = new LatLng(center.Lat - distance, center.Lng - distance),
                 Overlays = new List<LayerData>(),
-                BaseLayer = new LayerData(),
+                BaseLayer = new LayerData
+                {
+                    Address = style + ".json"
+                },
                 Routes = new List<RouteData>
                 {
                     new RouteData
                     {
-                        Markers = new List<MarkerData>
-                        {
-                            new MarkerData
-                            {
-                                Latlng = center
-                            }
-                        }
+                        Markers = new List<MarkerData>()
                     }
                 }
             };
