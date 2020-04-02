@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
-import { Router } from "@angular/router";
 import { remove } from "lodash";
+import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -8,7 +8,6 @@ import { LayersService } from "../../services/layers/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { BaseMapComponent } from "../base-map.component";
 import { LegendItemComponent, ILegendItem } from "./legend-item.component";
-import { RouteStrings } from "../../services/hash.service";
 import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP, SATELLITE } from "../../reducres/initial-state";
 
 export interface ILegendSection {
@@ -27,7 +26,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     private selectedSection: ILegendSection;
 
     constructor(resources: ResourcesService,
-                private readonly router: Router,
+                private readonly angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
                 private readonly sidebarService: SidebarService,
                 private readonly layersService: LayersService,
                 private readonly runningContext: RunningContextService) {
@@ -50,6 +49,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
         if (tabIndex === 1) {
             this.initalizeLegendSections();
         }
+        this.angulartics2GoogleAnalytics.eventTrack((tabIndex === 1 ? "Legend" : "About") + " tab selected", { category: "info" });
     }
 
     public openSection(section: ILegendSection) {
