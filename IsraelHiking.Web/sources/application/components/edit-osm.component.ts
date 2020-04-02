@@ -31,11 +31,7 @@ export class EditOSMComponent extends BaseMapComponent {
 
     public getOsmAddress() {
         let poiState = this.ngRedux.getState().poiState;
-        let baseLayerAddress = this.layersService.getSelectedBaseLayer().address;
-        if (baseLayerAddress.indexOf("{x}") === -1) {
-            // using the same logic that the server is using in ImageCreationService
-            baseLayerAddress = Urls.baseTilesAddress + "/Hebrew/tiles/{z}/{x}/{y}.png";
-        }
+        let baseLayerAddress = this.getBaseLayerAddress()
         if (poiState.isSidebarOpen &&
             poiState.selectedPointOfInterest != null &&
             poiState.selectedPointOfInterest.source.toLocaleLowerCase() === "osm") {
@@ -46,5 +42,26 @@ export class EditOSMComponent extends BaseMapComponent {
             currentLocation.zoom + 1,
             currentLocation.latitude,
             currentLocation.longitude);
+    }
+
+    private getBaseLayerAddress() {
+        let baseLayerAddress = this.layersService.getSelectedBaseLayer().address;
+        if (baseLayerAddress.indexOf("{x}") !== -1) {
+            return baseLayerAddress;
+        }
+        let defaultAddress = Urls.baseTilesAddress + "/Hebrew/tiles/{z}/{x}/{y}.png";
+        // using the same logic that the server is using in ImageCreationService + language
+        if (!baseLayerAddress) {
+            return defaultAddress;
+        }
+        let language = this.resources.currentLanguage.code === "he" ? "Hebrew" : "English";
+        let tiles = "tiles";
+        if (baseLayerAddress.endsWith(".json")) {
+            let styleKey = baseLayerAddress.replace(".json", "").split("/").splice(-1)[0];
+            if (styleKey === "ilMTB") {
+                tiles = "mtbtiles";
+            }
+        }
+        return `${Urls.baseTilesAddress}/${language}/${tiles}/{z}/{x}/{y}.png`
     }
 }
