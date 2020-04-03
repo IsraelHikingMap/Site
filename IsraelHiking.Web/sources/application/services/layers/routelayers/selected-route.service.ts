@@ -232,9 +232,12 @@ export class SelectedRouteService {
                 routePoint: startPoint,
                 routingType: postfixSegments[0].routingType
             } as RouteSegmentData);
+        let newRouteName = selectedRoute.name.indexOf(this.resources.split) === -1
+            ? selectedRoute.name + " " + this.resources.split
+            : selectedRoute.name;
         let splitRouteData =
             this.routesFactory.createRouteData(
-                this.createRouteName(selectedRoute.name + " " + this.resources.split),
+                this.createRouteName(newRouteName),
                 this.getLeastUsedColor());
         splitRouteData.segments = postfixSegments;
         let routeData = {
