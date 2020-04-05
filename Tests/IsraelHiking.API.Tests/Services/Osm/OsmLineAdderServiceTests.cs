@@ -38,7 +38,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
             
-            _service = new OsmLineAdderService(_elasticSearchGateway, new ItmWgs84MathTransfromFactory(), optionsProvider, geoJsonPreProcessor, _clientsFactory);
+            _service = new OsmLineAdderService(_elasticSearchGateway, new ItmWgs84MathTransfromFactory(), optionsProvider, geoJsonPreProcessor, _clientsFactory, new GeometryFactory());
         }
 
         private IAuthClient SetupOsmGateway(long changesetId)
@@ -272,7 +272,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         ///   | 
         /// </summary>
         [TestMethod]
-        public void AddAwayAndBackLine_NearAnotherLine_ShouldNotCreateASelfIntersectingLine()
+        public void AddAWayAndBackLine_NearAnotherLine_ShouldNotCreateASelfIntersectingLine()
         {
             var osmGateway = SetupOsmGateway(42);
             SetupHighway(42, new[]
@@ -292,6 +292,70 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4 &&
                                                                                              x.Create.OfType<Node>().Count() == 3));
+        }
+
+        /// <summary>
+        ///        _
+        ///       / |
+        /// <___./__|
+        /// </summary>
+        [TestMethod]
+        public void AddAWay_LoopToItself_ShouldUseTheStartNodeIdInTheMiddleToo()
+        {
+            var osmGateway = SetupOsmGateway(42);
+            SetupHighway(42, new[]
+                {
+                    new Coordinate(0, 0),
+                    new Coordinate(0, -1),
+                },
+                osmGateway);
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+
+            _service.Add(new LineString(new[]
+            {
+                new Coordinate(1.5, 0),
+                new Coordinate(1, 1),
+                new Coordinate(2, 1),
+                new Coordinate(2, 0),
+                new Coordinate(1, 0),
+                new Coordinate(0, 0),
+            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 7 &&
+                                                                                             x.Create.OfType<Node>().Count() == 5 &&
+                                                                                             x.Create.OfType<Way>().First().Nodes[4] == -1));
+        }
+
+        /// <summary>
+        ///        _
+        ///      _/ |
+        /// <___|___|
+        /// </summary>
+        [TestMethod]
+        public void AddAWay_LoopToItselfBeforeLastSectionIsCloseEnoughToo_ShouldNotAddTheFirstNodeInTheWrongPlace()
+        {
+            var osmGateway = SetupOsmGateway(42);
+            SetupHighway(42, new[]
+                {
+                    new Coordinate(0, 0),
+                    new Coordinate(0, -1),
+                },
+                osmGateway);
+            osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+
+            _service.Add(new LineString(new[]
+            {
+                new Coordinate(1.5, 0),
+                new Coordinate(1, 1),
+                new Coordinate(2, 1),
+                new Coordinate(2, 0),
+                new Coordinate(1.500001, 0),
+                new Coordinate(0, 0),
+            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+
+            osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 7 &&
+                                                                                             x.Create.OfType<Node>().Count() == 5 &&
+                                                                                             x.Create.OfType<Way>().First().Nodes[5] == -1));
         }
     }
 }

@@ -23,7 +23,8 @@ namespace IsraelHiking.API.Services.Osm
         private readonly MathTransform _itmWgs84MathTransform;
         private readonly MathTransform _wgs84ItmMathTransform;
         private readonly IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
-        private readonly IClientsFactory _factory;
+        private readonly IClientsFactory _osmApiClientsFactory;
+        private readonly GeometryFactory _geometryFactory;
         private readonly ConfigurationData _options;
 
         private IAuthClient _osmGateway;
@@ -35,29 +36,32 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="options"></param>
         /// <param name="geoJsonPreprocessorExecutor"></param>
-        /// <param name="factory"></param>
+        /// <param name="osmApiClientsFactory"></param>
+        /// <param name="geometryFactory"></param>
         public OsmLineAdderService(IElasticSearchGateway elasticSearchGateway,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IOptions<ConfigurationData> options,
             IOsmGeoJsonPreprocessorExecutor geoJsonPreprocessorExecutor,
-            IClientsFactory factory)
+            IClientsFactory osmApiClientsFactory,
+            GeometryFactory geometryFactory)
         {
             _elasticSearchGateway = elasticSearchGateway;
             _itmWgs84MathTransform = itmWgs84MathTransfromFactory.Create();
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
             _options = options.Value;
             _geoJsonPreprocessorExecutor = geoJsonPreprocessorExecutor;
-            _factory = factory;
+            _osmApiClientsFactory = osmApiClientsFactory;
+            _geometryFactory = geometryFactory;
         }
 
         /// <inheritdoc/>
         public async Task Add(LineString line, Dictionary<string, string> tags, TokenAndSecret tokenAndSecret)
         {
-            _osmGateway = _factory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
+            _osmGateway = _osmApiClientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
             var createdElements = new List<OsmGeo>();
             var modifiedElement = new List<OsmGeo>();
             int generatedId = -1;
-            var newWayNodeIds = new List<string>();
+            var newWayNodes = new List<Node>();
             var highways = await GetHighwaysInArea(line);
             var itmHighways = highways.Select(ToItmLineString).ToList();
             var waysToUpdateIds = new List<long?>();
@@ -67,7 +71,7 @@ namespace IsraelHiking.API.Services.Osm
                 if (coordinateIndex > 0)
                 {
                     var previousCoordinate = line.Coordinates[coordinateIndex - 1];
-                    AddIntersectingNodes(previousCoordinate, coordinate, newWayNodeIds, itmHighways, highways);
+                    AddIntersectingNodes(previousCoordinate, coordinate, newWayNodes, itmHighways, highways);
                 }
                 var closetHighway = GetClosetHighway(coordinate, itmHighways, highways);
                 if (closetHighway == null)
@@ -75,28 +79,28 @@ namespace IsraelHiking.API.Services.Osm
                     // no close highways, adding a new node
                     var node = new Node {Id = generatedId--, Latitude = coordinate.Y, Longitude = coordinate.X};
                     createdElements.Add(node);
-                    newWayNodeIds.Add(node.Id.ToString());
+                    newWayNodes.Add(node);
                     continue;
                 }
                 var itmPoint = GetItmCoordinate(coordinate);
                 var closestItmHighway = itmHighways.First(hw => hw.GetOsmId() == closetHighway.GetOsmId());
                 var closestItmPointInWay = closestItmHighway.Coordinates.OrderBy(c => c.Distance(itmPoint.Coordinate)).First();
                 var indexOnWay = closestItmHighway.Coordinates.ToList().IndexOf(closestItmPointInWay);
-                var closestNodeId = ((List<object>)closetHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[indexOnWay].ToString();
-                if (!CanAddNewNode(newWayNodeIds, closestNodeId))
+                var closestNode = CreateNodeFromExistingHighway(closetHighway, indexOnWay);
+                if (!CanAddNewNode(newWayNodes, closestNode.Id.Value))
                 {
                     continue;
                 }
                 if (closestItmPointInWay.Distance(itmPoint.Coordinate) <= _options.MaxDistanceToExisitngLineForMerge)
                 {
                     // close highway, adding the node id from that highway
-                    newWayNodeIds.Add(closestNodeId);
+                    newWayNodes.Add(closestNode);
                     continue;
                 }
                 // need to add a new node to existing highway
                 var newNode = new Node {Id = generatedId--, Latitude = coordinate.Y, Longitude = coordinate.X};
                 createdElements.Add(newNode);
-                newWayNodeIds.Add(newNode.Id.ToString());
+                newWayNodes.Add(newNode);
                 var indexToInsert = GetIndexToInsert(indexOnWay, closestItmHighway, itmPoint);
                 if (modifiedElement.FirstOrDefault(w => w.Id == closestItmHighway.GetOsmId()) is Way modifiedWay &&
                     modifiedWay.Nodes[indexToInsert] < 0)
@@ -108,7 +112,8 @@ namespace IsraelHiking.API.Services.Osm
                 modifiedElement.Add(simpleWay);
                 waysToUpdateIds.Add(simpleWay.Id);
             }
-            var newWay = CreateWay(newWayNodeIds, tags, generatedId--);
+            CloseLoopWithStartPointIfNeeded(newWayNodes);
+            var newWay = CreateWay(newWayNodes, tags, generatedId--);
             createdElements.Add(newWay);
             waysToUpdateIds.Add(newWay.Id);
             
@@ -138,17 +143,18 @@ namespace IsraelHiking.API.Services.Osm
         /// <summary>
         /// This method checks if a new node should and can be added
         /// </summary>
-        /// <param name="nodeIds"></param>
+        /// <param name="newWayNodes"></param>
         /// <param name="newNodeId"></param>
         /// <returns></returns>
-        private static bool CanAddNewNode(List<string> nodeIds, string newNodeId)
+        private static bool CanAddNewNode(List<Node> newWayNodes, long newNodeId)
         {
-            if (nodeIds.Any() && nodeIds.Last() == newNodeId)
+            if (newWayNodes.Any() && newWayNodes.Last().Id == newNodeId)
             {
                 // last node that was added had the same Id
                 return false;
             }
-            if (nodeIds.Contains(newNodeId) && nodeIds.IndexOf(newNodeId) == nodeIds.Count - 2)
+            var existingNode = newWayNodes.FirstOrDefault(n => n.Id == newNodeId);
+            if (existingNode != null && newWayNodes.IndexOf(existingNode) == newWayNodes.Count - 2)
             {
                 // avoid creating a self intersecting way
                 return false;
@@ -156,29 +162,36 @@ namespace IsraelHiking.API.Services.Osm
             return true;
         }
 
-        private void AddIntersectingNodes(Coordinate previousCoordinate, Coordinate coordinate, List<string> nodeIds,
+        /// <summary>
+        /// This adds an intersecting node of the new highway if it crosses an existing highway
+        /// </summary>
+        /// <param name="previousCoordinate"></param>
+        /// <param name="coordinate"></param>
+        /// <param name="newWayNodes"></param>
+        /// <param name="itmHighways"></param>
+        /// <param name="highways"></param>
+        private void AddIntersectingNodes(Coordinate previousCoordinate, Coordinate coordinate, List<Node> newWayNodes,
             List<LineString> itmHighways, List<Feature> highways)
         {
             var previousItmPoint = GetItmCoordinate(previousCoordinate);
-            var lineSegment = new LineString(new [] { previousItmPoint.Coordinate, GetItmCoordinate(coordinate).Coordinate});
-            var closeLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _options.MaxDistanceToExisitngLineForMerge &&
+            var lineSegment = _geometryFactory.CreateLineString(new [] { previousItmPoint.Coordinate, GetItmCoordinate(coordinate).Coordinate});
+            var closeItmLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _options.MaxDistanceToExisitngLineForMerge &&
                                                      hw.Distance(previousItmPoint) > _options.MaxDistanceToExisitngLineForMerge);
-            foreach (var closeLine in closeLines)
+            foreach (var closeItmLine in closeItmLines)
             {
-                var closestPointInExistingLine = closeLine.Coordinates.Select(c => new Point(c)).OrderBy(p => p.Distance(lineSegment)).First();
+                var closestPointInExistingLine = closeItmLine.Coordinates.Select(c => new Point(c)).OrderBy(p => p.Distance(lineSegment)).First();
                 if (closestPointInExistingLine.Distance(lineSegment) > _options.MaxDistanceToExisitngLineForMerge)
                 {
                     continue;
                 }
-                var indexInLine = closeLine.Coordinates.ToList().IndexOf(closestPointInExistingLine.Coordinate);
-                var closestHighway = highways.First(x => x.GetOsmId() == closeLine.GetOsmId());
-
-                var nodeId = ((List<object>)closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[indexInLine].ToString();
-                if (!CanAddNewNode(nodeIds, nodeId))
+                var indexInLine = closeItmLine.Coordinates.ToList().IndexOf(closestPointInExistingLine.Coordinate);
+                var closestHighway = highways.First(x => x.GetOsmId() == closeItmLine.GetOsmId());
+                var closestNode = CreateNodeFromExistingHighway(closestHighway, indexInLine);
+                if (!CanAddNewNode(newWayNodes, closestNode.Id.Value))
                 {
                     continue;
                 }
-                nodeIds.Add(nodeId);
+                newWayNodes.Add(closestNode);
             }
         }
 
@@ -254,12 +267,12 @@ namespace IsraelHiking.API.Services.Osm
             return lineString;
         }
 
-        private Way CreateWay(IEnumerable<string> nodeIds, Dictionary<string, string> tags, long id)
+        private Way CreateWay(IEnumerable<Node> newWayNodes, Dictionary<string, string> tags, long id)
         {
             var way = new Way
             {
                 Id = id,
-                Nodes = nodeIds.Select(long.Parse).ToArray(),
+                Nodes = newWayNodes.Select(n => n.Id.Value).ToArray(),
                 Tags = new TagsCollection(tags)
                 {
                     {"note", "Added by IHM algorithm - fixing maybe needed"}
@@ -293,6 +306,64 @@ namespace IsraelHiking.API.Services.Osm
                 highway = tags["highway"];
             }
             return $"Added a missing {colour}{highway} from a GPS trace using IsraelHiking.osm.org.il";
+        }
+
+        /// <summary>
+        /// This method tries to find two coordinates that their segment is the closest to the first coordinate of the line
+        /// In this case the first coordinate should be added to the way to create a close loop
+        /// Assuming of course it is inside the merge points threashold
+        /// </summary>
+        private void CloseLoopWithStartPointIfNeeded(List<Node> newWayNodes)
+        {
+            if (newWayNodes.Count < 3)
+            {
+                return;
+            }
+            var coordinates = newWayNodes.Select(n => new Coordinate(n.Longitude.Value, n.Latitude.Value)).ToArray();
+            var itmLine = ToItmLineString(new Feature { Geometry = _geometryFactory.CreateLineString(coordinates), Attributes = new AttributesTable { { FeatureAttributes.ID, "-1000" } } });
+            var firstItmCoordinate = itmLine.Coordinates.First();
+            var indexOfFirstDistantPoint = 1;
+            while (indexOfFirstDistantPoint < itmLine.Length)
+            {
+                if (itmLine[indexOfFirstDistantPoint].Distance(firstItmCoordinate) > _options.MinimalDistanceToClosestPoint)
+                {
+                    break;
+                }
+                indexOfFirstDistantPoint++;
+            }
+            if (indexOfFirstDistantPoint >= itmLine.Length - 1)
+            {
+                return;
+            }
+            LineSegment closestSegment = null;
+            for (int indexOnLine = indexOfFirstDistantPoint + 1; indexOnLine < itmLine.Coordinates.Length; indexOnLine++)
+            {
+                var segment = new LineSegment(itmLine.Coordinates[indexOnLine - 1], itmLine.Coordinates[indexOnLine]);
+                if (segment.Distance(firstItmCoordinate) > _options.MaxDistanceToExisitngLineForMerge)
+                {
+                    continue;
+                }
+                if (closestSegment == null || closestSegment.Distance(firstItmCoordinate) > segment.Distance(firstItmCoordinate))
+                {
+                    closestSegment = segment;
+                }
+            }
+            if (closestSegment == null)
+            {
+                return;
+            }
+            newWayNodes.Insert(itmLine.Coordinates.ToList().IndexOf(closestSegment.P1), newWayNodes.First());
+        }
+
+        private Node CreateNodeFromExistingHighway(Feature closetHighway, int indexOnWay)
+        {
+            var closestNodeId = long.Parse(((List<object>)closetHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[indexOnWay].ToString());
+            return new Node
+            {
+                Id = closestNodeId,
+                Latitude = closetHighway.Geometry.Coordinates[indexOnWay].Y,
+                Longitude = closetHighway.Geometry.Coordinates[indexOnWay].X
+            };
         }
     }
 }
