@@ -12,9 +12,6 @@
   <allow-intent href="mailto:*" />
   <allow-intent href="geo:*" />
   <allow-intent href="whatsapp:*" />
-  <preference name="AutoHideSplashScreen" value="true" />
-  <preference name="SplashScreenDelay" value="0" />
-  <preference name="FadeSplashScreenDuration" value="0" />
   <platform name="android">
     <allow-intent href="market:*" />
     <preference name="android-targetSdkVersion" value="28" />
@@ -136,6 +133,10 @@
   <platform name="ios">
     <allow-intent href="itms:*" />
     <allow-intent href="itms-apps:*" />
+    <preference name="deployment-target" value="13.0" />
+    <preference name="AutoHideSplashScreen" value="true" />
+    <preference name="SplashScreenDelay" value="0" />
+    <preference name="FadeSplashScreenDuration" value="0" />
     <splash src="www/content/favicons/Default@2x~universal~anyany.png" />
     <edit-config target="NSCameraUsageDescription" file="*-Info.plist" mode="merge">
         <string>We need the camera in order to take a picture</string>
