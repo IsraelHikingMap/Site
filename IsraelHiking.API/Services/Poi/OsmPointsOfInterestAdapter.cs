@@ -485,7 +485,7 @@ namespace IsraelHiking.API.Services.Poi
 
         private void SetWebsiteUrl(TagsCollectionBase tags, PointOfInterestExtended pointOfInterest)
         {
-            var regexp = new Regex("((https?://)|^)([a-z]+).wikipedia.org/wiki/(.*)");
+            var regexp = new Regex(@"((https?://)|^)([a-z]+)(\.m)?\.wikipedia.org/wiki/(.*)");
             var nonWikipediaUrls = new List<string>();
             foreach (var url in pointOfInterest.References.Select(r => r.Url))
             {
@@ -496,7 +496,7 @@ namespace IsraelHiking.API.Services.Poi
                     continue;
                 }
                 var language = match.Groups[3].Value;
-                var pageTitle = Uri.UnescapeDataString(match.Groups[4].Value.Replace("_", " "));
+                var pageTitle = Uri.UnescapeDataString(match.Groups[5].Value.Replace("_", " "));
                 var key = FeatureAttributes.WIKIPEDIA + ":" + language;
                 tags.AddOrReplace(key, pageTitle);
                 key = FeatureAttributes.WIKIPEDIA;

@@ -266,6 +266,33 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
+        public void AddPointOfInterest_WikipediaMobildLink_ShouldUpdateOsmAndElasticSearch()
+        {
+            var gateway = SetupHttpFactory();
+            var language = "he";
+            gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
+            var pointOfInterestToAdd = new PointOfInterestExtended
+            {
+                Location = new LatLng(),
+                ImagesUrls = new[] { "image1", "image2" },
+                Icon = _tagsHelper.GetCategoriesByType(Categories.POINTS_OF_INTEREST).First().Icon,
+                References = new[]
+                {
+                    new Reference {Url = "https://he.m.wikipedia.org/wiki/%D7%96%D7%95%D7%94%D7%A8_(%D7%9E%D7%95%D7%A9%D7%91)"}
+                }
+            };
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
+            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
+            _wikipediaGateway.GetReference(Arg.Any<string>(), language).Returns(new Reference { Url = "Some-Url" });
+
+            var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, new TokenAndSecret("", ""), language).Result;
+
+            Assert.IsNotNull(resutls);
+            _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
+            gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("זוהר")));
+        }
+
+        [TestMethod]
         public void UpdatePointWithTwoIcon_ShouldUpdate()
         {
             var gateway = SetupHttpFactory();
