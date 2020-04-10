@@ -14,7 +14,6 @@ import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SnappingService } from "../../services/snapping.service";
 import { DefaultStyleService } from "../../services/default-style.service";
-import { TouchPitchInteraction } from "../intercations/touch-pitch.interaction";
 
 @Component({
     selector: "main-map",
@@ -132,9 +131,6 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         });
         this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" }), "bottom-right");
         this.mapComponent.mapInstance.addControl(new AttributionControl({ compact: true }), "bottom-right");
-
-        let touchPitch = new TouchPitchInteraction(this.mapComponent.mapInstance);
-        touchPitch.enable();
     }
 
     public isMobile() {
