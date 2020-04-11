@@ -87,7 +87,10 @@ namespace IsraelHiking.DataAccess
                             var coordinate = new CoordinateZ(geoSearchResultItem.Coordinate.Longitude, geoSearchResultItem.Coordinate.Latitude, double.NaN);
                             var attributes = GetAttributes(coordinate, geoSearchResultItem.Page.Title,
                                 geoSearchResultItem.Page.Id.ToString(), language);
-                            features.Add(new Feature(new Point(coordinate), attributes));
+                            var feature = new Feature(new Point(coordinate), attributes);
+                            feature.SetTitles();
+                            feature.SetId();
+                            features.Add(feature);
                         }
                         return features;
                     }
