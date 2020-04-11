@@ -43,15 +43,20 @@ namespace IsraelHiking.Web
             var token = securityToken.Split(';').First().Trim('"');
             var tokenSecret = securityToken.Split(';').Last().Trim('"');
             var tokenAndSecret = new TokenAndSecret(token, tokenSecret);
-            var userId = _cache.ReverseGet(tokenAndSecret);
-            if (string.IsNullOrEmpty(userId))
+            var userId = string.Empty;
+            // https://www.tabsoverspaces.com/233703-named-locks-using-monitor-in-net-implementation/
+            // https://stackoverflow.com/questions/55188959/what-are-the-options-for-named-locks-in-net-core
+            lock (string.Intern(tokenAndSecret.ToString()))
             {
-                var osmGateway = _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
-                var user = osmGateway.GetUserDetails().Result;
-                userId = user.Id.ToString();
-                _logger.LogInformation("User " + userId + " had just logged in");
-                _cache.Add(userId, tokenAndSecret);
-                
+                userId = _cache.ReverseGet(tokenAndSecret);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    var osmGateway = _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
+                    var user = osmGateway.GetUserDetails().Result;
+                    userId = user.Id.ToString();
+                    _logger.LogInformation($"User {userId} had just logged in");
+                    _cache.Add(userId, tokenAndSecret);
+                }
             }
             validatedToken = new JwtSecurityToken();
             if (string.IsNullOrWhiteSpace(userId))

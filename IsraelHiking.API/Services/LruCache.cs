@@ -68,7 +68,7 @@ namespace IsraelHiking.API.Services
         {
             if (key == null || _dictionary.ContainsKey(key) == false)
             {
-                return default(TValue);
+                return default;
             }
             _dictionary[key].LastUsed = DateTime.Now;
             return _dictionary[key].Value;

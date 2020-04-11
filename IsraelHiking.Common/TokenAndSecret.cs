@@ -29,6 +29,11 @@
                 return ((Token?.GetHashCode() ?? 0) * 397) ^ (TokenSecret?.GetHashCode() ?? 0);
             }
         }
+
+        public override string ToString()
+        {
+            return $"{Token};{TokenSecret}";
+        }
     }
 
 }
