@@ -46,8 +46,10 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="lat">latitude</param>
         /// <param name="lon">longitude</param>
+        /// <param name="zoom">zoom</param>
         /// <param name="width">Image width in pixels</param>
         /// <param name="height">Image height in pixels</param>
+        /// <param name="style">style name</param>
         /// <returns>An image</returns>
         [HttpGet]
         [Route("")]
@@ -57,7 +59,7 @@ namespace IsraelHiking.API.Controllers
             [FromQuery] int? zoom = null,
             [FromQuery] int? width = null,
             [FromQuery] int? height = null,
-            [FromQuery] string? style = ""
+            [FromQuery] string style = ""
             )
         {
             var center = new LatLng(lat, lon);

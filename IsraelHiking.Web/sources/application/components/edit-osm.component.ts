@@ -31,7 +31,7 @@ export class EditOSMComponent extends BaseMapComponent {
 
     public getOsmAddress() {
         let poiState = this.ngRedux.getState().poiState;
-        let baseLayerAddress = this.getBaseLayerAddress()
+        let baseLayerAddress = this.getBaseLayerAddress();
         if (poiState.isSidebarOpen &&
             poiState.selectedPointOfInterest != null &&
             poiState.selectedPointOfInterest.source.toLocaleLowerCase() === "osm") {
@@ -62,6 +62,6 @@ export class EditOSMComponent extends BaseMapComponent {
                 tiles = "mtbtiles";
             }
         }
-        return `${Urls.baseTilesAddress}/${language}/${tiles}/{z}/{x}/{y}.png`
+        return `${Urls.baseTilesAddress}/${language}/${tiles}/{z}/{x}/{y}.png`;
     }
 }

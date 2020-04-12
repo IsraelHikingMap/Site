@@ -28,7 +28,6 @@ export class LegendItemComponent extends BaseMapComponent {
     public static readonly OSM_TAG_LINK = "osm-tag-link";
     public static readonly OSM_KEY_LINK = "osm-key-link";
 
-
     @Input()
     public item: ILegendItem;
     constructor(resources: ResourcesService,
@@ -36,7 +35,6 @@ export class LegendItemComponent extends BaseMapComponent {
                 private readonly layersService: LayersService) {
         super(resources);
     }
-
 
     public moveToLocation(item: ILegendItem) {
         this.fitBoundsService.flyTo(item.latlng, item.zoom);
