@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+  graphhopper-rebuild:
+    image: harelmazor/graphhopper:1.0-pre33.4.7
+    container_name: graphhopper-rebuild
+    volumes:
+      - ./data:/data:rw
+      - ./gh-config.yml:/data/gh-config.yml
+    entrypoint: ./graphhopper.sh
+    command: import asia_israel-and-palestine.pbf -c /data/gh-config.yml -fd -o /data/default-gh/

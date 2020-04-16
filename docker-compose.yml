@@ -24,14 +24,14 @@ services:
       - 9300:9300
     restart: always
   graphhopper:
-    image: graphhopper/graphhopper
+    image: harelmazor/graphhopper:1.0-pre33.4.7
     container_name: graphhopper
     volumes:
       - ghdata:/data:rw
-      - ./gh-config.yml:/data/gh-config.yml
+      - ./Graphhopper/gh-config.yml:/data/gh-config.yml
     ports:
       - 8989:8989
-    command: asia_israel-and-palestine.pbf -c /data/gh-config.yml -fd
+    command: -i - -c /data/gh-config.yml -o /data/default-gh/
     restart: always
 volumes:
   esdata:
