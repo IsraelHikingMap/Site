@@ -186,7 +186,7 @@ namespace IsraelHiking.API.Executors
                         .Concat(segment.OriginalCoordinates)
                         .Concat(segment.End.Line.Coordinates)
                         .Distinct()
-                        .ToArray()) as LineString);
+                        .ToArray()));
             }
             else if (!AddSegmentToLine(segment.Start.Line, segment, linesToProlong, input.MinimalDistance))
             {
@@ -260,7 +260,7 @@ namespace IsraelHiking.API.Executors
             {
                 list.Add(nextCoordinate);
             }
-            return _geometryFactory.CreateLineString(list.ToArray()) as LineString;
+            return _geometryFactory.CreateLineString(list.ToArray());
         }
 
         private SegmentWithLines CreateSegmentWithLines(Coordinate[] segment, LineAndCoordinate current, LineAndCoordinate next)

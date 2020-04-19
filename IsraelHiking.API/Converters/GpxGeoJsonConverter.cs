@@ -35,7 +35,7 @@ namespace IsraelHiking.API.Converters
                     collection.Add(lineStringFeature);
                     continue;
                 }
-                var lineStringList = track.Segments.Select(segment => new LineString(segment.Waypoints.Select(CreateGeoPosition).ToArray()) as LineString).ToArray();
+                var lineStringList = track.Segments.Select(segment => new LineString(segment.Waypoints.Select(CreateGeoPosition).ToArray())).ToArray();
                 var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.Name, gpx.Metadata.Creator, track.Description));
                 collection.Add(feature);
             }

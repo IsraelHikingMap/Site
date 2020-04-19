@@ -60,7 +60,7 @@ namespace IsraelHiking.API.Executors
                 }
                 AddLineString(lines, reversedGpxLine.Coordinates.Take(indexOfClosingLine).ToArray());
                 var reminingPoints = reversedGpxLine.Coordinates.Skip(indexOfClosingLine).ToArray();
-                reversedGpxLine = reminingPoints.Length > 1 ? _geometryFactory.CreateLineString(reminingPoints) as LineString : _geometryFactory.CreateLineString(new Coordinate[0]) as LineString;
+                reversedGpxLine = reminingPoints.Length > 1 ? _geometryFactory.CreateLineString(reminingPoints) : _geometryFactory.CreateLineString(new Coordinate[0]);
                 coordinateIndex = 0;
             }
             AddLineString(lines, reversedGpxLine.Coordinates);
@@ -99,7 +99,7 @@ namespace IsraelHiking.API.Executors
             {
                 return;
             }
-            gpxSplit.Add(_geometryFactory.CreateLineString(coordinates) as LineString);
+            gpxSplit.Add(_geometryFactory.CreateLineString(coordinates));
         }
 
         private bool IsCloseToALine(Coordinate coordinate, IReadOnlyList<LineString> lineStrings, double minimalDistanceToClosestPoint)

@@ -215,7 +215,7 @@ namespace IsraelHiking.API.Controllers
                     nonDuplicates.Add(coordinate);
                 }
             }
-            return _geometryFactory.CreateLineString(nonDuplicates.ToArray()) as LineString;
+            return _geometryFactory.CreateLineString(nonDuplicates.ToArray());
         }
 
         private LineString ToWgs84LineString(IEnumerable<Coordinate> coordinates)
@@ -229,7 +229,7 @@ namespace IsraelHiking.API.Controllers
                     nonDuplicates.Add(coordinate);
                 }
             }
-            return _geometryFactory.CreateLineString(nonDuplicates.ToArray()) as LineString;
+            return _geometryFactory.CreateLineString(nonDuplicates.ToArray());
         }
 
         private List<LineString> GpxToItmLineStrings(GpxFile gpx)

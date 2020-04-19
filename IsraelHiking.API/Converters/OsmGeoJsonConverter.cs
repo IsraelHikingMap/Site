@@ -153,7 +153,7 @@ namespace IsraelHiking.API.Converters
                 return null;
             }
             var jointLines = geometries.OfType<LineString>().ToList();
-            jointLines.AddRange(geometries.OfType<Polygon>().Select(p => _geometryFactory.CreateLineString(p.ExteriorRing.Coordinates.ToArray()) as LineString));
+            jointLines.AddRange(geometries.OfType<Polygon>().Select(p => _geometryFactory.CreateLineString(p.ExteriorRing.Coordinates.ToArray())));
             var multiLineString = _geometryFactory.CreateMultiLineString(jointLines.ToArray());
             return new Feature(multiLineString, ConvertTags(relation));
         }

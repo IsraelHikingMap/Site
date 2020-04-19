@@ -92,13 +92,13 @@ namespace IsraelHiking.API.Services
                         if (coordinateIndex > 1)
                         {
                             // need to add line only if there's more than 1 coordinate to take.
-                            splitGpxLines.Add(_geometryFactory.CreateLineString(coordinates.Take(coordinateIndex).ToArray()) as LineString);
+                            splitGpxLines.Add(_geometryFactory.CreateLineString(coordinates.Take(coordinateIndex).ToArray()));
                         }
                         coordinates = coordinates.Skip(coordinateIndex).ToArray();
                         coordinateIndex = 1;
                     }
                 }
-                splitGpxLines.Add(_geometryFactory.CreateLineString(coordinates.ToArray()) as LineString);
+                splitGpxLines.Add(_geometryFactory.CreateLineString(coordinates.ToArray()));
             }
             return splitGpxLines.Where(l => l.Coordinates.Length > 0).ToList();
         }
@@ -125,7 +125,7 @@ namespace IsraelHiking.API.Services
                         coordinates.Insert(coordinateIndex + 1, middle);
                     }
                 }
-                denseGpxLines.Add(_geometryFactory.CreateLineString(coordinates.Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1))).ToArray()) as LineString);
+                denseGpxLines.Add(_geometryFactory.CreateLineString(coordinates.Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1))).ToArray()));
             }
             return denseGpxLines;
         }
@@ -219,7 +219,7 @@ namespace IsraelHiking.API.Services
                 }
                 var splitLineToAdd = _geometryFactory.CreateLineString(itmLineSting.Coordinates
                     .Skip(segmentIndex * maxNumberOfPointsPerLine)
-                    .Take(maxNumberOfPointsPerLine + 1).ToArray()) as LineString;
+                    .Take(maxNumberOfPointsPerLine + 1).ToArray());
                 splitLines.Add(splitLineToAdd);
             }
             return splitLines;
@@ -241,7 +241,7 @@ namespace IsraelHiking.API.Services
                 if (currentLineCoordinates.First().Equals2D(previousLineCoordinates.Last()))
                 {
                     currentLineCoordinates.RemoveAt(0);
-                    lineToAdd = _geometryFactory.CreateLineString(previousLineCoordinates.Concat(currentLineCoordinates).ToArray()) as LineString;
+                    lineToAdd = _geometryFactory.CreateLineString(previousLineCoordinates.Concat(currentLineCoordinates).ToArray());
                 }
                 else
                 {
@@ -266,7 +266,7 @@ namespace IsraelHiking.API.Services
                 {
                     var index = mergedLines.IndexOf(lineToAddTo);
                     mergedLines.RemoveAt(index);
-                    var mergedLine = _geometryFactory.CreateLineString(lineToAddTo.Coordinates.Concat(missingLine.Coordinates.Skip(1)).ToArray()) as LineString;
+                    var mergedLine = _geometryFactory.CreateLineString(lineToAddTo.Coordinates.Concat(missingLine.Coordinates.Skip(1)).ToArray());
                     mergedLines.Insert(index, mergedLine);
                     continue;
                 }
@@ -276,7 +276,7 @@ namespace IsraelHiking.API.Services
                 {
                     var index = mergedLines.IndexOf(lineToAddTo);
                     mergedLines.RemoveAt(index);
-                    var mergedLine = _geometryFactory.CreateLineString(missingLine.Coordinates.Concat(lineToAddTo.Coordinates.Skip(1)).ToArray()) as LineString;
+                    var mergedLine = _geometryFactory.CreateLineString(missingLine.Coordinates.Concat(lineToAddTo.Coordinates.Skip(1)).ToArray());
                     mergedLines.Insert(index, mergedLine);
                     continue;
                 }
@@ -298,7 +298,7 @@ namespace IsraelHiking.API.Services
             var itmCoordinates = coordinates.Select(c => _wgs84ItmMathTransform.Transform(c.X, c.Y))
                 .Select(c => new Coordinate(Math.Round(c.x, 1), Math.Round(c.y, 1)))
                 .ToArray();
-            var line = _geometryFactory.CreateLineString(itmCoordinates) as LineString;
+            var line = _geometryFactory.CreateLineString(itmCoordinates);
             line.SetOsmId(id);
             return line;
         }
@@ -326,7 +326,7 @@ namespace IsraelHiking.API.Services
                 prolongInputs.Insert(0, new GpxProlongerExecutorInput
                 {
                     OriginalCoordinates = coordinates,
-                    ExistingItmHighways = await GetExistingCloseLines(_geometryFactory.CreateLineString(coordinates) as LineString),
+                    ExistingItmHighways = await GetExistingCloseLines(_geometryFactory.CreateLineString(coordinates)),
                     MinimalDistance = _options.MaxDistanceToExisitngLineForMerge,
                     MinimalAreaSize = _options.MinimalAreaSize,
                     MinimalLength = _options.MinimalProlongLineLength
@@ -338,7 +338,7 @@ namespace IsraelHiking.API.Services
                 input.LinesToProlong = linesToProlong;
                 linesToProlong = _gpxProlongerExecutor.Prolong(input);
             }
-            return linesToProlong.Select(l => _geometryFactory.CreateLineString(l.Coordinates.Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1))).ToArray()) as LineString).ToList();
+            return linesToProlong.Select(l => _geometryFactory.CreateLineString(l.Coordinates.Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1))).ToArray())).ToList();
         }
         
         private List<LineString> AdjustIntersections(List<LineString> gpxItmLines)
@@ -360,7 +360,7 @@ namespace IsraelHiking.API.Services
                 var currentCoordinates = currentLine.Coordinates.ToList();
                 ReplaceEdgeIfNeeded(adjustedLines, currentCoordinates.First(), currentCoordinates);
                 ReplaceEdgeIfNeeded(adjustedLines, currentCoordinates.Last(), currentCoordinates);
-                adjustedLines.Add(_geometryFactory.CreateLineString(currentCoordinates.ToArray()) as LineString);
+                adjustedLines.Add(_geometryFactory.CreateLineString(currentCoordinates.ToArray()));
             }
             return adjustedLines;
         }
@@ -385,7 +385,7 @@ namespace IsraelHiking.API.Services
             var projectedLocation = line.Project(coordinateToAddIfNeeded);
             var coordinateToAdd = line.ExtractPoint(projectedLocation);
             coordinates.Insert(projectedLocation.SegmentIndex + 1, coordinateToAdd);
-            return _geometryFactory.CreateLineString(coordinates.ToArray()) as LineString;
+            return _geometryFactory.CreateLineString(coordinates.ToArray());
         }
 
         private void ReplaceEdgeIfNeeded(List<LineString> adjustedLines, Coordinate coordinate, List<Coordinate> currentCoordinates)
