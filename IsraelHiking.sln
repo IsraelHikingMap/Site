@@ -36,7 +36,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{3585
 		Scripts\BuildAndPublishIOS.ps1 = Scripts\BuildAndPublishIOS.ps1
 		Scripts\CleanLogs.cmd = Scripts\CleanLogs.cmd
 		Scripts\Deploy.ps1 = Scripts\Deploy.ps1
-		gh-update.cmd = gh-update.cmd
+		gh-update.ps1 = gh-update.ps1
 		Scripts\TestAndPublishWeb.ps1 = Scripts\TestAndPublishWeb.ps1
 	EndProjectSection
 EndProject
