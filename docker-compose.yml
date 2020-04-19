@@ -28,7 +28,9 @@ services:
     container_name: graphhopper
     volumes:
       - ghdata:/data:rw
-      - ./Graphhopper/gh-config.yml:/data/gh-config.yml
+      - type: bind
+        source: ./gh-config.yml
+        target: /data/gh-config.yml
     ports:
       - 8989:8989
     command: -i - -c /data/gh-config.yml -o /data/default-gh/

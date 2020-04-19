@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		docker-compose.yml = docker-compose.yml
 		Dockerfile = Dockerfile
+		gh-config.yml = gh-config.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -35,19 +36,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{3585
 		Scripts\BuildAndPublishIOS.ps1 = Scripts\BuildAndPublishIOS.ps1
 		Scripts\CleanLogs.cmd = Scripts\CleanLogs.cmd
 		Scripts\Deploy.ps1 = Scripts\Deploy.ps1
+		gh-update.cmd = gh-update.cmd
 		Scripts\TestAndPublishWeb.ps1 = Scripts\TestAndPublishWeb.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{3E9EFE32-6A08-4960-AD00-83AC5FEAB259}"
 	ProjectSection(SolutionItems) = preProject
 		docs\faq.md = docs\faq.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Graphhopper", "Graphhopper", "{C5007659-0E97-48ED-8638-0622B63B5011}"
-	ProjectSection(SolutionItems) = preProject
-		Graphhopper\docker-compose-gh-rebuild.yml = Graphhopper\docker-compose-gh-rebuild.yml
-		Graphhopper\gh-config.yml = Graphhopper\gh-config.yml
-		Graphhopper\refrash-graph.ps1 = Graphhopper\refrash-graph.ps1
 	EndProjectSection
 EndProject
 Global
@@ -153,7 +148,6 @@ Global
 		{32A771F8-7A45-4359-9E22-B3CF5155C9A8} = {F72D33D1-176B-4BC5-851A-F71C1ABA74D9}
 		{3585675D-C9A0-4E48-A11D-4B9E789A0B0A} = {F82C943F-37C1-45DF-A2CF-7EFFB9C0B467}
 		{3E9EFE32-6A08-4960-AD00-83AC5FEAB259} = {F82C943F-37C1-45DF-A2CF-7EFFB9C0B467}
-		{C5007659-0E97-48ED-8638-0622B63B5011} = {F82C943F-37C1-45DF-A2CF-7EFFB9C0B467}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {82D60BA1-DDEE-4F6B-B842-56EF5620175E}
