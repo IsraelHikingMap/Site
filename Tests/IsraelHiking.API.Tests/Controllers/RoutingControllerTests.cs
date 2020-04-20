@@ -77,37 +77,15 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetRouting_GraphhopperReturnedEmptyResults_ShouldReturnLineStringWithTwoPoints()
-        {
-            _graphHopperGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
-                .Returns(new LineString(new Coordinate[0]));
-
-            var results = _controller.GetRouting("1,1", "2,2", RoutingType.FOUR_WHEEL_DRIVE).Result as OkObjectResult;
-            var content = results.Value as FeatureCollection;
-
-            Assert.AreEqual(1, content.Count);
-            var lineString = content.First().Geometry as LineString;
-            Assert.IsNotNull(lineString);
-            var points = lineString.Coordinates.OfType<Coordinate>();
-            Assert.AreEqual(1, points.First().X);
-            Assert.AreEqual(1, points.First().Y);
-            Assert.AreEqual(2, points.Last().X);
-            Assert.AreEqual(2, points.Last().Y);
-            Assert.AreEqual(2, points.Last().Y);
-
-        }
-
-
-        [TestMethod]
         public void GetRouting_Car_ShouldReturnLineStringFromGateway()
         {
             _graphHopperGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
-                .Returns(new LineString(new []
+                .Returns(new Feature(new LineString(new []
                 {
                     new CoordinateZ(1,1, double.NaN),
                     new CoordinateZ(1.5,1.5, double.NaN),
                     new CoordinateZ(2,2, double.NaN)
-                }));
+                }), new AttributesTable()));
 
             var results = _controller.GetRouting("1,1", "2,2", RoutingType.FOUR_WHEEL_DRIVE).Result as OkObjectResult;
             var content = results.Value as FeatureCollection;

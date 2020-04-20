@@ -1,12 +1,12 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using ProjNet.CoordinateSystems.Transformations;
 using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -53,7 +53,7 @@ namespace IsraelHiking.API.Controllers
         [ProducesResponseType(typeof(FeatureCollection), 200)]
         public async Task<IActionResult> GetRouting(string from, string to, string type)
         {
-            LineString lineString;
+            
             var profile = ConvertProfile(type);
             var pointFrom = await GetGeographicPosition(from);
             var pointTo = await GetGeographicPosition(to);
@@ -61,30 +61,17 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            if (profile == ProfileType.None)
-            {   
-                lineString = GetDenseStraightLine(pointFrom, pointTo);
-            }
-            else
-            {
-                lineString = await _graphHopperGateway.GetRouting(new RoutingGatewayRequest
+            Feature feature = profile == ProfileType.None 
+                ? GetDenseStraightLine(pointFrom, pointTo)
+                : await _graphHopperGateway.GetRouting(new RoutingGatewayRequest
                 {
-                    From = from,
-                    To = to,
+                    From = pointFrom,
+                    To = pointTo,
                     Profile = profile,
                 });
-                if (!lineString.Coordinates.Any())
-                {
-                    lineString = _geometryFactory.CreateLineString(new[] { pointFrom, pointTo }) as LineString;
-                }
-            }
-            ElevationSetterHelper.SetElevation(lineString, _elevationDataStorage);
-            var table = new AttributesTable
-            {
-                {"Name", "Routing from " + @from + " to " + to + " profile type: " + profile},
-                {"Creator", "IsraelHikingMap"}
-            };
-            var feature = new Feature(lineString, table);
+            ElevationSetterHelper.SetElevation(feature.Geometry, _elevationDataStorage);
+            feature.Attributes.AddOrUpdate("Name", $"Routing from {@from} to {to} profile type: {profile}");
+            feature.Attributes.AddOrUpdate("Creator", "IsraelHikingMap");
             return Ok(new FeatureCollection{ feature });
         }
 
@@ -100,6 +87,9 @@ namespace IsraelHiking.API.Controllers
                     profile = ProfileType.Bike;
                     break;
                 case RoutingType.FOUR_WHEEL_DRIVE:
+                    profile = ProfileType.Car4WheelDrive;
+                    break;
+                case RoutingType.CAR:
                     profile = ProfileType.Car;
                     break;
                 case RoutingType.NONE:
@@ -131,21 +121,22 @@ namespace IsraelHiking.API.Controllers
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        private LineString GetDenseStraightLine(Coordinate from, Coordinate to)
+        private Feature GetDenseStraightLine(Coordinate from, Coordinate to)
         {
             var itmFrom = _wgs84ItmMathTransform.Transform(from.X, from.Y);
             var itmTo = _wgs84ItmMathTransform.Transform(to.X, to.Y);
             var samples = (int)Math.Min(new Point(itmFrom.x, itmFrom.y).Distance(new Point(itmTo.x, itmTo.y)) / 30, 30);
             if (samples == 0)
             {
-                return _geometryFactory.CreateLineString(new[] {from, to}) as LineString;
+                return new Feature(_geometryFactory.CreateLineString(new[] {from, to}), new AttributesTable());
             }
             var coordinates = Enumerable.Range(0, samples + 1).Select(s => new CoordinateZ(
                 (to.X - from.X) * s / samples + from.X,
                 (to.Y - from.Y) * s / samples + from.Y,
                 0)
             );
-            return _geometryFactory.CreateLineString(coordinates.ToArray()) as LineString;
+            var lineString = _geometryFactory.CreateLineString(coordinates.ToArray());
+            return new Feature(lineString, new AttributesTable());
         }
     }
 }

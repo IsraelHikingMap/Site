@@ -64,7 +64,6 @@ namespace IsraelHiking.API.Controllers
                     return BadRequest("This operation can't be done from a remote client, please run this from the server");
                 }
                 if (request == null || 
-                    request.Routing == false &&
                     request.Highways == false &&
                     request.PointsOfInterest == false &&
                     request.UpdateOsmFile == false &&
@@ -74,7 +73,6 @@ namespace IsraelHiking.API.Controllers
                 {
                     request = new UpdateRequest
                     {
-                        Routing = true,
                         Highways = true,
                         PointsOfInterest = true,
                         UpdateOsmFile = true,

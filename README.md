@@ -32,6 +32,7 @@ The technology stack of this site is base on the following frameworks:
 * [Cordova](https://cordova.apache.org/) - Used to wrap the site as a mobile application and add some native capabilities
 * [Redux using angular-redux](https://github.com/angular-redux/platform)
 * [Dexie](https://dexie.org/) - Used for client side storage
+* [Docker](https://www.docker.com/)
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:
@@ -45,7 +46,7 @@ The architecture is based heavily on Angular:
     * routers - handles the routing using server side - if server fails the none-router will be used.
 * content - used for images and static content.
 * environments - used for angular-cli to define production and dev variables.
-* fonts - icomoon generated font for icons instead of images.
+* fonts - [icomoon](https://icomoon.io/app/) generated font for icons instead of images.
 * scss - used for global style files
 * translations - all relevant data related to i18n
  
@@ -62,10 +63,11 @@ The architecture is based on layers
 # Setting Up the Project for Development (Windows)
 In order to be able to build this site you'll need some tools:
 * Install [Java runtime](https://java.com/en/download/) - make sure to install 64bit version.
+* Install [Docker](https://www.docker.com/products/docker-desktop)
 * Download and install [Visual Studio community 2019](https://www.visualstudio.com/downloads) or later. Select:
   * ASP.NET and web development
   * .NET cross-platform development
-* [.Net core SDK 3.0 ](https://www.microsoft.com/net/download/core)
+* [.Net core SDK 3.1 ](https://www.microsoft.com/net/download/core)
 * Install [node.js](https://nodejs.org/en/) for windows (10.1+). Use the recommended 64-bit installer on modern Windows versions.
 * Open Visual Studio
 * Follow [these steps](https://stackoverflow.com/a/43850262/368683) to update the version of node.js Visual Studio uses
@@ -104,8 +106,8 @@ In order to be able to make the server work a few prerequisits are needed:
 * Windows machine with IIS enabled and a site (Although this site should be able to run on Linux it was never fully tested).
 * Install Java Runtime Environment.
 * Add `curl` to path.
-* `GraphHopper.cmd` should be a process that run when the server machine starts and never die - use a watchdog or windows service to make sure they do (we use NSSM. for linux, check the java command inside those files and use a deamon to run them).
-* Create a task to rebuild Graph Hopper and Elastic Search:
+* For graphhoper routing see instructions here: https://github.com/IsraelHikingMap/graphhopper-docker
+* Create a task to rebuild Elastic Search:
   * Open Windows' Task Scheduler
   * Create task
   * Add an action to run `curl -k -X POST https://israelhiking.osm.org.il/api/update -d ""`

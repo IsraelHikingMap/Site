@@ -15,11 +15,18 @@ namespace IsraelHiking.DataAccess
         public long time { get; set; }
         public bool points_encoded { get; set; }
         public JsonPoints points { get; set; }
+        public JsonDetails details { get; set; }
     }
 
     public class JsonPoints
     {
         public string type { get; set; }
         public List<List<double>> coordinates { get; set; }
+    }
+
+    public class JsonDetails
+    {
+        public List<List<string>> road_class { get; set; }
+        public List<List<string>> track_type { get; set; }
     }
 }

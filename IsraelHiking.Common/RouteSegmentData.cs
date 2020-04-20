@@ -7,6 +7,7 @@ namespace IsraelHiking.Common
     {
         public const string HIKE = "Hike";
         public const string BIKE = "Bike";
+        public const string CAR = "Car";
         public const string FOUR_WHEEL_DRIVE = "4WD";
         public const string NONE = "None";
     }

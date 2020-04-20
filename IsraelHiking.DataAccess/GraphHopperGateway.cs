@@ -1,11 +1,9 @@
 ﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
-using System;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -15,17 +13,15 @@ namespace IsraelHiking.DataAccess
     public class GraphHopperGateway : IGraphHopperGateway
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger _logger;
         private readonly ConfigurationData _options;
 
-        public GraphHopperGateway(IHttpClientFactory httpClientFactory, IOptions<ConfigurationData> options, ILogger logger)
+        public GraphHopperGateway(IHttpClientFactory httpClientFactory, IOptions<ConfigurationData> options)
         {
             _httpClientFactory = httpClientFactory;
             _options = options.Value;
-            _logger = logger;
         }
 
-        public async Task<LineString> GetRouting(RoutingGatewayRequest request)
+        public async Task<Feature> GetRouting(RoutingGatewayRequest request)
         {
             var httpClient = _httpClientFactory.CreateClient();
             string vehicle = "foot";
@@ -37,38 +33,38 @@ namespace IsraelHiking.DataAccess
                 case ProfileType.Bike:
                     vehicle = "bike2";
                     break;
-                case ProfileType.Car:
+                case ProfileType.Car4WheelDrive:
                     vehicle = "car4wd";
                     break;
+                case ProfileType.Car:
+                    vehicle = "car";
+                    break;
             }
-            var requestAddress = $"{_options.GraphhopperServerAddress}route?instructions=false&points_encoded=false&elevation=true&point={request.From}&point={request.To}&vehicle={vehicle}";
+            var fromStr = $"{request.From.Y},{request.From.X}";
+            var toStr = $"{request.To.Y},{request.To.X}";
+            var requestAddress = $"{$"{_options.GraphhopperServerAddress}route?instructions=false&points_encoded=false&elevation=true&details=track_type&details=road_class&point="}{fromStr}&point={toStr}&vehicle={vehicle}";
             var response = await httpClient.GetAsync(requestAddress);
             var content = await response.Content.ReadAsStringAsync();
             var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
             if (jsonResponse?.paths == null || !jsonResponse.paths.Any())
             {
-                return new LineString(new Coordinate[0]); // CoordinateZ
+                return LineStringToFeature(new LineString(new[] { request.From, request.To }));
             }
-            if (jsonResponse.paths.First().points.coordinates.Count == 1)
+            var path = jsonResponse.paths.First();
+            if (path.points.coordinates.Count == 1)
             {
-                var jsonCoordinates = jsonResponse.paths.First().points.coordinates.First();
+                var jsonCoordinates = path.points.coordinates.First();
                 var convertedCoordiates = new CoordinateZ(jsonCoordinates[0], jsonCoordinates[1], jsonCoordinates.Count > 2 ? jsonCoordinates[2] : 0.0);
-                return new LineString(new[] { convertedCoordiates, convertedCoordiates });
+                return LineStringToFeature(new LineString(new[] { convertedCoordiates, convertedCoordiates }));
             }
-            return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new CoordinateZ(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());
+            var lineString = new LineString(path.points.coordinates.Select(c => new CoordinateZ(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());
+            var table = new AttributesTable { { "details", path.details } };
+            return LineStringToFeature(lineString, table);
         }
 
-        public async Task Rebuild(MemoryStream osmFileStream)
+        private Feature LineStringToFeature(LineString line, AttributesTable table = null)
         {
-            _logger.LogInformation($"Starting creating graph hopper cache based on latest pbf file: {Sources.OSM_FILE_NAME}");
-            var httpClient = _httpClientFactory.CreateClient();
-            httpClient.Timeout = TimeSpan.FromMinutes(30);
-            var requestAddress = $"{_options.GraphhopperServerAddress}rebuild";
-            ByteArrayContent bytes = new ByteArrayContent(osmFileStream.ToArray());
-            MultipartFormDataContent multiContent = new MultipartFormDataContent();
-            multiContent.Add(bytes, "file", Sources.OSM_FILE_NAME);
-            await httpClient.PostAsync(requestAddress, multiContent);
-            _logger.LogInformation($"Finished creating graph hopper cache based on latest pbf file: {Sources.OSM_FILE_NAME}");
+            return new Feature(line, table ?? new AttributesTable());
         }
     }
 }

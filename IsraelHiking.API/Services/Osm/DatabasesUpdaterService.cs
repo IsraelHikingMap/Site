@@ -156,11 +156,6 @@ namespace IsraelHiking.API.Services.Osm
         /// <inheritdoc />
         public async Task Rebuild(UpdateRequest request)
         {
-            var rebuildRoutingTask = Task.CompletedTask;
-            if (request.Routing)
-            {
-                rebuildRoutingTask = RebuildRouting();
-            }
             if (request.Highways)
             {
                 await RebuildHighways();
@@ -177,19 +172,6 @@ namespace IsraelHiking.API.Services.Osm
             {
                 await RebuildSiteMap();
             }
-            await rebuildRoutingTask;
-        }
-
-        private async Task RebuildRouting()
-        {
-            _logger.LogInformation("Starting rebuilding routing database.");
-            using (var stream = _latestFileFetcherExecutor.Get())
-            using (var memoryStream = new MemoryStream())
-            {
-                stream.CopyTo(memoryStream);
-                await _graphHopperGateway.Rebuild(memoryStream);
-            }
-            _logger.LogInformation("Finished rebuilding routing database.");
         }
 
         private async Task RebuildPointsOfInterest()

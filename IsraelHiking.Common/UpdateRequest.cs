@@ -11,10 +11,6 @@
         /// </summary>
         public bool UpdateOsmFile { get; set; }
         /// <summary>
-        /// Update site's routing database
-        /// </summary>
-        public bool Routing { get; set; }
-        /// <summary>
         /// Update points of interest database
         /// </summary>
         public bool PointsOfInterest { get; set; }

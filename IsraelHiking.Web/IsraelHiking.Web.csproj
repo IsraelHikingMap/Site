@@ -85,7 +85,6 @@
     <PackageReference Include="AspNetCore.Proxy" Version="3.1.1" />
     <PackageReference Include="Codecov" Version="1.10.0" />
     <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.7.0-int.6" />
-    <PackageReference Include="IsraelHiking.Elasticsearch" Version="5.6.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.1" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="3.1.1" />
