@@ -7,7 +7,7 @@ import { ToastService } from "./toast.service";
 @Injectable()
 export class DragAndDropService {
 
-    constructor(private readonly resourcesService: ResourcesService,
+    constructor(private readonly resources: ResourcesService,
                 private readonly fileService: FileService,
                 private readonly toastService: ToastService) { }
 
@@ -25,7 +25,7 @@ export class DragAndDropService {
                         try {
                             await this.fileService.addRoutesFromFile(file);
                         } catch (ex) {
-                            this.toastService.error(this.resourcesService.unableToLoadFromFile + `: ${file.name}`);
+                            this.toastService.error(this.resources.unableToLoadFromFile + `: ${file.name}`);
                         }
                     }
                 }, 25);
@@ -35,7 +35,7 @@ export class DragAndDropService {
             let url = e.dataTransfer.getData("text");
             if (url) {
                 this.fileService.addRoutesFromUrl(url).then(() => { }, () => {
-                    this.toastService.error(resourcesService.unableToLoadFromUrl + `: ${url}`);
+                    this.toastService.error(this.resources.unableToLoadFromUrl + `: ${url}`);
                 });
             }
         });
