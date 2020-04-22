@@ -5,7 +5,7 @@ import { MapMouseEvent, Map, GeoJSONSource, Point } from "mapbox-gl";
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducres/routes.reducer";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
-import { RouterService } from "../../services/routers/router.service";
+import { RouterService } from "../../services/router.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { SnappingService } from "../../services/snapping.service";
 import { GeoLocationService } from "../../services/geo-location.service";

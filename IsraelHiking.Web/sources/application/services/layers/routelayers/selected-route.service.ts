@@ -19,7 +19,7 @@ import {
 import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "../../resources.service";
 import { SpatialService } from "../../spatial.service";
-import { RouterService } from "../../routers/router.service";
+import { RouterService } from "../../router.service";
 import { TracesService } from "../../traces.service";
 import { ToastService } from "../../toast.service";
 import {

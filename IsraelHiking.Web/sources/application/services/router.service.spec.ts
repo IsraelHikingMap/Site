@@ -3,10 +3,10 @@ import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 
 import { RouterService } from "./router.service";
-import { ResourcesService } from "../resources.service";
-import { ToastService } from "../toast.service";
-import { GeoJsonParser } from "../geojson.parser";
-import { ToastServiceMockCreator } from "../toast.service.spec";
+import { ResourcesService } from "./resources.service";
+import { ToastService } from "./toast.service";
+import { GeoJsonParser } from "./geojson.parser";
+import { ToastServiceMockCreator } from "./toast.service.spec";
 
 describe("RouterService", () => {
     beforeEach(() => {

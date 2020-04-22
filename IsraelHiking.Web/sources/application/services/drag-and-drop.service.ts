@@ -1,18 +1,17 @@
 import { Injectable } from "@angular/core";
+
 import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
-import { DataContainerService } from "./data-container.service";
-import { RouteData } from "../models/models";
 
 @Injectable()
 export class DragAndDropService {
 
     constructor(private readonly resourcesService: ResourcesService,
                 private readonly fileService: FileService,
-                private readonly dataContainerService: DataContainerService,
-                private readonly toastService: ToastService) {
+                private readonly toastService: ToastService) { }
 
+    public initialize() {
         document.addEventListener("dragover", (event) => {
             event.preventDefault();
         });
@@ -35,7 +34,7 @@ export class DragAndDropService {
 
             let url = e.dataTransfer.getData("text");
             if (url) {
-                this.fileService.addRoutesFromUrl(url).then(() => {}, () => {
+                this.fileService.addRoutesFromUrl(url).then(() => { }, () => {
                     this.toastService.error(resourcesService.unableToLoadFromUrl + `: ${url}`);
                 });
             }

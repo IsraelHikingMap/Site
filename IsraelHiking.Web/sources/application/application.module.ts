@@ -72,7 +72,7 @@ import { HashService } from "./services/hash.service";
 import { LayersService } from "./services/layers/layers.service";
 import { DataContainerService } from "./services/data-container.service";
 import { RoutesFactory } from "./services/layers/routelayers/routes.factory";
-import { RouterService } from "./services/routers/router.service";
+import { RouterService } from "./services/router.service";
 import { SnappingService } from "./services/snapping.service";
 import { FitBoundsService } from "./services/fit-bounds.service";
 import { RouteStatisticsService } from "./services/route-statistics.service";
@@ -384,8 +384,7 @@ export function getWindow() { return window; }
         bootstrap: [MainMapComponent]
     })
 export class ApplicationModule {
-    constructor(angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
-                dragAndDropService: DragAndDropService) {
+    constructor(angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics) {
         angulartics2GoogleAnalytics.startTracking();
     }
 }

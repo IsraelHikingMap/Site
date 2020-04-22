@@ -18,7 +18,7 @@ import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
-import { RouterService } from "../services/routers/router.service";
+import { RouterService } from "../services/router.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider, ISearchResultsPointOfInterest } from "../services/search-results.provider";

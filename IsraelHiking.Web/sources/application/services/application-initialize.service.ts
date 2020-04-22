@@ -9,6 +9,7 @@ import { OpenWithService } from "./open-with.service";
 import { PurchaseService } from "./purchase.service";
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { RunningContextService } from "./running-context.service";
+import { DragAndDropService } from "./drag-and-drop.service";
 
 @Injectable()
 export class ApplicationInitializeService {
@@ -19,7 +20,8 @@ export class ApplicationInitializeService {
                 private readonly applicationExitService: ApplicationExitService,
                 private readonly openWithService: OpenWithService,
                 private readonly purchaseService: PurchaseService,
-                private readonly runnincContextService: RunningContextService) {
+                private readonly runnincContextService: RunningContextService,
+                private readonly dragAndDropService: DragAndDropService) {
     }
 
     public async initialize() {
@@ -31,6 +33,7 @@ export class ApplicationInitializeService {
             this.applicationExitService.initialize();
             this.openWithService.initialize();
             this.purchaseService.initialize();
+            this.dragAndDropService.initialize();
             if (this.runnincContextService.isMobile
                 && !this.runnincContextService.isCordova
                 && !this.runnincContextService.isIFrame) {

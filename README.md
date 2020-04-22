@@ -43,7 +43,6 @@ The architecture is based heavily on Angular:
   * reducers - used for redux reducers, actions and payloads.
   * services - this layer hold the lower level data handling.
     * layers - where the layers logic is - POI, route, wiki, nakeb, relevant services, etc...
-    * routers - handles the routing using server side - if server fails the none-router will be used.
 * content - used for images and static content.
 * environments - used for angular-cli to define production and dev variables.
 * fonts - [icomoon](https://icomoon.io/app/) generated font for icons instead of images.
