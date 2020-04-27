@@ -31,6 +31,7 @@ export class PurchaseService {
         this.store.error((e: { code: number; message: string }) => {
             this.loggingService.error(`[Store] error handler: ${e.message} (${e.code})`);
         });
+        this.store.applicationUsername = () => this.ngRedux.getState().userState.userInfo.id;
 
         this.store.register({
             id: "offline_map",
@@ -60,7 +61,7 @@ export class PurchaseService {
             if (p.owned) {
                 this.loggingService.debug(`[Store] owned: ${p.id}`);
             }
-            if (p.expiryDate < new Date()) {
+            if (new Date(p.expiryDate) < new Date()) {
                 this.loggingService.debug(`[Store] expired: ${p.id}`);
             }
         });
