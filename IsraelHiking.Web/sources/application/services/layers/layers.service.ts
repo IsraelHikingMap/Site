@@ -14,7 +14,7 @@ import {
     EditableLayer,
     Overlay,
     ApplicationState,
-    UserState
+    UserInfo
 } from "../../models/models";
 import {
     AddBaseLayerAction,
@@ -62,8 +62,8 @@ export class LayersService {
     @select((state: ApplicationState) => state.layersState.selectedBaseLayerKey)
     public selectedBaseLayerKey$: Observable<string>;
 
-    @select((state: ApplicationState) => state.userState)
-    public userState$: Observable<UserState>;
+    @select((state: ApplicationState) => state.userState.userInfo)
+    public userInfo$: Observable<UserInfo>;
 
     constructor(private readonly resourcesService: ResourcesService,
                 private readonly authorizationService: AuthorizationService,
@@ -79,7 +79,7 @@ export class LayersService {
         this.overlays$.subscribe(o => this.overlays = o);
         this.selectedBaseLayerKey$.subscribe(k => this.selectedBaseLayerKey = k);
 
-        this.userState$.subscribe(() => this.getUserLayers());
+        this.userInfo$.subscribe(() => this.syncUserLayers());
     }
 
     public isBaseLayerSelected(layer: EditableLayer): boolean {
@@ -90,7 +90,7 @@ export class LayersService {
         return this.baseLayers.find(bl => this.compareKeys(bl.key, this.selectedBaseLayerKey)) || this.baseLayers[0];
     }
 
-    private getUserLayers = async (): Promise<any> => {
+    private async syncUserLayers(): Promise<void> {
         if (!this.authorizationService.isLoggedIn()) {
             return;
         }

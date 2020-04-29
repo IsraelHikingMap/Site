@@ -55,8 +55,8 @@ export class AuthorizationService {
     }
 
     public logout() {
-        this.ngRedux.dispatch(new SetTokenAction({ token: null }));
         this.ngRedux.dispatch(new SetUserInfoAction({ userInfo: null }));
+        this.ngRedux.dispatch(new SetTokenAction({ token: null }));
     }
 
     public async login(): Promise<void> {
