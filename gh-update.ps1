@@ -8,3 +8,5 @@ docker-compose run --rm --entrypoint /bin/bash graphhopper -c "rm -rf /data/defa
 docker-compose run --rm --entrypoint /bin/bash graphhopper -c "mv /data/new-gh /data/default-gh"
 # 4. Restart the container will make it use the updated default cache.
 docker-compose restart graphhopper
+# 5. In case of docker file changes, make sure to use the latest images, etc...
+docker-compose up -d graphhopper
