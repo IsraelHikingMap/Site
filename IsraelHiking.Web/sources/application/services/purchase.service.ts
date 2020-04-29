@@ -1,14 +1,18 @@
 import { Injectable } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
+import { NgRedux, select } from "@angular-redux/store";
 import { InAppPurchase2, IAPProduct } from "@ionic-native/in-app-purchase-2/ngx";
+import { Observable } from "rxjs";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { SetOfflineAvailableAction } from "../reducres/offline.reducer";
-import { ApplicationState } from "../models/models";
+import { ApplicationState, UserInfo } from "../models/models";
 
 @Injectable()
 export class PurchaseService {
+
+    @select((state: ApplicationState) => state.userState.userInfo)
+    private userInfo$: Observable<UserInfo>;
 
     constructor(private readonly store: InAppPurchase2,
                 private readonly runningContextService: RunningContextService,
@@ -20,6 +24,11 @@ export class PurchaseService {
         if (!this.runningContextService.isCordova) {
             return;
         }
+        this.userInfo$.subscribe(ui => {
+            this.store.applicationUsername = ui ? ui.id : null;
+            this.store.refresh();
+        });
+
         this.store.log = {
             error: (message: string | object) => this.loggingService.error(this.logMessageToString(message)),
             warn: (message: string | object) => this.loggingService.warning(this.logMessageToString(message)),
@@ -31,7 +40,6 @@ export class PurchaseService {
         this.store.error((e: { code: number; message: string }) => {
             this.loggingService.error(`[Store] error handler: ${e.message} (${e.code})`);
         });
-        this.store.applicationUsername = () => this.ngRedux.getState().userState.userInfo.id;
 
         this.store.register({
             id: "offline_map",
