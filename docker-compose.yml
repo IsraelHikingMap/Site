@@ -24,7 +24,7 @@ services:
       - 9300:9300
     restart: always
   graphhopper:
-    image: graphhopper/graphhopper:latest
+    image: graphhopper/graphhopper:1.0-pre38
     container_name: graphhopper
     volumes:
       - ghdata:/data:rw
