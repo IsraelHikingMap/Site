@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Services
         /// <inheritdoc/>
         public async Task<Dictionary<string, DateTime>> GetUpdatedFilesList(string userId, DateTime lastModifiedDate, bool mbTiles)
         {
-            _logger.LogInformation($"Getting the list of offline files for user: {userId}, mbtiles: {mbTiles}");
+            _logger.LogInformation($"Getting the list of offline files for user: {userId}, mbtiles: {mbTiles}, date: {lastModifiedDate}");
             var filesDictionary = new Dictionary<string, DateTime>();
             if (!await _receiptValidationGateway.IsEntitled(userId))
             {
