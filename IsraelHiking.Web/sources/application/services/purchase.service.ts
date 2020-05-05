@@ -25,8 +25,11 @@ export class PurchaseService {
             return;
         }
         this.userInfo$.subscribe(ui => {
-            this.store.applicationUsername = ui ? ui.id : null;
-            this.store.refresh();
+            if (ui != null) {
+                this.loggingService.error(`[Store] logged in: ` + ui.id);
+                this.store.applicationUsername = ui.id;
+                this.store.refresh();
+            }
         });
 
         this.store.log = {
@@ -73,7 +76,8 @@ export class PurchaseService {
                 this.loggingService.debug(`[Store] expired: ${p.id}`);
             }
         });
-        this.store.refresh();
+        // HM TODO: restore this?
+        // this.store.refresh();
     }
 
     public order(applicationUsername: string) {
