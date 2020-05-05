@@ -182,10 +182,15 @@ export class LayersSidebarComponent extends BaseMapComponent {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
-        this.purchaseService.order(userInfo.id);
+        this.purchaseService.order();
     }
 
     public downloadOfflineMaps() {
+        let userInfo = this.ngRedux.getState().userState.userInfo;
+        if (userInfo == null || !userInfo.id) {
+            this.toastService.warning(this.resources.loginRequired);
+            return;
+        }
         this.sidebarService.hide();
         DownloadProgressDialogComponent.openDialog(this.dialog);
     }

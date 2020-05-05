@@ -24,13 +24,6 @@ export class PurchaseService {
         if (!this.runningContextService.isCordova) {
             return;
         }
-        this.userInfo$.subscribe(ui => {
-            if (ui != null) {
-                //this.loggingService.info(`[Store] logged in: ` + ui.id);
-                //this.store.applicationUsername = ui.id;
-                //this.store.refresh();
-            }
-        });
 
         this.store.log = {
             error: (message: string | object) => this.loggingService.error(this.logMessageToString(message)),
@@ -76,13 +69,19 @@ export class PurchaseService {
                 this.loggingService.debug(`[Store] expired: ${p.id}`);
             }
         });
-        
-        this.store.refresh();
+
+        this.userInfo$.subscribe(ui => {
+            if (ui != null) {
+                this.loggingService.info(`[Store] logged in: ` + ui.id);
+                this.store.applicationUsername = ui.id;
+                this.store.refresh();
+            }
+        });
     }
 
-    public order(applicationUsername: string) {
-        this.loggingService.debug("[Store] Ordering product for: " + applicationUsername);
-        this.store.order("offline_map", { applicationUsername });
+    public order() {
+        this.loggingService.debug("[Store] Ordering product");
+        this.store.order("offline_map");
     }
 
     private logMessageToString(message: string | object): string {
