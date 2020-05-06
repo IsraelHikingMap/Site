@@ -34,7 +34,7 @@ export interface IRouteStatistics {
 }
 
 export class RouteStatisticsService {
-    public getStatisticsByRange = (route: RouteData, start: IRouteStatisticsPoint, end: IRouteStatisticsPoint) => {
+    public getStatisticsByRange(route: RouteData, start: IRouteStatisticsPoint, end: IRouteStatisticsPoint) {
         let routeStatistics = {
             points: [] as IRouteStatisticsPoint[],
             length: 0,
@@ -95,8 +95,9 @@ export class RouteStatisticsService {
         return routeStatistics;
     }
 
-    public getStatistics = (route: RouteData): IRouteStatistics => {
-        let fullStatistics = this.getStatisticsByRange(route, null, null);
+    public getStatistics(route: RouteData, closestRouteToRecording: RouteData): IRouteStatistics {
+        let routeForStatistics = closestRouteToRecording ? closestRouteToRecording : route;
+        let fullStatistics = this.getStatisticsByRange(routeForStatistics, null, null);
         if (route.segments.length === 0) {
             return fullStatistics;
         }
@@ -177,7 +178,7 @@ export class RouteStatisticsService {
         }
         let distance = SpatialService.getDistanceFromPointToLine([latlng.lng, latlng.lat],
             [[latlng1.lng, latlng1.lat], [latlng2.lng, latlng2.lat]]);
-        if (distance < 0.1) {
+        if (distance < 100) {
             return true;
         }
         return false;
@@ -187,9 +188,15 @@ export class RouteStatisticsService {
         if (statistics.points.length < 2) {
             return 0;
         }
+        let distance = SpatialService.getDistanceFromPointToLine(SpatialService.toCoordinate(latLng),
+            statistics.points.map(p => SpatialService.toCoordinate(p.latlng)));
+        if (distance > 50) {
+            return 0;
+        }
+        let closestPoint = SpatialService.getClosestPoint(latLng, statistics.points.map(p => p.latlng));
         let previousPoint = statistics.points[0];
         for (let currentPoint of statistics.points) {
-            if (this.isOnSegment(previousPoint.latlng, currentPoint.latlng, latLng) === false) {
+            if (this.isOnSegment(previousPoint.latlng, currentPoint.latlng, closestPoint) === false) {
                 previousPoint = currentPoint;
                 continue;
             }

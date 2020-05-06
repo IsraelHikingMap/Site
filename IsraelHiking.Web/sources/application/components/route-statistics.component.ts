@@ -11,8 +11,8 @@ import { BaseMapComponent } from "./base-map.component";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
-import { LatLngAlt, RouteData, ApplicationState } from "../models/models";
 import { GeoLocationService } from "../services/geo-location.service";
+import { LatLngAlt, RouteData, ApplicationState } from "../models/models";
 
 declare type DragState = "start" | "drag" | "none";
 
@@ -33,7 +33,8 @@ interface IChartElements {
     chartArea: Selection<SVGGElement, {}, null, undefined>;
     path: Selection<SVGPathElement, {}, null, undefined>;
     hoverGroup: Selection<BaseType, {}, null, undefined>;
-    dragRect: Selection<BaseType, {}, null, undefined>;
+    dragRect: Selection<SVGRectElement, {}, null, undefined>;
+    locationCircle: Selection<SVGCircleElement, {}, null, undefined>;
     xScale: ScaleContinuousNumeric<number, number>;
     yScale: ScaleContinuousNumeric<number, number>;
     margin: IMargin;
@@ -197,13 +198,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.redrawChart();
         }));
         this.componentSubscriptions.push(this.geoLocationService.positionChanged.subscribe(p => {
-            this.currentSpeed = (p == null) ? null : p.coords.speed * 3.6;
-            const currentSpeedTimeout = "currentSpeedTimeout";
-            this.cancelableTimeoutService.clearTimeoutByGroup(currentSpeedTimeout);
-            this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                // if there are no location updates reset speed.
-                this.currentSpeed = null;
-            }, 5000, currentSpeedTimeout);
+            this.onGeolocationChanged(p);
         }));
         this.routeChanged();
         this.componentSubscriptions.push(interval(1000).subscribe(() => {
@@ -267,6 +262,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.initializeStatistics(null);
         this.updateKmMarkers();
         this.setDataToChart([]);
+        this.refreshLocationCircle();
         this.onRouteDataChanged();
     }
 
@@ -275,12 +271,14 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (!selectedRoute) {
             return;
         }
-        this.statistics = this.routeStatisticsService.getStatistics(selectedRoute);
+        let closestRouteToRecording = this.selectedRouteService.getClosestRouteToRecording();
+        this.statistics = this.routeStatisticsService.getStatistics(selectedRoute, closestRouteToRecording);
         this.initializeStatistics(this.statistics);
         if (this.isVisible) {
             this.clearSubRouteSelection();
             this.setRouteColorToChart(selectedRoute.color);
             this.setDataToChart(this.statistics.points.map(p => p.coordinate));
+            this.refreshLocationCircle();
         }
         this.updateKmMarkers();
     }
@@ -305,11 +303,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.createChartAxis();
         this.addChartPath();
         this.addChartDragGroup();
+        this.addChartLocationCircle();
         this.addChartHoverGroup();
         this.addEventsSupport();
         // must be last
         this.setRouteColorToChart(routeColor);
         this.setDataToChart(data);
+        this.refreshLocationCircle();
         this.updateSubRouteSelectionOnChart();
     }
 
@@ -469,6 +469,18 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("fill", "gray")
             .attr("opacity", 0.4)
             .style("pointer-events", "none")
+            .style("display", "none");
+    }
+
+    private addChartLocationCircle() {
+        this.chartElements.locationCircle = this.chartElements.chartArea.append("circle")
+            .attr("class", "location-circle")
+            .attr("cx", 0)
+            .attr("cy", 0)
+            .attr("r", 5)
+            .attr("fill", "none")
+            .attr("stroke-width", 3)
+            .attr("stroke", SelectedRouteService.RECORDING_ROUTE_COLOR)
             .style("display", "none");
     }
 
@@ -720,16 +732,54 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (!this.statistics || !this.isVisible) {
             return;
         }
-        if (latlng == null) {
-            this.hideChartHover();
+        let point = this.getPointFromLatLng(latlng);
+        this.showChartHover(point);
+    }
+
+    private onGeolocationChanged(position: Position) {
+        this.currentSpeed = (position == null) ? null : position.coords.speed * 3.6;
+        const currentSpeedTimeout = "currentSpeedTimeout";
+        this.cancelableTimeoutService.clearTimeoutByGroup(currentSpeedTimeout);
+        this.cancelableTimeoutService.setTimeoutByGroup(() => {
+            // if there are no location updates reset speed.
+            this.currentSpeed = null;
+        }, 5000, currentSpeedTimeout);
+
+        if (!this.statistics || !this.isVisible) {
             return;
+        }
+        this.refreshLocationCircle();
+    }
+
+    private refreshLocationCircle() {
+        if (!this.isVisible) {
+            return;
+        }
+        let point = this.getPointFromLatLng(this.geoLocationService.currentLocation);
+        if (!point) {
+            this.chartElements.locationCircle.style("display", "none");
+            return;
+        }
+        let chartXCoordinate = this.chartElements.xScale(point.coordinate[0]);
+        let chartYCoordinate = this.chartElements.yScale(point.coordinate[1]);
+        if (isNaN(chartXCoordinate) || isNaN(chartXCoordinate)) {
+            // this is the case of no data on chart
+            this.chartElements.locationCircle.style("display", "none");
+            return;
+        }
+        this.chartElements.locationCircle.style("display", null);
+        this.chartElements.locationCircle.attr("cy", chartYCoordinate);
+        this.chartElements.locationCircle.attr("cx", chartXCoordinate);
+    }
+
+    private getPointFromLatLng(latlng: LatLngAlt): IRouteStatisticsPoint {
+        if (latlng == null) {
+            return null;
         }
         let x = this.routeStatisticsService.findDistanceForLatLng(this.statistics, latlng);
         if (x <= 0) {
-            this.hideChartHover();
-            return;
+            return null;
         }
-        let point = this.routeStatisticsService.interpolateStatistics(this.statistics, x);
-        this.showChartHover(point);
+        return this.routeStatisticsService.interpolateStatistics(this.statistics, x);
     }
 }

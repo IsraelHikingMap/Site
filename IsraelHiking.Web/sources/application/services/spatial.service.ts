@@ -1,13 +1,14 @@
 import { Injectable } from "@angular/core";
 import { LatLngAlt, Bounds } from "../models/models";
 import { Map, LngLatBoundsLike, LngLatBounds } from "mapbox-gl";
+import { lineString, featureCollection, Units } from "@turf/helpers";
 import simplify from "@turf/simplify";
-import { lineString, featureCollection } from "@turf/helpers";
 import distance from "@turf/distance";
 import center from "@turf/center";
 import bbox from "@turf/bbox";
 import circle from "@turf/circle";
 import nearestPointOnLine from "@turf/nearest-point-on-line";
+import pointToLineDistance from "@turf/point-to-line-distance";
 
 @Injectable()
 export class SpatialService {
@@ -57,39 +58,7 @@ export class SpatialService {
     }
 
     public static getDistanceFromPointToLine(coordinate: [number, number], coordinates: [number, number][]): number {
-        function sqr(x: number): number {
-            return x * x;
-        }
-
-        function dist2(p1: [number, number], p2: [number, number]): number {
-            return sqr(p1[0] - p2[0]) + sqr(p1[1] - p2[1]);
-        }
-
-        // p - point
-        // s - start point of segment
-        // e - end point of segment
-        function distToSegmentSquared(p: [number, number], s: [number, number], e: [number, number]): number {
-            let l2 = dist2(s, e);
-            if (l2 === 0) {
-                return dist2(p, s);
-            }
-            let t = ((p[0] - s[0]) * (e[0] - s[0]) + (p[1] - s[1]) * (e[1] - s[1])) / l2;
-            t = Math.max(0, Math.min(1, t));
-            return dist2(p, [s[0] + t * (e[0] - s[0]), s[1] + t * (e[1] - s[1])]);
-        }
-
-        function distToSegment(point: [number, number], startPoint: [number, number], endPoint: [number, number]) {
-            return Math.sqrt(distToSegmentSquared(point, startPoint, endPoint));
-        }
-
-        let minimalDistance = Infinity;
-        for (let coordinateIndex = 1; coordinateIndex < coordinates.length; coordinateIndex++) {
-            let currentDistance = distToSegment(coordinate, coordinates[coordinateIndex - 1], coordinates[coordinateIndex]);
-            if (currentDistance < minimalDistance) {
-                minimalDistance = currentDistance;
-            }
-        }
-        return minimalDistance;
+        return pointToLineDistance(coordinate, lineString(coordinates), { units: "meters" });
     }
 
     public static getClosestPoint(latlng: LatLngAlt, line: LatLngAlt[]): LatLngAlt {
@@ -183,7 +152,7 @@ export class SpatialService {
     }
 
     public static getCirclePolygon(centerPoint: LatLngAlt, radius: number): GeoJSON.Feature<GeoJSON.Polygon> {
-        let options = { steps: 64, units: "meters", properties: { } };
+        let options = { steps: 64, units: "meters" as Units, properties: {} };
         return circle(SpatialService.toCoordinate(centerPoint), radius, options);
     }
 }

@@ -34,6 +34,8 @@ import {
 
 @Injectable()
 export class SelectedRouteService {
+    public static readonly RECORDING_ROUTE_COLOR = "#FF6600";
+
     private static MERGE_THRESHOLD = 50; // meter.
 
     private routes: RouteData[];
@@ -210,6 +212,31 @@ export class SelectedRouteService {
             }
         }
         return null;
+    }
+
+    public getClosestRouteToRecording() {
+        if (this.selectedRouteId !== this.recordingRouteId) {
+            return null;
+        }
+        let routeToReturn = null;
+        let recordingRoute = this.getSelectedRoute();
+        let lastLatLng = this.getLastLatLng(recordingRoute);
+        let minimalDistance = SelectedRouteService.MERGE_THRESHOLD;
+        for (let routeData of this.routes) {
+            if (routeData.id === this.selectedRouteId || routeData.segments.length <= 0) {
+                continue;
+            }
+            for (let segment of routeData.segments) {
+                for (let latLng of segment.latlngs) {
+                    let currentDistance = SpatialService.getDistanceInMeters(latLng, lastLatLng);
+                    if (currentDistance < minimalDistance) {
+                        minimalDistance = currentDistance;
+                        routeToReturn = routeData;
+                    }
+                }
+            }
+        }
+        return routeToReturn;
     }
 
     public getLastSegment(routeData: RouteData): RouteSegmentData {

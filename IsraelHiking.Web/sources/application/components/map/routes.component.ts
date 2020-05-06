@@ -10,7 +10,6 @@ import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interact
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { LoggingService } from "../../services/logging.service";
 import { LatLngAlt, ApplicationState, RouteData } from "../../models/models";
 import { FileService } from "../../services/file.service";
 
@@ -48,7 +47,6 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
                 private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
                 private readonly fileService: FileService,
-                private readonly loggingService: LoggingService,
                 private readonly host: MapComponent
     ) {
         super(resources);
@@ -206,7 +204,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         let opacity = route.opacity || 1.0;
         let width = route.weight;
         if (this.isRouteRecording(route)) {
-            color = "#FF6600";
+            color = SelectedRouteService.RECORDING_ROUTE_COLOR;
             opacity = 1.0;
             width = 6;
         }
