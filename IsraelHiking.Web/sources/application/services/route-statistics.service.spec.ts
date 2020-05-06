@@ -13,7 +13,7 @@ describe("RouteStatisticsService", () => {
             segments: []
         } as RouteData;
 
-        let statistics = service.getStatistics(routeData);
+        let statistics = service.getStatistics(routeData, null);
 
         expect(statistics.gain).toBe(0);
         expect(statistics.loss).toBe(0);
@@ -36,7 +36,7 @@ describe("RouteStatisticsService", () => {
             ]
         } as RouteData;
 
-        let statistics = service.getStatistics(routeData);
+        let statistics = service.getStatistics(routeData, null);
 
         expect(statistics.gain).toBe(20);
         expect(statistics.loss).toBe(-20);
@@ -56,7 +56,7 @@ describe("RouteStatisticsService", () => {
             ]
         } as RouteData;
 
-        let statistics = service.getStatistics(routeData);
+        let statistics = service.getStatistics(routeData, null);
 
         expect(statistics.gain).toBe(0);
         expect(statistics.loss).toBe(0);
@@ -71,7 +71,7 @@ describe("RouteStatisticsService", () => {
                 }
             ]
         } as RouteData;
-        let statistics = service.getStatistics(routeData);
+        let statistics = service.getStatistics(routeData, null);
         let start = service.interpolateStatistics(statistics, 0.5);
         let end = service.interpolateStatistics(statistics, 1);
         statistics = service.getStatisticsByRange(routeData, start, end);
