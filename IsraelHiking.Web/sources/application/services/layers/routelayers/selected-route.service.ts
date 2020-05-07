@@ -214,21 +214,19 @@ export class SelectedRouteService {
         return null;
     }
 
-    public getClosestRouteToRecording() {
-        if (this.selectedRouteId !== this.recordingRouteId) {
+    public getClosestRouteToGPS(currentLocation: ILatLngTime): RouteData {
+        if (currentLocation == null) {
             return null;
         }
         let routeToReturn = null;
-        let recordingRoute = this.getSelectedRoute();
-        let lastLatLng = this.getLastLatLng(recordingRoute);
         let minimalDistance = SelectedRouteService.MERGE_THRESHOLD;
         for (let routeData of this.routes) {
-            if (routeData.id === this.selectedRouteId || routeData.segments.length <= 0) {
+            if (routeData.id === this.recordingRouteId || routeData.segments.length <= 0) {
                 continue;
             }
             for (let segment of routeData.segments) {
                 for (let latLng of segment.latlngs) {
-                    let currentDistance = SpatialService.getDistanceInMeters(latLng, lastLatLng);
+                    let currentDistance = SpatialService.getDistanceInMeters(latLng, currentLocation);
                     if (currentDistance < minimalDistance) {
                         minimalDistance = currentDistance;
                         routeToReturn = routeData;

@@ -263,6 +263,7 @@ export class ResourcesService {
     public offlinePurchaseGraditude: string;
     public purchaseOfflineMaps: string;
     public lastUpdatedOn: string;
+    public remainingDistance: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -521,7 +522,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1584619252734");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1588844381796");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -766,6 +767,7 @@ export class ResourcesService {
         this.offlinePurchaseGraditude = this.gettextCatalog.getString("Thanks for purchasing! download instructions here...");
         this.purchaseOfflineMaps = this.gettextCatalog.getString("Purchase maps for offline use");
         this.lastUpdatedOn = this.gettextCatalog.getString("Last updated on");
+        this.remainingDistance = this.gettextCatalog.getString("Remaining distance");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -833,7 +835,7 @@ export class ResourcesService {
             .getString("No offline files available, please press the download button below.");
         this.allFilesAreUpToDate = this.gettextCatalog.getString("All files are up-to-date :-)");
         this.thereSoMuchMoreYouCanDoWithOurApp = this.gettextCatalog.getString("There's so much more you can do with our app");
-        this.databaseUpgrade = this.gettextCatalog.getString("The offline database has been upgraded message...");
+        this.databaseUpgrade = this.gettextCatalog.getString("The offline database has been upgraded...");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

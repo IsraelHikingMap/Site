@@ -13,7 +13,7 @@ describe("RouteStatisticsService", () => {
             segments: []
         } as RouteData;
 
-        let statistics = service.getStatistics(routeData, null);
+        let statistics = service.getStatistics(routeData, null, null, false);
 
         expect(statistics.gain).toBe(0);
         expect(statistics.loss).toBe(0);
@@ -36,7 +36,7 @@ describe("RouteStatisticsService", () => {
             ]
         } as RouteData;
 
-        let statistics = service.getStatistics(routeData, null);
+        let statistics = service.getStatistics(routeData, null, null, false);
 
         expect(statistics.gain).toBe(20);
         expect(statistics.loss).toBe(-20);
@@ -56,7 +56,7 @@ describe("RouteStatisticsService", () => {
             ]
         } as RouteData;
 
-        let statistics = service.getStatistics(routeData, null);
+        let statistics = service.getStatistics(routeData, null, null, false);
 
         expect(statistics.gain).toBe(0);
         expect(statistics.loss).toBe(0);
@@ -71,7 +71,7 @@ describe("RouteStatisticsService", () => {
                 }
             ]
         } as RouteData;
-        let statistics = service.getStatistics(routeData, null);
+        let statistics = service.getStatistics(routeData, null, null, false);
         let start = service.interpolateStatistics(statistics, 0.5);
         let end = service.interpolateStatistics(statistics, 1);
         statistics = service.getStatisticsByRange(routeData, start, end);
@@ -116,13 +116,13 @@ describe("RouteStatisticsService", () => {
     });
 
     it("Should return zero for statistics with less than 2 points", () => {
-        let distance = service.findDistanceForLatLng({ points: [] } as IRouteStatistics, null);
+        let distance = service.findDistanceForLatLngInKM({ points: [] } as IRouteStatistics, null);
 
         expect(distance).toBe(0);
     });
 
     it("Should not return 0 distance for statistics on route", () => {
-        let distance = service.findDistanceForLatLng({
+        let distance = service.findDistanceForLatLngInKM({
             points: [
                 {
                     coordinate: [0, 0],
@@ -147,7 +147,7 @@ describe("RouteStatisticsService", () => {
     });
 
     it("Should return 0 distance for statistics not on route", () => {
-        let distance = service.findDistanceForLatLng({
+        let distance = service.findDistanceForLatLngInKM({
             points: [
                 {
                     coordinate: [0, 0],

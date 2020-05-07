@@ -34,7 +34,7 @@ interface IChartElements {
     path: Selection<SVGPathElement, {}, null, undefined>;
     hoverGroup: Selection<BaseType, {}, null, undefined>;
     dragRect: Selection<SVGRectElement, {}, null, undefined>;
-    locationCircle: Selection<SVGCircleElement, {}, null, undefined>;
+    locationGroup: Selection<BaseType, {}, null, undefined>;
     xScale: ScaleContinuousNumeric<number, number>;
     yScale: ScaleContinuousNumeric<number, number>;
     margin: IMargin;
@@ -52,15 +52,15 @@ interface IChartElements {
         trigger("animateChart", [
             transition(
                 ":enter", [
-                    style({ transform: "scale(0.2)", "transform-origin": "bottom right" }),
-                    animate("200ms", style({ transform: "scale(1)", "transform-origin": "bottom right" }))
-                ]
+                style({ transform: "scale(0.2)", "transform-origin": "bottom right" }),
+                animate("200ms", style({ transform: "scale(1)", "transform-origin": "bottom right" }))
+            ]
             ),
             transition(
                 ":leave", [
-                    style({ transform: "scale(1)", "transform-origin": "bottom right" }),
-                    animate("200ms", style({ transform: "scale(0.2)", "transform-origin": "bottom right" }))
-                ]
+                style({ transform: "scale(1)", "transform-origin": "bottom right" }),
+                animate("200ms", style({ transform: "scale(0.2)", "transform-origin": "bottom right" }))
+            ]
             )]
         )
     ],
@@ -75,10 +75,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public durationUnits: string;
     public averageSpeed: number;
     public currentSpeed: number;
+    public remainingDistance: number;
+    public ETA: string;
     public isKmMarkersOn: boolean;
     public isExpanded: boolean;
     public isTable: boolean;
     public isVisible: boolean;
+    public isFollowing: boolean;
     public kmMarkersSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public chartHoverSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public subRouteRange: IChartSubRouteRange;
@@ -115,9 +118,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.isExpanded = false;
         this.isVisible = false;
         this.isTable = false;
+        this.isFollowing = false;
         this.statistics = null;
         this.subRouteRange = null;
-        this.initializeStatistics(null);
+        this.setViewStatisticsValues(null);
         this.componentSubscriptions = [];
         this.kmMarkersSource = {
             type: "FeatureCollection",
@@ -141,20 +145,24 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.componentSubscriptions.push(this.selectedRouteService.selectedRouteHover.subscribe(this.onSelectedRouteHover));
     }
 
-    private initializeStatistics(statistics: IRouteStatistics): void {
+    private setViewStatisticsValues(statistics: IRouteStatistics): void {
         if (statistics == null) {
             this.length = 0;
             this.gain = 0;
             this.loss = 0;
+            this.remainingDistance = 0;
             this.updateDurationString(null);
             this.currentSpeed = null;
             this.averageSpeed = null;
+            this.ETA = "--:--";
         } else {
             this.length = statistics.length;
             this.gain = statistics.gain;
             this.loss = statistics.loss;
+            this.remainingDistance = statistics.remainingDistance;
             this.averageSpeed = statistics.averageSpeed;
             this.updateDurationString(statistics.duration);
+            this.updateETAString();
         }
     }
 
@@ -176,6 +184,23 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 this.duration = this.toTwoDigits(minutes) + ":" + this.toTwoDigits(seconds);
                 this.durationUnits = this.resources.minuteUnit;
             }
+        }
+    }
+
+    private updateETAString() {
+        let speed = null;
+        if (this.statistics.averageSpeed) {
+            speed = this.statistics.averageSpeed;
+        } else if (this.currentSpeed) {
+            speed = this.currentSpeed;
+        }
+        if (speed && this.statistics.remainingDistance) {
+            let timeLeftInMilliseconds = Math.floor(this.statistics.remainingDistance * 3600 / speed);
+            let finishDate = new Date(new Date().getTime() + timeLeftInMilliseconds);
+            this.ETA = finishDate.getHours().toString().padStart(2, "0") + ":" +
+                finishDate.getMinutes().toString().padStart(2, "0");
+        } else {
+            this.ETA = "--:--";
         }
     }
 
@@ -259,26 +284,24 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private routeChanged() {
-        this.initializeStatistics(null);
         this.updateKmMarkers();
         this.setDataToChart([]);
-        this.refreshLocationCircle();
+        this.hideLocationGroup();
         this.onRouteDataChanged();
     }
 
     private onRouteDataChanged = () => {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        if (!selectedRoute) {
+
+        this.updateStatistics();
+
+        if (!this.getRouteForChart()) {
             return;
         }
-        let closestRouteToRecording = this.selectedRouteService.getClosestRouteToRecording();
-        this.statistics = this.routeStatisticsService.getStatistics(selectedRoute, closestRouteToRecording);
-        this.initializeStatistics(this.statistics);
         if (this.isVisible) {
             this.clearSubRouteSelection();
-            this.setRouteColorToChart(selectedRoute.color);
+            this.setRouteColorToChart();
             this.setDataToChart(this.statistics.points.map(p => p.coordinate));
-            this.refreshLocationCircle();
+            this.refreshLocationGroup();
         }
         this.updateKmMarkers();
     }
@@ -291,25 +314,23 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (!this.lineChartContainer || !this.lineChartContainer.nativeElement) {
             return;
         }
-        let data = [];
-        let routeColor = "black";
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        if (this.statistics != null && selectedRoute) {
-            data = this.statistics.points.map(p => p.coordinate);
-            routeColor = selectedRoute.color;
-        }
 
+        this.routeColor = "black";
+        this.updateStatistics();
+        let data = this.statistics != null ?
+            this.statistics.points.map(p => p.coordinate)
+            : [];
         this.initChart();
         this.createChartAxis();
         this.addChartPath();
         this.addChartDragGroup();
-        this.addChartLocationCircle();
+        this.addChartLocationGroup();
         this.addChartHoverGroup();
         this.addEventsSupport();
         // must be last
-        this.setRouteColorToChart(routeColor);
+        this.setRouteColorToChart();
         this.setDataToChart(data);
-        this.refreshLocationCircle();
+        this.refreshLocationGroup();
         this.updateSubRouteSelectionOnChart();
     }
 
@@ -398,8 +419,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         const timeoutGroupName = "clickOnChart";
         this.cancelableTimeoutService.clearTimeoutByGroup(timeoutGroupName);
         this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                this.hideChartHover();
-            },
+            this.hideChartHover();
+        },
             5000,
             timeoutGroupName);
     }
@@ -472,16 +493,28 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .style("display", "none");
     }
 
-    private addChartLocationCircle() {
-        this.chartElements.locationCircle = this.chartElements.chartArea.append("circle")
+    private addChartLocationGroup() {
+        this.chartElements.locationGroup = this.chartElements.chartArea.append("g")
+            .attr("class", "location-group")
+            .style("display", "none");
+
+        this.chartElements.locationGroup.append("circle")
             .attr("class", "location-circle")
             .attr("cx", 0)
             .attr("cy", 0)
             .attr("r", 5)
             .attr("fill", "none")
             .attr("stroke-width", 3)
+            .attr("stroke", SelectedRouteService.RECORDING_ROUTE_COLOR);
+
+        this.chartElements.locationGroup.append("line")
+            .attr("class", "location-line")
+            .attr("y1", 0)
+            .attr("x1", 0)
+            .attr("x2", 0)
+            .attr("y2", this.chartElements.height)
             .attr("stroke", SelectedRouteService.RECORDING_ROUTE_COLOR)
-            .style("display", "none");
+            .attr("stroke-width", 1);
     }
 
     private addChartHoverGroup() {
@@ -584,11 +617,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .text(units);
     }
 
-    private setRouteColorToChart(routeColor: string) {
-        this.routeColor = routeColor;
-        this.chartElements.path.attr("stroke", routeColor);
-        this.chartElements.hoverGroup.select(".circle-point").attr("fill", routeColor);
-        this.chartElements.hoverGroup.select(".circle-point-aura").attr("stroke", routeColor);
+    private setRouteColorToChart() {
+        this.chartElements.path.attr("stroke", this.routeColor);
+        this.chartElements.hoverGroup.select(".circle-point").attr("fill", this.routeColor);
+        this.chartElements.hoverGroup.select(".circle-point-aura").attr("stroke", this.routeColor);
     }
 
     private setDataToChart(data: [number, number][]) {
@@ -623,18 +655,18 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             type: "FeatureCollection",
             features: []
         };
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        if (selectedRoute == null) {
+        let route = this.getRouteForChart();
+        if (route == null) {
             return;
         }
         if (this.isKmMarkersOn === false) {
             return;
         }
-        if (selectedRoute.segments.length <= 0) {
+        if (route.segments.length <= 0) {
             return;
         }
 
-        let points = this.getKmPoints(selectedRoute);
+        let points = this.getKmPoints(route);
         let features = [];
         for (let i = 0; i < points.length; i++) {
             features.push({
@@ -705,7 +737,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.redrawChart();
     }
 
-    private updateSubRouteSelectionOnChart = () => {
+    private updateSubRouteSelectionOnChart() {
         if (this.subRouteRange == null) {
             this.clearSubRouteSelection();
             return;
@@ -718,18 +750,18 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
         let start = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xStart));
         let end = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xEnd));
-        let statistics = this.routeStatisticsService.getStatisticsByRange(this.selectedRouteService.getSelectedRoute(), start, end);
-        this.initializeStatistics(statistics);
+        let statistics = this.routeStatisticsService.getStatisticsByRange(this.getRouteForChart(), start, end);
+        this.setViewStatisticsValues(statistics);
     }
 
     public clearSubRouteSelection() {
         this.chartElements.dragRect.style("display", "none");
         this.subRouteRange = null;
-        this.initializeStatistics(this.statistics);
+        this.setViewStatisticsValues(this.statistics);
     }
 
     private onSelectedRouteHover = (latlng: LatLngAlt) => {
-        if (!this.statistics || !this.isVisible) {
+        if (!this.isVisible) {
             return;
         }
         let point = this.getPointFromLatLng(latlng);
@@ -744,42 +776,70 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             // if there are no location updates reset speed.
             this.currentSpeed = null;
         }, 5000, currentSpeedTimeout);
-
-        if (!this.statistics || !this.isVisible) {
-            return;
-        }
-        this.refreshLocationCircle();
+        this.onRouteDataChanged();
     }
 
-    private refreshLocationCircle() {
-        if (!this.isVisible) {
-            return;
-        }
+    private refreshLocationGroup() {
         let point = this.getPointFromLatLng(this.geoLocationService.currentLocation);
         if (!point) {
-            this.chartElements.locationCircle.style("display", "none");
+            this.hideLocationGroup();
             return;
         }
         let chartXCoordinate = this.chartElements.xScale(point.coordinate[0]);
         let chartYCoordinate = this.chartElements.yScale(point.coordinate[1]);
         if (isNaN(chartXCoordinate) || isNaN(chartXCoordinate)) {
             // this is the case of no data on chart
-            this.chartElements.locationCircle.style("display", "none");
+            this.hideLocationGroup();
             return;
         }
-        this.chartElements.locationCircle.style("display", null);
-        this.chartElements.locationCircle.attr("cy", chartYCoordinate);
-        this.chartElements.locationCircle.attr("cx", chartXCoordinate);
+        this.chartElements.locationGroup.style("display", null);
+        this.chartElements.locationGroup.attr("transform", `translate(${chartXCoordinate}, 0)`);
+        this.chartElements.locationGroup.selectAll("circle").attr("cy", chartYCoordinate);
+    }
+
+    private hideLocationGroup() {
+        if (this.chartElements.locationGroup) {
+            this.chartElements.locationGroup.style("display", "none");
+        }
     }
 
     private getPointFromLatLng(latlng: LatLngAlt): IRouteStatisticsPoint {
         if (latlng == null) {
             return null;
         }
-        let x = this.routeStatisticsService.findDistanceForLatLng(this.statistics, latlng);
+        if (this.statistics == null) {
+            return null;
+        }
+        let x = this.routeStatisticsService.findDistanceForLatLngInKM(this.statistics, latlng);
         if (x <= 0) {
             return null;
         }
         return this.routeStatisticsService.interpolateStatistics(this.statistics, x);
+    }
+
+    private updateStatistics() {
+        let route = this.getRouteForChart();
+        if (!route) {
+            this.statistics = null;
+            this.setViewStatisticsValues(null);
+            return;
+        }
+        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation);
+        let routeIsRecording = this.selectedRouteService.getRecordingRoute() != null &&
+            this.selectedRouteService.getRecordingRoute().id === route.id;
+        this.statistics = this.routeStatisticsService.getStatistics(
+            route,
+            closestRouteToGps,
+            this.geoLocationService.currentLocation,
+            routeIsRecording);
+        this.isFollowing = this.statistics.remainingDistance != null;
+        this.routeColor = closestRouteToGps ? closestRouteToGps.color : route.color;
+        this.setViewStatisticsValues(this.statistics);
+    }
+
+    private getRouteForChart() {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation);
+        return selectedRoute || closestRouteToGps;
     }
 }

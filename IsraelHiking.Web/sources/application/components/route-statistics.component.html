@@ -8,16 +8,28 @@
                         <span>{{toShortNumber(length)}} <span class="units">{{getUnits(length)}}</span></span>
                     </div>
                 </mat-grid-tile>
-                <mat-grid-tile matTooltip="{{resources.gain}}" matTooltipPosition="below">
+                <mat-grid-tile *ngIf="!isFollowing" matTooltip="{{resources.gain}}" matTooltipPosition="below">
                     <div fxLayout="column" fxLayoutAlign=" center">
                         <i class="fa icon-arrow-up"></i>
                         <span>{{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span></span>
                     </div>
                 </mat-grid-tile>
-                <mat-grid-tile matTooltip="{{resources.loss}}" matTooltipPosition="below">
+                <mat-grid-tile *ngIf="!isFollowing" matTooltip="{{resources.loss}}" matTooltipPosition="below">
                     <div fxLayout="column" fxLayoutAlign=" center">
                         <i class="fa icon-arrow-down"></i>
                         <span><span dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span class="units">{{getUnits(loss)}}</span></span>
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile *ngIf="isFollowing" matTooltip="{{resources.remainingDistance}}" matTooltipPosition="below">
+                    <div fxLayout="column" fxLayoutAlign=" center">
+                        <i class="fa icon-arrow-circle-right"></i>
+                        <span>{{toShortNumber(remainingDistance)}} <span class="units">{{getUnits(remainingDistance)}}</span></span>
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile *ngIf="isFollowing">
+                    <div fxLayout="column" fxLayoutAlign=" center">
+                        ETA
+                        <span><span dir="ltr">{{ETA}}</span></span>
                     </div>
                 </mat-grid-tile>
                 <mat-grid-tile matTooltip="{{resources.duration}}" matTooltipPosition="above">
@@ -70,11 +82,17 @@
         <div class="pull-right" matTooltip="{{resources.length}}" matTooltipPosition="above">
             <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} <span class="units">{{getUnits(length)}}</span></span>
         </div>
-        <div class="pull-right" matTooltip="{{resources.gain}}" matTooltipPosition="above">
+        <div *ngIf="!isFollowing" class="pull-right" matTooltip="{{resources.gain}}" matTooltipPosition="above">
             <span class="control-container-item gutters"><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span></span>
         </div>
-        <div class="pull-right" matTooltip="{{resources.loss}}" matTooltipPosition="above">
+        <div *ngIf="!isFollowing" class="pull-right" matTooltip="{{resources.loss}}" matTooltipPosition="above">
             <span class="control-container-item gutters"><i class="fa icon-arrow-down"></i> <span dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span class="units">{{getUnits(loss)}}</span></span>
+        </div>
+        <div *ngIf="isFollowing" class="pull-right" matTooltip="{{resources.remainingDistance}}" matTooltipPosition="above">
+            <span class="control-container-item gutters"><i class="fa icon-arrow-circle-right"></i> {{toShortNumber(remainingDistance)}} <span class="units">{{getUnits(remainingDistance)}}</span></span>
+        </div>
+        <div *ngIf="isFollowing" class="pull-right">
+            <span class="control-container-item gutters">ETA <span dir="ltr">{{ETA}}</span></span>
         </div>
     </div>
 </div>

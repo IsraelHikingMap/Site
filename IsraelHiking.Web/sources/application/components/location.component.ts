@@ -78,9 +78,7 @@ export class LocationComponent extends BaseMapComponent {
 
         this.geoLocationService.positionChanged.subscribe(
             (position: Position) => {
-                if (position == null) {
-                    this.toastService.warning(this.resources.unableToFindYourLocation);
-                } else {
+                if (position != null) {
                     this.handlePositionChange(position);
                     this.updateRecordingRouteIfNeeded([this.geoLocationService.currentLocation]);
                 }

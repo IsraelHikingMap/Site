@@ -1,7 +1,7 @@
 import { last } from "lodash";
 
 import { SpatialService } from "./spatial.service";
-import { LatLngAlt, RouteData } from "../models/models";
+import { LatLngAlt, RouteData, ILatLngTime } from "../models/models";
 
 export interface IRouteStatisticsPoint {
     coordinate: [number, number];
@@ -31,6 +31,10 @@ export interface IRouteStatistics {
      * The average speed in km/hour for this route
      */
     averageSpeed: number;
+    /**
+     * The distnace in meters left to the end of the planned route
+     */
+    remainingDistance: number;
 }
 
 export class RouteStatisticsService {
@@ -40,6 +44,7 @@ export class RouteStatisticsService {
             length: 0,
             gain: 0,
             loss: 0,
+            remainingDistance: null,
             duration: null,
             averageSpeed: null
         } as IRouteStatistics;
@@ -95,23 +100,38 @@ export class RouteStatisticsService {
         return routeStatistics;
     }
 
-    public getStatistics(route: RouteData, closestRouteToRecording: RouteData): IRouteStatistics {
-        let routeForStatistics = closestRouteToRecording ? closestRouteToRecording : route;
-        let fullStatistics = this.getStatisticsByRange(routeForStatistics, null, null);
+    public getStatistics(route: RouteData,
+                         closestRouteToRecording: RouteData,
+                         latLng: ILatLngTime,
+                         routeIsRecording: boolean): IRouteStatistics {
+        let fullStatisticsRoute = this.getStatisticsByRange(route, null, null);
+        let fullStatisticsClosest = closestRouteToRecording ? this.getStatisticsByRange(closestRouteToRecording, null, null) : null;
+        if (fullStatisticsClosest == null) {
+            this.addDurationAndAverageSpeed(route, fullStatisticsRoute);
+            return fullStatisticsRoute;
+        }
+        fullStatisticsClosest.remainingDistance =
+            fullStatisticsClosest.length - (this.findDistanceForLatLngInKM(fullStatisticsClosest, latLng) * 1000);
+        if (routeIsRecording) {
+            this.addDurationAndAverageSpeed(route, fullStatisticsClosest);
+            fullStatisticsClosest.length = fullStatisticsRoute.length;
+        } else {
+            this.addDurationAndAverageSpeed(closestRouteToRecording, fullStatisticsClosest);
+            fullStatisticsClosest.length = fullStatisticsClosest.length - fullStatisticsClosest.remainingDistance;
+        }
+        return fullStatisticsClosest;
+    }
+
+    private addDurationAndAverageSpeed(route: RouteData, fullStatistics: IRouteStatistics) {
         if (route.segments.length === 0) {
-            return fullStatistics;
+            return;
         }
         let start = route.segments[0].latlngs[0];
-        if (start.timestamp === null) {
-            return fullStatistics;
-        }
         let end = last(last(route.segments).latlngs);
-        if (end.timestamp === null) {
-            return fullStatistics;
+        if (start.timestamp != null && end.timestamp != null) {
+            fullStatistics.duration = (new Date(end.timestamp).getTime() - new Date(start.timestamp).getTime()) / 1000;
+            fullStatistics.averageSpeed = fullStatistics.length / fullStatistics.duration * 3.6; // convert m/sec to km/hr
         }
-        fullStatistics.duration = (new Date(end.timestamp).getTime() - new Date(start.timestamp).getTime()) / 1000;
-        fullStatistics.averageSpeed = fullStatistics.length / fullStatistics.duration * 3.6; // convert m/sec to km/hr
-        return fullStatistics;
     }
 
     public interpolateStatistics(statistics: IRouteStatistics, x: number) {
@@ -184,7 +204,7 @@ export class RouteStatisticsService {
         return false;
     }
 
-    public findDistanceForLatLng(statistics: IRouteStatistics, latLng: LatLngAlt): number {
+    public findDistanceForLatLngInKM(statistics: IRouteStatistics, latLng: LatLngAlt): number {
         if (statistics.points.length < 2) {
             return 0;
         }
