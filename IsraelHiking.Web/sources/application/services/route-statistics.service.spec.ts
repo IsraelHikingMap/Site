@@ -44,6 +44,67 @@ describe("RouteStatisticsService", () => {
         expect(statistics.points.length).toBe(5);
     });
 
+    it("Should get statistics on route when recording and there's a route close by", () => {
+        let now = new Date();
+        let lastLatLng = { lat: 2, lng: 2, alt: 20, timestamp: new Date(now.getTime() + 1000) }; 
+        let recordingRouteData = {
+            segments: [
+                {
+                    latlngs: [
+                        { lat: 1, lng: 1, alt: 10, timestamp: now },
+                        lastLatLng
+                    ]
+                }
+            ]
+        } as RouteData;
+        let closestRouteData = {
+            segments: [
+                {
+                    latlngs: [
+                        { lat: 1, lng: 1, alt: 10 },
+                        { lat: 2, lng: 2, alt: 20 },
+                        { lat: 3, lng: 3, alt: 30 }
+                    ]
+                }
+            ]
+        } as RouteData;
+
+        let statistics = service.getStatistics(recordingRouteData, closestRouteData, lastLatLng, true);
+        let statisticsOfCloseRoute = service.getStatistics(closestRouteData, null, null, false);
+
+        expect(statistics.gain).toBe(20);
+        expect(statistics.loss).toBe(0);
+        expect(statistics.length).not.toBe(statisticsOfCloseRoute.length);
+        expect(statistics.points.length).toBe(3);
+        expect(statistics.averageSpeed).toBe(statistics.length * 3.6);
+        expect(statistics.remainingDistance).toBe(statisticsOfCloseRoute.length - statistics.length);
+    });
+
+    it("Should get statistics on route when gps is close by", () => {
+        let now = new Date();
+        let gpsLatLng = { lat: 2, lng: 2, alt: 20, timestamp: new Date() };
+        let routeData = {
+            segments: [
+                {
+                    latlngs: [
+                        { lat: 1, lng: 1, alt: 10 },
+                        { lat: 2, lng: 2, alt: 20 },
+                        { lat: 3, lng: 3, alt: 30 }
+                    ]
+                }
+            ]
+        } as RouteData;
+
+        let statistics = service.getStatistics(routeData, routeData, gpsLatLng, false);
+        let statisticsOfFullRoute = service.getStatistics(routeData, null, null, false);
+
+        expect(statistics.length).not.toBe(0);
+        expect(statistics.points.length).toBe(3);
+        expect(statistics.averageSpeed).toBeNull();
+        expect(statistics.remainingDistance).toBeCloseTo(statistics.length, -2);
+        expect(statistics.remainingDistance).toBeCloseTo(statisticsOfFullRoute.length / 2, -2);
+    });
+
     it("Should get simplified statistics on route", () => {
         let routeData = {
             segments: [
@@ -141,7 +202,7 @@ describe("RouteStatisticsService", () => {
                     latlng: { lat: 3, lng: 3 }
                 }
             ]
-        } as IRouteStatistics, {lat: 0.6, lng: 0.6 });
+        } as IRouteStatistics, { lat: 0.6, lng: 0.6 });
 
         expect(distance).not.toBe(0);
     });
@@ -166,7 +227,7 @@ describe("RouteStatisticsService", () => {
                     latlng: { lat: 0.0003, lng: 0.0003 }
                 }
             ]
-        } as IRouteStatistics, {lat: 0.005, lng: 0.005 });
+        } as IRouteStatistics, { lat: 0.005, lng: 0.005 });
 
         expect(distance).toBe(0);
     });

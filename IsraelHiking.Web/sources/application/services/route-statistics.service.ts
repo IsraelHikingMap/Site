@@ -101,28 +101,28 @@ export class RouteStatisticsService {
     }
 
     public getStatistics(route: RouteData,
-                         closestRouteToRecording: RouteData,
-                         latLng: ILatLngTime,
-                         routeIsRecording: boolean): IRouteStatistics {
-        let fullStatisticsRoute = this.getStatisticsByRange(route, null, null);
-        let fullStatisticsClosest = closestRouteToRecording ? this.getStatisticsByRange(closestRouteToRecording, null, null) : null;
-        if (fullStatisticsClosest == null) {
-            this.addDurationAndAverageSpeed(route, fullStatisticsRoute);
-            return fullStatisticsRoute;
+        closestRouteToRecording: RouteData,
+        latLng: ILatLngTime,
+        routeIsRecording: boolean): IRouteStatistics {
+        let routeStatistics = this.getStatisticsByRange(route, null, null);
+        let closestRouteStatistics = closestRouteToRecording ? this.getStatisticsByRange(closestRouteToRecording, null, null) : null;
+        if (closestRouteStatistics == null) {
+            this.addDurationAndAverageSpeed(route, routeStatistics.length, routeStatistics);
+            return routeStatistics;
         }
-        fullStatisticsClosest.remainingDistance =
-            fullStatisticsClosest.length - (this.findDistanceForLatLngInKM(fullStatisticsClosest, latLng) * 1000);
+        closestRouteStatistics.remainingDistance =
+            closestRouteStatistics.length - (this.findDistanceForLatLngInKM(closestRouteStatistics, latLng) * 1000);
         if (routeIsRecording) {
-            this.addDurationAndAverageSpeed(route, fullStatisticsClosest);
-            fullStatisticsClosest.length = fullStatisticsRoute.length;
+            this.addDurationAndAverageSpeed(route, routeStatistics.length, closestRouteStatistics);
+            closestRouteStatistics.length = routeStatistics.length;
         } else {
-            this.addDurationAndAverageSpeed(closestRouteToRecording, fullStatisticsClosest);
-            fullStatisticsClosest.length = fullStatisticsClosest.length - fullStatisticsClosest.remainingDistance;
+            this.addDurationAndAverageSpeed(closestRouteToRecording, closestRouteStatistics.length, closestRouteStatistics);
+            closestRouteStatistics.length = closestRouteStatistics.length - closestRouteStatistics.remainingDistance;
         }
-        return fullStatisticsClosest;
+        return closestRouteStatistics;
     }
 
-    private addDurationAndAverageSpeed(route: RouteData, fullStatistics: IRouteStatistics) {
+    private addDurationAndAverageSpeed(route: RouteData, length: number, fullStatistics: IRouteStatistics) {
         if (route.segments.length === 0) {
             return;
         }
@@ -130,7 +130,7 @@ export class RouteStatisticsService {
         let end = last(last(route.segments).latlngs);
         if (start.timestamp != null && end.timestamp != null) {
             fullStatistics.duration = (new Date(end.timestamp).getTime() - new Date(start.timestamp).getTime()) / 1000;
-            fullStatistics.averageSpeed = fullStatistics.length / fullStatistics.duration * 3.6; // convert m/sec to km/hr
+            fullStatistics.averageSpeed = length / fullStatistics.duration * 3.6; // convert m/sec to km/hr
         }
     }
 
