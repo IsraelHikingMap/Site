@@ -90,6 +90,27 @@ export class LayersService {
         return this.baseLayers.find(bl => this.compareKeys(bl.key, this.selectedBaseLayerKey)) || this.baseLayers[0];
     }
 
+    public getSelectedBaseLayerAddressForOSM(): string {
+        let baseLayerAddress = this.getSelectedBaseLayer().address;
+        if (baseLayerAddress.indexOf("{x}") !== -1) {
+            return baseLayerAddress;
+        }
+        let defaultAddress = Urls.baseTilesAddress + "/Hebrew/tiles/{z}/{x}/{y}.png";
+        // using the same logic that the server is using in ImageCreationService + language
+        if (!baseLayerAddress) {
+            return defaultAddress;
+        }
+        let language = this.resourcesService.currentLanguage.code === "he" ? "Hebrew" : "English";
+        let tiles = "tiles";
+        if (baseLayerAddress.endsWith(".json")) {
+            let styleKey = baseLayerAddress.replace(".json", "").split("/").splice(-1)[0];
+            if (styleKey === "ilMTB") {
+                tiles = "mtbtiles";
+            }
+        }
+        return `${Urls.baseTilesAddress}/${language}/${tiles}/{z}/{x}/{y}.png`;
+    }
+
     private async syncUserLayers(): Promise<void> {
         if (!this.authorizationService.isLoggedIn()) {
             return;

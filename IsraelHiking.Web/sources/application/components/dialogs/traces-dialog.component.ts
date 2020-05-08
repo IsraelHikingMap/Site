@@ -124,7 +124,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public editInOsm() {
-        let baseLayerAddress = this.layersService.getSelectedBaseLayer().address;
+        let baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
         window.open(this.authorizationService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTrace.id));
     }
 
