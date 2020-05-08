@@ -514,7 +514,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("x2", 0)
             .attr("y2", this.chartElements.height)
             .attr("stroke", SelectedRouteService.RECORDING_ROUTE_COLOR)
-            .attr("stroke-width", 1);
+            .attr("stroke-width", 2);
     }
 
     private addChartHoverGroup() {

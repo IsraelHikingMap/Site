@@ -12,6 +12,7 @@ import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
+import { ToastService } from "./toast.service";
 import { ILatLngTime } from "../models/models";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
@@ -37,6 +38,7 @@ export class GeoLocationService {
                 private readonly backgroundGeolocation: BackgroundGeolocation,
                 private readonly runningContextService: RunningContextService,
                 private readonly loggingService: LoggingService,
+                private readonly toastService: ToastService,
                 private readonly ngZone: NgZone) {
         this.watchNumber = -1;
         this.positionChanged = new EventEmitter<Position>();
@@ -102,9 +104,8 @@ export class GeoLocationService {
             (position: Position): void => this.handlePoistionChange(position),
             (err) => {
                 this.ngZone.run(() => {
-                    // sending error will terminate the stream
                     this.loggingService.error("Failed to start tracking " + JSON.stringify(err));
-                    this.positionChanged.next(null);
+                    this.toastService.warning(this.resources.unableToFindYourLocation);
                     this.disable();
                 });
             },
@@ -174,6 +175,7 @@ export class GeoLocationService {
     private stopWatching() {
         this.state = "disabled";
         this.currentLocation = null;
+        this.positionChanged.next(null);
         if (this.runningContextService.isCordova) {
             this.stopBackgroundGeolocation();
         } else {
