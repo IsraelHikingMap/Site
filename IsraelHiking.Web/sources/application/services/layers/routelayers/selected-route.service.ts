@@ -224,13 +224,18 @@ export class SelectedRouteService {
             if (routeData.id === this.recordingRouteId || routeData.segments.length <= 0) {
                 continue;
             }
+            let previousLatLng = routeData.segments[0].latlngs[0];
             for (let segment of routeData.segments) {
                 for (let latLng of segment.latlngs) {
-                    let currentDistance = SpatialService.getDistanceInMeters(latLng, currentLocation);
+                    if (latLng === previousLatLng) {
+                        continue;
+                    }
+                    let currentDistance = SpatialService.getDistanceFromPointToLine(currentLocation, [previousLatLng, latLng]);
                     if (currentDistance < minimalDistance) {
                         minimalDistance = currentDistance;
                         routeToReturn = routeData;
                     }
+                    previousLatLng = latLng;
                 }
             }
         }

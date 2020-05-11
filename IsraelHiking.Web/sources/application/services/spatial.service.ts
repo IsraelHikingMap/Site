@@ -57,8 +57,8 @@ export class SpatialService {
         return Math.sqrt(Math.pow(coordinate1[0] - coordinate2[0], 2) + Math.pow(coordinate1[1] - coordinate2[1], 2));
     }
 
-    public static getDistanceFromPointToLine(coordinate: [number, number], coordinates: [number, number][]): number {
-        return pointToLineDistance(coordinate, lineString(coordinates), { units: "meters" });
+    public static getDistanceFromPointToLine(latlng: LatLngAlt, line: LatLngAlt[]): number {
+        return pointToLineDistance(SpatialService.toCoordinate(latlng), SpatialService.getLineString(line), { units: "meters" });
     }
 
     public static getClosestPoint(latlng: LatLngAlt, line: LatLngAlt[]): LatLngAlt {

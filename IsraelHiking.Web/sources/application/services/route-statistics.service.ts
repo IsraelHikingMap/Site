@@ -101,9 +101,9 @@ export class RouteStatisticsService {
     }
 
     public getStatistics(route: RouteData,
-        closestRouteToRecording: RouteData,
-        latLng: ILatLngTime,
-        routeIsRecording: boolean): IRouteStatistics {
+                         closestRouteToRecording: RouteData,
+                         latLng: ILatLngTime,
+                         routeIsRecording: boolean): IRouteStatistics {
         let routeStatistics = this.getStatisticsByRange(route, null, null);
         let closestRouteStatistics = closestRouteToRecording ? this.getStatisticsByRange(closestRouteToRecording, null, null) : null;
         if (closestRouteStatistics == null) {
@@ -196,8 +196,7 @@ export class RouteStatisticsService {
                 return false;
             }
         }
-        let distance = SpatialService.getDistanceFromPointToLine([latlng.lng, latlng.lat],
-            [[latlng1.lng, latlng1.lat], [latlng2.lng, latlng2.lat]]);
+        let distance = SpatialService.getDistanceFromPointToLine(latlng, [latlng1, latlng2]);
         if (distance < 100) {
             return true;
         }
@@ -208,8 +207,7 @@ export class RouteStatisticsService {
         if (statistics.points.length < 2) {
             return 0;
         }
-        let distance = SpatialService.getDistanceFromPointToLine(SpatialService.toCoordinate(latLng),
-            statistics.points.map(p => SpatialService.toCoordinate(p.latlng)));
+        let distance = SpatialService.getDistanceFromPointToLine(latLng, statistics.points.map(p => p.latlng));
         if (distance > 50) {
             return 0;
         }

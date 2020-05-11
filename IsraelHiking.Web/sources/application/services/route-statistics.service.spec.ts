@@ -46,7 +46,7 @@ describe("RouteStatisticsService", () => {
 
     it("Should get statistics on route when recording and there's a route close by", () => {
         let now = new Date();
-        let lastLatLng = { lat: 2, lng: 2, alt: 20, timestamp: new Date(now.getTime() + 1000) }; 
+        let lastLatLng = { lat: 2, lng: 2, alt: 20, timestamp: new Date(now.getTime() + 1000) };
         let recordingRouteData = {
             segments: [
                 {
