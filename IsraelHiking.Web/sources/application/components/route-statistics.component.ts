@@ -78,6 +78,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public remainingDistance: number;
     public ETA: string;
     public isKmMarkersOn: boolean;
+    public isSlopeOn: boolean;
     public isExpanded: boolean;
     public isTable: boolean;
     public isVisible: boolean;
@@ -115,6 +116,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     ) {
         super(resources);
         this.isKmMarkersOn = false;
+        this.isSlopeOn = false;
         this.isExpanded = false;
         this.isVisible = false;
         this.isTable = false;
@@ -300,7 +302,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (this.isVisible) {
             this.clearSubRouteSelection();
             this.setRouteColorToChart();
-            this.setDataToChart(this.statistics.points.map(p => p.coordinate));
+            this.setDataToChart(this.getDataFromStatistics());
             this.refreshLocationGroup();
         }
         this.updateKmMarkers();
@@ -317,9 +319,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
         this.routeColor = "black";
         this.updateStatistics();
-        let data = this.statistics != null ?
-            this.statistics.points.map(p => p.coordinate)
-            : [];
         this.initChart();
         this.createChartAxis();
         this.addChartPath();
@@ -329,7 +328,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.addEventsSupport();
         // must be last
         this.setRouteColorToChart();
-        this.setDataToChart(data);
+        this.setDataToChart(this.getDataFromStatistics());
         this.refreshLocationGroup();
         this.updateSubRouteSelectionOnChart();
     }
@@ -348,7 +347,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             return;
         }
         let chartXCoordinate = this.chartElements.xScale(point.coordinate[0]);
-        let chartYCoordinate = this.chartElements.yScale(point.coordinate[1]);
+        let chartYCoordinate = this.chartElements.yScale(this.isSlopeOn ? point.slope : point.coordinate[1]);
         this.chartElements.hoverGroup.style("display", null);
         this.chartElements.hoverGroup.attr("transform", `translate(${chartXCoordinate}, 0)`);
         this.chartElements.hoverGroup.selectAll("circle").attr("cy", chartYCoordinate);
@@ -650,6 +649,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.updateKmMarkers();
     }
 
+    public toggleSlope() {
+        this.isSlopeOn = !this.isSlopeOn;
+        this.redrawChart();
+    }
+
     private updateKmMarkers() {
         this.kmMarkersSource = {
             type: "FeatureCollection",
@@ -786,7 +790,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             return;
         }
         let chartXCoordinate = this.chartElements.xScale(point.coordinate[0]);
-        let chartYCoordinate = this.chartElements.yScale(point.coordinate[1]);
+        let chartYCoordinate = this.chartElements.yScale(this.isSlopeOn ? point.slope : point.coordinate[1]);
         if (isNaN(chartXCoordinate) || isNaN(chartXCoordinate)) {
             // this is the case of no data on chart
             this.hideLocationGroup();
@@ -841,5 +845,15 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation);
         return selectedRoute || closestRouteToGps;
+    }
+
+    private getDataFromStatistics(): [number, number][] {
+        let data = [];
+        if (this.statistics) {
+            data = this.isSlopeOn
+                ? this.statistics.points.map(p => [p.coordinate[0], p.slope])
+                : this.statistics.points.map(p => p.coordinate);
+        }
+        return data;
     }
 }
