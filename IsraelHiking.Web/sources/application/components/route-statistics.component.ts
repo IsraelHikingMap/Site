@@ -37,6 +37,7 @@ interface IChartElements {
     locationGroup: Selection<BaseType, {}, null, undefined>;
     xScale: ScaleContinuousNumeric<number, number>;
     yScale: ScaleContinuousNumeric<number, number>;
+    yScaleSlope: ScaleContinuousNumeric<number, number>;
     margin: IMargin;
     width: number;
     height: number;
@@ -347,7 +348,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             return;
         }
         let chartXCoordinate = this.chartElements.xScale(point.coordinate[0]);
-        let chartYCoordinate = this.chartElements.yScale(this.isSlopeOn ? point.slope : point.coordinate[1]);
+        let chartYCoordinate = this.chartElements.yScale(point.coordinate[1]);
         this.chartElements.hoverGroup.style("display", null);
         this.chartElements.hoverGroup.attr("transform", `translate(${chartXCoordinate}, 0)`);
         this.chartElements.hoverGroup.selectAll("circle").attr("cy", chartYCoordinate);
@@ -426,6 +427,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private initChart() {
         let d3 = this.d3Service.getD3();
+        this.chartElements.margin.right = this.isSlopeOn ? 30 : 10;
         this.chartElements.svg = d3.select(this.lineChartContainer.nativeElement).select("svg");
         this.chartElements.svg.html("");
         let windowStyle = window.getComputedStyle(this.lineChartContainer.nativeElement);
@@ -440,13 +442,14 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("transform", `translate(${this.chartElements.margin.left},${this.chartElements.margin.top})`);
         this.chartElements.xScale = d3.scaleLinear().range([0, this.chartElements.width]);
         this.chartElements.yScale = d3.scaleLinear().range([this.chartElements.height, 0]);
+        this.chartElements.yScaleSlope = d3.scaleLinear().range([this.chartElements.height, 0]);
         this.chartElements.dragState = "none";
     }
 
     private createChartAxis() {
         let d3 = this.d3Service.getD3();
         this.chartElements.chartArea.append("g")
-            .attr("class", "x axis")
+            .attr("class", "x-axis")
             .attr("transform", `translate(0,${this.chartElements.height})`)
             .call(d3.axisBottom(this.chartElements.xScale).ticks(5))
             .append("text")
@@ -459,7 +462,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .remove();
 
         this.chartElements.chartArea.append("g")
-            .attr("class", "y axis")
+            .attr("class", "y-axis")
             .call(d3.axisLeft(this.chartElements.yScale).ticks(5))
             .append("text")
             .attr("fill", "#000")
@@ -467,6 +470,19 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("text-anchor", "middle")
             .attr("dir", this.resources.direction)
             .text(this.resources.heightInMeters);
+
+        if (this.isSlopeOn) {
+            this.chartElements.chartArea.append("g")
+                .attr("class", "y-axis-slope")
+                .attr("transform", `translate(${this.chartElements.width}, 0)`)
+                .call(d3.axisRight(this.chartElements.yScaleSlope).ticks(5))
+                .append("text")
+                .attr("fill", "#000")
+                .attr("transform", `translate(10, ${this.chartElements.height / 2}) rotate(-90)`)
+                .attr("text-anchor", "middle")
+                .attr("dir", this.resources.direction)
+                .text(this.resources.slope);
+        }
     }
 
     private addChartPath() {
@@ -476,6 +492,16 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("stroke-linejoin", "round")
             .attr("stroke-linecap", "round")
             .attr("stroke-width", 2);
+
+        if (this.isSlopeOn) {
+            this.chartElements.chartArea.append<SVGPathElement>("path")
+                .attr("class", "slope-line")
+                .attr("fill", "none")
+                .attr("stroke-linejoin", "round")
+                .attr("stroke-linecap", "round")
+                .attr("stroke-width", 1)
+                .attr("stroke", "black");
+        }
     }
 
     private addChartDragGroup() {
@@ -630,16 +656,31 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let duration = 1000;
         this.chartElements.xScale.domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]);
         this.chartElements.yScale.domain([d3.min(data, d => d[1]), d3.max(data, d => d[1])]);
+        let slopeData = [];
+        if (this.isSlopeOn && data.length > 0) {
+            slopeData = this.statistics.points.map(p => [p.coordinate[0], p.slope] as [number, number]);
+        }
+        // making the doing be symetric around zero
+        this.chartElements.yScaleSlope.domain([Math.min(d3.min(slopeData, d => d[1]), -d3.max(slopeData, d => d[1])),
+            Math.max(d3.max(slopeData, d => d[1]), -d3.min(slopeData, d => d[1]))]);
+        let slopeLine = d3.line()
+            .curve(d3.curveLinear)
+            .x(d => this.chartElements.xScale(d[0]))
+            .y(d => this.chartElements.yScaleSlope(d[1]));
+        let chartTransition = this.chartElements.chartArea.transition();
+        chartTransition.select(".slope-line").duration(duration).attr("d", slopeLine(slopeData));
+        chartTransition.select(".y-axis-slope")
+            .call(d3.axisRight(this.chartElements.yScaleSlope).ticks(5) as any)
+            .duration(duration);
         let line = d3.line()
             .curve(d3.curveCatmullRom)
             .x(d => this.chartElements.xScale(d[0]))
             .y(d => this.chartElements.yScale(d[1]));
-        let chartTransition = this.chartElements.chartArea.transition();
         chartTransition.select(".line").duration(duration).attr("d", line(data));
-        chartTransition.select(".x.axis")
+        chartTransition.select(".x-axis")
             .duration(duration)
             .call(d3.axisBottom(this.chartElements.xScale).ticks(5) as any);
-        chartTransition.select(".y.axis")
+        chartTransition.select(".y-axis")
             .call(d3.axisLeft(this.chartElements.yScale).ticks(5) as any)
             .duration(duration);
     }
@@ -790,7 +831,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             return;
         }
         let chartXCoordinate = this.chartElements.xScale(point.coordinate[0]);
-        let chartYCoordinate = this.chartElements.yScale(this.isSlopeOn ? point.slope : point.coordinate[1]);
+        let chartYCoordinate = this.chartElements.yScale(point.coordinate[1]);
         if (isNaN(chartXCoordinate) || isNaN(chartXCoordinate)) {
             // this is the case of no data on chart
             this.hideLocationGroup();
@@ -850,9 +891,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     private getDataFromStatistics(): [number, number][] {
         let data = [];
         if (this.statistics) {
-            data = this.isSlopeOn
-                ? this.statistics.points.map(p => [p.coordinate[0], p.slope])
-                : this.statistics.points.map(p => p.coordinate);
+            data = this.statistics.points.map(p => p.coordinate);
         }
         return data;
     }
