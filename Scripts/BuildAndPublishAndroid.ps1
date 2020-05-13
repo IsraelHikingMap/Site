@@ -1,3 +1,5 @@
+$env:Path += ";$env:ANDROID_HOME\tools\bin\;C:\Program Files\Git\mingw64\libexec\git-core"
+
 for($i=0;$i -lt 30;$i++) { $response += "y`n"};
 
 Invoke-Expression """$response"" | sdkmanager.bat --licenses"
