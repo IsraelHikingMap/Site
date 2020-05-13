@@ -105,6 +105,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     private componentSubscriptions: Subscription[];
     private zoom: number;
     private routeColor: string;
+    private audioContext: AudioContext;
 
     constructor(resources: ResourcesService,
                 private readonly changeDetectorRef: ChangeDetectorRef,
@@ -147,6 +148,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.redrawChart();
         }));
         this.componentSubscriptions.push(this.selectedRouteService.selectedRouteHover.subscribe(this.onSelectedRouteHover));
+        this.audioContext = new AudioContext();
     }
 
     private setViewStatisticsValues(statistics: IRouteStatistics): void {
@@ -663,7 +665,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         // making the doing be symetric around zero
         this.chartElements.yScaleSlope.domain([Math.min(d3.min(slopeData, d => d[1]), -d3.max(slopeData, d => d[1])),
-            Math.max(d3.max(slopeData, d => d[1]), -d3.min(slopeData, d => d[1]))]);
+        Math.max(d3.max(slopeData, d => d[1]), -d3.min(slopeData, d => d[1]))]);
         let slopeLine = d3.line()
             .curve(d3.curveLinear)
             .x(d => this.chartElements.xScale(d[0]))
@@ -904,8 +906,27 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         this.isFollowing = newIsFollowing;
         if (this.ngRedux.getState().configuration.isGotLostWarnings && this.isFollowing === false && navigator.vibrate) {
-            // is following
+            // is following stopped - playing sound and vibration
             navigator.vibrate([200, 100, 200]);
+            this.makeBeep(200).then(() => {
+                setTimeout(() => {
+                    this.makeBeep(200);
+                }, 100);
+            });
         }
+    }
+
+    private makeBeep(duration: number): Promise<void> {
+        return new Promise((resolve) => {
+            let oscillator = this.audioContext.createOscillator();
+            oscillator.type = "sine";
+            oscillator.connect(this.audioContext.destination);
+            oscillator.start();
+
+            setTimeout(() => {
+                oscillator.stop();
+                resolve();
+            }, duration);
+        });
     }
 }
