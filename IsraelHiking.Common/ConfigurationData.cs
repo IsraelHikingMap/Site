@@ -124,7 +124,7 @@ namespace IsraelHiking.Common
 
         public ConfigurationData()
         {
-            MaxCacheSize = 200; 
+            MaxCacheSize = 2000; 
             MaxSegmentsNumber = 40;
             InitialSplitSimplificationDistanceTolerace = 50;
             MaxDistanceToExisitngLineForMerge = 5;
