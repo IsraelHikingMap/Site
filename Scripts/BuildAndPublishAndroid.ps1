@@ -1,9 +1,3 @@
-choco install gradle --version 4.9 --no-progress
-
-$env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin;$env:ANDROID_HOME\tools\bin\;C:\Program Files\Git\mingw64\libexec\git-core"
-
-gradle --version
-
 for($i=0;$i -lt 30;$i++) { $response += "y`n"};
 
 Invoke-Expression """$response"" | sdkmanager.bat --licenses"
