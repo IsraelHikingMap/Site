@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef,
 import { trigger, style, transition, animate } from "@angular/animations";
 import { Subscription, Observable, interval } from "rxjs";
 import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "@katze/ngx-d3";
-import { select } from "@angular-redux/store";
+import { select, NgRedux } from "@angular-redux/store";
 
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
@@ -113,7 +113,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 private readonly routeStatisticsService: RouteStatisticsService,
                 private readonly cancelableTimeoutService: CancelableTimeoutService,
                 private readonly sidebarService: SidebarService,
-                private readonly geoLocationService: GeoLocationService
+                private readonly geoLocationService: GeoLocationService,
+                private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
         this.isKmMarkersOn = false;
@@ -877,8 +878,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             closestRouteToGps,
             this.geoLocationService.currentLocation,
             routeIsRecording);
-        this.isFollowing = this.statistics.remainingDistance != null;
         this.routeColor = closestRouteToGps ? closestRouteToGps.color : route.color;
+        this.updateIsFollowing();
         this.setViewStatisticsValues(this.statistics);
     }
 
@@ -894,5 +895,17 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             data = this.statistics.points.map(p => p.coordinate);
         }
         return data;
+    }
+
+    private updateIsFollowing() {
+        let newIsFollowing = this.statistics.remainingDistance != null;
+        if (this.isFollowing === newIsFollowing) {
+            return;
+        }
+        this.isFollowing = newIsFollowing;
+        if (this.ngRedux.getState().configuration.isGotLostWarnings && this.isFollowing === false && navigator.vibrate) {
+            // is following
+            navigator.vibrate([200, 100, 200]);
+        }
     }
 }

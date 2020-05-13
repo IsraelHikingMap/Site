@@ -23,6 +23,9 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
     // @select((state: ApplicationState) => state.configuration.isFindMissingRoutesAfterUpload)
     // public isFindMissingRoutesAfterUpload: Observable<boolean>;
 
+    @select((state: ApplicationState) => state.configuration.isGotLostWarnings)
+    public isGotLostWarnings: Observable<boolean>;
+
     constructor(resources: ResourcesService,
                 private readonly runningContextService: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -44,4 +47,8 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
     // public toggleFindMissingRoutesAfterUpload() {
     //    this.ngRedux.dispatch(ConfigurationActions.toggleFindMissingRoutesAfterUploadAction);
     // }
+
+    public toggleGotLostWarnings() {
+        this.ngRedux.dispatch(ConfigurationActions.toggleIsGotLostWarningsAction);
+    }
 }

@@ -21,6 +21,7 @@ export const initialState =
             isBatteryOptimization: false,
             isAutomaticRecordingUpload: true,
             // isFindMissingRoutesAfterUpload: false,
+            isGotLostWarnings: false,
             version: "9.0"
         } as Configuration,
         location: {

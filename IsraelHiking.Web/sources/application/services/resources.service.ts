@@ -259,6 +259,8 @@ export class ResourcesService {
     public automaticRecordingUploadHint: string;
     public findMissingRoutesAfterUpload: string;
     public findMissingRoutesAfterUploadHint: string;
+    public gotLostWarnings: string;
+    public gotLostWarningsHint: string;
     public navigateWithWaze: string;
     public offlinePurchaseGraditude: string;
     public purchaseOfflineMaps: string;
@@ -522,7 +524,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<any> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1588844381796");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1589352595737");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -763,6 +765,9 @@ export class ResourcesService {
         this.findMissingRoutesAfterUpload = this.gettextCatalog.getString("Find missing routes after upload");
         this.findMissingRoutesAfterUploadHint = this.gettextCatalog.getString("Asks you to classify missing routes " +
             "on the map after you upload a recording");
+        this.gotLostWarnings = this.gettextCatalog.getString("Got lost warnings");
+        this.gotLostWarningsHint = this.gettextCatalog.getString("Vibrates the device when your planned route " +
+            "is more than 50 meters from your current position");
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
         this.offlinePurchaseGraditude = this.gettextCatalog.getString("Thanks for purchasing! download instructions here...");
         this.purchaseOfflineMaps = this.gettextCatalog.getString("Purchase maps for offline use");
