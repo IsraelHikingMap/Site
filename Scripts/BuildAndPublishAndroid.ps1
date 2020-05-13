@@ -1,6 +1,8 @@
-choco install gradle --version 4.10 --no-progress
+choco install gradle --version 6.3 --no-progress
 
-$env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.10\bin;$env:ANDROID_HOME\tools\bin\;C:\Program Files\Git\mingw64\libexec\git-core"
+refreshenv
+
+$env:Path += ";$env:ANDROID_HOME\tools\bin\"
 
 gradle --version
 
