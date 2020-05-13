@@ -1,4 +1,8 @@
-$env:Path += ";$env:ANDROID_HOME\tools\bin\;C:\Program Files\Git\mingw64\libexec\git-core"
+choco install gradle --version 4.10 --no-progress
+
+$env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.10\bin;$env:ANDROID_HOME\tools\bin\;C:\Program Files\Git\mingw64\libexec\git-core"
+
+gradle --version
 
 for($i=0;$i -lt 30;$i++) { $response += "y`n"};
 
