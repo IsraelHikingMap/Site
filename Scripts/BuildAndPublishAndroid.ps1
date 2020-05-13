@@ -1,4 +1,4 @@
-choco install gradle --version 6.3 --no-progress
+choco install gradle --version 4.10.3 --no-progress
 
 refreshenv
 
