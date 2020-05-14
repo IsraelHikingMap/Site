@@ -810,6 +810,10 @@ msgstr ""
 msgid "Length"
 msgstr ""
 
+#: sources/application/services/resources.service.ts:769
+msgid "Lets you know when the your planned route is more than 50 meters from your current position"
+msgstr ""
+
 #: sources/application/services/resources.service.ts:907
 msgid "Light 4WD Vehicles"
 msgstr ""
@@ -1677,10 +1681,6 @@ msgstr ""
 
 #: sources/application/services/resources.service.ts:658
 msgid "User E-Mail"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:769
-msgid "Vibrates the device when your planned route is more than 50 meters from your current position"
 msgstr ""
 
 #: sources/application/services/resources.service.ts:665

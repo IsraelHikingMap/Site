@@ -1,5 +1,5 @@
 {
-    "4x4 Routing": "4x4 Routingupload",
+    "4x4 Routing": "4x4 Routing",
     "A few words about what you are sharing.": "A few words about what you are sharing.",
     "A link to a website": "A link to a website",
     "A name to be displayed in the layers controller": "A name to be displayed in the layers controller",
@@ -201,6 +201,7 @@
     "Learn Israel-specific mapping rules at the {{link}}Israel OSM Wiki Project{{linkend}}": "Learn Israel-specific mapping rules at the {{link}}Israel OSM Wiki Project{{linkend}}",
     "Legend": "Legend",
     "Length": "Length",
+    "Lets you know when the your planned route is more than 50 meters from your current position": "Lets you know when the your planned route is more than 50 meters from your current position",
     "Light 4WD Vehicles": "Light 4WD Vehicles",
     "Loading...": "Loading...",
     "Local": "Local",
@@ -418,7 +419,6 @@
     "Upload a trace": "Upload a trace",
     "Upload Point": "Upload point to OpenStreetMap",
     "User E-Mail": "User E-Mail",
-    "Vibrates the device when your planned route is more than 50 meters from your current position": "Vibrates the device when your planned route is more than 50 meters from your current position",
     "View": "View",
     "Viewpoint": "Viewpoint",
     "Views": "Views",
