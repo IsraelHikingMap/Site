@@ -35,7 +35,7 @@ namespace IsraelHiking.API
             services.AddTransient<IOsmGeoJsonPreprocessorExecutor, OsmGeoJsonPreprocessorExecutor>();
             services.AddTransient<IOsmLatestFileFetcherExecutor, OsmLatestFileFetcherExecutor>();
             services.AddTransient<IFeaturesMergeExecutor, FeaturesMergeExecutor>();
-            services.AddSingleton<LruCache<string, TokenAndSecret>>();
+            services.AddSingleton<UsersIdAndTokensCache>();
             services.AddTransient<IImageCreationService, ImageCreationService>();
             services.AddTransient<IOsmLineAdderService, OsmLineAdderService>();
             services.AddTransient<ITagsHelper, TagsHelper>();

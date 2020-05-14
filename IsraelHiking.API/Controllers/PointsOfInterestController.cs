@@ -32,7 +32,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
         private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
         private readonly ConfigurationData _options;
-        private readonly LruCache<string, TokenAndSecret> _cache;
+        private readonly UsersIdAndTokensCache _cache;
 
         /// <summary>
         /// Controller's constructor
@@ -52,7 +52,7 @@ namespace IsraelHiking.API.Controllers
             IBase64ImageStringToFileConverter base64ImageConverter,
             IImagesUrlsStorageExecutor imageUrlStoreExecutor,
             IOptions<ConfigurationData> options,
-            LruCache<string, TokenAndSecret> cache)
+            UsersIdAndTokensCache cache)
         {
             _clientsFactory = clientsFactory;
             _tagsHelper = tagsHelper;

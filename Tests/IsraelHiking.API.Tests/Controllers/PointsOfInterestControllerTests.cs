@@ -7,6 +7,7 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -29,7 +30,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private ITagsHelper _tagHelper;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
         private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
-        private LruCache<string, TokenAndSecret> _cache;
+        private UsersIdAndTokensCache _cache;
 
         [TestInitialize]
         public void TestInitialize()
@@ -41,7 +42,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
-            _cache = new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>());
+            _cache = new UsersIdAndTokensCache(optionsProvider, Substitute.For<ILogger>(), new MemoryCache(new MemoryCacheOptions()));
             var factory = Substitute.For<IClientsFactory>();
             factory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(_osmGateway);
             _controller = new PointsOfInterestController(factory, 

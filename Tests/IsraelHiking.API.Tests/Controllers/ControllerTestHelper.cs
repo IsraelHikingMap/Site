@@ -8,7 +8,7 @@ namespace IsraelHiking.API.Tests.Controllers
 {
     public static class ControllerTestHelper
     {
-        public static void SetupIdentity(this ControllerBase controller, LruCache<string, TokenAndSecret> cache = null, string osmUserId = "42")
+        public static void SetupIdentity(this ControllerBase controller, UsersIdAndTokensCache cache = null, string osmUserId = "42")
         {
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[] {
                 new Claim(ClaimTypes.Name, osmUserId)

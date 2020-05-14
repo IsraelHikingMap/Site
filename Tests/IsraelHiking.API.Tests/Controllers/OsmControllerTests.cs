@@ -6,6 +6,7 @@ using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -32,7 +33,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IDataContainerConverterService _dataContainerConverterService;
         private IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
         private ConfigurationData _options;
-        private LruCache<string, TokenAndSecret> _cache;
+        private UsersIdAndTokensCache _cache;
 
         private int SetupGpxUrl(GpxFile gpx, List<LineString> addibleLines = null)
         {
@@ -67,7 +68,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(_options);
-            _cache = new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>());
+            _cache = new UsersIdAndTokensCache(optionsProvider, Substitute.For<ILogger>(), new MemoryCache(new MemoryCacheOptions()));
             _controller = new OsmController(_clientsFactory, _dataContainerConverterService, new ItmWgs84MathTransfromFactory(), 
                 _elasticSearchGateway, _addibleGpxLinesFinderService, _osmLineAdderService, optionsProvider, new GeometryFactory(),
                 _cache);

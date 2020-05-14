@@ -37,7 +37,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
         private readonly IOsmLineAdderService _osmLineAdderService;
         private readonly GeometryFactory _geometryFactory;
-        private readonly LruCache<string, TokenAndSecret> _cache;
+        private readonly UsersIdAndTokensCache _cache;
         private readonly ConfigurationData _options;
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace IsraelHiking.API.Controllers
             IOsmLineAdderService osmLineAdderService,
             IOptions<ConfigurationData> options,
             GeometryFactory geometryFactory,
-            LruCache<string, TokenAndSecret> cache)
+            UsersIdAndTokensCache cache)
         {
             _clentsFactory = clentsFactory;
             _dataContainerConverterService = dataContainerConverterService;

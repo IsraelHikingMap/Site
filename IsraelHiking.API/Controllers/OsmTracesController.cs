@@ -25,7 +25,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IImageCreationService _imageCreationService;
-        private readonly LruCache<string, TokenAndSecret> _cache;
+        private readonly UsersIdAndTokensCache _cache;
         private readonly ConfigurationData _options;
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace IsraelHiking.API.Controllers
             IDataContainerConverterService dataContainerConverterService,
             IOptions<ConfigurationData> options,
             IImageCreationService imageCreationService,
-            LruCache<string, TokenAndSecret> cache)
+            UsersIdAndTokensCache cache)
         {
             _clientsFactory = clientsFactory;
             _elevationDataStorage = elevationDataStorage;

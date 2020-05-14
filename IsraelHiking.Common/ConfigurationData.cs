@@ -5,9 +5,9 @@ namespace IsraelHiking.Common
     public class ConfigurationData
     {
         /// <summary>
-        /// Maximum usesrs to store in cache
+        /// Maximum time in seconds to keep a user in the cache
         /// </summary>
-        public int MaxCacheSize { get; set; }
+        public int MaxUserTimeInCache { get; set; }
         /// <summary>
         /// The maximal number of points per line for splitting
         /// </summary>
@@ -124,7 +124,7 @@ namespace IsraelHiking.Common
 
         public ConfigurationData()
         {
-            MaxCacheSize = 2000; 
+            MaxUserTimeInCache = 20 * 60; 
             MaxSegmentsNumber = 40;
             InitialSplitSimplificationDistanceTolerace = 50;
             MaxDistanceToExisitngLineForMerge = 5;

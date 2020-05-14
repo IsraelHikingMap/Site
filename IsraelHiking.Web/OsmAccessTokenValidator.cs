@@ -15,12 +15,12 @@ namespace IsraelHiking.Web
     {
         private readonly ILogger _logger;
         private readonly IClientsFactory _clientsFactory;
-        private readonly LruCache<string, TokenAndSecret> _cache;
+        private readonly UsersIdAndTokensCache _cache;
         private readonly ConfigurationData _options;
 
         public OsmAccessTokenValidator(IClientsFactory clientsFactory,
             IOptions<ConfigurationData> options,
-            LruCache<string, TokenAndSecret> cache,
+            UsersIdAndTokensCache cache,
             ILogger logger)
         {
             _clientsFactory = clientsFactory;
