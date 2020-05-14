@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Style } from "mapbox-gl";
-import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
+import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
 import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { last } from "lodash";
 import JSZip from "jszip";
@@ -261,5 +261,15 @@ export class FileService {
             ? this.fileSystemWrapper.documentsDirectory
             : this.fileSystemWrapper.applicationStorageDirectory + "/databases";
         await this.fileSystemWrapper.writeFile(path, fileName, blob, { append: false, replace: true, truncate: 0 });
+    }
+
+    public async getLocalFileUrl(relativePath: string): Promise<string> {
+        let fileEntry = await this.fileSystemWrapper
+            .resolveLocalFilesystemUrl(this.fileSystemWrapper.applicationDirectory + "www/" + relativePath) as FileEntry;
+        return await new Promise((resolve, reject) => {
+            fileEntry.file((file) => {
+                resolve(file.localURL);
+            }, reject);
+        });
     }
 }

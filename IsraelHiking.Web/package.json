@@ -23,6 +23,7 @@
     "@ionic-native/in-app-browser": "^5.21.5",
     "@ionic-native/in-app-purchase-2": "^5.24.0",
     "@ionic-native/ionic-webview": "^5.21.5",
+    "@ionic-native/media": "^5.25.0",
     "@ionic-native/mobile-accessibility": "^5.21.5",
     "@ionic-native/network": "^5.21.5",
     "@ionic-native/sqlite": "^5.23.0",
@@ -56,6 +57,7 @@
     "cordova-plugin-file": "^6.0.1",
     "cordova-plugin-inappbrowser": "^3.2.0",
     "cordova-plugin-ionic-webview": "^4.1.1",
+    "cordova-plugin-media": "^5.0.3",
     "cordova-plugin-network-information": "^2.0.2",
     "cordova-plugin-purchase": "10.1.1",
     "cordova-plugin-statusbar": "^2.4.3",
@@ -184,7 +186,10 @@
       "cordova-plugin-zip": {},
       "cordova-sqlite-ext": {},
       "cordova-plugin-app-version": {},
-      "cordova-plugin-vibration": {}
+      "cordova-plugin-vibration": {},
+      "cordova-plugin-media": {
+        "KEEP_AVAUDIOSESSION_ALWAYS_ACTIVE": "NO"
+      }
     },
     "platforms": [
       "ios",

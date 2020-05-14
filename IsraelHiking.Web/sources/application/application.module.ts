@@ -60,6 +60,7 @@ import { Zip } from "@ionic-native/zip/ngx";
 import { Device } from "@ionic-native/device/ngx";
 import { SQLite } from "@ionic-native/sqlite/ngx";
 import { AppVersion } from "@ionic-native/app-version/ngx";
+import { Media } from "@ionic-native/media/ngx";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -103,6 +104,7 @@ import { ConnectionService } from "./services/connection.service";
 import { ScreenService } from "./services/screen.service";
 import { PurchaseService } from "./services/purchase.service";
 import { ApplicationInitializeService } from "./services/application-initialize.service";
+import { AudioPlayerFactory } from "./services/audio-player.factory";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
@@ -307,6 +309,7 @@ export function getWindow() { return window; }
             ScreenService,
             PurchaseService,
             ApplicationInitializeService,
+            AudioPlayerFactory,
             BackgroundGeolocation,
             Brightness,
             Camera,
@@ -321,6 +324,7 @@ export function getWindow() { return window; }
             Device,
             SQLite,
             AppVersion,
+            Media,
             RouteEditPoiInteraction,
             RouteEditRouteInteraction
         ],
