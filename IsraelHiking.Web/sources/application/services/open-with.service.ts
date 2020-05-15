@@ -114,17 +114,17 @@ export class OpenWithService {
             if (item.type.indexOf("kml") !== -1) {
                 name = "file.kml";
             } else if (item.type.indexOf("kmz") !== -1) {
-                name = "file.kml";
+                name = "file.kmz";
             } else if (item.type.indexOf("gpx") !== -1) {
-                name = "file.kml";
+                name = "file.gpx";
             } else if (item.type.indexOf("twl") !== -1) {
-                name = "file.kml";
+                name = "file.twl";
             } else if (item.type.indexOf("jpg") !== -1 || item.type.indexOf("jpeg") !== -1) {
-                name = "file.kml";
+                name = "file.jpg";
             }
         }
         try {
-            this.loggingService.info("Opening a shared file :" + name);
+            this.loggingService.info("Opening a shared file :" + name + ", " + item.path + ", " + item.type);
             await this.fileService.addRoutesFromFile(new File([blob], name));
         } catch (ex) {
             this.toastService.error(this.resources.unableToLoadFromFile);
