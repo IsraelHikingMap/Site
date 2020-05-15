@@ -69,7 +69,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         }
     }
 
-    public async ngAfterViewInit(): Promise<any> {
+    public async ngAfterViewInit(): Promise<void> {
         let dataToPreview = this.getDataFiltered();
         let imageUrl = await this.shareUrlsService.getImagePreview(dataToPreview);
         this.imageUrl = this.sanitizer.bypassSecurityTrustUrl(imageUrl) as string;

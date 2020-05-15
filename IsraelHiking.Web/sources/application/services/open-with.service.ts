@@ -7,6 +7,7 @@ import { FileService } from "./file.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
+import { LoggingService } from "./logging.service";
 import { RouteStrings } from "./hash.service";
 import { Urls } from "../urls";
 
@@ -28,13 +29,14 @@ export class OpenWithService {
                 private readonly toastService: ToastService,
                 private readonly matDialog: MatDialog,
                 private readonly router: Router,
+                private readonly loggingService: LoggingService,
                 private readonly ngZone: NgZone) { }
 
     public initialize() {
         if (!this.runningContextService.isCordova || !cordova.openwith || !cordova.openwith.init) {
             return;
         }
-        cordova.openwith.init(() => { }, (error) => console.error(`init failed with error: ${error}`));
+        cordova.openwith.init(() => { }, (error) => this.loggingService.error(`Open with init failed with error: ${error}`));
         cordova.openwith.addHandler((intent) => {
             if (intent.items.length <= 0) {
                 return;
@@ -53,6 +55,7 @@ export class OpenWithService {
     }
 
     private handleExternalUrl(item: Item) {
+        this.loggingService.info("Opening a shared url: " + item.uri);
         if (item.uri.indexOf(RouteStrings.ROUTE_SHARE + "/") !== -1 ||
             item.uri.indexOf(RouteStrings.ROUTE_POI + "/") !== -1 ||
             item.uri.indexOf(RouteStrings.ROUTE_URL + "/") !== -1 ||
@@ -94,33 +97,35 @@ export class OpenWithService {
 
     private async handleFile(data: string, item: Item) {
         let stringValue = atob(data);
-        let blob = this.nonAngularObjectsFactory.b64ToBlob(data, item.type) as any;
+        let blob = this.nonAngularObjectsFactory.b64ToBlob(data, item.type);
+        let name = "";
         if (!item.type || item.type === "application/octet-stream") {
-            blob.name = "file.twl";
+            name = "file.twl";
             if (stringValue.startsWith("PK")) {
-                blob.name = "file.kmz";
+                name = "file.kmz";
             } else if (stringValue.indexOf("<gpx") !== -1) {
-                blob.name = "file.gpx";
+                name = "file.gpx";
             } else if (stringValue.indexOf("<kml") !== -1) {
-                blob.name = "file.kml";
+                name = "file.kml";
             }
         } else if (item.path) {
-            blob.name = item.path.split("/").slice(-1)[0];
+            name = item.path.split("/").slice(-1)[0];
         } else {
             if (item.type.indexOf("kml") !== -1) {
-                blob.name = "file.kml";
+                name = "file.kml";
             } else if (item.type.indexOf("kmz") !== -1) {
-                blob.name = "file.kml";
+                name = "file.kml";
             } else if (item.type.indexOf("gpx") !== -1) {
-                blob.name = "file.kml";
+                name = "file.kml";
             } else if (item.type.indexOf("twl") !== -1) {
-                blob.name = "file.kml";
+                name = "file.kml";
             } else if (item.type.indexOf("jpg") !== -1 || item.type.indexOf("jpeg") !== -1) {
-                blob.name = "file.kml";
+                name = "file.kml";
             }
         }
         try {
-            await this.fileService.addRoutesFromFile(blob);
+            this.loggingService.info("Opening a shared file :" + name);
+            await this.fileService.addRoutesFromFile(new File([blob], name));
         } catch (ex) {
             this.toastService.error(this.resources.unableToLoadFromFile);
         }

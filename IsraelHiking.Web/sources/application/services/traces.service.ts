@@ -2,9 +2,10 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { NgRedux } from "@angular-redux/store";
 
+import { LoggingService } from "./logging.service";
+import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { Urls } from "../urls";
 import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducres/traces.reducer";
-import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
 
 @Injectable()
@@ -12,6 +13,7 @@ export class TracesService {
 
     constructor(private readonly httpClient: HttpClient,
                 private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+                private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
@@ -20,7 +22,7 @@ export class TracesService {
             .toPromise() as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     }
 
-    public syncTraces = async (): Promise<any> => {
+    public syncTraces = async (): Promise<void> => {
         try {
             let response = await this.httpClient.get(Urls.osmTrace).toPromise() as Trace[];
             let traces = ([] as Trace[]).concat(response || []);
@@ -46,7 +48,7 @@ export class TracesService {
                 }
             }
         } catch (ex) {
-            console.error("Unable to get user's traces.");
+            this.loggingService.error("Unable to get user's traces.");
         }
     }
 
@@ -60,7 +62,7 @@ export class TracesService {
         return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
     }
 
-    public async uploadRouteAsTrace(route: RouteData): Promise<any> {
+    public async uploadRouteAsTrace(route: RouteData): Promise<string> {
         let data = {
             routes: [route]
         } as DataContainer;
@@ -68,15 +70,15 @@ export class TracesService {
         let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
         let formData = new FormData();
         formData.append("file", blobToSave, route.name + ".gpx");
-        return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
+        return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise() as Promise<string>;
     }
 
-    public updateTrace = async (trace: Trace): Promise<any> => {
+    public async updateTrace(trace: Trace): Promise<void> {
         await this.httpClient.put(Urls.osmTrace + trace.id, trace, { responseType: "text" }).toPromise();
         this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace }));
     }
 
-    public deleteTrace = async (trace: Trace): Promise<any> => {
+    public async deleteTrace(trace: Trace): Promise<void> {
         if (trace.visibility !== "local") {
             await this.httpClient.delete(Urls.osmTrace + trace.id, { responseType: "text" }).toPromise();
         }

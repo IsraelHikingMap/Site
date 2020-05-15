@@ -143,7 +143,7 @@ export class FileService {
         return await this.saveBytesResponseToFile(responseData, fileName);
     }
 
-    public async addRoutesFromFile(file: File): Promise<any> {
+    public async addRoutesFromFile(file: File): Promise<void> {
         if (file.type === ImageResizeService.JPEG) {
             let container = await this.imageResizeService.resizeImageAndConvert(file);
             if (container.routes.length === 0 || container.routes[0].markers.length === 0) {

@@ -5,6 +5,7 @@ import { NgRedux } from "@angular-redux/store";
 
 import { TracesService } from "./traces.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
+import { LoggingService } from "./logging.service";
 import { Urls } from "../urls";
 import { Trace } from "../models/models";
 
@@ -18,7 +19,8 @@ describe("Traces Service", () => {
             providers: [
                 NgRedux,
                 TracesService,
-                { provide: NonAngularObjectsFactory, useValue: null }
+                { provide: NonAngularObjectsFactory, useValue: null },
+                { provide: LoggingService, useValue: {} },
             ]
         });
     });

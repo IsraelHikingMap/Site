@@ -8,6 +8,7 @@ import { ShareUrlsService } from "./share-urls.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { HashService } from "./hash.service";
 import { RunningContextService } from "./running-context.service";
+import { LoggingService } from "./logging.service";
 import { Urls } from "../urls";
 import { ShareUrl, DataContainer } from "../models/models";
 
@@ -24,6 +25,7 @@ describe("Share Urls Service", () => {
             ],
             providers: [
                 { provide: HashService, useValue: hashService },
+                { provide: LoggingService, useValue: {} },
                 RunningContextService,
                 Device,
                 WhatsAppService,

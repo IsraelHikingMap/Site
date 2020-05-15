@@ -208,7 +208,7 @@ export class DatabaseService {
         return this.sourceDatabases.get(dbName);
     }
 
-    public storePois(pois: GeoJSON.Feature[]): Promise<any> {
+    public storePois(pois: GeoJSON.Feature[]): Promise<void> {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkPut(pois);
     }
 
@@ -225,7 +225,7 @@ export class DatabaseService {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).get(id);
     }
 
-    public storeImages(images: ImageUrlAndData[]): Promise<any> {
+    public storeImages(images: ImageUrlAndData[]): Promise<void> {
         return this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).bulkPut(images);
     }
 

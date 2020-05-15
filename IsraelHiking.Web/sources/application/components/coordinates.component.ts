@@ -25,7 +25,7 @@ export class CoordinatesComponent extends BaseMapComponent implements OnInit {
         super(resources);
     }
 
-    public async ngOnInit(): Promise<any> {
+    public async ngOnInit(): Promise<void> {
         let params = new HttpParams()
             .set("lat", this.latlng.lat.toString())
             .set("lon", this.latlng.lng.toString());

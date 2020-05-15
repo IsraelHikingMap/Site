@@ -23,7 +23,7 @@ export class GetTextCatalogService {
         return this.strings[word] as string || word || "";
     }
 
-    public async loadRemote(url: string): Promise<any> {
+    public async loadRemote(url: string): Promise<void> {
         let response = await this.httpClient.get(url).toPromise();
         this.strings = response;
     }

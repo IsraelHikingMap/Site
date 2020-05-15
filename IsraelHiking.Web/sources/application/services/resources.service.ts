@@ -521,7 +521,7 @@ export class ResourcesService {
         }
     }
 
-    public setLanguage = async (language: ILanguage): Promise<any> => {
+    public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
         await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1589440483664");

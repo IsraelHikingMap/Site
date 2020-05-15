@@ -5,6 +5,7 @@ import { NgRedux } from "@angular-redux/store";
 
 import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
+import { LoggingService } from "./logging.service";
 import { Urls } from "../urls";
 import { SetShareUrlAction } from "../reducres/in-memory.reducer";
 import { ShareUrl, DataContainer, ApplicationState } from "../models/models";
@@ -24,6 +25,7 @@ export class ShareUrlsService {
     constructor(private readonly httpClient: HttpClient,
                 private readonly whatsAppService: WhatsAppService,
                 private readonly hashService: HashService,
+                private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.shareUrls = [];
@@ -60,35 +62,31 @@ export class ShareUrlsService {
         return this.httpClient.get(Urls.urls + shareUrlId).toPromise() as Promise<ShareUrl>;
     }
 
-    public getShareUrls = (): Promise<any> => {
-        let promise = this.httpClient.get(Urls.urls).toPromise();
-        promise.then((shareUrls: ShareUrl[]) => {
+    public async getShareUrls(): Promise<ShareUrl[]> {
+        try {
+            let shareUrls = await this.httpClient.get(Urls.urls).toPromise() as ShareUrl[];
             this.shareUrls.splice(0);
             this.shareUrls.push(...shareUrls);
-        }, () => {
-            console.error("Unable to get user's shares.");
-        });
-        return promise;
+            return shareUrls;
+        } catch {
+            this.loggingService.error("Unable to get user's shares");
+        }
+        return [];
     }
 
-    public createShareUrl = (shareUrl: ShareUrl): Promise<ShareUrl> => {
-        let promise = this.httpClient.post(Urls.urls, shareUrl).toPromise() as Promise<ShareUrl>;
-        promise.then((createdShareUrl: ShareUrl) => {
-            this.shareUrls.splice(0, 0, createdShareUrl);
-        });
-        return promise;
+    public async createShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
+        let createdShareUrl = await this.httpClient.post(Urls.urls, shareUrl).toPromise() as ShareUrl;
+        this.shareUrls.splice(0, 0, createdShareUrl);
+        return createdShareUrl;
     }
 
     public updateShareUrl = (shareUrl: ShareUrl): Promise<ShareUrl> => {
         return this.httpClient.put(Urls.urls + shareUrl.id, shareUrl).toPromise() as Promise<ShareUrl>;
     }
 
-    public deleteShareUrl = (shareUrl: ShareUrl): Promise<any> => {
-        let promise = this.httpClient.delete(Urls.urls + shareUrl.id, { responseType: "text" }).toPromise() as Promise<any>;
-        promise.then(() => {
-            remove(this.shareUrls, s => s.id === shareUrl.id);
-        });
-        return promise;
+    public async deleteShareUrl(shareUrl: ShareUrl): Promise<void> {
+        await this.httpClient.delete(Urls.urls + shareUrl.id, { responseType: "text" }).toPromise();
+        remove(this.shareUrls, s => s.id === shareUrl.id);
     }
 
     public getImageFromShareId = (shareUrl: ShareUrl, width?: number, height?: number) => {
