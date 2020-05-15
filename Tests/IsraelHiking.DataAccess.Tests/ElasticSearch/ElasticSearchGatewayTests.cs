@@ -1,6 +1,8 @@
 ﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using System.Collections.Generic;
@@ -136,6 +138,26 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             var imageItem = _gateway.GetAllUrls().Result;
 
             Assert.IsNotNull(imageItem);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void UpdatePointOfInterest_ShouldBeAbleToGetRightAfterAdding()
+        {
+            _gateway.Initialize();
+            var id = "42";
+            _gateway.DeletePointOfInterestById("1", Sources.OSM).Wait();
+            var feature = new Feature(new Point(0, 0), new AttributesTable
+            {
+                { FeatureAttributes.NAME, "name" },
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+            });
+            feature.SetId();
+            feature.SetTitles();
+            _gateway.UpdatePointsOfInterestData(new List<Feature> { feature }).Wait();
+            var results = _gateway.GetPointOfInterestById(id, Sources.OSM).Result;
+            Assert.IsNotNull(results);
         }
     }
 }

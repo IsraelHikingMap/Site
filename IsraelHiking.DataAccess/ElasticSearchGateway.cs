@@ -339,14 +339,9 @@ namespace IsraelHiking.DataAccess
 
         public async Task<Feature> GetPointOfInterestById(string id, string source)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
-                s => s.Index(OSM_POIS_ALIAS)
-                    .Size(1).Query(
-                        q => q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
-                             && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.ID}").Value(id))
-                    )
-            );
-            return response.Documents.FirstOrDefault();
+            var fullId = GeoJsonExtensions.GetId(source, id);
+            var response = await _elasticClient.GetAsync<Feature>(fullId, r => r.Index(OSM_POIS_ALIAS));
+            return response.Source;
         }
 
         public Task DeleteOsmPointOfInterestById(string id)
