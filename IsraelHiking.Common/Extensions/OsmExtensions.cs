@@ -21,6 +21,13 @@ namespace IsraelHiking.Common.Extensions
                     return tag.Value;
                 }
             }
+            foreach (var tag in tags)
+            {
+                if (tag.Key.Contains(FeatureAttributes.NAME))
+                {
+                    return tag.Value;
+                }
+            }
             return string.Empty;
         }
 
