@@ -100,14 +100,7 @@ export class OpenWithService {
         let blob = this.nonAngularObjectsFactory.b64ToBlob(data, item.type);
         let name = "";
         if (!item.type || item.type === "application/octet-stream") {
-            name = "file.twl";
-            if (stringValue.startsWith("PK")) {
-                name = "file.kmz";
-            } else if (stringValue.indexOf("<gpx") !== -1) {
-                name = "file.gpx";
-            } else if (stringValue.indexOf("<kml") !== -1) {
-                name = "file.kml";
-            }
+            name = this.getFormatStringValue(stringValue);
         } else if (item.path) {
             name = item.path.split("/").slice(-1)[0];
         } else {
@@ -121,13 +114,30 @@ export class OpenWithService {
                 name = "file.twl";
             } else if (item.type.indexOf("jpg") !== -1 || item.type.indexOf("jpeg") !== -1) {
                 name = "file.jpg";
+            } else {
+                name = this.getFormatStringValue(stringValue);
             }
         }
+        if (!name) {
+            this.loggingService.warning("Unable to find file format, defaulting to twl");
+            name = "file.twl";
+        }
         try {
-            this.loggingService.info("Opening a shared file :" + name + ", " + item.path + ", " + item.type);
+            this.loggingService.info("Opening a shared file: " + name + ", " + item.path + ", " + item.type);
             await this.fileService.addRoutesFromFile(new File([blob], name));
         } catch (ex) {
             this.toastService.error(this.resources.unableToLoadFromFile);
         }
+    }
+
+    private getFormatStringValue(stringValue: string): string {
+        if (stringValue.startsWith("PK")) {
+            return "file.kmz";
+        } else if (stringValue.toLowerCase().indexOf("<gpx") !== -1) {
+            return "file.gpx";
+        } else if (stringValue.toLowerCase().indexOf("<kml") !== -1) {
+            return "file.kml";
+        }
+        return "";
     }
 }
