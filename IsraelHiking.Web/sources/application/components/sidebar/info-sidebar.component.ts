@@ -64,6 +64,10 @@ export class InfoSidebarComponent extends BaseMapComponent {
         return this.runningContext.isCordova;
     }
 
+    public isMobile(): boolean {
+        return this.runningContext.isMobile;
+    }
+
     private initalizeLegendSections() {
         let id = 1;
         this.legendSections = [

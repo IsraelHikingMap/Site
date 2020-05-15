@@ -13,6 +13,10 @@
                         <img src="content/app-store-badge.png" width="200" />
                     </a>
                 </div>
+                <div *ngIf="isMobile()" fxLayout="row">
+                    <div fxFlex="15" class="text-center"><i class="fa icon-question-circle-o" fxFill></i></div>
+                    <div fxFlex>{{resources.longPressHint}}</div>
+                </div>
                 <h4>{{resources.infoHelpfulLinks}}</h4>
                 <div fxLayout="row">
                     <div fxFlex="15" class="text-center"><i class="fa icon-facebook" fxFill></i></div>

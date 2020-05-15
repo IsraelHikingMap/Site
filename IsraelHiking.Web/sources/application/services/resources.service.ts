@@ -266,6 +266,7 @@ export class ResourcesService {
     public purchaseOfflineMaps: string;
     public lastUpdatedOn: string;
     public remainingDistance: string;
+    public longPressHint: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -524,7 +525,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1589440483664");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1589567944666");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -773,6 +774,7 @@ export class ResourcesService {
         this.purchaseOfflineMaps = this.gettextCatalog.getString("Purchase maps for offline use");
         this.lastUpdatedOn = this.gettextCatalog.getString("Last updated on");
         this.remainingDistance = this.gettextCatalog.getString("Remaining distance");
+        this.longPressHint = this.gettextCatalog.getString("Long press on any button will shows its usage");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
