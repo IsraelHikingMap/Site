@@ -97,34 +97,34 @@ export class OpenWithService {
 
     private async handleFile(data: string, item: Item) {
         let stringValue = atob(data);
-        let blob = this.nonAngularObjectsFactory.b64ToBlob(data, item.type);
-        let name = "";
+        let blob = this.nonAngularObjectsFactory.b64ToBlob(data, item.type) as any;
         if (!item.type || item.type === "application/octet-stream") {
-            name = this.getFormatStringValue(stringValue);
+            blob.name = this.getFormatStringValue(stringValue);
         } else if (item.path) {
-            name = item.path.split("/").slice(-1)[0];
+            blob.name = item.path.split("/").slice(-1)[0];
         } else {
             if (item.type.indexOf("kml") !== -1) {
-                name = "file.kml";
+                blob.name = "file.kml";
             } else if (item.type.indexOf("kmz") !== -1) {
-                name = "file.kmz";
+                blob.name = "file.kmz";
             } else if (item.type.indexOf("gpx") !== -1) {
-                name = "file.gpx";
+                blob.name = "file.gpx";
             } else if (item.type.indexOf("twl") !== -1) {
-                name = "file.twl";
+                blob.name = "file.twl";
             } else if (item.type.indexOf("jpg") !== -1 || item.type.indexOf("jpeg") !== -1) {
-                name = "file.jpg";
+                blob.name = "file.jpg";
             } else {
-                name = this.getFormatStringValue(stringValue);
+                blob.name = this.getFormatStringValue(stringValue);
             }
         }
-        if (!name) {
-            this.loggingService.warning("Unable to find file format, defaulting to twl");
-            name = "file.twl";
+        if (!blob.name) {
+            this.loggingService.warning("Unable to find file format, defaulting to twl?");
+            blob.name = "file.twl";
         }
         try {
-            this.loggingService.info("Opening a shared file: " + name + ", " + item.path + ", " + item.type);
-            await this.fileService.addRoutesFromFile(new File([blob], name));
+            this.loggingService.info("Opening a shared file: " + blob.name + ", " + item.path + ", " + item.type);
+            // Do not use "new File(...)" as it breaks the functionality.
+            await this.fileService.addRoutesFromFile(blob);
         } catch (ex) {
             this.toastService.error(this.resources.unableToLoadFromFile);
         }
