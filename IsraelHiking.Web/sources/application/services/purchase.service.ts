@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { NgRedux, select } from "@angular-redux/store";
-import { InAppPurchase2, IAPProduct } from "@ionic-native/in-app-purchase-2/ngx";
+import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 import { Observable } from "rxjs";
 
 import { RunningContextService } from "./running-context.service";
@@ -59,15 +59,6 @@ export class PurchaseService {
         this.store.when("product").verified(product => {
             this.loggingService.debug(`[Store] Verified, Finishing: ${product.id}`);
             product.finish();
-        });
-        this.store.when("product").updated((p: IAPProduct) => {
-            this.loggingService.debug(`[Store] Updated: ${p.id}\n${JSON.stringify(p, null, 4)}`);
-            if (p.owned) {
-                this.loggingService.debug(`[Store] owned: ${p.id}`);
-            }
-            if (new Date(p.expiryDate) < new Date()) {
-                this.loggingService.debug(`[Store] expired: ${p.id}`);
-            }
         });
 
         this.userInfo$.subscribe(ui => {
