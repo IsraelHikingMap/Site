@@ -97,6 +97,7 @@ export class RouteStatisticsService {
                 : 0;
             previousSimplifiedPoint = simplifiedPoint;
         }
+        this.smoothSlope(routeStatistics);
         return routeStatistics;
     }
 
@@ -221,5 +222,26 @@ export class RouteStatisticsService {
             return previousPoint.coordinate[0] + SpatialService.getDistanceInMeters(previousPoint.latlng, latLng) / 1000;
         }
         return 0;
+    }
+
+    /**
+     * Smoothing the slope by using a moving mean with window of number of point / 10
+     * @param statistics - the statistics to update
+     */
+    private smoothSlope(statistics: IRouteStatistics) {
+        let slopes = statistics.points.map(p => p.slope);
+        let halfWindow = Math.ceil(statistics.points.length / 20);
+        for (let pointIndex = 0; pointIndex < statistics.points.length; pointIndex++) {
+            let sum = 0;
+            let count = 0;
+            for (let windowIndex = -halfWindow; windowIndex <= halfWindow; windowIndex++) {
+                if (pointIndex + windowIndex >= 0 && pointIndex + windowIndex < statistics.points.length) {
+                    sum += slopes[pointIndex + windowIndex];
+                    count++;
+                }
+                
+            }
+            statistics.points[pointIndex].slope = sum / count;
+        }
     }
 }

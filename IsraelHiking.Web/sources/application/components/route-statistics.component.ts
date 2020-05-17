@@ -506,6 +506,15 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 .attr("stroke-linecap", "round")
                 .attr("stroke-width", 1)
                 .attr("stroke", "black");
+            this.chartElements.chartArea.append<SVGPathElement>("line")
+                .attr("class", "slope-zero-axis")
+                .attr("stroke-width", 1)
+                .attr("stroke", "grey")
+                .attr("stroke-dasharray", "10,5")
+                .attr("x1", 0)
+                .attr("x2", this.chartElements.width)
+                .attr("y1", this.chartElements.height / 2)
+                .attr("y2", this.chartElements.height / 2)
         }
     }
 
@@ -659,24 +668,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         let d3 = this.d3Service.getD3();
         let duration = 1000;
+        let chartTransition = this.chartElements.chartArea.transition();
         this.chartElements.xScale.domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]);
         this.chartElements.yScale.domain([d3.min(data, d => d[1]), d3.max(data, d => d[1])]);
-        let slopeData = [];
-        if (this.isSlopeOn && data.length > 0) {
-            slopeData = this.statistics.points.map(p => [p.coordinate[0], p.slope] as [number, number]);
-        }
-        // making the doing be symetric around zero
-        this.chartElements.yScaleSlope.domain([Math.min(d3.min(slopeData, d => d[1]), -d3.max(slopeData, d => d[1])),
-        Math.max(d3.max(slopeData, d => d[1]), -d3.min(slopeData, d => d[1]))]);
-        let slopeLine = d3.line()
-            .curve(d3.curveLinear)
-            .x(d => this.chartElements.xScale(d[0]))
-            .y(d => this.chartElements.yScaleSlope(d[1]));
-        let chartTransition = this.chartElements.chartArea.transition();
-        chartTransition.select(".slope-line").duration(duration).attr("d", slopeLine(slopeData));
-        chartTransition.select(".y-axis-slope")
-            .call(d3.axisRight(this.chartElements.yScaleSlope).ticks(5) as any)
-            .duration(duration);
         let line = d3.line()
             .curve(d3.curveCatmullRom)
             .x(d => this.chartElements.xScale(d[0]))
@@ -688,6 +682,23 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         chartTransition.select(".y-axis")
             .call(d3.axisLeft(this.chartElements.yScale).ticks(5) as any)
             .duration(duration);
+        let slopeData = []
+        if (this.isSlopeOn && data.length > 0) {
+            slopeData = this.statistics.points.map(p => [p.coordinate[0], p.slope] as [number, number]);
+        }
+        // making the doing be symetric around zero
+        this.chartElements.yScaleSlope.domain([Math.min(d3.min(slopeData, d => d[1]), -d3.max(slopeData, d => d[1])),
+        Math.max(d3.max(slopeData, d => d[1]), -d3.min(slopeData, d => d[1]))]);
+        let slopeLine = d3.line()
+            .curve(d3.curveLinear)
+            .x(d => this.chartElements.xScale(d[0]))
+            .y(d => this.chartElements.yScaleSlope(d[1]));
+        chartTransition.select(".slope-line").duration(duration).attr("d", slopeLine(slopeData));
+        chartTransition.select(".y-axis-slope")
+            .call(d3.axisRight(this.chartElements.yScaleSlope).ticks(5) as any)
+            .duration(duration);
+        let zeroAxisY = this.chartElements.yScaleSlope(0) || this.chartElements.height / 2;
+        chartTransition.select(".slope-zero-axis").attr("y1", zeroAxisY).attr("y2", zeroAxisY);
     }
 
     public toggleKmMarker() {
