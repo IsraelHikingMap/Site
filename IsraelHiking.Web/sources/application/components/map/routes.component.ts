@@ -32,6 +32,9 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     @select((state: ApplicationState) => state.routes.present)
     public routes$: Observable<RouteData[]>;
 
+    @select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
+    public selectedRouteId$: Observable<RouteData[]>;
+
     @select((state: ApplicationState) => state.routeEditingState.recordingRouteId)
     public routeRecordingId$: Observable<string>;
 
@@ -61,6 +64,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routes = [];
         this.routeEditRouteInteraction.onRoutePointClick.subscribe(this.handleRoutePointClick);
         this.routes$.subscribe(this.handleRoutesChanges);
+        this.selectedRouteId$.subscribe(() => this.handleRoutesChanges(this.routes));
         this.routeRecordingId$.subscribe(this.buildFeatureCollections);
 
     }
@@ -230,7 +234,6 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.host.mapInstance.getCanvas().style.cursor = "";
         if (selectedRoute == null) {
-
             return;
         }
         if (selectedRoute.state === "Poi") {

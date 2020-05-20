@@ -80,6 +80,13 @@ export class SelectedRouteService {
         return route;
     }
 
+    public syncSelectedRouteWithEditingRoute() {
+        let editingRoute = this.routes.find(r => r.state == "Poi" || r.state == "Route");
+        if (editingRoute != null && editingRoute.id != this.selectedRouteId) {
+            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: editingRoute.id }));
+        }
+    }
+
     public getRouteById(id: string): RouteData {
         return this.routes.find((r) => r.id === id);
     }
