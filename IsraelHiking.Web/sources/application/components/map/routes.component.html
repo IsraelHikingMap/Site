@@ -13,8 +13,10 @@
                 'line-width': ['get', 'weight'],
                 'line-opacity': ['get', 'opacity']
             }"
+            (mouseEnter)="routeLineMouseEnter($event)"
             (mouseMove)="routeLineMouseOver($event)"
-            (mouseLeave)="routeLineMouseLeave()">
+            (mouseLeave)="routeLineMouseLeave()"
+            (click)="routeLineClick($event)">
 </mgl-layer>
 <mgl-layer id="route-line-direction"
            type="symbol"

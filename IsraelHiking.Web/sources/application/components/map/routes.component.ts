@@ -66,7 +66,6 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routes$.subscribe(this.handleRoutesChanges);
         this.selectedRouteId$.subscribe(() => this.handleRoutesChanges(this.routes));
         this.routeRecordingId$.subscribe(this.buildFeatureCollections);
-
     }
 
     private handleRoutesChanges = (routes: RouteData[]) => {
@@ -278,6 +277,12 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         return selectedRoute != null && selectedRoute.id === route.id && selectedRoute.state === "Poi";
     }
 
+    public routeLineMouseEnter(event) {
+        this.host.mapInstance.getCanvas().style.cursor = "pointer";
+        console.log(event.features);
+        this.routeLineMouseOver(event);
+    }
+
     public routeLineMouseOver(event) {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
@@ -294,5 +299,20 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
 
     public routeLineMouseLeave() {
         this.selectedRouteService.raiseHoverSelectedRoute(null);
+        if (!this.isEditMode()) {
+            this.host.mapInstance.getCanvas().style.cursor = "";
+        }
     }
+
+    public routeLineClick(event) {
+        if (event.features == null || event.features.length === 0) {
+            return;
+        }
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        let clickedRoute = this.selectedRouteService.getRouteById(event.features[0].properties.id);
+        if (clickedRoute != null && clickedRoute != selectedRoute && !this.isEditMode()) {
+            this.selectedRouteService.setSelectedRoute(clickedRoute.id);
+        }
+    }
+
 }
