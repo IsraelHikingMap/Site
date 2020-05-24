@@ -1,5 +1,7 @@
+import { orderBy, remove } from "lodash";
+
 import { createReducerFromClass, ReduxAction, BaseAction } from "./reducer-action-decorator";
-import { initialState } from "./initial-state";
+import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS } from "./initial-state";
 import { LayersState, EditableLayer, Overlay } from "../models/models";
 
 const ADD_BASE_LAYER = "ADD_BASE_LAYER";
@@ -121,11 +123,19 @@ export class ToggleOfflineAction extends BaseAction<ToggleOfflinePayload> {
 }
 
 class LayersReducer {
+    private sort(layers: EditableLayer[]): EditableLayer[] {
+        let ordered = orderBy(layers, l => l.key);
+        let specialKeys = [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS];
+        let removed = remove(ordered, o => specialKeys.indexOf(o.key) !== -1);
+        ordered = [...removed, ...ordered];
+        return ordered;
+    }
+
     @ReduxAction(ADD_BASE_LAYER)
     public addBaseLayer(lastState: LayersState, action: AddBaseLayerAction): LayersState {
         return {
             ...lastState,
-            baseLayers: [...lastState.baseLayers, action.payload.layerData]
+            baseLayers: this.sort([...lastState.baseLayers, action.payload.layerData])
         };
     }
 
@@ -133,7 +143,7 @@ class LayersReducer {
     public addOverlay(lastState: LayersState, action: AddOverlayAction): LayersState {
         return {
             ...lastState,
-            overlays: [...lastState.overlays, action.payload.layerData]
+            overlays: this.sort([...lastState.overlays, action.payload.layerData]) as Overlay[]
         };
     }
 
