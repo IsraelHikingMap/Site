@@ -7,6 +7,7 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SixLabors.ImageSharp;
@@ -16,7 +17,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
@@ -25,7 +25,6 @@ namespace IsraelHiking.API.Executors
     /// <inheritdoc/>
     public class PointsOfInterestFilesCreatorExecutor : IPointsOfInterestFilesCreatorExecutor
     {
-        private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IWebHostEnvironment _environment;
         private readonly IImagesRepository _imagesRepository;
@@ -34,18 +33,15 @@ namespace IsraelHiking.API.Executors
         /// Constructor
         /// </summary>
         /// <param name="fileSystemHelper"></param>
-        /// <param name="remoteFileFetcherGateway"></param>
         /// <param name="environment"></param>
         /// <param name="imagesRepository"></param>
         /// <param name="logger"></param>
         public PointsOfInterestFilesCreatorExecutor(IFileSystemHelper fileSystemHelper,
-            IRemoteFileFetcherGateway remoteFileFetcherGateway,
             IWebHostEnvironment environment,
             IImagesRepository imagesRepository,
             ILogger logger)
         {
             _fileSystemHelper = fileSystemHelper;
-            _remoteFileFetcherGateway = remoteFileFetcherGateway;
             _environment = environment;
             _imagesRepository = imagesRepository;
             _logger = logger;
@@ -99,11 +95,37 @@ namespace IsraelHiking.API.Executors
         private void CreateOfflinePoisFile(List<Feature> features)
         {
             var collection = new FeatureCollection();
+            var slimCollection = new FeatureCollection();
             foreach (var feature in features)
             {
+                var geoLocation = feature.Attributes[FeatureAttributes.POI_GEOLOCATION] as AttributesTable;
+
+                var slimFeature = new Feature(new Point(
+                    double.Parse(geoLocation[FeatureAttributes.LON].ToString()),
+                    double.Parse(geoLocation[FeatureAttributes.LAT].ToString())), new AttributesTable());
+                foreach (var property in new[] {
+                        FeatureAttributes.POI_ICON,
+                        FeatureAttributes.POI_NAMES,
+                        FeatureAttributes.POI_ID,
+                        FeatureAttributes.POI_CATEGORY,
+                        FeatureAttributes.ID,
+                        FeatureAttributes.POI_ICON_COLOR,
+                        FeatureAttributes.POI_SOURCE,
+                        FeatureAttributes.POI_LANGUAGE
+                        })
+                {
+                    slimFeature.Attributes.AddOrUpdate(property, feature.Attributes[property]);
+                }
+                slimFeature.Attributes.AddOrUpdate(FeatureAttributes.POI_HAS_EXTRA_DATA, Languages.Array.ToDictionary(l => l, l => feature.HasExtraData(l)));
+                slimCollection.Add(slimFeature);
                 collection.Add(feature);
             }
-            var outputMemStream = new MemoryStream();
+            using (var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "pois-slim.geojson")))
+            {
+                fileStream.Write(slimCollection.ToBytes());
+            }
+
+            using (var outputMemStream = new MemoryStream())
             using (var zipStream = new ZipOutputStream(outputMemStream))
             {
                 zipStream.SetLevel(9);

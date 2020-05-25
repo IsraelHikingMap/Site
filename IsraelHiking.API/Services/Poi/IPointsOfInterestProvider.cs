@@ -2,6 +2,7 @@
 using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Poi
@@ -19,6 +20,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="categories">The categories</param>
         /// <param name="language">The language</param>
         /// <returns>An array of POIs</returns>
+        [Obsolete("This is no longer needed")]
         Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language);
 
         /// <summary>

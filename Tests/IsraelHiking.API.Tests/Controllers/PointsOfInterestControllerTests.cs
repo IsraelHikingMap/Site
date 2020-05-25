@@ -60,7 +60,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var category = "category";
 
-            _controller.GetCategoriesByType(category);
+            _controller.GetCategoriesByGroup(category);
 
             _tagHelper.Received(1).GetCategoriesByType(category);
         }

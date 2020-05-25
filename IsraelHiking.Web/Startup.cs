@@ -168,6 +168,7 @@ namespace IsraelHiking.Web
             var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
             fileExtensionContentTypeProvider.Mappings.Add(".pbf", "application/x-protobuf");
             fileExtensionContentTypeProvider.Mappings.Add(".db", "application/octet-stream");
+            fileExtensionContentTypeProvider.Mappings.Add(".geojson", "application/json");
 
             foreach (var proxy in configurationData.ProxiesDictionary)
             {

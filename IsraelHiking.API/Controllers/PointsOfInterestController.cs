@@ -67,13 +67,13 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Gets the available categories for the specified type
         /// </summary>
-        /// <param name="categoriesType">The categories' type</param>
+        /// <param name="categoriesGroup">The categories' type</param>
         /// <returns></returns>
-        [Route("categories/{categoriesType}")]
+        [Route("categories/{categoriesGroup}")]
         [HttpGet]
-        public IEnumerable<Category> GetCategoriesByType(string categoriesType)
+        public IEnumerable<Category> GetCategoriesByGroup(string categoriesGroup)
         {
-            return _tagsHelper.GetCategoriesByType(categoriesType);
+            return _tagsHelper.GetCategoriesByType(categoriesGroup);
         }
 
         /// <summary>
@@ -86,6 +86,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of GeoJSON features</returns>
         [Route("")]
         [HttpGet]
+        [Obsolete("This was changed by geojson - remove 09/2020")]
         public async Task<PointOfInterest[]> GetPointsOfInterest(string northEast, string southWest, string categories,
             string language = "")
         {
