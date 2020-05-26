@@ -4,6 +4,7 @@ using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -16,6 +17,7 @@ namespace IsraelHiking.DataAccess
         public long id { get; set; }
         public LatLng start { get; set; }
         public string title { get; set; }
+        public DateTime last_modified { get; set; }
     }
 
     internal class JsonNakebItemExtended : JsonNakebItem
@@ -99,6 +101,7 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.POI_ICON_COLOR, "black"},
                 {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                 {FeatureAttributes.POI_GEOLOCATION, geoLocation},
+                {FeatureAttributes.POI_LAST_MODIFIED, nakebItem.last_modified.ToString("o")}
             };
 
             return attributes;

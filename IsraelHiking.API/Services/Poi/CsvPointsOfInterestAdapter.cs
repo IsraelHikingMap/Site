@@ -8,6 +8,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -127,14 +128,15 @@ namespace IsraelHiking.API.Services.Poi
             return Task.Run(() =>
             {
                 _logger.LogInformation("Getting records from csv file: " + FileName);
-                var pointsOfInterest = GetRecords();
-                var features = pointsOfInterest.Select(ConvertCsvRowToFeature).ToList();
+                var fileInfo = _fileProvider.GetFileInfo(Path.Combine(CSV_DIRECTORY, FileName));
+                var pointsOfInterest = GetRecords(fileInfo);
+                var features = pointsOfInterest.Select(f => ConvertCsvRowToFeature(f, fileInfo.LastModified.DateTime)).ToList();
                 _logger.LogInformation($"Got {features.Count} records from csv file: {FileName}");
                 return features;
             });
         }
 
-        private Feature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest)
+        private Feature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest, DateTime lastModified)
         {
             var geoLocation = new AttributesTable
             {
@@ -153,6 +155,7 @@ namespace IsraelHiking.API.Services.Poi
                 {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
                 {FeatureAttributes.POI_CATEGORY, pointOfInterest.Category},
                 {FeatureAttributes.POI_SHARE_REFERENCE, pointOfInterest.FileUrl },
+                {FeatureAttributes.POI_LAST_MODIFIED, lastModified.ToString("o") },
                 {FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl},
                 {FeatureAttributes.POI_SOURCE_IMAGE_URL, pointOfInterest.SourceImageUrl},
                 {FeatureAttributes.ID, pointOfInterest.Id},
@@ -165,9 +168,8 @@ namespace IsraelHiking.API.Services.Poi
             return feature;
         }
 
-        private IEnumerable<CsvPointOfInterestRow> GetRecords()
+        private IEnumerable<CsvPointOfInterestRow> GetRecords(IFileInfo fileInfo)
         {
-            var fileInfo = _fileProvider.GetFileInfo(Path.Combine(CSV_DIRECTORY, FileName));
             var stream = fileInfo.CreateReadStream();
             var reader = new StreamReader(stream);
             var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
@@ -178,7 +180,8 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public override async Task<Feature> GetRawPointOfInterestById(string id)
         {
-            var feature = GetRecords().Where(r => r.Id == id).Select(ConvertCsvRowToFeature).First();
+            var fileInfo = _fileProvider.GetFileInfo(Path.Combine(CSV_DIRECTORY, FileName));
+            var feature = GetRecords(fileInfo).Where(r => r.Id == id).Select(r => ConvertCsvRowToFeature(r, fileInfo.LastModified.DateTime)).First();
             if (feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE) &&
                 !string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString()))
             {

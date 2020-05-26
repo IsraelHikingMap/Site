@@ -4,12 +4,41 @@ using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess
 {
+    internal class JsonGraphHopperResponse
+    {
+        public List<JsonPath> paths { get; set; }
+    }
+
+    internal class JsonPath
+    {
+        public double distance { get; set; }
+        public List<double> bbox { get; set; }
+        public double weight { get; set; }
+        public long time { get; set; }
+        public bool points_encoded { get; set; }
+        public JsonPoints points { get; set; }
+        public JsonDetails details { get; set; }
+    }
+
+    internal class JsonPoints
+    {
+        public string type { get; set; }
+        public List<List<double>> coordinates { get; set; }
+    }
+
+    internal class JsonDetails
+    {
+        public List<List<string>> road_class { get; set; }
+        public List<List<string>> track_type { get; set; }
+    }
+
     public class GraphHopperGateway : IGraphHopperGateway
     {
         private readonly IHttpClientFactory _httpClientFactory;

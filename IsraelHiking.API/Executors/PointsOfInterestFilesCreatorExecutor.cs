@@ -60,24 +60,15 @@ namespace IsraelHiking.API.Executors
         {
             using (var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "sitemap.xml")))
             {
-                var list = features.Select(p =>
+                var list = features.Select(feature =>
                 {
-                    var dateString = DateTime.Now.ToUniversalTime().ToString("o");
-                    if (p.Attributes.Exists(FeatureAttributes.POI_LAST_MODIFIED))
-                    {
-                        if (p.Attributes[FeatureAttributes.POI_LAST_MODIFIED] is DateTime dateTime)
-                        {
-                            dateString = dateTime.ToUniversalTime().ToString("o");
-                        }
-                        else
-                        {
-                            dateString = p.Attributes[FeatureAttributes.POI_LAST_MODIFIED].ToString();
-                        }
-                    }
+                    var dateString = feature.Attributes.Exists(FeatureAttributes.POI_LAST_MODIFIED)
+                        ? DateTime.Parse(feature.Attributes[FeatureAttributes.POI_LAST_MODIFIED].ToString()).ToUniversalTime().ToString("o")
+                        : DateTime.Now.ToUniversalTime().ToString("o");
                     return new tUrl
                     {
                         lastmod = dateString,
-                        loc = "https://israelhiking.osm.org.il/poi/" + p.Attributes[FeatureAttributes.POI_SOURCE] + "/" + p.Attributes[FeatureAttributes.ID],
+                        loc = "https://israelhiking.osm.org.il/poi/" + feature.Attributes[FeatureAttributes.POI_SOURCE] + "/" + feature.Attributes[FeatureAttributes.ID],
                     };
                 });
                 var siteMap = new urlset

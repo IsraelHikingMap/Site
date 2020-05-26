@@ -187,7 +187,8 @@ namespace IsraelHiking.DataAccess
                     {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
                     {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                     {FeatureAttributes.WEBSITE, _wikiSite.SiteInfo.MakeArticleUrl(page.Title)},
-                    {FeatureAttributes.POI_SOURCE_IMAGE_URL, "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" }
+                    {FeatureAttributes.POI_SOURCE_IMAGE_URL, "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" },
+                    {FeatureAttributes.POI_LAST_MODIFIED, page.LastRevision.TimeStamp.ToString("o")},
                 });
             var image = await GetPageImageUrl(page).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(image))

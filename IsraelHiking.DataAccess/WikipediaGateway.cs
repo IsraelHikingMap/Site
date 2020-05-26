@@ -163,9 +163,9 @@ namespace IsraelHiking.DataAccess
             {
                 attributes.Add(FeatureAttributes.IMAGE_URL, imageUrl);
             }
-            attributes.Add(FeatureAttributes.POI_USER_NAME + ":" + language, page.LastRevision.UserName);
-            attributes.Add(FeatureAttributes.POI_USER_ADDRESS + ":" + language, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeUriString(page.LastRevision.UserName)}"));
-            attributes.Add(FeatureAttributes.POI_LAST_MODIFIED + ":" + language, page.LastRevision.TimeStamp.ToString("o"));
+            attributes.Add(FeatureAttributes.POI_USER_NAME, page.LastRevision.UserName);
+            attributes.Add(FeatureAttributes.POI_USER_ADDRESS, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeUriString(page.LastRevision.UserName)}"));
+            attributes.Add(FeatureAttributes.POI_LAST_MODIFIED, page.LastRevision.TimeStamp.ToString("o"));
             var feature = new Feature(new Point(coordinate), attributes);
             feature.SetTitles();
             feature.SetId();
