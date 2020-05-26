@@ -80,7 +80,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
             _elasticSearchGateway.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
             _elasticSearchGateway.Received(1).UpdatePointsOfInterestZeroDownTime(Arg.Any<List<Feature>>());
-            _pointsOfInterestFilesCreatorExecutor.Received(1).Create(Arg.Any<List<Feature>>());
+            _pointsOfInterestFilesCreatorExecutor.Received(1).CreateSiteMapXmlFile(Arg.Any<List<Feature>>());
         }
 
         [TestMethod]

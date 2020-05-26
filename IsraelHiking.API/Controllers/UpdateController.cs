@@ -69,7 +69,8 @@ namespace IsraelHiking.API.Controllers
                     request.UpdateOsmFile == false &&
                     request.DownloadOsmFile == false &&
                     request.Images == false &&
-                    request.SiteMap == false)
+                    request.SiteMap == false &&
+                    request.OfflinePoisFile == false)
                 {
                     request = new UpdateRequest
                     {
@@ -78,7 +79,8 @@ namespace IsraelHiking.API.Controllers
                         UpdateOsmFile = true,
                         DownloadOsmFile = true,
                         SiteMap = true,
-                        Images = true
+                        Images = true,
+                        OfflinePoisFile = true
                     };
                     _logger.LogInformation("No specific filters were applied, updating all databases.");
                 }

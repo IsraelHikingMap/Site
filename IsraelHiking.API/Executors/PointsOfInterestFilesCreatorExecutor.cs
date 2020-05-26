@@ -48,15 +48,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc/>
-        public void Create(List<Feature> features)
-        {
-            _logger.LogInformation($"Starting points of interest files creation: {features.Count}.");
-            CreateSitemapXmlFile(features);
-            CreateOfflinePoisFile(features);
-            _logger.LogInformation($"Finished points of interest files creation: {features.Count}.");
-        }
-
-        private void CreateSitemapXmlFile(List<Feature> features)
+        public void CreateSiteMapXmlFile(List<Feature> features)
         {
             using (var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "sitemap.xml")))
             {
@@ -83,7 +75,8 @@ namespace IsraelHiking.API.Executors
             }
         }
 
-        private void CreateOfflinePoisFile(List<Feature> features)
+        /// <inheritdoc/>
+        public void CreateOfflinePoisFile(List<Feature> features)
         {
             var collection = new FeatureCollection();
             var slimCollection = new FeatureCollection();

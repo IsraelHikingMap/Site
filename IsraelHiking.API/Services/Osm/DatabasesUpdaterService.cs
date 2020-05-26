@@ -172,6 +172,10 @@ namespace IsraelHiking.API.Services.Osm
             {
                 await RebuildSiteMap();
             }
+            if (request.OfflinePoisFile)
+            {
+                await RebuildOfflinePoisFile();
+            }
         }
 
         private async Task RebuildPointsOfInterest()
@@ -221,8 +225,16 @@ namespace IsraelHiking.API.Services.Osm
         {
             _logger.LogInformation("Starting rebuilding sitemap.");
             var features = await _elasticSearchGateway.GetAllPointsOfInterest();
-            _pointsOfInterestFilesCreatorExecutor.Create(features);
+            _pointsOfInterestFilesCreatorExecutor.CreateSiteMapXmlFile(features);
             _logger.LogInformation("Finished rebuilding sitemap.");
+        }
+
+        private async Task RebuildOfflinePoisFile()
+        {
+            _logger.LogInformation("Starting rebuilding offline pois file.");
+            var features = await _elasticSearchGateway.GetAllPointsOfInterest();
+            _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
+            _logger.LogInformation("Finished rebuilding offline pois file.");
         }
     }
 }

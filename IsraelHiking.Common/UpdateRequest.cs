@@ -26,6 +26,10 @@
         /// Update site map xml file and offline points of interest file
         /// </summary>
         public bool SiteMap { get; set; }
-        
+        /// <summary>
+        /// Update pois file
+        /// </summary>
+        public bool OfflinePoisFile { get; set; }
+
     }
 }
