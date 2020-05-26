@@ -26,9 +26,8 @@ namespace IsraelHiking.DataAccess.Tests
                 Profile = ProfileType.Foot
             }).Result;
             Assert.IsNotNull(results);
-            var details = results.Attributes["details"] as JsonDetails;
+            var details = results.Attributes["details"];
             Assert.IsNotNull(details);
-            Assert.IsTrue(details.road_class.Count > 0);
         }
     }
 }
