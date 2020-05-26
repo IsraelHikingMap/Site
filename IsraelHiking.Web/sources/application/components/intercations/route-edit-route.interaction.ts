@@ -301,7 +301,7 @@ export class RouteEditRouteInteraction {
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
         let segment = { ...routeData.segments[index] };
         if (index === 0) {
-            let nextSegment = routeData.segments[index + 1];
+            let nextSegment = { ...routeData.segments[index + 1] };
             await this.runRouting(latlng, nextSegment);
             let snappedLatLng = this.getSnappingForRoute(latlng, [nextSegment.latlngs[0]]);
             segment.latlngs = await this.elevationProvider.updateHeights([snappedLatLng, snappedLatLng]) as ILatLngTime[];
@@ -328,7 +328,7 @@ export class RouteEditRouteInteraction {
             segment.routePoint = latlng;
             segment.routingType = routingType;
             await this.runRouting(previousSegment.routePoint, segment);
-            let nextSegment = routeData.segments[index + 1];
+            let nextSegment = { ...routeData.segments[index + 1] };
             await this.runRouting(segment.routePoint, nextSegment);
             this.ngRedux.dispatch(new UpdateSegmentsAction({
                 routeId: routeData.id,
