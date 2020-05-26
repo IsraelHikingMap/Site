@@ -279,7 +279,6 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
 
     public routeLineMouseEnter(event) {
         this.host.mapInstance.getCanvas().style.cursor = "pointer";
-        console.log(event.features);
         this.routeLineMouseOver(event);
     }
 
@@ -310,7 +309,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         }
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         let clickedRoute = this.selectedRouteService.getRouteById(event.features[0].properties.id);
-        if (clickedRoute != null && clickedRoute != selectedRoute && !this.isEditMode()) {
+        if (clickedRoute != null && clickedRoute !== selectedRoute && !this.isEditMode()) {
             this.selectedRouteService.setSelectedRoute(clickedRoute.id);
         }
     }

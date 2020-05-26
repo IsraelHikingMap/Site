@@ -82,7 +82,6 @@ import { ToastService } from "./services/toast.service";
 import { ElevationProvider } from "./services/elevation.provider";
 import { SearchResultsProvider } from "./services/search-results.provider";
 import { GeoJsonParser } from "./services/geojson.parser";
-import { CategoriesLayerFactory } from "./services/layers/categories-layers.factory";
 import { DragAndDropService } from "./services/drag-and-drop.service";
 import { PoiService } from "./services/poi.service";
 import { GeoLocationService } from "./services/geo-location.service";
@@ -168,6 +167,8 @@ import { SecuredImageComponent } from "./components/secured-image.component";
 import { ConfigurationDialogComponent } from "./components/dialogs/configuration-dialog.component";
 import { DownloadProgressDialogComponent } from "./components/dialogs/download-progress-dialog.component";
 import { UseAppDialogComponent } from "./components/dialogs/use-app-dialog.component";
+import { CategoriesGroupComponent } from "./components/sidebar/categories-group.component";
+
 // variables and functions
 import { routes } from "./routes";
 
@@ -257,7 +258,8 @@ export function getWindow() { return window; }
             AutomaticLayerPresentationComponent,
             ConfigurationDialogComponent,
             DownloadProgressDialogComponent,
-            UseAppDialogComponent
+            UseAppDialogComponent,
+            CategoriesGroupComponent
         ],
         providers: [
             GestureConfig,
@@ -287,7 +289,6 @@ export function getWindow() { return window; }
             ElevationProvider,
             SearchResultsProvider,
             GeoJsonParser,
-            CategoriesLayerFactory,
             DragAndDropService,
             PoiService,
             GeoLocationService,
@@ -381,6 +382,7 @@ export function getWindow() { return window; }
             ConfigurationDialogComponent,
             DownloadProgressDialogComponent,
             UseAppDialogComponent,
+            CategoriesGroupComponent,
             NameInUseValidatorDirective,
             ImageCaptureDirective,
             OfflineImagePipe

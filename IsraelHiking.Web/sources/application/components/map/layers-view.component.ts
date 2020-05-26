@@ -1,13 +1,11 @@
-import { Component, OnInit, ViewChildren, QueryList } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { GeoJSONSourceComponent } from "ngx-mapbox-gl";
-import { MarkersForClustersComponent } from "ngx-mapbox-gl/lib/markers-for-clusters/markers-for-clusters.component";
 import { select } from "@angular-redux/store";
 
-import { PoiService, CategoriesType } from "../../services/poi.service";
+import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers/layers.service";
-import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
 import { RouteStrings } from "../../services/hash.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -21,17 +19,12 @@ import { ApplicationState, Overlay, PointOfInterest, PointOfInterestExtended } f
 export class LayersViewComponent extends BaseMapComponent implements OnInit {
     private static readonly MAX_MENU_POINTS_IN_CLUSTER = 7;
 
-    @ViewChildren("cluster")
-    public clustersComponents: QueryList<MarkersForClustersComponent>;
-
-    public categoriesTypes: CategoriesType[];
-    public poiGeoJsonData: { [category: string]: GeoJSON.FeatureCollection<GeoJSON.Point> };
+    public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public selectedPoiFeature: GeoJSON.Feature<GeoJSON.Point>;
     public selectedPoiGeoJson: GeoJSON.FeatureCollection;
     public selectedCluster: GeoJSON.Feature<GeoJSON.Point>;
     public clusterPoints: PointOfInterest[];
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point>;
-    public poiSourceName: { [categoriesType: string]: string };
 
     @select((state: ApplicationState) => state.layersState.overlays)
     public overlays: Observable<Overlay[]>;
@@ -42,10 +35,9 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     constructor(resources: ResourcesService,
                 private readonly router: Router,
                 private readonly layersService: LayersService,
-                private readonly categoriesLayerFactory: CategoriesLayerFactory,
-                private readonly poiService: PoiService) {
+                private readonly poiService: PoiService
+    ) {
         super(resources);
-        this.categoriesTypes = this.poiService.getCategoriesTypes();
         this.selectedCluster = null;
         this.hoverFeature = null;
         this.selectedPoiFeature = null;
@@ -53,32 +45,17 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
             type: "FeatureCollection",
             features: []
         };
-        this.poiGeoJsonData = {};
-        this.poiSourceName = {};
-        for (let categoriesType of this.categoriesTypes) {
-            this.poiGeoJsonData[categoriesType] = { type: "FeatureCollection", features: [] };
-            this.poiSourceName[categoriesType] = "poiSource" + categoriesType.replace(/\s/g, "");
-        }
     }
 
     public getBaseLayer() {
         return this.layersService.getSelectedBaseLayer();
     }
 
-    public isVisible(categoriesType: CategoriesType) {
-        return this.categoriesLayerFactory.get(categoriesType).isVisible();
-    }
-
     public ngOnInit() {
-        for (let categoriesType of this.categoriesTypes) {
-            this.categoriesLayerFactory.get(categoriesType).markersLoaded.subscribe(() => {
-                let features = this.categoriesLayerFactory.get(categoriesType).pointsOfInterest.map(p => this.poiToFeature(p));
-                this.poiGeoJsonData[categoriesType] = {
-                    type: "FeatureCollection",
-                    features
-                };
-            });
-        }
+        this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
+        this.poiService.poisChanged.subscribe(() => {
+            this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
+        });
         this.selectedPoi$.subscribe((poi) => this.onSelectedPoiChanged(poi));
     }
 
@@ -96,13 +73,13 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     }
 
     private poiToFeature(p: PointOfInterest): GeoJSON.Feature<GeoJSON.Point> {
-        let id = p.source + "__" + p.id;
+        let id = p.source + "_" + p.id;
         return {
             type: "Feature",
             properties: {
-                id,
-                icon: p.icon,
-                iconColor: p.iconColor,
+                poiId: id,
+                poiIcon: p.icon,
+                poiIconColor: p.iconColor,
                 title: p.title,
                 hasExtraData: p.hasExtraData
             },
@@ -135,10 +112,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         this.selectedCluster = feature;
         this.clusterPoints = features.map(f => {
             let properties = f.properties;
-            let sourceAndId = this.getSourceAndId(f.properties.id.toString());
+            let sourceAndId = this.getSourceAndId(f.properties.poiId);
             return {
-                icon: properties.icon,
-                iconColor: properties.iconColor,
+                icon: properties.poiIcon,
+                iconColor: properties.poiIconColor,
                 title: properties.title,
                 id: sourceAndId.id,
                 source: sourceAndId.source
@@ -147,8 +124,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     }
 
     private getSourceAndId(sourceAndId: string): { source: string, id: string } {
-        let poiSource = sourceAndId.split("__")[0];
-        let id = sourceAndId.split("__")[1];
+        let poiSource = sourceAndId.split("_")[0];
+        let id = sourceAndId.replace(poiSource + "_", "");
         return {
             source: poiSource,
             id

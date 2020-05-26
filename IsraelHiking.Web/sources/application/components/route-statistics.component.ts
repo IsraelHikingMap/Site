@@ -514,7 +514,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 .attr("x1", 0)
                 .attr("x2", this.chartElements.width)
                 .attr("y1", this.chartElements.height / 2)
-                .attr("y2", this.chartElements.height / 2)
+                .attr("y2", this.chartElements.height / 2);
         }
     }
 
@@ -682,7 +682,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         chartTransition.select(".y-axis")
             .call(d3.axisLeft(this.chartElements.yScale).ticks(5) as any)
             .duration(duration);
-        let slopeData = []
+        let slopeData = [];
         if (this.isSlopeOn && data.length > 0) {
             slopeData = this.statistics.points.map(p => [p.coordinate[0], p.slope] as [number, number]);
         }

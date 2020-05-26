@@ -55,31 +55,9 @@
                 </div>
             </div>
         </mat-expansion-panel>
-        <ng-container *ngFor="let categoriesType of categoriesTypes">
-            <mat-expansion-panel [expanded]="getExpandState(categoriesType)" (opened)="expand(categoriesType)" (closed)="collapse(categoriesType)">
-                <mat-expansion-panel-header>
-                    <button mat-button (click)="toggleCategoriesLayerVisibility(categoriesType, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle visiblity of category layer {{categoriesType}}">
-                        <i class="fa fa-lg" [ngClass]="{'icon-eye': isCategoriesLayerVisible(categoriesType), 'icon-eye-slash': !isCategoriesLayerVisible(categoriesType)}"></i>
-                    </button>
-                    <p>{{resources.translate(categoriesType)}}</p>
-                </mat-expansion-panel-header>
-                <div *ngFor="let category of getCategories(categoriesType)">
-                    <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleCategory(categoriesType, category)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle category visibility {{category.name}}">
-                        <div fxFlex="10"></div>
-                        <div fxFlex="15">
-                            <i class="fa" [ngClass]="{'icon-eye': category.visible, 'icon-eye-slash': !category.visible}"></i>
-                        </div>
-                        <div fxFlex="15">
-                            <i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i>
-                        </div>
-                        <div fxFlex>
-                            <span>{{resources.translate(category.name)}}</span>
-                        </div>
-                    </div>
-                </div>
-            </mat-expansion-panel>
+        <ng-container *ngFor="let categoriesGroup of (categoriesGroups | async)">
+            <categories-group [categoriesGroup]="categoriesGroup"></categories-group>
         </ng-container>
-
         <mat-expansion-panel [expanded]="getExpandState('Private Routes')" (opened)="expand('Private Routes')" (closed)="collapse('Private Routes')">
             <mat-expansion-panel-header>
                 <button mat-button (click)="addRoute($event)" matTooltip="{{resources.addRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add route"><i class="fa fa-lg icon-plus"></i></button>

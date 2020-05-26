@@ -10,6 +10,7 @@ import { PurchaseService } from "./purchase.service";
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { RunningContextService } from "./running-context.service";
 import { DragAndDropService } from "./drag-and-drop.service";
+import { PoiService } from "./poi.service";
 
 @Injectable()
 export class ApplicationInitializeService {
@@ -21,7 +22,10 @@ export class ApplicationInitializeService {
                 private readonly openWithService: OpenWithService,
                 private readonly purchaseService: PurchaseService,
                 private readonly runnincContextService: RunningContextService,
-                private readonly dragAndDropService: DragAndDropService) {
+                private readonly dragAndDropService: DragAndDropService,
+                private readonly poiService: PoiService,
+
+    ) {
     }
 
     public async initialize() {
@@ -39,6 +43,7 @@ export class ApplicationInitializeService {
                 && !this.runnincContextService.isIFrame) {
                 UseAppDialogComponent.openDialog(this.dialog);
             }
+            this.poiService.initialize(); // do not wait for it to complete
             await this.loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
             if (ex.toString().indexOf("A mutation operation was attempted on a database that did not allow mutations") !== -1) {

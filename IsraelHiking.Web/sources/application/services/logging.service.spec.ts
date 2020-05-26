@@ -21,6 +21,8 @@ describe("LoggingService", () => {
     });
 
     it("should init logger instance", () => {
+        let spy = spyOn(console, "log");
         loggingService.info("debug");
+        expect(console.log).toHaveBeenCalled();
     });
 });

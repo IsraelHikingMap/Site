@@ -1,6 +1,8 @@
-import { Injectable } from "@angular/core";
+import { Injectable, EventEmitter } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
+import { NgRedux, select } from "@angular-redux/store";
 import { uniq } from "lodash";
+import { Observable } from "rxjs";
 import { timeout } from "rxjs/operators";
 
 import { ResourcesService } from "./resources.service";
@@ -9,25 +11,20 @@ import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
+import { FileService } from "./file.service";
+import { LoggingService } from "./logging.service";
 import { GeoJsonParser } from "./geojson.parser";
+import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducres/layers.reducer";
 import { Urls } from "../urls";
-import { MarkerData, LatLngAlt, PointOfInterestExtended, PointOfInterest } from "../models/models";
-
-export type CategoriesType = "Points of Interest" | "Routes";
-
-export interface IIconColorLabel {
-    icon: string;
-    color: string;
-    label: string;
-}
-
-export interface ICategory {
-    name: string;
-    icon: string;
-    color: string;
-    visible: boolean;
-    items: { iconColorCategory: IIconColorLabel, tags: any[] }[];
-}
+import {
+    MarkerData,
+    LatLngAlt,
+    PointOfInterestExtended,
+    ApplicationState,
+    Category,
+    IconColorLabel,
+    CategoriesGroup
+} from "../models/models";
 
 export interface IPoiSocialLinks {
     poiLink: string;
@@ -36,17 +33,23 @@ export interface IPoiSocialLinks {
     waze: string;
 }
 
-export interface ISelectableCategory extends ICategory {
+export interface ISelectableCategory extends Category {
     isSelected: boolean;
-    selectedIcon: IIconColorLabel;
-    icons: IIconColorLabel[];
+    selectedIcon: IconColorLabel;
+    icons: IconColorLabel[];
     label: string;
 }
 
 @Injectable()
 export class PoiService {
-    private categoriesMap: Map<CategoriesType, ICategory[]>;
-    private poiCache: PointOfInterestExtended[];
+    private poisCache: PointOfInterestExtended[];
+    private poisGeojson: GeoJSON.FeatureCollection<GeoJSON.Point>;
+
+    public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point>;
+    public poisChanged: EventEmitter<void>;
+
+    @select((state: ApplicationState) => state.layersState.categoriesGroups)
+    private categoriesGroups: Observable<CategoriesGroup[]>;
 
     constructor(private readonly resources: ResourcesService,
                 private readonly httpClient: HttpClient,
@@ -55,38 +58,127 @@ export class PoiService {
                 private readonly databaseService: DatabaseService,
                 private readonly runningContextService: RunningContextService,
                 private readonly geoJsonParser: GeoJsonParser,
+                private readonly loggingService: LoggingService,
+                private readonly fileService: FileService,
+                private readonly ngRedux: NgRedux<ApplicationState>
     ) {
-        this.poiCache = [];
-        this.categoriesMap = new Map<CategoriesType, ICategory[]>();
-        this.categoriesMap.set("Points of Interest", []);
-        this.categoriesMap.set("Routes", []);
+        this.poisCache = [];
+        this.poisChanged = new EventEmitter();
 
         this.resources.languageChanged.subscribe(() => {
-            this.poiCache = [];
+            this.poisCache = [];
         });
+
+        this.poiGeojsonFiltered = {
+            type: "FeatureCollection",
+            features: []
+        };
+
+        this.poisGeojson = {
+            type: "FeatureCollection",
+            features: []
+        };
     }
 
-    public async getCategories(categoriesType: CategoriesType): Promise<ICategory[]> {
-        let categories = this.categoriesMap.get(categoriesType);
-        if (Object.keys(categories).length > 0) {
-            return categories;
+    public async initialize() {
+        try {
+            this.resources.languageChanged.subscribe(() => this.updatePois());
+            this.categoriesGroups.subscribe(() => this.updatePois());
+            await this.syncCategories();
+
+            if (this.runningContextService.isCordova) {
+                let poiText = await this.fileService.getCachedFile("pois-slim.geojson");
+                if (poiText) {
+                    this.loggingService.info("Loaded POIs from file");
+                    this.poisGeojson = JSON.parse(poiText);
+                    this.updatePois();
+                }
+            }
+            // HM TODO: toast? progress?
+            this.poisGeojson = await this.httpClient.get(Urls.slimGeoJSON)
+                .pipe(timeout(30000)).toPromise() as GeoJSON.FeatureCollection<GeoJSON.Point>;
+            this.updatePois();
+            if (this.runningContextService.isCordova) {
+                await this.fileService.storeFileToCache("pois-slim.geojson", JSON.stringify(this.poisGeojson));
+            }
+        } catch (ex) {
+            this.loggingService.warning("Unable to sync public pois and categories - using local data: " + ex.message);
         }
-        let categoriesArray = await this.httpClient.get(Urls.poiCategories + categoriesType).toPromise() as ICategory[];
-        for (let category of categoriesArray) {
-            categories.push(category);
-        }
-        // HM TODO: store response somewhere and only refresh it at startup
-        return categories;
+
     }
 
-    public getCategoriesTypes(): CategoriesType[] {
-        return Array.from(this.categoriesMap.keys());
+    public updatePois() {
+        let visibleCategories = [];
+        for (let categoriesGroup of this.ngRedux.getState().layersState.categoriesGroups) {
+            for (let category of categoriesGroup.categories) {
+                if (category.visible) {
+                    visibleCategories.push(category.name);
+                }
+            }
+        }
+        if (visibleCategories.length === 0) {
+            this.poiGeojsonFiltered = {
+                type: "FeatureCollection",
+                features: []
+            };
+            this.poisChanged.next();
+            return;
+        }
+
+        let visibleFeatures = [];
+        let language = this.resources.getCurrentLanguageCodeSimplified();
+        for (let feature of this.poisGeojson.features) {
+            if (feature.properties.poiLanguage !== "all" && feature.properties.poiLanguage !== language) {
+                continue;
+            }
+            if (visibleCategories.indexOf(feature.properties.poiCategory) === -1) {
+                continue;
+            }
+            let titles = feature.properties.poiNames[language] || feature.properties.poiNames.all;
+            feature.properties.title = (titles && titles.length > 0) ? titles[0] : "";
+            feature.properties.hasExtraData = feature.properties.poiHasExtraData[language] || false;
+            visibleFeatures.push(feature);
+        }
+        this.poiGeojsonFiltered = {
+            type: "FeatureCollection",
+            features: visibleFeatures
+        };
+        this.poisChanged.next();
+    }
+
+    public async syncCategories(): Promise<void> {
+        try {
+            for (let categoriesGroup of this.ngRedux.getState().layersState.categoriesGroups) {
+                let categories = await this.httpClient.get(Urls.poiCategories + categoriesGroup.type)
+                    .pipe(timeout(10000)).toPromise() as Category[];
+                let visibility = categoriesGroup.visible;
+                if (this.runningContextService.isIFrame) {
+                    this.ngRedux.dispatch(new SetCategoriesGroupVisibilityAction({
+                        groupType: categoriesGroup.type,
+                        visible: false
+                    }));
+                    visibility = false;
+                }
+                for (let category of categories) {
+                    if (categoriesGroup.categories.find(c => c.name === category.name) == null) {
+                        category.visible = visibility;
+                        this.ngRedux.dispatch(new AddCategoryAction({
+                            groupType: categoriesGroup.type,
+                            category
+                        }));
+                    }
+                }
+            }
+        } catch (ex) {
+            this.loggingService.warning("Unable to sync categories, using local categories");
+        }
+
     }
 
     public getSelectableCategories = async (): Promise<ISelectableCategory[]> => {
-        let categories = await this.getCategories("Points of Interest");
+        let categoriesGroup = this.ngRedux.getState().layersState.categoriesGroups.find(g => g.type === "Points of Interest");
         let selectableCategories = [] as ISelectableCategory[];
-        for (let category of categories) {
+        for (let category of categoriesGroup.categories) {
             if (category.name === "Wikipedia" || category.name === "iNature") {
                 continue;
             }
@@ -104,23 +196,8 @@ export class PoiService {
         return selectableCategories;
     }
 
-    public async getPoints(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[]): Promise<PointOfInterest[]> {
-        let language = this.resources.getCurrentLanguageCodeSimplified();
-        if (!this.runningContextService.isOnline) {
-            let features = await this.databaseService.getPois(northEast, southWest, categoriesTypes, language);
-            return features.map(f => this.featureToPoint(f)).filter(f => f != null);
-        }
-
-        let params = new HttpParams()
-            .set("northEast", northEast.lat + "," + northEast.lng)
-            .set("southWest", southWest.lat + "," + southWest.lng)
-            .set("categories", categoriesTypes.join(","))
-            .set("language", language);
-        return this.httpClient.get(Urls.poi, { params }).pipe(timeout(10000)).toPromise() as Promise<PointOfInterest[]>;
-    }
-
     public async getPoint(id: string, source: string, language?: string): Promise<PointOfInterestExtended> {
-        let itemInCache = this.poiCache.find(p => p.id === id && p.source === source);
+        let itemInCache = this.poisCache.find(p => p.id === id && p.source === source);
         if (itemInCache) {
             return { ...itemInCache };
         }
@@ -135,13 +212,13 @@ export class PoiService {
         let params = new HttpParams()
             .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
         let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params }).toPromise() as PointOfInterestExtended;
-        this.poiCache.splice(0, 0, poi);
+        this.poisCache.splice(0, 0, poi);
         return { ...poi };
     }
 
     public async uploadPoint(poiExtended: PointOfInterestExtended): Promise<PointOfInterestExtended> {
         let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-        this.poiCache = [];
+        this.poisCache = [];
         return this.httpClient.post(uploadAddress, poiExtended).toPromise() as Promise<PointOfInterestExtended>;
     }
 

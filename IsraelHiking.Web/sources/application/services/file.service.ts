@@ -276,4 +276,18 @@ export class FileService {
             }, reject);
         });
     }
+
+    public async getCachedFile(fileName: string): Promise<string> {
+        try {
+            return await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.cacheDirectory, fileName);
+        } catch (ex) {
+            this.loggingService.warning("Unable to get file from cache: " + ex.message);
+            return null;
+        }
+    }
+
+    public storeFileToCache(fileName: string, content: string) {
+        return this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, content,
+            { replace: true, append: false, truncate: 0 });
+    }
 }

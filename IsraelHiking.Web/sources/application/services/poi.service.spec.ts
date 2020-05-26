@@ -1,7 +1,6 @@
-import { TestBed, inject } from "@angular/core/testing";
+import { TestBed, inject, flushMicrotasks, fakeAsync, tick, flush } from "@angular/core/testing";
 import { HttpClientModule, HttpRequest } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { NgRedux } from "@angular-redux/store";
 import { Device } from "@ionic-native/device/ngx";
 
 import { ToastServiceMockCreator } from "./toast.service.spec";
@@ -12,81 +11,65 @@ import { PoiService } from "./poi.service";
 import { HashService } from "./hash.service";
 import { DatabaseService } from "./database.service";
 import { LoggingService } from "./logging.service";
-import { ConnectionService } from "./connection.service";
-import { GeoJsonParser } from "./geojson.parser";
-import { Urls } from "../urls";
-import { PointOfInterestExtended } from "../models/models";
-import { SQLite } from "@ionic-native/sqlite/ngx";
+import { FileService } from "./file.service";
 import { ToastService } from "./toast.service";
+import { GeoJsonParser } from "./geojson.parser";
+import { SQLite } from "@ionic-native/sqlite/ngx";
+import { Urls } from "../urls";
+import { PointOfInterestExtended, ApplicationState } from "../models/models";
+import { NgReduxTestingModule, MockNgRedux } from "@angular-redux/store/testing";
 
 describe("Poi Service", () => {
 
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
         let hashService = {};
-        let connectionService = {
-            monitor: () => {
-                return {
-                    subscribe: () => { }
-                };
-            }
-        };
+        let fileServiceMock = {};
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
-                HttpClientTestingModule
+                HttpClientTestingModule,
+                NgReduxTestingModule
             ],
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: HashService, useValue: hashService },
-                { provide: ConnectionService, useValue: connectionService },
                 { provide: ToastService, useValue: null },
+                { provide: FileService, useValue: fileServiceMock },
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,
                 PoiService,
                 DatabaseService,
                 LoggingService,
-                NgRedux,
                 Device,
                 SQLite
             ]
         });
+        MockNgRedux.reset();
     });
 
-    it("Should get categories from server", (inject([PoiService, HttpTestingController],
+    it("Should initialize and sync categories from server", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-            let promise = poiService.getCategories("Points of Interest").then((resutls) => {
-                expect(resutls).not.toBeNull();
-                expect(resutls.length).toBe(1);
-            }, fail);
-
-            mockBackend.match(() => true)[0].flush([{ icon: "icon", name: "category" }]);
-            return promise;
-        })));
-
-    it("Should get available categories types", (inject([PoiService], (poiService: PoiService) => {
-        expect(poiService.getCategoriesTypes().length).toBe(2);
-    })));
-
-    it("Should get points from server", (inject([PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
-
-            let northEast = { lat: 1, lng: 2 };
-            let southWest = { lat: 3, lng: 4 };
-
-            let promise = poiService.getPoints(northEast, southWest, []).then((res) => {
-                expect(res).not.toBeNull();
+            MockNgRedux.getInstance().getState = () => ({
+                layersState: {
+                    categoriesGroups: [{ type: "type", categories: [], visible: true }]
+                }
             });
+            let changed = false;
+            poiService.poisChanged.subscribe(() => changed = true);
+            let promise = poiService.initialize();
+            mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            mockBackend.match(r => r.url === Urls.slimGeoJSON)[0].flush({ type: "FeatureCollection", features: [] });
 
-            mockBackend.expectOne((request) => {
-                let paramsString = request.params.toString();
-                return paramsString.includes(northEast.lat + "," + northEast.lng) &&
-                    paramsString.includes(southWest.lat + "," + southWest.lng);
-            }).flush({});
-            return promise;
+            await promise;
+
+            expect(changed).toBe(true);
         })));
+
+
 
     it("Should get a point by id and source from the server", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {

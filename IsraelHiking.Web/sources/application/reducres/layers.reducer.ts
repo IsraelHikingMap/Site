@@ -1,8 +1,8 @@
-import { orderBy, remove } from "lodash";
+import { orderBy, remove, some } from "lodash";
 
 import { createReducerFromClass, ReduxAction, BaseAction } from "./reducer-action-decorator";
 import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS } from "./initial-state";
-import { LayersState, EditableLayer, Overlay } from "../models/models";
+import { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models/models";
 
 const ADD_BASE_LAYER = "ADD_BASE_LAYER";
 const ADD_OVERLAY = "ADD_OVERLAY";
@@ -13,7 +13,9 @@ const UPDATE_OVERLAY = "UPDATE_OVERLAY";
 const SELECT_BASE_LAYER = "SELECT_BASE_LAYER";
 const EXPAND_GROUP = "EXPAND_GROUP";
 const COLLAPSE_GROUP = "COLLAPSE_GROUP";
-const SET_ITEM_VISIBILITY = "SET_ITEM_VISIBILITY";
+const SET_CATEGORIES_GROUP_VISIBILITY = "SET_CATEGORIES_GROUP_VISIBILITY";
+const ADD_CATEGORY = "ADD_CATEGORY";
+const SET_CATEGORY_VISIBILITY = "SET_CATEGORY_VISIBILITY";
 const TOGGLE_OFFLINE = "TOGGLE_OFFLINE";
 
 export interface AddBaseLayerPayload {
@@ -46,8 +48,19 @@ export interface ToggleGroupPayload {
     name: string;
 }
 
-export interface SetItemVisibilityPayload {
+export interface SetCategoriesGroupVisibilityPayload {
+    groupType: CategoriesGroupType;
+    visible: boolean;
+}
+
+export interface AddCategoryPayload {
+    groupType: CategoriesGroupType;
+    category: Category;
+}
+
+export interface SetCategoryVisibilityPayload {
     name: string;
+    groupType: CategoriesGroupType;
     visible: boolean;
 }
 
@@ -110,9 +123,21 @@ export class CollapseGroupAction extends BaseAction<ToggleGroupPayload> {
     }
 }
 
-export class SetItemVisibilityAction extends BaseAction<SetItemVisibilityPayload> {
-    constructor(payload: SetItemVisibilityPayload) {
-        super(SET_ITEM_VISIBILITY, payload);
+export class SetCategoriesGroupVisibilityAction extends BaseAction<SetCategoriesGroupVisibilityPayload> {
+    constructor(payload: SetCategoriesGroupVisibilityPayload) {
+        super(SET_CATEGORIES_GROUP_VISIBILITY, payload);
+    }
+}
+
+export class AddCategoryAction extends BaseAction<AddCategoryPayload> {
+    constructor(payload: AddCategoryPayload) {
+        super(ADD_CATEGORY, payload);
+    }
+}
+
+export class SetCategoryVisibilityAction extends BaseAction<SetCategoryVisibilityPayload> {
+    constructor(payload: SetCategoryVisibilityPayload) {
+        super(SET_CATEGORY_VISIBILITY, payload);
     }
 }
 
@@ -221,22 +246,66 @@ class LayersReducer {
         };
     }
 
-    @ReduxAction(SET_ITEM_VISIBILITY)
-    public setItemVisibility(lastState: LayersState, action: SetItemVisibilityAction): LayersState {
-        let visible = [...lastState.visible];
-        let item = visible.find(n => n.name === action.payload.name);
-        if (item == null) {
-            item = { name: action.payload.name, visible: action.payload.visible };
-            visible.push(item);
-            return {
-                ...lastState,
-                visible
-            };
-        }
-        visible.splice(visible.indexOf(item), 1, { ...item, visible: action.payload.visible });
+    @ReduxAction(ADD_CATEGORY)
+    public addCategory(lastState: LayersState, action: AddCategoryAction): LayersState {
+        let groups = [...lastState.categoriesGroups];
+        let group = groups.find(g => g.type === action.payload.groupType);
+        let categories = [...group.categories];
+        categories.push(action.payload.category);
+        let newGroup = {
+            ...group,
+            categories
+        };
+        groups.splice(groups.indexOf(group), 1, newGroup);
         return {
             ...lastState,
-            visible
+            categoriesGroups: groups
+        };
+    }
+
+    @ReduxAction(SET_CATEGORY_VISIBILITY)
+    public setCatgegoryVisibility(lastState: LayersState, action: SetCategoryVisibilityAction): LayersState {
+        let groups = [...lastState.categoriesGroups];
+        let group = groups.find(g => g.type === action.payload.groupType);
+        let categories = [...group.categories];
+        let category = categories.find(c => c.name === action.payload.name);
+        let newCategory = {
+            ...category,
+            visible: action.payload.visible
+        };
+        categories.splice(categories.indexOf(category), 1, newCategory);
+        let newGroup = {
+            ...group,
+            categories,
+            visible: some(categories, c => c.visible)
+        };
+        groups.splice(groups.indexOf(group), 1, newGroup);
+        return {
+            ...lastState,
+            categoriesGroups: groups
+        };
+    }
+
+    @ReduxAction(SET_CATEGORIES_GROUP_VISIBILITY)
+    public setCatgegoriesGroupVisibility(lastState: LayersState, action: SetCategoriesGroupVisibilityAction): LayersState {
+        let groups = [...lastState.categoriesGroups];
+        let group = groups.find(g => g.type === action.payload.groupType);
+        let categories = [];
+        for (let category of group.categories) {
+            categories.push({
+                ...category,
+                visible: action.payload.visible
+            });
+        }
+        let newGroup = {
+            ...group,
+            categories,
+            visible: action.payload.visible
+        };
+        groups.splice(groups.indexOf(group), 1, newGroup);
+        return {
+            ...lastState,
+            categoriesGroups: groups
         };
     }
 

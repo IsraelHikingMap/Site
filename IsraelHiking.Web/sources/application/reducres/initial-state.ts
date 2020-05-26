@@ -100,7 +100,16 @@ export const initialState =
             ],
             selectedBaseLayerKey: ISRAEL_HIKING_MAP,
             expanded: ["Base Layers", "Overlays", "Private Routes"],
-            visible: []
+            categoriesGroups: [{
+                type: "Points of Interest",
+                categories: [],
+                visible: true
+            },
+            {
+                type: "Routes",
+                categories: [],
+                visible: true
+            }]
         },
         userState: {
             userInfo: null,

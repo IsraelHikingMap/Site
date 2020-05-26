@@ -239,7 +239,7 @@ export class RouteStatisticsService {
                     sum += slopes[pointIndex + windowIndex];
                     count++;
                 }
-                
+
             }
             statistics.points[pointIndex].slope = sum / count;
         }

@@ -212,15 +212,6 @@ export class DatabaseService {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkPut(pois);
     }
 
-    public getPois(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[], language: string): Promise<GeoJSON.Feature[]> {
-        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME)
-            .where(DatabaseService.POIS_LOCATION_COLUMN)
-            .between([southWest.lat, southWest.lng], [northEast.lat, northEast.lng])
-            .filter((x: GeoJSON.Feature) => x.properties.poiLanguage === language || x.properties.poiLanguage === "all")
-            .filter((x: GeoJSON.Feature) => categoriesTypes.indexOf(x.properties.poiCategory) !== -1)
-            .toArray();
-    }
-
     public getPoiById(id: string): Promise<GeoJSON.Feature> {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).get(id);
     }

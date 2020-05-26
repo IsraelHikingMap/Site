@@ -1,10 +1,10 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { MatSelectChange } from "@angular/material";
 
-import { PoiService, ISelectableCategory, IIconColorLabel } from "../../../services/poi.service";
+import { PoiService, ISelectableCategory } from "../../../services/poi.service";
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
-import { PointOfInterestExtended } from "../../../models/models";
+import { PointOfInterestExtended, IconColorLabel } from "../../../models/models";
 
 @Component({
     selector: "public-poi-edit",
@@ -53,7 +53,7 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
         }
 
         if (this.info.id && selectedIcon == null) {
-            selectedIcon = { icon: this.info.icon, color: "black", label: this.resources.other } as IIconColorLabel;
+            selectedIcon = { icon: this.info.icon, color: "black", label: this.resources.other } as IconColorLabel;
             selectedCategory.icons.push(selectedIcon);
         } else if (!this.info.id && selectedIcon == null) {
             selectedIcon = selectedCategory.icons[0];
@@ -71,7 +71,7 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
         }
     }
 
-    public selectIcon(icon: IIconColorLabel) {
+    public selectIcon(icon: IconColorLabel) {
         this.selectedCategory.selectedIcon = icon;
         this.info.icon = icon.icon;
     }
