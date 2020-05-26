@@ -31,11 +31,15 @@ namespace IsraelHiking.API.Converters
             {
                 if (track.Segments.Length == 1)
                 {
-                    var lineStringFeature = new Feature(new LineString(track.Segments[0].Waypoints.Select(CreateGeoPosition).ToArray()), CreateProperties(track.Name, track.Description));
+                    if (track.Segments.First().Waypoints.Count <= 1)
+                    {
+                        continue;
+                    }
+                    var lineStringFeature = new Feature(new LineString(track.Segments.First().Waypoints.Select(CreateGeoPosition).ToArray()), CreateProperties(track.Name, track.Description));
                     collection.Add(lineStringFeature);
                     continue;
                 }
-                var lineStringList = track.Segments.Select(segment => new LineString(segment.Waypoints.Select(CreateGeoPosition).ToArray())).ToArray();
+                var lineStringList = track.Segments.Where(s => s.Waypoints.Count > 1).Select(segment => new LineString(segment.Waypoints.Select(CreateGeoPosition).ToArray())).ToArray();
                 var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.Name, gpx.Metadata.Creator, track.Description));
                 collection.Add(feature);
             }

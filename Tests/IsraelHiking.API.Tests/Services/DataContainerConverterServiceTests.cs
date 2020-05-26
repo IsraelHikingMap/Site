@@ -392,5 +392,31 @@ namespace IsraelHiking.API.Tests.Services
 
             Assert.AreNotEqual(0, converterd.Length);
         }
+
+        [TestMethod]
+        public void ConvertDataContainer_InvalidSinglePointInSegment_ShouldNotFailToConvertToGeoJson()
+        {
+            var dataContainer = new DataContainer
+            {
+                Routes = new List<RouteData>
+                {
+                    new RouteData
+                    {
+                        Segments = new List<RouteSegmentData>
+                        {
+                            new RouteSegmentData
+                            {
+                                Latlngs = new List<LatLngTime>
+                                {
+                                    new LatLngTime()
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var feautreCollection = _converterService.ToAnyFormat(dataContainer, FlowFormats.GEOJSON).Result;
+            Assert.IsNotNull(feautreCollection);
+        }
     }
 }
