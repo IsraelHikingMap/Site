@@ -76,7 +76,7 @@ export class FileService {
 
     private async createIHMDirectoryIfNeeded(): Promise<string> {
         let folder = this.runningContextService.isIos
-            ? this.fileSystemWrapper.syncedDataDirectory
+            ? this.fileSystemWrapper.documentsDirectory
             : this.fileSystemWrapper.externalRootDirectory;
         await this.fileSystemWrapper.createDir(folder, "IsraelHikingMap", true);
         return `${folder}/IsraelHikingMap`;

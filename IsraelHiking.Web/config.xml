@@ -156,6 +156,9 @@
     <edit-config target="NSMotionUsageDescription" file="*-Info.plist" mode="merge">
       <string>We need to access your motion direction in order to be able to show it on the map while navigating</string>
     </edit-config>
+    <edit-config target="UIFileSharingEnabled" file="*-Info.plist" mode="overwrite">
+      <true/>
+    </edit-config>
     <edit-config target="CFBundleLocalizations" file="*-Info.plist" mode="overwrite">
       <array>
         <string>en</string>
