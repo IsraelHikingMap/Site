@@ -159,6 +159,9 @@
     <edit-config target="UIFileSharingEnabled" file="*-Info.plist" mode="overwrite">
       <true/>
     </edit-config>
+    <edit-config target="LSSupportsOpeningDocumentsInPlace" file="*-Info.plist" mode="overwrite">
+      <true/>
+    </edit-config>
     <edit-config target="CFBundleLocalizations" file="*-Info.plist" mode="overwrite">
       <array>
         <string>en</string>
