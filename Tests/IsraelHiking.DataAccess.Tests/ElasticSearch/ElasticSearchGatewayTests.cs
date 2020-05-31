@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -157,6 +158,17 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             feature.SetTitles();
             _gateway.UpdatePointsOfInterestData(new List<Feature> { feature }).Wait();
             var results = _gateway.GetPointOfInterestById(id, Sources.OSM).Result;
+            Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void GetPointsOfInterestUpdates_ShouldGetSome()
+        {
+            _gateway.Initialize();
+
+            var results = _gateway.GetPointsOfInterestUpdates(DateTime.Now.AddDays(-20)).Result;
+
             Assert.IsNotNull(results);
         }
     }

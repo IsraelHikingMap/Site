@@ -107,6 +107,20 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
         }
 
+        private List<T> GetAllItemsByScrolling<T>(ISearchResponse<T> response) where T: class
+        {
+            var list = new List<T>();
+            list.AddRange(response.Documents.ToList());
+            var results = _elasticClient.Scroll<T>("10s", response.ScrollId);
+            list.AddRange(results.Documents.ToList());
+            while (results.Documents.Any())
+            {
+                results = _elasticClient.Scroll<T>("10s", results.ScrollId);
+                list.AddRange(results.Documents.ToList());
+            }
+            return list;
+        }
+
         private QueryContainer FeatureNameSearchQueryWithFactor(QueryContainerDescriptor<Feature> q, string searchTerm, string language)
         {
             return q.FunctionScore(
@@ -317,15 +331,7 @@ namespace IsraelHiking.DataAccess
                     .Scroll("10s")
                     .Query(q => q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories))
                     ));
-            list.AddRange(response.Documents.ToList());
-            var results = _elasticClient.Scroll<Feature>("10s", response.ScrollId);
-            list.AddRange(results.Documents.ToList());
-            while (results.Documents.Any())
-            {
-                results = _elasticClient.Scroll<Feature>("10s", results.ScrollId);
-                list.AddRange(results.Documents.ToList());
-            }
-            return list;
+            return GetAllItemsByScrolling(response);
         }
 
         private GeoBoundingBoxQueryDescriptor<Feature> ConvertToGeoBoundingBox(GeoBoundingBoxQueryDescriptor<Feature> b,
@@ -335,6 +341,19 @@ namespace IsraelHiking.DataAccess
                 bb => bb.TopLeft(new GeoCoordinate(northEast.Y, southWest.X))
                     .BottomRight(new GeoCoordinate(southWest.Y, northEast.X))
             ).Field($"{PROPERTIES}.{FeatureAttributes.POI_GEOLOCATION}");
+        }
+
+        public async Task<List<Feature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate)
+        {
+            var list = new List<Feature>();
+            var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
+            var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
+                    .Size(10000)
+                    .Scroll("10s")
+                    .Query(q => q.DateRange(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_LAST_MODIFIED}").GreaterThan(lastModifiedDate))
+                        && q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories))
+                    ));
+            return GetAllItemsByScrolling(response);
         }
 
         public async Task<Feature> GetPointOfInterestById(string id, string source)
@@ -366,14 +385,7 @@ namespace IsraelHiking.DataAccess
                         q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
                     )
             );
-            var features = response.Documents.ToList();
-            var results = _elasticClient.Scroll<Feature>("10s", response.ScrollId);
-            features.AddRange(results.Documents.ToList());
-            while (results.Documents.Any())
-            {
-                results = _elasticClient.Scroll<Feature>("10s", results.ScrollId);
-                features.AddRange(results.Documents.ToList());
-            }
+            var features = GetAllItemsByScrolling(response);
             _logger.LogInformation($"Got {features.Count} features for source {source}");
             return features;
         }
@@ -618,7 +630,6 @@ namespace IsraelHiking.DataAccess
         }
         public async Task<List<string>> GetAllUrls()
         {
-            var list = new List<string>();
             _elasticClient.Refresh(IMAGES);
             var response = await _elasticClient.SearchAsync<ImageItem>(
                 s => s.Index(IMAGES)
@@ -628,15 +639,8 @@ namespace IsraelHiking.DataAccess
                     .Includes(i => i.Fields(f => f.ImageUrl, f => f.Hash))
                 ).Query(q => q.MatchAll())
             );
-            list.AddRange(response.Documents.Select(i => i.ImageUrl).ToList());
-            var results = _elasticClient.Scroll<ImageItem>("10s", response.ScrollId);
-            list.AddRange(results.Documents.Select(i => i.ImageUrl).ToList());
-            while (results.Documents.Any())
-            {
-                results = _elasticClient.Scroll<ImageItem>("10s", results.ScrollId);
-                list.AddRange(results.Documents.Select(i => i.ImageUrl).ToList());
-            }
-            return list;
+            var list = GetAllItemsByScrolling(response);
+            return list.Select(i => i.ImageUrl).ToList();
         }
 
         public Task StoreImage(ImageItem imageItem)

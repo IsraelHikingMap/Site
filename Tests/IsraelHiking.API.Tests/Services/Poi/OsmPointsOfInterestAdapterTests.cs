@@ -248,7 +248,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             {
                 Location = new LatLng(),
                 ImagesUrls = new [] { "image1", "image2" },
-                Icon = _tagsHelper.GetCategoriesByType(Categories.POINTS_OF_INTEREST).First().Icon,
+                Icon = _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon,
                 References = new[]
                 {
                     new Reference {Url = "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D"}
@@ -275,7 +275,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             {
                 Location = new LatLng(),
                 ImagesUrls = new[] { "image1", "image2" },
-                Icon = _tagsHelper.GetCategoriesByType(Categories.POINTS_OF_INTEREST).First().Icon,
+                Icon = _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon,
                 References = new[]
                 {
                     new Reference {Url = "https://he.m.wikipedia.org/wiki/%D7%96%D7%95%D7%94%D7%A8_(%D7%9E%D7%95%D7%A9%D7%91)"}

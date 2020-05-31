@@ -58,5 +58,12 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="language"></param>
         /// <returns></returns>
         public Task<Feature> GetClosestPoint(Coordinate location, string source, string language = "");
+
+        /// <summary>
+        /// Get the all the points that were undated since the given date
+        /// </summary>
+        /// <param name="lastMoidified">The last modidifaction date that the client has</param>
+        /// <returns></returns>
+        public Task<Feature[]> GetUpdates(DateTime lastMoidified);
     }
 }

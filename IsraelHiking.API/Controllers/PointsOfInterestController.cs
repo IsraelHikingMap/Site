@@ -73,7 +73,7 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public IEnumerable<Category> GetCategoriesByGroup(string categoriesGroup)
         {
-            return _tagsHelper.GetCategoriesByType(categoriesGroup);
+            return _tagsHelper.GetCategoriesByGroup(categoriesGroup);
         }
 
         /// <summary>
@@ -200,6 +200,23 @@ namespace IsraelHiking.API.Controllers
         public Task<Feature> GetClosestPoint(string location, string source, string language)
         {
             return _pointsOfInterestProvider.GetClosestPoint(location.ToCoordinate(), source, language);
+        }
+
+        /// <summary>
+        /// Get a POI by id and source
+        /// </summary>
+        /// <param name="lastModified"></param>
+        /// <returns></returns>
+        [Route("updates/{lastModified}")]
+        [HttpGet]
+        public async Task<IActionResult> GetPointOfInterestUpdate(DateTime lastModified)
+        {
+            var poiItem = await _pointsOfInterestProvider.GetUpdates(lastModified);
+            if (poiItem == null)
+            {
+                return NotFound();
+            }
+            return Ok(poiItem);
         }
     }
 }

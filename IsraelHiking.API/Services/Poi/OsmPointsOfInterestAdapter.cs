@@ -548,5 +548,15 @@ namespace IsraelHiking.API.Services.Poi
                 .OrderBy(f => f.Geometry.Coordinate.Distance(location))
                 .FirstOrDefault();
         }
+
+        /// <inheritdoc/>
+        public async Task<Feature[]> GetUpdates(DateTime lastMoidifiedDate)
+        {
+            var results = (lastMoidifiedDate == DateTime.MinValue)
+                ? await _elasticSearchGateway.GetAllPointsOfInterest()
+                : await _elasticSearchGateway.GetPointsOfInterestUpdates(lastMoidifiedDate);
+            return results.ToArray();
+            
+        }
     }
 }
