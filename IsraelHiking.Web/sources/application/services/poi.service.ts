@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient, HttpParams, HttpEventType } from "@angular/common/http";
 import { NgRedux, select } from "@angular-redux/store";
 import { uniq } from "lodash";
 import { Observable } from "rxjs";
@@ -11,10 +11,11 @@ import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService } from "./database.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
-import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducres/layers.reducer";
+import { ToastService } from "./toast.service";
+import { SetOfflinePoisLastModifiedDateAction } from "../reducres/offline.reducer";
 import { Urls } from "../urls";
 import {
     MarkerData,
@@ -44,6 +45,7 @@ export interface ISelectableCategory extends Category {
 export class PoiService {
     private poisCache: PointOfInterestExtended[];
     private poisGeojson: GeoJSON.FeatureCollection<GeoJSON.Point>;
+    private searchTermMap: Map<string, string[]>;
 
     public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public poisChanged: EventEmitter<void>;
@@ -52,15 +54,15 @@ export class PoiService {
     private categoriesGroups: Observable<CategoriesGroup[]>;
 
     constructor(private readonly resources: ResourcesService,
-                private readonly httpClient: HttpClient,
-                private readonly whatsappService: WhatsAppService,
-                private readonly hashService: HashService,
-                private readonly databaseService: DatabaseService,
-                private readonly runningContextService: RunningContextService,
-                private readonly geoJsonParser: GeoJsonParser,
-                private readonly loggingService: LoggingService,
-                private readonly fileService: FileService,
-                private readonly ngRedux: NgRedux<ApplicationState>
+        private readonly httpClient: HttpClient,
+        private readonly whatsappService: WhatsAppService,
+        private readonly hashService: HashService,
+        private readonly databaseService: DatabaseService,
+        private readonly runningContextService: RunningContextService,
+        private readonly geoJsonParser: GeoJsonParser,
+        private readonly loggingService: LoggingService,
+        private readonly toastService: ToastService,
+        private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         this.poisCache = [];
         this.poisChanged = new EventEmitter();
@@ -78,33 +80,102 @@ export class PoiService {
             type: "FeatureCollection",
             features: []
         };
+
+        this.searchTermMap = new Map<string, string[]>();
     }
 
     public async initialize() {
-        try {
-            this.resources.languageChanged.subscribe(() => this.updatePois());
-            this.categoriesGroups.subscribe(() => this.updatePois());
-            await this.syncCategories();
+        this.resources.languageChanged.subscribe(() => this.updatePois());
+        this.categoriesGroups.subscribe(() => this.updatePois());
+        await this.syncCategories();
+        await this.rebuildPois()
+        this.toastService.progress({
+            action: this.downloadPOIs
+        });
+    }
 
-            if (this.runningContextService.isCordova) {
-                let poiText = await this.fileService.getCachedFile("pois-slim.geojson");
-                if (poiText) {
-                    this.loggingService.info("Loaded POIs from file");
-                    this.poisGeojson = JSON.parse(poiText);
-                    this.updatePois();
+    private async rebuildPois() {
+        this.poisGeojson.features = await this.databaseService.getPoisForClustering();
+        for (let feature of this.poisGeojson.features) {
+            let language = this.resources.getCurrentLanguageCodeSimplified();
+            if (!feature.properties.poiNames[language] || feature.properties.poiNames[language].length == 0) {
+                continue;
+            }
+            for (let name of feature.properties.poiNames[language]) {
+                if (this.searchTermMap.has(name)) {
+                    this.searchTermMap.get(name).push(feature.properties.poiId);
+                } else {
+                    this.searchTermMap.set(name, [feature.properties.poiId]);
                 }
             }
-            // HM TODO: toast? progress?
-            this.poisGeojson = await this.httpClient.get(Urls.slimGeoJSON)
-                .pipe(timeout(30000)).toPromise() as GeoJSON.FeatureCollection<GeoJSON.Point>;
-            this.updatePois();
-            if (this.runningContextService.isCordova) {
-                await this.fileService.storeFileToCache("pois-slim.geojson", JSON.stringify(this.poisGeojson));
+        }
+        this.updatePois();
+    }
+
+    private downloadPOIs = async (progressCallback: (value: number, text?: string) => void) => {
+        try {
+            // HM TODO: add progress text in resources service
+            let lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
+            let lastModifiedString = lastModified ? lastModified.toUTCString() : null;
+            this.loggingService.info(`Getting POIs for: ${lastModifiedString} from server`);
+            let updates = await this.getUpdatesWithProgress(lastModifiedString, (value) => progressCallback(value * 90));
+            progressCallback(80);
+            this.loggingService.info(`Storing POIs for: ${lastModifiedString}, got: ${updates.length}`);
+            this.databaseService.storePois(updates);
+            let lastUpdate = lastModified;
+            for (let update of updates) {
+                let dateValue = new Date(update.properties.poiLastModified);
+                if (dateValue > lastUpdate) {
+                    lastUpdate = dateValue;
+                }
             }
+            this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: lastUpdate }));
+            this.loggingService.info(`Updating POIs for clustering from database: ${updates.length}`);
+            progressCallback(95);
+            await this.rebuildPois();
+            this.loggingService.info(`Updated pois for clustering: ${this.poisGeojson.features.length}`);
+            progressCallback(100, "All set, POIS are up-to-date");
+            
+            // HM TODO: get images? get pois.ihm file?
+
         } catch (ex) {
             this.loggingService.warning("Unable to sync public pois and categories - using local data: " + ex.message);
         }
+    }
 
+    public async getSerchResults(searchTerm: string): Promise<PointOfInterestExtended[]> {
+        let ids = this.searchTermMap.get(searchTerm);
+        if (!ids) {
+            return [];
+        }
+        let results = []
+        for (let id of uniq(ids)) {
+            let feature = await this.databaseService.getPoiById(id);
+            let point = this.featureToPoint(feature);
+            results.push(point);
+        }
+        return results;
+    }
+
+    private getUpdatesWithProgress(lastModifiedString: string, progressCallback: Function): Promise<GeoJSON.Feature<GeoJSON.Geometry>[]> {
+        return new Promise((resolve, reject) => {
+            this.httpClient.get(Urls.poiUpdates + lastModifiedString, {
+                observe: "events",
+                responseType: "json",
+                reportProgress: true
+            }).subscribe(event => {
+                if (event.type === HttpEventType.DownloadProgress) {
+                    progressCallback(event.loaded / event.total);
+                }
+                if (event.type === HttpEventType.Response) {
+                    if (event.ok) {
+                        resolve(event.body as GeoJSON.Feature<GeoJSON.Geometry>[]);
+                    } else {
+                        reject(new Error(event.statusText));
+                    }
+                }
+            }, error => reject(error));
+        });
     }
 
     public updatePois() {
@@ -137,7 +208,9 @@ export class PoiService {
             let titles = feature.properties.poiNames[language] || feature.properties.poiNames.all;
             feature.properties.title = (titles && titles.length > 0) ? titles[0] : "";
             feature.properties.hasExtraData = feature.properties.poiHasExtraData[language] || false;
-            visibleFeatures.push(feature);
+            if (feature.properties.title || feature.properties.hasExtraData) {
+                visibleFeatures.push(feature);
+            }
         }
         this.poiGeojsonFiltered = {
             type: "FeatureCollection",

@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpEventType } from "@angular/common/http";
 import { Style } from "mapbox-gl";
 import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
 import { WebView } from "@ionic-native/ionic-webview/ngx";
@@ -289,5 +289,26 @@ export class FileService {
     public storeFileToCache(fileName: string, content: string) {
         return this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, content,
             { replace: true, append: false, truncate: 0 });
+    }
+
+    public async getFileContentWithProgress(url: string, progressCallback: (value: number) => void) {
+        return new Promise((resolve, reject) => {
+            this.httpClient.get(url, {
+                observe: "events",
+                responseType: "blob",
+                reportProgress: true
+            }).subscribe(event => {
+                if (event.type === HttpEventType.DownloadProgress) {
+                    progressCallback(event.loaded / event.total);
+                }
+                if (event.type === HttpEventType.Response) {
+                    if (event.ok) {
+                        resolve(event.body);
+                    } else {
+                        reject(new Error(event.statusText));
+                    }
+                }
+            }, error => reject(error));
+        });
     }
 }

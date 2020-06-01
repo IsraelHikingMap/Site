@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
-import { MatSnackBar } from "@angular/material";
+import { MatSnackBar, MatDialog } from "@angular/material";
 import { ResourcesService } from "./resources.service";
 import { ConfirmDialogComponent, ConfirmType } from "../components/dialogs/confirm-dialog.component";
+import { ProgressDialogComponent, IProgressDialogConfig } from "../components/dialogs/progress-dialog.component";
 
 export interface IConfirmOptions {
     message: string;
@@ -18,8 +19,9 @@ export interface IConfirmOptions {
 export class ToastService {
     private duration: number;
 
-    constructor(private resources: ResourcesService,
-                private snackbar: MatSnackBar) {
+    constructor(private readonly resources: ResourcesService,
+                private readonly matDialog: MatDialog,
+                private readonly snackbar: MatSnackBar) {
         this.duration = 6000;
     }
 
@@ -92,5 +94,9 @@ export class ToastService {
         }
         componentRef.instance.confirmIcon = options.confirmIcon;
         componentRef.instance.declineIcon = options.declineIcon;
+    }
+
+    public progress(config: IProgressDialogConfig) {
+        ProgressDialogComponent.openDialog(this.matDialog, config);
     }
 }

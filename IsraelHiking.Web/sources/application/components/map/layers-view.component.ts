@@ -135,4 +135,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     public clearSelectedClusterPopup() {
         this.selectedCluster = null;
     }
+
+    public setHoverFeature(selectedPoi: GeoJSON.Feature<GeoJSON.Point>) {
+        if (selectedPoi.properties.title) {
+            this.hoverFeature = selectedPoi;
+        }
+    }
 }

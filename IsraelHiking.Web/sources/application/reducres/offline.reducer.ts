@@ -4,6 +4,7 @@ import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-actio
 
 const SET_OFFLINE_AVAILABLE = "SET_OFFLINE_AVAILABLE";
 const SET_OFFLINE_LAST_MODIFIED_DATE = "SET_OFFLINE_LAST_MODIFIED_DATE";
+const SET_OFFLINE_POIS_LAST_MODIFIED_DATE = "SET_OFFLINE_POIS_LAST_MODIFIED_DATE";
 
 export interface SetOfflineAvailablePayload {
     isAvailble: boolean;
@@ -25,6 +26,12 @@ export class SetOfflineLastModifiedAction extends BaseAction<SetOfflineLastModif
     }
 }
 
+export class SetOfflinePoisLastModifiedDateAction extends BaseAction<SetOfflineLastModifiedPayload> {
+    constructor(payload: SetOfflineLastModifiedPayload) {
+        super(SET_OFFLINE_POIS_LAST_MODIFIED_DATE, payload);
+    }
+}
+
 export class OfflineReducer {
     @ReduxAction(SET_OFFLINE_AVAILABLE)
     public setOfflineAvailable(lastState: OfflineState, action: SetOfflineAvailableAction): OfflineState {
@@ -39,6 +46,14 @@ export class OfflineReducer {
         return {
             ...lastState,
             lastModifiedDate: action.payload.lastModifiedDate
+        };
+    }
+
+    @ReduxAction(SET_OFFLINE_POIS_LAST_MODIFIED_DATE)
+    public setPoisLastModifed(lastState: OfflineState, action: SetOfflineLastModifiedAction): OfflineState {
+        return {
+            ...lastState,
+            poisLastModifiedDate: action.payload.lastModifiedDate
         };
     }
 }

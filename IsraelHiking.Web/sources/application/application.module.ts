@@ -165,7 +165,7 @@ import { TracesComponent } from "./components/map/traces.component";
 import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
 import { SecuredImageComponent } from "./components/secured-image.component";
 import { ConfigurationDialogComponent } from "./components/dialogs/configuration-dialog.component";
-import { DownloadProgressDialogComponent } from "./components/dialogs/download-progress-dialog.component";
+import { ProgressDialogComponent } from "./components/dialogs/progress-dialog.component";
 import { UseAppDialogComponent } from "./components/dialogs/use-app-dialog.component";
 import { CategoriesGroupComponent } from "./components/sidebar/categories-group.component";
 
@@ -257,7 +257,7 @@ export function getWindow() { return window; }
             PrivatePoiShowDialogComponent,
             AutomaticLayerPresentationComponent,
             ConfigurationDialogComponent,
-            DownloadProgressDialogComponent,
+            ProgressDialogComponent,
             UseAppDialogComponent,
             CategoriesGroupComponent
         ],
@@ -380,7 +380,7 @@ export function getWindow() { return window; }
             AutomaticLayerPresentationComponent,
             SecuredImageComponent,
             ConfigurationDialogComponent,
-            DownloadProgressDialogComponent,
+            ProgressDialogComponent,
             UseAppDialogComponent,
             CategoriesGroupComponent,
             NameInUseValidatorDirective,
