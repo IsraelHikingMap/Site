@@ -93,17 +93,9 @@ namespace IsraelHiking.API.Tests.Gpx
             var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
             var newGpx = _gpxGeoJsonConverter.ToGpx(featureCollection);
 
-            Assert.AreEqual(gpx.Tracks.Count, newGpx.Tracks.Count);
-            Assert.AreEqual(gpx.Tracks[0].Name, newGpx.Tracks[0].Name);
-            for (int i = 0; i < newGpx.Tracks[0].Segments.Length; i++)
-            {
-                for (int j = 0; j < newGpx.Tracks[0].Segments[i].Waypoints.Count; j++)
-                {
-                    Assert.AreEqual(gpx.Tracks[0].Segments[i].Waypoints[j].ElevationInMeters, newGpx.Tracks[0].Segments[i].Waypoints[j].ElevationInMeters);
-                    Assert.AreEqual(gpx.Tracks[0].Segments[i].Waypoints[j].Latitude.Value, newGpx.Tracks[0].Segments[i].Waypoints[j].Latitude.Value);
-                    Assert.AreEqual(gpx.Tracks[0].Segments[i].Waypoints[j].Longitude.Value, newGpx.Tracks[0].Segments[i].Waypoints[j].Longitude.Value);
-                }
-            }
+            Assert.AreEqual(1, newGpx.Routes.Count);
+            Assert.AreEqual(gpx.Tracks[0].Name, newGpx.Routes[0].Name);
+            Assert.AreEqual(3, newGpx.Routes[0].Waypoints.Count);
         }
 
         [TestMethod]
