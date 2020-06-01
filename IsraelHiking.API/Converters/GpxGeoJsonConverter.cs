@@ -15,16 +15,27 @@ namespace IsraelHiking.API.Converters
         private const string DESCRIPTIOM = "description";
         private const string CREATOR = "Creator";
 
+        private readonly GeometryFactory _geometryFactory;
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="geometryFactory"></param>
+
+        public GpxGeoJsonConverter(GeometryFactory geometryFactory)
+        {
+            _geometryFactory = geometryFactory;
+        }
+
         ///<inheritdoc />
         public FeatureCollection ToGeoJson(GpxFile gpx)
         {
             var collection = new FeatureCollection();
             var points = gpx.Waypoints ?? new List<GpxWaypoint>();
-            var pointsFeatures = points.Select(point => new Feature(new Point(CreateGeoPosition(point)), CreateProperties(point.Name, point.Description)));
+            var pointsFeatures = points.Select(point => new Feature(_geometryFactory.CreatePoint(CreateGeoPosition(point)), CreateProperties(point.Name, point.Description)));
             pointsFeatures.ToList().ForEach(f => collection.Add(f));
 
             var routes = gpx.Routes ?? new List<GpxRoute>();
-            var routesFeatures = routes.Select(route => new Feature(new LineString(route.Waypoints.Select(CreateGeoPosition).ToArray()), CreateProperties(route.Name, route.Description)));
+            var routesFeatures = routes.Select(route => new Feature(CreateLineSringFromWaypoints(route.Waypoints), CreateProperties(route.Name, route.Description)));
             routesFeatures.ToList().ForEach(f => collection.Add(f));
 
             foreach (var track in gpx.Tracks ?? new List<GpxTrack>())
@@ -35,13 +46,18 @@ namespace IsraelHiking.API.Converters
                     {
                         continue;
                     }
-                    var lineStringFeature = new Feature(new LineString(track.Segments.First().Waypoints.Select(CreateGeoPosition).ToArray()), CreateProperties(track.Name, track.Description));
-                    collection.Add(lineStringFeature);
+                    var lineStringFeature = new Feature(CreateLineSringFromWaypoints(track.Segments.First().Waypoints), CreateProperties(track.Name, track.Description));
+                    if (lineStringFeature.Geometry != null)
+                    {
+                        collection.Add(lineStringFeature);
+                    }
                     continue;
                 }
-                var lineStringList = track.Segments.Where(s => s.Waypoints.Count > 1).Select(segment => new LineString(segment.Waypoints.Select(CreateGeoPosition).ToArray())).ToArray();
-                var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.Name, gpx.Metadata.Creator, track.Description));
-                collection.Add(feature);
+                var feature = new Feature(CreateLinesFromSegments(track.Segments), CreateMultiLineProperties(track.Name, gpx.Metadata.Creator, track.Description));
+                if (feature.Geometry != null)
+                {
+                    collection.Add(feature);
+                }
             }
             return collection;
         }
@@ -79,6 +95,46 @@ namespace IsraelHiking.API.Converters
             return waypoint.ElevationInMeters.HasValue 
                 ? new CoordinateZ(lon, lat, (double)waypoint.ElevationInMeters)
                 : new CoordinateZ(lon, lat, double.NaN);
+        }
+
+        private LineString CreateLineSringFromWaypoints(ImmutableGpxWaypointTable waypoints)
+        {
+            var coordinates = waypoints.Select(CreateGeoPosition).ToList();
+            return CreateLineStringFromCoordinates(coordinates);
+            
+        }
+
+        private LineString CreateLineStringFromCoordinates(List<Coordinate> coordinates)
+        {
+            for (var coordinateIndex = coordinates.Count - 1; coordinateIndex > 0; coordinateIndex--)
+            {
+                if (coordinates[coordinateIndex].Equals2D(coordinates[coordinateIndex - 1]))
+                {
+                    coordinates.RemoveAt(coordinateIndex);
+                }
+            }
+            if (coordinates.Count == 1)
+            {
+                return null;
+            }
+            return _geometryFactory.CreateLineString(coordinates.ToArray());
+        }
+
+        private Geometry CreateLinesFromSegments(ImmutableArray<GpxTrackSegment> segments)
+        {
+            var coordinatesGroups = segments.Select(s => s.Waypoints.Select(CreateGeoPosition).ToArray()).ToList();
+            for (var groupIndex = coordinatesGroups.Count - 1; groupIndex > 0; groupIndex--)
+            {
+                if (coordinatesGroups[groupIndex].First().Equals2D(coordinatesGroups[groupIndex - 1].Last()))
+                {
+                    coordinatesGroups[groupIndex - 1] = coordinatesGroups[groupIndex - 1].Concat(coordinatesGroups[groupIndex].Skip(1)).ToArray();
+                    coordinatesGroups.RemoveAt(groupIndex);
+                }
+            }
+            return coordinatesGroups.Count > 1
+                ? _geometryFactory.CreateMultiLineString(
+                    coordinatesGroups.Select(g => CreateLineStringFromCoordinates(g.ToList())).Where(l => l != null).ToArray())
+                : CreateLineStringFromCoordinates(coordinatesGroups.First().ToList()) as Geometry;
         }
 
         private GpxWaypoint CreateWaypoint(IFeature pointFeature)

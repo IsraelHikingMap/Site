@@ -12,7 +12,7 @@ namespace IsraelHiking.API.Tests.Converters
         [TestMethod]
         public void ToGpx_WithAllTypesOffeatures_ShouldBeConverted()
         {
-            var converter = new GpxGeoJsonConverter();
+            var converter = new GpxGeoJsonConverter(new GeometryFactory());
             var geojson = new FeatureCollection();
             var table = new AttributesTable
             {

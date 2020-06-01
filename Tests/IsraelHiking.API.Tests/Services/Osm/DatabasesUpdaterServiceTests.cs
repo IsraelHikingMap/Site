@@ -32,7 +32,6 @@ namespace IsraelHiking.API.Tests.Services.Osm
         private IElasticSearchGateway _elasticSearchGateway;
         private IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
         private IFeaturesMergeExecutor _featuresMergeExecutor;
-        private IGraphHopperGateway _graphHopperGateway;
         private IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
         private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
@@ -50,7 +49,6 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _osmRepository = Substitute.For<IOsmRepository>();
             _geoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
             _featuresMergeExecutor = Substitute.For<IFeaturesMergeExecutor>();
-            _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
             _osmLatestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
             _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
             _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
@@ -62,7 +60,6 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 _pointsOfInterestAdapterFactory, 
                 _featuresMergeExecutor, 
                 _osmLatestFileFetcherExecutor, 
-                _graphHopperGateway,
                 _pointsOfInterestFilesCreatorExecutor,
                 null,
                 Substitute.For<ILogger>());

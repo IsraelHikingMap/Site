@@ -158,17 +158,15 @@ namespace IsraelHiking.API.Controllers
 
         private async Task UploadToImgurAndUpdateLink(RemoteFileFetcherGatewayResponse file, LinkData link)
         {
-            using (var memoryStream = new MemoryStream(file.Content))
+            using var memoryStream = new MemoryStream(file.Content);
+            try
             {
-                try
-                {
-                    var newUrl = await _imgurGateway.UploadImage(memoryStream);
-                    link.Url = newUrl;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Failed uploading image: {ex.Message}");
-                }
+                var newUrl = await _imgurGateway.UploadImage(memoryStream);
+                link.Url = newUrl;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed uploading image: {ex.Message}");
             }
         }
 

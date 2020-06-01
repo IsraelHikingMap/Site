@@ -63,7 +63,7 @@ namespace IsraelHiking.API.Services
         {
             var gpx = _gpxDataContainerConverter.ToGpx(dataContainer);
             return Convert(gpx.ToBytes(), GPX, format);
-        }
+            }
 
         ///<inheritdoc />
         public async Task<DataContainer> ToDataContainer(byte[] content, string fileName)

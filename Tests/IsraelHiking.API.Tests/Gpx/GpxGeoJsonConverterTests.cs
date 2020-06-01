@@ -11,7 +11,7 @@ namespace IsraelHiking.API.Tests.Gpx
     [TestClass]
     public class GpxGeoJsonConverterTests
     {
-        private readonly IGpxGeoJsonConverter _gpxGeoJsonConverter = new GpxGeoJsonConverter();
+        private readonly IGpxGeoJsonConverter _gpxGeoJsonConverter = new GpxGeoJsonConverter(new GeometryFactory());
 
         [TestMethod]
         public void CovertGeoJsonToGpx_OnlyOnePoint_ShouldBeConverted()

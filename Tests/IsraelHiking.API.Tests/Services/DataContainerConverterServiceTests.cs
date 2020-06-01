@@ -40,7 +40,7 @@ namespace IsraelHiking.API.Tests.Services
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
             _imgurGateway = Substitute.For<IImgurGateway>();
             _routeDataSplitterService = Substitute.For<IRouteDataSplitterService>();
-            var gpxGeoJsonConverter = new GpxGeoJsonConverter();
+            var gpxGeoJsonConverter = new GpxGeoJsonConverter(new GeometryFactory());
             var converterFlowItems = new List<IConverterFlowItem>
             {
                 new GeoJsonGpxConverterFlow(gpxGeoJsonConverter),
@@ -71,10 +71,58 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertDataContainerToGeoJson_ShouldConvertToGeoJson()
         {
-            var dataContainer = new DataContainer { Routes = new List<RouteData> { new RouteData { Markers = new List<MarkerData> { new MarkerData { Latlng = new LatLng() } } } } };
+            var dataContainer = new DataContainer
+            {
+                Routes = new List<RouteData> {
+                    new RouteData { 
+                        Markers = new List<MarkerData> {
+                            new MarkerData { Latlng = new LatLng(0, 0) } 
+                        },
+                        Segments = new List<RouteSegmentData>
+                        {
+                            new RouteSegmentData
+                            {
+                                Latlngs = new List<LatLngTime> { new LatLngTime(0,0), new LatLngTime(0, 0) }
+                            },
+                            new RouteSegmentData
+                            {
+                                Latlngs = new List<LatLngTime> { new LatLngTime(0,0), new LatLngTime(1, 1) }
+                            }
+                        }
+                    }
+                }
+            };
+            var results = _converterService.ToAnyFormat(dataContainer, FlowFormats.GEOJSON).Result.ToFeatureCollection();
+
+            Assert.AreEqual(2, results.Count);
+            Assert.AreEqual(2, results.Last().Geometry.Coordinates.Length);
+        }
+
+        [TestMethod]
+        public void ConvertDataContainerToGeoJson_WithNonMatchingSegments_ShouldConvertToGeoJson()
+        {
+            var dataContainer = new DataContainer
+            {
+                Routes = new List<RouteData> {
+                    new RouteData {
+                        Segments = new List<RouteSegmentData>
+                        {
+                            new RouteSegmentData
+                            {
+                                Latlngs = new List<LatLngTime> { new LatLngTime(0,0), new LatLngTime(0, 0) }
+                            },
+                            new RouteSegmentData
+                            {
+                                Latlngs = new List<LatLngTime> { new LatLngTime(0.1,0.1), new LatLngTime(1, 1) }
+                            }
+                        }
+                    }
+                }
+            };
             var results = _converterService.ToAnyFormat(dataContainer, FlowFormats.GEOJSON).Result.ToFeatureCollection();
 
             Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(2, results.First().Geometry.Coordinates.Length);
         }
 
         [TestMethod]
