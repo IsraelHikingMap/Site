@@ -5,7 +5,6 @@ export class Urls {
     public static readonly baseTilesAddress = environment.baseTilesAddress;
     public static readonly apiBase = environment.baseApiAddress;
     public static readonly emptyHtml = Urls.baseAddress + "/empty-for-oauth.html";
-    public static readonly slimGeoJSON = Urls.baseAddress + "/pois-slim.geojson";
     public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";
     public static readonly elevation = Urls.apiBase + "elevation";

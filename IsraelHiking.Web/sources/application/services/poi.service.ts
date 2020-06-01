@@ -54,15 +54,15 @@ export class PoiService {
     private categoriesGroups: Observable<CategoriesGroup[]>;
 
     constructor(private readonly resources: ResourcesService,
-        private readonly httpClient: HttpClient,
-        private readonly whatsappService: WhatsAppService,
-        private readonly hashService: HashService,
-        private readonly databaseService: DatabaseService,
-        private readonly runningContextService: RunningContextService,
-        private readonly geoJsonParser: GeoJsonParser,
-        private readonly loggingService: LoggingService,
-        private readonly toastService: ToastService,
-        private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly httpClient: HttpClient,
+                private readonly whatsappService: WhatsAppService,
+                private readonly hashService: HashService,
+                private readonly databaseService: DatabaseService,
+                private readonly runningContextService: RunningContextService,
+                private readonly geoJsonParser: GeoJsonParser,
+                private readonly loggingService: LoggingService,
+                private readonly toastService: ToastService,
+                private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         this.poisCache = [];
         this.poisChanged = new EventEmitter();
@@ -88,7 +88,7 @@ export class PoiService {
         this.resources.languageChanged.subscribe(() => this.updatePois());
         this.categoriesGroups.subscribe(() => this.updatePois());
         await this.syncCategories();
-        await this.rebuildPois()
+        await this.rebuildPois();
         this.toastService.progress({
             action: this.downloadPOIs
         });
@@ -98,7 +98,7 @@ export class PoiService {
         this.poisGeojson.features = await this.databaseService.getPoisForClustering();
         for (let feature of this.poisGeojson.features) {
             let language = this.resources.getCurrentLanguageCodeSimplified();
-            if (!feature.properties.poiNames[language] || feature.properties.poiNames[language].length == 0) {
+            if (!feature.properties.poiNames[language] || feature.properties.poiNames[language].length === 0) {
                 continue;
             }
             for (let name of feature.properties.poiNames[language]) {
@@ -135,7 +135,7 @@ export class PoiService {
             await this.rebuildPois();
             this.loggingService.info(`Updated pois for clustering: ${this.poisGeojson.features.length}`);
             progressCallback(100, "All set, POIS are up-to-date");
-            
+
             // HM TODO: get images? get pois.ihm file?
 
         } catch (ex) {
@@ -148,7 +148,7 @@ export class PoiService {
         if (!ids) {
             return [];
         }
-        let results = []
+        let results = [];
         for (let id of uniq(ids)) {
             let feature = await this.databaseService.getPoiById(id);
             let point = this.featureToPoint(feature);
@@ -157,7 +157,8 @@ export class PoiService {
         return results;
     }
 
-    private getUpdatesWithProgress(lastModifiedString: string, progressCallback: Function): Promise<GeoJSON.Feature<GeoJSON.Geometry>[]> {
+    private getUpdatesWithProgress(lastModifiedString: string, progressCallback: (value: number) => void)
+        : Promise<GeoJSON.Feature<GeoJSON.Geometry>[]> {
         return new Promise((resolve, reject) => {
             this.httpClient.get(Urls.poiUpdates + lastModifiedString, {
                 observe: "events",

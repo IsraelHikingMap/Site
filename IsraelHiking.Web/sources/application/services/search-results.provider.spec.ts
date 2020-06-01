@@ -4,6 +4,9 @@ import { HttpClientTestingModule, HttpTestingController } from "@angular/common/
 
 import { SearchResultsProvider, ISearchResultsPointOfInterest } from "./search-results.provider";
 import { GeoJsonParser } from "./geojson.parser";
+import { RunningContextService } from "./running-context.service";
+import { Device } from "@ionic-native/device/ngx";
+import { PoiService } from "./poi.service";
 
 describe("SearchResultsProvider", () => {
     beforeEach(() => {
@@ -14,7 +17,9 @@ describe("SearchResultsProvider", () => {
             ],
             providers: [
                 GeoJsonParser,
-                SearchResultsProvider
+                SearchResultsProvider,
+                { provide: RunningContextService, useValue: { isOnline: true } },
+                { provide: PoiService, useValue: null }
             ]
         });
     });

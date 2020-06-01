@@ -14,8 +14,8 @@ export interface ISearchResultsPointOfInterest extends PointOfInterestExtended {
 export class SearchResultsProvider {
 
     constructor(private readonly httpClient: HttpClient,
-        private readonly runningContextService: RunningContextService,
-        private readonly poiService: PoiService) {
+                private readonly runningContextService: RunningContextService,
+                private readonly poiService: PoiService) {
     }
 
     public getResults = async (searchTerm: string, isHebrew: boolean): Promise<ISearchResultsPointOfInterest[]> => {

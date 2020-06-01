@@ -53,8 +53,8 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public lastModified: Observable<Date>;
 
     constructor(resources: ResourcesService,
-        private readonly dialog: MatDialog,
-        private readonly httpClient: HttpClient,
+                private readonly dialog: MatDialog,
+                private readonly httpClient: HttpClient,
                 private readonly purchaseService: PurchaseService,
                 private readonly layersService: LayersService,
                 private readonly selectedRouteService: SelectedRouteService,

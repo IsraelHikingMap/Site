@@ -16,7 +16,7 @@ import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { SQLite } from "@ionic-native/sqlite/ngx";
 import { Urls } from "../urls";
-import { PointOfInterestExtended, ApplicationState } from "../models/models";
+import { PointOfInterestExtended } from "../models/models";
 import { NgReduxTestingModule, MockNgRedux } from "@angular-redux/store/testing";
 
 describe("Poi Service", () => {
@@ -25,6 +25,9 @@ describe("Poi Service", () => {
         let toastMock = new ToastServiceMockCreator();
         let hashService = {};
         let fileServiceMock = {};
+        let databaseServiceMock = {
+            getPoisForClustering: () => Promise.resolve([])
+        };
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -34,13 +37,13 @@ describe("Poi Service", () => {
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: HashService, useValue: hashService },
-                { provide: ToastService, useValue: null },
+                { provide: ToastService, useValue: toastMock.toastService },
                 { provide: FileService, useValue: fileServiceMock },
+                { provide: DatabaseService, useValue: databaseServiceMock },
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,
                 PoiService,
-                DatabaseService,
                 LoggingService,
                 Device,
                 SQLite
@@ -62,14 +65,12 @@ describe("Poi Service", () => {
             let promise = poiService.initialize();
             mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            mockBackend.match(r => r.url === Urls.slimGeoJSON)[0].flush({ type: "FeatureCollection", features: [] });
+            // mockBackend.match(r => r.url === Urls.slimGeoJSON)[0].flush({ type: "FeatureCollection", features: [] });
 
             await promise;
 
             expect(changed).toBe(true);
         })));
-
-
 
     it("Should get a point by id and source from the server", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
