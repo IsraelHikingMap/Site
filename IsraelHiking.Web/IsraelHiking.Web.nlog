@@ -9,7 +9,7 @@
     <add assembly="NLog.Web.AspNetCore"/>
   </extensions>
   
-  <targets>
+  <targets async="true">
     <!-- write logs to file -->
     <target xsi:type="File" 
             name="error" 

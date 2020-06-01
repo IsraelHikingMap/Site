@@ -8,6 +8,7 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 {
@@ -101,11 +102,14 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         public void GetPoisBySource_ShouldGetThem()
         {
             _gateway.Initialize();
-
-            var features = _gateway.GetExternalPoisBySource(Sources.INATURE).Result;
-            features = _gateway.GetExternalPoisBySource(Sources.WIKIPEDIA).Result;
-
-            Assert.IsTrue(features.Count > 10000);
+            var tasks = new List<Task<List<Feature>>>
+            {
+                _gateway.GetExternalPoisBySource(Sources.INATURE),
+                _gateway.GetExternalPoisBySource(Sources.NAKEB),
+                _gateway.GetExternalPoisBySource(Sources.WIKIPEDIA)
+            };
+            Task.WhenAll(tasks).Wait();
+            Assert.IsTrue(tasks.Last().Result.Count > 10000);
         }
 
         [TestMethod]

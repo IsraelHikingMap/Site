@@ -11,8 +11,9 @@ namespace IsraelHiking.API.Executors
         /// <summary>
         /// This method will merge features and return a list of merged features
         /// </summary>
-        /// <param name="features"></param>
+        /// <param name="osmFeatures"></param>
+        /// <param name="externalFeatures"></param>
         /// <returns></returns>
-        List<Feature> Merge(List<Feature> features);
+        List<Feature> Merge(List<Feature> osmFeatures, List<Feature> externalFeatures);
     }
 }

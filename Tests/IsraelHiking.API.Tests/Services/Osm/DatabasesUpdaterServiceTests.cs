@@ -16,6 +16,7 @@ using OsmSharp.Changesets;
 using OsmSharp.Complete;
 using OsmSharp.IO.API;
 using OsmSharp.Tags;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -74,7 +75,8 @@ namespace IsraelHiking.API.Tests.Services.Osm
             adapter.GetPointsForIndexing().Returns(new List<Feature>());
             _pointsOfInterestAdapterFactory.GetBySource(Arg.Any<string>()).Returns(adapter);
             _elasticSearchGateway.GetExternalPoisBySource(Arg.Any<string>()).Returns(new List<Feature>());
-            _featuresMergeExecutor.Merge(Arg.Any<List<Feature>>()).Returns(new List<Feature>());
+            _elasticSearchGateway.GetAllPointsOfInterest(Arg.Any<bool>()).Returns(new List<Feature>());
+            _featuresMergeExecutor.Merge(Arg.Any<List<Feature>>(), Arg.Any<List<Feature>>()).Returns(new List<Feature>());
 
             _service.Rebuild(new UpdateRequest { Highways = true, PointsOfInterest = true, SiteMap = true }).Wait();
 
@@ -120,7 +122,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _service.Update(changes).Wait();
 
             _elasticSearchGateway.Received(1).DeleteHighwaysById("way_1");
-            _elasticSearchGateway.Received(1).DeleteOsmPointOfInterestById("way_1");
+            _elasticSearchGateway.Received(1).DeleteOsmPointOfInterestById("way_1", Arg.Any<DateTime?>());
         }
 
         [TestMethod]

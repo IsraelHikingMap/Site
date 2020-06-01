@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
 using OsmSharp.Changesets;
@@ -110,7 +112,7 @@ namespace IsraelHiking.API.Services.Osm
             var relevantTagsDictionary = _tagsHelper.GetAllTags();
             foreach (var poiToRemove in changes.Delete)
             {
-                var task = _elasticSearchGateway.DeleteOsmPointOfInterestById(poiToRemove.GetId());
+                var task = _elasticSearchGateway.DeleteOsmPointOfInterestById(poiToRemove.GetId(), poiToRemove.TimeStamp);
                 deleteTasks.Add(task);
             }
             await Task.WhenAll(deleteTasks);
@@ -184,10 +186,27 @@ namespace IsraelHiking.API.Services.Osm
             var osmSource = _pointsOfInterestAdapterFactory.GetBySource(Sources.OSM);
             var osmFeaturesTask = osmSource.GetPointsForIndexing();
             var sources = _pointsOfInterestAdapterFactory.GetAll().Where(s => s.Source != Sources.OSM).Select(s => s.Source);
-            var otherTasks = sources.Select(s => _elasticSearchGateway.GetExternalPoisBySource(s)).ToArray();
-            await Task.WhenAll(new Task[] { osmFeaturesTask }.Concat(otherTasks));
-            var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result.Concat(otherTasks.SelectMany(t => t.Result)).ToList());
-            await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features);
+            var externalFeatures = new List<Feature>();
+            foreach (var source in sources)
+            {
+                externalFeatures.AddRange(await _elasticSearchGateway.GetExternalPoisBySource(source));
+            }
+            var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result, externalFeatures);
+            _logger.LogInformation("Adding deleted features to new ones");
+            var exitingFeatures = await _elasticSearchGateway.GetAllPointsOfInterest(true);
+            var newFeaturesDictionary = features.ToDictionary(f => f.GetId(), f => f);
+            var deletedFeatures = exitingFeatures.Where(f => !newFeaturesDictionary.ContainsKey(f.GetId())).ToArray();
+            foreach (var deletedFeatureToMark in deletedFeatures)
+            {
+                if (!deletedFeatureToMark.Attributes.Exists(FeatureAttributes.POI_DELETED))
+                {
+                    deletedFeatureToMark.Attributes.Add(FeatureAttributes.POI_DELETED, true);
+                    deletedFeatureToMark.Attributes.AddOrUpdate(FeatureAttributes.POI_LAST_MODIFIED, DateTime.Now.ToString("o"));
+                    _logger.LogDebug("Removed feature id: " + deletedFeatureToMark.GetId());
+                }
+            }
+            _logger.LogInformation("Added deleted features to new ones: " + deletedFeatures.Length);
+            await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features.Concat(deletedFeatures).ToList());
             _logger.LogInformation("Finished rebuilding POIs database.");
         }
 
@@ -209,7 +228,7 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation("Starting rebuilding images database.");
             using (var stream = _latestFileFetcherExecutor.Get())
             {
-                var features = await _elasticSearchGateway.GetAllPointsOfInterest();
+                var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
                 var featuresUrls = features.SelectMany(f =>
                     f.Attributes.GetNames()
                     .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
@@ -224,7 +243,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildSiteMap()
         {
             _logger.LogInformation("Starting rebuilding sitemap.");
-            var features = await _elasticSearchGateway.GetAllPointsOfInterest();
+            var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
             _pointsOfInterestFilesCreatorExecutor.CreateSiteMapXmlFile(features);
             _logger.LogInformation("Finished rebuilding sitemap.");
         }
@@ -232,7 +251,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildOfflinePoisFile()
         {
             _logger.LogInformation("Starting rebuilding offline pois file.");
-            var features = await _elasticSearchGateway.GetAllPointsOfInterest();
+            var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
             _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
             _logger.LogInformation("Finished rebuilding offline pois file.");
         }

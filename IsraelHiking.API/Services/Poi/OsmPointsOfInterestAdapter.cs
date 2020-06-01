@@ -553,7 +553,7 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<Feature[]> GetUpdates(DateTime lastMoidifiedDate)
         {
             var results = (lastMoidifiedDate == DateTime.MinValue)
-                ? await _elasticSearchGateway.GetAllPointsOfInterest()
+                ? await _elasticSearchGateway.GetAllPointsOfInterest(false)
                 : await _elasticSearchGateway.GetPointsOfInterestUpdates(lastMoidifiedDate);
             return results.ToArray();
             

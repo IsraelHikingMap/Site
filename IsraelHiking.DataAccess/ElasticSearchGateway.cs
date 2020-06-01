@@ -321,9 +321,8 @@ namespace IsraelHiking.DataAccess
             return response.Documents.ToList();
         }
 
-        public async Task<List<Feature>> GetAllPointsOfInterest()
+        public async Task<List<Feature>> GetAllPointsOfInterest(bool withDeleted)
         {
-            var list = new List<Feature>();
             _elasticClient.Refresh(OSM_POIS_ALIAS);
             var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
             var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
@@ -331,7 +330,12 @@ namespace IsraelHiking.DataAccess
                     .Scroll("10s")
                     .Query(q => q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories))
                     ));
-            return GetAllItemsByScrolling(response);
+            var list = GetAllItemsByScrolling(response);
+            if (withDeleted == false)
+            {
+                list = list.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
+            }
+            return list;
         }
 
         private GeoBoundingBoxQueryDescriptor<Feature> ConvertToGeoBoundingBox(GeoBoundingBoxQueryDescriptor<Feature> b,
@@ -363,10 +367,15 @@ namespace IsraelHiking.DataAccess
             return response.Source;
         }
 
-        public Task DeleteOsmPointOfInterestById(string id)
+        public async Task DeleteOsmPointOfInterestById(string id, DateTime? timeStamp)
         {
-            var fullId = GeoJsonExtensions.GetId(Sources.OSM, id);
-            return _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_POIS_ALIAS));
+            var feature = await GetPointOfInterestById(id, Sources.OSM);
+            if (feature != null)
+            {
+                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_DELETED, true);
+                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_LAST_MODIFIED, (timeStamp ?? DateTime.Now).ToString("o"));
+            }
+            await UpdatePointsOfInterestData(new List<Feature> { feature });
         }
 
         public Task DeletePointOfInterestById(string id, string source)
