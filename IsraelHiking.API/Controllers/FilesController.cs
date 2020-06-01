@@ -131,13 +131,11 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest();
             }
-            using (var memoryStream = new MemoryStream())
-            {
-                var fileName = file.FileName;
-                await file.CopyToAsync(memoryStream);
-                var dataContainer = await ConvertToDataContainer(memoryStream.ToArray(), fileName);
-                return Ok(dataContainer);
-            }
+            using var memoryStream = new MemoryStream();
+            var fileName = file.FileName;
+            await file.CopyToAsync(memoryStream);
+            var dataContainer = await ConvertToDataContainer(memoryStream.ToArray(), fileName);
+            return Ok(dataContainer);
         }
 
         private async Task<DataContainer> ConvertToDataContainer(byte[] data, string fileName)

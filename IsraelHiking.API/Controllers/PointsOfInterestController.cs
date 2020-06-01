@@ -162,23 +162,19 @@ namespace IsraelHiking.API.Controllers
                 {
                     continue;
                 }
-                using (var md5 = MD5.Create())
+                using var md5 = MD5.Create();
+                var imageUrl = await _imageUrlStoreExecutor.GetImageUrlIfExists(md5, file.Content);
+                if (imageUrl != null)
                 {
-                    var imageUrl = await _imageUrlStoreExecutor.GetImageUrlIfExists(md5, file.Content);
-                    if (imageUrl != null)
-                    {
-                        imageUrls[urlIndex] = imageUrl;
-                        continue;
-                    }
-                    using (var memoryStream = new MemoryStream(file.Content))
-                    {
-                        var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title,
-                            pointOfInterest.Description, user.DisplayName, file.FileName, memoryStream,
-                            pointOfInterest.Location.ToCoordinate());
-                        imageUrls[urlIndex] = await _wikimediaCommonGateway.GetImageUrl(imageName);
-                        await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrls[urlIndex]);
-                    }
+                    imageUrls[urlIndex] = imageUrl;
+                    continue;
                 }
+                using var memoryStream = new MemoryStream(file.Content);
+                var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title,
+                    pointOfInterest.Description, user.DisplayName, file.FileName, memoryStream,
+                    pointOfInterest.Location.ToCoordinate());
+                imageUrls[urlIndex] = await _wikimediaCommonGateway.GetImageUrl(imageName);
+                await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrls[urlIndex]);
             }
 
             if (string.IsNullOrWhiteSpace(pointOfInterest.Id))

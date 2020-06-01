@@ -29,7 +29,6 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
         private readonly IFeaturesMergeExecutor _featuresMergeExecutor;
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
-        private readonly IGraphHopperGateway _graphHopperGateway;
         private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private readonly ILogger _logger;
@@ -55,7 +54,6 @@ namespace IsraelHiking.API.Services.Osm
             IPointsOfInterestAdapterFactory pointsOfInterestAdapterFactory,
             IFeaturesMergeExecutor featuresMergeExecutor,
             IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
-            IGraphHopperGateway graphHopperGateway,
             IPointsOfInterestFilesCreatorExecutor pointsOfInterestFilesCreatorExecutor,
             IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
             ILogger logger)
@@ -68,7 +66,6 @@ namespace IsraelHiking.API.Services.Osm
             _pointsOfInterestFilesCreatorExecutor = pointsOfInterestFilesCreatorExecutor;
             _featuresMergeExecutor = featuresMergeExecutor;
             _latestFileFetcherExecutor = latestFileFetcherExecutor;
-            _graphHopperGateway = graphHopperGateway;
             _osmGateway = clinetsFactory.CreateNonAuthClient();
             _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
             _logger = logger;

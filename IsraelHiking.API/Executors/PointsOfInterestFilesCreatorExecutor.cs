@@ -50,29 +50,27 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc/>
         public void CreateSiteMapXmlFile(List<Feature> features)
         {
-            using (var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "sitemap.xml")))
+            using var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "sitemap.xml"));
+            var list = features.Select(feature =>
             {
-                var list = features.Select(feature =>
+                var dateString = feature.Attributes.Exists(FeatureAttributes.POI_LAST_MODIFIED)
+                ? DateTime.Parse(feature.Attributes[FeatureAttributes.POI_LAST_MODIFIED].ToString()).ToUniversalTime().ToString("o")
+                : DateTime.Now.ToUniversalTime().ToString("o");
+                return new tUrl
                 {
-                    var dateString = feature.Attributes.Exists(FeatureAttributes.POI_LAST_MODIFIED)
-                        ? DateTime.Parse(feature.Attributes[FeatureAttributes.POI_LAST_MODIFIED].ToString()).ToUniversalTime().ToString("o")
-                        : DateTime.Now.ToUniversalTime().ToString("o");
-                    return new tUrl
-                    {
-                        lastmod = dateString,
-                        loc = "https://israelhiking.osm.org.il/poi/" + feature.Attributes[FeatureAttributes.POI_SOURCE] + "/" + feature.Attributes[FeatureAttributes.ID],
-                    };
-                });
-                var siteMap = new urlset
-                {
-                    url = list.Concat(new[] { new tUrl {
+                    lastmod = dateString,
+                    loc = "https://israelhiking.osm.org.il/poi/" + feature.Attributes[FeatureAttributes.POI_SOURCE] + "/" + feature.Attributes[FeatureAttributes.ID],
+                };
+            });
+            var siteMap = new urlset
+            {
+                url = list.Concat(new[] { new tUrl {
                         loc = "https://israelhiking.osm.org.il/",
                         lastmod =  DateTime.Now.ToUniversalTime().ToString("o")
                     }}).ToArray()
-                };
-                var serializer = new XmlSerializer(typeof(urlset));
-                serializer.Serialize(fileStream, siteMap);
-            }
+            };
+            var serializer = new XmlSerializer(typeof(urlset));
+            serializer.Serialize(fileStream, siteMap);
         }
 
         /// <inheritdoc/>
@@ -109,25 +107,23 @@ namespace IsraelHiking.API.Executors
                 fileStream.Write(slimCollection.ToBytes());
             }
 
-            using (var outputMemStream = new MemoryStream())
-            using (var zipStream = new ZipOutputStream(outputMemStream))
+            using var outputMemStream = new MemoryStream();
+            using var zipStream = new ZipOutputStream(outputMemStream);
+            zipStream.SetLevel(9);
+
+            var newEntry = new ZipEntry("pois/pois.geojson")
             {
-                zipStream.SetLevel(9);
+                DateTime = DateTime.Now
+            };
+            zipStream.PutNextEntry(newEntry);
+            StreamUtils.Copy(new MemoryStream(collection.ToBytes()), zipStream, new byte[4096]);
+            zipStream.CloseEntry();
 
-                var newEntry = new ZipEntry("pois/pois.geojson")
-                {
-                    DateTime = DateTime.Now
-                };
-                zipStream.PutNextEntry(newEntry);
-                StreamUtils.Copy(new MemoryStream(collection.ToBytes()), zipStream, new byte[4096]);
-                zipStream.CloseEntry();
+            CreateImagesJsonFiles(features, zipStream);
+            zipStream.Finish();
+            outputMemStream.Position = 0;
 
-                CreateImagesJsonFiles(features, zipStream);
-                zipStream.Finish();
-                outputMemStream.Position = 0;
-
-                _fileSystemHelper.WriteAllBytes("pois.ihm", outputMemStream.ToArray());
-            }
+            _fileSystemHelper.WriteAllBytes("pois.ihm", outputMemStream.ToArray());
         }
 
         private void CreateImagesJsonFiles(List<Feature> features, ZipOutputStream zipStream)

@@ -347,19 +347,12 @@ namespace IsraelHiking.API.Services
         ///<inheritdoc/>
         public IEnumerable<Category> GetCategoriesByGroup(string categoriesGroup)
         {
-            string[] categories;
-            switch (categoriesGroup)
+            string[] categories = categoriesGroup switch
             {
-                case Categories.POINTS_OF_INTEREST:
-                    categories = Categories.Points;
-                    break;
-                case Categories.ROUTES:
-                    categories = Categories.Routes;
-                    break;
-                default:
-                    throw new ArgumentException($"categories for the provided categoriesType: {categoriesGroup}");
-            }
-
+                Categories.POINTS_OF_INTEREST => Categories.Points,
+                Categories.ROUTES => Categories.Routes,
+                _ => throw new ArgumentException($"categories for the provided categoriesType: {categoriesGroup}"),
+            };
             return _categories.Where(c => categories.Contains(c.Name));
         }
 

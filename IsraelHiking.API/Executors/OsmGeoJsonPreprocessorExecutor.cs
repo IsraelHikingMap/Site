@@ -295,9 +295,9 @@ namespace IsraelHiking.API.Executors
                 { FeatureAttributes.LON, geoLocation.X }
             });
             feature.Attributes.Add(FeatureAttributes.POI_ALT, _elevationDataStorage.GetElevation(geoLocation).Result);
-            var northEast = _wgs84ItmConverter.Transform(geoLocation.X, geoLocation.Y);
-            feature.Attributes.Add(FeatureAttributes.POI_ITM_EAST, northEast.x);
-            feature.Attributes.Add(FeatureAttributes.POI_ITM_NORTH, northEast.y);
+            var (x, y) = _wgs84ItmConverter.Transform(geoLocation.X, geoLocation.Y);
+            feature.Attributes.Add(FeatureAttributes.POI_ITM_EAST, x);
+            feature.Attributes.Add(FeatureAttributes.POI_ITM_NORTH, y);
 
         }
     }

@@ -137,8 +137,8 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.Description = feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
             poiItem.IsEditable = false;
             poiItem.Contribution = GetContribution(feature.Attributes);
-            var itmCoordinate = _wgs84ItmMathTransform.Transform(poiItem.Location.Lng, poiItem.Location.Lat);
-            poiItem.ItmCoordinates = new NorthEast { East = (int)itmCoordinate.x, North = (int)itmCoordinate.y };
+            var (x, y) = _wgs84ItmMathTransform.Transform(poiItem.Location.Lng, poiItem.Location.Lat);
+            poiItem.ItmCoordinates = new NorthEast { East = (int)x, North = (int)y };
             return poiItem;
         }
 
@@ -298,16 +298,14 @@ namespace IsraelHiking.API.Services.Poi
         public override async Task<List<Feature>> GetPointsForIndexing()
         {
             _logger.LogInformation("Starting getting OSM points of interest");
-            using (var stream = _latestFileFetcherExecutor.Get())
-            {
-                var osmNamesDictionary = await _osmRepository.GetElementsWithName(stream);
-                var relevantTagsDictionary = _tagsHelper.GetAllTags();
-                var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(stream, relevantTagsDictionary);
-                osmNamesDictionary.Add(string.Empty, namelessNodes.Cast<ICompleteOsmGeo>().ToList());
-                var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-                _logger.LogInformation("Finished getting OSM points of interest: " + features.Count);
-                return features;
-            }
+            using var stream = _latestFileFetcherExecutor.Get();
+            var osmNamesDictionary = await _osmRepository.GetElementsWithName(stream);
+            var relevantTagsDictionary = _tagsHelper.GetAllTags();
+            var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(stream, relevantTagsDictionary);
+            osmNamesDictionary.Add(string.Empty, namelessNodes.Cast<ICompleteOsmGeo>().ToList());
+            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
+            _logger.LogInformation("Finished getting OSM points of interest: " + features.Count);
+            return features;
         }
 
         private void SyncImages(TagsCollectionBase tags, string[] images)

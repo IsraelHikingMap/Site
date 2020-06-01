@@ -141,27 +141,25 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest("Invalid trace id: " + traceId);
             }
-            using (var memoryStream = new MemoryStream())
+            using var memoryStream = new MemoryStream();
+            await file.Stream.CopyToAsync(memoryStream);
+            var gpxBytes = await _dataContainerConverterService.Convert(memoryStream.ToArray(), file.FileName, DataContainerConverterService.GPX);
+            var gpx = gpxBytes.ToGpx().UpdateBounds();
+            var highwayType = GetHighwayType(gpx);
+            var gpxItmLines = GpxToItmLineStrings(gpx);
+            if (!gpxItmLines.Any())
             {
-                await file.Stream.CopyToAsync(memoryStream);
-                var gpxBytes = await _dataContainerConverterService.Convert(memoryStream.ToArray(), file.FileName, DataContainerConverterService.GPX);
-                var gpx = gpxBytes.ToGpx().UpdateBounds();
-                var highwayType = GetHighwayType(gpx);
-                var gpxItmLines = GpxToItmLineStrings(gpx);
-                if (!gpxItmLines.Any())
-                {
-                    return BadRequest("File does not contain any traces...");
-                }
-                var manipulatedItmLines = await _addibleGpxLinesFinderService.GetLines(gpxItmLines);
-                var attributesTable = new AttributesTable { { "highway", highwayType } };
-                attributesTable.Add("source", "trace id: " + traceId);
-                var featureCollection = new FeatureCollection();
-                foreach (var line in manipulatedItmLines)
-                {
-                    featureCollection.Add(new Feature(ToWgs84LineString(line.Coordinates), attributesTable));
-                }
-                return Ok(featureCollection);
+                return BadRequest("File does not contain any traces...");
             }
+            var manipulatedItmLines = await _addibleGpxLinesFinderService.GetLines(gpxItmLines);
+            var attributesTable = new AttributesTable { { "highway", highwayType } };
+            attributesTable.Add("source", "trace id: " + traceId);
+            var featureCollection = new FeatureCollection();
+            foreach (var line in manipulatedItmLines)
+            {
+                featureCollection.Add(new Feature(ToWgs84LineString(line.Coordinates), attributesTable));
+            }
+            return Ok(featureCollection);
         }
 
         private string GetHighwayType(GpxFile gpx)

@@ -14,21 +14,32 @@ namespace IsraelHiking.DataAccess
 {
     internal class JsonNakebItem
     {
-        public long id { get; set; }
-        public LatLng start { get; set; }
-        public string title { get; set; }
-        public DateTime last_modified { get; set; }
+        [JsonProperty("id")]
+        public long Id { get; set; }
+        [JsonProperty("start")]
+        public LatLng Start { get; set; }
+        [JsonProperty("title")]
+        public string Title { get; set; }
+        [JsonProperty("last_modified")]
+        public DateTime LastModified { get; set; }
     }
 
     internal class JsonNakebItemExtended : JsonNakebItem
     {
-        public double length { get; set; }
-        public string picture { get; set; }
-        public string link { get; set; }
-        public string[] attributes { get; set; }
-        public string prolog { get; set; }
-        public LatLng[] latlngs { get; set; }
-        public MarkerData[] markers { get; set; }
+        [JsonProperty("length")]
+        public double Length { get; set; }
+        [JsonProperty("picture")]
+        public string Picture { get; set; }
+        [JsonProperty("link")]
+        public string Link { get; set; }
+        [JsonProperty("attributes")]
+        public string[] Attributes { get; set; }
+        [JsonProperty("prolog")]
+        public string Prolog { get; set; }
+        [JsonProperty("latlngs")]
+        public LatLng[] Latlngs { get; set; }
+        [JsonProperty("markers")]
+        public MarkerData[] Markers { get; set; }
     }
 
     public class NakebGateway : INakebGateway
@@ -58,17 +69,17 @@ namespace IsraelHiking.DataAccess
             var content = await reponse.Content.ReadAsStringAsync();
             var nakebItem = JsonConvert.DeserializeObject<JsonNakebItemExtended>(content);
             var attributes = GetAttributes(nakebItem);
-            var description = nakebItem.prolog ?? string.Empty;
+            var description = nakebItem.Prolog ?? string.Empty;
             if (!description.EndsWith("."))
             {
                 description += ".";
             }
-            description += $"\n{string.Join(", ", nakebItem.attributes)}.";
+            description += $"\n{string.Join(", ", nakebItem.Attributes)}.";
             attributes.Add(FeatureAttributes.DESCRIPTION + ":" + Languages.HEBREW, description);
-            attributes.Add(FeatureAttributes.IMAGE_URL, nakebItem.picture);
-            attributes.Add(FeatureAttributes.WEBSITE, nakebItem.link);
+            attributes.Add(FeatureAttributes.IMAGE_URL, nakebItem.Picture);
+            attributes.Add(FeatureAttributes.WEBSITE, nakebItem.Link);
             attributes.Add(FeatureAttributes.POI_SOURCE_IMAGE_URL, NAKEB_LOGO);
-            var lineString = new LineString(nakebItem.latlngs.Select(l => l.ToCoordinate()).ToArray());
+            var lineString = new LineString(nakebItem.Latlngs.Select(l => l.ToCoordinate()).ToArray());
             // Ignoring markers for simplification
             var feature = new Feature(lineString, attributes);
             feature.SetTitles();
@@ -78,7 +89,7 @@ namespace IsraelHiking.DataAccess
 
         private Feature ConvertToPointFeature(JsonNakebItem nakebItem)
         {
-            var point = new Point(nakebItem.start.ToCoordinate());
+            var point = new Point(nakebItem.Start.ToCoordinate());
             return new Feature(point, GetAttributes(nakebItem));
         }
 
@@ -86,14 +97,14 @@ namespace IsraelHiking.DataAccess
         {
             var geoLocation = new AttributesTable
             {
-                {FeatureAttributes.LAT, nakebItem.start.Lat},
-                {FeatureAttributes.LON, nakebItem.start.Lng}
+                {FeatureAttributes.LAT, nakebItem.Start.Lat},
+                {FeatureAttributes.LON, nakebItem.Start.Lng}
             };
             var attributes = new AttributesTable
             {
-                {FeatureAttributes.ID, nakebItem.id.ToString()},
-                {FeatureAttributes.NAME, nakebItem.title},
-                {FeatureAttributes.NAME + ":" + Languages.HEBREW, nakebItem.title},
+                {FeatureAttributes.ID, nakebItem.Id.ToString()},
+                {FeatureAttributes.NAME, nakebItem.Title},
+                {FeatureAttributes.NAME + ":" + Languages.HEBREW, nakebItem.Title},
                 {FeatureAttributes.POI_SOURCE, Sources.NAKEB},
                 {FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE},
                 {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
@@ -101,7 +112,7 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.POI_ICON_COLOR, "black"},
                 {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                 {FeatureAttributes.POI_GEOLOCATION, geoLocation},
-                {FeatureAttributes.POI_LAST_MODIFIED, nakebItem.last_modified.ToString("o")}
+                {FeatureAttributes.POI_LAST_MODIFIED, nakebItem.LastModified.ToString("o")}
             };
 
             return attributes;
