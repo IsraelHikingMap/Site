@@ -1,4 +1,4 @@
-﻿namespace IsraelHiking.Common
+﻿namespace IsraelHiking.Common.FileExplorer
 {
     public class FileFormatViewModel
     {
