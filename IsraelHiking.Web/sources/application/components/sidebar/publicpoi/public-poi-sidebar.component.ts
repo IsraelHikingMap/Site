@@ -2,7 +2,6 @@ import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
 import { NgRedux, select } from "@angular-redux/store";
-import { sum } from "lodash";
 import { Observable } from "rxjs";
 
 import { BaseMapComponent } from "../../base-map.component";
@@ -17,6 +16,7 @@ import { RoutesFactory } from "../../../services/layers/routelayers/routes.facto
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducres/poi.reducer";
 import { SpatialService } from "../../../services/spatial.service";
+import { RunningContextService } from "../../../services/running-context.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { sidebarAnimate } from "../sidebar.component";
 import {
@@ -64,6 +64,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 private readonly hashService: HashService,
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly sidebarService: SidebarService,
+                private readonly runningContextSerivce: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.sidebarService.hideWithoutChangingAddressbar();
@@ -203,6 +204,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             this.toastService.info(this.resources.loginRequired);
             return;
         }
+        if (!this.runningContextSerivce.isOnline) {
+            this.toastService.warning(this.resources.cantEditWhileOffline);
+            return;
+        }
         this.router.navigate([RouteStrings.ROUTE_POI, this.poiExtended.source, this.poiExtended.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
     }
@@ -219,6 +224,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public async save() {
+        if (!this.runningContextSerivce.isOnline) {
+            this.toastService.warning(this.resources.cantEditWhileOffline);
+            return;
+        }
         this.isLoading = true;
         try {
             let poiExtended = await this.poiService.uploadPoint(this.info);

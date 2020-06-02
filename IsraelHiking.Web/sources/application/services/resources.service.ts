@@ -323,6 +323,8 @@ export class ResourcesService {
     public allFilesAreUpToDate: string;
     public thereSoMuchMoreYouCanDoWithOurApp: string;
     public databaseUpgrade: string;
+    public cantEditWhileOffline: string;
+    public downloadingPoisForOfflineUsage: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -525,7 +527,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1589567944666");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1591125199044");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -843,6 +845,8 @@ export class ResourcesService {
         this.allFilesAreUpToDate = this.gettextCatalog.getString("All files are up-to-date :-)");
         this.thereSoMuchMoreYouCanDoWithOurApp = this.gettextCatalog.getString("There's so much more you can do with our app");
         this.databaseUpgrade = this.gettextCatalog.getString("The offline database has been upgraded...");
+        this.cantEditWhileOffline = this.gettextCatalog.getString("You can't edit while offline...");
+        this.downloadingPoisForOfflineUsage = this.gettextCatalog.getString("Downloading points of interest for offline usage...");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

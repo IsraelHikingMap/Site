@@ -26,7 +26,6 @@ import {
     IconColorLabel,
     CategoriesGroup
 } from "../models/models";
-import { feature } from "@turf/helpers";
 
 interface IImageItem {
     thumbnail: string;
@@ -125,14 +124,14 @@ export class PoiService {
 
     private downloadPOIs = async (progressCallback: (value: number, text?: string) => void) => {
         try {
-            // HM TODO: add progress text in resources service
             let lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
             let lastModifiedString = lastModified ? lastModified.toUTCString() : null;
             this.loggingService.info(`Getting POIs for: ${lastModifiedString} from server`);
-            let updates = await this.getUpdatesWithProgress(lastModifiedString, (value) => progressCallback(value * 80));
+            let updates = await this.getUpdatesWithProgress(lastModifiedString, (value) =>
+                progressCallback(value * 80, this.resources.downloadingPoisForOfflineUsage));
             this.loggingService.info(`Storing POIs for: ${lastModifiedString}, got: ${updates.features.length}`);
             let lastUpdate = lastModified;
-            var deletedIds = [] as string[];
+            let deletedIds = [] as string[];
             for (let update of updates.features) {
                 let dateValue = new Date(update.properties.poiLastModified);
                 if (dateValue > lastUpdate) {
@@ -146,14 +145,14 @@ export class PoiService {
             this.databaseService.deletePois(deletedIds);
             this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: lastUpdate }));
             this.loggingService.info(`Updating POIs for clustering from database: ${updates.features.length}`);
-            progressCallback(90);
+            progressCallback(90, this.resources.downloadingPoisForOfflineUsage);
             await this.rebuildPois();
             this.loggingService.info(`Updated pois for clustering: ${this.poisGeojson.features.length}`);
             progressCallback(95);
             let imageAndData = [] as ImageUrlAndData[];
             for (let image of updates.images) {
                 for (let imageUrl of image.imageUrls) {
-                    imageAndData.push({ imageUrl: imageUrl, data: image.thumbnail });
+                    imageAndData.push({ imageUrl, data: image.thumbnail });
                 }
             }
             this.loggingService.info(`Storing images: ${imageAndData.length}`);
