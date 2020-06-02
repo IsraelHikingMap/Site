@@ -73,9 +73,20 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.SetupIdentity(_cache);
             var osmGateWay = SetupOAuthClient();
 
-            _controller.PutGpsTrace("42", new Trace { Id = "7", Visibility = "public" }).Wait();
+            _controller.PutGpsTrace("42", new Trace { Id = "42", Visibility = "public" }).Wait();
 
             osmGateWay.Received(1).UpdateTrace(Arg.Any<GpxFile>());
+        }
+
+        [TestMethod]
+        public void PutGpsTrace_WrongId_ShouldNotUpdate()
+        {
+            _controller.SetupIdentity(_cache);
+            var osmGateWay = SetupOAuthClient();
+
+            _controller.PutGpsTrace("7", new Trace { Id = "42", Visibility = "public" }).Wait();
+
+            osmGateWay.Received(0).UpdateTrace(Arg.Any<GpxFile>());
         }
 
         [TestMethod]
