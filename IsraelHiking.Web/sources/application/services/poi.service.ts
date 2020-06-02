@@ -26,6 +26,7 @@ import {
     IconColorLabel,
     CategoriesGroup
 } from "../models/models";
+import { feature } from "@turf/helpers";
 
 interface IImageItem {
     thumbnail: string;
@@ -130,14 +131,19 @@ export class PoiService {
             this.loggingService.info(`Getting POIs for: ${lastModifiedString} from server`);
             let updates = await this.getUpdatesWithProgress(lastModifiedString, (value) => progressCallback(value * 80));
             this.loggingService.info(`Storing POIs for: ${lastModifiedString}, got: ${updates.features.length}`);
-            this.databaseService.storePois(updates.features);
             let lastUpdate = lastModified;
+            var deletedIds = [] as string[];
             for (let update of updates.features) {
                 let dateValue = new Date(update.properties.poiLastModified);
                 if (dateValue > lastUpdate) {
                     lastUpdate = dateValue;
                 }
+                if (update.properties.poiDeleted) {
+                    deletedIds.push(update.properties.poiId);
+                }
             }
+            this.databaseService.storePois(updates.features);
+            this.databaseService.deletePois(deletedIds);
             this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: lastUpdate }));
             this.loggingService.info(`Updating POIs for clustering from database: ${updates.features.length}`);
             progressCallback(90);

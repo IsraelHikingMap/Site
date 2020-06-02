@@ -212,6 +212,10 @@ export class DatabaseService {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkPut(pois);
     }
 
+    public deletePois(poiIds: string[]): Promise<void> {
+        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkDelete(poiIds);
+    }
+
     public async getPoisForClustering(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
         this.loggingService.debug("Getting POIs for clutering from DB");
         let features = await this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).toArray();
