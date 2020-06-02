@@ -140,5 +140,20 @@ namespace IsraelHiking.API.Executors
             }
             return imageUrl;
         }
+
+        /// <inheritdoc/>
+        public async Task<ImageItem[]> GetAllImagesForUrls(string[] imageUrls)
+        {
+            var images = new List<ImageItem>();
+            foreach (var imageUrl in imageUrls)
+            {
+                var imageItem = await _imagesRepository.GetImageByUrl(imageUrl);
+                if (imageItem != null)
+                {
+                    images.Add(imageItem);
+                }
+            }
+            return images.ToArray();
+        }
     }
 }

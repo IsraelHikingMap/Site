@@ -3,6 +3,7 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
@@ -207,14 +208,23 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [Route("updates/{lastModified}")]
         [HttpGet]
-        public async Task<IActionResult> GetPointOfInterestUpdates(DateTime lastModified)
+        public async Task<UpdatesResponse> GetPointOfInterestUpdates(DateTime lastModified)
         {
-            var poiItem = await _pointsOfInterestProvider.GetUpdates(lastModified);
-            if (poiItem == null)
+            var feautres = await _pointsOfInterestProvider.GetUpdates(lastModified);
+            var imageUrls = new List<string>();
+            foreach (var feature in feautres)
             {
-                return NotFound();
+                var currentImageUrls = feature.Attributes.GetNames()
+                    .Where(a => a.StartsWith(FeatureAttributes.IMAGE_URL))
+                    .Select(k => feature.Attributes[k].ToString());
+                imageUrls.AddRange(currentImageUrls.ToList());
             }
-            return Ok(poiItem);
+            var images = await _imageUrlStoreExecutor.GetAllImagesForUrls(imageUrls.ToArray());
+            return new UpdatesResponse
+            {
+                Features = feautres,
+                Images = images
+            };
         }
     }
 }

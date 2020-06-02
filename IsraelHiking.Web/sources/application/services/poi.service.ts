@@ -8,7 +8,7 @@ import { timeout } from "rxjs/operators";
 import { ResourcesService } from "./resources.service";
 import { HashService, IPoiRouterData } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
-import { DatabaseService } from "./database.service";
+import { DatabaseService, ImageUrlAndData } from "./database.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
@@ -26,6 +26,16 @@ import {
     IconColorLabel,
     CategoriesGroup
 } from "../models/models";
+
+interface IImageItem {
+    thumbnail: string;
+    imageUrls: string[];
+}
+
+interface IUpdatesResponse {
+    features: GeoJSON.Feature<GeoJSON.Geometry>[];
+    images: IImageItem[];
+}
 
 export interface IPoiSocialLinks {
     poiLink: string;
@@ -118,25 +128,31 @@ export class PoiService {
             let lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
             let lastModifiedString = lastModified ? lastModified.toUTCString() : null;
             this.loggingService.info(`Getting POIs for: ${lastModifiedString} from server`);
-            let updates = await this.getUpdatesWithProgress(lastModifiedString, (value) => progressCallback(value * 90));
-            progressCallback(80);
-            this.loggingService.info(`Storing POIs for: ${lastModifiedString}, got: ${updates.length}`);
-            this.databaseService.storePois(updates);
+            let updates = await this.getUpdatesWithProgress(lastModifiedString, (value) => progressCallback(value * 80));
+            this.loggingService.info(`Storing POIs for: ${lastModifiedString}, got: ${updates.features.length}`);
+            this.databaseService.storePois(updates.features);
             let lastUpdate = lastModified;
-            for (let update of updates) {
+            for (let update of updates.features) {
                 let dateValue = new Date(update.properties.poiLastModified);
                 if (dateValue > lastUpdate) {
                     lastUpdate = dateValue;
                 }
             }
             this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: lastUpdate }));
-            this.loggingService.info(`Updating POIs for clustering from database: ${updates.length}`);
-            progressCallback(95);
+            this.loggingService.info(`Updating POIs for clustering from database: ${updates.features.length}`);
+            progressCallback(90);
             await this.rebuildPois();
             this.loggingService.info(`Updated pois for clustering: ${this.poisGeojson.features.length}`);
+            progressCallback(95);
+            let imageAndData = [] as ImageUrlAndData[];
+            for (let image of updates.images) {
+                for (let imageUrl of image.imageUrls) {
+                    imageAndData.push({ imageUrl: imageUrl, data: image.thumbnail });
+                }
+            }
+            this.loggingService.info(`Storing images: ${imageAndData.length}`);
+            this.databaseService.storeImages(imageAndData);
             progressCallback(100, "All set, POIS are up-to-date");
-
-            // HM TODO: get images? get pois.ihm file?
 
         } catch (ex) {
             this.loggingService.warning("Unable to sync public pois and categories - using local data: " + ex.message);
@@ -158,7 +174,7 @@ export class PoiService {
     }
 
     private getUpdatesWithProgress(lastModifiedString: string, progressCallback: (value: number) => void)
-        : Promise<GeoJSON.Feature<GeoJSON.Geometry>[]> {
+        : Promise<IUpdatesResponse> {
         return new Promise((resolve, reject) => {
             this.httpClient.get(Urls.poiUpdates + lastModifiedString, {
                 observe: "events",
@@ -170,7 +186,8 @@ export class PoiService {
                 }
                 if (event.type === HttpEventType.Response) {
                     if (event.ok) {
-                        resolve(event.body as GeoJSON.Feature<GeoJSON.Geometry>[]);
+                        progressCallback(1.0);
+                        resolve(event.body as IUpdatesResponse);
                     } else {
                         reject(new Error(event.statusText));
                     }
