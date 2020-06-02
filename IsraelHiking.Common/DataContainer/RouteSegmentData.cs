@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
-namespace IsraelHiking.Common
+namespace IsraelHiking.Common.DataContainer
 {
     public static class RoutingType
     {
@@ -20,7 +20,7 @@ namespace IsraelHiking.Common
         public LatLng RoutePoint { get; set; }
         [JsonProperty("latlngs")]
         public List<LatLngTime> Latlngs { get; set; }
-        
+
         public RouteSegmentData()
         {
             Latlngs = new List<LatLngTime>();

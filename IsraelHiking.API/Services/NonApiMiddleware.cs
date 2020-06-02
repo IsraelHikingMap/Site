@@ -1,13 +1,11 @@
 ﻿using IsraelHiking.API.Services.Poi;
-using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using System;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;

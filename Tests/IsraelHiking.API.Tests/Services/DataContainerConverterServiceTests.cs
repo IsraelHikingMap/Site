@@ -6,6 +6,7 @@ using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -59,7 +60,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertDataContainerToGpx_ShouldConvertToGpx()
         {
-            var dataContainer = new DataContainer();
+            var dataContainer = new DataContainerPoco();
 
             var results = _converterService.ToAnyFormat(dataContainer, FlowFormats.GPX).Result.ToGpx();
 
@@ -71,7 +72,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertDataContainerToGeoJson_ShouldConvertToGeoJson()
         {
-            var dataContainer = new DataContainer
+            var dataContainer = new DataContainerPoco
             {
                 Routes = new List<RouteData> {
                     new RouteData { 
@@ -101,7 +102,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertDataContainerToGeoJson_WithNonMatchingSegments_ShouldConvertToGeoJson()
         {
-            var dataContainer = new DataContainer
+            var dataContainer = new DataContainerPoco
             {
                 Routes = new List<RouteData> {
                     new RouteData {
@@ -128,7 +129,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertDataContainerToKml_ShouldConvertToKmlUsingGpsBabel()
         {
-            var dataContainer = new DataContainer();
+            var dataContainer = new DataContainerPoco();
             _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(_randomBytes);
 
             var results = _converterService.ToAnyFormat(dataContainer, FlowFormats.KML).Result;
@@ -139,7 +140,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertDataContainerToGpxSingleTrack_ShouldConvertToGpxUsingGpsBabelAndThenToGpxSingleTrack()
         {
-            var dataContainer = new DataContainer
+            var dataContainer = new DataContainerPoco
             {
                 Routes = new List<RouteData>
                 {
@@ -180,7 +181,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertDataContainerToGpxRoute_ShouldConvertToGpxUsingGpsBabelAndThenToGpxRoute()
         {
-            var dataContainer = new DataContainer
+            var dataContainer = new DataContainerPoco
             {
                 Routes = new List<RouteData>
                 {
@@ -444,7 +445,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertDataContainer_InvalidSinglePointInSegment_ShouldNotFailToConvertToGeoJson()
         {
-            var dataContainer = new DataContainer
+            var dataContainer = new DataContainerPoco
             {
                 Routes = new List<RouteData>
                 {

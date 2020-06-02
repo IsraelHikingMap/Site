@@ -3,6 +3,7 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
+using IsraelHiking.Common.DataContainer;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
@@ -45,7 +46,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _osmRepository = Substitute.For<IOsmRepository>();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
             _latestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
-            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _clientsFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileFetcherExecutor, _tagsHelper, _options, Substitute.For<ILogger>());
+            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _clientsFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileFetcherExecutor, Substitute.For<IImagesRepository>(), _tagsHelper, _options, Substitute.For<ILogger>());
         }
 
         private IAuthClient SetupHttpFactory()
@@ -124,7 +125,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
             _wikipediaGateway.GetReference("page with space", "en").Returns(new Reference { Url = "page_with_space" });
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
-                new DataContainer
+                new DataContainerPoco
                 {
                     Routes = new List<RouteData>
                     {
@@ -167,7 +168,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
-                new DataContainer { Routes = new List<RouteData>() });
+                new DataContainerPoco { Routes = new List<RouteData>() });
             _wikipediaGateway.GetByPageTitle(Arg.Any<string>(), Arg.Any<string>()).Returns(
                 new Feature(new Point(0, 0), new AttributesTable()));
 
@@ -186,7 +187,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
-                new DataContainer { Routes = new List<RouteData>() });
+                new DataContainerPoco { Routes = new List<RouteData>() });
 
             var result = _adapter.GetPointOfInterestById(Sources.OSM, poiId, null).Result;
 
@@ -204,7 +205,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
-                new DataContainer { Routes = new List<RouteData>() });
+                new DataContainerPoco { Routes = new List<RouteData>() });
             _wikipediaGateway.GetByPageTitle(Arg.Any<string>(), Arg.Any<string>()).Returns(
                 new Feature(new Point(0, 0), new AttributesTable()));
             _wikipediaGateway.GetReference("page", language).Returns(new Reference { Url = "page" });
@@ -228,7 +229,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.Add(FeatureAttributes.WEBSITE + "2", "website2");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
-                new DataContainer { Routes = new List<RouteData>() });
+                new DataContainerPoco { Routes = new List<RouteData>() });
 
             var result = _adapter.GetPointOfInterestById(Sources.OSM, poiId, language).Result;
 
@@ -254,7 +255,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     new Reference {Url = "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D"}
                 }
             };
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco {Routes = new List<RouteData>()});
             _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
             _wikipediaGateway.GetReference(Arg.Any<string>(), language).Returns(new Reference { Url = "Some-Url" });
 
@@ -281,7 +282,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     new Reference {Url = "https://he.m.wikipedia.org/wiki/%D7%96%D7%95%D7%94%D7%A8_(%D7%9E%D7%95%D7%A9%D7%91)"}
                 }
             };
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco { Routes = new List<RouteData>() });
             _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
             _wikipediaGateway.GetReference(Arg.Any<string>(), language).Returns(new Reference { Url = "Some-Url" });
 
@@ -304,7 +305,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 Description = "new description",
                 References = new Reference[0]
             };
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco { Routes = new List<RouteData>() });
             gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,
@@ -332,7 +333,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 Icon = "oldIcon",
                 References = new Reference[0]
             };
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco {Routes = new List<RouteData>()});
             gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,
@@ -366,7 +367,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     }
                 }
             };
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco { Routes = new List<RouteData>() });
             gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,
@@ -394,7 +395,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 Icon = "oldIcon",
                 References = new Reference[0]
             };
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco { Routes = new List<RouteData>() });
             gateway.GetNode(1).Returns(new Node
             {
                 Id = 1,

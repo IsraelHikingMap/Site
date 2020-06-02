@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using IsraelHiking.API.Gpx;
+using IsraelHiking.Common;
+using IsraelHiking.Common.DataContainer;
+using NetTopologySuite.IO;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using IsraelHiking.API.Gpx;
-using IsraelHiking.Common;
-using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters
 {
@@ -22,7 +23,7 @@ namespace IsraelHiking.API.Converters
         public const string ISRAEL_HIKING_MAP = "IsraelHikingMap";
 
         ///<inheritdoc />
-        public GpxFile ToGpx(DataContainer container)
+        public GpxFile ToGpx(DataContainerPoco container)
         {
             var containerRoutes = container.Routes ?? new List<RouteData>();
             var nonEmptyRoutes = containerRoutes.Where(r => r.Segments.SelectMany(s => s.Latlngs).Any());
@@ -43,10 +44,10 @@ namespace IsraelHiking.API.Converters
         }
 
         ///<inheritdoc />
-        public DataContainer ToDataContainer(GpxFile gpx)
+        public DataContainerPoco ToDataContainer(GpxFile gpx)
         {
             gpx = gpx.UpdateBounds();
-            var container = new DataContainer
+            var container = new DataContainerPoco
             {
                 Routes = ConvertRoutesToRoutesData(gpx.Routes ?? new List<GpxRoute>())
             };
@@ -107,7 +108,7 @@ namespace IsraelHiking.API.Converters
             return tracks;
         }
 
-        private void UpdateBoundingBox(DataContainer container, GpxBoundingBox bounds)
+        private void UpdateBoundingBox(DataContainerPoco container, GpxBoundingBox bounds)
         {
             container.NorthEast = new LatLng 
             {

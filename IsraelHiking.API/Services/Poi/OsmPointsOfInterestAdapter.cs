@@ -2,6 +2,7 @@
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
@@ -16,7 +17,6 @@ using OsmSharp.Tags;
 using ProjNet.CoordinateSystems.Transformations;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -41,6 +41,7 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly IImagesRepository _imagesRepository;
         private readonly MathTransform _wgs84ItmMathTransform;
         private readonly ConfigurationData _options;
 
@@ -56,6 +57,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="wikipediaGateway"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="latestFileFetcherExecutor"></param>
+        /// <param name="imagesRepository"></param>
         /// <param name="tagsHelper"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
@@ -68,6 +70,7 @@ namespace IsraelHiking.API.Services.Poi
             IWikipediaGateway wikipediaGateway,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
+            IImagesRepository imagesRepository,
             ITagsHelper tagsHelper,
             IOptions<ConfigurationData> options,
             ILogger logger) :
@@ -82,6 +85,7 @@ namespace IsraelHiking.API.Services.Poi
             _latestFileFetcherExecutor = latestFileFetcherExecutor;
             _elevationDataStorage = elevationDataStorage;
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
+            _imagesRepository = imagesRepository;
             _options = options.Value;
             _elasticSearchGateway = elasticSearchGateway;
         }
@@ -553,6 +557,15 @@ namespace IsraelHiking.API.Services.Poi
             var results = (lastMoidifiedDate == DateTime.MinValue)
                 ? await _elasticSearchGateway.GetAllPointsOfInterest(false)
                 : await _elasticSearchGateway.GetPointsOfInterestUpdates(lastMoidifiedDate);
+            foreach (var feature in results)
+            {
+                var imageKeys = feature.Attributes.GetNames().Where(a => a.StartsWith(FeatureAttributes.IMAGE_URL));
+                foreach (var imageKey in imageKeys)
+                {
+                    var imageItem = _imagesRepository.GetImageByUrl(feature.Attributes[imageKey].ToString());
+                }
+                // HM TODO: add this to resposne
+            }
             return results.ToArray();
             
         }

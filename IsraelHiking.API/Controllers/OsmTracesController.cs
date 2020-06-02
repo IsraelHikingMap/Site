@@ -1,5 +1,8 @@
 ﻿using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.DataContainer;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -71,7 +74,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of traces</returns>
         [Authorize]
         [HttpGet("{id}")]
-        public async Task<DataContainer> GetTraceById(int id)
+        public async Task<DataContainerPoco> GetTraceById(int id)
         {
             var gateway = CreateClient();
             var file = await gateway.GetTraceData(id);

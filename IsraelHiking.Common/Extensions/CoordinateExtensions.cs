@@ -1,7 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using System.Linq;
 
-namespace IsraelHiking.Common
+namespace IsraelHiking.Common.Extensions
 {
     public static class CoordinateExtensions
     {
@@ -18,7 +18,7 @@ namespace IsraelHiking.Common
 
         public static double[] ToDoubleArray(this Coordinate coordinate)
         {
-            return new [] { coordinate.X, coordinate.Y };
+            return new[] { coordinate.X, coordinate.Y };
         }
 
         public static Coordinate ToCoordinate(this double[] point)

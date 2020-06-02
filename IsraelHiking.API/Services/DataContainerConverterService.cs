@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
-using IsraelHiking.Common;
+using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services
 {
@@ -59,14 +59,14 @@ namespace IsraelHiking.API.Services
         }
 
         ///<inheritdoc />
-        public Task<byte[]> ToAnyFormat(DataContainer dataContainer, string format)
+        public Task<byte[]> ToAnyFormat(DataContainerPoco dataContainer, string format)
         {
             var gpx = _gpxDataContainerConverter.ToGpx(dataContainer);
             return Convert(gpx.ToBytes(), GPX, format);
             }
 
         ///<inheritdoc />
-        public async Task<DataContainer> ToDataContainer(byte[] content, string fileName)
+        public async Task<DataContainerPoco> ToDataContainer(byte[] content, string fileName)
         {
             var gpx = (await Convert(content, fileName, GPX)).ToGpx();
             var container = _gpxDataContainerConverter.ToDataContainer(gpx);

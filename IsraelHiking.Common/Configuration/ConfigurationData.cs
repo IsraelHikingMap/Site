@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace IsraelHiking.Common
+namespace IsraelHiking.Common.Configuration
 {
     public class ConfigurationData
     {
@@ -124,7 +124,7 @@ namespace IsraelHiking.Common
 
         public ConfigurationData()
         {
-            MaxUserTimeInCache = 20 * 60; 
+            MaxUserTimeInCache = 20 * 60;
             MaxSegmentsNumber = 40;
             InitialSplitSimplificationDistanceTolerace = 50;
             MaxDistanceToExisitngLineForMerge = 5;
@@ -135,7 +135,7 @@ namespace IsraelHiking.Common
             MinimalProlongLineLength = 10;
             MinimalAreaSize = 1000;
             SimplificationDistanceTolerance = 3;
-            MinimalMissingPartLength = 200; 
+            MinimalMissingPartLength = 200;
             MinimalMissingSelfLoopPartLegth = MinimalDistanceToClosestPoint;
             MaxNumberOfPointsPerLine = 1000;
             MaxLengthPerLine = 3000;

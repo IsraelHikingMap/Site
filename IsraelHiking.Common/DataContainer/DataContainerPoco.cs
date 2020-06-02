@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
-namespace IsraelHiking.Common
+namespace IsraelHiking.Common.DataContainer
 {
-    public class DataContainer
+    public class DataContainerPoco
     {
         [JsonProperty("routes")]
         public List<RouteData> Routes { get; set; }
@@ -16,7 +16,7 @@ namespace IsraelHiking.Common
         [JsonProperty("overlays")]
         public List<LayerData> Overlays { get; set; }
 
-        public DataContainer()
+        public DataContainerPoco()
         {
             Routes = new List<RouteData>();
         }

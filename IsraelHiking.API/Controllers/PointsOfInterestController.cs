@@ -3,6 +3,8 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -205,7 +207,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [Route("updates/{lastModified}")]
         [HttpGet]
-        public async Task<IActionResult> GetPointOfInterestUpdate(DateTime lastModified)
+        public async Task<IActionResult> GetPointOfInterestUpdates(DateTime lastModified)
         {
             var poiItem = await _pointsOfInterestProvider.GetUpdates(lastModified);
             if (poiItem == null)

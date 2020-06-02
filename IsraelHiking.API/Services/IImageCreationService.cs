@@ -1,4 +1,4 @@
-﻿using IsraelHiking.Common;
+﻿using IsraelHiking.Common.DataContainer;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services
@@ -9,12 +9,12 @@ namespace IsraelHiking.API.Services
     public interface IImageCreationService
     {
         /// <summary>
-        /// Creates an image from the data in <see cref="DataContainer"/>
+        /// Creates an image from the data in <see cref="DataContainerPoco"/>
         /// </summary>
         /// <param name="dataContainer">The data to create the iamge from</param>
         /// <param name="width">Desired image width</param>
         /// <param name="height">Desired image height</param>
         /// <returns>Bitmap image represented as bytes</returns>
-        Task<byte[]> Create(DataContainer dataContainer, int width, int height);
+        Task<byte[]> Create(DataContainerPoco dataContainer, int width, int height);
     }
 }

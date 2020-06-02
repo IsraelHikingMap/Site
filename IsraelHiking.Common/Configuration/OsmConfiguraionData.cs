@@ -1,4 +1,4 @@
-﻿namespace IsraelHiking.Common
+﻿namespace IsraelHiking.Common.Configuration
 {
     /// <summary>
     /// An object that describe how to connect to OSM

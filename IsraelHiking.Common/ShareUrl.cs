@@ -1,5 +1,6 @@
-﻿using System;
+﻿using IsraelHiking.Common.DataContainer;
 using Newtonsoft.Json;
+using System;
 
 namespace IsraelHiking.Common
 {
@@ -21,6 +22,6 @@ namespace IsraelHiking.Common
         public DateTime LastViewed { get; set; }
 
         [JsonProperty("dataContainer")]
-        public DataContainer DataContainer { get; set; }
+        public DataContainerPoco DataContainer { get; set; }
     }
 }

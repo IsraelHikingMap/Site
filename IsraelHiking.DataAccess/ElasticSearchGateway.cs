@@ -1,5 +1,6 @@
 ﻿using Elasticsearch.Net;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;

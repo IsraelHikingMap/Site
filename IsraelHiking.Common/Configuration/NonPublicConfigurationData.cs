@@ -1,4 +1,4 @@
-﻿namespace IsraelHiking.Common
+﻿namespace IsraelHiking.Common.Configuration
 {
     public class NonPublicConfigurationData
     {

@@ -5,10 +5,11 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
@@ -88,7 +89,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostSaveFile_ConvertToGpx_ShouldReturnByteArray()
         {
-            var dataContainer = new DataContainer
+            var dataContainer = new DataContainerPoco
             {
                 Routes = new List<RouteData>
                 {
@@ -135,7 +136,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             var results = _controller.PostOpenFile(file).Result as OkObjectResult;
             Assert.IsNotNull(results);
-            var dataContainer = results.Value as DataContainer;
+            var dataContainer = results.Value as DataContainerPoco;
 
             Assert.AreEqual(1, dataContainer.Routes.Count);
             Assert.AreEqual(1, dataContainer.Routes.First().Segments.Count);

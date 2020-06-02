@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.DataContainer;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Microsoft.Extensions.Options;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace IsraelHiking.API.Tests.Services
 {

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using IsraelHiking.Common.DataContainer;
 using NetTopologySuite.Features;
 
 namespace IsraelHiking.Common.Poi
@@ -14,7 +14,7 @@ namespace IsraelHiking.Common.Poi
 
         public Reference[] References { get; set; }
         public FeatureCollection FeatureCollection { get; set; }
-        public DataContainer DataContainer { get; set; }
+        public DataContainerPoco DataContainer { get; set; }
         public Contribution Contribution { get; set; }
         public NorthEast ItmCoordinates { get; set; }
     }

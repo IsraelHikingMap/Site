@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
+using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp;
-using Microsoft.Extensions.Options;
-using OsmSharp.Tags;
-using Microsoft.Extensions.Logging;
-using NetTopologySuite.Features;
 using OsmSharp.Complete;
-using IsraelHiking.DataAccessInterfaces;
+using OsmSharp.Tags;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Services.Osm
 {

@@ -1,5 +1,6 @@
 ﻿using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;

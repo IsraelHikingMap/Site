@@ -1,4 +1,4 @@
-﻿using IsraelHiking.Common;
+﻿using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;

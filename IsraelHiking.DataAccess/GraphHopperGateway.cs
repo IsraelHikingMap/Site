@@ -1,4 +1,5 @@
 ﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;

@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.Primitives;
 using SixLabors.Shapes;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services
 {
@@ -24,7 +25,7 @@ namespace IsraelHiking.API.Services
         public int Height { get; set; }
         public int Zoom { get; set; }
         public double N { get; set; }
-        public DataContainer DataContainer { get; set; }
+        public DataContainerPoco DataContainer { get; set; }
         public AddressAndOpacity[] AddressesTemplates { get; set; }
     }
 
@@ -65,7 +66,7 @@ namespace IsraelHiking.API.Services
         }
 
         ///<inheritdoc />
-        public async Task<byte[]> Create(DataContainer dataContainer, int width, int height)
+        public async Task<byte[]> Create(DataContainerPoco dataContainer, int width, int height)
         {
             var context = new ImageCreationContext
             {

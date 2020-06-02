@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using IsraelHiking.Common.DataContainer;
+using Newtonsoft.Json;
 
 namespace IsraelHiking.Common
 {

@@ -1,6 +1,7 @@
 ﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -52,7 +53,7 @@ namespace IsraelHiking.API.Controllers
         /// Returns the data relevant to a given shared route
         /// </summary>
         /// <param name="id">The shared route ID</param>
-        /// <param name="format">The format to convert to, default is <see cref="DataContainer"/>, but you can use "gpx", "csv" and all other formats that can be opened in this site</param>
+        /// <param name="format">The format to convert to, default is <see cref="DataContainerPoco"/>, but you can use "gpx", "csv" and all other formats that can be opened in this site</param>
         /// <returns>The shared route in the requested format</returns>
         // GET api/Urls/abc?format=gpx
         [HttpGet]

@@ -1,13 +1,11 @@
 ﻿using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
-using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SixLabors.ImageSharp;
@@ -74,58 +72,11 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc/>
-        public void CreateOfflinePoisFile(List<Feature> features)
+        public void CreateOfflineImagesFile(List<Feature> features)
         {
-            var collection = new FeatureCollection();
-            var slimCollection = new FeatureCollection();
-            foreach (var feature in features)
-            {
-                var geoLocation = feature.Attributes[FeatureAttributes.POI_GEOLOCATION] as AttributesTable;
-
-                var slimFeature = new Feature(new Point(
-                    double.Parse(geoLocation[FeatureAttributes.LON].ToString()),
-                    double.Parse(geoLocation[FeatureAttributes.LAT].ToString())), new AttributesTable());
-                foreach (var property in new[] {
-                        FeatureAttributes.POI_ICON,
-                        FeatureAttributes.POI_NAMES,
-                        FeatureAttributes.POI_ID,
-                        FeatureAttributes.POI_CATEGORY,
-                        FeatureAttributes.ID,
-                        FeatureAttributes.POI_ICON_COLOR,
-                        FeatureAttributes.POI_SOURCE,
-                        FeatureAttributes.POI_LANGUAGE
-                        })
-                {
-                    slimFeature.Attributes.AddOrUpdate(property, feature.Attributes[property]);
-                }
-                slimFeature.Attributes.AddOrUpdate(FeatureAttributes.POI_HAS_EXTRA_DATA, Languages.Array.ToDictionary(l => l, l => feature.HasExtraData(l)));
-                slimCollection.Add(slimFeature);
-                collection.Add(feature);
-            }
-            using var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "pois-slim.geojson"));
-            fileStream.Write(slimCollection.ToBytes());
-
             using var outputMemStream = new MemoryStream();
             using var zipStream = new ZipOutputStream(outputMemStream);
             zipStream.SetLevel(9);
-
-            var newEntry = new ZipEntry("pois/pois.geojson")
-            {
-                DateTime = DateTime.Now
-            };
-            zipStream.PutNextEntry(newEntry);
-            StreamUtils.Copy(new MemoryStream(collection.ToBytes()), zipStream, new byte[4096]);
-            zipStream.CloseEntry();
-
-            CreateImagesJsonFiles(features, zipStream);
-            zipStream.Finish();
-            outputMemStream.Position = 0;
-
-            _fileSystemHelper.WriteAllBytes("pois.ihm", outputMemStream.ToArray());
-        }
-
-        private void CreateImagesJsonFiles(List<Feature> features, ZipOutputStream zipStream)
-        {
             var items = new ConcurrentBag<ImageItem>();
             var downloadedUrls = _imagesRepository.GetAllUrls().Result.ToHashSet();
             _logger.LogInformation($"Staring Image file creation: {features.Count} features, exiting images: {downloadedUrls.Count}");
@@ -164,6 +115,10 @@ namespace IsraelHiking.API.Executors
                 index++;
             }
             _logger.LogInformation("Finished Image file creation: " + items.Count());
+            zipStream.Finish();
+            outputMemStream.Position = 0;
+
+            _fileSystemHelper.WriteAllBytes("images.ihm", outputMemStream.ToArray());
         }
     }
 }

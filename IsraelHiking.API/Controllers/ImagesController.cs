@@ -1,5 +1,7 @@
 ﻿using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -64,7 +66,7 @@ namespace IsraelHiking.API.Controllers
         {
             var center = new LatLng(lat, lon);
             var distance = 0.001;
-            var container = new DataContainer
+            var container = new DataContainerPoco
             {
                 NorthEast = new LatLng(center.Lat + distance, center.Lng + distance),
                 SouthWest = new LatLng(center.Lat - distance, center.Lng - distance),
@@ -119,13 +121,13 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// When sending a <see cref="DataContainer"/> you'll recieve the image preview
+        /// When sending a <see cref="DataContainerPoco"/> you'll recieve the image preview
         /// </summary>
         /// <param name="dataContainer"></param>
         /// <returns></returns>
         [HttpPost]
         [Route("")]
-        public async Task<IActionResult> PostDataContainer([FromBody]DataContainer dataContainer)
+        public async Task<IActionResult> PostDataContainer([FromBody]DataContainerPoco dataContainer)
         {
             var imageData = await _imageCreationService.Create(dataContainer, 600, 315);
             return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));

@@ -1,8 +1,9 @@
-﻿using System;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
 
 namespace IsraelHiking.API.Services
 {

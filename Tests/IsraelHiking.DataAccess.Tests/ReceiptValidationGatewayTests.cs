@@ -1,4 +1,4 @@
-﻿using IsraelHiking.Common;
+﻿using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

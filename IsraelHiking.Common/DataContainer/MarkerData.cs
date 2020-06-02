@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
-namespace IsraelHiking.Common
+namespace IsraelHiking.Common.DataContainer
 {
     public class MarkerData
     {

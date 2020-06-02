@@ -3,7 +3,7 @@ using IsraelHiking.API;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
-using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccessInterfaces;

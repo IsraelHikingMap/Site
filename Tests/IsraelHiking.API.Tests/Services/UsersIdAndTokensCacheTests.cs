@@ -1,11 +1,12 @@
-﻿using System.Threading.Tasks;
-using IsraelHiking.API.Services;
+﻿using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Caching.Memory;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Tests.Services
 {

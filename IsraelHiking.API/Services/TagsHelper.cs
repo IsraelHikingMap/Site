@@ -1,9 +1,10 @@
-﻿using System;
+﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
+using Microsoft.Extensions.Options;
+using NetTopologySuite.Features;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using IsraelHiking.Common;
-using NetTopologySuite.Features;
-using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services
 {

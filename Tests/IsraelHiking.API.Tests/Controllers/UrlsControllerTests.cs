@@ -2,6 +2,7 @@
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -60,8 +61,8 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var id = "someId";
             var bytes = new byte[] { 1 };
-            _repository.GetUrlById(id).Returns(new ShareUrl { Id = id, DataContainer = new DataContainer() });
-            _containerConverterService.ToAnyFormat(Arg.Any<DataContainer>(), "gpx").Returns(bytes);
+            _repository.GetUrlById(id).Returns(new ShareUrl { Id = id, DataContainer = new DataContainerPoco() });
+            _containerConverterService.ToAnyFormat(Arg.Any<DataContainerPoco>(), "gpx").Returns(bytes);
 
             var results = _controller.GetShareUrl(id, "gpx").Result as FileContentResult;
 
@@ -131,7 +132,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             var shareUrl = new ShareUrl
             {
-                DataContainer = new DataContainer
+                DataContainer = new DataContainerPoco
                 {
                     Routes = new List<RouteData>
                     {

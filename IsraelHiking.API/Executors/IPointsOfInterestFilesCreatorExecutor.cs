@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using NetTopologySuite.Features;
+﻿using NetTopologySuite.Features;
+using System.Collections.Generic;
 
 namespace IsraelHiking.API.Executors
 {
@@ -18,6 +18,6 @@ namespace IsraelHiking.API.Executors
         /// This function creates the pois-slim.geojson file inside the wwwroot folder
         /// </summary>
         /// <param name="features"></param>
-        void CreateOfflinePoisFile(List<Feature> features);
+        void CreateOfflineImagesFile(List<Feature> features);
     }
 }

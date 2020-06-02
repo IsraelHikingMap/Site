@@ -1,27 +1,27 @@
-﻿using System.Threading.Tasks;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common.DataContainer;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services
 {
     /// <summary>
-    /// Conversion service from and to <see cref="DataContainer"/>
+    /// Conversion service from and to <see cref="DataContainerPoco"/>
     /// </summary>
     public interface IDataContainerConverterService
     {
         /// <summary>
-        /// Converts bytes to <see cref="DataContainer"/>
+        /// Converts bytes to <see cref="DataContainerPoco"/>
         /// </summary>
         /// <param name="content">File content in bytes</param>
         /// <param name="fileName">File name</param>
-        /// <returns>Converted <see cref="DataContainer"/></returns>
-        Task<DataContainer> ToDataContainer(byte[] content, string fileName);
+        /// <returns>Converted <see cref="DataContainerPoco"/></returns>
+        Task<DataContainerPoco> ToDataContainer(byte[] content, string fileName);
         /// <summary>
-        /// Converts <see cref="DataContainer"/> to any format
+        /// Converts <see cref="DataContainerPoco"/> to any format
         /// </summary>
         /// <param name="dataContainer">The data container</param>
         /// <param name="format">The format to convert to like GPX, KML etc.</param>
         /// <returns>Converted file in the form of bytes</returns>
-        Task<byte[]> ToAnyFormat(DataContainer dataContainer, string format);
+        Task<byte[]> ToAnyFormat(DataContainerPoco dataContainer, string format);
         /// <summary>
         /// Converts any format to any format
         /// </summary>

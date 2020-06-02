@@ -1,4 +1,4 @@
-﻿using IsraelHiking.Common;
+﻿using IsraelHiking.Common.DataContainer;
 
 namespace IsraelHiking.API.Services
 {

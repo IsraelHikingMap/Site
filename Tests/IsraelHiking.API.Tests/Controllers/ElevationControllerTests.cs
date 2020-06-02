@@ -1,5 +1,5 @@
 ﻿using IsraelHiking.API.Controllers;
-using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;

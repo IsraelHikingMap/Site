@@ -1,6 +1,7 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -15,6 +10,10 @@ using OsmSharp;
 using OsmSharp.Changesets;
 using OsmSharp.Complete;
 using OsmSharp.IO.API;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Osm
 {
@@ -245,7 +244,7 @@ namespace IsraelHiking.API.Services.Osm
         {
             _logger.LogInformation("Starting rebuilding offline pois file.");
             var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
-            _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
+            _pointsOfInterestFilesCreatorExecutor.CreateOfflineImagesFile(features);
             _logger.LogInformation("Finished rebuilding offline pois file.");
         }
     }

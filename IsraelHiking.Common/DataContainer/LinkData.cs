@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace IsraelHiking.Common
+namespace IsraelHiking.Common.DataContainer
 {
     public class LinkData
     {

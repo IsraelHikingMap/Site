@@ -1,6 +1,8 @@
 ﻿using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.DataContainer;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -92,13 +94,13 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Gets a file from an external Url and converts it to <see cref="DataContainer"/>
+        /// Gets a file from an external Url and converts it to <see cref="DataContainerPoco"/>
         /// </summary>
         /// <param name="url">The url to fetch the file from</param>
         /// <returns>A data container after convertion</returns>
         [HttpGet]
         // GET api/files?url=http://jeeptrip.co.il/routes/pd6bccre.twl
-        public async Task<DataContainer> GetRemoteFile(string url)
+        public async Task<DataContainerPoco> GetRemoteFile(string url)
         {
             var response = await _remoteFileFetcherGateway.GetFileContent(url);
             var dataContainer = await ConvertToDataContainer(response.Content, response.FileName);
@@ -106,25 +108,25 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Converts <see cref="DataContainer"/> (client side presention) to any given format.
+        /// Converts <see cref="DataContainerPoco"/> (client side presention) to any given format.
         /// </summary>
         /// <param name="format">The format to convert to</param>
         /// <param name="dataContainer">The container to convert</param>
         /// <returns>A byte representation of file in the converted format</returns>
         [HttpPost]
         // POST api/files?format=gpx
-        public Task<byte[]> PostSaveFile(string format, [FromBody]DataContainer dataContainer)
+        public Task<byte[]> PostSaveFile(string format, [FromBody]DataContainerPoco dataContainer)
         {
             return _dataContainerConverterService.ToAnyFormat(dataContainer, format);
         }
 
         /// <summary>
-        /// Reads the uploaded file and converts it to <see cref="DataContainer"/>
+        /// Reads the uploaded file and converts it to <see cref="DataContainerPoco"/>
         /// </summary>
-        /// <returns>A <see cref="DataContainer"/> after conversion of the file uploaded</returns>
+        /// <returns>A <see cref="DataContainerPoco"/> after conversion of the file uploaded</returns>
         [HttpPost]
         [Route("open")]
-        [ProducesResponseType(typeof(DataContainer), 200)]
+        [ProducesResponseType(typeof(DataContainerPoco), 200)]
         public async Task<IActionResult> PostOpenFile(IFormFile file)
         {
             if (file == null)
@@ -138,7 +140,7 @@ namespace IsraelHiking.API.Controllers
             return Ok(dataContainer);
         }
 
-        private async Task<DataContainer> ConvertToDataContainer(byte[] data, string fileName)
+        private async Task<DataContainerPoco> ConvertToDataContainer(byte[] data, string fileName)
         {
             var dataContainer = await _dataContainerConverterService.ToDataContainer(data, fileName);
             foreach (var latLng in dataContainer.Routes.SelectMany(routeData => routeData.Segments.SelectMany(routeSegmentData => routeSegmentData.Latlngs)))

@@ -1,6 +1,8 @@
 ﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +55,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var siteUrl = new ShareUrl
             {
                 Id = "1",
-                DataContainer = new DataContainer()
+                DataContainer = new DataContainerPoco()
             };
             _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
 
@@ -73,7 +75,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostDataContainer_ShouldCreateImage()
         {
-            var dataContainer = new DataContainer();
+            var dataContainer = new DataContainerPoco();
 
             _controller.PostDataContainer(dataContainer).Wait();
 

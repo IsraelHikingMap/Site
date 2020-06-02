@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
+using IsraelHiking.Common.DataContainer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.IO;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Gpx
 {
@@ -23,7 +24,7 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void ToGpx_NoData_ShouldReturnEmptyGpx()
         {
-            var dataContainer = new DataContainer();
+            var dataContainer = new DataContainerPoco();
 
             var gpx = _converter.ToGpx(dataContainer);
 
@@ -35,7 +36,7 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void ToGpx_WithData_ShouldReturnFullGpx()
         {
-            var dataContainer = new DataContainer
+            var dataContainer = new DataContainerPoco
             {
                 Routes = new List<RouteData>
                 {
@@ -142,7 +143,7 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void ConvertToGpxAndBack_WithData_ShouldReturnTheSameData()
         {
-            var dataContainer = new DataContainer
+            var dataContainer = new DataContainerPoco
             {
                 Routes = new List<RouteData>
                 {
