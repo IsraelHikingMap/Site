@@ -85,7 +85,7 @@ export class ShareUrlsService {
     }
 
     public async deleteShareUrl(shareUrl: ShareUrl): Promise<void> {
-        await this.httpClient.delete(Urls.urls + shareUrl.id, { responseType: "text" }).toPromise();
+        await this.httpClient.delete(Urls.urls + shareUrl.id).toPromise();
         remove(this.shareUrls, s => s.id === shareUrl.id);
     }
 

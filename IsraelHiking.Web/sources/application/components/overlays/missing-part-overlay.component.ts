@@ -53,7 +53,7 @@ export class MissingPartOverlayComponent extends ClosableOverlayComponent {
 
     public addMissingPartToOsm = async () => {
         try {
-            await this.httpClient.put(Urls.osm, this.feature, { responseType: "text" }).toPromise();
+            await this.httpClient.put(Urls.osm, this.feature).toPromise();
             this.toastService.success(this.resources.routeAddedSuccessfullyItWillTakeTime);
             this.remove();
         } catch (ex) {

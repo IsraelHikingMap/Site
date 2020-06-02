@@ -59,7 +59,7 @@ export class TracesService {
     public uploadTrace(file: File): Promise<any> {
         let formData = new FormData();
         formData.append("file", file, file.name);
-        return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
+        return this.httpClient.post(Urls.osmTrace, formData).toPromise();
     }
 
     public async uploadRouteAsTrace(route: RouteData): Promise<string> {
@@ -70,17 +70,17 @@ export class TracesService {
         let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
         let formData = new FormData();
         formData.append("file", blobToSave, route.name + ".gpx");
-        return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise() as Promise<string>;
+        return this.httpClient.post(Urls.osmTrace, formData).toPromise() as Promise<string>;
     }
 
     public async updateTrace(trace: Trace): Promise<void> {
-        await this.httpClient.put(Urls.osmTrace + trace.id, trace, { responseType: "text" }).toPromise();
+        await this.httpClient.put(Urls.osmTrace + trace.id, trace).toPromise();
         this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace }));
     }
 
     public async deleteTrace(trace: Trace): Promise<void> {
         if (trace.visibility !== "local") {
-            await this.httpClient.delete(Urls.osmTrace + trace.id, { responseType: "text" }).toPromise();
+            await this.httpClient.delete(Urls.osmTrace + trace.id).toPromise();
         }
         this.ngRedux.dispatch(new RemoveTraceAction({ traceId: trace.id }));
     }
