@@ -1,11 +1,7 @@
-﻿using System.IO;
-using System.Net;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
-using IsraelHiking.Common;
+using IsraelHiking.Common.Api;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -13,6 +9,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using OsmSharp;
 using OsmSharp.Changesets;
+using System.IO;
+using System.Net;
+using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace IsraelHiking.API.Tests.Controllers
 {

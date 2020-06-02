@@ -1,6 +1,6 @@
 ﻿using NetTopologySuite.Geometries;
 
-namespace IsraelHiking.Common
+namespace IsraelHiking.Common.Api
 {
     public enum ProfileType
     {

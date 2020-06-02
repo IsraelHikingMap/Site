@@ -1,4 +1,4 @@
-﻿using IsraelHiking.Common;
+﻿using IsraelHiking.Common.Api;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccessInterfaces

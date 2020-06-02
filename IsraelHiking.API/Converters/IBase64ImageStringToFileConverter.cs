@@ -1,4 +1,4 @@
-﻿using IsraelHiking.Common;
+﻿using IsraelHiking.Common.Api;
 
 namespace IsraelHiking.API.Converters
 {

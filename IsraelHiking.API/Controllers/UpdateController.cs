@@ -1,6 +1,6 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
-using IsraelHiking.Common;
+using IsraelHiking.Common.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
