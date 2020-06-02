@@ -487,8 +487,8 @@ namespace IsraelHiking.DataAccess
                     ms.Map<ImageItem>(m =>
                         m.Properties(p =>
                             p.Keyword(k => k.Name(ii => ii.Hash))
-                             .Keyword(s => s.Name(n => n.ImageUrl))
-                             .Binary(a => a.Name(i => i.Data))
+                             .Keyword(s => s.Name(n => n.ImageUrls))
+                             .Binary(a => a.Name(i => i.Thumbnail))
                         )
                     )
                 )
@@ -627,7 +627,7 @@ namespace IsraelHiking.DataAccess
         {
             var response = await _elasticClient.SearchAsync<ImageItem>(s =>
                 s.Index(IMAGES)
-                .Query(q => q.Match(m => m.Field(i => i.ImageUrl).Query(url)))
+                .Query(q => q.Match(m => m.Field(i => i.ImageUrls).Query(url)))
             );
             return response.Documents.FirstOrDefault();
         }
@@ -645,11 +645,11 @@ namespace IsraelHiking.DataAccess
                     .Size(10000)
                     .Scroll("10s")
                     .Source(sf => sf
-                    .Includes(i => i.Fields(f => f.ImageUrl, f => f.Hash))
+                    .Includes(i => i.Fields(f => f.ImageUrls, f => f.Hash))
                 ).Query(q => q.MatchAll())
             );
             var list = GetAllItemsByScrolling(response);
-            return list.Select(i => i.ImageUrl).ToList();
+            return list.SelectMany(i => i.ImageUrls).ToList();
         }
 
         public Task StoreImage(ImageItem imageItem)

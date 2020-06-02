@@ -48,52 +48,50 @@ namespace IsraelHiking.API.Executors
                 await _imagesRepository.DeleteImageByUrl(imageUrlToRemove);
             }
             _logger.LogInformation($"Finished removing images, starting downloading and index: {imagesUrls.Count}");
-            using (var md5 = MD5.Create())
+            using var md5 = MD5.Create();
+            var counter = 0;
+            Parallel.ForEach(imagesUrls, new ParallelOptions { MaxDegreeOfParallelism = 20 }, (imageUrl) =>
             {
-                var counter = 0;
-                Parallel.ForEach(imagesUrls, new ParallelOptions { MaxDegreeOfParallelism = 20 }, (imageUrl) =>
+                try
                 {
-                    try
+                    Interlocked.Increment(ref counter);
+                    if (counter % 100 == 0)
                     {
-                        Interlocked.Increment(ref counter);
-                        if (counter % 100 == 0)
+                        _logger.LogInformation($"Indexed {counter} images of {imagesUrls.Count}");
+                    }
+                    if (exitingUrls.Contains(imageUrl))
+                    {
+                        var size = _remoteFileFetcherGateway.GetFileSize(imageUrl).Result;
+                        if (size > 0)
                         {
-                            _logger.LogInformation($"Indexed {counter} images of {imagesUrls.Count}");
-                        }
-                        if (exitingUrls.Contains(imageUrl))
-                        {
-                            var size = _remoteFileFetcherGateway.GetFileSize(imageUrl).Result;
-                            if (size > 0)
-                            {
-                                return;
-                            }
-                        }
-                        var content = new byte[0];
-                        for (int retryIndex = 0; retryIndex < 3; retryIndex++)
-                        {
-                            try
-                            {
-                                content = _remoteFileFetcherGateway.GetFileContent(imageUrl).Result.Content;
-                                break;
-                            }
-                            catch
-                            {
-                                Task.Delay(200).Wait();
-                            }
-                        }
-                        if (content.Length == 0)
-                        {
-                            _imagesRepository.DeleteImageByUrl(imageUrl).Wait();
                             return;
                         }
-                        StoreImage(md5, content, imageUrl).Wait();
                     }
-                    catch (Exception ex)
+                    var content = new byte[0];
+                    for (int retryIndex = 0; retryIndex < 3; retryIndex++)
                     {
-                        _logger.LogWarning(ex, "There was a problem with the following image url: " + imageUrl + " ");
+                        try
+                        {
+                            content = _remoteFileFetcherGateway.GetFileContent(imageUrl).Result.Content;
+                            break;
+                        }
+                        catch
+                        {
+                            Task.Delay(200).Wait();
+                        }
                     }
-                });
-            }
+                    if (content.Length == 0)
+                    {
+                        _imagesRepository.DeleteImageByUrl(imageUrl).Wait();
+                        return;
+                    }
+                    StoreImage(md5, content, imageUrl).Wait();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "There was a problem with the following image url: " + imageUrl + " ");
+                }
+            });
         }
 
         private byte[] ResizeImage(Image originalImage, int newSizeInPixels)
@@ -114,16 +112,18 @@ namespace IsraelHiking.API.Executors
         {
             var hash = md5.ComputeHash(content).ToHashString();
             var image = Image.Load(content, out var _);
-            content = ResizeImage(image, 200);
             var imageItemInDatabase = await _imagesRepository.GetImageByHash(hash);
-            if (imageItemInDatabase != null && imageItemInDatabase.ImageUrl != imageUrl)
+            if (imageItemInDatabase != null && !imageItemInDatabase.ImageUrls.Contains(imageUrl))
             {
-                _logger.LogWarning($"The following urls have the same image:\n{imageItemInDatabase.ImageUrl}\n{imageUrl}");
+                imageItemInDatabase.ImageUrls.Add(imageUrl);
+                await _imagesRepository.StoreImage(imageItemInDatabase);
+                return;
             }
+            content = ResizeImage(image, 100);
             await _imagesRepository.StoreImage(new ImageItem
             {
-                ImageUrl = imageUrl,
-                Data = $"data:image/jpeg;base64," + Convert.ToBase64String(content),
+                ImageUrls = new List<string> { imageUrl },
+                Thumbnail = $"data:image/jpeg;base64," + Convert.ToBase64String(content),
                 Hash = hash
             });
         }
@@ -133,7 +133,7 @@ namespace IsraelHiking.API.Executors
         {
             var hash = md5.ComputeHash(content).ToHashString();
             var imageItem = await _imagesRepository.GetImageByHash(hash);
-            var imageUrl = imageItem?.ImageUrl;
+            var imageUrl = imageItem?.ImageUrls.FirstOrDefault();
             if (imageUrl != null)
             {
                 _logger.LogInformation($"Found exiting image with url: {imageUrl}");

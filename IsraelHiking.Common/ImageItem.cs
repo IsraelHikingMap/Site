@@ -1,9 +1,15 @@
-﻿namespace IsraelHiking.Common
+﻿using System.Collections.Generic;
+
+namespace IsraelHiking.Common
 {
     public class ImageItem
     {
-        public string ImageUrl { get; set; }
-        public string Data { get; set; }
+        /// <summary>
+        /// Used as a key
+        /// </summary>
         public string Hash { get; set; }
+        public List<string> ImageUrls { get; set; }
+        public string Thumbnail { get; set; }
+        
     }
 }
