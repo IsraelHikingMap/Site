@@ -44,11 +44,9 @@ namespace IsraelHiking.API.Converters.ConverterFlows
             {
                 return false;
             }
-            using (var mempryStream = new MemoryStream(content))
-            {
-                var document = XDocument.Load(mempryStream);
-                return document.Elements().Where(x => x.Name.LocalName == "gpx").Attributes().Any(a => a.Name.LocalName == "version" && a.Value == "1.0");
-            }
+            using var mempryStream = new MemoryStream(content);
+            var document = XDocument.Load(mempryStream);
+            return document.Elements().Where(x => x.Name.LocalName == "gpx").Attributes().Any(a => a.Name.LocalName == "version" && a.Value == "1.0");
         }
     }
 }

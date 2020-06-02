@@ -23,9 +23,9 @@ namespace IsraelHiking.DataAccess
                 cmdArguments = $"/c {fileName} {arguments}";
             }
             _logger.LogDebug($"Running: {processToRun} {cmdArguments}");
-            using (var process = new Process())
+            using var process = new Process
             {
-                process.StartInfo = new ProcessStartInfo
+                StartInfo = new ProcessStartInfo
                 {
                     FileName = processToRun,
                     Arguments = cmdArguments,
@@ -33,26 +33,26 @@ namespace IsraelHiking.DataAccess
                     CreateNoWindow = true,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
-                };
-                StandardOutput = string.Empty;
-                process.Start();
-                StandardOutput = process.StandardOutput.ReadToEnd();
+                }
+            };
+            StandardOutput = string.Empty;
+            process.Start();
+            StandardOutput = process.StandardOutput.ReadToEnd();
 
-                process.WaitForExit(timeOutInMilliseconds);
+            process.WaitForExit(timeOutInMilliseconds);
 
-                while (!process.StandardOutput.EndOfStream)
-                {
-                    StandardOutput += process.StandardOutput.ReadLine();
-                }
-                StandardOutput = StandardOutput.Replace("\0", string.Empty).Trim();
-                if (process.ExitCode == 0)
-                {
-                    _logger.LogDebug($"Process {fileName} finished successfully");
-                }
-                else
-                {
-                    _logger.LogError($"Process {processToRun} {cmdArguments} did not finished successfully");
-                }
+            while (!process.StandardOutput.EndOfStream)
+            {
+                StandardOutput += process.StandardOutput.ReadLine();
+            }
+            StandardOutput = StandardOutput.Replace("\0", string.Empty).Trim();
+            if (process.ExitCode == 0)
+            {
+                _logger.LogDebug($"Process {fileName} finished successfully");
+            }
+            else
+            {
+                _logger.LogError($"Process {processToRun} {cmdArguments} did not finished successfully");
             }
         }
     }

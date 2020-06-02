@@ -53,7 +53,10 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc />
         public async Task Update(bool downloadFile = true, bool updateFile = true)
         {
-            _logger.LogInformation("Starting updating to latest OSM file.");
+            if (downloadFile == false && updateFile == false)
+            {
+                return;
+            }
             var workingDirectory = Path.Combine(_options.BinariesFolder, OSM_C_TOOLS_FOLDER);
             var directoryContents = _fileProvider.GetDirectoryContents(OSM_C_TOOLS_FOLDER);
             if (!directoryContents.Any())
@@ -62,13 +65,15 @@ namespace IsraelHiking.API.Executors
             }
             if (downloadFile || updateFile)
             {
+                _logger.LogInformation("Starting downloading OSM file.");
                 await DownloadDailyOsmFile(workingDirectory);
             }
             if (updateFile)
             {
+                _logger.LogInformation("Starting updating to latest OSM file.");
                 UpdateFileToLatestVersion(workingDirectory);
             }
-            _logger.LogInformation("Finished updating to latest OSM file.");
+            _logger.LogInformation("Finished OSM file manipulation.");
         }
 
         /// <inheritdoc />

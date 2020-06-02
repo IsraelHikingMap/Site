@@ -41,20 +41,18 @@ namespace IsraelHiking.API.Converters.ConverterFlows
             {
                 return gpx.ToBytes();
             }
-            using (var stream = new MemoryStream(content))
+            using var stream = new MemoryStream(content);
+            var link = _imgurGateway.UploadImage(stream).Result;
+            var wayPoint = gpx.Waypoints.First();
+            var gpxObject = new GpxFile
             {
-                var link = _imgurGateway.UploadImage(stream).Result;
-                var wayPoint = gpx.Waypoints.First();
-                var gpxObject = new GpxFile
-                {
-                    Metadata = new GpxMetadata(GpxDataContainerConverter.ISRAEL_HIKING_MAP + "_jpg")
-                };
-                gpxObject.Waypoints.Add(
-                    new GpxWaypoint(wayPoint.Longitude, wayPoint.Latitude)
-                        .WithLinks(new[] {new GpxWebLink(link, "", "image/jpeg")}.ToImmutableArray())
-                );
-                return gpxObject.ToBytes();
-            }
+                Metadata = new GpxMetadata(GpxDataContainerConverter.ISRAEL_HIKING_MAP + "_jpg")
+            };
+            gpxObject.Waypoints.Add(
+                new GpxWaypoint(wayPoint.Longitude, wayPoint.Latitude)
+                    .WithLinks(new[] { new GpxWebLink(link, "", "image/jpeg") }.ToImmutableArray())
+            );
+            return gpxObject.ToBytes();
         }
 
         

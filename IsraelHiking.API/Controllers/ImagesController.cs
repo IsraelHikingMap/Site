@@ -140,11 +140,9 @@ namespace IsraelHiking.API.Controllers
         [Route("anonymous")]
         public async Task<string> PostUploadImage([FromForm]IFormFile file)
         {
-            using (var stream = file.OpenReadStream())
-            {
-                var link = await _imgurGateway.UploadImage(stream);
-                return link;
-            }
+            using var stream = file.OpenReadStream();
+            var link = await _imgurGateway.UploadImage(stream);
+            return link;
         }
     }
 }

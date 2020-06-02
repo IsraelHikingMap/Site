@@ -57,39 +57,37 @@ namespace IsraelHiking.API.Controllers
             var pointsOfInterest = csvReader.GetRecords<CsvPointOfInterestRow>().ToList();
 
             var stream = new MemoryStream();
-            using (TextWriter writer = new StreamWriter(stream, Encoding.UTF8, 1024, true))
+            using TextWriter writer = new StreamWriter(stream, Encoding.UTF8, 1024, true);
+            var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            csvWriter.Configuration.HasHeaderRecord = true;
+            csvWriter.WriteHeader<CsvPointOfInterestRow>();
+            csvWriter.NextRecord();
+            foreach (var csvRow in pointsOfInterest)
             {
-                var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
-                csvWriter.Configuration.HasHeaderRecord = true;
-                csvWriter.WriteHeader<CsvPointOfInterestRow>();
-                csvWriter.NextRecord();
-                foreach (var csvRow in pointsOfInterest)
+                if (!string.IsNullOrWhiteSpace(csvRow.FileUrl))
                 {
-                    if (!string.IsNullOrWhiteSpace(csvRow.FileUrl))
-                    {
-                        var response = await _remoteFileFetcher.GetFileContent(csvRow.FileUrl);
-                        var geojsonBytes = await _dataContainerConverterService.Convert(response.Content,
-                            response.FileName, FlowFormats.GEOJSON);
-                        var geoJson = geojsonBytes.ToFeatureCollection();
-                        var coordinate = geoJson.First().Geometry.Coordinate;
-                        csvRow.Latitude = coordinate.Y;
-                        csvRow.Longitude = coordinate.X;
-                    }
-                    csvRow.SourceImageUrl = sourceImageUrl;
-                    csvRow.Website = csvRow.Website;
-                    csvRow.Icon = icon;
-                    csvRow.IconColor = iconColor;
-                    csvRow.Category = category;
-                    csvRow.Id = Regex.Match(csvRow.Website, idRegExPattern).Groups[1].Value;
-                    csvWriter.WriteRecord(csvRow);
-                    csvWriter.NextRecord();
+                    var response = await _remoteFileFetcher.GetFileContent(csvRow.FileUrl);
+                    var geojsonBytes = await _dataContainerConverterService.Convert(response.Content,
+                        response.FileName, FlowFormats.GEOJSON);
+                    var geoJson = geojsonBytes.ToFeatureCollection();
+                    var coordinate = geoJson.First().Geometry.Coordinate;
+                    csvRow.Latitude = coordinate.Y;
+                    csvRow.Longitude = coordinate.X;
                 }
-
-                csvWriter.Flush();
-                writer.Flush();
-                stream.Seek(0, SeekOrigin.Begin);
-                return File(stream, "text/csv");
+                csvRow.SourceImageUrl = sourceImageUrl;
+                csvRow.Website = csvRow.Website;
+                csvRow.Icon = icon;
+                csvRow.IconColor = iconColor;
+                csvRow.Category = category;
+                csvRow.Id = Regex.Match(csvRow.Website, idRegExPattern).Groups[1].Value;
+                csvWriter.WriteRecord(csvRow);
+                csvWriter.NextRecord();
             }
+
+            csvWriter.Flush();
+            writer.Flush();
+            stream.Seek(0, SeekOrigin.Begin);
+            return File(stream, "text/csv");
         }
     }
 }

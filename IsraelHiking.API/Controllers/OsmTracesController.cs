@@ -75,16 +75,14 @@ namespace IsraelHiking.API.Controllers
         {
             var gateway = CreateClient();
             var file = await gateway.GetTraceData(id);
-            using (MemoryStream memoryStream = new MemoryStream())
+            using MemoryStream memoryStream = new MemoryStream();
+            file.Stream.CopyTo(memoryStream);
+            var dataContainer = await _dataContainerConverterService.ToDataContainer(memoryStream.ToArray(), file.FileName);
+            foreach (var latLng in dataContainer.Routes.SelectMany(routeData => routeData.Segments.SelectMany(routeSegmentData => routeSegmentData.Latlngs)))
             {
-                file.Stream.CopyTo(memoryStream);
-                var dataContainer = await _dataContainerConverterService.ToDataContainer(memoryStream.ToArray(), file.FileName);
-                foreach (var latLng in dataContainer.Routes.SelectMany(routeData => routeData.Segments.SelectMany(routeSegmentData => routeSegmentData.Latlngs)))
-                {
-                    latLng.Alt = await _elevationDataStorage.GetElevation(latLng.ToCoordinate());
-                }
-                return dataContainer;
+                latLng.Alt = await _elevationDataStorage.GetElevation(latLng.ToCoordinate());
             }
+            return dataContainer;
         }
 
         /// <summary>
@@ -115,18 +113,16 @@ namespace IsraelHiking.API.Controllers
             {
                 return new BadRequestResult();
             }
-            using (var memoryStream = new MemoryStream())
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            var gateway = CreateClient();
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            await gateway.CreateTrace(new GpxFile
             {
-                await file.CopyToAsync(memoryStream);
-                var gateway = CreateClient();
-                memoryStream.Seek(0, SeekOrigin.Begin);
-                await gateway.CreateTrace(new GpxFile
-                {
-                    Name = file.FileName,
-                    Description = Path.GetFileNameWithoutExtension(file.FileName),
-                    Visibility = Visibility.Private
-                }, memoryStream);
-            }
+                Name = file.FileName,
+                Description = Path.GetFileNameWithoutExtension(file.FileName),
+                Visibility = Visibility.Private
+            }, memoryStream);
             return Ok();
         }
 
@@ -139,11 +135,15 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         [Route("{id}")]
         [HttpPut]
-        public async Task<Trace> PutGpsTrace(string id, [FromBody]Trace trace)
+        public async Task<IActionResult> PutGpsTrace(string id, [FromBody]Trace trace)
         {
+            if (id != trace.Id)
+            {
+                return BadRequest("trace id and url id do not match");
+            }
             var gateway = CreateClient();
             await gateway.UpdateTrace(TraceToGpxFile(trace));
-            return trace;
+            return Ok(trace);
         }
 
         /// <summary>

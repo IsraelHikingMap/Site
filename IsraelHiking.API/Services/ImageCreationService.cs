@@ -278,7 +278,7 @@ namespace IsraelHiking.API.Services
                     var points = route.Segments.SelectMany(s => s.Latlngs).Select(l => ConvertLatLngToPoint(l, context)).ToArray();
                     var markerPoints = route.Markers.Select(m => ConvertLatLngToPoint(m.Latlng, context));
                     var lineColor = _routeColors[routeColorIndex++];
-                    routeColorIndex = routeColorIndex % _routeColors.Length;
+                    routeColorIndex %= _routeColors.Length;
                     if (!string.IsNullOrEmpty(route.Color))
                     {
                         lineColor = FromColorString(route.Color, route.Opacity);

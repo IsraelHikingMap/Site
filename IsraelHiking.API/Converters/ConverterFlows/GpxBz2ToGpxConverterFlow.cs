@@ -17,14 +17,12 @@ namespace IsraelHiking.API.Converters.ConverterFlows
         /// <inheritdoc />
         public byte[] Transform(byte[] content)
         {
-            using (var contentStream = new MemoryStream(content))
-            using (var bzipStream = new BZip2InputStream(contentStream))
-            using (var memoryStreamDecompressed = new MemoryStream())
-            {
-                bzipStream.CopyTo(memoryStreamDecompressed);
-                var bytes = memoryStreamDecompressed.ToArray();
-                return bytes;
-            }
+            using var contentStream = new MemoryStream(content);
+            using var bzipStream = new BZip2InputStream(contentStream);
+            using var memoryStreamDecompressed = new MemoryStream();
+            bzipStream.CopyTo(memoryStreamDecompressed);
+            var bytes = memoryStreamDecompressed.ToArray();
+            return bytes;
         }
     }
 }

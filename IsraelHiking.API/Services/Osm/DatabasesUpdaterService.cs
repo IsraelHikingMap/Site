@@ -210,12 +210,10 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildHighways()
         {
             _logger.LogInformation("Starting rebuilding highways database.");
-            using (var stream = _latestFileFetcherExecutor.Get())
-            {
-                var osmHighways = await _osmRepository.GetAllHighways(stream);
-                var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
-                await _elasticSearchGateway.UpdateHighwaysZeroDownTime(geoJsonHighways);
-            }
+            using var stream = _latestFileFetcherExecutor.Get();
+            var osmHighways = await _osmRepository.GetAllHighways(stream);
+            var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
+            await _elasticSearchGateway.UpdateHighwaysZeroDownTime(geoJsonHighways);
 
             _logger.LogInformation("Finished rebuilding highways database.");
         }
@@ -223,17 +221,15 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildImages()
         {
             _logger.LogInformation("Starting rebuilding images database.");
-            using (var stream = _latestFileFetcherExecutor.Get())
-            {
-                var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
-                var featuresUrls = features.SelectMany(f =>
-                    f.Attributes.GetNames()
-                    .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
-                    .Select(k => f.Attributes[k].ToString())
-                );
-                var urls = await _osmRepository.GetImagesUrls(stream);
-                await _imagesUrlsStorageExecutor.DownloadAndStoreUrls(urls.Union(featuresUrls).ToList());
-            }
+            using var stream = _latestFileFetcherExecutor.Get();
+            var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
+            var featuresUrls = features.SelectMany(f =>
+                f.Attributes.GetNames()
+                .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                .Select(k => f.Attributes[k].ToString())
+            );
+            var urls = await _osmRepository.GetImagesUrls(stream);
+            await _imagesUrlsStorageExecutor.DownloadAndStoreUrls(urls.Union(featuresUrls).ToList());
             _logger.LogInformation("Finished rebuilding images database.");
         }
 

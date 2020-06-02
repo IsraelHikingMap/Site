@@ -77,15 +77,13 @@ namespace IsraelHiking.API.Gpx
         /// <returns>The <see cref="byte"/> array</returns>
         public static byte[] ToBytes(this FeatureCollection featureCollection)
         {
-            using (var outputStream = new MemoryStream())
-            {
-                var writer = new StreamWriter(outputStream);
-                var jsonWriter = new JsonTextWriter(writer);
-                var serializer = GeoJsonSerializer.Create(new GeometryFactory(), 3);
-                serializer.Serialize(jsonWriter, featureCollection);
-                jsonWriter.Flush();
-                return outputStream.ToArray();
-            }
+            using var outputStream = new MemoryStream();
+            var writer = new StreamWriter(outputStream);
+            var jsonWriter = new JsonTextWriter(writer);
+            var serializer = GeoJsonSerializer.Create(new GeometryFactory(), 3);
+            serializer.Serialize(jsonWriter, featureCollection);
+            jsonWriter.Flush();
+            return outputStream.ToArray();
         }
 
         /// <summary>
@@ -95,15 +93,11 @@ namespace IsraelHiking.API.Gpx
         /// <returns>The <see cref="FeatureCollection"/></returns>
         public static FeatureCollection ToFeatureCollection(this byte[] featureCollectionContent)
         {
-            using (var stream = new MemoryStream(featureCollectionContent))
-            {
-                var serializer = GeoJsonSerializer.Create(new GeometryFactory(), 3);
-                using (var streamReader = new StreamReader(stream))
-                using (var jsonTextReader = new JsonTextReader(streamReader))
-                {
-                    return serializer.Deserialize<FeatureCollection>(jsonTextReader);
-                }
-            }
+            using var stream = new MemoryStream(featureCollectionContent);
+            var serializer = GeoJsonSerializer.Create(new GeometryFactory(), 3);
+            using var streamReader = new StreamReader(stream);
+            using var jsonTextReader = new JsonTextReader(streamReader);
+            return serializer.Deserialize<FeatureCollection>(jsonTextReader);
         }
 
         /// <summary>
@@ -113,18 +107,16 @@ namespace IsraelHiking.API.Gpx
         /// <returns>The <see cref="GpxFile"/></returns>
         public static GpxFile ToGpx(this byte[] gpxContent)
         {
-            using (var stream = new MemoryStream(gpxContent))
+            using var stream = new MemoryStream(gpxContent);
+            var reader = new XmlTextReader(stream);
+            return GpxFile.ReadFrom(reader, new GpxReaderSettings
             {
-                var reader = new XmlTextReader(stream);
-                return GpxFile.ReadFrom(reader, new GpxReaderSettings
-                {
-                    ExtensionReader = new IsraelHikingGpxExtensionReader(),
-                    DefaultCreatorIfMissing = "unknown",
-                    IgnoreVersionAttribute = true,
-                    IgnoreBadDateTime = true,
-                    BuildWebLinksForVeryLongUriValues = true
-                });
-            }
+                ExtensionReader = new IsraelHikingGpxExtensionReader(),
+                DefaultCreatorIfMissing = "unknown",
+                IgnoreVersionAttribute = true,
+                IgnoreBadDateTime = true,
+                BuildWebLinksForVeryLongUriValues = true
+            });
         }
 
         /// <summary>
@@ -134,22 +126,20 @@ namespace IsraelHiking.API.Gpx
         /// <returns>The <see cref="byte"/> array</returns>
         public static byte[] ToBytes(this GpxFile gpx)
         {
-            using (var outputStream = new MemoryStream())
+            using var outputStream = new MemoryStream();
+            var xmlWriterSettings = new XmlWriterSettings
             {
-                var xmlWriterSettings = new XmlWriterSettings
-                {
-                    Indent = true,
-                    IndentChars = "\t",
-                    Encoding = Encoding.UTF8
-                };
-                var xmlWriter = XmlWriter.Create(outputStream, xmlWriterSettings);
-                gpx.WriteTo(xmlWriter, new GpxWriterSettings
-                {
-                    ExtensionWriter = new IsraelHikingGpxExtensionWriter()
-                });
-                xmlWriter.Flush();
-                return outputStream.ToArray();
-            }
+                Indent = true,
+                IndentChars = "\t",
+                Encoding = Encoding.UTF8
+            };
+            var xmlWriter = XmlWriter.Create(outputStream, xmlWriterSettings);
+            gpx.WriteTo(xmlWriter, new GpxWriterSettings
+            {
+                ExtensionWriter = new IsraelHikingGpxExtensionWriter()
+            });
+            xmlWriter.Flush();
+            return outputStream.ToArray();
         }
 
         /// <summary>

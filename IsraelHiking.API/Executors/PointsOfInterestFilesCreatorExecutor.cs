@@ -102,10 +102,8 @@ namespace IsraelHiking.API.Executors
                 slimCollection.Add(slimFeature);
                 collection.Add(feature);
             }
-            using (var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "pois-slim.geojson")))
-            {
-                fileStream.Write(slimCollection.ToBytes());
-            }
+            using var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "pois-slim.geojson"));
+            fileStream.Write(slimCollection.ToBytes());
 
             using var outputMemStream = new MemoryStream();
             using var zipStream = new ZipOutputStream(outputMemStream);

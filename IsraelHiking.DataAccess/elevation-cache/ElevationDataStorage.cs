@@ -123,20 +123,18 @@ namespace IsraelHiking.DataAccess
 
         private byte[] GetByteArrayFromZip(IFileInfo hgtZipFileInfo)
         {
-            using (var memoryStream = new MemoryStream())
-            using (var hgtStream = hgtZipFileInfo.CreateReadStream())
+            using var memoryStream = new MemoryStream();
+            using var hgtStream = hgtZipFileInfo.CreateReadStream();
+            var hgtZipFile = new ZipFile(hgtStream);
+            foreach (ZipEntry zipEntry in hgtZipFile)
             {
-                var hgtZipFile = new ZipFile(hgtStream);
-                foreach (ZipEntry zipEntry in hgtZipFile)
+                if (zipEntry.Name.ToLowerInvariant().Contains("hgt") == false)
                 {
-                    if (zipEntry.Name.ToLowerInvariant().Contains("hgt") == false)
-                    {
-                        continue;
-                    }
-                    var zipStream = hgtZipFile.GetInputStream(zipEntry);
-                    StreamUtils.Copy(zipStream, memoryStream, new byte[4096]);
-                    return memoryStream.ToArray();
+                    continue;
                 }
+                var zipStream = hgtZipFile.GetInputStream(zipEntry);
+                StreamUtils.Copy(zipStream, memoryStream, new byte[4096]);
+                return memoryStream.ToArray();
             }
             return null;
         }

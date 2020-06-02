@@ -86,7 +86,6 @@ namespace IsraelHiking.API.Controllers
                 }
                 _logger.LogInformation("Starting updating site's databases according to request: " + JsonConvert.SerializeObject(request));
                 await _osmLatestFileFetcherExecutor.Update(request.DownloadOsmFile, request.UpdateOsmFile);
-                _logger.LogInformation("Update OSM file completed.");
 
                 await _databasesUpdaterService.Rebuild(request);
                 _logger.LogInformation("Finished updating site's databases according to request");
@@ -122,12 +121,10 @@ namespace IsraelHiking.API.Controllers
             try
             {
                 _logger.LogInformation("Starting incremental site's databases update");
-                using (var updatesStream = await _osmLatestFileFetcherExecutor.GetUpdates())
-                {
-                    XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
-                    var changes = (OsmChange) serializer.Deserialize(updatesStream);
-                    await _databasesUpdaterService.Update(changes);
-                }
+                using var updatesStream = await _osmLatestFileFetcherExecutor.GetUpdates();
+                XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
+                var changes = (OsmChange) serializer.Deserialize(updatesStream);
+                await _databasesUpdaterService.Update(changes);
                 _logger.LogInformation("Finished incremental site's databases update");
                 return Ok();
             }
