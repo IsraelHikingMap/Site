@@ -131,7 +131,7 @@ namespace IsraelHiking.DataAccess
                 name += Path.GetExtension(fileName);
             }
             name = name.Replace(".jpg", ".jpeg");
-            var wikiFileName = $"Israel_Hiking_Map_{GetWikiName(name)}";
+            var wikiFileName = $"IHM_{GetWikiName(name)}";
             var wikiNameWithoutExtension = Path.GetFileNameWithoutExtension(wikiFileName);
             var countingFileName = wikiNameWithoutExtension.Substring(0, Math.Min(170, wikiNameWithoutExtension.Length));
             var extension = Path.GetExtension(wikiFileName);
