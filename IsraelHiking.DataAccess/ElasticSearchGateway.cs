@@ -375,8 +375,8 @@ namespace IsraelHiking.DataAccess
             {
                 feature.Attributes.AddOrUpdate(FeatureAttributes.POI_DELETED, true);
                 feature.Attributes.AddOrUpdate(FeatureAttributes.POI_LAST_MODIFIED, (timeStamp ?? DateTime.Now).ToString("o"));
+                await UpdatePointsOfInterestData(new List<Feature> { feature });
             }
-            await UpdatePointsOfInterestData(new List<Feature> { feature });
         }
 
         public Task DeletePointOfInterestById(string id, string source)

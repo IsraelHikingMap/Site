@@ -90,7 +90,7 @@ namespace IsraelHiking.API.Executors
             var groupedByName = osmFeatures.Where(f => f.Attributes.Exists(FeatureAttributes.NAME))
                 .GroupBy(f => f.Attributes[FeatureAttributes.NAME].ToString()).ToList();
             _logger.LogInformation($"Finished grouping by name: {groupedByName.Count}");
-            Parallel.For(0, groupedByName.Count, new ParallelOptions { MaxDegreeOfParallelism = 5 }, (groupIndex) =>
+            Parallel.For(0, groupedByName.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount / 2 }, (groupIndex) =>
             {
                 var features = groupedByName[groupIndex].ToList();
                 while (features.Count > 0)
@@ -175,7 +175,7 @@ namespace IsraelHiking.API.Executors
             var containers = osmFeatures.Where(f => f.IsValidContainer()).OrderBy(f => f.Geometry.Area).ToList();
             var places = osmFeatures.Where(f => f.Geometry is Point && f.Attributes.Exists(PLACE) && f.Attributes.Exists(FeatureAttributes.NAME)).ToList();
             WriteToBothLoggers($"Starting places merging places: {places.Count}, to containers: {containers.Count}");
-            Parallel.For(0, places.Count, new ParallelOptions { MaxDegreeOfParallelism = 5 }, (placeIndex) =>
+            Parallel.For(0, places.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount / 2 }, (placeIndex) =>
             {
                 var placesToRemove = UpdatePlacesGeometry(places[placeIndex], containers);
                 if (placesToRemove.Any())
