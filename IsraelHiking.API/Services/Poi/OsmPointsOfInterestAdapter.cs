@@ -90,7 +90,6 @@ namespace IsraelHiking.API.Services.Poi
         public override string Source => Sources.OSM;
 
         /// <inheritdoc />
-        [Obsolete("This is no longer needed")]
         public async Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
             var features = await _elasticSearchGateway.GetPointsOfInterest(northEast, southWest, categories, language);
