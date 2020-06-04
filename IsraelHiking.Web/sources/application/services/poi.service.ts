@@ -1,9 +1,9 @@
-import { Injectable, EventEmitter } from "@angular/core";
+import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { HttpClient, HttpParams, HttpEventType } from "@angular/common/http";
 import { NgRedux, select } from "@angular-redux/store";
 import { uniq } from "lodash";
-import { Observable } from "rxjs";
-import { timeout } from "rxjs/operators";
+import { Observable, fromEvent } from "rxjs";
+import { timeout, throttleTime } from "rxjs/operators";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, IPoiRouterData } from "./hash.service";
@@ -14,6 +14,7 @@ import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducres/layers.reducer";
+import { MapService } from "./map.service";
 import { ToastService } from "./toast.service";
 import { SetOfflinePoisLastModifiedDateAction } from "../reducres/offline.reducer";
 import { Urls } from "../urls";
@@ -24,7 +25,8 @@ import {
     ApplicationState,
     Category,
     IconColorLabel,
-    CategoriesGroup
+    CategoriesGroup,
+    PointOfInterest
 } from "../models/models";
 
 interface IImageItem {
@@ -65,6 +67,7 @@ export class PoiService {
 
     constructor(private readonly resources: ResourcesService,
                 private readonly httpClient: HttpClient,
+                private readonly ngZone: NgZone,
                 private readonly whatsappService: WhatsAppService,
                 private readonly hashService: HashService,
                 private readonly databaseService: DatabaseService,
@@ -72,6 +75,7 @@ export class PoiService {
                 private readonly geoJsonParser: GeoJsonParser,
                 private readonly loggingService: LoggingService,
                 private readonly toastService: ToastService,
+                private readonly mapService: MapService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         this.poisCache = [];
@@ -98,10 +102,65 @@ export class PoiService {
         this.resources.languageChanged.subscribe(() => this.updatePois());
         this.categoriesGroups.subscribe(() => this.updatePois());
         await this.syncCategories();
-        await this.rebuildPois();
-        this.toastService.progress({
-            action: this.downloadPOIs
-        });
+        if (this.runningContextService.isCordova) {
+            await this.rebuildPois();
+            this.toastService.progress({
+                action: this.downloadPOIs
+            });
+        } else {
+            await this.updatePois();
+            fromEvent(this.mapService.map, "moveend")
+                .pipe(throttleTime(500, undefined, { trailing: true }))
+                .subscribe(() => {
+                    this.ngZone.run(() => {
+                        this.updatePois();
+                    });
+                });
+        }
+    }
+
+    private async getPoisFromServer(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
+        let visibleCategories = this.getVisibleCategories();
+        if (this.mapService.map.getZoom() <= 10) {
+            return [];
+        }
+        let bounds = SpatialService.getMapBounds(this.mapService.map);
+        // Adding half a screen padding:
+        bounds.northEast.lng += (bounds.northEast.lng - bounds.southWest.lng) / 2.0;
+        bounds.northEast.lat += (bounds.northEast.lat - bounds.southWest.lat) / 2.0;
+        bounds.southWest.lng -= (bounds.northEast.lng - bounds.southWest.lng) / 2.0;
+        bounds.southWest.lat -= (bounds.northEast.lat - bounds.southWest.lat) / 2.0;
+
+        let language = this.resources.getCurrentLanguageCodeSimplified();
+        let params = new HttpParams()
+            .set("northEast", bounds.northEast.lat + "," + bounds.northEast.lng)
+            .set("southWest", bounds.southWest.lat + "," + bounds.southWest.lng)
+            .set("categories", visibleCategories.join(","))
+            .set("language", language);
+        let pointsOfInterest = await this.httpClient.get(Urls.poi, { params }).pipe(timeout(10000)).toPromise() as PointOfInterest[];
+        this.poisGeojson.features = pointsOfInterest.map(p => this.pointToFeature(p));
+        return this.poisGeojson.features;
+    }
+
+    private getPoisFromLocalStorage(): GeoJSON.Feature<GeoJSON.Point>[] {
+        let visibleFeatures = [];
+        let visibleCategories = this.getVisibleCategories();
+        let language = this.resources.getCurrentLanguageCodeSimplified();
+        for (let feature of this.poisGeojson.features) {
+            if (feature.properties.poiLanguage !== "all" && feature.properties.poiLanguage !== language) {
+                continue;
+            }
+            if (visibleCategories.indexOf(feature.properties.poiCategory) === -1) {
+                continue;
+            }
+            let titles = feature.properties.poiNames[language] || feature.properties.poiNames.all;
+            feature.properties.title = (titles && titles.length > 0) ? titles[0] : "";
+            feature.properties.hasExtraData = feature.properties.poiHasExtraData[language] || false;
+            if (feature.properties.title || feature.properties.hasExtraData) {
+                visibleFeatures.push(feature);
+            }
+        }
+        return visibleFeatures;
     }
 
     private async rebuildPois() {
@@ -201,15 +260,19 @@ export class PoiService {
         });
     }
 
-    public updatePois() {
+    private getVisibleCategories(): string[] {
         let visibleCategories = [];
         for (let categoriesGroup of this.ngRedux.getState().layersState.categoriesGroups) {
-            for (let category of categoriesGroup.categories) {
-                if (category.visible) {
-                    visibleCategories.push(category.name);
-                }
-            }
+            visibleCategories.push(...categoriesGroup.categories
+                .filter(c => c.visible)
+                .map(c => c.name));
         }
+        return visibleCategories;
+    }
+
+    public async updatePois() {
+        await await this.mapService.initializationPromise;
+        let visibleCategories = this.getVisibleCategories();
         if (visibleCategories.length === 0) {
             this.poiGeojsonFiltered = {
                 type: "FeatureCollection",
@@ -218,23 +281,10 @@ export class PoiService {
             this.poisChanged.next();
             return;
         }
-
-        let visibleFeatures = [];
-        let language = this.resources.getCurrentLanguageCodeSimplified();
-        for (let feature of this.poisGeojson.features) {
-            if (feature.properties.poiLanguage !== "all" && feature.properties.poiLanguage !== language) {
-                continue;
-            }
-            if (visibleCategories.indexOf(feature.properties.poiCategory) === -1) {
-                continue;
-            }
-            let titles = feature.properties.poiNames[language] || feature.properties.poiNames.all;
-            feature.properties.title = (titles && titles.length > 0) ? titles[0] : "";
-            feature.properties.hasExtraData = feature.properties.poiHasExtraData[language] || false;
-            if (feature.properties.title || feature.properties.hasExtraData) {
-                visibleFeatures.push(feature);
-            }
-        }
+        let visibleFeatures = this.runningContextService.isCordova
+            ? this.getPoisFromLocalStorage()
+            : await this.getPoisFromServer()
+        
         this.poiGeojsonFiltered = {
             type: "FeatureCollection",
             features: visibleFeatures
@@ -343,6 +393,25 @@ export class PoiService {
             poiExtended.imagesUrls.push(url);
         });
         return poiExtended;
+    }
+
+    public pointToFeature(p: PointOfInterest): GeoJSON.Feature<GeoJSON.Point> {
+        let id = p.source + "_" + p.id;
+        return {
+            type: "Feature",
+            properties: {
+                poiId: id,
+                poiIcon: p.icon,
+                poiIconColor: p.iconColor,
+                title: p.title,
+                hasExtraData: p.hasExtraData,
+            },
+            id,
+            geometry: {
+                type: "Point",
+                coordinates: [p.location.lng, p.location.lat]
+            }
+        };
     }
 
     private featureToPoint(f: GeoJSON.Feature): PointOfInterestExtended {

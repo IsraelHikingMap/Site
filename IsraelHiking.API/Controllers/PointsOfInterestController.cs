@@ -89,7 +89,6 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of GeoJSON features</returns>
         [Route("")]
         [HttpGet]
-        [Obsolete("This was changed by geojson - remove 09/2020")]
         public async Task<PointOfInterest[]> GetPointsOfInterest(string northEast, string southWest, string categories,
             string language = "")
         {

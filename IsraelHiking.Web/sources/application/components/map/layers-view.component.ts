@@ -68,27 +68,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
             };
             return;
         }
-        this.selectedPoiFeature = this.poiToFeature(poi);
+        this.selectedPoiFeature = this.poiService.pointToFeature(poi);
         this.selectedPoiGeoJson = poi.featureCollection;
-    }
-
-    private poiToFeature(p: PointOfInterest): GeoJSON.Feature<GeoJSON.Point> {
-        let id = p.source + "_" + p.id;
-        return {
-            type: "Feature",
-            properties: {
-                poiId: id,
-                poiIcon: p.icon,
-                poiIconColor: p.iconColor,
-                title: p.title,
-                hasExtraData: p.hasExtraData
-            },
-            id,
-            geometry: {
-                type: "Point",
-                coordinates: [p.location.lng, p.location.lat]
-            }
-        };
     }
 
     public openPoi(id, e: Event) {
