@@ -283,8 +283,8 @@ export class PoiService {
         }
         let visibleFeatures = this.runningContextService.isCordova
             ? this.getPoisFromLocalStorage()
-            : await this.getPoisFromServer()
-        
+            : await this.getPoisFromServer();
+
         this.poiGeojsonFiltered = {
             type: "FeatureCollection",
             features: visibleFeatures

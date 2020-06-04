@@ -1,4 +1,4 @@
-import { TestBed, inject, flushMicrotasks, fakeAsync, tick, flush } from "@angular/core/testing";
+import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule, HttpRequest } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { Device } from "@ionic-native/device/ngx";
@@ -18,6 +18,7 @@ import { SQLite } from "@ionic-native/sqlite/ngx";
 import { Urls } from "../urls";
 import { PointOfInterestExtended } from "../models/models";
 import { NgReduxTestingModule, MockNgRedux } from "@angular-redux/store/testing";
+import { MapService } from "./map.service";
 
 describe("Poi Service", () => {
 
@@ -28,6 +29,12 @@ describe("Poi Service", () => {
         let databaseServiceMock = {
             getPoisForClustering: () => Promise.resolve([])
         };
+        let mapServiceMosk = {
+            map: {
+                on: () => { },
+                off: () => { },
+            }
+        }
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -40,6 +47,7 @@ describe("Poi Service", () => {
                 { provide: ToastService, useValue: toastMock.toastService },
                 { provide: FileService, useValue: fileServiceMock },
                 { provide: DatabaseService, useValue: databaseServiceMock },
+                { provide: MapService, useValue: mapServiceMosk },
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,
