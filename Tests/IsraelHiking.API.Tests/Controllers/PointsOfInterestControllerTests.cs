@@ -51,7 +51,8 @@ namespace IsraelHiking.API.Tests.Controllers
                 _wikimediaCommonGateway, 
                 _pointsOfInterestProvider, 
                 new Base64ImageStringToFileConverter(), 
-                _imagesUrlsStorageExecutor, 
+                _imagesUrlsStorageExecutor,
+                Substitute.For<ILogger>(),
                 optionsProvider, 
                 _cache);
         }
