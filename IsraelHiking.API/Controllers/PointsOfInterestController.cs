@@ -10,6 +10,7 @@ using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using OsmSharp.IO.API;
@@ -34,6 +35,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
         private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
+        private readonly ILogger _logger;
         private readonly ConfigurationData _options;
         private readonly UsersIdAndTokensCache _cache;
 
@@ -54,6 +56,7 @@ namespace IsraelHiking.API.Controllers
             IPointsOfInterestProvider pointsOfInterestProvider,
             IBase64ImageStringToFileConverter base64ImageConverter,
             IImagesUrlsStorageExecutor imageUrlStoreExecutor,
+            ILogger logger,
             IOptions<ConfigurationData> options,
             UsersIdAndTokensCache cache)
         {
@@ -64,6 +67,7 @@ namespace IsraelHiking.API.Controllers
             _imageUrlStoreExecutor = imageUrlStoreExecutor;
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _wikimediaCommonGateway = wikimediaCommonGateway;
+            _logger = logger;
             _options = options.Value;
         }
 
@@ -209,7 +213,9 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public async Task<UpdatesResponse> GetPointOfInterestUpdates(DateTime lastModified)
         {
+            _logger.LogInformation("Got POIs updates request for " + lastModified.ToString());
             var feautres = await _pointsOfInterestProvider.GetUpdates(lastModified);
+            _logger.LogInformation("Got updates from database, getting images");
             var imageUrls = new List<string>();
             foreach (var feature in feautres)
             {
@@ -219,6 +225,7 @@ namespace IsraelHiking.API.Controllers
                 imageUrls.AddRange(currentImageUrls.ToList());
             }
             var images = await _imageUrlStoreExecutor.GetAllImagesForUrls(imageUrls.ToArray());
+            _logger.LogInformation("Finished getting POIs updates, returning content to client");
             return new UpdatesResponse
             {
                 Features = feautres,

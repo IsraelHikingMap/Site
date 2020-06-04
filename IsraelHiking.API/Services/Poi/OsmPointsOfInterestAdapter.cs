@@ -549,7 +549,6 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc/>
         public async Task<Feature[]> GetUpdates(DateTime lastMoidifiedDate)
         {
-            var images = new List<ImageItem>();
             var results = (lastMoidifiedDate == DateTime.MinValue)
                 ? await _elasticSearchGateway.GetAllPointsOfInterest(false)
                 : await _elasticSearchGateway.GetPointsOfInterestUpdates(lastMoidifiedDate);

@@ -102,7 +102,7 @@ namespace IsraelHiking.API.Executors
             var newSize = new Size((int)(originalImage.Width * ratio), (int)(originalImage.Height * ratio));
             originalImage.Mutate(x => x.Resize(newSize));
 
-            var memoryStream = new MemoryStream();
+            using var memoryStream = new MemoryStream();
             originalImage.SaveAsJpeg(memoryStream);
             return memoryStream.ToArray();
         }
