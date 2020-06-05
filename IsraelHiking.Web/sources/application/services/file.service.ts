@@ -291,7 +291,12 @@ export class FileService {
             { replace: true, append: false, truncate: 0 });
     }
 
-    public async getFileContentWithProgress(url: string, progressCallback: (value: number) => void) {
+    /**
+     * Downloads a file while reporting progress
+     * @param url The url of the file
+     * @param progressCallback reports progress between 0 and 1
+     */
+    public async getFileContentWithProgress(url: string, progressCallback: (value: number) => void): Promise<Blob> {
         return new Promise((resolve, reject) => {
             this.httpClient.get(url, {
                 observe: "events",

@@ -24,6 +24,7 @@ export class Urls {
     public static readonly poiCategories = Urls.poi + "categories/";
     public static readonly poiClosest = Urls.poi + "closest/";
     public static readonly poiUpdates = Urls.poi + "updates/";
+    public static readonly poisOfflineFile = Urls.baseAddress + "/PointsOfInterest/offline-pois.zip";
 
     public static readonly facebook = "http://www.facebook.com/sharer/sharer.php?u=";
     public static readonly waze = "https://www.waze.com/ul?navigate=yes&zoom=17&ll=";

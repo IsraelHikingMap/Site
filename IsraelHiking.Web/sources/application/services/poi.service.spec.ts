@@ -34,7 +34,7 @@ describe("Poi Service", () => {
                 on: () => { },
                 off: () => { },
             }
-        }
+        };
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
