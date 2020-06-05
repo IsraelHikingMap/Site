@@ -245,7 +245,7 @@ namespace IsraelHiking.API.Services.Osm
         {
             _logger.LogInformation("Starting rebuilding offline pois file.");
             var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
-            _pointsOfInterestFilesCreatorExecutor.CreateOfflineImagesFile(features);
+            _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
             _logger.LogInformation("Finished rebuilding offline pois file.");
         }
     }

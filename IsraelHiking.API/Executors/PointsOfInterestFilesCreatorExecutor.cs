@@ -1,10 +1,13 @@
 ﻿using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
+using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -27,21 +30,25 @@ namespace IsraelHiking.API.Executors
         private readonly IWebHostEnvironment _environment;
         private readonly IImagesRepository _imagesRepository;
         private readonly ILogger _logger;
+        private readonly ConfigurationData _options;
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="fileSystemHelper"></param>
         /// <param name="environment"></param>
         /// <param name="imagesRepository"></param>
+        /// <param name="options"></param>
         /// <param name="logger"></param>
         public PointsOfInterestFilesCreatorExecutor(IFileSystemHelper fileSystemHelper,
             IWebHostEnvironment environment,
             IImagesRepository imagesRepository,
+            IOptions<ConfigurationData> options,
             ILogger logger)
         {
             _fileSystemHelper = fileSystemHelper;
             _environment = environment;
             _imagesRepository = imagesRepository;
+            _options = options.Value;
             _logger = logger;
         }
 
@@ -72,11 +79,20 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc/>
-        public void CreateOfflineImagesFile(List<Feature> features)
+        public void CreateOfflinePoisFile(List<Feature> features)
         {
             using var outputMemStream = new MemoryStream();
             using var zipStream = new ZipOutputStream(outputMemStream);
             zipStream.SetLevel(9);
+            var collection = new FeatureCollection();
+            foreach (var feature in features)
+            {
+                collection.Add(feature);
+            }
+            zipStream.PutNextEntry(new ZipEntry("pois/pois.geojson") { DateTime = DateTime.Now });
+            StreamUtils.Copy(new MemoryStream(collection.ToBytes()), zipStream, new byte[4096]);
+            zipStream.CloseEntry();
+
             var items = new ConcurrentBag<ImageItem>();
             var downloadedUrls = _imagesRepository.GetAllUrls().Result.ToHashSet();
             _logger.LogInformation($"Staring Image file creation: {features.Count} features, exiting images: {downloadedUrls.Count}");
@@ -104,11 +120,7 @@ namespace IsraelHiking.API.Executors
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 });
-                var newEntry = new ZipEntry($"images/images{index:000}.json")
-                {
-                    DateTime = DateTime.Now
-                };
-                zipStream.PutNextEntry(newEntry);
+                zipStream.PutNextEntry(new ZipEntry($"images/images{index:000}.json") { DateTime = DateTime.Now });
                 StreamUtils.Copy(new MemoryStream(Encoding.UTF8.GetBytes(imageItemsString)), zipStream, new byte[4096]);
                 zipStream.CloseEntry();
                 list = list.Skip(1000).ToList();
@@ -117,8 +129,11 @@ namespace IsraelHiking.API.Executors
             _logger.LogInformation("Finished Image file creation: " + items.Count());
             zipStream.Finish();
             outputMemStream.Position = 0;
-
-            _fileSystemHelper.WriteAllBytes("images.ihm", outputMemStream.ToArray());
+            var listingValue = _options.ListingDictionary["PointsOfInterest"];
+            var fullFilePath = Path.IsPathRooted(listingValue) 
+                ? listingValue : 
+                Path.GetFullPath(Path.Combine(_options.BinariesFolder, listingValue));
+            _fileSystemHelper.WriteAllBytes(fullFilePath, outputMemStream.ToArray());
         }
     }
 }

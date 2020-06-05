@@ -57,6 +57,7 @@ namespace IsraelHiking.Web
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddResponseCompression();
             services.AddMemoryCache();
             services.AddDetection();
             services.AddHttpClient();
@@ -137,7 +138,7 @@ namespace IsraelHiking.Web
                 rewriteOptions.AddRedirectToHttps();
             }
             app.UseRewriter(rewriteOptions);
-
+            app.UseResponseCompression();
             app.UseCors(builder =>
             {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();//.AllowCredentials();
@@ -185,14 +186,15 @@ namespace IsraelHiking.Web
 
             foreach (var directory in configurationData.ListingDictionary)
             {
+                var fullPath = Path.IsPathRooted(directory.Value) ? directory.Value : Path.GetFullPath(Path.Combine(configurationData.BinariesFolder, directory.Value));
                 var fileServerOptions = new FileServerOptions
                 {
-                    FileProvider = new PhysicalFileProvider(directory.Value),
+                    FileProvider = new PhysicalFileProvider(fullPath),
                     RequestPath = new PathString("/" + directory.Key),
                     EnableDirectoryBrowsing = true,
                     DirectoryBrowserOptions =
                     {
-                        FileProvider = new PhysicalFileProvider(directory.Value),
+                        FileProvider = new PhysicalFileProvider(fullPath),
                         RequestPath = new PathString("/" + directory.Key),
                         Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices
                             .GetRequiredService<IFileSystemHelper>())

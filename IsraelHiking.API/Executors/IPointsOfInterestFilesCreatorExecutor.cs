@@ -18,6 +18,6 @@ namespace IsraelHiking.API.Executors
         /// This function creates the pois-slim.geojson file inside the wwwroot folder
         /// </summary>
         /// <param name="features"></param>
-        void CreateOfflineImagesFile(List<Feature> features);
+        void CreateOfflinePoisFile(List<Feature> features);
     }
 }
