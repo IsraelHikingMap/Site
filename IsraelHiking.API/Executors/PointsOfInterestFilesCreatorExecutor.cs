@@ -130,10 +130,10 @@ namespace IsraelHiking.API.Executors
             zipStream.Finish();
             outputMemStream.Position = 0;
             var listingValue = _options.ListingDictionary["PointsOfInterest"];
-            var fullFilePath = Path.IsPathRooted(listingValue) 
+            var fullFolderPath = Path.IsPathRooted(listingValue) 
                 ? listingValue : 
                 Path.GetFullPath(Path.Combine(_options.BinariesFolder, listingValue));
-            _fileSystemHelper.WriteAllBytes(fullFilePath, outputMemStream.ToArray());
+            _fileSystemHelper.WriteAllBytes(Path.Combine(fullFolderPath, "offline-pois.zip"), outputMemStream.ToArray());
         }
     }
 }
