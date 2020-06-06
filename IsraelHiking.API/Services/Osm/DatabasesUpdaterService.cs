@@ -187,6 +187,10 @@ namespace IsraelHiking.API.Services.Osm
             {
                 externalFeatures.AddRange(await _elasticSearchGateway.GetExternalPoisBySource(source));
             }
+            if (externalFeatures.GroupBy(f => f.GetId()).Any(g => g.Count() > 1))
+            {
+                _logger.LogWarning("Got duplicate id from database :-(");
+            }
             var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result, externalFeatures);
             _logger.LogInformation("Adding deleted features to new ones");
             var exitingFeatures = await _elasticSearchGateway.GetAllPointsOfInterest(true);
