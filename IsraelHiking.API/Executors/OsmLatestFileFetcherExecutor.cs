@@ -64,7 +64,7 @@ namespace IsraelHiking.API.Executors
             {
                 _fileSystemHelper.CreateDirectory(workingDirectory);
             }
-            if (downloadFile || updateFile)
+            if (downloadFile)
             {
                 _logger.LogInformation("Starting downloading OSM file.");
                 await DownloadDailyOsmFile(workingDirectory);
