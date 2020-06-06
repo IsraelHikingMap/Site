@@ -57,6 +57,7 @@ namespace IsraelHiking.Web
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddProxies();
             services.AddResponseCompression();
             services.AddMemoryCache();
             services.AddDetection();
@@ -65,8 +66,8 @@ namespace IsraelHiking.Web
             services.AddIHMApi();
             services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
             services.AddSingleton<IClientsFactory>(serviceProvider =>
-                new ClientsFactory(serviceProvider.GetRequiredService<ILogger>(), 
-                serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(), 
+                new ClientsFactory(serviceProvider.GetRequiredService<ILogger>(),
+                serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(),
                 serviceProvider.GetRequiredService<IOptions<ConfigurationData>>().Value.OsmConfiguration.BaseAddress + "/api/"));
             var geometryFactory = new GeometryFactory(new PrecisionModel(100000000));
             services.AddSingleton<GeometryFactory, GeometryFactory>(serviceProvider => geometryFactory);
@@ -82,7 +83,8 @@ namespace IsraelHiking.Web
                     options.SerializerSettings.Converters.Add(converter);
                 }
             });
-            services.AddAuthentication(options => {
+            services.AddAuthentication(options =>
+            {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer();
@@ -171,18 +173,23 @@ namespace IsraelHiking.Web
             fileExtensionContentTypeProvider.Mappings.Add(".db", "application/octet-stream");
             fileExtensionContentTypeProvider.Mappings.Add(".geojson", "application/json");
 
-            foreach (var proxy in configurationData.ProxiesDictionary)
+            app.UseProxies(proxies =>
             {
-                app.UseProxy(proxy.Key, (_, args) =>
+                foreach (var proxyEntry in configurationData.ProxiesDictionary)
                 {
-                    var targetAddress = proxy.Value;
-                    foreach (var argValuePair in args)
-                    {
-                        targetAddress = targetAddress.Replace("{" + argValuePair.Key + "}", argValuePair.Value.ToString());
-                    }
-                    return targetAddress;
-                });
-            }
+                    proxies.Map(proxyEntry.Key,
+                        proxy => proxy.UseHttp((_, args) =>
+                        {
+                            var targetAddress = proxyEntry.Value;
+                            foreach (var argValuePair in args)
+                            {
+                                targetAddress = targetAddress.Replace("{" + argValuePair.Key + "}", argValuePair.Value.ToString());
+                            }
+                            return targetAddress;
+                        }
+                    ));
+                }
+            });
 
             foreach (var directory in configurationData.ListingDictionary)
             {
