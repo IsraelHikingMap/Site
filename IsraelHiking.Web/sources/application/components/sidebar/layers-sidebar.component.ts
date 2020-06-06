@@ -206,11 +206,11 @@ export class LayersSidebarComponent extends BaseMapComponent {
             }
             if (length === 0) {
                 this.loggingService.info("All offline files are up-to-date");
-                this.toastService.success(this.resources.allFilesAreUpToDate);
+                this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
             } else {
                 this.loggingService.info("Finished downloading offline files, update date to: " + newestFileDate.toUTCString());
                 this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: newestFileDate }));
-                this.toastService.success(this.resources.downloadFinishedSuccessfully);
+                this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
             }
             this.sidebarService.show("layers");
         } finally {

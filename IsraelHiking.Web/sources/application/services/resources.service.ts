@@ -325,6 +325,7 @@ export class ResourcesService {
     public databaseUpgrade: string;
     public cantEditWhileOffline: string;
     public downloadingPoisForOfflineUsage: string;
+    public useTheCloudIconToGoOffline: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -527,7 +528,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1591125199044");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1591472311968");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -847,6 +848,7 @@ export class ResourcesService {
         this.databaseUpgrade = this.gettextCatalog.getString("The offline database has been upgraded...");
         this.cantEditWhileOffline = this.gettextCatalog.getString("You can't edit while offline...");
         this.downloadingPoisForOfflineUsage = this.gettextCatalog.getString("Downloading points of interest for offline usage...");
+        this.useTheCloudIconToGoOffline = this.gettextCatalog.getString("Use the cloud icon to go offline");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");
