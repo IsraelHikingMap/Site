@@ -43,7 +43,6 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="pointsOfInterestAdapterFactory"></param>
         /// <param name="featuresMergeExecutor"></param>
         /// <param name="latestFileFetcherExecutor"></param>
-        /// <param name="graphHopperGateway"></param>
         /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
         /// <param name="imagesUrlsStorageExecutor"></param>
         /// <param name="logger"></param>

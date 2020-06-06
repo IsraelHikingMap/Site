@@ -48,6 +48,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="base64ImageConverter"></param>
         /// <param name="imageUrlStoreExecutor"></param>
+        /// <param name="logger"></param>
         /// <param name="options"></param>
         /// <param name="cache"></param>
         public PointsOfInterestController(IClientsFactory clientsFactory,

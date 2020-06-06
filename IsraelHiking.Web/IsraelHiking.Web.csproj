@@ -118,6 +118,6 @@
     <ProjectReference Include="..\IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if not exist $(OutDir)\PointsOfInterest mkdir PointsOfInterest $(OutDir)\PointsOfInterest" />
+    <Exec Command="if not exist $(OutDir)PointsOfInterest mkdir PointsOfInterest $(OutDir)PointsOfInterest" />
   </Target>
 </Project>
