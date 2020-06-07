@@ -182,11 +182,7 @@ namespace IsraelHiking.API.Services.Osm
             var osmSource = _pointsOfInterestAdapterFactory.GetBySource(Sources.OSM);
             var osmFeaturesTask = osmSource.GetPointsForIndexing();
             var sources = _pointsOfInterestAdapterFactory.GetAll().Where(s => s.Source != Sources.OSM).Select(s => s.Source);
-            var externalFeatures = new List<Feature>();
-            foreach (var source in sources)
-            {
-                externalFeatures.AddRange(await _elasticSearchGateway.GetExternalPoisBySource(source));
-            }
+            var externalFeatures = sources.Select(s => _elasticSearchGateway.GetExternalPoisBySource(s)).SelectMany(t => t.Result).ToList();
             if (externalFeatures.GroupBy(f => f.GetId()).Any(g => g.Count() > 1))
             {
                 _logger.LogWarning("Got duplicate id from database :-(");

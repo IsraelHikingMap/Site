@@ -4,15 +4,19 @@ import { encode } from "base64-arraybuffer";
 
 import { RunningContextService } from "../services/running-context.service";
 import { DatabaseService } from "../services/database.service";
+import { LoggingService } from "../services/logging.service";
 
 @Pipe({ name: "offlineImage" })
 export class OfflineImagePipe implements PipeTransform {
     constructor(private readonly http: HttpClient,
                 private readonly runningContextService: RunningContextService,
+                private readonly loggingService: LoggingService,
                 private readonly databaseService: DatabaseService) {
     }
 
     public async transform(value: string, cache: boolean): Promise<string> {
+        // HM TODO: remove this when issue is resolved!
+        this.loggingService.debug("Showing image: " + value + ", isOnline: " + this.runningContextService.isOnline + ", cache: " + cache);
         if (!this.runningContextService.isOnline) {
             let data = await this.databaseService.getImageByUrl(value);
             if (data != null) {

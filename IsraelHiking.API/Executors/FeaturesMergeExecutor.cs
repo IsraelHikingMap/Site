@@ -165,7 +165,7 @@ namespace IsraelHiking.API.Executors
                 }
             }
             externalFeatures = externalFeatures.Where(f => featureIdsToRemove.Contains(f.GetId()) == false).ToList();
-            _logger.LogInformation("Finisehd external features merging by title into OSM. " + externalFeatures.Count);
+            _logger.LogInformation("Finished external features merging by title into OSM. " + externalFeatures.Count);
             return externalFeatures;
         }
 
