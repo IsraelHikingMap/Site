@@ -9,7 +9,7 @@
 </div>
 <div fxLayout="row" *ngIf="images.length > 0">
     <div class="img-container-small" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
-        <img [src]="getCurrentImage() | offlineImage | async"
+        <img [src]="getCurrentImage() | offlineImage:'true' | async"
              class="img-responsive-full cursor-zoom-in img-center"
              (click)="showImage()"/>
     </div>
