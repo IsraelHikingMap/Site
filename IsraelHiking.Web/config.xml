@@ -23,9 +23,6 @@
     <icon density="xhdpi" src="www/content/favicons/android-chrome-96x96.png" />
     <icon density="xxhdpi" src="www/content/favicons/android-chrome-144x144.png" />
     <icon density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
-    <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/application" xmlns:android="http://schemas.android.com/apk/res/android">
-      <application android:usesCleartextTraffic="true" />
-    </edit-config>
     <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission" xmlns:android="http://schemas.android.com/apk/res/android">
       <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     </edit-config>
