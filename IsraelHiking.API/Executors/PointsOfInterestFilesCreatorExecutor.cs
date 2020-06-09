@@ -116,14 +116,14 @@ namespace IsraelHiking.API.Executors
             var index = 0;
             while (list.Count > 0)
             {
-                var imageItemsString = JsonConvert.SerializeObject(list.Take(1000).ToList(), new JsonSerializerSettings
+                var imageItemsString = JsonConvert.SerializeObject(list.Take(200).ToList(), new JsonSerializerSettings
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 });
                 zipStream.PutNextEntry(new ZipEntry($"images/images{index:000}.json") { DateTime = DateTime.Now });
                 StreamUtils.Copy(new MemoryStream(Encoding.UTF8.GetBytes(imageItemsString)), zipStream, new byte[4096]);
                 zipStream.CloseEntry();
-                list = list.Skip(1000).ToList();
+                list = list.Skip(200).ToList();
                 index++;
             }
             _logger.LogInformation("Finished Image file creation: " + items.Count());

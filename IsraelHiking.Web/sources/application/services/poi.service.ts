@@ -106,9 +106,7 @@ export class PoiService {
         await this.syncCategories();
         if (this.runningContextService.isCordova) {
             await this.rebuildPois();
-            this.toastService.progress({
-                action: this.downloadPOIs
-            });
+            await this.updateOfflinePois();
         } else {
             await this.updatePois();
             fromEvent(this.mapService.map, "moveend")
@@ -144,7 +142,7 @@ export class PoiService {
         return this.poisGeojson.features;
     }
 
-    private getPoisFromLocalStorage(): GeoJSON.Feature<GeoJSON.Point>[] {
+    private getPoisFromMemory(): GeoJSON.Feature<GeoJSON.Point>[] {
         let visibleFeatures = [];
         let visibleCategories = this.getVisibleCategories();
         let language = this.resources.getCurrentLanguageCodeSimplified();
@@ -183,38 +181,23 @@ export class PoiService {
         this.updatePois();
     }
 
-    private downloadPOIs = async (progressCallback: (value: number, text?: string) => void) => {
+    private async updateOfflinePois() {
         try {
             let lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
-            let lastModifiedString = lastModified ? lastModified.toUTCString() : null;
-            this.loggingService.info(`[POIs] Getting POIs for: ${lastModifiedString} from server`);
-            progressCallback(1, this.resources.downloadingPoisForOfflineUsage);
+            this.loggingService.info(`[POIs] Getting POIs for: ${lastModified ? lastModified.toUTCString() : null} from server`);
             if (lastModified == null || Date.now() - lastModified.getTime() > 1000 * 60 * 60 * 24 * 180) {
-                lastModified = null;
-                let poiIdsToDelete = this.poisGeojson.features.map(f => f.properties.poiId);
-                this.loggingService.info(`[POIs] Deleting exiting pois: ${poiIdsToDelete.length}`);
-                await this.databaseService.deletePois(poiIdsToDelete);
-                this.loggingService.info(`[POIs] Starting downloading pois file`);
-                let poisFile = await this.fileService.getFileContentWithProgress(Urls.poisOfflineFile,
-                    (value) => progressCallback(1 + value * 49, this.resources.downloadingPoisForOfflineUsage));
-                this.loggingService.info(`[POIs] Finished downloading pois file, opening it`);
-                await this.fileService.openIHMfile(poisFile, async (poisString: string) => {
-                    let poisJson = JSON.parse(poisString) as GeoJSON.FeatureCollection;
-                    await this.databaseService.storePois(poisJson.features);
-                    lastModified = this.getLastModifiedFromFeatures(lastModified, poisJson.features);
-                    progressCallback(55, this.resources.downloadingPoisForOfflineUsage);
-                }, async (imagesString: string, progressPercentage: number) => {
-                    let imagesUrl = this.imageItemToUrl(JSON.parse(imagesString) as IImageItem[]);
-                    await this.databaseService.storeImages(imagesUrl);
-                    progressCallback(progressPercentage * 0.25 + 55, this.resources.downloadingPoisForOfflineUsage);
+                await this.toastService.progress({
+                    action: (progressCallback) => this.downlodOfflineFileAndUpdateDatabase(progressCallback)
                 });
-                lastModifiedString = lastModified ? lastModified.toUTCString() : null;
-                this.loggingService.info(`[POIs] Updating last modified to: ${lastModified}`);
-                this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: lastModified }));
-                this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModifiedString}`);
+                lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
             }
-            let updates = await this.httpClient.get(Urls.poiUpdates + lastModifiedString).toPromise() as IUpdatesResponse;
-            this.loggingService.info(`[POIs] Storing POIs for: ${lastModifiedString}, got: ${updates.features.length}`);
+            if (lastModified == null) {
+                // don't send a request that is too big to the server by mistake
+                return;
+            }
+            // HM TODO: timeout?
+            let updates = await this.httpClient.get(Urls.poiUpdates + lastModified.toISOString()).toPromise() as IUpdatesResponse;
+            this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()}, got: ${updates.features.length}`);
             let latestUpdate = this.getLastModifiedFromFeatures(lastModified, updates.features);
             let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => f.properties.poiId);
             this.databaseService.storePois(updates.features);
@@ -222,17 +205,39 @@ export class PoiService {
             this.loggingService.info(`[POIs] Updating last modified to: ${latestUpdate}`);
             this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: latestUpdate }));
             this.loggingService.info(`[POIs] Updating POIs for clustering from database: ${updates.features.length}`);
-            progressCallback(90, this.resources.downloadingPoisForOfflineUsage);
             await this.rebuildPois();
             this.loggingService.info(`[POIs] Updated pois for clustering: ${this.poisGeojson.features.length}`);
-            progressCallback(95);
             let imageAndData = this.imageItemToUrl(updates.images);
             this.loggingService.info(`[POIs] Storing images: ${imageAndData.length}`);
             this.databaseService.storeImages(imageAndData);
-            progressCallback(100);
         } catch (ex) {
             this.loggingService.warning("[POIs] Unable to sync public pois and categories - using local data: " + ex.message);
         }
+    }
+
+    private async downlodOfflineFileAndUpdateDatabase(progressCallback: (value: number, text?: string) => void): Promise<void> {
+        progressCallback(1, this.resources.downloadingPoisForOfflineUsage);
+        let lastModified = null;
+        let poiIdsToDelete = this.poisGeojson.features.map(f => f.properties.poiId);
+        this.loggingService.info(`[POIs] Deleting exiting pois: ${poiIdsToDelete.length}`);
+        await this.databaseService.deletePois(poiIdsToDelete);
+        this.loggingService.info(`[POIs] Starting downloading pois file`);
+        let poisFile = await this.fileService.getFileContentWithProgress(Urls.poisOfflineFile,
+            (value) => progressCallback(1 + value * 49, this.resources.downloadingPoisForOfflineUsage));
+        this.loggingService.info(`[POIs] Finished downloading pois file, opening it`);
+        await this.fileService.openIHMfile(poisFile, async (poisString: string) => {
+            let poisJson = JSON.parse(poisString) as GeoJSON.FeatureCollection;
+            await this.databaseService.storePois(poisJson.features);
+            lastModified = this.getLastModifiedFromFeatures(lastModified, poisJson.features);
+            progressCallback(55, this.resources.downloadingPoisForOfflineUsage);
+        }, async (imagesString: string, progressPercentage: number) => {
+            let imagesUrl = this.imageItemToUrl(JSON.parse(imagesString) as IImageItem[]);
+            await this.databaseService.storeImages(imagesUrl);
+            progressCallback(progressPercentage * 0.45 + 55, this.resources.downloadingPoisForOfflineUsage);
+        });
+        this.loggingService.info(`[POIs] Updating last modified to: ${lastModified}`);
+        this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: lastModified }));
+        this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
     }
 
     private getLastModifiedFromFeatures(lastModified: Date, features: GeoJSON.Feature[]): Date {
@@ -293,7 +298,7 @@ export class PoiService {
         }
         let visibleFeatures = !this.runningContextService.isCordova || this.ngRedux.getState().offlineState.poisLastModifiedDate == null
             ? await this.getPoisFromServer()
-            : this.getPoisFromLocalStorage();
+            : this.getPoisFromMemory();
 
         this.poiGeojsonFiltered = {
             type: "FeatureCollection",
@@ -326,7 +331,7 @@ export class PoiService {
                 }
             }
         } catch (ex) {
-            this.loggingService.warning("Unable to sync categories, using local categories");
+            this.loggingService.warning("[POIs] Unable to sync categories, using local categories");
         }
 
     }

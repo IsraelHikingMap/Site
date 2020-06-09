@@ -96,7 +96,8 @@ export class ToastService {
         componentRef.instance.declineIcon = options.declineIcon;
     }
 
-    public progress(config: IProgressDialogConfig) {
-        ProgressDialogComponent.openDialog(this.matDialog, config);
+    public progress(config: IProgressDialogConfig): Promise<any> {
+        let dialogRef = ProgressDialogComponent.openDialog(this.matDialog, config);
+        return dialogRef.afterClosed().toPromise();
     }
 }

@@ -37,8 +37,8 @@ export class ProgressDialogComponent extends BaseMapComponent {
             });
     }
 
-    public static openDialog(dialog: MatDialog, progressConfig: IProgressDialogConfig) {
-        dialog.open(ProgressDialogComponent, {
+    public static openDialog(dialog: MatDialog, progressConfig: IProgressDialogConfig): MatDialogRef<ProgressDialogComponent> {
+        return dialog.open(ProgressDialogComponent, {
             hasBackdrop: false,
             closeOnNavigation: false,
             disableClose: true,
