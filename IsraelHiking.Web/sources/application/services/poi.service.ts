@@ -187,7 +187,9 @@ export class PoiService {
             this.loggingService.info(`[POIs] Getting POIs for: ${lastModified ? lastModified.toUTCString() : null} from server`);
             if (lastModified == null || Date.now() - lastModified.getTime() > 1000 * 60 * 60 * 24 * 180) {
                 await this.toastService.progress({
-                    action: (progressCallback) => this.downlodOfflineFileAndUpdateDatabase(progressCallback)
+                    action: (progressCallback) => this.downlodOfflineFileAndUpdateDatabase(progressCallback),
+                    showContinueButton: true,
+                    continueText: this.resources.largeFilesUseWifi
                 });
                 lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
             }

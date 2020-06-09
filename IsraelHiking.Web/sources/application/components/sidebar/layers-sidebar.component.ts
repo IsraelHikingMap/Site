@@ -166,7 +166,9 @@ export class LayersSidebarComponent extends BaseMapComponent {
             return;
         }
         this.toastService.progress({
-            action: this.downloadOfflineFiles
+            action: this.downloadOfflineFiles,
+            showContinueButton: true,
+            continueText: this.resources.largeFilesUseWifi
         });
     }
 

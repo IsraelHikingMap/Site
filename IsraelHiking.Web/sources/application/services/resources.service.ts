@@ -267,6 +267,7 @@ export class ResourcesService {
     public lastUpdatedOn: string;
     public remainingDistance: string;
     public longPressHint: string;
+    public continue: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -326,6 +327,7 @@ export class ResourcesService {
     public cantEditWhileOffline: string;
     public downloadingPoisForOfflineUsage: string;
     public useTheCloudIconToGoOffline: string;
+    public largeFilesUseWifi: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -528,7 +530,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1591472311968");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1591687099648");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -778,6 +780,7 @@ export class ResourcesService {
         this.lastUpdatedOn = this.gettextCatalog.getString("Last updated on");
         this.remainingDistance = this.gettextCatalog.getString("Remaining distance");
         this.longPressHint = this.gettextCatalog.getString("Long press on any button will shows its usage");
+        this.continue = this.gettextCatalog.getString("Continue");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -849,6 +852,7 @@ export class ResourcesService {
         this.cantEditWhileOffline = this.gettextCatalog.getString("You can't edit while offline...");
         this.downloadingPoisForOfflineUsage = this.gettextCatalog.getString("Downloading points of interest for offline usage...");
         this.useTheCloudIconToGoOffline = this.gettextCatalog.getString("Use the cloud icon to go offline");
+        this.largeFilesUseWifi = this.gettextCatalog.getString("You are about to download large files, you can change to wifi before clicking continue...");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

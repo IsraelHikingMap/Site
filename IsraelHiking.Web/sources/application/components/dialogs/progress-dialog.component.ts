@@ -8,6 +8,8 @@ export type ProgressCallback = (value: number, text?: string) => void;
 
 export interface IProgressDialogConfig {
     action: (progressCallback: ProgressCallback) => Promise<void>;
+    showContinueButton: boolean;
+    continueText: string;
 }
 
 @Component({
@@ -18,6 +20,9 @@ export class ProgressDialogComponent extends BaseMapComponent {
     public progressPersentage: number;
     public text: string;
     public isError: boolean;
+    public isContinue: boolean;
+
+    public continueAction: () => void;
 
     constructor(resources: ResourcesService,
                 private readonly matDialogRef: MatDialogRef<ProgressDialogComponent>,
@@ -26,15 +31,28 @@ export class ProgressDialogComponent extends BaseMapComponent {
         super(resources);
         this.progressPersentage = 0;
         this.text = "";
-        data.action((value, text) => {
-            this.progressPersentage = value;
-            this.text = text;
-        }).then(
-            () => this.matDialogRef.close(),
-            (ex) => {
-                this.text = ex.message;
-                this.isError = true;
-            });
+        this.isContinue = data.showContinueButton;
+        let wrappedAction = () => {
+            data.action((value, text) => {
+                this.progressPersentage = value;
+                this.text = text;
+            }).then(
+                () => this.matDialogRef.close(),
+                (ex) => {
+                    this.text = ex.message;
+                    this.isError = true;
+                });
+        }
+
+        if (data.showContinueButton) {
+            this.text = data.continueText;
+            this.continueAction = () => {
+                this.isContinue = false;
+                wrappedAction();
+            }
+        } else {
+            wrappedAction();
+        }
     }
 
     public static openDialog(dialog: MatDialog, progressConfig: IProgressDialogConfig): MatDialogRef<ProgressDialogComponent> {
