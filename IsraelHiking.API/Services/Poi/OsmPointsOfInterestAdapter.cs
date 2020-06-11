@@ -264,33 +264,16 @@ namespace IsraelHiking.API.Services.Poi
                 AddTagsByIcon(completeOsmGeo.Tags, pointOfInterest.Icon);
             }
             RemoveEmptyTags(completeOsmGeo.Tags);
-            if (AreTagsCollectionEqual(oldTags, completeOsmGeo.Tags.ToArray()))
+            if (Enumerable.SequenceEqual(oldTags, completeOsmGeo.Tags.ToArray()))
             {
                 return pointOfInterest;
             }
-
             var changesetId = await osmGateway.CreateChangeset($"Updated {pointOfInterest.Title} using IsraelHiking.osm.org.il");
             await osmGateway.UpdateElement(changesetId, completeOsmGeo);
             await osmGateway.CloseChangeset(changesetId);
 
             var featureToReturn = await UpdateElasticSearch(completeOsmGeo, pointOfInterest.Title);
             return await FeatureToExtendedPoi(featureToReturn, language);
-        }
-
-        private bool AreTagsCollectionEqual(Tag[] oldTags, Tag[] currentTags)
-        {
-            if (oldTags.Length != currentTags.Length)
-            {
-                return false;
-            }
-            foreach (var currentTag in currentTags)
-            {
-                if (!oldTags.Any(t => t.Equals(currentTag)))
-                {
-                    return false;
-                }
-            }
-            return true;
         }
 
         /// <inheritdoc />
@@ -363,22 +346,9 @@ namespace IsraelHiking.API.Services.Poi
                     feature.Geometry = featureFromDb.Geometry;
                 }
             }
-
+            // set last modified date to be yesterday so that rebuild will override it and client will get it on next update.
+            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_LAST_MODIFIED, DateTime.Now.AddDays(-1));
             await _elasticSearchGateway.UpdatePointsOfInterestData(new List<Feature> { feature });
-            foreach (var language in Languages.Array)
-            {
-                var title = feature.Attributes.GetWikipediaTitle(language);
-                if (string.IsNullOrWhiteSpace(title))
-                {
-                    continue;
-                }
-                var pageFetaure = await _wikipediaGateway.GetByPageTitle(title, language);
-                if (pageFetaure == null)
-                {
-                    continue;
-                }
-                await _elasticSearchGateway.DeletePointOfInterestById(pageFetaure.Attributes[FeatureAttributes.ID].ToString(), Sources.WIKIPEDIA);
-            }
             return feature;
         }
 
