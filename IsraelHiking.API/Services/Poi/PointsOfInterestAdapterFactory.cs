@@ -1,36 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using IsraelHiking.Common.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services.Poi
 {
     /// <inheritdoc />
     public class PointsOfInterestAdapterFactory : IPointsOfInterestAdapterFactory
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IFileProvider _fileProvider;
         private readonly List<IPointsOfInterestAdapter> _adapters;
+        private readonly ConfigurationData _options;
 
         /// <summary>
         /// Constructor, reads from CSV folder to create dynamic adapters
         /// </summary>
         /// <param name="adapters"></param>
         /// <param name="serviceProvider"></param>
-        /// <param name="fileProvider"></param>
+        /// <param name="options"></param>
         public PointsOfInterestAdapterFactory(
             IEnumerable<IPointsOfInterestAdapter> adapters,
             IServiceProvider serviceProvider,
-            IFileProvider fileProvider)
+            IOptions<ConfigurationData> options)
         {
-            _serviceProvider = serviceProvider;
-            _fileProvider = fileProvider;
             _adapters = adapters.ToList();
-            foreach (var file in fileProvider.GetDirectoryContents(CsvPointsOfInterestAdapter.CSV_DIRECTORY))
+            _options = options.Value;
+            foreach (var file in _options.CsvsDictionary.Keys)
             {
                 var csvAdapter = serviceProvider.GetRequiredService<CsvPointsOfInterestAdapter>();
-                csvAdapter.SetFileName(file.Name);
+                csvAdapter.SetFileNameAndAddress(file, _options.CsvsDictionary[file]);
                 _adapters.Add(csvAdapter);
             }
         }
@@ -44,18 +44,6 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public IEnumerable<IPointsOfInterestAdapter> GetAll()
         {
-            // refreshing csv list
-            var removeList = _adapters.OfType<CsvPointsOfInterestAdapter>().ToList();
-            foreach (var csvPointsOfInterestAdapter in removeList)
-            {
-                _adapters.Remove(csvPointsOfInterestAdapter);
-            }
-            foreach (var file in _fileProvider.GetDirectoryContents(CsvPointsOfInterestAdapter.CSV_DIRECTORY))
-            {
-                var csvAdapter = _serviceProvider.GetRequiredService<CsvPointsOfInterestAdapter>();
-                csvAdapter.SetFileName(file.Name);
-                _adapters.Add(csvAdapter);
-            }
             return _adapters;
         }
     }

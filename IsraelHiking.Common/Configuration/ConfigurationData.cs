@@ -118,6 +118,10 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public Dictionary<string, string> ProxiesDictionary { get; set; }
         /// <summary>
+        /// A list of external sources - address and file name
+        /// </summary>
+        public Dictionary<string, string> CsvsDictionary { get; set; }
+        /// <summary>
         /// A list of colors to select the route color from
         /// </summary>
         public List<string> Colors { get; set; }
@@ -154,6 +158,7 @@ namespace IsraelHiking.Common.Configuration
                 ConsumerSecret = "Hro40NSObALdx8Dm7Xv1mKvxjwlGITqetXUBYUwv",
                 BaseAddress = "https://www.openstreetmap.org"
             };
+            CsvsDictionary = new Dictionary<string, string>();
             ListingDictionary = new Dictionary<string, string>();
             ProxiesDictionary = new Dictionary<string, string>();
             Colors = new List<string>

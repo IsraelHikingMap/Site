@@ -4,7 +4,6 @@ using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -77,63 +76,62 @@ namespace IsraelHiking.API.Services.Poi
     /// </summary>
     public class CsvPointsOfInterestAdapter : BasePointsOfInterestAdapter
     {
-        /// <summary>
-        /// The directory where to look for the csv files
-        /// </summary>
-        public const string CSV_DIRECTORY = "CSV";
-
-        private readonly IFileProvider _fileProvider;
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
 
         /// <summary>
-        /// The file name relevant to this adapter, set it using <see cref="SetFileName"/>
+        /// The file name relevant to this adapter, set it using <see cref="SetFileNameAndAddress"/>
         /// </summary>
-        public string FileName { get; private set;  }
-
-        /// <inheritdoc />
-        public override string Source => Path.GetFileNameWithoutExtension(FileName);
+        private string _fileName;
 
         /// <summary>
-        /// Constructor, make sure to use <see cref="SetFileName"/> after constructing this
+        /// The file address relevant to this adapter, set it using <see cref="SetFileNameAndAddress"/>
+        /// </summary>
+        private string _fileAddress;
+
+        private List<Feature> _cachedFeatures;
+
+        /// <inheritdoc />
+        public override string Source => Path.GetFileNameWithoutExtension(_fileName);
+
+        /// <summary>
+        /// Constructor, make sure to use <see cref="SetFileNameAndAddress"/> after constructing this
         /// </summary>
         /// <param name="dataContainerConverterService"></param>
-        /// <param name="fileProvider"></param>
         /// <param name="remoteFileFetcherGateway"></param>
         /// <param name="logger"></param>
         public CsvPointsOfInterestAdapter(
             IDataContainerConverterService dataContainerConverterService,
-            IFileProvider fileProvider,
             IRemoteFileFetcherGateway remoteFileFetcherGateway,
             ILogger logger
         ) :
             base(dataContainerConverterService,
             logger)
         {
-            _fileProvider = fileProvider;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
+            _cachedFeatures = new List<Feature>();
         }
 
         /// <summary>
-        /// This method is used as late initialiation for setting file name
+        /// This method is used as late initialiation for setting file name and address
         /// </summary>
         /// <param name="fileName"></param>
-        public void SetFileName(string fileName)
+        /// <param name="fileAddress"></param>
+        public void SetFileNameAndAddress(string fileName, string fileAddress)
         {
-            FileName = fileName;
+            _fileName = fileName;
+            _fileAddress = fileAddress;
         }
 
         /// <inheritdoc />
-        public override Task<List<Feature>> GetPointsForIndexing()
+        public override async Task<List<Feature>> GetPointsForIndexing()
         {
-            return Task.Run(() =>
-            {
-                _logger.LogInformation("Getting records from csv file: " + FileName);
-                var fileInfo = _fileProvider.GetFileInfo(Path.Combine(CSV_DIRECTORY, FileName));
-                var pointsOfInterest = GetRecords(fileInfo);
-                var features = pointsOfInterest.Select(f => ConvertCsvRowToFeature(f, fileInfo.LastModified.DateTime)).ToList();
-                _logger.LogInformation($"Got {features.Count} records from csv file: {FileName}");
-                return features;
-            });
+            _logger.LogInformation("Getting records from csv file: " + _fileName);
+            var fileContent = await _remoteFileFetcherGateway.GetFileContent(_fileAddress);
+            using var memoryStream = new MemoryStream(fileContent.Content);
+            var pointsOfInterest = GetRecords(memoryStream);
+            _cachedFeatures = pointsOfInterest.Select(f => ConvertCsvRowToFeature(f, DateTime.Now)).ToList();
+            _logger.LogInformation($"Got {_cachedFeatures.Count} records from csv file: {_fileName}");
+            return _cachedFeatures;
         }
 
         private Feature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest, DateTime lastModified)
@@ -168,9 +166,8 @@ namespace IsraelHiking.API.Services.Poi
             return feature;
         }
 
-        private IEnumerable<CsvPointOfInterestRow> GetRecords(IFileInfo fileInfo)
+        private IEnumerable<CsvPointOfInterestRow> GetRecords(Stream stream)
         {
-            var stream = fileInfo.CreateReadStream();
             var reader = new StreamReader(stream);
             var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
             csv.Configuration.MissingFieldFound = null;
@@ -180,8 +177,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public override async Task<Feature> GetRawPointOfInterestById(string id)
         {
-            var fileInfo = _fileProvider.GetFileInfo(Path.Combine(CSV_DIRECTORY, FileName));
-            var feature = GetRecords(fileInfo).Where(r => r.Id == id).Select(r => ConvertCsvRowToFeature(r, fileInfo.LastModified.DateTime)).First();
+            var feature = _cachedFeatures.First(f => f.Attributes[FeatureAttributes.ID].ToString() == id);
             if (feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE) &&
                 !string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString()))
             {
