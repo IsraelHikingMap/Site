@@ -233,5 +233,24 @@ namespace IsraelHiking.Common.Extensions
         {
             return Enum.Parse<OsmGeoType>(id.Split("_").First(), true);
         }
+
+        public static DateTime GetLastModified(this IFeature feature)
+        {
+            if (!feature.Attributes.Exists(FeatureAttributes.POI_LAST_MODIFIED))
+            {
+                return DateTime.Now;
+            }
+            return DateTime.Parse(feature.Attributes[FeatureAttributes.POI_LAST_MODIFIED].ToString());
+        }
+
+        public static void SetLastModified(this IFeature feature, DateTime dateTime)
+        {
+            feature.Attributes.SetLastModified(dateTime);
+        }
+
+        public static void SetLastModified(this IAttributesTable table, DateTime dateTime)
+        {
+            table.AddOrUpdate(FeatureAttributes.POI_LAST_MODIFIED, dateTime.ToString("o"));
+        }
     }
 }

@@ -74,7 +74,7 @@ namespace IsraelHiking.API.Converters
             };
             if (osmObject.TimeStamp.HasValue)
             {
-                table.Add(FeatureAttributes.POI_LAST_MODIFIED, osmObject.TimeStamp.Value.ToString("o"));
+                table.SetLastModified(osmObject.TimeStamp.Value);
             }
             if (!string.IsNullOrWhiteSpace(osmObject.UserName))
             {

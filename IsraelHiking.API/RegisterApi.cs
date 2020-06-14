@@ -45,7 +45,6 @@ namespace IsraelHiking.API
             services.AddTransient<IImagesUrlsStorageExecutor, ImagesUrlsStorageExecutor>();
 
             // registration here is what determines the order of which to merge points:
-            services.AddTransient<IPointsOfInterestAdapter, OsmPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, NakebPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, INaturePointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, WikipediaPointsOfInterestAdapter>();

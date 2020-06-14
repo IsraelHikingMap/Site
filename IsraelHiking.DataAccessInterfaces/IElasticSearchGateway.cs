@@ -1,4 +1,5 @@
-﻿using NetTopologySuite.Features;
+﻿using IsraelHiking.DataAccessInterfaces.Repositories;
+using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
-    public interface IElasticSearchGateway : IRepository, IImagesRepository
+    public interface IElasticSearchGateway : IRepository, IImagesRepository, IExternalSourcesRepository
     {
         void Initialize();
         Task<List<Feature>> Search(string searchTerm, string language);
@@ -27,10 +28,5 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<Feature> GetPointOfInterestById(string id, string source);
         Task DeleteOsmPointOfInterestById(string id, DateTime? timeStamp);
         Task DeletePointOfInterestById(string id, string source);
-
-        Task<List<Feature>> GetExternalPoisBySource(string source);
-        Task<Feature> GetExternalPoiById(string id, string source);
-        Task AddExternalPoi(Feature featureCollection);
-        Task DeleteExternalPoisBySource(string source);
     }
 }

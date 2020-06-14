@@ -26,7 +26,7 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Points of interest adapter for OSM data
     /// </summary>
-    public class OsmPointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestProvider
+    public class OsmPointsOfInterestAdapter : IPointsOfInterestProvider
     {
         /// <summary>
         /// This icon is the default icon when no icon was used
@@ -41,6 +41,8 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly IDataContainerConverterService _dataContainerConverterService;
+        private readonly ILogger _logger;
         private readonly MathTransform _wgs84ItmMathTransform;
         private readonly ConfigurationData _options;
 
@@ -70,9 +72,7 @@ namespace IsraelHiking.API.Services.Poi
             IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
             ITagsHelper tagsHelper,
             IOptions<ConfigurationData> options,
-            ILogger logger) :
-            base(dataContainerConverterService,
-                logger)
+            ILogger logger)
         {
             _clientsFactory = clentsFactory;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
@@ -84,10 +84,9 @@ namespace IsraelHiking.API.Services.Poi
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
             _options = options.Value;
             _elasticSearchGateway = elasticSearchGateway;
+            _dataContainerConverterService = dataContainerConverterService;
+            _logger = logger;
         }
-
-        /// <inheritdoc />
-        public override string Source => Sources.OSM;
 
         /// <inheritdoc />
         public async Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
@@ -135,22 +134,22 @@ namespace IsraelHiking.API.Services.Poi
                 .ToArray();
             poiItem.Description = feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
             poiItem.IsEditable = false;
-            poiItem.Contribution = GetContribution(feature.Attributes);
+            poiItem.Contribution = GetContribution(feature);
             var (x, y) = _wgs84ItmMathTransform.Transform(poiItem.Location.Lng, poiItem.Location.Lat);
             poiItem.ItmCoordinates = new NorthEast { East = (int)x, North = (int)y };
             return poiItem;
         }
 
-        private Contribution GetContribution(IAttributesTable mainFeatureAttributes)
+        private Contribution GetContribution(IFeature feature)
         {
-            var contribution = new Contribution();
+            var contribution = new Contribution
+            {
+                LastModifiedDate = feature.GetLastModified()
+            };
+            var mainFeatureAttributes = feature.Attributes;
             if (mainFeatureAttributes.Exists(FeatureAttributes.POI_USER_NAME))
             {
                 contribution.UserName = mainFeatureAttributes[FeatureAttributes.POI_USER_NAME].ToString();
-            }
-            if (mainFeatureAttributes.Exists(FeatureAttributes.POI_LAST_MODIFIED))
-            {
-                contribution.LastModifiedDate = DateTime.Parse(mainFeatureAttributes[FeatureAttributes.POI_LAST_MODIFIED].ToString());
             }
             if (mainFeatureAttributes.Exists(FeatureAttributes.POI_USER_ADDRESS))
             {
@@ -277,7 +276,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public override async Task<List<Feature>> GetPointsForIndexing()
+        public async Task<List<Feature>> GetAll()
         {
             _logger.LogInformation("Starting getting OSM points of interest");
             using var stream = _latestFileFetcherExecutor.Get();
@@ -347,7 +346,7 @@ namespace IsraelHiking.API.Services.Poi
                 }
             }
             // set last modified date to be yesterday so that rebuild will override it and client will get it on next update.
-            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_LAST_MODIFIED, DateTime.Now.AddDays(-1));
+            feature.SetLastModified(DateTime.Now.AddDays(-1));
             await _elasticSearchGateway.UpdatePointsOfInterestData(new List<Feature> { feature });
             return feature;
         }
@@ -493,13 +492,6 @@ namespace IsraelHiking.API.Services.Poi
                 _options.OsmConfiguration.ConsumerSecret, 
                 tokenAndSecret.Token, 
                 tokenAndSecret.TokenSecret);
-        }
-
-        /// <inheritdoc />
-        public override Task<Feature> GetRawPointOfInterestById(string id)
-        {
-            // This should not return anything
-            throw new NotImplementedException();
         }
 
         /// <inheritdoc/>

@@ -5,6 +5,7 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -58,12 +59,9 @@ namespace IsraelHiking.API.Executors
             using var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "sitemap.xml"));
             var list = features.Select(feature =>
             {
-                var dateString = feature.Attributes.Exists(FeatureAttributes.POI_LAST_MODIFIED)
-                ? DateTime.Parse(feature.Attributes[FeatureAttributes.POI_LAST_MODIFIED].ToString()).ToUniversalTime().ToString("o")
-                : DateTime.Now.ToUniversalTime().ToString("o");
                 return new tUrl
                 {
-                    lastmod = dateString,
+                    lastmod = feature.GetLastModified().ToUniversalTime().ToString("o"),
                     loc = "https://israelhiking.osm.org.il/poi/" + feature.Attributes[FeatureAttributes.POI_SOURCE] + "/" + feature.Attributes[FeatureAttributes.ID],
                 };
             });

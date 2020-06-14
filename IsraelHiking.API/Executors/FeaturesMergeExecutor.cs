@@ -553,10 +553,9 @@ namespace IsraelHiking.API.Executors
 
         private void MergeDates(Feature target, Feature source)
         {
-            if (DateTime.Parse(target.Attributes[FeatureAttributes.POI_LAST_MODIFIED].ToString()) <
-                DateTime.Parse(source.Attributes[FeatureAttributes.POI_LAST_MODIFIED].ToString()))
+            if (target.GetLastModified() < source.GetLastModified())
             {
-                CopyKeysIfExist(target, source, FeatureAttributes.POI_LAST_MODIFIED);
+                target.SetLastModified(source.GetLastModified());
             }
         }
 

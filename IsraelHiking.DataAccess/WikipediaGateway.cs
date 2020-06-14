@@ -44,16 +44,21 @@ namespace IsraelHiking.DataAccess
             }
         }
 
-        public Task<List<Feature>> GetAll()
-        {
-            throw new NotImplementedException("Please use GetByLocation instead");
-        }
-
-        public Task<Feature> GetByPageTitle(string title, string language)
+        public async Task<List<Feature>> GetByPagesTitles(string[] titles, string language)
         {
             var site = _wikiSites[language];
-            var page = new WikiPage(site, title);
-            return ConvertPageToFeature(page, language);
+            var pages = titles.Select(title => new WikiPage(site, title)).ToArray();
+            await pages.RefreshAsync(new WikiPageQueryProvider
+            {
+                Properties =
+                {
+                    new ExtractsPropertyProvider {AsPlainText = true, IntroductionOnly = true, MaxSentences = 1},
+                    new PageImagesPropertyProvider {QueryOriginalImage = true},
+                    new GeoCoordinatesPropertyProvider {QueryPrimaryCoordinate = true},
+                    new RevisionsPropertyProvider { FetchContent = false }
+                }
+            });
+            return pages.Select(p => ConvertPageToFeature(p, language)).Where(f => f != null).ToList();
         }
 
         /// <summary>
@@ -85,13 +90,13 @@ namespace IsraelHiking.DataAccess
                         foreach (var geoSearchResultItem in results)
                         {
                             var coordinate = new CoordinateZ(geoSearchResultItem.Coordinate.Longitude, geoSearchResultItem.Coordinate.Latitude, double.NaN);
-                            var attributes = GetAttributes(coordinate, geoSearchResultItem.Page.Title,
-                                geoSearchResultItem.Page.Id.ToString(), language);
+                            var attributes = GetAttributes(coordinate, geoSearchResultItem.Page, language);
                             var feature = new Feature(new Point(coordinate), attributes);
                             feature.SetTitles();
                             feature.SetId();
                             features.Add(feature);
                         }
+
                         return features;
                     }
                     var mid = new Coordinate((northEast.X + southWest.X) / 2.0, (northEast.Y + southWest.Y) / 2.0);
@@ -119,29 +124,8 @@ namespace IsraelHiking.DataAccess
             };
         }
 
-        public async Task<Feature> GetById(string id)
+        private Feature ConvertPageToFeature(WikiPage page, string language)
         {
-            var splitId = id.Split('_');
-            var language = splitId.First();
-            var pageId = splitId.Last();
-            var site = _wikiSites[language];
-            var stub = await WikiPageStub.FromPageIds(site, new[] { int.Parse(pageId) }).FirstAsync();
-            var page = new WikiPage(site, stub.Title);
-            return await ConvertPageToFeature(page, language);
-        }
-
-        private async Task<Feature> ConvertPageToFeature(WikiPage page, string language)
-        {
-            await page.RefreshAsync(new WikiPageQueryProvider
-            {
-                Properties =
-                {
-                    new ExtractsPropertyProvider {AsPlainText = true, IntroductionOnly = true, MaxSentences = 1},
-                    new PageImagesPropertyProvider {QueryOriginalImage = true},
-                    new GeoCoordinatesPropertyProvider {QueryPrimaryCoordinate = true},
-                    new RevisionsPropertyProvider { FetchContent = false }
-                }
-            });
             if (page.Exists == false)
             {
                 return null;
@@ -152,7 +136,7 @@ namespace IsraelHiking.DataAccess
                 return null;
             }
             var coordinate = new CoordinateZ(geoCoordinate.Longitude, geoCoordinate.Latitude, double.NaN);
-            var attributes = GetAttributes(coordinate, page.Title, page.Id.ToString(), language);
+            var attributes = GetAttributes(coordinate, page.PageStub, language);
             attributes.Add(FeatureAttributes.DESCRIPTION + ":" + language, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
             var imageUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url ?? string.Empty;
             if (!string.IsNullOrWhiteSpace(imageUrl) &&
@@ -165,14 +149,14 @@ namespace IsraelHiking.DataAccess
             }
             attributes.Add(FeatureAttributes.POI_USER_NAME, page.LastRevision.UserName);
             attributes.Add(FeatureAttributes.POI_USER_ADDRESS, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeUriString(page.LastRevision.UserName)}"));
-            attributes.Add(FeatureAttributes.POI_LAST_MODIFIED, page.LastRevision.TimeStamp.ToString("o"));
+            attributes.SetLastModified(page.LastRevision.TimeStamp);
             var feature = new Feature(new Point(coordinate), attributes);
             feature.SetTitles();
             feature.SetId();
             return feature;
         }
 
-        private AttributesTable GetAttributes(Coordinate location, string title, string id, string language)
+        private AttributesTable GetAttributes(Coordinate location, WikiPageStub page, string language)
         {
             var geoLocation = new AttributesTable
             {
@@ -181,11 +165,11 @@ namespace IsraelHiking.DataAccess
             };
             var attributes = new AttributesTable
             {
-                {FeatureAttributes.ID, language + "_" + id},
-                {FeatureAttributes.NAME, title},
-                {FeatureAttributes.NAME + ":" + language, title},
-                {FeatureAttributes.WIKIPEDIA + ":" + language, title},
-                {FeatureAttributes.WIKIPEDIA, language + ":" + title},
+                {FeatureAttributes.ID, ToId(language, page.Id.ToString()) },
+                {FeatureAttributes.NAME, page.Title},
+                {FeatureAttributes.NAME + ":" + language, page.Title},
+                {FeatureAttributes.WIKIPEDIA + ":" + language, page.Title},
+                {FeatureAttributes.WIKIPEDIA, language + ":" + page.Title},
                 {FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA},
                 {FeatureAttributes.POI_CATEGORY, Categories.WIKIPEDIA},
                 {FeatureAttributes.POI_LANGUAGE, language},
@@ -193,11 +177,15 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.POI_ICON_COLOR, "black"},
                 {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                 {FeatureAttributes.POI_GEOLOCATION, geoLocation},
-                {FeatureAttributes.WEBSITE, _wikiSites[language].SiteInfo.MakeArticleUrl(title)},
+                {FeatureAttributes.WEBSITE, _wikiSites[language].SiteInfo.MakeArticleUrl(page.Title)},
                 {FeatureAttributes.POI_SOURCE_IMAGE_URL, WIKI_LOGO}
-
             };
             return attributes;
+        }
+
+        private string ToId(string language, string pageId)
+        {
+            return language + "_" + pageId;
         }
     }
 }

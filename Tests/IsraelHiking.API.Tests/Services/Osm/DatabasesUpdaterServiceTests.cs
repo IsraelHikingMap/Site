@@ -37,6 +37,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         private IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
         private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
+        private IPointsOfInterestProvider _pointsOfInterestProvider;
 
         [TestInitialize]
         public void TestInitialize()
@@ -54,6 +55,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _osmLatestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
             _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
             _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
+            _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
             _service = new DatabasesUpdaterService(_clientsFactory, 
                 _elasticSearchGateway, 
                 _geoJsonPreprocessorExecutor, 
@@ -64,6 +66,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 _osmLatestFileFetcherExecutor, 
                 _pointsOfInterestFilesCreatorExecutor,
                 null,
+                _pointsOfInterestProvider,
                 Substitute.For<ILogger>());
         }
 
@@ -71,11 +74,12 @@ namespace IsraelHiking.API.Tests.Services.Osm
         public void TestRebuild_ShouldRebuildHighwaysAndPoints()
         {
             var adapter = Substitute.For<IPointsOfInterestAdapter>();
-            adapter.GetPointsForIndexing().Returns(new List<Feature>());
+            adapter.GetAll().Returns(new List<Feature>());
             _pointsOfInterestAdapterFactory.GetBySource(Arg.Any<string>()).Returns(adapter);
             _elasticSearchGateway.GetExternalPoisBySource(Arg.Any<string>()).Returns(new List<Feature>());
             _elasticSearchGateway.GetAllPointsOfInterest(Arg.Any<bool>()).Returns(new List<Feature>());
             _featuresMergeExecutor.Merge(Arg.Any<List<Feature>>(), Arg.Any<List<Feature>>()).Returns(new List<Feature>());
+            _pointsOfInterestProvider.GetAll().Returns(new List<Feature>());
 
             _service.Rebuild(new UpdateRequest { Highways = true, PointsOfInterest = true, SiteMap = true }).Wait();
 

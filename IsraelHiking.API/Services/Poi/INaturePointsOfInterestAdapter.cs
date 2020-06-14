@@ -1,10 +1,13 @@
 ﻿using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,10 +17,12 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Converts points from INature to site's POIs
     /// </summary>
-    public class INaturePointsOfInterestAdapter : BasePointsOfInterestAdapter
+    public class INaturePointsOfInterestAdapter : IPointsOfInterestAdapter
     {
         private readonly IINatureGateway _iNatureGateway;
         private readonly IRepository _repository;
+        private readonly IDataContainerConverterService _dataContainerConverterService;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Class constructor
@@ -29,43 +34,50 @@ namespace IsraelHiking.API.Services.Poi
         public INaturePointsOfInterestAdapter(IDataContainerConverterService dataContainerConverterService,
             IINatureGateway iNatureGateway,
             IRepository repository,
-            ILogger logger) : 
-            base(dataContainerConverterService,
-                logger)
+            ILogger logger) 
         {
             _iNatureGateway = iNatureGateway;
             _repository = repository;
+            _dataContainerConverterService = dataContainerConverterService;
+            _logger = logger;
         }
 
         /// <inheritdoc />
-        public override string Source => Sources.INATURE;
+        public string Source => Sources.INATURE;
 
         /// <inheritdoc />
-        public override async Task<List<Feature>> GetPointsForIndexing()
+        public async Task<List<Feature>> GetAll()
         {
             _logger.LogInformation("Getting data from iNature.");
             var features = await _iNatureGateway.GetAll();
+            foreach (var feature in features)
+            {
+                await UpdateGeometry(feature);
+            }
             _logger.LogInformation($"Got {features.Count} points from iNature.");
             return features;
         }
 
-        /// <inheritdoc />
-        public override async Task<Feature> GetRawPointOfInterestById(string id)
+        private async Task UpdateGeometry(Feature feature)
         {
-            var feature = await _iNatureGateway.GetById(id);
             if (!feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE))
             {
-                return feature;
+                return;
             }
             var share = await _repository.GetUrlById(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
             if (share == null)
             {
-                return feature;
+                return;
             }
             var featureBytes = await _dataContainerConverterService.ToAnyFormat(share.DataContainer, FlowFormats.GEOJSON);
             var lineFeature = featureBytes.ToFeatureCollection().FirstOrDefault(f => f.Geometry is LineString || f.Geometry is MultiLineString) as Feature;
             feature.Geometry = lineFeature?.Geometry ?? feature.Geometry;
-            return feature;
+        }
+
+        /// <inheritdoc />
+        public async Task<List<Feature>> GetUpdates(DateTime lastMoidifiedDate)
+        {
+            return await _iNatureGateway.GetUpdates(lastMoidifiedDate);
         }
     }
 }

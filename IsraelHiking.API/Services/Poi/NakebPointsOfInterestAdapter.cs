@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
@@ -10,41 +13,49 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Adapts from nakeb interface to business logic point of interest
     /// </summary>
-    public class NakebPointsOfInterestAdapter : BasePointsOfInterestAdapter
+    public class NakebPointsOfInterestAdapter : IPointsOfInterestAdapter
     {
         /// <inheritdoc />
-        public override string Source => Sources.NAKEB;
+        public string Source => Sources.NAKEB;
 
         private readonly INakebGateway _nakebGateway;
-
+        private readonly ILogger _logger;
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="nakebGateway"></param>
-        /// <param name="dataContainerConverterService"></param>
         /// <param name="logger"></param>
         public NakebPointsOfInterestAdapter(INakebGateway nakebGateway,
-            IDataContainerConverterService dataContainerConverterService,
-            ILogger logger) :
-            base(dataContainerConverterService,
-                logger)
+            ILogger logger)
         {
             _nakebGateway = nakebGateway;
+            _logger = logger;
         }
 
         /// <inheritdoc />
-        public override async Task<List<Feature>> GetPointsForIndexing()
+        public async Task<List<Feature>> GetAll()
         {
             _logger.LogInformation("Getting data from Nakeb.");
-            var features = await _nakebGateway.GetAll();
+            var slimFeatures = await _nakebGateway.GetAll();
+            var features = new List<Feature>();
+            foreach (var slimFeature in slimFeatures)
+            {
+                features.Add(await _nakebGateway.GetById(slimFeature.Attributes[FeatureAttributes.ID].ToString()));
+            }
             _logger.LogInformation($"Got {features.Count} routes from Nakeb.");
             return features;
         }
 
         /// <inheritdoc />
-        public override Task<Feature> GetRawPointOfInterestById(string id)
+        public async Task<List<Feature>> GetUpdates(DateTime lastMoidifiedDate)
         {
-            return _nakebGateway.GetById(id);
+            var slimFeatures = await _nakebGateway.GetAll();
+            var features = new List<Feature>();
+            foreach (var slimFeature in slimFeatures.Where(f => f.GetLastModified() > lastMoidifiedDate))
+            {
+                features.Add(await _nakebGateway.GetById(slimFeature.Attributes[FeatureAttributes.ID].ToString()));
+            }
+            return features;
         }
     }
 }

@@ -406,13 +406,13 @@ namespace IsraelHiking.DataAccess
             return response.Source;
         }
 
-        public async Task AddExternalPoi(Feature feature)
+        public async Task AddExternalPois(List<Feature> features)
         {
             if (_elasticClient.IndexExists(EXTERNAL_POIS).Exists == false)
             {
                 await CreateExternalPoisIndex();
             }
-            await _elasticClient.IndexAsync(feature, r => r.Index(EXTERNAL_POIS).Id(feature.GetId()));
+            await UpdateData(features, EXTERNAL_POIS);
         }
 
         public Task DeleteExternalPoisBySource(string source)

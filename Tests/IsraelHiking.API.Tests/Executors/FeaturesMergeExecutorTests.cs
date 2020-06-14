@@ -28,9 +28,9 @@ namespace IsraelHiking.API.Tests.Executors
                 {FeatureAttributes.POI_ICON, "icon" },
                 {FeatureAttributes.POI_CATEGORY, Categories.OTHER },
                 {FeatureAttributes.POI_SEARCH_FACTOR, 1.0 },
-                {FeatureAttributes.DESCRIPTION, string.Empty },
-                {FeatureAttributes.POI_LAST_MODIFIED, DateTime.Now.ToString("o") },
+                {FeatureAttributes.DESCRIPTION, string.Empty }
             });
+            feature.SetLastModified(DateTime.Now);
             feature.SetId();
             return feature;
         }

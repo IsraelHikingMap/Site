@@ -3,6 +3,7 @@ using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Poi
@@ -64,5 +65,11 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="lastMoidified">The last modidifaction date that the client has</param>
         /// <returns></returns>
         public Task<Feature[]> GetUpdates(DateTime lastMoidified);
+
+        /// <summary>
+        /// Get all points from the OSM repository
+        /// </summary>
+        /// <returns></returns>
+        public Task<List<Feature>> GetAll();
     }
 }

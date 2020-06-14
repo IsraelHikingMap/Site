@@ -1,6 +1,7 @@
 ﻿using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -31,7 +32,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var features = new List<Feature>();
             _iNatureGateway.GetAll().Returns(features);
 
-            var resutls = _adapter.GetPointsForIndexing().Result;
+            var resutls = _adapter.GetAll().Result;
 
             Assert.AreEqual(features.Count, resutls.Count);
         }

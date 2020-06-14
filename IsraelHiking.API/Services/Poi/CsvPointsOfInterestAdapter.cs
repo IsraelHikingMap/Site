@@ -74,9 +74,11 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Responsible for helping with csv files
     /// </summary>
-    public class CsvPointsOfInterestAdapter : BasePointsOfInterestAdapter
+    public class CsvPointsOfInterestAdapter : IPointsOfInterestAdapter
     {
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
+        private readonly IDataContainerConverterService _dataContainerConverterService;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// The file name relevant to this adapter, set it using <see cref="SetFileNameAndAddress"/>
@@ -88,10 +90,8 @@ namespace IsraelHiking.API.Services.Poi
         /// </summary>
         private string _fileAddress;
 
-        private List<Feature> _cachedFeatures;
-
         /// <inheritdoc />
-        public override string Source => Path.GetFileNameWithoutExtension(_fileName);
+        public string Source => Path.GetFileNameWithoutExtension(_fileName);
 
         /// <summary>
         /// Constructor, make sure to use <see cref="SetFileNameAndAddress"/> after constructing this
@@ -102,13 +102,11 @@ namespace IsraelHiking.API.Services.Poi
         public CsvPointsOfInterestAdapter(
             IDataContainerConverterService dataContainerConverterService,
             IRemoteFileFetcherGateway remoteFileFetcherGateway,
-            ILogger logger
-        ) :
-            base(dataContainerConverterService,
-            logger)
+            ILogger logger)
         {
+            _dataContainerConverterService = dataContainerConverterService;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
-            _cachedFeatures = new List<Feature>();
+            _logger = logger;
         }
 
         /// <summary>
@@ -123,15 +121,19 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public override async Task<List<Feature>> GetPointsForIndexing()
+        public async Task<List<Feature>> GetAll()
         {
             _logger.LogInformation("Getting records from csv file: " + _fileName);
             var fileContent = await _remoteFileFetcherGateway.GetFileContent(_fileAddress);
             using var memoryStream = new MemoryStream(fileContent.Content);
             var pointsOfInterest = GetRecords(memoryStream);
-            _cachedFeatures = pointsOfInterest.Select(f => ConvertCsvRowToFeature(f, DateTime.Now)).ToList();
-            _logger.LogInformation($"Got {_cachedFeatures.Count} records from csv file: {_fileName}");
-            return _cachedFeatures;
+            var features = pointsOfInterest.Select(f => ConvertCsvRowToFeature(f, DateTime.Now)).ToList();
+            foreach (var feature in features)
+            {
+                await UpdateGeometry(feature);
+            }
+            _logger.LogInformation($"Got {features.Count} records from csv file: {_fileName}");
+            return features;
         }
 
         private Feature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest, DateTime lastModified)
@@ -153,7 +155,6 @@ namespace IsraelHiking.API.Services.Poi
                 {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
                 {FeatureAttributes.POI_CATEGORY, pointOfInterest.Category},
                 {FeatureAttributes.POI_SHARE_REFERENCE, pointOfInterest.FileUrl },
-                {FeatureAttributes.POI_LAST_MODIFIED, lastModified.ToString("o") },
                 {FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl},
                 {FeatureAttributes.POI_SOURCE_IMAGE_URL, pointOfInterest.SourceImageUrl},
                 {FeatureAttributes.ID, pointOfInterest.Id},
@@ -161,6 +162,7 @@ namespace IsraelHiking.API.Services.Poi
                 {FeatureAttributes.WEBSITE, pointOfInterest.Website}
             };
             var feature = new Feature(new Point(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude)), table);
+            feature.SetLastModified(lastModified);
             feature.SetTitles();
             feature.SetId();
             return feature;
@@ -175,9 +177,8 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public override async Task<Feature> GetRawPointOfInterestById(string id)
+        private async Task UpdateGeometry(Feature feature)
         {
-            var feature = _cachedFeatures.First(f => f.Attributes[FeatureAttributes.ID].ToString() == id);
             if (feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE) &&
                 !string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString()))
             {
@@ -185,7 +186,14 @@ namespace IsraelHiking.API.Services.Poi
                 var convertedBytes = await _dataContainerConverterService.Convert(content.Content, content.FileName, FlowFormats.GEOJSON);
                 feature.Geometry = convertedBytes.ToFeatureCollection().FirstOrDefault()?.Geometry ?? feature.Geometry;
             }
-            return feature;
+        }
+
+        /// <inheritdoc />
+        public async Task<List<Feature>> GetUpdates(DateTime lastMoidifiedDate)
+        {
+            var features = await GetAll();
+            // HM TODO: this should be by comparison?
+            return features.Where(f => f.GetLastModified() > lastMoidifiedDate).ToList();
         }
     }
 }

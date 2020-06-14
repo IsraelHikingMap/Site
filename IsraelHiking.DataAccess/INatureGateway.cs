@@ -48,18 +48,7 @@ namespace IsraelHiking.DataAccess
             };
             var results = await allpagesGenerator.EnumItemsAsync().ToListAsync().ConfigureAwait(false);
             _logger.LogInformation($"Got {results.Count} pages from iNature, fetching their content and images");
-            var features = new ConcurrentBag<Feature>();
-            await Task.Run(() =>
-            {
-                Parallel.ForEach(results, new ParallelOptions { MaxDegreeOfParallelism = 5 }, (page) =>
-               {
-                   var feature = PageToFeature(page).Result;
-                   if (feature != null)
-                   {
-                       features.Add(feature);
-                   }
-               });
-            }).ConfigureAwait(false);
+            var features = await GetFeaturesFromTitles(results.Select(r => r.Title).ToArray());
             return features.ToList();
         }
 
@@ -94,7 +83,7 @@ namespace IsraelHiking.DataAccess
             return imagePage.LastFileRevision?.Url;
         }
 
-        private async Task<WikiPage> GetPageContent(WikiPageStub pageStub)
+        private async Task<WikiPage> GetPageContent(string title)
         {
             WikiPage page = null;
             var retry = 0;
@@ -102,7 +91,7 @@ namespace IsraelHiking.DataAccess
             {
                 try
                 {
-                    page = new WikiPage(_wikiSite, pageStub.Id);
+                    page = new WikiPage(_wikiSite, title);
                     await page.RefreshAsync(PageQueryOptions.FetchContent).ConfigureAwait(false);
                 }
                 catch
@@ -114,21 +103,14 @@ namespace IsraelHiking.DataAccess
 
             if (retry >= 10)
             {
-                _logger.LogWarning("Failed to get content for page after 10 retries: " + pageStub.Title);
+                _logger.LogWarning("Failed to get content for page after 10 retries: " + title);
             }
             return page;
         }
 
-        public async Task<Feature> GetById(string id)
+        private async Task<Feature> TitleToFeature(string title)
         {
-            var wikiPageStub = new WikiPageStub(int.Parse(id));
-            var feature = await PageToFeature(wikiPageStub);
-            return feature;
-        }
-
-        private async Task<Feature> PageToFeature(WikiPageStub pageStub)
-        {
-            var page = await GetPageContent(pageStub).ConfigureAwait(false);
+            var page = await GetPageContent(title).ConfigureAwait(false);
             if (string.IsNullOrEmpty(page?.Content))
             {
                 return null;
@@ -187,9 +169,9 @@ namespace IsraelHiking.DataAccess
                     {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
                     {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                     {FeatureAttributes.WEBSITE, _wikiSite.SiteInfo.MakeArticleUrl(page.Title)},
-                    {FeatureAttributes.POI_SOURCE_IMAGE_URL, "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" },
-                    {FeatureAttributes.POI_LAST_MODIFIED, page.LastRevision.TimeStamp.ToString("o")},
+                    {FeatureAttributes.POI_SOURCE_IMAGE_URL, "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" }
                 });
+            feature.SetLastModified(page.LastRevision.TimeStamp);
             var image = await GetPageImageUrl(page).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(image))
             {
@@ -213,6 +195,37 @@ namespace IsraelHiking.DataAccess
             feature.SetTitles();
             feature.SetId();
             return feature;
+        }
+
+        public async Task<List<Feature>> GetUpdates(DateTime lastUpdated)
+        {
+            var recentChangesGEnerator = new RecentChangesGenerator(_wikiSite)
+            {
+                StartTime = DateTime.Now,
+                EndTime = lastUpdated,
+                LastRevisionsOnly = true,
+                TypeFilters = RecentChangesFilterTypes.Create | RecentChangesFilterTypes.Edit
+            };
+            var titles = await recentChangesGEnerator.EnumItemsAsync().ToListAsync().ConfigureAwait(false);
+            _logger.LogInformation($"Got {titles.Count} updated pages from iNature, fetching their content and images");
+            return await GetFeaturesFromTitles(titles.Select(i => i.Title).ToArray());
+        }
+
+        private async Task<List<Feature>> GetFeaturesFromTitles(string[] titles)
+        {
+            var features = new ConcurrentBag<Feature>();
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(titles, new ParallelOptions { MaxDegreeOfParallelism = 5 }, (title) =>
+                {
+                    var feature = TitleToFeature(title).Result;
+                    if (feature != null)
+                    {
+                        features.Add(feature);
+                    }
+                });
+            }).ConfigureAwait(false);
+            return features.ToList();
         }
     }
 }

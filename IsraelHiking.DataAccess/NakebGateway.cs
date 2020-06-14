@@ -112,10 +112,9 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.POI_ICON, "icon-hike"},
                 {FeatureAttributes.POI_ICON_COLOR, "black"},
                 {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
-                {FeatureAttributes.POI_GEOLOCATION, geoLocation},
-                {FeatureAttributes.POI_LAST_MODIFIED, nakebItem.LastModified.ToString("o")}
+                {FeatureAttributes.POI_GEOLOCATION, geoLocation}
             };
-
+            attributes.SetLastModified(nakebItem.LastModified);
             return attributes;
         }
     }

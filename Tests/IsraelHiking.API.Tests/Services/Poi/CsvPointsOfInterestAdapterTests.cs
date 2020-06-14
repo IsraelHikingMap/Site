@@ -1,8 +1,10 @@
-﻿using IsraelHiking.API.Services.Poi;
+﻿using IsraelHiking.API.Gpx;
+using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common.Api;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Features;
 using NSubstitute;
 using System.Text;
 
@@ -35,28 +37,21 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
-        public void GetPointsForIndexing_ShouldReturnOnePoint()
+        public void GetAll_ShouldReturnOnePoint()
         {
             var address = "http://csv.csv";
             _adapter.SetFileNameAndAddress("csv.csv", address);
             SetupFileStream(address);
+            _remoteFileFetcherGateway.GetFileContent("8").Returns(new RemoteFileFetcherGatewayResponse
+            {
+                Content = new FeatureCollection().ToBytes(),
+                FileName = "csv.geojson"
+            });
+            _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(new FeatureCollection().ToBytes());
 
-            var features = _adapter.GetPointsForIndexing().Result;
+            var features = _adapter.GetAll().Result;
 
             Assert.AreEqual(1, features.Count);
-        }
-
-        [TestMethod]
-        public void GetById_IndexingRan_ShouldReturnOnePoint()
-        {
-            var address = "http://csv.csv";
-            _adapter.SetFileNameAndAddress("csv.csv", address);
-            SetupFileStream(address);
-            _adapter.GetPointsForIndexing().Wait();
-
-            var feature = _adapter.GetRawPointOfInterestById("1");
-
-            Assert.IsNotNull(feature);
         }
     }
 }

@@ -5,7 +5,6 @@ using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
-using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
 using OsmSharp.Changesets;
@@ -27,6 +26,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly ITagsHelper _tagsHelper;
         private readonly IOsmRepository _osmRepository;
         private readonly IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
+        private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly IFeaturesMergeExecutor _featuresMergeExecutor;
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
@@ -45,6 +45,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="latestFileFetcherExecutor"></param>
         /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
         /// <param name="imagesUrlsStorageExecutor"></param>
+        /// <param name="pointsOfInterestProvider"></param>
         /// <param name="logger"></param>
         public DatabasesUpdaterService(IClientsFactory clinetsFactory,
             IElasticSearchGateway elasticSearchGateway,
@@ -55,6 +56,7 @@ namespace IsraelHiking.API.Services.Osm
             IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
             IPointsOfInterestFilesCreatorExecutor pointsOfInterestFilesCreatorExecutor,
             IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
+            IPointsOfInterestProvider pointsOfInterestProvider,
             ILogger logger)
         {
             _elasticSearchGateway = elasticSearchGateway;
@@ -65,6 +67,7 @@ namespace IsraelHiking.API.Services.Osm
             _pointsOfInterestFilesCreatorExecutor = pointsOfInterestFilesCreatorExecutor;
             _featuresMergeExecutor = featuresMergeExecutor;
             _latestFileFetcherExecutor = latestFileFetcherExecutor;
+            _pointsOfInterestProvider = pointsOfInterestProvider;
             _osmGateway = clinetsFactory.CreateNonAuthClient();
             _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
             _logger = logger;
@@ -179,9 +182,8 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildPointsOfInterest()
         {
             _logger.LogInformation("Starting rebuilding POIs database.");
-            var osmSource = _pointsOfInterestAdapterFactory.GetBySource(Sources.OSM);
-            var osmFeaturesTask = osmSource.GetPointsForIndexing();
-            var sources = _pointsOfInterestAdapterFactory.GetAll().Where(s => s.Source != Sources.OSM).Select(s => s.Source);
+            var osmFeaturesTask = _pointsOfInterestProvider.GetAll();
+            var sources = _pointsOfInterestAdapterFactory.GetAll().Select(s => s.Source);
             var externalFeatures = sources.Select(s => _elasticSearchGateway.GetExternalPoisBySource(s)).SelectMany(t => t.Result).ToList();
             if (externalFeatures.GroupBy(f => f.GetId()).Any(g => g.Count() > 1))
             {
@@ -197,7 +199,7 @@ namespace IsraelHiking.API.Services.Osm
                 if (!deletedFeatureToMark.Attributes.Exists(FeatureAttributes.POI_DELETED))
                 {
                     deletedFeatureToMark.Attributes.Add(FeatureAttributes.POI_DELETED, true);
-                    deletedFeatureToMark.Attributes.AddOrUpdate(FeatureAttributes.POI_LAST_MODIFIED, DateTime.Now.ToString("o"));
+                    deletedFeatureToMark.SetLastModified(DateTime.Now);
                     _logger.LogDebug("Removed feature id: " + deletedFeatureToMark.GetId());
                 }
             }

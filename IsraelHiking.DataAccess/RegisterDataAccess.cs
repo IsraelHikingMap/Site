@@ -1,5 +1,6 @@
 ﻿using IsraelHiking.DataAccess.OpenStreetMap;
 using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IsraelHiking.DataAccess
@@ -17,6 +18,7 @@ namespace IsraelHiking.DataAccess
             services.AddSingleton<IElasticSearchGateway, ElasticSearchGateway>();
             services.AddSingleton<IRepository>(x => x.GetService<IElasticSearchGateway>());
             services.AddSingleton<IImagesRepository>(x => x.GetService<IElasticSearchGateway>());
+            services.AddSingleton<IExternalSourcesRepository>(x => x.GetService<IElasticSearchGateway>());
             services.AddSingleton<IElevationDataStorage, ElevationDataStorage>();
             services.AddTransient<IOsmRepository, OsmRepository>();
             services.AddTransient<INakebGateway, NakebGateway>();
