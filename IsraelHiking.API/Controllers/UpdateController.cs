@@ -65,6 +65,7 @@ namespace IsraelHiking.API.Controllers
                 }
                 if (request == null || 
                     request.Highways == false &&
+                    request.AllExternalSources == false &&
                     request.PointsOfInterest == false &&
                     request.UpdateOsmFile == false &&
                     request.DownloadOsmFile == false &&
@@ -75,6 +76,7 @@ namespace IsraelHiking.API.Controllers
                     request = new UpdateRequest
                     {
                         Highways = true,
+                        AllExternalSources = true,
                         PointsOfInterest = true,
                         UpdateOsmFile = true,
                         DownloadOsmFile = true,

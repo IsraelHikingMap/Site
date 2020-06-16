@@ -31,6 +31,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
+        private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
         private readonly ILogger _logger;
         /// <summary>
         /// Service's constructor
@@ -57,6 +58,7 @@ namespace IsraelHiking.API.Services.Osm
             IPointsOfInterestFilesCreatorExecutor pointsOfInterestFilesCreatorExecutor,
             IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
             IPointsOfInterestProvider pointsOfInterestProvider,
+            IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor,
             ILogger logger)
         {
             _elasticSearchGateway = elasticSearchGateway;
@@ -70,6 +72,7 @@ namespace IsraelHiking.API.Services.Osm
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _osmGateway = clinetsFactory.CreateNonAuthClient();
             _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
+            _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
             _logger = logger;
         }
 
@@ -157,6 +160,11 @@ namespace IsraelHiking.API.Services.Osm
         /// <inheritdoc />
         public async Task Rebuild(UpdateRequest request)
         {
+            // Order do matters in the sequence
+            if (request.AllExternalSources)
+            {
+                await UpdateExternalSources();
+            }
             if (request.Highways)
             {
                 await RebuildHighways();
@@ -248,6 +256,16 @@ namespace IsraelHiking.API.Services.Osm
             var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
             _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
             _logger.LogInformation("Finished rebuilding offline pois file.");
+        }
+
+        private async Task UpdateExternalSources()
+        {
+            _logger.LogInformation("Starting updating external sources.");
+            foreach (var source in _pointsOfInterestAdapterFactory.GetAll().Select(s => s.Source))
+            {
+                await _externalSourceUpdaterExecutor.UpdateSource(source);
+            }
+            _logger.LogInformation("Finished updating external sources.");
         }
     }
 }

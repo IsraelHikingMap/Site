@@ -197,8 +197,10 @@ export class PoiService {
                 // don't send a request that is too big to the server by mistake
                 return;
             }
-            // HM TODO: timeout?
-            let updates = await this.httpClient.get(Urls.poiUpdates + lastModified.toISOString()).toPromise() as IUpdatesResponse;
+            // just to be on the safe side - reduce 6 hours.
+            lastModified.setHours(lastModified.getHours() - 6);
+            let updates = await this.httpClient.get(Urls.poiUpdates + lastModified.toISOString())
+                .pipe(timeout(60000)).toPromise() as IUpdatesResponse;
             this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()}, got: ${updates.features.length}`);
             let latestUpdate = this.getLastModifiedFromFeatures(lastModified, updates.features);
             let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => f.properties.poiId);

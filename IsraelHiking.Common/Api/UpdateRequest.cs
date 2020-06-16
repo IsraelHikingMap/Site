@@ -11,6 +11,10 @@
         /// </summary>
         public bool UpdateOsmFile { get; set; }
         /// <summary>
+        /// Update all external sources with latest updates
+        /// </summary>
+        public bool AllExternalSources { get; set; }
+        /// <summary>
         /// Update points of interest database
         /// </summary>
         public bool PointsOfInterest { get; set; }
@@ -30,6 +34,5 @@
         /// Update pois file
         /// </summary>
         public bool OfflinePoisFile { get; set; }
-
     }
 }
