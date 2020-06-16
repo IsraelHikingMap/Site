@@ -69,6 +69,10 @@ namespace IsraelHiking.API.Services.Poi
         /// The longitude of the POI
         /// </summary>
         public double Longitude { get; set; }
+        /// <summary>
+        /// The date this POI was last updated
+        /// </summary>
+        public DateTime LastModified { get; set; }
     }
 
     /// <summary>
@@ -123,20 +127,15 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public async Task<List<Feature>> GetAll()
         {
-            _logger.LogInformation("Getting records from csv file: " + _fileName);
-            var fileContent = await _remoteFileFetcherGateway.GetFileContent(_fileAddress);
-            using var memoryStream = new MemoryStream(fileContent.Content);
-            var pointsOfInterest = GetRecords(memoryStream);
-            var features = pointsOfInterest.Select(f => ConvertCsvRowToFeature(f, DateTime.Now)).ToList();
+            var features = await GetAllFeaturesWithoutGeometry();
             foreach (var feature in features)
             {
                 await UpdateGeometry(feature);
             }
-            _logger.LogInformation($"Got {features.Count} records from csv file: {_fileName}");
             return features;
         }
 
-        private Feature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest, DateTime lastModified)
+        private Feature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest)
         {
             var geoLocation = new AttributesTable
             {
@@ -162,7 +161,7 @@ namespace IsraelHiking.API.Services.Poi
                 {FeatureAttributes.WEBSITE, pointOfInterest.Website}
             };
             var feature = new Feature(new Point(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude)), table);
-            feature.SetLastModified(lastModified);
+            feature.SetLastModified(pointOfInterest.LastModified);
             feature.SetTitles();
             feature.SetId();
             return feature;
@@ -191,9 +190,25 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public async Task<List<Feature>> GetUpdates(DateTime lastMoidifiedDate)
         {
-            var features = await GetAll();
-            // HM TODO: this should be by comparison?
-            return features.Where(f => f.GetLastModified() > lastMoidifiedDate).ToList();
+            var features = await GetAllFeaturesWithoutGeometry();
+            features = features.Where(f => f.GetLastModified() > lastMoidifiedDate).ToList();
+            foreach (var feature in features)
+            {
+                await UpdateGeometry(feature);
+            }
+            return features;
+        }
+
+        private async Task<List<Feature>> GetAllFeaturesWithoutGeometry()
+        {
+            _logger.LogInformation("Getting records from csv file: " + _fileName);
+            var fileContent = await _remoteFileFetcherGateway.GetFileContent(_fileAddress);
+            using var memoryStream = new MemoryStream(fileContent.Content);
+            var csvRows = GetRecords(memoryStream);
+            var features =  csvRows.Select(ConvertCsvRowToFeature).ToList();
+            _logger.LogInformation($"Got {features.Count} records from csv file: {_fileName}");
+            return features;
+
         }
     }
 }
