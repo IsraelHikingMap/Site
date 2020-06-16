@@ -42,14 +42,14 @@ export class ProgressDialogComponent extends BaseMapComponent {
                     this.text = ex.message;
                     this.isError = true;
                 });
-        }
+        };
 
         if (data.showContinueButton) {
             this.text = data.continueText;
             this.continueAction = () => {
                 this.isContinue = false;
                 wrappedAction();
-            }
+            };
         } else {
             wrappedAction();
         }

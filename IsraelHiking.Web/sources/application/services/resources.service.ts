@@ -852,7 +852,8 @@ export class ResourcesService {
         this.cantEditWhileOffline = this.gettextCatalog.getString("You can't edit while offline...");
         this.downloadingPoisForOfflineUsage = this.gettextCatalog.getString("Downloading points of interest for offline usage...");
         this.useTheCloudIconToGoOffline = this.gettextCatalog.getString("Use the cloud icon to go offline");
-        this.largeFilesUseWifi = this.gettextCatalog.getString("You are about to download large files, you can change to wifi before clicking continue...");
+        this.largeFilesUseWifi = this.gettextCatalog
+            .getString("You are about to download large files, you can change to wifi before clicking continue...");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");
