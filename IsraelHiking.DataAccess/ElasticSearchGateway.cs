@@ -77,21 +77,11 @@ namespace IsraelHiking.DataAccess
                 CreatePointsOfInterestIndex(OSM_POIS_INDEX1);
                 _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_POIS_ALIAS).Index(OSM_POIS_INDEX1)));
             }
-            if (_elasticClient.IndexExists(OSM_POIS_INDEX1).Exists &&
-                _elasticClient.IndexExists(OSM_POIS_INDEX2).Exists)
-            {
-                _elasticClient.DeleteIndex(OSM_POIS_INDEX2);
-            }
             if (_elasticClient.IndexExists(OSM_HIGHWAYS_INDEX1).Exists == false &&
                 _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists == false)
             {
                 CreateHighwaysIndex(OSM_HIGHWAYS_INDEX1);
                 _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_HIGHWAYS_ALIAS).Index(OSM_HIGHWAYS_INDEX1)));
-            }
-            if (_elasticClient.IndexExists(OSM_HIGHWAYS_INDEX1).Exists &&
-                _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists)
-            {
-                _elasticClient.DeleteIndex(OSM_HIGHWAYS_INDEX2);
             }
             if (_elasticClient.IndexExists(SHARES).Exists == false)
             {
