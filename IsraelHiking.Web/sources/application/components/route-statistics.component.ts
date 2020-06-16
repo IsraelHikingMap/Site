@@ -3,6 +3,7 @@ import { trigger, style, transition, animate } from "@angular/animations";
 import { Subscription, Observable, interval } from "rxjs";
 import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "@katze/ngx-d3";
 import { select, NgRedux } from "@angular-redux/store";
+import { regressionLoess } from "d3-regression";
 
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
@@ -684,13 +685,17 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .duration(duration);
         let slopeData = [];
         if (this.isSlopeOn && data.length > 0) {
-            slopeData = this.statistics.points.map(p => [p.coordinate[0], p.slope] as [number, number]);
+            // smoothing the slope data for the chart
+            slopeData = regressionLoess()
+                .x(d => d.coordinate[0])
+                .y(d => d.slope)
+                .bandwidth(0.03)(this.statistics.points);
         }
         // making the doing be symetric around zero
         this.chartElements.yScaleSlope.domain([Math.min(d3.min(slopeData, d => d[1]), -d3.max(slopeData, d => d[1])),
         Math.max(d3.max(slopeData, d => d[1]), -d3.min(slopeData, d => d[1]))]);
         let slopeLine = d3.line()
-            .curve(d3.curveLinear)
+            .curve(d3.curveCatmullRom)
             .x(d => this.chartElements.xScale(d[0]))
             .y(d => this.chartElements.yScaleSlope(d[1]));
         chartTransition.select(".slope-line").duration(duration).attr("d", slopeLine(slopeData));
