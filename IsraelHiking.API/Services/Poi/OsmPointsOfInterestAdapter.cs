@@ -345,8 +345,8 @@ namespace IsraelHiking.API.Services.Poi
                     feature.Geometry = featureFromDb.Geometry;
                 }
             }
-            // set last modified date to be yesterday so that rebuild will override it and client will get it on next update.
-            feature.SetLastModified(DateTime.Now.AddDays(-1));
+            // set last modified date to be minimal date so that rebuild will override it and client will not store it forever.
+            feature.SetLastModified(DateTime.MinValue);
             await _elasticSearchGateway.UpdatePointsOfInterestData(new List<Feature> { feature });
             return feature;
         }

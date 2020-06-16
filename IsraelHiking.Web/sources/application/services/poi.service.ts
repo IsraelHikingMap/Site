@@ -382,7 +382,11 @@ export class PoiService {
     public async uploadPoint(poiExtended: PointOfInterestExtended): Promise<PointOfInterestExtended> {
         let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
         this.poisCache = [];
-        return this.httpClient.post(uploadAddress, poiExtended).toPromise() as Promise<PointOfInterestExtended>;
+        let poi = await this.httpClient.post(uploadAddress, poiExtended).toPromise() as PointOfInterestExtended;
+        if (this.runningContextService.isCordova) {
+            this.databaseService.storePois(poi.featureCollection.features);
+        }
+        return poi;
     }
 
     public getPoiSocialLinks(poiExtended: PointOfInterestExtended): IPoiSocialLinks {
@@ -433,7 +437,7 @@ export class PoiService {
 
     private featureToPoint(f: GeoJSON.Feature): PointOfInterestExtended {
         let language = this.resources.getCurrentLanguageCodeSimplified();
-        let imageUrls = uniq(Object.keys(f.properties).filter(k => k.toLowerCase().startsWith("image")).map(k => f.properties[k]));
+        let imagesUrls = uniq(Object.keys(f.properties).filter(k => k.toLowerCase().startsWith("image")).map(k => f.properties[k]));
         // HM TODO: remove this?
         // let references = Object.keys(f.properties).filter(k => k.toLowerCase().startsWith("website")).map(k => ({
         //     url: f.properties[k],
@@ -445,7 +449,7 @@ export class PoiService {
         let poi = {
             id: f.properties.identifier,
             category: f.properties.poiCategory,
-            hasExtraData: description != null || imageUrls.length > 0,
+            hasExtraData: description != null || imagesUrls.length > 0,
             icon: f.properties.poiIcon,
             iconColor: f.properties.poiIconColor,
             location: {
@@ -469,11 +473,11 @@ export class PoiService {
             } as GeoJSON.FeatureCollection,
             references,
             contribution: {
-                lastModifiedDate: new Date(f.properties["poiLastModified:" + language] || f.properties.poiLastModified),
-                userAddress: f.properties["poiUserAddress:" + language] || f.properties.poiUserAddress,
-                userName: f.properties["poiUserName:" + language] || f.properties.poiUserName
+                lastModifiedDate: new Date(f.properties.poiLastModified),
+                userAddress: f.properties.poiUserAddress,
+                userName: f.properties.poiUserName
             },
-            imagesUrls: imageUrls,
+            imagesUrls,
             description,
             title: Array.isArray(f.properties.poiNames[language]) && f.properties.poiNames[language].length !== 0
                 ? f.properties.poiNames[language][0]
