@@ -21,14 +21,8 @@ namespace IsraelHiking.DataAccess
 
         public async Task<RemoteFileFetcherGatewayResponse> GetFileContent(string url)
         {
-            using var client = new HttpClient(
-                new HttpClientHandler
-                {
-                    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-                })
-            {
-                Timeout = TimeSpan.FromMinutes(20)
-            };
+            var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromMinutes(20);
             var response = await client.GetAsync(url);
             var fileName = response.Content.Headers.ContentDisposition?.FileName?.Trim('"') ??
                 response.Content.Headers.ContentDisposition?.FileNameStar?.Trim('"') ??
