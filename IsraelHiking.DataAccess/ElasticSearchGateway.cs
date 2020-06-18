@@ -9,26 +9,102 @@ using Nest;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Feature = NetTopologySuite.Features.Feature;
 
 namespace IsraelHiking.DataAccess
 {
-    public class GeoJsonNetSerializer : JsonNetSerializer
+    /// <summary>
+	/// A JSON serializer that uses Json.NET for serialization and able to parse geojson objects
+	/// </summary>
+	public class GeoJsonNetSerializer : IElasticsearchSerializer
     {
-        public GeoJsonNetSerializer(IConnectionSettingsValues settings, GeometryFactory geometryFactory) : base(settings)
+        private static readonly Encoding ExpectedEncoding = new UTF8Encoding(false);
+
+        private readonly ConcurrentDictionary<string, IPropertyMapping> Properties = new ConcurrentDictionary<string, IPropertyMapping>();
+        private readonly JsonSerializerSettings _noneIndentedSettings;
+        private readonly JsonSerializerSettings _indentedSettings;
+
+        public GeoJsonNetSerializer(IConnectionSettingsValues settings)
         {
-            OverwriteDefaultSerializers((s, cvs) =>
+            _noneIndentedSettings = CreateSettings(SerializationFormatting.None, settings);
+            _indentedSettings = CreateSettings(SerializationFormatting.Indented, settings);
+        }
+
+        public IPropertyMapping CreatePropertyMapping(MemberInfo memberInfo)
+        {
+            var memberInfoString = $"{memberInfo.DeclaringType?.FullName}.{memberInfo.Name}";
+            if (Properties.TryGetValue(memberInfoString, out var mapping))
+                return mapping;
+
+            mapping = PropertyMappingFromAttributes(memberInfo);
+            Properties.TryAdd(memberInfoString, mapping);
+            return mapping;
+        }
+
+        public T Deserialize<T>(Stream stream)
+        {
+            if (stream == null) return default;
+
+            using var streamReader = new StreamReader(stream);
+            using var jsonTextReader = new JsonTextReader(streamReader);
+            return JsonSerializer.Create(_noneIndentedSettings).Deserialize<T>(jsonTextReader);
+        }
+
+        public Task<T> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            //Json.NET does not support reading a stream asynchronously :(
+            var result = Deserialize<T>(stream);
+            return Task.FromResult(result);
+        }
+
+        public void Serialize(object data, Stream writableStream, SerializationFormatting formatting = SerializationFormatting.Indented)
+        {
+            var serializer = formatting == SerializationFormatting.Indented
+                ? JsonSerializer.Create(_indentedSettings)
+                : JsonSerializer.Create(_noneIndentedSettings);
+
+            using var writer = new StreamWriter(writableStream, ExpectedEncoding, 1024, true);
+            using var jsonWriter = new JsonTextWriter(writer);
+            serializer.Serialize(jsonWriter, data);
+            writer.Flush();
+            jsonWriter.Flush();
+        }
+
+        private static IPropertyMapping PropertyMappingFromAttributes(MemberInfo memberInfo)
+        {
+            var jsonProperty = memberInfo.GetCustomAttribute<JsonPropertyAttribute>(true);
+            var dataMember = memberInfo.GetCustomAttribute<DataMemberAttribute>(true);
+            var ignoreProperty = memberInfo.GetCustomAttribute<JsonIgnoreAttribute>(true);
+            if (jsonProperty == null && ignoreProperty == null && dataMember == null) return null;
+
+            return new PropertyMapping { Name = jsonProperty?.PropertyName ?? dataMember?.Name, Ignore = ignoreProperty != null };
+        }
+
+        private JsonSerializerSettings CreateSettings(SerializationFormatting formatting, IConnectionSettingsValues connectionSettings)
+        {
+            var settings = new JsonSerializerSettings()
             {
-                foreach (var converter in GeoJsonSerializer.Create(geometryFactory, 3).Converters)
-                {
-                    s.Converters.Add(converter);
-                }
-            });
+                Formatting = formatting == SerializationFormatting.Indented ? Formatting.Indented : Formatting.None,
+                ContractResolver = new ElasticContractResolver(connectionSettings, null),
+                DefaultValueHandling = DefaultValueHandling.Include,
+                NullValueHandling = NullValueHandling.Ignore
+            };
+            foreach(var converter in GeoJsonSerializer.Create(GeometryFactory.Default, 3).Converters)
+            {
+                settings.Converters.Add(converter);
+            }
+            return settings;
         }
     }
 
@@ -50,15 +126,13 @@ namespace IsraelHiking.DataAccess
 
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
-        private readonly GeometryFactory _geometryFactory;
         private readonly ConfigurationData _options;
         private IElasticClient _elasticClient;
 
-        public ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger logger, GeometryFactory geometryFactory)
+        public ElasticSearchGateway(IOptions<ConfigurationData> options, ILogger logger)
         {
             _options = options.Value;
             _logger = logger;
-            _geometryFactory = geometryFactory;
         }
 
         public void Initialize()
@@ -69,7 +143,7 @@ namespace IsraelHiking.DataAccess
             var connectionString = new ConnectionSettings(
                 pool,
                 new HttpConnection(),
-                new SerializerFactory(s => new GeoJsonNetSerializer(s, _geometryFactory)))
+                new SerializerFactory(s => new GeoJsonNetSerializer(s)))
                 .PrettyJson()
                 .EnableDebugMode()
                 .DisableDirectStreaming();

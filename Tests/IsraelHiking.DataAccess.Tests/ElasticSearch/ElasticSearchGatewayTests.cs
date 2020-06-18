@@ -23,7 +23,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         {
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
-            _gateway = new ElasticSearchGateway(options, new TraceLogger(), new GeometryFactory());
+            _gateway = new ElasticSearchGateway(options, new TraceLogger());
         }
 
         [TestMethod]
