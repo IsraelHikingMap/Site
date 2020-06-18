@@ -47,6 +47,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
         /// <param name="imagesUrlsStorageExecutor"></param>
         /// <param name="pointsOfInterestProvider"></param>
+        /// <param name="externalSourceUpdaterExecutor"></param>
         /// <param name="logger"></param>
         public DatabasesUpdaterService(IClientsFactory clinetsFactory,
             IElasticSearchGateway elasticSearchGateway,
