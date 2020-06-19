@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace IsraelHiking.API.Services.Osm
 {
@@ -28,7 +29,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly IFeaturesMergeExecutor _featuresMergeExecutor;
-        private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
+        private readonly IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
         private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
@@ -69,7 +70,7 @@ namespace IsraelHiking.API.Services.Osm
             _pointsOfInterestAdapterFactory = pointsOfInterestAdapterFactory;
             _pointsOfInterestFilesCreatorExecutor = pointsOfInterestFilesCreatorExecutor;
             _featuresMergeExecutor = featuresMergeExecutor;
-            _latestFileFetcherExecutor = latestFileFetcherExecutor;
+            _osmLatestFileFetcherExecutor = latestFileFetcherExecutor;
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _osmGateway = clinetsFactory.CreateNonAuthClient();
             _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
@@ -78,9 +79,12 @@ namespace IsraelHiking.API.Services.Osm
         }
 
         /// <inheritdoc />
-        public async Task Update(OsmChange changes)
+        public async Task Update()
         {
             _logger.LogInformation("Staring updating from OSM change file");
+            using var updatesStream = await _osmLatestFileFetcherExecutor.GetUpdates();
+            XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
+            var changes = (OsmChange)serializer.Deserialize(updatesStream);
             await Updatehighways(changes);
             await UpdatePointsOfInterest(changes);
             _logger.LogInformation("Finished updating from OSM change file");
@@ -166,6 +170,10 @@ namespace IsraelHiking.API.Services.Osm
             {
                 await UpdateExternalSources();
             }
+            if (request.UpdateOsmFile || request.DownloadOsmFile)
+            {
+                await _osmLatestFileFetcherExecutor.Update(request.DownloadOsmFile, request.UpdateOsmFile);
+            }
             if (request.Highways)
             {
                 await RebuildHighways();
@@ -216,7 +224,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildHighways()
         {
             _logger.LogInformation("Starting rebuilding highways database.");
-            using var stream = _latestFileFetcherExecutor.Get();
+            using var stream = _osmLatestFileFetcherExecutor.Get();
             var osmHighways = await _osmRepository.GetAllHighways(stream);
             var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
             await _elasticSearchGateway.UpdateHighwaysZeroDownTime(geoJsonHighways);
@@ -227,7 +235,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildImages()
         {
             _logger.LogInformation("Starting rebuilding images database.");
-            using var stream = _latestFileFetcherExecutor.Get();
+            using var stream = _osmLatestFileFetcherExecutor.Get();
             var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
             var featuresUrls = features.SelectMany(f =>
                 f.Attributes.GetNames()

@@ -20,7 +20,9 @@ using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace IsraelHiking.API.Tests.Services.Osm
 {
@@ -99,8 +101,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 0))
                 .Returns(new List<Feature>());
+            _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes));
 
-            _service.Update(changes).Wait();
+            _service.Update().Wait();
 
             _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Is<List<Feature>>(x => x.Count == 0));
             _elasticSearchGateway.Received(1).UpdateHighwaysData(Arg.Is<List<Feature>>(x => x.Count == 0));
@@ -122,8 +125,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 0))
                 .Returns(new List<Feature>());
+            _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes));
 
-            _service.Update(changes).Wait();
+            _service.Update().Wait();
 
             _elasticSearchGateway.Received(1).DeleteHighwaysById("way_1");
             _elasticSearchGateway.Received(1).DeleteOsmPointOfInterestById("way_1", Arg.Any<DateTime?>());
@@ -152,8 +156,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 1))
                 .Returns(list);
             _osmGateway.GetCompleteWay(1).Returns(way);
+            _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes));
 
-            _service.Update(changes).Wait();
+            _service.Update().Wait();
 
             _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Is<List<Feature>>(x => x.Count == 1));
             _elasticSearchGateway.Received(1).UpdateHighwaysData(Arg.Is<List<Feature>>(x => x.Count == 1));
@@ -194,12 +199,20 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 .Returns(list);
             _osmGateway.GetCompleteWay(1).Returns(way);
             _elasticSearchGateway.GetPointOfInterestById("way_1", Sources.OSM).Returns(wayFeatureInDatabase);
+            _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes));
 
-            _service.Update(changes).Wait();
+            _service.Update().Wait();
 
             _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Is<List<Feature>>(x => x.Count == 1 && x.First().Attributes.Exists(FeatureAttributes.POI_CATEGORY)));
         }
 
-
+        private Stream CreateStream(OsmChange changes)
+        {
+            Stream stream = new MemoryStream();
+            var serializer = new XmlSerializer(typeof(OsmChange));
+            serializer.Serialize(stream, changes);
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
+        }
     }
 }

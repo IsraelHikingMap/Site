@@ -54,10 +54,6 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc />
         public async Task Update(bool downloadFile = true, bool updateFile = true)
         {
-            if (downloadFile == false && updateFile == false)
-            {
-                return;
-            }
             var workingDirectory = Path.Combine(_options.BinariesFolder, OSM_C_TOOLS_FOLDER);
             var directoryContents = _fileProvider.GetDirectoryContents(OSM_C_TOOLS_FOLDER);
             if (!directoryContents.Any())

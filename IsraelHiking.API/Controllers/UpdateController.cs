@@ -4,11 +4,9 @@ using IsraelHiking.Common.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using OsmSharp.Changesets;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -22,24 +20,19 @@ namespace IsraelHiking.API.Controllers
         private static readonly SemaphoreSlim UpdateSemaphore = new SemaphoreSlim(1, 1);
 
         private readonly ILogger _logger;
-        private readonly IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
         private readonly IDatabasesUpdaterService _databasesUpdaterService;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="osmLatestFileFetcherExecutor"></param>
         /// <param name="databasesUpdaterService"></param>
         /// <param name="logger"></param>
         public UpdateController(
-            IOsmLatestFileFetcherExecutor osmLatestFileFetcherExecutor,
             IDatabasesUpdaterService databasesUpdaterService,
             ILogger logger)
         {
-            _osmLatestFileFetcherExecutor = osmLatestFileFetcherExecutor;
             _databasesUpdaterService = databasesUpdaterService;
             _logger = logger;
-            
         }
 
         /// <summary>
@@ -87,8 +80,6 @@ namespace IsraelHiking.API.Controllers
                     _logger.LogInformation("No specific filters were applied, updating all databases.");
                 }
                 _logger.LogInformation("Starting updating site's databases according to request: " + JsonConvert.SerializeObject(request));
-                await _osmLatestFileFetcherExecutor.Update(request.DownloadOsmFile, request.UpdateOsmFile);
-
                 await _databasesUpdaterService.Rebuild(request);
                 _logger.LogInformation("Finished updating site's databases according to request");
                 return Ok();
@@ -122,12 +113,7 @@ namespace IsraelHiking.API.Controllers
             await UpdateSemaphore.WaitAsync();
             try
             {
-                _logger.LogInformation("Starting incremental site's databases update");
-                using var updatesStream = await _osmLatestFileFetcherExecutor.GetUpdates();
-                XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
-                var changes = (OsmChange) serializer.Deserialize(updatesStream);
-                await _databasesUpdaterService.Update(changes);
-                _logger.LogInformation("Finished incremental site's databases update");
+                await _databasesUpdaterService.Update();
                 return Ok();
             }
             finally
