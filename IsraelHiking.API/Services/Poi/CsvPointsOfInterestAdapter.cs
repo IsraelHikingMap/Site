@@ -161,7 +161,7 @@ namespace IsraelHiking.API.Services.Poi
                 {FeatureAttributes.WEBSITE, pointOfInterest.Website}
             };
             var feature = new Feature(new Point(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude)), table);
-            feature.SetLastModified(pointOfInterest.LastModified);
+            feature.SetLastModified(pointOfInterest.LastModified > DateTime.Now ? DateTime.Now : pointOfInterest.LastModified);
             feature.SetTitles();
             feature.SetId();
             return feature;
