@@ -144,9 +144,7 @@ namespace IsraelHiking.DataAccess
                 pool,
                 new HttpConnection(),
                 new SerializerFactory(s => new GeoJsonNetSerializer(s)))
-                .PrettyJson()
-                .EnableDebugMode()
-                .DisableDirectStreaming();
+                .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
             if (_elasticClient.IndexExists(OSM_POIS_INDEX1).Exists == false &&
                 _elasticClient.IndexExists(OSM_POIS_INDEX2).Exists == false)
@@ -463,13 +461,6 @@ namespace IsraelHiking.DataAccess
                     )
             );
             var features = GetAllItemsByScrolling(response);
-            var duplicate = features.GroupBy(f => f.GetId()).FirstOrDefault(g => g.Count() > 1);
-            if (duplicate != null)
-            {
-                var filePath = Path.GetFullPath(DateTime.Now.ToString("o").Replace(":", "-") + ".txt");
-                _logger.LogWarning($"Got duplicate id {duplicate.First().GetId()} from database :-(, writing dump to: {filePath}");
-                File.WriteAllText(filePath, response.DebugInformation);
-            }
             _logger.LogInformation($"Got {features.Count} features for source {source}");
             return features;
         }
