@@ -357,9 +357,10 @@ export class ResourcesService {
     public infoHelpfulLinks: string;
     public infoFacebookLink: string;
     public infoGithubLink: string;
+    public infoOsmWikiLink: string;
+    public infoFAQLink: string;
     public infoDownloadMapForOfflineUse: string;
     public infoDownloadOldMapsForOfflineUse: string;
-    public infoOsmWikiLink: string;
     public infoFooterThanks: string;
     public infoFooterAuthors: string;
     public infoPrivacyPolicyTermsOfService: string;
@@ -530,7 +531,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1591687099648");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1592686820137");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -887,19 +888,12 @@ export class ResourcesService {
             .getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.")
             .replace("{{link}}", "<a dir='ltr' href='https://www.openstreetmap.org/' target='_blank'>")
             .replace("{{linkend}}", "</a>");
-        this.infoFacebookLink = this.gettextCatalog
-            .getString("Interact with other users in our {{link}}Facebook group{{linkend}}")
-            .replace("{{link}}", "<a href='https://www.facebook.com/groups/israelhikingmap/' target='_blank'>")
-            .replace("{{linkend}}", "</a>");
+        this.infoFacebookLink = this.gettextCatalog.getString("Interact with other users in our Facebook group");
         this.infoGithubLink = this.gettextCatalog
-            .getString("Request features and report bugs on our {{link}}Github project{{linkend}} page")
-            .replace("{{link}}", "<a href='http://www.github.com/IsraelHikingMap' target='_blank'>")
-            .replace("{{linkend}}", "</a>");
+            .getString("Request features and report bugs on our Github project page");
         this.infoOsmWikiLink = this.gettextCatalog
-            .getString("Learn Israel-specific mapping rules at the {{link}}Israel OSM Wiki Project{{linkend}}")
-            .replace("{{link}}", "<a href='http://wiki.openstreetmap.org/wiki/WikiProject_Israel' target='_blank'>")
-            .replace("{{linkend}}", "</a>");
-        // end
+            .getString("Learn Israel-specific mapping rules at the Israel OSM Wiki Project");
+        this.infoFAQLink = this.gettextCatalog.getString("F.A.Q");
         this.infoDownloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
         this.infoDownloadOldMapsForOfflineUse = this.gettextCatalog
             .getString("Download old raster maps for offline use in OruxMaps and Locus");

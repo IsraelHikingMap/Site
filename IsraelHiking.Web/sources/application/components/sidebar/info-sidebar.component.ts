@@ -18,7 +18,8 @@ export interface ILegendSection {
 
 @Component({
     selector: "info-sidebar",
-    templateUrl: "./info-sidebar.component.html"
+    templateUrl: "./info-sidebar.component.html",
+    styleUrls: ["./info-sidebar.component.scss"]
 })
 export class InfoSidebarComponent extends BaseMapComponent {
     public legendSections: ILegendSection[];
