@@ -87,13 +87,15 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _pointsOfInterestAdapterFactory.GetBySource(Arg.Any<string>()).Returns(adapter);
             _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns(new List<Feature>());
             _pointsOfInterestRepository.GetAllPointsOfInterest(Arg.Any<bool>()).Returns(new List<Feature>());
+            _pointsOfInterestRepository.GetPointsOfInterestUpdates(Arg.Any<DateTime>()).Returns(new List<Feature>());
             _featuresMergeExecutor.Merge(Arg.Any<List<Feature>>(), Arg.Any<List<Feature>>()).Returns(new List<Feature>());
             _pointsOfInterestProvider.GetAll().Returns(new List<Feature>());
-
+            
             _service.Rebuild(new UpdateRequest { Highways = true, PointsOfInterest = true, SiteMap = true }).Wait();
 
             _highwaysRepository.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
-            _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestZeroDownTime(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.Received(2).StorePointsOfInterestDataToSecondaryIndex(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.Received(1).SwitchPointsOfInterestIndices();
             _pointsOfInterestFilesCreatorExecutor.Received(1).CreateSiteMapXmlFile(Arg.Any<List<Feature>>());
         }
 

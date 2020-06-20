@@ -215,23 +215,19 @@ namespace IsraelHiking.API.Controllers
         public async Task<UpdatesResponse> GetPointOfInterestUpdates(DateTime lastModified)
         {
             _logger.LogInformation("Got POIs updates request for " + lastModified.ToString());
-            var feautres = await _pointsOfInterestProvider.GetUpdates(lastModified);
+            var response = await _pointsOfInterestProvider.GetUpdates(lastModified);
             _logger.LogInformation("Got updates from database, getting images");
             var imageUrls = new List<string>();
-            foreach (var feature in feautres)
+            foreach (var feature in response.Features)
             {
                 var currentImageUrls = feature.Attributes.GetNames()
                     .Where(a => a.StartsWith(FeatureAttributes.IMAGE_URL))
                     .Select(k => feature.Attributes[k].ToString());
                 imageUrls.AddRange(currentImageUrls.ToList());
             }
-            var images = await _imageUrlStoreExecutor.GetAllImagesForUrls(imageUrls.ToArray());
+            response.Images = await _imageUrlStoreExecutor.GetAllImagesForUrls(imageUrls.ToArray());
             _logger.LogInformation("Finished getting POIs updates, returning content to client");
-            return new UpdatesResponse
-            {
-                Features = feautres,
-                Images = images
-            };
+            return response;
         }
     }
 }

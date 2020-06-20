@@ -2,6 +2,7 @@
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
@@ -346,8 +347,7 @@ namespace IsraelHiking.API.Services.Poi
                     feature.Geometry = featureFromDb.Geometry;
                 }
             }
-            // set last modified date to be minimal date so that rebuild will override it and client will not store it forever.
-            feature.SetLastModified(DateTime.MinValue);
+            feature.SetLastModified(DateTime.Now);
             await _pointsOfInterestRepository.UpdatePointsOfInterestData(new List<Feature> { feature });
             return feature;
         }
@@ -510,12 +510,18 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public async Task<Feature[]> GetUpdates(DateTime lastMoidifiedDate)
+        public async Task<UpdatesResponse> GetUpdates(DateTime lastMoidifiedDate)
         {
             var results = (lastMoidifiedDate == DateTime.MinValue)
                 ? await _pointsOfInterestRepository.GetAllPointsOfInterest(false)
                 : await _pointsOfInterestRepository.GetPointsOfInterestUpdates(lastMoidifiedDate);
-            return results.ToArray();
+            var lastModified = await _pointsOfInterestRepository.GetLastSuccessfulRebuildTime();
+            return new UpdatesResponse
+            {
+                Features = results.ToArray(),
+                LastModified = lastModified
+            };
+            
         }
     }
 }

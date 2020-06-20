@@ -1,4 +1,5 @@
 ﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using Microsoft.Extensions.Options;
@@ -23,14 +24,14 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         {
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
-            _gateway = new ElasticSearchGateway(options, new TraceLogger());
+            _gateway = new ElasticSearchGateway(options, new TraceLogger()); 
+            _gateway.Initialize().Wait();
         }
 
         [TestMethod]
         [Ignore]
         public void Search_ShouldReturnResults()
         {
-            _gateway.Initialize();
             var results = _gateway.Search("מנות", "name").Result;
             Assert.AreEqual(10, results.Count);
         }
@@ -39,7 +40,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void SearchWithinPlace_ShouldReturnResults()
         {
-            _gateway.Initialize();
             var placesFeatures = _gateway.SearchPlaces("תמרת", Languages.HEBREW).Result;
             Assert.AreEqual(5, placesFeatures.Count);
             var envolope = placesFeatures.First().Geometry.EnvelopeInternal;
@@ -52,7 +52,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void GetHighways_ShouldReturnResults()
         {
-            _gateway.Initialize();
             var northEast = new Coordinate(35.0516, 31.7553);
             var southWest = new Coordinate(35.0251, 31.7467);
             var results = _gateway.GetHighways(northEast, southWest).Result;
@@ -65,7 +64,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void SetIndex_ShouldReturnResults()
         {
-            _gateway.Initialize();
             _gateway.AddUrl(new ShareUrl {Id = "123", OsmUserId = "789"});
             _ = _gateway.GetUrlsByUser("789").Result;
             _ = _gateway.GetUrlById("123").Result;
@@ -76,7 +74,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void DeleteThenGet_ShouldReturnEmpty()
         {
-            _gateway.Initialize();
             var id = "he_22216";
             var feature = _gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA).Result;
             Assert.IsNotNull(feature);
@@ -91,8 +88,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void GetContainers_ShouldGetSome()
         {
-            _gateway.Initialize();
-
             var features = _gateway.GetContainers(new Coordinate(35.225306, 32.703806)).Result;
 
             Assert.IsTrue(features.Count > 0);
@@ -102,7 +97,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void GetPoisBySource_ShouldGetThem()
         {
-            _gateway.Initialize();
             var tasks = new List<Task<List<Feature>>>
             {
                 _gateway.GetExternalPoisBySource(Sources.INATURE),
@@ -110,6 +104,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
                 _gateway.GetExternalPoisBySource(Sources.WIKIPEDIA)
             };
             Task.WhenAll(tasks).Wait();
+
             Assert.IsTrue(tasks.Last().Result.Count > 10000);
         }
 
@@ -117,8 +112,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void GetImageByUrl_ShouldGetIt()
         {
-            _gateway.Initialize();
-
             var imageItem = _gateway.GetImageByUrl("https://upload.wikimedia.org/wikipedia/commons/0/05/Israel_Hiking_Map_%D7%97%D7%95%D7%A8%D7%91%D7%AA_%D7%97%D7%A0%D7%95%D7%AA_2.jpeg").Result;
 
             Assert.IsNotNull(imageItem);
@@ -128,8 +121,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void GetImageHash_ShouldGetIt()
         {
-            _gateway.Initialize();
-
             var imageItem = _gateway.GetImageByHash("7F4E8F16362FD1E527FFBC516E0197C7").Result;
 
             Assert.IsNotNull(imageItem);
@@ -139,8 +130,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void GetAllUrls_ShouldGetThem()
         {
-            _gateway.Initialize();
-
             var imageItem = _gateway.GetAllUrls().Result;
 
             Assert.IsNotNull(imageItem);
@@ -150,7 +139,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void UpdatePointOfInterest_ShouldBeAbleToGetRightAfterAdding()
         {
-            _gateway.Initialize();
             var id = "42";
             _gateway.DeletePointOfInterestById("1", Sources.OSM).Wait();
             var feature = new Feature(new Point(0, 0), new AttributesTable
@@ -170,11 +158,35 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void GetPointsOfInterestUpdates_ShouldGetSome()
         {
-            _gateway.Initialize();
-
             var results = _gateway.GetPointsOfInterestUpdates(DateTime.Now.AddDays(-20)).Result;
 
             Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void StoreRebuildContext_ShouldStore()
+        {
+            _gateway.StoreRebuildContext(new RebuildContext
+            {
+                StartTime = DateTime.Now.AddDays(-5),
+                Succeeded = true,
+                ErrorMessage = string.Empty,
+                Request = new UpdateRequest
+                {
+                    PointsOfInterest = true,
+                    AllExternalSources = true,
+                }
+            }).Wait();
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void GetLastSuccessfulRebuildTime_ShouldSGetIt()
+        {
+            var results = _gateway.GetLastSuccessfulRebuildTime().Result;
+
+            Assert.IsTrue(results > DateTime.MinValue);
         }
     }
 }

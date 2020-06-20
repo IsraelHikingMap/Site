@@ -38,6 +38,7 @@ interface IImageItem {
 interface IUpdatesResponse {
     features: GeoJSON.Feature<GeoJSON.Geometry>[];
     images: IImageItem[];
+    lastModified: Date;
 }
 
 export interface IPoiSocialLinks {
@@ -197,17 +198,14 @@ export class PoiService {
                 // don't send a request that is too big to the server by mistake
                 return;
             }
-            // just to be on the safe side - reduce 6 hours.
-            lastModified.setHours(lastModified.getHours() - 6);
             let updates = await this.httpClient.get(Urls.poiUpdates + lastModified.toISOString())
                 .pipe(timeout(60000)).toPromise() as IUpdatesResponse;
             this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()}, got: ${updates.features.length}`);
-            let latestUpdate = this.getLastModifiedFromFeatures(lastModified, updates.features);
             let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => f.properties.poiId);
             this.databaseService.storePois(updates.features);
             this.databaseService.deletePois(deletedIds);
-            this.loggingService.info(`[POIs] Updating last modified to: ${latestUpdate}`);
-            this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: latestUpdate }));
+            this.loggingService.info(`[POIs] Updating last modified to: ${updates.lastModified}`);
+            this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: updates.lastModified }));
             this.loggingService.info(`[POIs] Updating POIs for clustering from database: ${updates.features.length}`);
             await this.rebuildPois();
             this.loggingService.info(`[POIs] Updated pois for clustering: ${this.poisGeojson.features.length}`);

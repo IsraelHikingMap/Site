@@ -174,37 +174,57 @@ namespace IsraelHiking.API.Services.Osm
         public async Task Rebuild(UpdateRequest request)
         {
             // Order do matters in the sequence
-            if (request.AllExternalSources)
+            var rebuildContext = new RebuildContext
             {
-                await UpdateExternalSources();
-            }
-            if (request.UpdateOsmFile || request.DownloadOsmFile)
+                StartTime = DateTime.Now,
+                Request = request,
+                Succeeded = true
+            };
+            try
             {
-                await _osmLatestFileFetcherExecutor.Update(request.DownloadOsmFile, request.UpdateOsmFile);
+                if (request.AllExternalSources)
+                {
+                    await UpdateExternalSources();
+                }
+                if (request.UpdateOsmFile || request.DownloadOsmFile)
+                {
+                    await _osmLatestFileFetcherExecutor.Update(request.DownloadOsmFile, request.UpdateOsmFile);
+                }
+                if (request.Highways)
+                {
+                    await RebuildHighways();
+                }
+                if (request.PointsOfInterest)
+                {
+                    await RebuildPointsOfInterest(rebuildContext);
+                }
+                if (request.Images)
+                {
+                    await RebuildImages();
+                }
+                if (request.SiteMap)
+                {
+                    await RebuildSiteMap();
+                }
+                if (request.OfflinePoisFile)
+                {
+                    await RebuildOfflinePoisFile(rebuildContext);
+                }
             }
-            if (request.Highways)
+            catch (Exception ex)
             {
-                await RebuildHighways();
+                rebuildContext.Succeeded = false;
+                rebuildContext.ErrorMessage = ex.Message;
+                _logger.LogError(ex, "Failed rebuilding databases");
             }
-            if (request.PointsOfInterest)
+            finally
             {
-                await RebuildPointsOfInterest();
+                await _pointsOfInterestRepository.StoreRebuildContext(rebuildContext);
             }
-            if (request.Images)
-            {
-                await RebuildImages();
-            }
-            if (request.SiteMap)
-            {
-                await RebuildSiteMap();
-            }
-            if (request.OfflinePoisFile)
-            {
-                await RebuildOfflinePoisFile();
-            }
+            
         }
 
-        private async Task RebuildPointsOfInterest()
+        private async Task RebuildPointsOfInterest(RebuildContext rebuildContext)
         {
             _logger.LogInformation("Starting rebuilding POIs database.");
             var osmFeaturesTask = _pointsOfInterestProvider.GetAll();
@@ -214,7 +234,7 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation("Adding deleted features to new ones");
             var exitingFeatures = await _pointsOfInterestRepository.GetAllPointsOfInterest(true);
             var newFeaturesDictionary = features.ToDictionary(f => f.GetId(), f => f);
-            var deletedFeatures = exitingFeatures.Where(f => !newFeaturesDictionary.ContainsKey(f.GetId())).ToArray();
+            var deletedFeatures = exitingFeatures.Where(f => f.GetLastModified() <= rebuildContext.StartTime && !newFeaturesDictionary.ContainsKey(f.GetId())).ToArray();
             foreach (var deletedFeatureToMark in deletedFeatures)
             {
                 if (!deletedFeatureToMark.Attributes.Exists(FeatureAttributes.POI_DELETED))
@@ -225,7 +245,13 @@ namespace IsraelHiking.API.Services.Osm
                 }
             }
             _logger.LogInformation("Added deleted features to new ones: " + deletedFeatures.Length);
-            await _pointsOfInterestRepository.UpdatePointsOfInterestZeroDownTime(features.Concat(deletedFeatures).ToList());
+            await _pointsOfInterestRepository.StorePointsOfInterestDataToSecondaryIndex(features.Concat(deletedFeatures).ToList());
+            _logger.LogInformation("Getting all features added since rebuild started: " + rebuildContext.StartTime.ToLongTimeString());
+            var addedFeaturesAfterRebuildStart = await _pointsOfInterestRepository.GetPointsOfInterestUpdates(rebuildContext.StartTime);
+            _logger.LogInformation("Got all features added since rebuild started: " + addedFeaturesAfterRebuildStart.Count);
+            await _pointsOfInterestRepository.StorePointsOfInterestDataToSecondaryIndex(addedFeaturesAfterRebuildStart);
+            _logger.LogInformation("Finished storing all features");
+            await _pointsOfInterestRepository.SwitchPointsOfInterestIndices();
             _logger.LogInformation("Finished rebuilding POIs database.");
         }
 
@@ -263,10 +289,11 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation("Finished rebuilding sitemap.");
         }
 
-        private async Task RebuildOfflinePoisFile()
+        private async Task RebuildOfflinePoisFile(RebuildContext context)
         {
-            _logger.LogInformation("Starting rebuilding offline pois file.");
+            _logger.LogInformation($"Starting rebuilding offline pois file for date: {context.StartTime.ToInvariantString()}");
             var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
+            features = features.Where(f => f.GetLastModified() <= context.StartTime).ToList();
             _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
             _logger.LogInformation("Finished rebuilding offline pois file.");
         }

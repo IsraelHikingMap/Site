@@ -132,6 +132,7 @@ namespace IsraelHiking.DataAccess
         private const string CUSTOM_USER_LAYERS = "custom_user_layers";
         private const string EXTERNAL_POIS = "external_pois";
         private const string IMAGES = "images";
+        private const string REBUILD_LOG = "rebuild_log";
 
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
@@ -286,19 +287,20 @@ namespace IsraelHiking.DataAccess
             return response.Documents.ToList();
         }
 
-        private async Task UpdateZeroDownTime(string index1, string index2, string alias, Func<string, Task> createIndexDelegate, List<Feature> features)
+        private (string currentIndex, string newIndex) GetIndicesStatus(string index1, string index2, string alias)
         {
             var currentIndex = index1;
             var newIndex = index2;
-            if (_elasticClient.IndexExists(index2).Exists)
+            if (_elasticClient.GetIndicesPointingToAlias(alias).Contains(index2))
             {
                 currentIndex = index2;
                 newIndex = index1;
             }
+            return (currentIndex, newIndex);
+        }
 
-            await createIndexDelegate(newIndex);
-            await UpdateUsingPaging(features, newIndex);
-
+        private async Task SwitchIndices(string currentIndex, string newIndex, string alias)
+        {
             await _elasticClient.AliasAsync(a => a
                 .Remove(i => i.Alias(alias).Index(currentIndex))
                 .Add(i => i.Alias(alias).Index(newIndex))
@@ -306,13 +308,14 @@ namespace IsraelHiking.DataAccess
             await _elasticClient.DeleteIndexAsync(currentIndex);
         }
 
-        public Task UpdateHighwaysZeroDownTime(List<Feature> highways)
+        public async Task UpdateHighwaysZeroDownTime(List<Feature> highways)
         {
-            return UpdateZeroDownTime(OSM_HIGHWAYS_INDEX1,
-                OSM_HIGHWAYS_INDEX2,
-                OSM_HIGHWAYS_ALIAS,
-                CreateHighwaysIndex,
-                highways);
+            var (currentIndex, newIndex) = GetIndicesStatus(OSM_HIGHWAYS_INDEX1, OSM_HIGHWAYS_INDEX2, OSM_HIGHWAYS_ALIAS);
+
+            await CreateHighwaysIndex(newIndex);
+            await UpdateUsingPaging(highways, newIndex);
+
+            await SwitchIndices(currentIndex, newIndex, OSM_HIGHWAYS_ALIAS);
         }
 
         public async Task DeleteHighwaysById(string id)
@@ -321,13 +324,17 @@ namespace IsraelHiking.DataAccess
             await _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_HIGHWAYS_ALIAS));
         }
 
-        public Task UpdatePointsOfInterestZeroDownTime(List<Feature> pointsOfInterest)
+        public async Task StorePointsOfInterestDataToSecondaryIndex(List<Feature> pointsOfInterest)
         {
-            return UpdateZeroDownTime(OSM_POIS_INDEX1,
-                OSM_POIS_INDEX2,
-                OSM_POIS_ALIAS,
-                CreatePointsOfInterestIndex,
-                pointsOfInterest);
+            var (_, newIndex) = GetIndicesStatus(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS);
+            await CreatePointsOfInterestIndex(newIndex);
+            await UpdateUsingPaging(pointsOfInterest, newIndex);
+        }
+
+        public async Task SwitchPointsOfInterestIndices()
+        {
+            var (currentIndex, newIndex) = GetIndicesStatus(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS);
+            await SwitchIndices(currentIndex, newIndex, OSM_POIS_ALIAS);
         }
 
         public Task UpdateHighwaysData(List<Feature> features)
@@ -743,5 +750,24 @@ namespace IsraelHiking.DataAccess
             }
         }
 
+        public Task StoreRebuildContext(RebuildContext context)
+        {
+            return _elasticClient.IndexAsync(context, r => r.Index(REBUILD_LOG).Id(context.StartTime.ToString("o")));
+        }
+
+        public async Task<DateTime> GetLastSuccessfulRebuildTime()
+        {
+            const string MAX_DATE = "max_date";
+            var response = await _elasticClient.SearchAsync<RebuildContext>(s => s.Index(REBUILD_LOG)
+                    .Size(1)
+                    .Query(q => q.Term(t => t.Field(r => r.Succeeded).Value(true)))
+                    .Aggregations(a => a.Max(MAX_DATE, m => m.Field(r => r.StartTime)))
+                    );
+            if (DateTime.TryParse(response.Aggs.Max(MAX_DATE).ValueAsString, out var date))
+            {
+                return date;
+            }
+            return DateTime.MinValue;
+        }
     }
 }
