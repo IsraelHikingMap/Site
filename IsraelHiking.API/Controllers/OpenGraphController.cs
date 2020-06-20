@@ -14,14 +14,14 @@ namespace IsraelHiking.API.Controllers
     public class OpenGraphController : ControllerBase
     {
         private readonly ILogger _logger;
-        private readonly IRepository _repository;
+        private readonly IShareUrlsRepository _repository;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="repository"></param>
         /// <param name="logger"></param>
-        public OpenGraphController(IRepository repository, 
+        public OpenGraphController(IShareUrlsRepository repository, 
             ILogger logger)
         {
             _repository = repository;

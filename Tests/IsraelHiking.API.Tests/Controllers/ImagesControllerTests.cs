@@ -18,14 +18,14 @@ namespace IsraelHiking.API.Tests.Controllers
     public class ImagesControllerTests
     {
         private ImagesController _controller;
-        private IRepository _repository;
+        private IShareUrlsRepository _repository;
         private IImageCreationService _imageCreationService;
         private IImgurGateway _imgurGateway;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _repository = Substitute.For<IRepository>();
+            _repository = Substitute.For<IShareUrlsRepository>();
             _imageCreationService = Substitute.For<IImageCreationService>();
             _imgurGateway = Substitute.For<IImgurGateway>();
             var options = Substitute.For<IOptions<ConfigurationData>>();

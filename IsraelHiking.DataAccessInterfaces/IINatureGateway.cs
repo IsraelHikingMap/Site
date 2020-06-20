@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
-    public interface IINatureGateway
+    public interface IINatureGateway : IInitializable
     {
-        Task Initialize();
-
         Task<List<Feature>> GetAll();
 
         Task<List<Feature>> GetUpdates(DateTime lastUpdated);

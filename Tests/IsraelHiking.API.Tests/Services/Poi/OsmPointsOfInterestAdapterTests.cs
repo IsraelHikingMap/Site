@@ -7,6 +7,7 @@ using IsraelHiking.Common.DataContainer;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -29,6 +30,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IClientsFactory _clientsFactory;
         private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private IOsmRepository _osmRepository;
+        private IPointsOfInterestRepository _pointsOfInterestRepository;
         private IWikipediaGateway _wikipediaGateway;
         private IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private ITagsHelper _tagsHelper;
@@ -46,7 +48,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _osmRepository = Substitute.For<IOsmRepository>();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
             _latestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
-            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _clientsFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileFetcherExecutor, _tagsHelper, _options, Substitute.For<ILogger>());
+            _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
+            _adapter = new OsmPointsOfInterestAdapter(_pointsOfInterestRepository, _elevationDataStorage, _clientsFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileFetcherExecutor, _tagsHelper, _options, Substitute.For<ILogger>());
         }
 
         private IAuthClient SetupHttpFactory()
@@ -59,7 +62,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetPointsOfInterest_FilterRelevant_ShouldReturnEmptyElist()
         {
-            _elasticSearchGateway.GetPointsOfInterest(null, null, null, null).Returns(new List<Feature>
+            _pointsOfInterestRepository.GetPointsOfInterest(null, null, null, null).Returns(new List<Feature>
             {
                 new Feature { Geometry = new Point(null), Attributes = new AttributesTable() }
             });
@@ -76,7 +79,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var feature = GetValidFeature("poiId", Sources.OSM);
             feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
             feature.Attributes.Add("name:en", name);
-            _elasticSearchGateway.GetPointsOfInterest(null, null, null, "en").Returns(new List<Feature> { feature });
+            _pointsOfInterestRepository.GetPointsOfInterest(null, null, null, "en").Returns(new List<Feature> { feature });
 
             var result = _adapter.GetPointsOfInterest(null, null, null, "en").Result;
 
@@ -91,7 +94,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
             feature.Attributes.Add(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
             feature.Attributes.Add(FeatureAttributes.WIKIPEDIA, FeatureAttributes.DESCRIPTION);
-            _elasticSearchGateway.GetPointsOfInterest(null, null, null, "he").Returns(new List<Feature> { feature });
+            _pointsOfInterestRepository.GetPointsOfInterest(null, null, null, "he").Returns(new List<Feature> { feature });
 
             var result = _adapter.GetPointsOfInterest(null, null, null, "he").Result;
 
@@ -104,7 +107,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             var feature = GetValidFeature("poiId", Sources.OSM);
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, string.Empty);
-            _elasticSearchGateway.GetPointsOfInterest(null, null, null, "he").Returns(new List<Feature> { feature });
+            _pointsOfInterestRepository.GetPointsOfInterest(null, null, null, "he").Returns(new List<Feature> { feature });
 
             var result = _adapter.GetPointsOfInterest(null, null, null, "he").Result;
 
@@ -122,7 +125,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.Add(FeatureAttributes.IMAGE_URL + "1", FeatureAttributes.IMAGE_URL + "1");
             feature.Attributes.Add(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
             feature.Attributes.Add(FeatureAttributes.WIKIPEDIA + ":en", "page with space");
-            _elasticSearchGateway.GetPointOfInterestById(poiId, Sources.OSM).Returns(feature);
+            _pointsOfInterestRepository.GetPointOfInterestById(poiId, Sources.OSM).Returns(feature);
             _wikipediaGateway.GetReference("page with space", "en").Returns(new Reference { Url = "page_with_space" });
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainerPoco
@@ -166,7 +169,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var feature = GetValidFeature(poiId, Sources.OSM);
             feature.Attributes.Add(FeatureAttributes.WIKIPEDIA, "en:en:page");
             feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
-            _elasticSearchGateway.GetPointOfInterestById(poiId, Sources.OSM).Returns(feature);
+            _pointsOfInterestRepository.GetPointOfInterestById(poiId, Sources.OSM).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainerPoco { Routes = new List<RouteData>() });
 
@@ -187,7 +190,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.Add(FeatureAttributes.WEBSITE + "1", "website1");
             feature.Attributes.Add(FeatureAttributes.POI_SOURCE_IMAGE_URL + "1", "sourceimage1");
             feature.Attributes.Add(FeatureAttributes.WEBSITE + "2", "website2");
-            _elasticSearchGateway.GetPointOfInterestById(poiId, Sources.OSM).Returns(feature);
+            _pointsOfInterestRepository.GetPointOfInterestById(poiId, Sources.OSM).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainerPoco { Routes = new List<RouteData>() });
 
@@ -216,13 +219,12 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 }
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco {Routes = new List<RouteData>()});
-            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
             _wikipediaGateway.GetReference(Arg.Any<string>(), language).Returns(new Reference { Url = "Some-Url" });
 
             var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, new TokenAndSecret("", ""), language).Result;
 
             Assert.IsNotNull(resutls);
-            _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("תל שלם")));
         }
 
@@ -243,13 +245,12 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 }
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco { Routes = new List<RouteData>() });
-            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
             _wikipediaGateway.GetReference(Arg.Any<string>(), language).Returns(new Reference { Url = "Some-Url" });
 
             var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, new TokenAndSecret("", ""), language).Result;
 
             Assert.IsNotNull(resutls);
-            _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("זוהר")));
         }
 
@@ -275,7 +276,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     new Tag("natural", "cave_entrance"),
                 }
             });
-            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
             var results = _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Result;
 
@@ -303,7 +303,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     new Tag("image1", "imageurl3"),
                 }
             });
-            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
             var results = _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Result;
 
@@ -336,7 +335,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     { FeatureAttributes.DESCRIPTION, "description" }
                 }
             });
-            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
             _wikipediaGateway.GetReference(Arg.Any<string>(), "en").Returns(new Reference { Url = "Some-Url" });
             
             _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Wait();
@@ -365,11 +363,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     new Tag("image1", "imageurl1"),
                 }
             });
-            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
             _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Wait();
 
-            _elasticSearchGateway.DidNotReceive().UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.DidNotReceive().UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.DidNotReceive().CreateChangeset(Arg.Any<TagsCollection>());
             gateway.DidNotReceive().CloseChangeset(Arg.Any<long>());
         }
@@ -406,7 +403,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     {FeatureAttributes.POI_SOURCE, Sources.OSM}
                 })
             };
-            _elasticSearchGateway.GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(), Arg.Any<string>()).Returns(list);
+            _pointsOfInterestRepository.GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(), Arg.Any<string>()).Returns(list);
 
             var results = _adapter.GetClosestPoint(new Coordinate(0,0), Sources.OSM, "").Result;
 

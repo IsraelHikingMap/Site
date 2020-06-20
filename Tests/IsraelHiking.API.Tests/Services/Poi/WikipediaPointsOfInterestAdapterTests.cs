@@ -7,7 +7,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
-using NSubstitute.Routing.AutoValues;
 using System.Collections.Generic;
 
 namespace IsraelHiking.API.Tests.Services.Poi

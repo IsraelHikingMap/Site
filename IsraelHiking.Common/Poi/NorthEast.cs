@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace IsraelHiking.Common.Poi
+﻿namespace IsraelHiking.Common.Poi
 {
     /// <summary>
     /// Return value for elevation request

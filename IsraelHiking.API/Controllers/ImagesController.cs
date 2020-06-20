@@ -23,7 +23,7 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly IImageCreationService _imageCreationService;
         private readonly IImgurGateway _imgurGateway;
-        private readonly IRepository _repository;
+        private readonly IShareUrlsRepository _repository;
         private readonly ConfigurationData _options;
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="imageCreationService"></param>
         /// <param name="imgurGateway"></param>
         /// <param name="options"></param>
-        public ImagesController(IRepository repository,
+        public ImagesController(IShareUrlsRepository repository,
             IImageCreationService imageCreationService,
             IImgurGateway imgurGateway,
             IOptions<ConfigurationData> options)

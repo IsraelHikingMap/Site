@@ -6,6 +6,7 @@ using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
@@ -40,7 +41,7 @@ namespace IsraelHiking.API.Services.Poi
         private readonly ITagsHelper _tagsHelper;
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private readonly IElevationDataStorage _elevationDataStorage;
-        private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly ILogger _logger;
         private readonly MathTransform _wgs84ItmMathTransform;
@@ -49,7 +50,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <summary>
         /// Class constructor
         /// </summary>
-        /// <param name="elasticSearchGateway"></param>
+        /// <param name="pointsOfInterestRepository"></param>
         /// <param name="elevationDataStorage"></param>
         /// <param name="clentsFactory"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
@@ -61,7 +62,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="tagsHelper"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public OsmPointsOfInterestAdapter(IElasticSearchGateway elasticSearchGateway,
+        public OsmPointsOfInterestAdapter(IPointsOfInterestRepository pointsOfInterestRepository,
             IElevationDataStorage elevationDataStorage,
             IClientsFactory clentsFactory,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
@@ -83,7 +84,7 @@ namespace IsraelHiking.API.Services.Poi
             _elevationDataStorage = elevationDataStorage;
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
             _options = options.Value;
-            _elasticSearchGateway = elasticSearchGateway;
+            _pointsOfInterestRepository = pointsOfInterestRepository;
             _dataContainerConverterService = dataContainerConverterService;
             _logger = logger;
         }
@@ -91,7 +92,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public async Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
-            var features = await _elasticSearchGateway.GetPointsOfInterest(northEast, southWest, categories, language);
+            var features = await _pointsOfInterestRepository.GetPointsOfInterest(northEast, southWest, categories, language);
             var points = features.Where(f => f.IsProperPoi(language)).Select(f => ConvertToPoiItem<PointOfInterest>(f, language)).ToArray();
             foreach (var pointOfInterest in points.Where(p => string.IsNullOrWhiteSpace(p.Icon)))
             {
@@ -103,7 +104,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public async Task<PointOfInterestExtended> GetPointOfInterestById(string source, string id, string language)
         {
-            var feature = await _elasticSearchGateway.GetPointOfInterestById(id, source);
+            var feature = await _pointsOfInterestRepository.GetPointOfInterestById(id, source);
             if (feature == null)
             {
                 return null;
@@ -330,7 +331,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 return null;
             }
-            var featureFromDb = await _elasticSearchGateway.GetPointOfInterestById(feature.Attributes[FeatureAttributes.ID].ToString(), Sources.OSM);
+            var featureFromDb = await _pointsOfInterestRepository.GetPointOfInterestById(feature.Attributes[FeatureAttributes.ID].ToString(), Sources.OSM);
             if (featureFromDb != null)
             {
                 foreach (var attributeKey in featureFromDb.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_PREFIX)))
@@ -347,7 +348,7 @@ namespace IsraelHiking.API.Services.Poi
             }
             // set last modified date to be minimal date so that rebuild will override it and client will not store it forever.
             feature.SetLastModified(DateTime.MinValue);
-            await _elasticSearchGateway.UpdatePointsOfInterestData(new List<Feature> { feature });
+            await _pointsOfInterestRepository.UpdatePointsOfInterestData(new List<Feature> { feature });
             return feature;
         }
 
@@ -498,7 +499,7 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<Feature> GetClosestPoint(Coordinate location, string source, string language = "")
         {
             var distance = _options.MergePointsOfInterestThreshold;
-            var results = await _elasticSearchGateway.GetPointsOfInterest(
+            var results = await _pointsOfInterestRepository.GetPointsOfInterest(
                 new Coordinate(location.X + distance, location.Y + distance),
                 new Coordinate(location.X - distance, location.Y - distance),
                 Categories.Points, 
@@ -512,8 +513,8 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<Feature[]> GetUpdates(DateTime lastMoidifiedDate)
         {
             var results = (lastMoidifiedDate == DateTime.MinValue)
-                ? await _elasticSearchGateway.GetAllPointsOfInterest(false)
-                : await _elasticSearchGateway.GetPointsOfInterestUpdates(lastMoidifiedDate);
+                ? await _pointsOfInterestRepository.GetAllPointsOfInterest(false)
+                : await _pointsOfInterestRepository.GetPointsOfInterestUpdates(lastMoidifiedDate);
             return results.ToArray();
         }
     }

@@ -4,7 +4,6 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using NSubstitute;
 using System.Collections.Generic;
 using System.Linq;

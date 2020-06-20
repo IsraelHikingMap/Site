@@ -248,12 +248,13 @@ namespace IsraelHiking.Web
         private void InitializeServices(IServiceProvider serviceProvider)
         {
             var logger = serviceProvider.GetRequiredService<ILogger>();
+            logger.LogInformation("-----------------------------------------------");
             logger.LogInformation("Initializing singleton services");
-            serviceProvider.GetRequiredService<IElasticSearchGateway>().Initialize();
-            serviceProvider.GetRequiredService<IElevationDataStorage>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading elevation data from files."));
-            serviceProvider.GetRequiredService<IWikimediaCommonGateway>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading wikimedia gateway."));
-            serviceProvider.GetRequiredService<IWikipediaGateway>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading wikipedia gateway."));
-            serviceProvider.GetRequiredService<IINatureGateway>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading iNature gateway."));
+            var initializableServices = serviceProvider.GetServices<IInitializable>();
+            foreach (var service in initializableServices)
+            {
+                service.Initialize();
+            }
         }
 
         private string GetBinariesFolder(IServiceProvider serviceProvider)

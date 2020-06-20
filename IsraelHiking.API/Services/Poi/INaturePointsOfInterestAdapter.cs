@@ -1,7 +1,6 @@
 ﻿using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
@@ -20,7 +19,7 @@ namespace IsraelHiking.API.Services.Poi
     public class INaturePointsOfInterestAdapter : IPointsOfInterestAdapter
     {
         private readonly IINatureGateway _iNatureGateway;
-        private readonly IRepository _repository;
+        private readonly IShareUrlsRepository _repository;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly ILogger _logger;
 
@@ -33,7 +32,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="logger"></param>
         public INaturePointsOfInterestAdapter(IDataContainerConverterService dataContainerConverterService,
             IINatureGateway iNatureGateway,
-            IRepository repository,
+            IShareUrlsRepository repository,
             ILogger logger) 
         {
             _iNatureGateway = iNatureGateway;

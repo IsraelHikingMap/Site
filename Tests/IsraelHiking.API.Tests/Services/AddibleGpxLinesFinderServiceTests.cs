@@ -2,7 +2,7 @@
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,7 +18,7 @@ namespace IsraelHiking.API.Tests.Services
     public class AddibleGpxLinesFinderServiceTests
     {
         private IAddibleGpxLinesFinderService _service;
-        private IElasticSearchGateway _elasticSearchGateway;
+        private IHighwaysRepository _highwaysRepository;
         private ConfigurationData _options;
 
         private void SetupHighways(List<LineString> lineStrings = null)
@@ -35,19 +35,19 @@ namespace IsraelHiking.API.Tests.Services
                 highway.Attributes.Add(FeatureAttributes.ID, id.ToString());
                 id++;
             }
-            _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(highways);
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(highways);
         }
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
+            _highwaysRepository = Substitute.For<IHighwaysRepository>();
             _options = new ConfigurationData();
             _options.MinimalProlongLineLength = 0;
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(_options);
             var geometryFactory = new GeometryFactory();
-            _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(geometryFactory), new GpxProlongerExecutor(geometryFactory), new ItmWgs84MathTransfromFactory(), _elasticSearchGateway, optionsProvider, geometryFactory, Substitute.For<ILogger>());
+            _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(geometryFactory), new GpxProlongerExecutor(geometryFactory), new ItmWgs84MathTransfromFactory(), _highwaysRepository, optionsProvider, geometryFactory, Substitute.For<ILogger>());
         }
 
         [TestMethod]

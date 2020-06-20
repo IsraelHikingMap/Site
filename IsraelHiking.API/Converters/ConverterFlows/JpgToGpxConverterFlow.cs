@@ -1,7 +1,6 @@
 ﻿using IsraelHiking.API.Gpx;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.IO;
-using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;

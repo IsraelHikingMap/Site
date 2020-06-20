@@ -3,9 +3,8 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
-    public interface IElevationDataStorage
+    public interface IElevationDataStorage : IInitializable
     {
-        Task Initialize();
         Task<double> GetElevation(Coordinate latLng);
     }
 }

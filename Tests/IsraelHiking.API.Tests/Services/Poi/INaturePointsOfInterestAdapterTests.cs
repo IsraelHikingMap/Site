@@ -1,5 +1,4 @@
 ﻿using IsraelHiking.API.Services.Poi;
-using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
@@ -15,14 +14,14 @@ namespace IsraelHiking.API.Tests.Services.Poi
     {
         private INaturePointsOfInterestAdapter _adapter;
         private IINatureGateway _iNatureGateway;
-        private IRepository _repository;
+        private IShareUrlsRepository _repository;
 
         [TestInitialize]
         public void TestInitialize()
         {
             InitializeSubstitues();
             _iNatureGateway = Substitute.For<IINatureGateway>();
-            _repository = Substitute.For<IRepository>();
+            _repository = Substitute.For<IShareUrlsRepository>();
             _adapter = new INaturePointsOfInterestAdapter(_dataContainerConverterService, _iNatureGateway, _repository, Substitute.For<ILogger>());
         }
 

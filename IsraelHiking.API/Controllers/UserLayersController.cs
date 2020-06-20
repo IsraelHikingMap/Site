@@ -15,13 +15,13 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class UserLayersController : ControllerBase
     {
-        private readonly IRepository _repository;
+        private readonly IUserLayersRepository _repository;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="repository"></param>
-        public UserLayersController(IRepository repository)
+        public UserLayersController(IUserLayersRepository repository)
         {
             _repository = repository;
         }

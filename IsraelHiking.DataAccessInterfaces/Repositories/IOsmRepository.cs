@@ -4,7 +4,7 @@ using OsmSharp.Complete;
 using System.IO;
 using OsmSharp;
 
-namespace IsraelHiking.DataAccessInterfaces
+namespace IsraelHiking.DataAccessInterfaces.Repositories
 {
     public interface IOsmRepository
     {

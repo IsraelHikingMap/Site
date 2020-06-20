@@ -3,7 +3,7 @@ using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using OsmSharp;
@@ -22,7 +22,9 @@ namespace IsraelHiking.API.Services.Osm
     public class DatabasesUpdaterService : IDatabasesUpdaterService
     {
         private readonly INonAuthClient _osmGateway;
-        private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly IExternalSourcesRepository _externalSourcesRepository;
+        private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
+        private readonly IHighwaysRepository _highwaysRepository;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly ITagsHelper _tagsHelper;
         private readonly IOsmRepository _osmRepository;
@@ -38,7 +40,9 @@ namespace IsraelHiking.API.Services.Osm
         /// Service's constructor
         /// </summary>
         /// <param name="clinetsFactory"></param>
-        /// <param name="elasticSearchGateway"></param>
+        /// <param name="externalSourcesRepository"></param>
+        /// <param name="pointsOfInterestRepository"></param>
+        /// <param name="highwaysRepository"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="tagsHelper"></param>
         /// <param name="osmRepository"></param>
@@ -51,7 +55,9 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="externalSourceUpdaterExecutor"></param>
         /// <param name="logger"></param>
         public DatabasesUpdaterService(IClientsFactory clinetsFactory,
-            IElasticSearchGateway elasticSearchGateway,
+            IExternalSourcesRepository externalSourcesRepository,
+            IPointsOfInterestRepository pointsOfInterestRepository,
+            IHighwaysRepository highwaysRepository,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             ITagsHelper tagsHelper, IOsmRepository osmRepository,
             IPointsOfInterestAdapterFactory pointsOfInterestAdapterFactory,
@@ -63,7 +69,9 @@ namespace IsraelHiking.API.Services.Osm
             IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor,
             ILogger logger)
         {
-            _elasticSearchGateway = elasticSearchGateway;
+            _externalSourcesRepository = externalSourcesRepository;
+            _pointsOfInterestRepository = pointsOfInterestRepository;
+            _highwaysRepository = highwaysRepository;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _tagsHelper = tagsHelper;
             _osmRepository = osmRepository;
@@ -95,7 +103,7 @@ namespace IsraelHiking.API.Services.Osm
             var deleteTasks = new List<Task>();
             foreach (var highwaysToRemove in changes.Delete.OfType<Way>())
             {
-                var task = _elasticSearchGateway.DeleteHighwaysById(highwaysToRemove.GetId());
+                var task = _highwaysRepository.DeleteHighwaysById(highwaysToRemove.GetId());
                 deleteTasks.Add(task);
             }
             await Task.WhenAll(deleteTasks);
@@ -110,7 +118,7 @@ namespace IsraelHiking.API.Services.Osm
             }
             var updatedWays = await Task.WhenAll(updateTasks);
             var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(updatedWays.ToList());
-            await _elasticSearchGateway.UpdateHighwaysData(geoJsonHighways);
+            await _highwaysRepository.UpdateHighwaysData(geoJsonHighways);
         }
 
         private async Task UpdatePointsOfInterest(OsmChange changes)
@@ -119,7 +127,7 @@ namespace IsraelHiking.API.Services.Osm
             var relevantTagsDictionary = _tagsHelper.GetAllTags();
             foreach (var poiToRemove in changes.Delete)
             {
-                var task = _elasticSearchGateway.DeleteOsmPointOfInterestById(poiToRemove.GetId(), poiToRemove.TimeStamp);
+                var task = _pointsOfInterestRepository.DeleteOsmPointOfInterestById(poiToRemove.GetId(), poiToRemove.TimeStamp);
                 deleteTasks.Add(task);
             }
             await Task.WhenAll(deleteTasks);
@@ -138,7 +146,7 @@ namespace IsraelHiking.API.Services.Osm
             foreach (var poiToUpdate in changes.Modify
                 .Where(o => IsRelevantPointOfInterest(o, relevantTagsDictionary)))
             {
-                var featureFromDb = await _elasticSearchGateway.GetPointOfInterestById(poiToUpdate.GetId(), Sources.OSM);
+                var featureFromDb = await _pointsOfInterestRepository.GetPointOfInterestById(poiToUpdate.GetId(), Sources.OSM);
                 if (featureFromDb == null)
                 {
                     continue;
@@ -154,7 +162,7 @@ namespace IsraelHiking.API.Services.Osm
                     featureToUpdate.Geometry = featureFromDb.Geometry;
                 }
             }
-            await _elasticSearchGateway.UpdatePointsOfInterestData(features);
+            await _pointsOfInterestRepository.UpdatePointsOfInterestData(features);
         }
 
         private bool IsRelevantPointOfInterest(OsmGeo osm, List<KeyValuePair<string, string>> relevantTagsDictionary)
@@ -201,10 +209,10 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation("Starting rebuilding POIs database.");
             var osmFeaturesTask = _pointsOfInterestProvider.GetAll();
             var sources = _pointsOfInterestAdapterFactory.GetAll().Select(s => s.Source);
-            var externalFeatures = sources.Select(s => _elasticSearchGateway.GetExternalPoisBySource(s)).SelectMany(t => t.Result).ToList();
+            var externalFeatures = sources.Select(s => _externalSourcesRepository.GetExternalPoisBySource(s)).SelectMany(t => t.Result).ToList();
             var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result, externalFeatures);
             _logger.LogInformation("Adding deleted features to new ones");
-            var exitingFeatures = await _elasticSearchGateway.GetAllPointsOfInterest(true);
+            var exitingFeatures = await _pointsOfInterestRepository.GetAllPointsOfInterest(true);
             var newFeaturesDictionary = features.ToDictionary(f => f.GetId(), f => f);
             var deletedFeatures = exitingFeatures.Where(f => !newFeaturesDictionary.ContainsKey(f.GetId())).ToArray();
             foreach (var deletedFeatureToMark in deletedFeatures)
@@ -217,7 +225,7 @@ namespace IsraelHiking.API.Services.Osm
                 }
             }
             _logger.LogInformation("Added deleted features to new ones: " + deletedFeatures.Length);
-            await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features.Concat(deletedFeatures).ToList());
+            await _pointsOfInterestRepository.UpdatePointsOfInterestZeroDownTime(features.Concat(deletedFeatures).ToList());
             _logger.LogInformation("Finished rebuilding POIs database.");
         }
 
@@ -227,7 +235,7 @@ namespace IsraelHiking.API.Services.Osm
             using var stream = _osmLatestFileFetcherExecutor.Get();
             var osmHighways = await _osmRepository.GetAllHighways(stream);
             var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
-            await _elasticSearchGateway.UpdateHighwaysZeroDownTime(geoJsonHighways);
+            await _highwaysRepository.UpdateHighwaysZeroDownTime(geoJsonHighways);
 
             _logger.LogInformation("Finished rebuilding highways database.");
         }
@@ -236,7 +244,7 @@ namespace IsraelHiking.API.Services.Osm
         {
             _logger.LogInformation("Starting rebuilding images database.");
             using var stream = _osmLatestFileFetcherExecutor.Get();
-            var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
+            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
             var featuresUrls = features.SelectMany(f =>
                 f.Attributes.GetNames()
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
@@ -250,7 +258,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildSiteMap()
         {
             _logger.LogInformation("Starting rebuilding sitemap.");
-            var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
+            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
             _pointsOfInterestFilesCreatorExecutor.CreateSiteMapXmlFile(features);
             _logger.LogInformation("Finished rebuilding sitemap.");
         }
@@ -258,7 +266,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildOfflinePoisFile()
         {
             _logger.LogInformation("Starting rebuilding offline pois file.");
-            var features = await _elasticSearchGateway.GetAllPointsOfInterest(false);
+            var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
             _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
             _logger.LogInformation("Finished rebuilding offline pois file.");
         }

@@ -1,7 +1,7 @@
 ﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Geometries;
@@ -22,7 +22,7 @@ namespace IsraelHiking.API.Services
         private readonly IGpxProlongerExecutor _gpxProlongerExecutor;
         private readonly MathTransform _itmWgs84MathTransform;
         private readonly MathTransform _wgs84ItmMathTransform;
-        private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly IHighwaysRepository _highwaysRepository;
         private readonly GeometryFactory _geometryFactory;
         private readonly ILogger _logger;
         private readonly ConfigurationData _options;
@@ -33,14 +33,14 @@ namespace IsraelHiking.API.Services
         /// <param name="gpxLoopsSplitterExecutor"></param>
         /// <param name="gpxProlongerExecutor"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
-        /// <param name="elasticSearchGateway"></param>
+        /// <param name="highwaysRepository"></param>
         /// <param name="options"></param>
         /// <param name="geometryFactory"></param>
         /// <param name="logger"></param>
         public AddibleGpxLinesFinderService(IGpxLoopsSplitterExecutor gpxLoopsSplitterExecutor,
             IGpxProlongerExecutor gpxProlongerExecutor,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
-            IElasticSearchGateway elasticSearchGateway,
+            IHighwaysRepository highwaysRepository,
             IOptions<ConfigurationData> options,
             GeometryFactory geometryFactory,
             ILogger logger)
@@ -49,7 +49,7 @@ namespace IsraelHiking.API.Services
             _gpxProlongerExecutor = gpxProlongerExecutor;
             _itmWgs84MathTransform = itmWgs84MathTransfromFactory.Create();
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
-            _elasticSearchGateway = elasticSearchGateway;
+            _highwaysRepository = highwaysRepository;
             _geometryFactory = geometryFactory;
             _logger = logger;
             _options = options.Value;
@@ -289,7 +289,7 @@ namespace IsraelHiking.API.Services
         {
             var northEast = _itmWgs84MathTransform.Transform(gpxItmLine.Coordinates.Max(c => c.X) + tolerance, gpxItmLine.Coordinates.Max(c => c.Y) + tolerance);
             var southWest = _itmWgs84MathTransform.Transform(gpxItmLine.Coordinates.Min(c => c.X) - tolerance, gpxItmLine.Coordinates.Min(c => c.Y) - tolerance);
-            var highways = await _elasticSearchGateway.GetHighways(new Coordinate(northEast.x, northEast.y), new Coordinate(southWest.x, southWest.y));
+            var highways = await _highwaysRepository.GetHighways(new Coordinate(northEast.x, northEast.y), new Coordinate(southWest.x, southWest.y));
             return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates, highway.GetOsmId())).ToList();
         }
 

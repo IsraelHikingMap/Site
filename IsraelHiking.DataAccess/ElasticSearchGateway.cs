@@ -3,6 +3,7 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Nest;
@@ -108,7 +109,15 @@ namespace IsraelHiking.DataAccess
         }
     }
 
-    public class ElasticSearchGateway : IElasticSearchGateway
+    public class ElasticSearchGateway :
+        IInitializable,
+        IPointsOfInterestRepository,
+        IHighwaysRepository,
+        ISearchRepository,
+        IUserLayersRepository,
+        IImagesRepository,
+        IExternalSourcesRepository,
+        IShareUrlsRepository
     {
         private const int PAGE_SIZE = 10000;
 
@@ -135,42 +144,44 @@ namespace IsraelHiking.DataAccess
             _logger = logger;
         }
 
-        public void Initialize()
+        public Task Initialize()
         {
-            var uri = _options.ElasticsearchServerAddress;
-            _logger.LogInformation("Initialing elastic search with uri: " + uri);
-            var pool = new SingleNodeConnectionPool(new Uri(uri));
-            var connectionString = new ConnectionSettings(
-                pool,
-                new HttpConnection(),
-                new SerializerFactory(s => new GeoJsonNetSerializer(s)))
-                .PrettyJson();
-            _elasticClient = new ElasticClient(connectionString);
-            if (_elasticClient.IndexExists(OSM_POIS_INDEX1).Exists == false &&
-                _elasticClient.IndexExists(OSM_POIS_INDEX2).Exists == false)
+            return Task.Run(() =>
             {
-                CreatePointsOfInterestIndex(OSM_POIS_INDEX1);
-                _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_POIS_ALIAS).Index(OSM_POIS_INDEX1)));
-            }
-            if (_elasticClient.IndexExists(OSM_HIGHWAYS_INDEX1).Exists == false &&
-                _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists == false)
-            {
-                CreateHighwaysIndex(OSM_HIGHWAYS_INDEX1);
-                _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_HIGHWAYS_ALIAS).Index(OSM_HIGHWAYS_INDEX1)));
-            }
-            if (_elasticClient.IndexExists(SHARES).Exists == false)
-            {
-                _elasticClient.CreateIndex(SHARES);
-            }
-            if (_elasticClient.IndexExists(CUSTOM_USER_LAYERS).Exists == false)
-            {
-                _elasticClient.CreateIndex(CUSTOM_USER_LAYERS);
-            }
-            if (_elasticClient.IndexExists(IMAGES).Exists == false)
-            {
-                CreateImagesIndex();
-            }
-            _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
+                var uri = _options.ElasticsearchServerAddress;
+                var pool = new SingleNodeConnectionPool(new Uri(uri));
+                var connectionString = new ConnectionSettings(
+                    pool,
+                    new HttpConnection(),
+                    new SerializerFactory(s => new GeoJsonNetSerializer(s)))
+                    .PrettyJson();
+                _elasticClient = new ElasticClient(connectionString);
+                if (_elasticClient.IndexExists(OSM_POIS_INDEX1).Exists == false &&
+                    _elasticClient.IndexExists(OSM_POIS_INDEX2).Exists == false)
+                {
+                    CreatePointsOfInterestIndex(OSM_POIS_INDEX1);
+                    _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_POIS_ALIAS).Index(OSM_POIS_INDEX1)));
+                }
+                if (_elasticClient.IndexExists(OSM_HIGHWAYS_INDEX1).Exists == false &&
+                    _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists == false)
+                {
+                    CreateHighwaysIndex(OSM_HIGHWAYS_INDEX1);
+                    _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_HIGHWAYS_ALIAS).Index(OSM_HIGHWAYS_INDEX1)));
+                }
+                if (_elasticClient.IndexExists(SHARES).Exists == false)
+                {
+                    _elasticClient.CreateIndex(SHARES);
+                }
+                if (_elasticClient.IndexExists(CUSTOM_USER_LAYERS).Exists == false)
+                {
+                    _elasticClient.CreateIndex(CUSTOM_USER_LAYERS);
+                }
+                if (_elasticClient.IndexExists(IMAGES).Exists == false)
+                {
+                    CreateImagesIndex();
+                }
+                _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
+            });
         }
 
         private List<T> GetAllItemsByScrolling<T>(ISearchResponse<T> response) where T: class

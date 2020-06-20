@@ -1,7 +1,6 @@
 ﻿using IsraelHiking.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
-using System;
 using System.Linq;
 
 namespace IsraelHiking.DataAccess.Tests

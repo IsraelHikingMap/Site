@@ -1,7 +1,4 @@
 ﻿using NetTopologySuite.Features;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace IsraelHiking.Common.Api
 {

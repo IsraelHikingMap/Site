@@ -42,6 +42,7 @@ namespace IsraelHiking.DataAccess
                 _wikiSites[language] = new WikiSite(wikiClient, new SiteOptions($"https://{language}.wikipedia.org/w/api.php"));
                 await _wikiSites[language].Initialization;
             }
+            _logger.LogInformation("Finished initializing Wikipedia service");
         }
 
         public async Task<List<Feature>> GetByPagesTitles(string[] titles, string language)

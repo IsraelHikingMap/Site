@@ -22,7 +22,7 @@ namespace IsraelHiking.API.Tests.Services
         private NonApiMiddleware _middleware;
         private IWebHostEnvironment _hostingEnvironment;
         private IServiceProvider _serviceProvider;
-        private IRepository _repository;
+        private IShareUrlsRepository _repository;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
 
         [TestInitialize]
@@ -30,7 +30,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             _hostingEnvironment = Substitute.For<IWebHostEnvironment>();
             _serviceProvider = Substitute.For<IServiceProvider>();
-            _repository = Substitute.For<IRepository>();
+            _repository = Substitute.For<IShareUrlsRepository>();
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
             var config = new ConfigurationData();
             var options = Substitute.For<IOptions<ConfigurationData>>();

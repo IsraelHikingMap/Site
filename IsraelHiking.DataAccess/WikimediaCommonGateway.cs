@@ -51,6 +51,7 @@ namespace IsraelHiking.DataAccess
             {
                 _logger.LogError("Wikimedia user is empty!");
             }
+            _logger.LogInformation("Finished initializing Wikimedia common service");
         }
 
         public async Task Initialize()

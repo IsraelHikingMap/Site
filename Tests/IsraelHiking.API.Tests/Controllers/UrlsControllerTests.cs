@@ -21,14 +21,14 @@ namespace IsraelHiking.API.Tests.Controllers
     public class UrlsControllerTests
     {
         private UrlsController _controller;
-        private IRepository _repository;
+        private IShareUrlsRepository _repository;
         private IDataContainerConverterService _containerConverterService;
         private IImgurGateway _imgurGateway;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _repository = Substitute.For<IRepository>();
+            _repository = Substitute.For<IShareUrlsRepository>();
             _containerConverterService = Substitute.For<IDataContainerConverterService>();
             _imgurGateway = Substitute.For<IImgurGateway>();
             _controller = new UrlsController(_repository, _containerConverterService, new Base64ImageStringToFileConverter(), _imgurGateway, Substitute.For<ILogger>());

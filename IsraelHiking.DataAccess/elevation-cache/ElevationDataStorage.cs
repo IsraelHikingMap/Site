@@ -31,15 +31,19 @@ namespace IsraelHiking.DataAccess
             _initializationTaskPerLatLng = new ConcurrentDictionary<Coordinate, Task>();
         }
 
-        public Task Initialize()
+        public async Task Initialize()
         {
             if (_fileProvider.GetDirectoryContents(ELEVATION_CACHE).Any() == false)
             {
-                _logger.LogError($"!!! The folder: {ELEVATION_CACHE} does not exists, please change the BinariesFolder key in the configuration file !!!");
-                return Task.CompletedTask;
+                _logger.LogError($"Elevation service initialization: The folder: {ELEVATION_CACHE} does not exists, please change the BinariesFolder key in the configuration file");
+                return;
             }
             var hgtZipFiles = _fileProvider.GetDirectoryContents(ELEVATION_CACHE);
-            _logger.LogInformation("Found " + hgtZipFiles.Count() + " files in: " + _fileProvider.GetFileInfo(ELEVATION_CACHE).PhysicalPath);
+            if (!hgtZipFiles.Any())
+            {
+                _logger.LogError($"Elevation service initialization: There are no file in folder: {ELEVATION_CACHE}");
+                return;
+            }
             foreach (var hgtZipFile in hgtZipFiles)
             {
                 var match = HGT_NAME.Match(hgtZipFile.Name);
@@ -57,7 +61,6 @@ namespace IsraelHiking.DataAccess
 
                 _initializationTaskPerLatLng[key] = Task.Run(() =>
                 {
-                    _logger.LogInformation("Reading file " + hgtZipFile.Name);
                     var byteArray = GetByteArrayFromZip(hgtZipFile);
                     if (byteArray == null)
                     {
@@ -79,11 +82,11 @@ namespace IsraelHiking.DataAccess
                         elevationArray[(byteIndex / 2) / samples, (byteIndex / 2) % samples] = currentElevation;
                     }
                     _elevationData[key] = elevationArray;
-                    _logger.LogInformation("Finished reading file " + hgtZipFile.Name);
                 });
             }
 
-            return Task.WhenAll(_initializationTaskPerLatLng.Values);
+            await Task.WhenAll(_initializationTaskPerLatLng.Values);
+            _logger.LogInformation($"Finished initializing elevation service, Found {hgtZipFiles.Count()} files.");
         }
 
         /// <summary>

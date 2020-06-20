@@ -24,7 +24,7 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class UrlsController : ControllerBase
     {
-        private readonly IRepository _repository;
+        private readonly IShareUrlsRepository _repository;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
         private readonly IImgurGateway _imgurGateway;
@@ -38,7 +38,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="base64ImageConverter"></param>
         /// <param name="imgurGateway"></param>
         /// <param name="logger"></param>
-        public UrlsController(IRepository repository,
+        public UrlsController(IShareUrlsRepository repository,
             IDataContainerConverterService dataContainerConverterService,
             IBase64ImageStringToFileConverter base64ImageConverter,
             IImgurGateway imgurGateway,

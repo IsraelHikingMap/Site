@@ -2,7 +2,7 @@
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Services.Osm
     /// <inheritdoc/>
     public class OsmLineAdderService : IOsmLineAdderService
     {
-        private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly IHighwaysRepository _highwaysRepository;
         private readonly MathTransform _itmWgs84MathTransform;
         private readonly MathTransform _wgs84ItmMathTransform;
         private readonly IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
@@ -33,20 +33,20 @@ namespace IsraelHiking.API.Services.Osm
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="elasticSearchGateway"></param>
+        /// <param name="highwaysRepository"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="options"></param>
         /// <param name="geoJsonPreprocessorExecutor"></param>
         /// <param name="osmApiClientsFactory"></param>
         /// <param name="geometryFactory"></param>
-        public OsmLineAdderService(IElasticSearchGateway elasticSearchGateway,
+        public OsmLineAdderService(IHighwaysRepository highwaysRepository,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IOptions<ConfigurationData> options,
             IOsmGeoJsonPreprocessorExecutor geoJsonPreprocessorExecutor,
             IClientsFactory osmApiClientsFactory,
             GeometryFactory geometryFactory)
         {
-            _elasticSearchGateway = elasticSearchGateway;
+            _highwaysRepository = highwaysRepository;
             _itmWgs84MathTransform = itmWgs84MathTransfromFactory.Create();
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
             _options = options.Value;
@@ -232,7 +232,7 @@ namespace IsraelHiking.API.Services.Osm
             var northEastLatLon = _itmWgs84MathTransform.Transform(northEast.x, northEast.y);
             var southWestLatLon = _itmWgs84MathTransform.Transform(southWest.x, southWest.y);
 
-            var highways = await _elasticSearchGateway.GetHighways(new Coordinate(northEastLatLon.x, northEastLatLon.y), 
+            var highways = await _highwaysRepository.GetHighways(new Coordinate(northEastLatLon.x, northEastLatLon.y), 
                 new Coordinate(southWestLatLon.x, southWestLatLon.y));
             return highways.ToList();
         }
@@ -291,7 +291,7 @@ namespace IsraelHiking.API.Services.Osm
             var tasksList = wayIds.Select(wayId => _osmGateway.GetCompleteWay(wayId.Value)).ToList();
             var newlyaddedWays = await Task.WhenAll(tasksList);
             var newlyHighwaysFeatures = _geoJsonPreprocessorExecutor.Preprocess(newlyaddedWays.ToList());
-            await _elasticSearchGateway.UpdateHighwaysData(newlyHighwaysFeatures);
+            await _highwaysRepository.UpdateHighwaysData(newlyHighwaysFeatures);
         }
 
         private string CreateCommentFromTags(Dictionary<string, string> tags)

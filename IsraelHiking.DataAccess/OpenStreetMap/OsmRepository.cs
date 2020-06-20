@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IsraelHiking.DataAccessInterfaces;
 using OsmSharp.Complete;
 using OsmSharp.Streams;
 using OsmSharp.Streams.Complete;
@@ -10,6 +9,7 @@ using System.IO;
 using IsraelHiking.Common.Extensions;
 using OsmSharp;
 using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 
 namespace IsraelHiking.DataAccess.OpenStreetMap
 {

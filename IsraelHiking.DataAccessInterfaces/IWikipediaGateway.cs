@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
-    public interface IWikipediaGateway
+    public interface IWikipediaGateway: IInitializable
     {
-        Task Initialize();
         Task<List<Feature>> GetByBoundingBox(Coordinate sourhWest, Coordinate northEast, string language);
         Reference GetReference(string title, string language);
         Task<List<Feature>> GetByPagesTitles(string[] titles, string language);

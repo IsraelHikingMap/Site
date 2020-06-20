@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using IsraelHiking.Common.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services.Poi

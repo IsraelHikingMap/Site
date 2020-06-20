@@ -7,10 +7,8 @@ using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using ProjNet.CoordinateSystems.Transformations;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Executors

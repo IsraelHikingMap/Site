@@ -3,7 +3,7 @@ using IsraelHiking.API.Converters.CoordinatesParsers;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
-using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -19,18 +19,18 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class SearchController : ControllerBase
     {
-        private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly ISearchRepository _searchRepository;
         private readonly IEnumerable<ICoordinatesParser> _coordinatesParsers;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="elasticSearchGateway"></param>
+        /// <param name="searchRepository"></param>
         /// <param name="coordinatesParsers"></param>
-        public SearchController(IElasticSearchGateway elasticSearchGateway,
+        public SearchController(ISearchRepository searchRepository,
             IEnumerable<ICoordinatesParser> coordinatesParsers)
         {
-            _elasticSearchGateway = elasticSearchGateway;
+            _searchRepository = searchRepository;
             _coordinatesParsers = coordinatesParsers;
         }
 
@@ -56,16 +56,16 @@ namespace IsraelHiking.API.Controllers
                 var splitted = term.Split(',');
                 var place = splitted.Last().Trim();
                 term = splitted.First().Trim();
-                var placesFeatures = await _elasticSearchGateway.SearchPlaces(place, language);
+                var placesFeatures = await _searchRepository.SearchPlaces(place, language);
                 if (placesFeatures.Any())
                 {
                     var envolope = placesFeatures.First().Geometry.EnvelopeInternal;
-                    var featuresWithinPlaces = await _elasticSearchGateway.SearchByLocation(
+                    var featuresWithinPlaces = await _searchRepository.SearchByLocation(
                         new Coordinate(envolope.MaxX, envolope.MaxY), new Coordinate(envolope.MinX, envolope.MinY), term, language);
                     return await Task.WhenAll(featuresWithinPlaces.OfType<IFeature>().ToList().Select(f => ConvertFromFeature(f,language)));
                 }
             }
-            var features = await _elasticSearchGateway.Search(term, language);
+            var features = await _searchRepository.Search(term, language);
             return await Task.WhenAll(features.OfType<IFeature>().ToList().Select(f => ConvertFromFeature(f, language)));
         }
 
@@ -91,7 +91,7 @@ namespace IsraelHiking.API.Controllers
         private async Task<string> GetDisplayName(IFeature feature, string language, string title)
         {
             var displayName = title;
-            var containers = await _elasticSearchGateway.GetContainers(feature.Geometry.Coordinate);
+            var containers = await _searchRepository.GetContainers(feature.Geometry.Coordinate);
             var featureGeometry = feature.Geometry.GetGeometryN(0);
             var container = containers.Where(c =>
                     c.Attributes[FeatureAttributes.ID] != feature.Attributes[FeatureAttributes.ID] &&
