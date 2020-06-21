@@ -159,20 +159,27 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.purchaseService.order();
     }
 
-    public downloadOfflineMaps() {
+    public async downloadOfflineMaps() {
         let userInfo = this.ngRedux.getState().userState.userInfo;
         if (userInfo == null || !userInfo.id) {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
+
+        let fileNames = await this.getFilesToDownloadDictionary();
+        if (Object.keys(fileNames).length === 0) {
+            this.loggingService.info("All offline files are up-to-date");
+            this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
+            return;
+        }
         this.toastService.progress({
-            action: this.downloadOfflineFiles,
+            action: (progress) => this.downloadOfflineFilesProgressAction(progress, fileNames),
             showContinueButton: true,
             continueText: this.resources.largeFilesUseWifi
         });
     }
 
-    private downloadOfflineFiles = async (reportProgress: (progressValue: number) => void) => {
+    private async downloadOfflineFilesProgressAction(reportProgress: (progressValue: number) => void, fileNames: {}): Promise<void> {
         this.sidebarService.hide();
         let setBackToOffline = false;
         if (this.layersService.getSelectedBaseLayer().isOfflineOn) {
@@ -180,8 +187,6 @@ export class LayersSidebarComponent extends BaseMapComponent {
             setBackToOffline = true;
         }
         try {
-            let fileNames = await this.getFilesDictionary();
-            length = Object.keys(fileNames).length;
             let newestFileDate = new Date(0);
             for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
                 let fileName = Object.keys(fileNames)[fileNameIndex];
@@ -206,14 +211,9 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 }
                 reportProgress(this.getFileInstallationProgress(length, fileNameIndex, 100));
             }
-            if (length === 0) {
-                this.loggingService.info("All offline files are up-to-date");
-                this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
-            } else {
-                this.loggingService.info("Finished downloading offline files, update date to: " + newestFileDate.toUTCString());
-                this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: newestFileDate }));
-                this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
-            }
+            this.loggingService.info("Finished downloading offline files, update date to: " + newestFileDate.toUTCString());
+            this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: newestFileDate }));
+            this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
             this.sidebarService.show("layers");
         } finally {
             if (setBackToOffline) {
@@ -227,7 +227,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
             (fileNameIndex * 2 + 1) * 50.0 / numberOfFile;
     }
 
-    private async getFilesDictionary(): Promise<{}> {
+    private async getFilesToDownloadDictionary(): Promise<{}> {
         let lastModified = this.ngRedux.getState().offlineState.lastModifiedDate;
         return await this.httpClient.get(Urls.offlineFiles, {
             params: {
