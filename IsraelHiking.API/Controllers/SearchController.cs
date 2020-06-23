@@ -92,21 +92,21 @@ namespace IsraelHiking.API.Controllers
         {
             var displayName = title;
             var containers = await _searchRepository.GetContainers(feature.Geometry.Coordinate);
-            var featureGeometry = feature.Geometry.GetGeometryN(0);
+            var geometries = Enumerable.Range(0, feature.Geometry.NumGeometries).Select(i => feature.Geometry.GetGeometryN(i)).ToArray();
             var container = containers.Where(c =>
                     c.Attributes[FeatureAttributes.ID] != feature.Attributes[FeatureAttributes.ID] &&
-                    c.Geometry.Covers(featureGeometry) &&
-                    c.Geometry.EqualsTopologically(featureGeometry) == false)
+                    geometries.All(g => c.Geometry.Covers(g)) &&
+                    c.Geometry.EqualsTopologically(feature.Geometry) == false)
                 .OrderBy(c => c.Geometry.Area)
                 .FirstOrDefault();
             if (container == null)
             {
                 return displayName;
             }
-            var address = container.GetTitle(language);
-            if (!string.IsNullOrWhiteSpace(address))
+            var containerTitle = container.GetTitle(language);
+            if (!string.IsNullOrWhiteSpace(containerTitle))
             {
-                displayName += ", " + address;
+                displayName += ", " + containerTitle;
             }
 
             return displayName;

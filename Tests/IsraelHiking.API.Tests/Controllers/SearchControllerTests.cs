@@ -168,6 +168,58 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
+        public void GetSearchResults_GeometryCollectionNoContainers_ShouldNotFail()
+        {
+            var place = "place";
+            var searchTerm = "searchTerm, " + place;
+            var placeFeature = new Feature(new Polygon(new LinearRing(new[]
+            {
+                new Coordinate(0, 0),
+                new Coordinate(0, 1),
+                new Coordinate(2, 0),
+                new Coordinate(0, 0)
+            })), new AttributesTable
+            {
+                {FeatureAttributes.NAME, place},
+                {FeatureAttributes.ID, "place_id" }
+            });
+            placeFeature.SetTitles();
+            var featureLocation = new Coordinate(0.5, 0.5);
+            var featureInPlace = new Feature(new GeometryCollection(new Geometry[]
+                {
+                    new Point(featureLocation),
+                    new LineString(new [] { new Coordinate(0,0), new Coordinate(3,3) })
+                }), new AttributesTable
+                {
+                    {FeatureAttributes.NAME, "name"},
+                    {
+                        FeatureAttributes.POI_GEOLOCATION,
+                        new AttributesTable
+                            {{FeatureAttributes.LAT, featureLocation.Y}, {FeatureAttributes.LON, featureLocation.X}}
+                    },
+                    {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
+                    {FeatureAttributes.POI_SOURCE, Sources.OSM},
+                    {FeatureAttributes.POI_ICON, string.Empty},
+                    {FeatureAttributes.POI_ICON_COLOR, "black"},
+                    {FeatureAttributes.ID, "id"}
+                }
+            );
+            featureInPlace.SetTitles();
+            var featuresInsidePlace = new List<Feature> { featureInPlace };
+            _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<Feature> { placeFeature });
+            _searchRepository
+                .SearchByLocation(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), "searchTerm", Languages.ENGLISH)
+                .Returns(featuresInsidePlace);
+            _searchRepository.GetContainers(featureLocation).Returns(new List<Feature> { placeFeature });
+
+            var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.ToList();
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(featuresInsidePlace.Count, results.Count);
+            Assert.IsFalse(results.First().DisplayName.Contains(place));
+        }
+
+        [TestMethod]
         public void GetSearchResults_ContainerHasNoName_ShouldNotIAddItToDisplayName()
         {
             var place = "place";
