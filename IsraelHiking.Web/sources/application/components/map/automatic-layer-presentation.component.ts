@@ -76,6 +76,9 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             if (state.hasInternetAccess === this.hasInternetAccess) {
                 return;
             }
+            if (this.layerData.isOfflineOn === true) {
+                return;
+            }
             this.hasInternetAccess = state.hasInternetAccess;
             if (this.sourceAdded) {
                 this.removeLayer(this.layerData.address);
