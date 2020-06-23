@@ -73,6 +73,9 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             if (this.ngRedux.getState().offlineState.lastModifiedDate == null || this.layerData.isOfflineAvailable == false) {
                 return;
             }
+            if (state.hasInternetAccess === this.hasInternetAccess) {
+                return;
+            }
             this.hasInternetAccess = state.hasInternetAccess;
             if (this.sourceAdded) {
                 this.removeLayer(this.layerData.address);
@@ -93,9 +96,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
 
     async ngOnChanges(changes: SimpleChanges) {
         if (this.sourceAdded) {
-            console.log(changes.layerData, changes.layerData.previousValue);
             let addressToRemove = changes.layerData ? changes.layerData.previousValue.address : this.layerData.address;
-            console.log("about to remove address: " + addressToRemove);
             this.removeLayer(addressToRemove);
             await this.createLayer();
         }
