@@ -13,7 +13,7 @@ import { LayerData, EditableLayer } from "../../../models/models";
     templateUrl: "./layer-properties-dialog.component.html"
 })
 export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
-    private baseLayer: EditableLayer;
+    private backupBaseLayer: EditableLayer;
 
     constructor(resources: ResourcesService,
                 mapService: MapService,
@@ -27,23 +27,20 @@ export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
     }
 
     public setBaseLayer(layer: EditableLayer) {
-        this.baseLayer = layer;
-        this.key = this.baseLayer.key;
-        this.maxZoom = this.baseLayer.maxZoom;
-        this.minZoom = this.baseLayer.minZoom;
-        this.address = this.baseLayer.address;
+        this.layerData = { ...layer };
+        this.backupBaseLayer = layer;
     }
 
     public removeLayer() {
-        this.layersService.removeBaseLayer(this.baseLayer);
+        this.layersService.removeBaseLayer(this.backupBaseLayer);
     }
 
     protected internalSave(layerData: LayerData): void {
         let baseLayer = {
             ...layerData,
-            id: this.baseLayer.id,
+            id: this.backupBaseLayer.id,
             isEditable: true
         } as EditableLayer;
-        this.layersService.updateBaseLayer(this.baseLayer, baseLayer);
+        this.layersService.updateBaseLayer(this.backupBaseLayer, baseLayer);
     }
 }

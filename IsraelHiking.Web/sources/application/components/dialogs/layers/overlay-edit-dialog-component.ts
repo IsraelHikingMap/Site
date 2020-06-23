@@ -13,7 +13,7 @@ import { LayerData, Overlay } from "../../../models/models";
     templateUrl: "./layer-properties-dialog.component.html"
 })
 export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
-    private overlay: Overlay;
+    private backupOverlay: Overlay;
 
     constructor(resources: ResourcesService,
                 mapService: MapService,
@@ -27,25 +27,24 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
     }
 
     public setOverlay(layer: Overlay) {
-        this.overlay = layer;
-        this.key = this.overlay.key;
-        this.maxZoom = this.overlay.maxZoom;
-        this.minZoom = this.overlay.minZoom;
-        this.address = this.overlay.address;
-        this.opacity = this.overlay.opacity || 1.0;
+        this.layerData = {
+            ...layer,
+            opacity: layer.opacity || 1.0
+        };
+        this.backupOverlay = layer;
     }
 
     public removeLayer() {
-        this.layersService.removeOverlay(this.overlay);
+        this.layersService.removeOverlay(this.backupOverlay);
     }
 
     protected internalSave(layerData: LayerData): void {
         let overlay = {
             ...layerData,
-            id: this.overlay.id,
+            id: this.layerData.id,
             isEditable: true,
             visible: true
         } as Overlay;
-        this.layersService.updateOverlay(this.overlay, overlay);
+        this.layersService.updateOverlay(this.backupOverlay, overlay);
     }
 }

@@ -6,6 +6,9 @@ import { Subscription } from "rxjs";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { BaseMapComponent } from "../base-map.component";
+import { ConnectionService } from "../../services/connection.service";
+import { NgRedux } from "@angular-redux/store";
+import { ApplicationState, EditableLayer } from "../../models/models";
 
 @Component({
     selector: "auto-layer",
@@ -18,23 +21,13 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         "Click me to see attribution</a>";
 
     @Input()
-    public address: string;
-    @Input()
-    public minZoom: number;
-    @Input()
-    public maxZoom: number;
-    @Input()
-    public opacity: number;
-    @Input()
     public visible: boolean;
     @Input()
     public before: string;
     @Input()
-    public key: string;
-    @Input()
     public isBaselayer: boolean;
     @Input()
-    public isOffline: boolean;
+    public layerData: EditableLayer;
 
     private rasterSourceId;
     private rasterLayerId;
@@ -42,15 +35,19 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private subscriptions: Subscription[];
     private jsonSourcesIds: string[];
     private jsonLayersIds: string[];
+    private hasInternetAccess: boolean;
 
     constructor(resources: ResourcesService,
                 private readonly host: MapComponent,
-                private readonly fileService: FileService) {
+                private readonly fileService: FileService,
+                private readonly connectionSerive: ConnectionService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
         this.rasterSourceId = `raster-source-${layerIndex}`;
         this.sourceAdded = false;
+        this.hasInternetAccess = true;
         this.jsonSourcesIds = [];
         this.jsonLayersIds = [];
         this.subscriptions = [];
@@ -68,7 +65,17 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         }
         this.subscriptions.push(this.resources.languageChanged.subscribe(async () => {
             if (this.sourceAdded) {
-                this.removeLayer(this.address);
+                this.removeLayer(this.layerData.address);
+                await this.createLayer();
+            }
+        }));
+        this.subscriptions.push(this.connectionSerive.monitor(true).subscribe(async (state) => {
+            if (this.ngRedux.getState().offlineState.lastModifiedDate == null || this.layerData.isOfflineAvailable == false) {
+                return;
+            }
+            this.hasInternetAccess = state.hasInternetAccess;
+            if (this.sourceAdded) {
+                this.removeLayer(this.layerData.address);
                 await this.createLayer();
             }
         }));
@@ -79,14 +86,16 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             subscription.unsubscribe();
         }
         if (this.sourceAdded) {
-            this.removeLayer(this.address);
+            this.removeLayer(this.layerData.address);
             this.sourceAdded = false;
         }
     }
 
     async ngOnChanges(changes: SimpleChanges) {
         if (this.sourceAdded) {
-            let addressToRemove = changes.address ? changes.address.previousValue : this.address;
+            console.log(changes.layerData, changes.layerData.previousValue);
+            let addressToRemove = changes.layerData ? changes.layerData.previousValue.address : this.layerData.address;
+            console.log("about to remove address: " + addressToRemove);
             this.removeLayer(addressToRemove);
             await this.createLayer();
         }
@@ -97,19 +106,19 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     private createRasterLayer() {
-        let address = this.address;
+        let address = this.layerData.address;
         let scheme = "xyz";
-        if (this.address.toLocaleLowerCase().endsWith("/mapserver")) {
+        if (this.layerData.address.toLocaleLowerCase().endsWith("/mapserver")) {
             address += "/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&f=image";
-        } else if (this.address.indexOf("{-y}") !== -1) {
+        } else if (this.layerData.address.indexOf("{-y}") !== -1) {
             address = address.replace("{-y}", "{y}");
             scheme = "tms";
         }
         let source = {
             type: "raster",
             tiles: [address],
-            minzoom: Math.max(this.minZoom - 1, 0),
-            maxzoom: this.maxZoom,
+            minzoom: Math.max(this.layerData.minZoom - 1, 0),
+            maxzoom: this.layerData.maxZoom,
             scheme,
             tileSize: 256,
             attribution: AutomaticLayerPresentationComponent.ATTRIBUTION
@@ -123,7 +132,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 visibility: (this.visible ? "visible" : "none") as "visible" | "none"
             } as RasterLayout,
             paint: {
-                "raster-opacity": this.opacity || 1.0
+                "raster-opacity": this.layerData.opacity || 1.0
             }
         } as Layer;
         this.host.mapInstance.addLayer(layer, this.before);
@@ -135,7 +144,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     private async createJsonLayer() {
-        let response = await this.fileService.getStyleJsonContent(this.address, this.isOffline);
+        let response = await this.fileService
+            .getStyleJsonContent(this.layerData.address, this.layerData.isOfflineOn || !this.hasInternetAccess);
         let language = this.resources.getCurrentLanguageCodeSimplified();
         let styleJson = JSON.parse(JSON.stringify(response).replace(/name_he/g, `name_${language}`)) as Style;
         this.updateSourcesAndLayers(styleJson.sources, styleJson.layers);
@@ -147,7 +157,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             if (sources.hasOwnProperty(sourceKey) && this.visible) {
                 let source = sources[sourceKey];
                 if (!this.isBaselayer) {
-                    sourceKey = this.key + "_" + sourceKey;
+                    sourceKey = this.layerData.key + "_" + sourceKey;
                 }
                 if (source.type === "vector") {
                     source.attribution = attributiuonUpdated === false ? AutomaticLayerPresentationComponent.ATTRIBUTION : "";
@@ -160,8 +170,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         for (let layer of layers) {
             if (this.isBaselayer || (this.visible && layer.metadata && layer.metadata["IHM:overlay"])) {
                 if (!this.isBaselayer) {
-                    layer.id = this.key + "_" + layer.id;
-                    layer.source = this.key + "_" + layer.source;
+                    layer.id = this.layerData.key + "_" + layer.id;
+                    layer.source = this.layerData.key + "_" + layer.source;
                 }
                 this.jsonLayersIds.push(layer.id);
                 this.host.mapInstance.addLayer(layer, this.before);
@@ -181,13 +191,13 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     private async createLayer() {
-        if (this.isRaster(this.address)) {
+        if (this.isRaster(this.layerData.address)) {
             this.createRasterLayer();
         } else {
             await this.createJsonLayer();
         }
         if (this.isBaselayer) {
-            this.host.mapInstance.setMinZoom(Math.max(this.minZoom - 1, 0));
+            this.host.mapInstance.setMinZoom(Math.max(this.layerData.minZoom - 1, 0));
         }
     }
 
