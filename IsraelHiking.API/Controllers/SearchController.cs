@@ -99,11 +99,7 @@ namespace IsraelHiking.API.Controllers
                     c.Geometry.EqualsTopologically(feature.Geometry) == false)
                 .OrderBy(c => c.Geometry.Area)
                 .FirstOrDefault();
-            if (container == null)
-            {
-                return displayName;
-            }
-            var containerTitle = container.GetTitle(language);
+            var containerTitle = container?.GetTitle(language);
             if (!string.IsNullOrWhiteSpace(containerTitle))
             {
                 displayName += ", " + containerTitle;
