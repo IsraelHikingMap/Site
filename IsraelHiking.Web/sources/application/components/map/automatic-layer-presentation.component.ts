@@ -70,7 +70,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             }
         }));
         this.subscriptions.push(this.connectionSerive.monitor(true).subscribe(async (state) => {
-            if (this.ngRedux.getState().offlineState.lastModifiedDate == null || this.layerData.isOfflineAvailable == false) {
+            if (this.ngRedux.getState().offlineState.lastModifiedDate == null || this.layerData.isOfflineAvailable === false) {
                 return;
             }
             if (state.hasInternetAccess === this.hasInternetAccess) {
