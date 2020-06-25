@@ -93,6 +93,9 @@ export class ImageScrollerComponent extends BaseMapComponent {
     }
 
     public showImage() {
+        if (!this.runningContextService.isOnline) {
+            return;
+        }
         let imagesUrls = [];
         for (let imageUrl of this.images) {
             let imageUrlToPush = imageUrl;
