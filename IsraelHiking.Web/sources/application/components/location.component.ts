@@ -13,7 +13,7 @@ import { RoutesFactory } from "../services/layers/routelayers/routes.factory";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
-import { FileService } from "../services/file.service";
+import { DeviceOrientationService } from "../services/device-orientation.service";
 import { LoggingService } from "../services/logging.service";
 import { AddRouteAction, AddRecordingPointsAction } from "../reducres/routes.reducer";
 import { StartRecordingAction } from "../reducres/route-editing-state.reducer";
@@ -45,7 +45,7 @@ export class LocationComponent extends BaseMapComponent {
                 private readonly routesFactory: RoutesFactory,
                 private readonly cancelableTimeoutService: CancelableTimeoutService,
                 private readonly fitBoundsService: FitBoundsService,
-                private readonly fileService: FileService,
+                private readonly deviceOrientationService: DeviceOrientationService,
                 private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 private readonly host: MapComponent) {
@@ -89,6 +89,21 @@ export class LocationComponent extends BaseMapComponent {
                 let latlngs = positions.map(p => this.geoLocationService.positionToLatLngTime(p));
                 this.updateRecordingRouteIfNeeded(latlngs);
             });
+
+        this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
+            if (!this.isActive() || !this.isFollowingLocation()) {
+                return;
+            }
+            if (this.locationFeatures.features.length !== 2) {
+                return;
+            }
+            let radius = this.locationFeatures.features[1].properties.radius;
+            let center = SpatialService.toLatLng((this.locationFeatures.features[0].geometry as GeoJSON.Point).coordinates as [number, number]);
+            this.updateLocationFeatureCollection(center, radius, bearing);
+            if (!this.isKeepNorthUp && !this.host.mapInstance.isMoving()) {
+                this.fitBoundsService.moveTo(center, this.host.mapInstance.getZoom(), false, bearing);
+            }
+        });
 
         let lastRecordedRoute = this.selectedRouteService.getRecordingRoute();
         if (lastRecordedRoute != null) {
@@ -304,7 +319,7 @@ export class LocationComponent extends BaseMapComponent {
             let coordinates = pointGeometry.coordinates as [number, number];
             let center = SpatialService.toLatLng(coordinates);
             let zoom = this.host.mapInstance.getZoom();
-            this.fitBoundsService.moveTo(center, zoom, bearing);
+            this.fitBoundsService.moveTo(center, zoom, true, bearing);
         }
     }
 

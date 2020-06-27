@@ -152,7 +152,7 @@ export class SpatialService {
     }
 
     public static getCirclePolygon(centerPoint: LatLngAlt, radius: number): GeoJSON.Feature<GeoJSON.Polygon> {
-        let options = { steps: 64, units: "meters" as Units, properties: {} };
+        let options = { steps: 64, units: "meters" as Units, properties: { radius } };
         return circle(SpatialService.toCoordinate(centerPoint), radius, options);
     }
 }
