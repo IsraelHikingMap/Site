@@ -185,6 +185,9 @@ export class PoiService {
     private async updateOfflinePois() {
         try {
             let lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
+            if (lastModified != null) {
+                lastModified = new Date(lastModified); // deserialize from 
+            }
             this.loggingService.info(`[POIs] Getting POIs for: ${lastModified ? lastModified.toUTCString() : null} from server`);
             if (lastModified == null || Date.now() - lastModified.getTime() > 1000 * 60 * 60 * 24 * 180) {
                 await this.toastService.progress({
@@ -192,14 +195,14 @@ export class PoiService {
                     showContinueButton: true,
                     continueText: this.resources.largeFilesUseWifi
                 });
-                lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
+                lastModified = new Date(this.ngRedux.getState().offlineState.poisLastModifiedDate);
             }
             if (lastModified == null) {
                 // don't send a request that is too big to the server by mistake
                 return;
             }
             let updates = await this.httpClient.get(Urls.poiUpdates + lastModified.toISOString())
-                .pipe(timeout(60000)).toPromise() as IUpdatesResponse;
+                .pipe(timeout(120000)).toPromise() as IUpdatesResponse;
             this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()}, got: ${updates.features.length}`);
             let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => f.properties.poiId);
             this.databaseService.storePois(updates.features);
@@ -230,7 +233,7 @@ export class PoiService {
         await this.fileService.openIHMfile(poisFile, async (poisString: string) => {
             let poisJson = JSON.parse(poisString) as GeoJSON.FeatureCollection;
             await this.databaseService.storePois(poisJson.features);
-            lastModified = this.getLastModifiedFromFeatures(lastModified, poisJson.features);
+            lastModified = this.getLastModifiedFromFeatures(poisJson.features);
             progressCallback(55, this.resources.downloadingPoisForOfflineUsage);
         }, async (imagesString: string, progressPercentage: number) => {
             let imagesUrl = this.imageItemToUrl(JSON.parse(imagesString) as IImageItem[]);
@@ -242,15 +245,15 @@ export class PoiService {
         this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
     }
 
-    private getLastModifiedFromFeatures(lastModified: Date, features: GeoJSON.Feature[]): Date {
-        let lastUpdate = lastModified;
+    private getLastModifiedFromFeatures(features: GeoJSON.Feature[]): Date {
+        let lastModified = null;
         for (let feature of features) {
             let dateValue = new Date(feature.properties.poiLastModified);
-            if (lastUpdate == null || dateValue > lastUpdate) {
-                lastUpdate = dateValue;
+            if (lastModified == null || dateValue > lastModified) {
+                lastModified = dateValue;
             }
         }
-        return lastUpdate;
+        return lastModified;
     }
 
     private imageItemToUrl(images: IImageItem[]): ImageUrlAndData[] {
