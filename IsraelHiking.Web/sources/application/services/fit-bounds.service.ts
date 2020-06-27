@@ -49,13 +49,13 @@ export class FitBoundsService {
         this.mapService.map.flyTo({ center: latLng, zoom });
     }
 
-    public async moveTo(center: LatLngAlt, zoom: number, animate: boolean, bearing?: number) {
+    public async moveTo(center: LatLngAlt, zoom: number, bearing: number) {
         await this.mapService.initializationPromise;
         this.mapService.map.easeTo({
-            bearing: bearing || this.mapService.map.getBearing(),
+            bearing,
             center,
             zoom,
-            animate,
+            animate: true,
             easing: (x) => x,
             offset: [0, 100]
         });

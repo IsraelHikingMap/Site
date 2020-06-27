@@ -55,7 +55,7 @@ export class LocationComponent extends BaseMapComponent {
         this.isPanned = false;
         this.isKeepNorthUp = false;
         this.locationLatLng = null;
-        this.updateLocationFeatureCollection(null);
+        this.clearLocationFeatureCollection();
 
         this.host.load.subscribe(() => {
             this.host.mapInstance.on("dragstart",
@@ -68,7 +68,7 @@ export class LocationComponent extends BaseMapComponent {
                     this.cancelableTimeoutService.setTimeoutByGroup(() => {
                         this.isPanned = false;
                         if (this.isFollowingLocation()) {
-                            this.setLocation();
+                            this.moveMapToGpsPosition();
                         }
                     },
                         LocationComponent.NOT_FOLLOWING_TIMEOUT,
@@ -91,17 +91,14 @@ export class LocationComponent extends BaseMapComponent {
             });
 
         this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
-            if (!this.isActive() || !this.isFollowingLocation()) {
+            if (!this.isActive() || this.locationFeatures.features.length === 0) {
                 return;
             }
-            if (this.locationFeatures.features.length !== 2) {
-                return;
-            }
-            let radius = this.locationFeatures.features[1].properties.radius;
-            let center = SpatialService.toLatLng((this.locationFeatures.features[0].geometry as GeoJSON.Point).coordinates as [number, number]);
+            let center = this.getCenterFromLocationFeatureCollection();
+            let radius = this.getRadiusFromLocationFeatureCollection();
             this.updateLocationFeatureCollection(center, radius, bearing);
-            if (!this.isKeepNorthUp && !this.host.mapInstance.isMoving()) {
-                this.fitBoundsService.moveTo(center, this.host.mapInstance.getZoom(), false, bearing);
+            if (!this.host.mapInstance.isMoving() && this.isFollowingLocation()) {
+                this.moveMapToGpsPosition()
             }
         });
 
@@ -173,7 +170,7 @@ export class LocationComponent extends BaseMapComponent {
         if (!this.isFollowing || this.isPanned) {
             this.isFollowing = true;
             this.isPanned = false;
-            this.setLocation();
+            this.moveMapToGpsPosition();
             return;
         }
         // following and not panned
@@ -273,25 +270,15 @@ export class LocationComponent extends BaseMapComponent {
         if (this.locationFeatures.features.length === 0) {
             this.isFollowing = true;
         }
-        let heading = null;
-        let needToUpdateHeading = !isNaN(position.coords.heading) && position.coords.speed !== 0;
-        if (needToUpdateHeading) {
-            heading = position.coords.heading;
-        }
+        let validHeading = !isNaN(position.coords.heading) && position.coords.speed !== 0;
+        let heading = validHeading ? position.coords.heading : this.getBrearingFromLocationFeatureCollection();
         this.updateLocationFeatureCollection({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
             alt: position.coords.altitude
         }, position.coords.accuracy, heading);
-
-        if (!this.host.mapInstance.isMoving()) {
-            if (this.isFollowingLocation() && this.isKeepNorthUp) {
-                this.setLocation();
-            } else if (this.isFollowingLocation() && !this.isKeepNorthUp && needToUpdateHeading) {
-                this.setLocation(heading);
-            } else if (this.isFollowingLocation() && !this.isKeepNorthUp && !needToUpdateHeading) {
-                this.setLocation();
-            }
+        if (!this.host.mapInstance.isMoving() && this.isFollowingLocation()) {
+            this.moveMapToGpsPosition();
         }
     }
 
@@ -308,32 +295,49 @@ export class LocationComponent extends BaseMapComponent {
 
     private disableGeoLocation() {
         this.geoLocationService.disable();
-        if (this.locationFeatures.features.length > 0) {
-            this.updateLocationFeatureCollection(null);
-        }
+        this.clearLocationFeatureCollection();
     }
 
-    private setLocation(bearing?: number) {
-        if (this.locationFeatures.features.length > 0) {
-            let pointGeometry = this.locationFeatures.features.map(f => f.geometry).find(g => g.type === "Point") as GeoJSON.Point;
-            let coordinates = pointGeometry.coordinates as [number, number];
-            let center = SpatialService.toLatLng(coordinates);
-            let zoom = this.host.mapInstance.getZoom();
-            this.fitBoundsService.moveTo(center, zoom, true, bearing);
-        }
-    }
-
-    private updateLocationFeatureCollection(center: LatLngAlt, radius?: number, heading?: number) {
-        if (center == null) {
-            this.locationFeatures = {
-                type: "FeatureCollection",
-                features: []
-            };
+    private moveMapToGpsPosition() {
+        if (this.locationFeatures.features.length === 0) {
             return;
         }
-        if (heading == null && this.locationFeatures.features.length > 0) {
-            heading = this.locationFeatures.features[0].properties.heading;
+        let center = this.getCenterFromLocationFeatureCollection();
+        let bearing = this.isKeepNorthUp
+            ? 0
+            : this.getBrearingFromLocationFeatureCollection();
+        this.fitBoundsService.moveTo(center, this.host.mapInstance.getZoom(), bearing);
+    }
+
+    private getCenterFromLocationFeatureCollection(): LatLngAlt {
+        let pointGeometry = this.locationFeatures.features.map(f => f.geometry).find(g => g.type === "Point") as GeoJSON.Point;
+        let coordinates = pointGeometry.coordinates as [number, number];
+        return SpatialService.toLatLng(coordinates);
+    }
+
+    private getBrearingFromLocationFeatureCollection(): number {
+        let pointFeature = this.locationFeatures.features.find(f => f.geometry.type === "Point");
+        return pointFeature == null
+            ? this.host.mapInstance.getBearing()
+            : pointFeature.properties.heading;
+    }
+
+    private getRadiusFromLocationFeatureCollection(): number {
+        let radiusFeature = this.locationFeatures.features.find(f => f.geometry.type === "Polygon");
+        if (radiusFeature == null) {
+            return null;
         }
+        return radiusFeature.properties.radius;
+    }
+
+    private clearLocationFeatureCollection() {
+        this.locationFeatures = {
+            type: "FeatureCollection",
+            features: []
+        };
+    }
+
+    private updateLocationFeatureCollection(center: LatLngAlt, radius: number, heading: number) {
         let features: GeoJSON.Feature<GeoJSON.Geometry>[] = [{
             type: "Feature",
             properties: { heading },
@@ -343,7 +347,7 @@ export class LocationComponent extends BaseMapComponent {
             }
         }];
         if (radius != null) {
-            features.push(SpatialService.getCirclePolygon(center, radius));
+            features.push(SpatialService.getCirclePolygonFeature(center, radius));
         }
         this.locationFeatures = {
             type: "FeatureCollection",
