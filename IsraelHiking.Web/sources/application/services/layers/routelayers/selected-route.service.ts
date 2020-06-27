@@ -3,8 +3,7 @@ import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { some } from "lodash";
 
-import { SetSelectedRouteAction, StopRecordingAction } from "../../../reducres/route-editing-state.reducer";
-import { AddTraceAction } from "../../../reducres/traces.reducer";
+import { SetSelectedRouteAction } from "../../../reducres/route-editing-state.reducer";
 import {
     AddRouteAction,
     SplitRouteAction,
@@ -20,16 +19,12 @@ import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "../../resources.service";
 import { SpatialService } from "../../spatial.service";
 import { RouterService } from "../../router.service";
-import { TracesService } from "../../traces.service";
-import { ToastService } from "../../toast.service";
 import {
     RouteData,
     ApplicationState,
     RouteSegmentData,
     ILatLngTime,
     LatLngAlt,
-    DataContainer,
-    TraceVisibility
 } from "../../../models/models";
 
 @Injectable()
@@ -56,8 +51,6 @@ export class SelectedRouteService {
     constructor(private readonly resources: ResourcesService,
                 private readonly routesFactory: RoutesFactory,
                 private readonly routerService: RouterService,
-                private readonly tracesService: TracesService,
-                private readonly toastService: ToastService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.routes = [];
         this.selectedRouteHover = new EventEmitter();
@@ -93,56 +86,6 @@ export class SelectedRouteService {
 
     public getRecordingRoute(): RouteData {
         return this.getRouteById(this.recordingRouteId);
-    }
-
-    public stopRecording() {
-        let recordingRoute = this.getRecordingRoute();
-        this.ngRedux.dispatch(new StopRecordingAction({
-            routeId: recordingRoute.id
-        }));
-        this.addRecordingToTraces(recordingRoute);
-    }
-
-    private async addRecordingToTraces(routeData: RouteData) {
-        let latLngs = routeData.segments[0].latlngs;
-        let northEast = { lat: Math.max(...latLngs.map(l => l.lat)), lng: Math.max(...latLngs.map(l => l.lng)) };
-        let southWest = { lat: Math.min(...latLngs.map(l => l.lat)), lng: Math.min(...latLngs.map(l => l.lng)) };
-        let container = {
-            routes: [routeData],
-            northEast,
-            southWest
-        } as DataContainer;
-
-        let trace = {
-            name: routeData.name,
-            description: routeData.description,
-            id: routeData.id,
-            timeStamp: routeData.segments[0].latlngs[0].timestamp,
-            dataContainer: container,
-            tags: [],
-            tagsString: "",
-            visibility: "local" as TraceVisibility,
-            isInEditMode: false,
-            url: "",
-            imageUrl: "",
-            dataUrl: "",
-            user: ""
-        };
-        let state = this.ngRedux.getState();
-        if (state.configuration.isAutomaticRecordingUpload &&
-            state.userState.userInfo != null) {
-            try {
-                await this.tracesService.uploadRouteAsTrace(routeData);
-                this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
-            } catch {
-                this.ngRedux.dispatch(new AddTraceAction({ trace }));
-            }
-        } else {
-            this.ngRedux.dispatch(new AddTraceAction({ trace }));
-        }
-        if (state.userState.userInfo == null) {
-            this.toastService.warning(this.resources.youNeedToLoginToSeeYourTraces);
-        }
     }
 
     public getOrCreateSelectedRoute(): RouteData {

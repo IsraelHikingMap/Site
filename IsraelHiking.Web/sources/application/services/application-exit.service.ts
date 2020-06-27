@@ -9,8 +9,8 @@ import { ToastService } from "./toast.service";
 import { MatDialog } from "@angular/material";
 import { SidebarService } from "./sidebar.service";
 import { SetSidebarAction } from "../reducres/poi.reducer";
-import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { GeoLocationService } from "./geo-location.service";
+import { RecordedRouteService } from "./recorded-route.service";
 import { ApplicationState } from "../models/models";
 
 declare var navigator: Navigator;
@@ -31,7 +31,7 @@ export class ApplicationExitService {
                 private readonly ngZone: NgZone,
                 private readonly databaseService: DatabaseService,
                 private readonly runningContext: RunningContextService,
-                private readonly selectedRouteService: SelectedRouteService,
+                private readonly recordingRouteService: RecordedRouteService,
                 private readonly geoLocationService: GeoLocationService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 private readonly loggingService: LoggingService,
@@ -61,13 +61,13 @@ export class ApplicationExitService {
                     }));
                     return;
                 }
-                if (this.selectedRouteService.getRecordingRoute() != null) {
+                if (this.recordingRouteService.isRecording()) {
                     this.toastService.confirm({
                         message: this.resources.areYouSureYouWantToStopRecording,
                         type: "YesNo",
                         confirmAction: () => {
                             this.loggingService.info("Stop recording using the back button");
-                            this.selectedRouteService.stopRecording();
+                            this.recordingRouteService.stopRecording();
                         },
                         declineAction: () => { }
                     });
@@ -79,7 +79,7 @@ export class ApplicationExitService {
                     this.toastService.info(this.resources.wrappingThingsUp);
                     this.loggingService.debug("Starting IHM Application Exit");
                     await this.databaseService.close();
-                    this.geoLocationService.disable();
+                    await this.geoLocationService.disable();
                     this.loggingService.debug("Finished IHM Application Exit");
                     await this.loggingService.close();
                     navigator.app.exitApp();

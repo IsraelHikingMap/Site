@@ -10,7 +10,6 @@ import {
 
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
-import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ILatLngTime } from "../models/models";
@@ -20,14 +19,10 @@ declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
 @Injectable()
 export class GeoLocationService {
     private static readonly TIME_OUT = 30000;
-    private static readonly MAX_TIME_DIFFERENCE = 60; // seconds
-    private static readonly MAX_SPPED = 55; // meters / seconds =~ 200 Km/hs
-    private static readonly MIN_ACCURACY = 50; // meters
 
     private state: GeoLocationServiceState;
     private watchNumber: number;
     private isBackground: boolean;
-    private rejectedPosition: ILatLngTime;
     private wasInitialized: boolean;
 
     public positionChanged: EventEmitter<Position>;
@@ -46,7 +41,6 @@ export class GeoLocationService {
         this.state = "disabled";
         this.isBackground = false;
         this.currentLocation = null;
-        this.rejectedPosition = null;
         this.wasInitialized = false;
         this.isBackground = false;
     }
@@ -67,13 +61,13 @@ export class GeoLocationService {
         }
     }
 
-    public disable() {
+    public async disable() {
         switch (this.state) {
             case "disabled":
                 return;
             case "searching":
             case "tracking":
-                this.stopWatching();
+                await this.stopWatching();
                 return;
         }
     }
@@ -160,41 +154,37 @@ export class GeoLocationService {
             async () => {
                 this.isBackground = false;
                 this.loggingService.debug("Geo-location now in foreground");
-                if (this.currentLocation) {
-                    this.loggingService.debug("Sending bulk location update");
-                    let locations = await this.backgroundGeolocation.getValidLocations();
-                    let positions = locations.map(l => this.locationToPosition(l)).filter(p => this.validateRecordingAndUpdateState(p));
-                    if (positions.length > 0) {
-                        this.bulkPositionChanged.next(positions);
-                    }
+                let locations = await this.backgroundGeolocation.getValidLocations() as BackgroundGeolocationResponse[];
+                let positions = locations.map(l => this.locationToPosition(l));
+                if (positions.length > 0) {
+                    this.loggingService.debug(`Sending bulk location update: ${positions.length}`);
+                    this.currentLocation = this.positionToLatLngTime(positions[positions.length - 1]);
+                    this.bulkPositionChanged.next(positions);
                 }
             });
         this.backgroundGeolocation.start();
     }
 
-    private stopWatching() {
+    private async stopWatching() {
         this.state = "disabled";
         this.currentLocation = null;
         this.positionChanged.next(null);
         if (this.runningContextService.isCordova) {
-            this.stopBackgroundGeolocation();
+            this.loggingService.debug("Stopping background geo-location");
+            await this.backgroundGeolocation.stop();
         } else {
+            this.loggingService.debug("Stopping browser geo-location: " + this.watchNumber);
             this.stopNavigator();
         }
     }
 
     private stopNavigator() {
-        this.loggingService.debug("Stopping browser geo-location: " + this.watchNumber);
         if (this.watchNumber !== -1) {
             window.navigator.geolocation.clearWatch(this.watchNumber);
             this.watchNumber = -1;
         }
     }
 
-    private stopBackgroundGeolocation() {
-        this.loggingService.debug("Stopping background geo-location");
-        this.backgroundGeolocation.stop();
-    }
 
     private handlePoistionChange(position: Position): void {
         if (this.isBackground) {
@@ -208,62 +198,9 @@ export class GeoLocationService {
             if (this.state !== "tracking") {
                 return;
             }
-            if (this.validateRecordingAndUpdateState(position)) {
-                this.positionChanged.next(position);
-            }
+            this.currentLocation = this.positionToLatLngTime(position);
+            this.positionChanged.next(position);
         });
-    }
-
-    private validateRecordingAndUpdateState(position: Position): boolean {
-        if (this.currentLocation == null) {
-            this.loggingService.debug("Adding the first position: " + JSON.stringify(this.positionToLatLngTime(position)));
-            this.updatePosition(position);
-            return true;
-        }
-        let nonValidReason = this.isValid(this.currentLocation, position);
-        if (nonValidReason === "") {
-            this.updatePosition(position);
-            return true;
-        }
-        if (this.rejectedPosition == null) {
-            this.rejectedPosition = this.positionToLatLngTime(position);
-            this.loggingService.debug("Rejecting position: " + JSON.stringify(this.positionToLatLngTime(position)) +
-                " reason:" + nonValidReason);
-            return false;
-        }
-        nonValidReason = this.isValid(this.rejectedPosition, position);
-        if (nonValidReason === "") {
-            this.loggingService.debug("Validating a rejected position: " + JSON.stringify(this.positionToLatLngTime(position)));
-            this.updatePosition(position);
-            return true;
-        }
-        this.rejectedPosition = this.positionToLatLngTime(position);
-        this.loggingService.debug("Rejecting position for rejected: " + JSON.stringify(position) + " reason: " + nonValidReason);
-        return false;
-    }
-
-    private isValid(test: ILatLngTime, position: Position): string {
-        let distance = SpatialService.getDistanceInMeters(test, this.positionToLatLngTime(position));
-        let timeDifference = Math.abs(position.timestamp - test.timestamp.getTime()) / 1000;
-        if (timeDifference === 0) {
-            return "Time difference is 0";
-        }
-        if (distance / timeDifference > GeoLocationService.MAX_SPPED) {
-            return "Speed too high: " + distance / timeDifference;
-        }
-        if (timeDifference > GeoLocationService.MAX_TIME_DIFFERENCE) {
-            return "Time difference too high: " + timeDifference;
-        }
-        if (position.coords.accuracy > GeoLocationService.MIN_ACCURACY) {
-            return "Accuracy too low: " + position.coords.accuracy;
-        }
-        return "";
-    }
-
-    private updatePosition(position: Position) {
-        this.currentLocation = this.positionToLatLngTime(position);
-        this.rejectedPosition = null;
-        this.loggingService.debug("Valid position, updating: (" + position.coords.latitude + ", " + position.coords.longitude + ")");
     }
 
     public positionToLatLngTime(position: Position): ILatLngTime {

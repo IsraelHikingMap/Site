@@ -1,7 +1,5 @@
 import { Component } from "@angular/core";
 import { LocalStorage } from "ngx-store";
-import { first } from "rxjs/operators";
-import { NgRedux } from "@angular-redux/store";
 import { MapComponent } from "ngx-mapbox-gl";
 
 import { ResourcesService } from "../services/resources.service";
@@ -9,15 +7,12 @@ import { BaseMapComponent } from "./base-map.component";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToastService } from "../services/toast.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
-import { RoutesFactory } from "../services/layers/routelayers/routes.factory";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
-import { LoggingService } from "../services/logging.service";
-import { AddRouteAction, AddRecordingPointsAction } from "../reducres/routes.reducer";
-import { StartRecordingAction } from "../reducres/route-editing-state.reducer";
-import { ApplicationState, LatLngAlt, ILatLngTime } from "../models/models";
+import { RecordedRouteService } from "../services/recorded-route.service";
+import { LatLngAlt } from "../models/models";
 
 @Component({
     selector: "location",
@@ -42,12 +37,10 @@ export class LocationComponent extends BaseMapComponent {
                 private readonly geoLocationService: GeoLocationService,
                 private readonly toastService: ToastService,
                 private readonly selectedRouteService: SelectedRouteService,
-                private readonly routesFactory: RoutesFactory,
+                private readonly recordedRouteService: RecordedRouteService,
                 private readonly cancelableTimeoutService: CancelableTimeoutService,
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly deviceOrientationService: DeviceOrientationService,
-                private readonly loggingService: LoggingService,
-                private readonly ngRedux: NgRedux<ApplicationState>,
                 private readonly host: MapComponent) {
         super(resources);
 
@@ -80,14 +73,11 @@ export class LocationComponent extends BaseMapComponent {
             (position: Position) => {
                 if (position != null) {
                     this.handlePositionChange(position);
-                    this.updateRecordingRouteIfNeeded([this.geoLocationService.currentLocation]);
                 }
             });
         this.geoLocationService.bulkPositionChanged.subscribe(
             (positions: Position[]) => {
                 this.handlePositionChange(positions[positions.length - 1]);
-                let latlngs = positions.map(p => this.geoLocationService.positionToLatLngTime(p));
-                this.updateRecordingRouteIfNeeded(latlngs);
             });
 
         this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
@@ -98,30 +88,9 @@ export class LocationComponent extends BaseMapComponent {
             let radius = this.getRadiusFromLocationFeatureCollection();
             this.updateLocationFeatureCollection(center, radius, bearing);
             if (!this.host.mapInstance.isMoving() && this.isFollowingLocation()) {
-                this.moveMapToGpsPosition()
+                this.moveMapToGpsPosition();
             }
         });
-
-        let lastRecordedRoute = this.selectedRouteService.getRecordingRoute();
-        if (lastRecordedRoute != null) {
-            this.loggingService.info("Recording was interrupted");
-            this.resources.languageChanged.pipe(first()).toPromise().then(() => {
-                // let resources service get the strings
-                this.toastService.confirm({
-                    message: this.resources.continueRecording,
-                    type: "YesNo",
-                    confirmAction: () => {
-                        this.loggingService.info("User choose to continue recording");
-                        this.toggleTracking();
-                        this.selectedRouteService.setSelectedRoute(lastRecordedRoute.id);
-                    },
-                    declineAction: () => {
-                        this.loggingService.info("User choose to stop recording");
-                        this.stopRecording();
-                    },
-                });
-            });
-        }
     }
 
     public isFollowingLocation(): boolean {
@@ -137,8 +106,7 @@ export class LocationComponent extends BaseMapComponent {
         if (selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
             return;
         }
-        let coordinates = (this.locationFeatures.features[0].geometry as GeoJSON.Point).coordinates as [number, number];
-        this.locationLatLng = SpatialService.toLatLng(coordinates);
+        this.locationLatLng = this.getCenterFromLocationFeatureCollection();
     }
 
     public toggleKeepNorthUp() {
@@ -189,7 +157,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public isRecording() {
-        return this.selectedRouteService.getRecordingRoute() != null;
+        return this.recordedRouteService.isRecording();
     }
 
     public toggleRecording() {
@@ -198,7 +166,7 @@ export class LocationComponent extends BaseMapComponent {
                 message: this.resources.areYouSureYouWantToStopRecording,
                 type: "YesNo",
                 confirmAction: () => {
-                    this.stopRecording();
+                    this.recordedRouteService.stopRecording();
                 },
                 declineAction: () => { },
             });
@@ -214,44 +182,8 @@ export class LocationComponent extends BaseMapComponent {
                     customDeclineText: this.resources.dontShowThisMessageAgain
                 });
             }
-            this.createRecordingRoute();
+            this.recordedRouteService.startRecording();
         }
-    }
-
-    private stopRecording() {
-        this.loggingService.debug("Stop recording");
-        this.selectedRouteService.stopRecording();
-    }
-
-    private createRecordingRoute() {
-        this.loggingService.debug("Starting recording");
-        let date = new Date();
-        let name = this.resources.route + " " + date.toISOString().split("T")[0];
-        if (!this.selectedRouteService.isNameAvailable(name)) {
-            let dateString =
-                `${date.toISOString().split("T")[0]} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-            name = this.resources.route + " " + dateString;
-        }
-        let route = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
-        let currentLocation = this.geoLocationService.currentLocation;
-        let routingType = this.ngRedux.getState().routeEditingState.routingType;
-        route.segments.push({
-            routingType,
-            latlngs: [currentLocation, currentLocation],
-            routePoint: currentLocation
-        });
-        route.segments.push({
-            routingType,
-            latlngs: [currentLocation],
-            routePoint: currentLocation
-        });
-        this.ngRedux.dispatch(new AddRouteAction({
-            routeData: route
-        }));
-        this.selectedRouteService.setSelectedRoute(route.id);
-        this.ngRedux.dispatch(new StartRecordingAction({
-            routeId: route.id
-        }));
     }
 
     public isDisabled() {
@@ -279,17 +211,6 @@ export class LocationComponent extends BaseMapComponent {
         }, position.coords.accuracy, heading);
         if (!this.host.mapInstance.isMoving() && this.isFollowingLocation()) {
             this.moveMapToGpsPosition();
-        }
-    }
-
-    private updateRecordingRouteIfNeeded(locations: ILatLngTime[]) {
-        let recordingRoute = this.selectedRouteService.getRecordingRoute();
-        if (recordingRoute != null) {
-            this.loggingService.debug("Adding a new point/s to the recording route.");
-            this.ngRedux.dispatch(new AddRecordingPointsAction({
-                routeId: recordingRoute.id,
-                latlngs: locations
-            }));
         }
     }
 

@@ -104,6 +104,7 @@ import { ScreenService } from "./services/screen.service";
 import { PurchaseService } from "./services/purchase.service";
 import { ApplicationInitializeService } from "./services/application-initialize.service";
 import { DeviceOrientationService } from "./services/device-orientation.service";
+import { RecordedRouteService } from "./services/recorded-route.service";
 import { AudioPlayerFactory } from "./services/audio-player.factory";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 // interactions
@@ -312,6 +313,7 @@ export function getWindow() { return window; }
             PurchaseService,
             ApplicationInitializeService,
             DeviceOrientationService,
+            RecordedRouteService,
             AudioPlayerFactory,
             BackgroundGeolocation,
             Brightness,
