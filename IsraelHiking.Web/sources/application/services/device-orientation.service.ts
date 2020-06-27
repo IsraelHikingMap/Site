@@ -1,4 +1,4 @@
-﻿import { Injectable, EventEmitter, NgZone } from "@angular/core";
+import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { fromEvent } from "rxjs";
 import { throttleTime } from "rxjs/operators";
 
@@ -13,13 +13,13 @@ export class DeviceOrientationService {
     constructor(private readonly ngZone: NgZone) {
         this.orientationChanged = new EventEmitter();
         this.initialOffset = 0;
-        if ('ondeviceorientationabsolute' in window) {
+        if ("ondeviceorientationabsolute" in window) {
             fromEvent(window, "deviceorientationabsolute").pipe(
                 throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })
             ).subscribe((event: DeviceOrientationEvent) => {
                 this.fireOrientationChange(event.alpha);
             });
-        } else if ('ondeviceorientation' in window) {
+        } else if ("ondeviceorientation" in window) {
             fromEvent(window, "deviceorientation").pipe(
                 throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })
             ).subscribe((event: DeviceOrientationEvent & { webkitCompassAccuracy: number; webkitCompassHeading: number }) => {
@@ -27,7 +27,7 @@ export class DeviceOrientationService {
                     && +event.webkitCompassAccuracy > 0 && +event.webkitCompassAccuracy < 50) {
                     this.initialOffset = event.webkitCompassHeading || 0;
                 }
-                this.fireOrientationChange(event.alpha - this.initialOffset)
+                this.fireOrientationChange(event.alpha - this.initialOffset);
             });
         }
     }

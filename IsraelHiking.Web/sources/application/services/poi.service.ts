@@ -186,7 +186,7 @@ export class PoiService {
         try {
             let lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
             if (lastModified != null) {
-                lastModified = new Date(lastModified); // deserialize from 
+                lastModified = new Date(lastModified); // deserialize from
             }
             this.loggingService.info(`[POIs] Getting POIs for: ${lastModified ? lastModified.toUTCString() : null} from server`);
             if (lastModified == null || Date.now() - lastModified.getTime() > 1000 * 60 * 60 * 24 * 180) {
