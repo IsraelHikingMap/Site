@@ -185,7 +185,6 @@ export class GeoLocationService {
         }
     }
 
-
     private handlePoistionChange(position: Position): void {
         if (this.isBackground) {
             return;
