@@ -12,14 +12,12 @@ export class DeviceOrientationService {
     public orientationChanged: EventEmitter<number>;
 
     private subscription: Subscription;
-    private initialOffset: number;
     private isBackground: boolean;
 
     constructor(private readonly ngZone: NgZone,
                 private readonly runningContextService: RunningContextService,
                 private readonly loggingService: LoggingService) {
         this.orientationChanged = new EventEmitter();
-        this.initialOffset = 0;
         this.isBackground = false;
         this.subscription = null;
     }
@@ -27,7 +25,6 @@ export class DeviceOrientationService {
     public initialize() {
         document.addEventListener("resume", () => {
             this.isBackground = false;
-            this.initialOffset = 0;
         });
         document.addEventListener("resign", () => {
             this.isBackground = true;
@@ -77,11 +74,11 @@ export class DeviceOrientationService {
             this.subscription = fromEvent(window, "deviceorientation").pipe(
                 throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })
             ).subscribe((event: DeviceOrientationEvent & { webkitCompassAccuracy: number; webkitCompassHeading: number }) => {
-                if (this.initialOffset === 0 && event.absolute !== true
-                    && +event.webkitCompassAccuracy > 0 && +event.webkitCompassAccuracy < 50) {
-                    this.initialOffset = event.webkitCompassHeading || 0;
+                let alpha = event.alpha;
+                if (event.absolute !== true && +event.webkitCompassAccuracy > 0 && +event.webkitCompassAccuracy < 50) {
+                    alpha = 360 - event.webkitCompassHeading;
                 }
-                this.fireOrientationChange(event.alpha - this.initialOffset);
+                this.fireOrientationChange(alpha);
             });
         }
     }
@@ -90,7 +87,6 @@ export class DeviceOrientationService {
         if (this.subscription != null) {
             this.loggingService.info("Disabling device orientation service");
             this.subscription.unsubscribe();
-            this.initialOffset = 0;
         }
     }
 
