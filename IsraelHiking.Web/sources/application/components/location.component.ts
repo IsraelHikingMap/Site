@@ -125,13 +125,11 @@ export class LocationComponent extends BaseMapComponent {
 
     public toggleTracking() {
         if (this.isLoading()) {
-            this.disableGeoLocation();
+            this.disableLocation();
             return;
         }
         if (this.isDisabled()) {
-            this.geoLocationService.enable();
-            this.isFollowing = true;
-            this.isPanned = false;
+            this.enableLocation();
             return;
         }
         // is active must be true
@@ -147,7 +145,7 @@ export class LocationComponent extends BaseMapComponent {
             return;
         }
         if (!this.isRecording()) {
-            this.disableGeoLocation();
+            this.disableLocation();
             return;
         }
     }
@@ -214,9 +212,17 @@ export class LocationComponent extends BaseMapComponent {
         }
     }
 
-    private disableGeoLocation() {
+    private disableLocation() {
         this.geoLocationService.disable();
+        this.deviceOrientationService.disable();
         this.clearLocationFeatureCollection();
+    }
+
+    private enableLocation() {
+        this.geoLocationService.enable();
+        this.deviceOrientationService.enable();
+        this.isFollowing = true;
+        this.isPanned = false;
     }
 
     private moveMapToGpsPosition() {

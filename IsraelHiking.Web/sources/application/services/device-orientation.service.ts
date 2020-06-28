@@ -1,8 +1,9 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { fromEvent } from "rxjs";
+import { fromEvent, Subscription } from "rxjs";
 import { throttleTime } from "rxjs/operators";
 
 import { LoggingService } from "./logging.service";
+import { RunningContextService } from "./running-context.service";
 
 @Injectable()
 export class DeviceOrientationService {
@@ -10,36 +11,20 @@ export class DeviceOrientationService {
 
     public orientationChanged: EventEmitter<number>;
 
+    private subscription: Subscription;
     private initialOffset: number;
     private isBackground: boolean;
 
     constructor(private readonly ngZone: NgZone,
-        private readonly loggingService: LoggingService) {
+                private readonly runningContextService: RunningContextService,
+                private readonly loggingService: LoggingService) {
         this.orientationChanged = new EventEmitter();
         this.initialOffset = 0;
         this.isBackground = false;
+        this.subscription = null;
     }
 
     public initialize() {
-        if ("ondeviceorientationabsolute" in window) {
-            this.loggingService.info("Initializing device orientation service with absolute event")
-            fromEvent(window, "deviceorientationabsolute").pipe(
-                throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })
-            ).subscribe((event: DeviceOrientationEvent) => {
-                this.fireOrientationChange(event.alpha);
-            });
-        } else if ("ondeviceorientation" in window) {
-            this.loggingService.info("Initializing device orientation service with regular event")
-            fromEvent(window, "deviceorientation").pipe(
-                throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })
-            ).subscribe((event: DeviceOrientationEvent & { webkitCompassAccuracy: number; webkitCompassHeading: number }) => {
-                if (this.initialOffset === 0 && event.absolute !== true
-                    && +event.webkitCompassAccuracy > 0 && +event.webkitCompassAccuracy < 50) {
-                    this.initialOffset = event.webkitCompassHeading || 0;
-                }
-                this.fireOrientationChange(event.alpha - this.initialOffset);
-            });
-        }
         document.addEventListener("resume", () => {
             this.isBackground = false;
         });
@@ -73,6 +58,38 @@ export class DeviceOrientationService {
             alpha = 360 - alpha;
             this.orientationChanged.next(alpha);
         });
+    }
+
+    public enable() {
+        if (this.runningContextService.isIos) {
+            (DeviceOrientationEvent as any).requestPermission();
+        }
+        if ("ondeviceorientationabsolute" in window) {
+            this.loggingService.info("Enabling device orientation service with absolute event");
+            this.subscription = fromEvent(window, "deviceorientationabsolute").pipe(
+                throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })
+            ).subscribe((event: DeviceOrientationEvent) => {
+                this.fireOrientationChange(event.alpha);
+            });
+        } else if ("ondeviceorientation" in window) {
+            this.loggingService.info("Enabling device orientation service with regular event");
+            this.subscription = fromEvent(window, "deviceorientation").pipe(
+                throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })
+            ).subscribe((event: DeviceOrientationEvent & { webkitCompassAccuracy: number; webkitCompassHeading: number }) => {
+                if (this.initialOffset === 0 && event.absolute !== true
+                    && +event.webkitCompassAccuracy > 0 && +event.webkitCompassAccuracy < 50) {
+                    this.initialOffset = event.webkitCompassHeading || 0;
+                }
+                this.fireOrientationChange(event.alpha - this.initialOffset);
+            });
+        }
+    }
+
+    public disable() {
+        if (this.subscription != null) {
+            this.loggingService.info("Disabling device orientation service");
+            this.subscription.unsubscribe();
+        }
     }
 
 }
