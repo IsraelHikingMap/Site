@@ -42,7 +42,6 @@ export class GeoLocationService {
         this.isBackground = false;
         this.currentLocation = null;
         this.wasInitialized = false;
-        this.isBackground = false;
     }
 
     public getState(): GeoLocationServiceState {

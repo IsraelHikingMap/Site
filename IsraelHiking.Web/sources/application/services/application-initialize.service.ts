@@ -12,6 +12,7 @@ import { RunningContextService } from "./running-context.service";
 import { DragAndDropService } from "./drag-and-drop.service";
 import { PoiService } from "./poi.service";
 import { RecordedRouteService } from "./recorded-route.service";
+import { DeviceOrientationService } from "./device-orientation.service";
 
 @Injectable()
 export class ApplicationInitializeService {
@@ -25,6 +26,7 @@ export class ApplicationInitializeService {
                 private readonly runnincContextService: RunningContextService,
                 private readonly dragAndDropService: DragAndDropService,
                 private readonly poiService: PoiService,
+                private readonly deviceOrientationService: DeviceOrientationService,
                 private readonly recordedRouteService: RecordedRouteService
     ) {
     }
@@ -47,6 +49,7 @@ export class ApplicationInitializeService {
             }
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();
+            this.deviceOrientationService.initialize();
             await this.loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
             if (ex.toString().indexOf("A mutation operation was attempted on a database that did not allow mutations") !== -1) {
