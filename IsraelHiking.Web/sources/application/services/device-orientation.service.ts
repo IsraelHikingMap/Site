@@ -27,6 +27,7 @@ export class DeviceOrientationService {
     public initialize() {
         document.addEventListener("resume", () => {
             this.isBackground = false;
+            this.initialOffset = 0;
         });
         document.addEventListener("resign", () => {
             this.isBackground = true;
@@ -89,6 +90,7 @@ export class DeviceOrientationService {
         if (this.subscription != null) {
             this.loggingService.info("Disabling device orientation service");
             this.subscription.unsubscribe();
+            this.initialOffset = 0;
         }
     }
 
