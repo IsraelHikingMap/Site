@@ -32,6 +32,7 @@ export class ApplicationInitializeService {
     public async initialize() {
         try {
             await this.loggingService.initialize();
+            await this.loggingService.info("---------------------------------------");
             await this.loggingService.info("Starting IHM Application Initialization");
             this.screenService.initialize();
             await this.databaseService.initialize();
