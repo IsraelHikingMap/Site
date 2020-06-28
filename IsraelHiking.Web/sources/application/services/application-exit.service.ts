@@ -79,7 +79,12 @@ export class ApplicationExitService {
                     this.toastService.info(this.resources.wrappingThingsUp);
                     this.loggingService.debug("Starting IHM Application Exit");
                     await this.databaseService.close();
-                    await this.geoLocationService.disable();
+                    let disablePromise = this.geoLocationService.disable();
+                    let timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(), 2000));
+                    await Promise.race([
+                        disablePromise,
+                        timeoutPromise
+                    ]);
                     this.loggingService.debug("Finished IHM Application Exit");
                     await this.loggingService.close();
                     navigator.app.exitApp();
