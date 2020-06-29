@@ -27,6 +27,8 @@ export class LocationComponent extends BaseMapComponent {
     private showBatteryConfirmation = true;
 
     private isPanned: boolean;
+    private lastSpeed: number;
+    private lastSpeedTime: number;
 
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public isFollowing: boolean;
@@ -48,6 +50,8 @@ export class LocationComponent extends BaseMapComponent {
         this.isPanned = false;
         this.isKeepNorthUp = false;
         this.locationLatLng = null;
+        this.lastSpeed = null;
+        this.lastSpeedTime = null;
         this.clearLocationFeatureCollection();
 
         this.host.load.subscribe(() => {
@@ -84,6 +88,10 @@ export class LocationComponent extends BaseMapComponent {
             if (!this.isActive() || this.locationFeatures.features.length === 0) {
                 return;
             }
+            if (this.lastSpeed != null && new Date().getTime() - this.lastSpeedTime < 5000) {
+                return;
+            }
+            this.lastSpeed = null;
             let center = this.getCenterFromLocationFeatureCollection();
             let radius = this.getRadiusFromLocationFeatureCollection();
             this.updateLocationFeatureCollection(center, radius, bearing);
@@ -201,6 +209,10 @@ export class LocationComponent extends BaseMapComponent {
             this.isFollowing = true;
         }
         let validHeading = !isNaN(position.coords.heading) && position.coords.speed !== 0;
+        if (validHeading) {
+            this.lastSpeed = position.coords.speed;
+            this.lastSpeedTime = new Date().getTime();
+        }
         let heading = validHeading ? position.coords.heading : this.getBrearingFromLocationFeatureCollection();
         this.updateLocationFeatureCollection({
             lat: position.coords.latitude,
