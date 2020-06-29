@@ -240,7 +240,7 @@ namespace IsraelHiking.DataAccess
                     .Sort(f => f.Descending("_score"))
                     .Query(q => FeatureNameSearchQueryWithFactor(q, searchTerm, language))
             );
-            return response.Documents.ToList();
+            return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
         public async Task<List<Feature>> SearchPlaces(string place, string language)
@@ -254,7 +254,7 @@ namespace IsraelHiking.DataAccess
                                 && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CONTAINER}").Value(true))
                     )
             );
-            return response.Documents.ToList();
+            return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
         public async Task<List<Feature>> SearchByLocation(Coordinate nortEast, Coordinate southWest, string searchTerm, string language)
@@ -269,7 +269,7 @@ namespace IsraelHiking.DataAccess
                              q.GeoBoundingBox(b => ConvertToGeoBoundingBox(b, nortEast, southWest))
                     )
             );
-            return response.Documents.ToList();
+            return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
         public async Task<List<Feature>> GetContainers(Coordinate coordinate)
@@ -284,7 +284,7 @@ namespace IsraelHiking.DataAccess
                                 .Relation(GeoShapeRelation.Contains))
                         && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CONTAINER}").Value(true)))
             );
-            return response.Documents.ToList();
+            return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
         private (string currentIndex, string newIndex) GetIndicesStatus(string index1, string index2, string alias)
@@ -402,7 +402,7 @@ namespace IsraelHiking.DataAccess
                         q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_LANGUAGE}").Terms(languages))
                     )
             );
-            return response.Documents.ToList();
+            return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
         public async Task<List<Feature>> GetAllPointsOfInterest(bool withDeleted)
