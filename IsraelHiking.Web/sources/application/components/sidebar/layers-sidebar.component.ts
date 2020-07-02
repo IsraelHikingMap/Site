@@ -188,6 +188,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
         }
         try {
             let newestFileDate = new Date(0);
+            let length = Object.keys(fileNames).length;
             for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
                 let fileName = Object.keys(fileNames)[fileNameIndex];
                 let fileDate = new Date(fileNames[fileName]);
