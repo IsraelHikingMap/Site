@@ -406,10 +406,10 @@
 		"pixelRatio": 2
 	},
 	"cliff_pattern": {
-		"width": 72,
-		"height": 72,
-		"x": 0,
-		"y": 1288,
+		"width": 20,
+		"height": 52,
+		"x": 28,
+		"y": 1296,
 		"pixelRatio": 2
 	},
 	"plus_pattern": {
@@ -427,10 +427,10 @@
 		"pixelRatio": 2
 	},
 	"gradient_pattern": {
-		"width": 64,
-		"height": 64,
+		"width": 16,
+		"height": 16,
 		"x": 388,
-		"y": 1292,
+		"y": 1340,
 		"pixelRatio": 2
 	},
 	"arrowhead": {
