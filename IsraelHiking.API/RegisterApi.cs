@@ -43,6 +43,7 @@ namespace IsraelHiking.API
             services.AddTransient<IOfflineFilesService, OfflineFilesService>();
             services.AddTransient<IImagesUrlsStorageExecutor, ImagesUrlsStorageExecutor>();
             services.AddTransient<IExternalSourceUpdaterExecutor, ExternalSourceUpdaterExecutor>();
+            services.AddTransient<ISimplePointAdderExecutor, SimplePointAdderExecutor>();
 
             // registration here is what determines the order of which to merge points:
             services.AddTransient<IPointsOfInterestAdapter, NakebPointsOfInterestAdapter>();

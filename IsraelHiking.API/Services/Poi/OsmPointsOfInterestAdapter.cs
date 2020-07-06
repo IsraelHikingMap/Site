@@ -35,7 +35,6 @@ namespace IsraelHiking.API.Services.Poi
         /// </summary>
         public const string SEARCH_ICON = "icon-search";
 
-        private readonly IClientsFactory _clientsFactory;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly IOsmRepository _osmRepository;
         private readonly IWikipediaGateway _wikipediaGateway;
@@ -53,7 +52,6 @@ namespace IsraelHiking.API.Services.Poi
         /// </summary>
         /// <param name="pointsOfInterestRepository"></param>
         /// <param name="elevationDataStorage"></param>
-        /// <param name="clentsFactory"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>
         /// <param name="dataContainerConverterService"></param>
@@ -65,7 +63,6 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="logger"></param>
         public OsmPointsOfInterestAdapter(IPointsOfInterestRepository pointsOfInterestRepository,
             IElevationDataStorage elevationDataStorage,
-            IClientsFactory clentsFactory,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
             IDataContainerConverterService dataContainerConverterService,
@@ -76,7 +73,6 @@ namespace IsraelHiking.API.Services.Poi
             IOptions<ConfigurationData> options,
             ILogger logger)
         {
-            _clientsFactory = clentsFactory;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _osmRepository = osmRepository;
             _wikipediaGateway = wikipediaGateway;
@@ -222,10 +218,8 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public async Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, IAuthClient osmGateway, string language)
         {
-            var osmGateway = CreateOsmGateway(tokenAndSecret);
-            var changesetId = await osmGateway.CreateChangeset($"Added {pointOfInterest.Title} using IsraelHiking.osm.org.il");
             var node = new Node
             {
                 Latitude = pointOfInterest.Location.Lat,
@@ -238,6 +232,7 @@ namespace IsraelHiking.API.Services.Poi
             SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             AddTagsByIcon(node.Tags, pointOfInterest.Icon);
             RemoveEmptyTags(node.Tags);
+            var changesetId = await osmGateway.CreateChangeset($"Added {pointOfInterest.Title} using IsraelHiking.osm.org.il");
             node.Id = await osmGateway.CreateElement(changesetId, node);
             await osmGateway.CloseChangeset(changesetId);
 
@@ -246,9 +241,8 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public async Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, IAuthClient osmGateway, string language)
         {
-            var osmGateway = CreateOsmGateway(tokenAndSecret);
             var id = pointOfInterest.Id;
             ICompleteOsmGeo completeOsmGeo = await osmGateway.GetCompleteElement(GeoJsonExtensions.GetOsmId(id), GeoJsonExtensions.GetOsmType(id));
             var featureBeforeUpdate = ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title);
@@ -487,18 +481,10 @@ namespace IsraelHiking.API.Services.Poi
             }
         }
 
-        private IAuthClient CreateOsmGateway(TokenAndSecret tokenAndSecret)
-        {
-            return _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, 
-                _options.OsmConfiguration.ConsumerSecret, 
-                tokenAndSecret.Token, 
-                tokenAndSecret.TokenSecret);
-        }
-
         /// <inheritdoc/>
         public async Task<Feature> GetClosestPoint(Coordinate location, string source, string language = "")
         {
-            var distance = _options.MergePointsOfInterestThreshold;
+            var distance = _options.ClosestPointsOfInterestThreshold;
             var results = await _pointsOfInterestRepository.GetPointsOfInterest(
                 new Coordinate(location.X + distance, location.Y + distance),
                 new Coordinate(location.X - distance, location.Y - distance),

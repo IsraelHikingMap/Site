@@ -77,9 +77,13 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public double SearchFactor { get; set; }
         /// <summary>
-        /// This threshold is used to determine if two points of interest are close enough
+        /// This threshold is used to determine if two points of interest are close enough to be merged
         /// </summary>
         public double MergePointsOfInterestThreshold { get; set; }
+        /// <summary>
+        /// This threshold is used to determine if two points of interest are close enough to be suggested
+        /// </summary>
+        public double ClosestPointsOfInterestThreshold { get; set; }
         /// <summary>
         /// The folder where the binary files are at
         /// </summary>
@@ -146,6 +150,7 @@ namespace IsraelHiking.Common.Configuration
             RadialSimplificationAngle = 90;
             SearchFactor = 0.5;
             MergePointsOfInterestThreshold = 1 / 60.0; // 1 minute
+            ClosestPointsOfInterestThreshold = 0.001; // around 100 m
             BinariesFolder = string.Empty;
             GraphhopperServerAddress = "http://localhost:8989/";
             ElasticsearchServerAddress = "http://localhost:9200/";

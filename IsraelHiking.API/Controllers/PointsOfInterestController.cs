@@ -35,6 +35,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
         private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
+        private readonly ISimplePointAdderExecutor _simplePointAdderExecutor;
         private readonly ILogger _logger;
         private readonly ConfigurationData _options;
         private readonly UsersIdAndTokensCache _cache;
@@ -48,6 +49,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="base64ImageConverter"></param>
         /// <param name="imageUrlStoreExecutor"></param>
+        /// <param name="simplePointAdderExecutor"></param>
         /// <param name="logger"></param>
         /// <param name="options"></param>
         /// <param name="cache"></param>
@@ -57,6 +59,7 @@ namespace IsraelHiking.API.Controllers
             IPointsOfInterestProvider pointsOfInterestProvider,
             IBase64ImageStringToFileConverter base64ImageConverter,
             IImagesUrlsStorageExecutor imageUrlStoreExecutor,
+            ISimplePointAdderExecutor simplePointAdderExecutor,
             ILogger logger,
             IOptions<ConfigurationData> options,
             UsersIdAndTokensCache cache)
@@ -68,6 +71,7 @@ namespace IsraelHiking.API.Controllers
             _imageUrlStoreExecutor = imageUrlStoreExecutor;
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _wikimediaCommonGateway = wikimediaCommonGateway;
+            _simplePointAdderExecutor = simplePointAdderExecutor;
             _logger = logger;
             _options = options.Value;
         }
@@ -155,8 +159,7 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest("Title must not be more than 255 characters...");
             }
-            var tokenAndSecret = _cache.Get(User.Identity.Name);
-            var osmGateway = _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
+            var osmGateway = CreateOsmGateway();
             var user = await osmGateway.GetUserDetails();
             var imageUrls = pointOfInterest.ImagesUrls ?? new string[0];
             for (var urlIndex = 0; urlIndex < imageUrls.Length; urlIndex++)
@@ -186,9 +189,9 @@ namespace IsraelHiking.API.Controllers
 
             if (string.IsNullOrWhiteSpace(pointOfInterest.Id))
             {
-                return Ok(await _pointsOfInterestProvider.AddPointOfInterest(pointOfInterest, tokenAndSecret, language));
+                return Ok(await _pointsOfInterestProvider.AddPointOfInterest(pointOfInterest, osmGateway, language));
             }
-            return Ok(await _pointsOfInterestProvider.UpdatePointOfInterest(pointOfInterest, tokenAndSecret, language));
+            return Ok(await _pointsOfInterestProvider.UpdatePointOfInterest(pointOfInterest, osmGateway, language));
         }
 
         /// <summary>
@@ -228,6 +231,29 @@ namespace IsraelHiking.API.Controllers
             response.Images = await _imageUrlStoreExecutor.GetAllImagesForUrls(imageUrls.ToArray());
             _logger.LogInformation("Finished getting POIs updates, returning content to client");
             return response;
+        }
+
+        /// <summary>
+        /// Get a POI by id and source
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Route("simple")]
+        [HttpPost]
+        [Authorize]
+        public Task AddSimplePoint([FromBody]AddSimplePointOfInterestRequest request)
+        {
+            _logger.LogInformation($"Adding a simple POI at of type {request.PointType} at {request.LatLng.Lat}, {request.LatLng.Lng}");
+            var osmGateway = CreateOsmGateway();
+            return _simplePointAdderExecutor.Add(osmGateway, request);
+        }
+
+        
+
+        private IAuthClient CreateOsmGateway()
+        {
+            var tokenAndSecret = _cache.Get(User.Identity.Name);
+            return _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
         }
     }
 }

@@ -30,6 +30,8 @@ import {
     PointOfInterest
 } from "../models/models";
 
+export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Bollards";
+
 interface IImageItem {
     thumbnail: string;
     imageUrls: string[];
@@ -512,5 +514,9 @@ export class PoiService {
         }, this.resources.getCurrentLanguageCodeSimplified());
         let markerData = dataContainer.routes[0].markers[0];
         return markerData;
+    }
+
+    public addSimplePoint(latlng: LatLngAlt, pointType: SimplePointType): Promise<any> {
+        return this.httpClient.post(Urls.poiSimple, { latLng: latlng, pointType }).toPromise();
     }
 }

@@ -1,8 +1,8 @@
-﻿using IsraelHiking.Common;
-using IsraelHiking.Common.Api;
+﻿using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -36,20 +36,20 @@ namespace IsraelHiking.API.Services.Poi
         /// <summary>
         /// Adds a POI
         /// </summary>
-        /// <param name="pointOfInterest"></param>
-        /// <param name="tokenAndSecret"></param>
+        /// <param name="pointOfInterest">The POI's data to add</param>
+        /// <param name="osmGateway"></param>
         /// <param name="language"></param>
         /// <returns></returns>
-        Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language);
+        Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, IAuthClient osmGateway, string language);
 
         /// <summary>
         /// Updates a POI
         /// </summary>
         /// <param name="pointOfInterest">The POI's new data</param>
-        /// <param name="tokenAndSecret">Credentials</param>
+        /// <param name="osmGateway"></param>
         /// <param name="language">The relevant language</param>
         /// <returns></returns>
-        Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language);
+        Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, IAuthClient osmGateway, string language);
 
         /// <summary>
         /// Get the closest point to the given location, only for the given source

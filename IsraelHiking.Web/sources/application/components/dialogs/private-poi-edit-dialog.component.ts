@@ -6,7 +6,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ImageResizeService } from "../../services/image-resize.service";
-import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
+import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { LinkData, MarkerData, ApplicationState } from "../../models/models";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducres/routes.reducer";
 
@@ -57,7 +57,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     constructor(resources: ResourcesService,
                 private readonly fileService: FileService,
                 private readonly imageResizeService: ImageResizeService,
-                private readonly privatePoiUploaderService: PrivatePoiUploaderService,
+                private readonly matDialog: MatDialog,
                 private readonly dialogRef: MatDialogRef<PrivatePoiEditDialogComponent>,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 @Inject(MAT_DIALOG_DATA) data) {
@@ -152,12 +152,13 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public async uploadPoint() {
-        await this.privatePoiUploaderService.uploadPoint(
-            this.marker.latlng,
-            this.imageLink,
-            this.title,
-            this.description,
-            this.markerType);
+        AddSimplePoiDialogComponent.openDialog(this.matDialog, {
+            latlng: this.marker.latlng,
+            imageLink: this.imageLink,
+            title: this.title,
+            description: this.description,
+            markerType: this.markerType
+        });
         this.dialogRef.close();
     }
 

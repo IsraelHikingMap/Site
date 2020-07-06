@@ -6,10 +6,16 @@ import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { PrivatePoiEditDialogComponent } from "./private-poi-edit-dialog.component";
-import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
+import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { AddPrivatePoiAction } from "../../reducres/routes.reducer";
 import { ApplicationState, MarkerData, LinkData } from "../../models/models";
+
+interface IPrivatePoiShowDialogData {
+    marker: MarkerData;
+    routeId: string;
+    index: number;
+}
 
 @Component({
     selector: "private-poi-show-dialog",
@@ -37,7 +43,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
                         marker,
                         routeId,
                         index
-                    }
+                    } as IPrivatePoiShowDialogData
                 });
         }, 100);
     }
@@ -45,11 +51,10 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
                 private readonly matDialog: MatDialog,
                 private readonly imageGalleryService: ImageGalleryService,
-                private readonly privatePoiUploaderService: PrivatePoiUploaderService,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 private readonly dialogRef: MatDialogRef<PrivatePoiShowDialogComponent>,
-                @Inject(MAT_DIALOG_DATA) data) {
+                @Inject(MAT_DIALOG_DATA) data: IPrivatePoiShowDialogData) {
         super(resources);
 
         this.marker = data.marker;
@@ -75,12 +80,14 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     }
 
     public async uploadPoint() {
-        await this.privatePoiUploaderService.uploadPoint(
-            this.marker.latlng,
-            this.imageLink,
-            this.title,
-            this.description,
-            this.marker.type);
+        AddSimplePoiDialogComponent.openDialog(this.matDialog,
+            {
+                latlng: this.marker.latlng,
+                imageLink: this.imageLink,
+                title: this.title,
+                description: this.description,
+                markerType: this.marker.type
+            });
         this.dialogRef.close();
     }
 
