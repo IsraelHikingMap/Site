@@ -49,7 +49,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
             _latestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
             _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
-            _adapter = new OsmPointsOfInterestAdapter(_pointsOfInterestRepository, _elevationDataStorage, _clientsFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileFetcherExecutor, _tagsHelper, _options, Substitute.For<ILogger>());
+            _adapter = new OsmPointsOfInterestAdapter(_pointsOfInterestRepository, _elevationDataStorage, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileFetcherExecutor, _tagsHelper, _options, Substitute.For<ILogger>());
         }
 
         private IAuthClient SetupHttpFactory()
@@ -221,7 +221,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco {Routes = new List<RouteData>()});
             _wikipediaGateway.GetReference(Arg.Any<string>(), language).Returns(new Reference { Url = "Some-Url" });
 
-            var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, new TokenAndSecret("", ""), language).Result;
+            var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, gateway, language).Result;
 
             Assert.IsNotNull(resutls);
             _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
@@ -247,7 +247,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco { Routes = new List<RouteData>() });
             _wikipediaGateway.GetReference(Arg.Any<string>(), language).Returns(new Reference { Url = "Some-Url" });
 
-            var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, new TokenAndSecret("", ""), language).Result;
+            var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, gateway, language).Result;
 
             Assert.IsNotNull(resutls);
             _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
@@ -277,7 +277,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 }
             });
 
-            var results = _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Result;
+            var results = _adapter.UpdatePointOfInterest(pointOfInterest, gateway, "en").Result;
 
             CollectionAssert.AreEqual(pointOfInterest.ImagesUrls.OrderBy(i => i).ToArray(), results.ImagesUrls.OrderBy(i => i).ToArray());
         }
@@ -304,7 +304,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 }
             });
 
-            var results = _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Result;
+            var results = _adapter.UpdatePointOfInterest(pointOfInterest, gateway, "en").Result;
 
             CollectionAssert.AreEqual(pointOfInterest.ImagesUrls.OrderBy(i => i).ToArray(), results.ImagesUrls.OrderBy(i => i).ToArray());
         }
@@ -337,7 +337,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             });
             _wikipediaGateway.GetReference(Arg.Any<string>(), "en").Returns(new Reference { Url = "Some-Url" });
             
-            _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Wait();
+            _adapter.UpdatePointOfInterest(pointOfInterest, gateway, "en").Wait();
 
             gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA + ":en") && x.Tags.Contains(FeatureAttributes.WIKIPEDIA, "en:Literary Hall")));
         }
@@ -364,7 +364,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 }
             });
 
-            _adapter.UpdatePointOfInterest(pointOfInterest, new TokenAndSecret("", ""), "en").Wait();
+            _adapter.UpdatePointOfInterest(pointOfInterest, gateway, "en").Wait();
 
             _pointsOfInterestRepository.DidNotReceive().UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.DidNotReceive().CreateChangeset(Arg.Any<TagsCollection>());

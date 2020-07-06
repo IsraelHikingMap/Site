@@ -52,6 +52,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 _pointsOfInterestProvider, 
                 new Base64ImageStringToFileConverter(), 
                 _imagesUrlsStorageExecutor,
+                Substitute.For<ISimplePointAdderExecutor>(),
                 Substitute.For<ILogger>(),
                 optionsProvider, 
                 _cache);
@@ -142,7 +143,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var result = _controller.UploadPointOfInterest(poi, "he").Result as OkObjectResult;
 
             Assert.IsNotNull(result);
-            _pointsOfInterestProvider.Received(1).AddPointOfInterest(Arg.Any<PointOfInterestExtended>(), Arg.Any<TokenAndSecret>(), Arg.Any<string>());
+            _pointsOfInterestProvider.Received(1).AddPointOfInterest(Arg.Any<PointOfInterestExtended>(), _osmGateway, Arg.Any<string>());
         }
 
         [TestMethod]
@@ -154,7 +155,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var result = _controller.UploadPointOfInterest(poi, "he").Result as OkObjectResult;
 
             Assert.IsNotNull(result);
-            _pointsOfInterestProvider.Received(1).UpdatePointOfInterest(Arg.Any<PointOfInterestExtended>(), Arg.Any<TokenAndSecret>(), Arg.Any<string>());
+            _pointsOfInterestProvider.Received(1).UpdatePointOfInterest(Arg.Any<PointOfInterestExtended>(), _osmGateway, Arg.Any<string>());
         }
 
         [TestMethod]
