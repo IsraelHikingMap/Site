@@ -45,7 +45,7 @@ namespace IsraelHiking.API.Executors
             var changesetId = await osmGateway.CreateChangeset($"Uploading simple POI, type: {request.PointType} using IsraelHiking.osm.org.il");
             await osmGateway.UploadChangeset(changesetId, change);
             await osmGateway.CloseChangeset(changesetId);
-            var modifiedWay = change.Modify.OfType<Way>().FirstOrDefault();
+            var modifiedWay = change.Modify?.OfType<Way>().FirstOrDefault();
             if (modifiedWay != null)
             {
                 var completeWay = await osmGateway.GetCompleteWay(modifiedWay.Id.Value);
