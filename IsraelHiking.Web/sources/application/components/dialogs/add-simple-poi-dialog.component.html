@@ -10,30 +10,51 @@
     <div mat-dialog-content>
         <div fxLayout="row">
             <div fxFlex>
-                <button mat-button matDialogClose fxFill (click)="addSimplePoint('Tap')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add cattle grid to OSM"><i class="fa icon-tap" [style.color]="'blue'"></i></button>
+                <button mat-button matDialogClose fxFill (click)="addSimplePoint('Tap')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add cattle grid to OSM">
+                    <i class="fa icon-tap" [style.color]="'blue'"></i><br />
+                    {{resources.legendDrinkingWater}}
+                </button>
             </div>
             <div fxFlex>
-                <button mat-button matDialogClose fxFill (click)="addSimplePoint('CattleGrid')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add cattle grid to OSM"><i class="fa fa-lg icon-cattle-grid"></i></button>
+                <button mat-button matDialogClose fxFill (click)="addSimplePoint('CattleGrid')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add cattle grid to OSM">
+                    <i class="fa fa-lg icon-cattle-grid"></i><br />
+                    {{resources.legendCattleGrid}}
+                </button>
             </div>
             <div fxFlex>
-                <button mat-button matDialogClose fxFill (click)="addSimplePoint('Parking')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add parking to OSM"><i class="fa icon-parking" [style.color]="'blue'"></i></button>
+                <button mat-button matDialogClose fxFill (click)="addSimplePoint('Parking')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add parking to OSM">
+                    <i class="fa icon-parking" [style.color]="'blue'"></i><br />
+                    {{resources.legendParking}}
+                </button>
             </div>
         </div>
         <div fxLayout="row">
             <div fxFlex>
-                <button mat-button matDialogClose fxFill (click)="addSimplePoint('OpenGate')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add open gate to OSM"><i class="fa icon-gate"></i></button>
+                <button mat-button matDialogClose fxFill (click)="addSimplePoint('OpenGate')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add open gate to OSM">
+                    <i class="fa icon-gate"></i><br />
+                    {{resources.legendGate}}
+                </button>
             </div>
             <div fxFlex>
-                <button mat-button matDialogClose fxFill (click)="addSimplePoint('ClosedGate')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add closed gate to OSM"><i class="fa icon-gate" [style.color]="'red'"></i></button>
+                <button mat-button matDialogClose fxFill (click)="addSimplePoint('ClosedGate')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add closed gate to OSM">
+                    <i class="fa icon-gate" [style.color]="'red'"></i><br />
+                    {{resources.legendClosedGate}}
+                </button>
             </div>
             <div fxFlex>
-                <button mat-button matDialogClose fxFill (click)="addSimplePoint('Bollards')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add bollards to OSM"><i class="fa icon-bollards"></i></button>
+                <button mat-button matDialogClose fxFill (click)="addSimplePoint('Block')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add block to OSM">
+                    <i class="fa icon-bollards"></i><br />
+                    {{resources.legendBlock}}
+                </button>
             </div>
         </div>
         <div fxLayout="row">
             <div fxFlex>
-                <button mat-button matDialogClose fxFill (click)="addComplexPoint()" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add complex point to OSM"><i class="fa fa-lg icon-info-circle"></i> {{resources.other}}</button>
+                <button mat-button matDialogClose fxFill (click)="addComplexPoint()" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add complex point to OSM">
+                    <i class="fa fa-lg icon-info-circle"></i><br />
+                    {{resources.other}}
+                </button>
             </div>
         </div>
     </div>
-    </div>
+</div>

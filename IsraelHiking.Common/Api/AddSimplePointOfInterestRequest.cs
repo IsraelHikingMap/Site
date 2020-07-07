@@ -8,7 +8,7 @@
         Parking,
         OpenGate,
         ClosedGate,
-        Bollards
+        Block
     }
 
     public class AddSimplePointOfInterestRequest

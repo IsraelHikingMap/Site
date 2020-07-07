@@ -60,7 +60,7 @@ namespace IsraelHiking.API.Executors
             {
                 SimplePointType.Tap => new TagsCollection { { "amenity", "diriking_water" } },
                 SimplePointType.Parking => new TagsCollection { { "amenity", "parking" } },
-                SimplePointType.Bollards => new TagsCollection {
+                SimplePointType.Block => new TagsCollection {
                         { "barrier", "yes" },
                         { "motor_vehicle", "no" }
                     },
@@ -83,7 +83,7 @@ namespace IsraelHiking.API.Executors
             {
                 SimplePointType.Tap => false,
                 SimplePointType.Parking => false,
-                SimplePointType.Bollards => true,
+                SimplePointType.Block => true,
                 SimplePointType.CattleGrid => true,
                 SimplePointType.ClosedGate => true,
                 SimplePointType.OpenGate => true,
