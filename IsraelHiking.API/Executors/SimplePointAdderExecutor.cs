@@ -1,9 +1,10 @@
-﻿using IsraelHiking.API.Converters;
-using IsraelHiking.API.Services.Osm;
+﻿using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
+using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces.Repositories;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
@@ -21,21 +22,22 @@ namespace IsraelHiking.API.Executors
     /// <inheritdoc/>
     public class SimplePointAdderExecutor : ISimplePointAdderExecutor
     {
-        private const double CLOSEST_HIGHWAY_DISTANCE = 0.0003; // around 30 m
-
         private readonly IHighwaysRepository _highwaysRepository;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
+        private readonly ConfigurationData _options;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="highwaysRepository"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
-        public SimplePointAdderExecutor(IHighwaysRepository highwaysRepository,
+        public SimplePointAdderExecutor(IOptions<ConfigurationData> options,
+            IHighwaysRepository highwaysRepository,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor)
         {
             _highwaysRepository = highwaysRepository;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
+            _options = options.Value;
         }
 
         /// <inheritdoc/>
@@ -97,7 +99,7 @@ namespace IsraelHiking.API.Executors
             var highways = await _highwaysRepository.GetHighways(new Coordinate(latLng.Lng + diff, latLng.Lat + diff),
                 new Coordinate(latLng.Lng - diff, latLng.Lat - diff));
             var point = new Point(latLng.Lng, latLng.Lat);
-            var closest = highways.Where(h => h.Geometry.Distance(point) < CLOSEST_HIGHWAY_DISTANCE)
+            var closest = highways.Where(h => h.Geometry.Distance(point) < _options.ClosestHighwayForGates)
                 .OrderBy(h => h.Geometry.Distance(point)).FirstOrDefault();
             return closest;
         }
@@ -127,7 +129,7 @@ namespace IsraelHiking.API.Executors
             var coordinate = request.LatLng.ToCoordinate();
             var closestNode = closestHighway.Geometry.Coordinates.OrderBy(n => n.Distance(coordinate)).FirstOrDefault();
             var closetNodeIndex = Array.FindIndex(closestHighway.Geometry.Coordinates.ToArray(), n => n == closestNode);
-            if (closestNode.Distance(coordinate) < CLOSEST_HIGHWAY_DISTANCE
+            if (closestNode.Distance(coordinate) < _options.ClosestNodeForGates
                 || closetNodeIndex == 0 || closetNodeIndex == closestHighway.Geometry.Coordinates.Length - 1)
             {
                 var nodeId = long.Parse(((List<object>)closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[closetNodeIndex].ToString());

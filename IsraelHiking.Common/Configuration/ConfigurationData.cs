@@ -61,7 +61,7 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public double SimplificationDistanceTolerance { get; set; }
         /// <summary>
-        /// The minimal distance allowed to treat a point as non part of an existing line
+        /// The minimal distance in meters allowed to treat a point as non part of an existing line
         /// </summary>
         public double MinimalDistanceToClosestPoint { get; set; }
         /// <summary>
@@ -77,13 +77,21 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public double SearchFactor { get; set; }
         /// <summary>
-        /// This threshold is used to determine if two points of interest are close enough to be merged
+        /// This threshold in degrees that is used to determine if two points of interest are close enough to be merged
         /// </summary>
         public double MergePointsOfInterestThreshold { get; set; }
         /// <summary>
-        /// This threshold is used to determine if two points of interest are close enough to be suggested
+        /// This threshold in degrees that is used to determine if two points of interest are close enough to be suggested when updating
         /// </summary>
         public double ClosestPointsOfInterestThreshold { get; set; }
+        /// <summary>
+        /// This distance to the closest highway for adding gates in degrees
+        /// </summary>
+        public double ClosestHighwayForGates { get; set; }
+        /// <summary>
+        /// This distance to the closest node for updaing gates in degrees
+        /// </summary>
+        public double ClosestNodeForGates { get; set; }
         /// <summary>
         /// The folder where the binary files are at
         /// </summary>
@@ -150,7 +158,9 @@ namespace IsraelHiking.Common.Configuration
             RadialSimplificationAngle = 90;
             SearchFactor = 0.5;
             MergePointsOfInterestThreshold = 1 / 60.0; // 1 minute
-            ClosestPointsOfInterestThreshold = 0.001; // around 100 m
+            ClosestPointsOfInterestThreshold = 0.001; // around 100m
+            ClosestHighwayForGates = 0.0003; // around 30m
+            ClosestNodeForGates = 0.00005; // around 5m
             BinariesFolder = string.Empty;
             GraphhopperServerAddress = "http://localhost:8989/";
             ElasticsearchServerAddress = "http://localhost:9200/";
