@@ -172,6 +172,8 @@ export class LayersSidebarComponent extends BaseMapComponent {
             this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
             return;
         }
+        this.loggingService.info("Starting downloading offline files, last update: " +
+            this.ngRedux.getState().offlineState.lastModifiedDate);
         this.toastService.progress({
             action: (progress) => this.downloadOfflineFilesProgressAction(progress, fileNames),
             showContinueButton: true,
@@ -196,6 +198,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 let fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
                     (value) => reportProgress((50.0 / length) * value +
                         fileNameIndex * 100.0 / length));
+                this.loggingService.info(`Finished downloading ${fileName}`)
                 if (fileName.endsWith(".mbtiles")) {
                     await this.databaseService.closeDatabase(fileName.replace(".mbtiles", ""));
                     await this.fileService.saveToDatabasesFolder(fileContent as Blob, fileName);
