@@ -39,9 +39,7 @@ export class FileComponent extends BaseMapComponent {
         if (file.name.endsWith(".ihm") && this.ngRedux.getState().offlineState.isOfflineAvailable) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             try {
-                await this.fileService.openIHMfile(file,
-                    this.poisStoreCallback,
-                    this.imagesStoreCallback);
+                await this.fileService.writeStyles(file);
                 this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             } catch (ex) {
                 this.toastService.error(ex.message);
@@ -50,6 +48,7 @@ export class FileComponent extends BaseMapComponent {
         }
         if (file.name.endsWith(".mbtiles") && this.ngRedux.getState().offlineState.isOfflineAvailable) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
+            await this.databaseService.closeDatabase(file.name.replace(".mbtiles", ""));
             await this.fileService.saveToDatabasesFolder(file, file.name);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: new Date(file.lastModified) }));

@@ -61,6 +61,7 @@ import { Device } from "@ionic-native/device/ngx";
 import { SQLite } from "@ionic-native/sqlite/ngx";
 import { AppVersion } from "@ionic-native/app-version/ngx";
 import { Media } from "@ionic-native/media/ngx";
+import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -332,6 +333,7 @@ export function getWindow() { return window; }
             SQLite,
             AppVersion,
             Media,
+            FileTransfer,
             RouteEditPoiInteraction,
             RouteEditRouteInteraction
         ],

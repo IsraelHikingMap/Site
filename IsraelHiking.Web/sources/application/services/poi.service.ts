@@ -4,6 +4,7 @@ import { NgRedux, select } from "@angular-redux/store";
 import { uniq } from "lodash";
 import { Observable, fromEvent } from "rxjs";
 import { timeout, throttleTime } from "rxjs/operators";
+import JSZip from "jszip";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, IPoiRouterData } from "./hash.service";
@@ -232,19 +233,40 @@ export class PoiService {
         let poisFile = await this.fileService.getFileContentWithProgress(Urls.poisOfflineFile,
             (value) => progressCallback(1 + value * 49, this.resources.downloadingPoisForOfflineUsage));
         this.loggingService.info(`[POIs] Finished downloading pois file, opening it`);
-        await this.fileService.openIHMfile(poisFile, async (poisString: string) => {
-            let poisJson = JSON.parse(poisString) as GeoJSON.FeatureCollection;
-            await this.databaseService.storePois(poisJson.features);
-            lastModified = this.getLastModifiedFromFeatures(poisJson.features);
-            progressCallback(55, this.resources.downloadingPoisForOfflineUsage);
-        }, async (imagesString: string, progressPercentage: number) => {
-            let imagesUrl = this.imageItemToUrl(JSON.parse(imagesString) as IImageItem[]);
-            await this.databaseService.storeImages(imagesUrl);
-            progressCallback(progressPercentage * 0.45 + 55, this.resources.downloadingPoisForOfflineUsage);
-        });
+        await this.openPoisFile(poisFile, progressCallback);
         this.loggingService.info(`[POIs] Updating last modified to: ${lastModified}`);
         this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: lastModified }));
         this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
+    }
+
+    public async openPoisFile(blob: Blob, progressCallback: (value: number, text?: string) => void): Promise<Date> {
+        let zip = new JSZip();
+        await zip.loadAsync(blob);
+        await this.writeImages(zip, progressCallback);
+        return await this.writePois(zip, progressCallback);
+    }
+
+    private async writePois(zip: JSZip, progressCallback: (percentage: number, content: string) => void): Promise<Date> {
+        let poisFileName = Object.keys(zip.files).find(name => name.startsWith("pois/") && name.endsWith(".geojson"));
+        let lastModified = new Date(0);
+        let poisText = (await zip.file(poisFileName).async("text")).trim();
+        let poisJson = JSON.parse(poisText) as GeoJSON.FeatureCollection;
+        await this.databaseService.storePois(poisJson.features);
+        lastModified = this.getLastModifiedFromFeatures(poisJson.features);
+        progressCallback(100, this.resources.downloadingPoisForOfflineUsage);
+        return lastModified;
+    }
+
+    private async writeImages(zip: JSZip, progressCallback: (percentage: number, content: string) => void) {
+        let images = Object.keys(zip.files).filter(name => name.startsWith("images/") && name.endsWith(".json"));
+        for (let imagesFileIndex = 0; imagesFileIndex < images.length; imagesFileIndex++) {
+            let imagesFile = images[imagesFileIndex];
+            let imagesString = await zip.file(imagesFile).async("text") as string;
+            let imagesUrl = this.imageItemToUrl(JSON.parse(imagesString) as IImageItem[]);
+            await this.databaseService.storeImages(imagesUrl);
+            progressCallback((imagesFileIndex + 1) / images.length * 100 * 0.45 + 50, this.resources.downloadingPoisForOfflineUsage);
+            this.loggingService.debug("[POIs] Added images: " + imagesFile);
+        }
     }
 
     private getLastModifiedFromFeatures(features: GeoJSON.Feature[]): Date {

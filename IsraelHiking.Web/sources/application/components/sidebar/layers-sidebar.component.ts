@@ -195,23 +195,18 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 let fileName = Object.keys(fileNames)[fileNameIndex];
                 let fileDate = new Date(fileNames[fileName]);
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
-                let fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
-                    (value) => reportProgress((50.0 / length) * value +
-                        fileNameIndex * 100.0 / length));
-                this.loggingService.info(`Finished downloading ${fileName}`)
                 if (fileName.endsWith(".mbtiles")) {
                     await this.databaseService.closeDatabase(fileName.replace(".mbtiles", ""));
-                    await this.fileService.saveToDatabasesFolder(fileContent as Blob, fileName);
+                    await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`,
+                        (value) => reportProgress((50.0 / length) * value +
+                            fileNameIndex * 100.0 / length));
+                    this.loggingService.info(`Finished downloading ${fileName}`);
                 } else {
-                    await this.fileService.openIHMfile(fileContent as Blob,
-                        async (content: string) => {
-                            await this.databaseService.storePois(JSON.parse(content).features);
-                        },
-                        async (content, percentage) => {
-                            await this.databaseService.storeImages(JSON.parse(content));
-                            reportProgress(this.getFileInstallationProgress(length, fileNameIndex, percentage));
-                        }
-                    );
+                    let fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
+                        (value) => reportProgress((50.0 / length) * value +
+                            fileNameIndex * 100.0 / length));
+                    this.loggingService.info(`Finished downloading ${fileName}`);
+                    await this.fileService.writeStyles(fileContent as Blob);
                 }
                 reportProgress(this.getFileInstallationProgress(length, fileNameIndex, 100));
             }

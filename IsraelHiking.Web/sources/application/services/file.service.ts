@@ -3,6 +3,7 @@ import { HttpClient, HttpEventType } from "@angular/common/http";
 import { Style } from "mapbox-gl";
 import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
 import { WebView } from "@ionic-native/ionic-webview/ngx";
+import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { last } from "lodash";
 import JSZip from "jszip";
 
@@ -29,6 +30,7 @@ export class FileService {
     constructor(private readonly httpClient: HttpClient,
                 private readonly fileSystemWrapper: FileSystemWrapper,
                 private readonly webView: WebView,
+                private readonly fileTransfer: FileTransfer,
                 private readonly runningContextService: RunningContextService,
                 private readonly imageResizeService: ImageResizeService,
                 private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
@@ -202,46 +204,15 @@ export class FileService {
         return true;
     }
 
-    public async openIHMfile(blob: Blob,
-                             poisCallback: (content: string) => Promise<void>,
-                             imagesCallback: (content: string, percentage: number) => Promise<void>,
-    ): Promise<void> {
+    public async writeStyles(blob: Blob) {
         let zip = new JSZip();
         await zip.loadAsync(blob);
-        await this.writePois(zip, poisCallback);
-        await this.writeImages(zip, imagesCallback);
-
-        if (!this.runningContextService.isCordova) {
-            return;
-        }
-        await this.writeStyles(zip);
-    }
-
-    private async writePois(zip: JSZip, poisCallback: (content: string) => Promise<void>) {
-        let poisFileName = Object.keys(zip.files).find(name => name.startsWith("pois/") && name.endsWith(".geojson"));
-        if (poisFileName != null) {
-            let poisText = (await zip.file(poisFileName).async("text")).trim();
-            await poisCallback(poisText);
-            this.loggingService.debug("Added pois.");
-        }
-    }
-
-    private async writeImages(zip: JSZip, imagesCallback: (content: string, percentage: number) => Promise<void>) {
-        let images = Object.keys(zip.files).filter(name => name.startsWith("images/") && name.endsWith(".json"));
-        for (let imagesFileIndex = 0; imagesFileIndex < images.length; imagesFileIndex++) {
-            let imagesFile = images[imagesFileIndex];
-            await imagesCallback(await zip.file(imagesFile).async("text") as string, (imagesFileIndex + 1) / images.length * 100);
-            this.loggingService.debug("Added images: " + imagesFile);
-        }
-    }
-
-    private async writeStyles(zip: JSZip) {
         let styles = Object.keys(zip.files).filter(name => name.startsWith("styles/") && name.endsWith(".json"));
         for (let styleFileName of styles) {
             let styleText = (await zip.file(styleFileName).async("text")).trim();
             await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName.replace("styles/", ""), styleText,
                 { append: false, replace: true, truncate: 0 });
-            this.loggingService.debug("Write style finished succefully!");
+            this.loggingService.debug(`Write style finished succefully: ${styleFileName}`);
         }
     }
 
@@ -260,10 +231,14 @@ export class FileService {
         return data;
     }
 
-    public async saveToDatabasesFolder(blob: Blob, fileName: string) {
-        let path = this.runningContextService.isIos
+    private getDatabaseFolder() {
+        return this.runningContextService.isIos
             ? this.fileSystemWrapper.documentsDirectory
             : this.fileSystemWrapper.applicationStorageDirectory + "/databases";
+    }
+
+    public async saveToDatabasesFolder(blob: Blob, fileName: string) {
+        let path = this.getDatabaseFolder();
         await this.fileSystemWrapper.writeFile(path, fileName, blob, { append: false, replace: true, truncate: 0 });
     }
 
@@ -315,5 +290,14 @@ export class FileService {
                 }
             }, error => reject(error));
         });
+    }
+
+    public async downloadDatabaseFile(url: string, progressCallback: (value: number) => void) {
+        let fileTransferObject = this.fileTransfer.create();
+        let path = this.getDatabaseFolder();
+        fileTransferObject.onProgress((event) => {
+            progressCallback(event.loaded / event.total);
+        });
+        await fileTransferObject.download(url, path);
     }
 }
