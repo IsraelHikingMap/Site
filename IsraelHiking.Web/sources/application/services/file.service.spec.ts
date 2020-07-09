@@ -1,9 +1,12 @@
-import { TestBed, inject, fakeAsync } from "@angular/core/testing";
-import { HttpClientModule, HttpClient } from "@angular/common/http";
+import { TestBed, inject } from "@angular/core/testing";
+import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { Device } from "@ionic-native/device/ngx";
+import { WebView } from "@ionic-native/ionic-webview/ngx";
+import { FileTransfer } from "@ionic-native/file-transfer/ngx";
+import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 
-import { FileService, IFormatViewModel } from "./file.service";
+import { FileService } from "./file.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { ImageResizeService } from "./image-resize.service";
 import { Urls } from "../urls";
@@ -22,7 +25,11 @@ describe("FileService", () => {
 
     beforeEach(() => {
         imageResizeService = {
-            resizeImageAndConvert: jasmine.createSpy("resizeImageAndConvert")
+            resizeImageAndConvert: () => Promise.resolve({
+                northEast: { lat: 0, lng: 0 },
+                southWest: { lat: 1, lng: 1 },
+                routes: [{ markers: [{} as MarkerData] }] as RouteData[]
+            } as DataContainer)
         } as any as ImageResizeService;
         nonAngularObjectsFactory = {
             saveAsWrapper: jasmine.createSpy("saveAsWrapper"),
@@ -42,24 +49,15 @@ describe("FileService", () => {
             providers: [
                 RunningContextService,
                 Device,
+                FileSystemWrapper,
+                WebView,
                 LoggingService,
-                {
-                    provide: FileService,
-                    useFactory: fakeAsync((http, mockBackend: HttpTestingController,
-                                           runningContextService: RunningContextService, loggingService: LoggingService) => {
-                        let fileService = new FileService(http,
-                            null,
-                            null,
-                            runningContextService,
-                            imageResizeService,
-                            nonAngularObjectsFactory,
-                            selectedRouteService,
-                            fitBoundsService,
-                            loggingService);
-                        return fileService;
-                    }),
-                    deps: [HttpClient, HttpTestingController, RunningContextService, LoggingService]
-                }
+                FileTransfer,
+                { provide: FitBoundsService, useValue: fitBoundsService },
+                { provide: SelectedRouteService, useValue: selectedRouteService },
+                { provide: NonAngularObjectsFactory, useValue: nonAngularObjectsFactory },
+                { provide: ImageResizeService, useValue: imageResizeService },
+                FileService
             ]
         });
     });
@@ -103,17 +101,9 @@ describe("FileService", () => {
 
     it("Should open jpeg file and resize it", inject([FileService, HttpTestingController],
         async (fileService: FileService) => {
-            let file = new Blob([""], { type: "image/jpeg" }) as File;
-            imageResizeService.resizeImageAndConvert = () => Promise.resolve({
-                northEast: { lat: 0, lng: 0 },
-                southWest: { lat: 1, lng: 1 },
-                routes: [{ markers: [{} as MarkerData] }] as RouteData[]
-            } as DataContainer);
-            let promise = fileService.addRoutesFromFile(file).then(() => {
-                expect(selectedRouteService.addRoutes).toHaveBeenCalled();
-            }, fail);
-
-            return promise;
+            let file = new Blob([""], { type: ImageResizeService.JPEG }) as File;
+            await fileService.addRoutesFromFile(file);
+            expect(selectedRouteService.addRoutes).toHaveBeenCalled();
         }));
 
     it("Should not get a file from event when there's no files", inject([FileService], (fileService: FileService) => {
