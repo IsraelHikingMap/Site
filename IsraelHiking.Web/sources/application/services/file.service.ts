@@ -292,12 +292,12 @@ export class FileService {
         });
     }
 
-    public async downloadDatabaseFile(url: string, progressCallback: (value: number) => void) {
+    public async downloadDatabaseFile(url: string, fileName: string, progressCallback: (value: number) => void) {
         let fileTransferObject = this.fileTransfer.create();
         let path = this.getDatabaseFolder();
         fileTransferObject.onProgress((event) => {
             progressCallback(event.loaded / event.total);
         });
-        await fileTransferObject.download(url, path);
+        await fileTransferObject.download(url, path + "/" + fileName);
     }
 }

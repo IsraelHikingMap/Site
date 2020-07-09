@@ -197,7 +197,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
                 if (fileName.endsWith(".mbtiles")) {
                     await this.databaseService.closeDatabase(fileName.replace(".mbtiles", ""));
-                    await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`,
+                    await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`, fileName,
                         (value) => reportProgress((50.0 / length) * value +
                             fileNameIndex * 100.0 / length));
                     this.loggingService.info(`Finished downloading ${fileName}`);

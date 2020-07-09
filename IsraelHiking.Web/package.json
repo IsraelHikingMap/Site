@@ -48,6 +48,7 @@
     "angulartics2": "7.5.2",
     "b64-to-blob": "1.2.19",
     "base64-arraybuffer": "^0.2.0",
+    "cordova-android": "^8.1.0",
     "cordova-ios": "^5.1.1",
     "cordova-plugin-app-version": "^0.1.9",
     "cordova-plugin-brightness": "^0.2.0",
@@ -198,7 +199,8 @@
       "cordova-plugin-file-transfer": {}
     },
     "platforms": [
-      "ios"
+      "ios",
+      "android"
     ]
   },
   "version": "9.0.0"
