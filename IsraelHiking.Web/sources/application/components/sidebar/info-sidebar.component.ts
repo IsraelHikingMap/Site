@@ -12,9 +12,9 @@ import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP, SATELLITE } from "../../reducres/ini
 import legendSectionsJson from "../../../content/legend/legend.json";
 
 export interface ILegendSection {
+    key: string;
     items: ILegendItem[];
     title: string;
-    id: string;
 }
 
 @Component({
@@ -59,7 +59,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     public isSectionOpen(section: ILegendSection) {
-        return this.selectedSection != null && this.selectedSection.id === section.id;
+        return this.selectedSection != null && this.selectedSection.key === section.key;
     }
 
     public isApp(): boolean {
@@ -71,13 +71,11 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     private initalizeLegendSections() {
-        let id = 1;
         this.legendSections = JSON.parse(JSON.stringify(legendSectionsJson));
         for (let section of this.legendSections) {
-            section.id = "_" + id++;
-            section.title = this.resources[section.title];
+            section.title = this.resources[section.key];
             for (let item of section.items) {
-                item.title = this.resources[item.title];
+                item.title = this.resources[item.key];
             }
         }
 
@@ -85,7 +83,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
             this.removeMtbUnwantedLegend();
         } else if (this.layersService.getSelectedBaseLayer().key === ISRAEL_HIKING_MAP) {
             this.removeIhmUnwantedLegend();
-        } else if (this.layersService.getSelectedBaseLayer().key === SATELLITE) {
+        } else {
             this.legendSections = [];
         }
     }

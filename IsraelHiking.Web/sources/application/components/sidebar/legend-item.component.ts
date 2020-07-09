@@ -5,7 +5,6 @@ import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
 import { LatLngAlt } from "../../models/models";
-import { Urls } from "../../urls";
 
 type LegendItemType = "POI" | "Way";
 
@@ -16,6 +15,7 @@ export interface ILegendItem {
     type: LegendItemType;
     osmTags: string[];
     link: string;
+    key: string;
 }
 
 @Component({
@@ -51,8 +51,7 @@ export class LegendItemComponent extends BaseMapComponent {
     }
 
     public getImageAddress(item: ILegendItem) {
-        let width = item.type === "POI" ? 50 : 200;
         let styleKey = this.layersService.getSelectedBaseLayer().address.replace(".json", "").split("/").splice(-1)[0];
-        return `${Urls.images}?lat=${item.latlng.lat}&lon=${item.latlng.lng}&zoom=${item.zoom}&width=${width}&height=50&style=${styleKey}`;
+        return `content/legend/${styleKey}_${item.key}.png`;
     }
 }

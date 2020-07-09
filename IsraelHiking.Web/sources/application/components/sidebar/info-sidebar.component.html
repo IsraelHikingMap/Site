@@ -73,8 +73,8 @@
                 <p>{{resources.legendEmpty}}</p>
             </div>
             <mat-accordion>
-                <mat-expansion-panel *ngFor="let section of legendSections" [id]="section.id" (opened)="openSection(section)">
-                    <mat-expansion-panel-header [ngx-scroll-to]="section.id">
+                <mat-expansion-panel *ngFor="let section of legendSections" [id]="section.key" (opened)="openSection(section)">
+                    <mat-expansion-panel-header [ngx-scroll-to]="section.key">
                         {{section.title}}
                     </mat-expansion-panel-header>
                     <div *ngIf="isSectionOpen(section)">
