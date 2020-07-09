@@ -166,6 +166,7 @@
   <platform name="ios">
     <allow-intent href="itms:*" />
     <allow-intent href="itms-apps:*" />
+    <preference name="deployment-target" value="13.0" />
     <preference name="AutoHideSplashScreen" value="true" />
     <preference name="SplashScreenDelay" value="0" />
     <preference name="FadeSplashScreenDuration" value="0" />
