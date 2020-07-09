@@ -209,7 +209,13 @@ export class DatabaseService {
     }
 
     public storePois(pois: GeoJSON.Feature[]): Promise<void> {
-        return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkPut(pois);
+        let chunkSize = pois.length / 20;
+        while (pois.length > 0) {
+            let poisToStore = pois.splice(0, chunkSize);
+            this.loggingService.debug(`[POIs] Storing pois, left: ${pois.length}`);
+            return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkPut(poisToStore);
+        }
+        
     }
 
     public deletePois(poiIds: string[]): Promise<void> {
