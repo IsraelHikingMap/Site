@@ -225,7 +225,6 @@ export class PoiService {
 
     private async downlodOfflineFileAndUpdateDatabase(progressCallback: (value: number, text?: string) => void): Promise<void> {
         progressCallback(1, this.resources.downloadingPoisForOfflineUsage);
-        let lastModified = null;
         let poiIdsToDelete = this.poisGeojson.features.map(f => f.properties.poiId);
         this.loggingService.info(`[POIs] Deleting exiting pois: ${poiIdsToDelete.length}`);
         await this.databaseService.deletePois(poiIdsToDelete);
@@ -233,7 +232,7 @@ export class PoiService {
         let poisFile = await this.fileService.getFileContentWithProgress(Urls.poisOfflineFile,
             (value) => progressCallback(1 + value * 49, this.resources.downloadingPoisForOfflineUsage));
         this.loggingService.info(`[POIs] Finished downloading pois file, opening it`);
-        await this.openPoisFile(poisFile, progressCallback);
+        let lastModified = await this.openPoisFile(poisFile, progressCallback);
         this.loggingService.info(`[POIs] Updating last modified to: ${lastModified}`);
         this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: lastModified }));
         this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
