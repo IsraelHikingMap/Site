@@ -88,7 +88,7 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void PostSaveFile_ConvertToGpx_ShouldReturnByteArray()
+        public void PostConvertFile_ConvertToGpx_ShouldReturnByteArray()
         {
             var dataContainer = new DataContainerPoco
             {
@@ -113,7 +113,7 @@ namespace IsraelHiking.API.Tests.Controllers
             };
             var expectedGpx = _gpxDataContainerConverter.ToGpx(dataContainer);
 
-            var bytes = _controller.PostSaveFile("gpx", dataContainer).Result;
+            var bytes = _controller.PostConvertFile("gpx", dataContainer).Result;
 
             
             CollectionAssert.AreEqual(expectedGpx.ToBytes(), bytes);

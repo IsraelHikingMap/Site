@@ -195,9 +195,10 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 let fileName = Object.keys(fileNames)[fileNameIndex];
                 let fileDate = new Date(fileNames[fileName]);
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
+                let token = this.ngRedux.getState().userState.token;
                 if (fileName.endsWith(".mbtiles")) {
                     await this.databaseService.closeDatabase(fileName.replace(".mbtiles", ""));
-                    await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`, fileName,
+                    await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`, fileName, token,
                         (value) => reportProgress((50.0 / length) * value +
                             fileNameIndex * 100.0 / length));
                     this.loggingService.info(`Finished downloading ${fileName}`);
