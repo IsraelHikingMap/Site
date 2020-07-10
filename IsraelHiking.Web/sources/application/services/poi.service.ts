@@ -214,9 +214,9 @@ export class PoiService {
             this.databaseService.deletePois(deletedIds);
             this.loggingService.info(`[POIs] Updating last modified to: ${updates.lastModified}`);
             this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: updates.lastModified }));
-            this.loggingService.info(`[POIs] Updating POIs for clustering from database: ${updates.features.length}`);
+            this.loggingService.info(`[POIs] Getting POIs for clustering from database`);
             await this.rebuildPois();
-            this.loggingService.info(`[POIs] Updated pois for clustering: ${this.poisGeojson.features.length}`);
+            this.loggingService.info(`[POIs] Got POIs for clustering: ${this.poisGeojson.features.length}`);
             let imageAndData = this.imageItemToUrl(updates.images);
             this.loggingService.info(`[POIs] Storing images: ${imageAndData.length}`);
             this.databaseService.storeImages(imageAndData);
