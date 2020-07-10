@@ -250,6 +250,7 @@ export class PoiService {
         let poisFileName = Object.keys(zip.files).find(name => name.startsWith("pois/") && name.endsWith(".geojson"));
         let lastModified = new Date(0);
         let poisJson = JSON.parse((await zip.file(poisFileName).async("text")).trim()) as GeoJSON.FeatureCollection;
+        lastModified = this.getLastModifiedFromFeatures(poisJson.features);
         this.loggingService.info(`[POIs] Storing pois in chunks`);
         let chunks = 20;
         let chunkSize = poisJson.features.length / chunks;
@@ -261,7 +262,6 @@ export class PoiService {
             progressCallback((chunkIndex * 10.0 / chunks) + 90, this.resources.downloadingPoisForOfflineUsage);
             chunkIndex++;
         }
-        lastModified = this.getLastModifiedFromFeatures(poisJson.features);
         progressCallback(100, this.resources.downloadingPoisForOfflineUsage);
         return lastModified;
     }
