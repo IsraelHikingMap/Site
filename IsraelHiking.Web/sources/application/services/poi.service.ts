@@ -208,7 +208,9 @@ export class PoiService {
                 .pipe(timeout(120000)).toPromise() as IUpdatesResponse;
             this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()}, got: ${updates.features.length}`);
             let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => f.properties.poiId);
-            this.databaseService.storePois(updates.features);
+            do {
+                await this.databaseService.storePois(updates.features.splice(0, 500));
+            } while (updates.features.length > 0);
             this.databaseService.deletePois(deletedIds);
             this.loggingService.info(`[POIs] Updating last modified to: ${updates.lastModified}`);
             this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: updates.lastModified }));

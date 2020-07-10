@@ -140,7 +140,7 @@ namespace IsraelHiking.API.Executors
             var fullFolderPath = Path.IsPathRooted(listingValue) 
                 ? listingValue : 
                 Path.GetFullPath(Path.Combine(_options.BinariesFolder, listingValue));
-            _fileSystemHelper.WriteAllBytes(Path.Combine(fullFolderPath, "offline-pois-chunked.zip"), outputMemStream.ToArray());
+            _fileSystemHelper.WriteAllBytes(Path.Combine(fullFolderPath, "pois.zip"), outputMemStream.ToArray());
         }
     }
 }
