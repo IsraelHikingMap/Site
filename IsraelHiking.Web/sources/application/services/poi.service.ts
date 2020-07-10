@@ -238,7 +238,7 @@ export class PoiService {
         this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
     }
 
-    public async openPoisFile(blob: Blob, progressCallback: (value: number, text?: string) => void): Promise<Date> {
+    public async openPoisFile(blob: Blob, progressCallback: (percentage: number, text?: string) => void): Promise<Date> {
         let zip = new JSZip();
         await zip.loadAsync(blob);
         await this.writeImages(zip, progressCallback);
@@ -250,7 +250,17 @@ export class PoiService {
         let poisFileName = Object.keys(zip.files).find(name => name.startsWith("pois/") && name.endsWith(".geojson"));
         let lastModified = new Date(0);
         let poisJson = JSON.parse((await zip.file(poisFileName).async("text")).trim()) as GeoJSON.FeatureCollection;
-        await this.databaseService.storePois(poisJson.features);
+        this.loggingService.info(`[POIs] Storing pois in chunks`);
+        let chunks = 20;
+        let chunkSize = poisJson.features.length / chunks;
+        let chunkIndex = 0;
+        while (poisJson.features.length > 0) {
+            let poisToStore = poisJson.features.splice(0, chunkSize);
+            this.loggingService.debug(`[POIs] Storing pois ${chunkIndex}/${chunks}`);
+            await this.databaseService.storePois(poisToStore);
+            progressCallback((chunkIndex * 10.0 / chunks) + 90, this.resources.downloadingPoisForOfflineUsage);
+            chunkIndex++;
+        }
         lastModified = this.getLastModifiedFromFeatures(poisJson.features);
         progressCallback(100, this.resources.downloadingPoisForOfflineUsage);
         return lastModified;
@@ -263,7 +273,7 @@ export class PoiService {
             let imagesJson = JSON.parse(await zip.file(imagesFile).async("text") as string) as IImageItem[];
             let imagesUrl = this.imageItemToUrl(imagesJson);
             await this.databaseService.storeImages(imagesUrl);
-            progressCallback((imagesFileIndex + 1) / images.length * 100 * 0.45 + 50, this.resources.downloadingPoisForOfflineUsage);
+            progressCallback((imagesFileIndex + 1) * 40.0 / images.length + 50, this.resources.downloadingPoisForOfflineUsage);
             this.loggingService.debug("[POIs] Added images: " + imagesFile);
         }
     }
