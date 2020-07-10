@@ -208,7 +208,9 @@ export class PoiService {
                 .pipe(timeout(120000)).toPromise() as IUpdatesResponse;
             this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()}, got: ${updates.features.length}`);
             let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => f.properties.poiId);
-            this.databaseService.storePois(updates.features);
+            do {
+                await this.databaseService.storePois(updates.features.splice(0, 500));
+            } while (updates.features.length > 0);
             this.databaseService.deletePois(deletedIds);
             this.loggingService.info(`[POIs] Updating last modified to: ${updates.lastModified}`);
             this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: updates.lastModified }));
@@ -238,33 +240,40 @@ export class PoiService {
         this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
     }
 
-    public async openPoisFile(blob: Blob, progressCallback: (value: number, text?: string) => void): Promise<Date> {
+    public async openPoisFile(blob: Blob, progressCallback: (percentage: number, text?: string) => void): Promise<Date> {
         let zip = new JSZip();
         await zip.loadAsync(blob);
         await this.writeImages(zip, progressCallback);
+        this.loggingService.info(`[POIs] Finished saving images to database`);
         return await this.writePois(zip, progressCallback);
     }
 
     private async writePois(zip: JSZip, progressCallback: (percentage: number, content: string) => void): Promise<Date> {
-        let poisFileName = Object.keys(zip.files).find(name => name.startsWith("pois/") && name.endsWith(".geojson"));
         let lastModified = new Date(0);
-        let poisText = (await zip.file(poisFileName).async("text")).trim();
-        let poisJson = JSON.parse(poisText) as GeoJSON.FeatureCollection;
-        await this.databaseService.storePois(poisJson.features);
-        lastModified = this.getLastModifiedFromFeatures(poisJson.features);
-        progressCallback(100, this.resources.downloadingPoisForOfflineUsage);
+        let poisFileNames = Object.keys(zip.files).filter(name => name.startsWith("pois/") && name.endsWith(".geojson"));
+        for (let poiFileIndex = 0; poiFileIndex < poisFileNames.length; poiFileIndex++) {
+            let poisFileName = poisFileNames[poiFileIndex];
+            let poisJson = JSON.parse((await zip.file(poisFileName).async("text")).trim()) as GeoJSON.FeatureCollection;
+            let chunkLastModified = this.getLastModifiedFromFeatures(poisJson.features);
+            if (chunkLastModified > lastModified) {
+                lastModified = chunkLastModified;
+            }
+            await this.databaseService.storePois(poisJson.features);
+            progressCallback(((poiFileIndex + 1) * 10.0 / poisFileNames.length) + 90, this.resources.downloadingPoisForOfflineUsage);
+            this.loggingService.debug(`[POIs] Stored pois ${poisFileName} ${poiFileIndex}/${poisFileNames.length}`);
+        }
         return lastModified;
     }
 
     private async writeImages(zip: JSZip, progressCallback: (percentage: number, content: string) => void) {
-        let images = Object.keys(zip.files).filter(name => name.startsWith("images/") && name.endsWith(".json"));
-        for (let imagesFileIndex = 0; imagesFileIndex < images.length; imagesFileIndex++) {
-            let imagesFile = images[imagesFileIndex];
-            let imagesString = await zip.file(imagesFile).async("text") as string;
-            let imagesUrl = this.imageItemToUrl(JSON.parse(imagesString) as IImageItem[]);
+        let imagesFileNames = Object.keys(zip.files).filter(name => name.startsWith("images/") && name.endsWith(".json"));
+        for (let imagesFileIndex = 0; imagesFileIndex < imagesFileNames.length; imagesFileIndex++) {
+            let imagesFile = imagesFileNames[imagesFileIndex];
+            let imagesJson = JSON.parse(await zip.file(imagesFile).async("text") as string) as IImageItem[];
+            let imagesUrl = this.imageItemToUrl(imagesJson);
             await this.databaseService.storeImages(imagesUrl);
-            progressCallback((imagesFileIndex + 1) / images.length * 100 * 0.45 + 50, this.resources.downloadingPoisForOfflineUsage);
-            this.loggingService.debug("[POIs] Added images: " + imagesFile);
+            progressCallback((imagesFileIndex + 1) * 40.0 / imagesFileNames.length + 50, this.resources.downloadingPoisForOfflineUsage);
+            this.loggingService.debug(`[POIs] Stored images ${imagesFile} ${imagesFileIndex}/${imagesFileNames.length}`);
         }
     }
 

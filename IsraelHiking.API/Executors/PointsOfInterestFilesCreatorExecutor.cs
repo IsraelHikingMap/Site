@@ -82,14 +82,22 @@ namespace IsraelHiking.API.Executors
             using var outputMemStream = new MemoryStream();
             using var zipStream = new ZipOutputStream(outputMemStream);
             zipStream.SetLevel(9);
-            var collection = new FeatureCollection();
-            foreach (var feature in features)
+            var featuresList = features.ToList();
+            var index = 0;
+            var chunkSize = 1000;
+            while (featuresList.Count > 0)
             {
-                collection.Add(feature);
+                var collection = new FeatureCollection();
+                foreach (var feature in featuresList.Take(chunkSize))
+                {
+                    collection.Add(feature);
+                }
+                zipStream.PutNextEntry(new ZipEntry($"pois/pois{index:000}.geojson") { DateTime = DateTime.Now });
+                StreamUtils.Copy(new MemoryStream(collection.ToBytes()), zipStream, new byte[4096]);
+                zipStream.CloseEntry();
+                featuresList = featuresList.Skip(chunkSize).ToList();
+                index++;
             }
-            zipStream.PutNextEntry(new ZipEntry("pois/pois.geojson") { DateTime = DateTime.Now });
-            StreamUtils.Copy(new MemoryStream(collection.ToBytes()), zipStream, new byte[4096]);
-            zipStream.CloseEntry();
 
             var items = new ConcurrentBag<ImageItem>();
             var downloadedUrls = _imagesRepository.GetAllUrls().Result.ToHashSet();
@@ -111,17 +119,18 @@ namespace IsraelHiking.API.Executors
             });
 
             var list = items.ToList();
-            var index = 0;
+            index = 0;
+            chunkSize = 200;
             while (list.Count > 0)
             {
-                var imageItemsString = JsonConvert.SerializeObject(list.Take(200).ToList(), new JsonSerializerSettings
+                var imageItemsString = JsonConvert.SerializeObject(list.Take(chunkSize).ToList(), new JsonSerializerSettings
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 });
                 zipStream.PutNextEntry(new ZipEntry($"images/images{index:000}.json") { DateTime = DateTime.Now });
                 StreamUtils.Copy(new MemoryStream(Encoding.UTF8.GetBytes(imageItemsString)), zipStream, new byte[4096]);
                 zipStream.CloseEntry();
-                list = list.Skip(200).ToList();
+                list = list.Skip(chunkSize).ToList();
                 index++;
             }
             _logger.LogInformation("Finished Image file creation: " + items.Count());
@@ -131,7 +140,7 @@ namespace IsraelHiking.API.Executors
             var fullFolderPath = Path.IsPathRooted(listingValue) 
                 ? listingValue : 
                 Path.GetFullPath(Path.Combine(_options.BinariesFolder, listingValue));
-            _fileSystemHelper.WriteAllBytes(Path.Combine(fullFolderPath, "offline-pois.zip"), outputMemStream.ToArray());
+            _fileSystemHelper.WriteAllBytes(Path.Combine(fullFolderPath, "pois.zip"), outputMemStream.ToArray());
         }
     }
 }
