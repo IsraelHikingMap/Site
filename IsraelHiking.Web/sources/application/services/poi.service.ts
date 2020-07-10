@@ -247,6 +247,7 @@ export class PoiService {
     }
 
     private async writePois(zip: JSZip, progressCallback: (percentage: number, content: string) => void): Promise<Date> {
+        return new Date();
         let poisFileName = Object.keys(zip.files).find(name => name.startsWith("pois/") && name.endsWith(".geojson"));
         let lastModified = new Date(0);
         let poisJson = JSON.parse((await zip.file(poisFileName).async("text")).trim()) as GeoJSON.FeatureCollection;
