@@ -161,7 +161,15 @@ export class RecordedRouteService {
         if (recordingRoute == null) {
             return;
         }
-        let validPositions = positions.filter(p => this.validateRecordingAndUpdateState(p));
+
+        let lastValidLocation = last(last(this.selectedRouteService.getRecordingRoute().segments).latlngs);
+        let validPositions = [];
+        for (let position of positions) {
+            if (this.validateRecordingAndUpdateState(position, lastValidLocation)) {
+                validPositions.push(position);
+                lastValidLocation = this.geoLocationService.positionToLatLngTime(position);
+            }
+        }
         if (validPositions.length === 0) {
             return;
         }
@@ -172,9 +180,8 @@ export class RecordedRouteService {
         }));
     }
 
-    private validateRecordingAndUpdateState(position: Position): boolean {
-        let lastLatLng = last(last(this.selectedRouteService.getRecordingRoute().segments).latlngs);
-        let nonValidReason = this.isValid(lastLatLng, position);
+    private validateRecordingAndUpdateState(position: Position, lastValidLocation: ILatLngTime): boolean {
+        let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
             this.loggingService.debug("Valid position, updating: (" + position.coords.latitude + ", " + position.coords.longitude + ")");
             this.rejectedPosition = null;
