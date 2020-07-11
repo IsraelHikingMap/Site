@@ -30,6 +30,7 @@ export class FileService {
     constructor(private readonly httpClient: HttpClient,
                 private readonly fileSystemWrapper: FileSystemWrapper,
                 private readonly webView: WebView,
+                // tslint:disable-next-line
                 private readonly fileTransfer: FileTransfer,
                 private readonly runningContextService: RunningContextService,
                 private readonly imageResizeService: ImageResizeService,

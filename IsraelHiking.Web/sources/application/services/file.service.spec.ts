@@ -52,6 +52,7 @@ describe("FileService", () => {
                 FileSystemWrapper,
                 WebView,
                 LoggingService,
+                // tslint:disable-next-line
                 FileTransfer,
                 { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: SelectedRouteService, useValue: selectedRouteService },

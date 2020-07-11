@@ -333,6 +333,7 @@ export function getWindow() { return window; }
             SQLite,
             AppVersion,
             Media,
+            // tslint:disable-next-line
             FileTransfer,
             RouteEditPoiInteraction,
             RouteEditRouteInteraction

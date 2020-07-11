@@ -57,7 +57,7 @@ describe("RecordedRouteService", () => {
     it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService,
         LoggingService, SelectedRouteService],
         (service: RecordedRouteService, geoService: GeoLocationService,
-            logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
+         logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
             service.initialize();
             let recordingRoute = {
                 id: "1",
