@@ -1,9 +1,9 @@
-﻿import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { TestBed, inject } from "@angular/core/testing";
 import { NgReduxTestingModule } from "@angular-redux/store/testing";
 
 import { RecordedRouteService } from "./recorded-route.service";
-import { ToastServiceMockCreator } from "./toast.service.spec"
+import { ToastServiceMockCreator } from "./toast.service.spec";
 import { GeoLocationService } from "./geo-location.service";
 import { ResourcesService } from "./resources.service";
 import { TracesService } from "./traces.service";
@@ -21,10 +21,10 @@ import { Device } from "@ionic-native/device/ngx";
 describe("RecordedRouteService", () => {
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
-        //let geoLocationMock = {
+        // let geoLocationMock = {
         //    positionChanged: new EventEmitter(),
         //    bulkPositionChanged: new EventEmitter(),
-        //}
+        // }
         let loggingServiceMock = {
             debug: () => { }
         };
@@ -39,7 +39,7 @@ describe("RecordedRouteService", () => {
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: ToastService, useValue: toastMock.toastService },
-                //{ provide: GeoLocationService, useValue: geoLocationMock },
+                // { provide: GeoLocationService, useValue: geoLocationMock },
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: SelectedRouteService, useValue: selectedRouteServiceMock },
                 { provide: TracesService, useValue: null },
@@ -54,8 +54,10 @@ describe("RecordedRouteService", () => {
         });
     });
 
-    it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService, LoggingService, SelectedRouteService],
-        (service: RecordedRouteService, geoService: GeoLocationService, logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
+    it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService,
+        LoggingService, SelectedRouteService],
+        (service: RecordedRouteService, geoService: GeoLocationService,
+            logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
             service.initialize();
             let recordingRoute = {
                 id: "1",
@@ -103,5 +105,5 @@ describe("RecordedRouteService", () => {
             expect(spy.calls.all()[1].args[0].startsWith("Rejecting position:")).toBeTruthy(spy.calls.all()[1].args[0]);
             expect(spy.calls.all()[2].args[0].startsWith("Validating a rejected position")).toBeTruthy(spy.calls.all()[2].args[0]);
             expect(spy.calls.all()[3].args[0].startsWith("Valid position")).toBeTruthy(spy.calls.all()[3].args[0]);
-    }));
+        }));
 });
