@@ -86,7 +86,7 @@ export class GeoLocationService {
     }
 
     private startNavigator() {
-        this.loggingService.info("Starting browser geo-location");
+        this.loggingService.info("[GeoLocation] Starting browser tracking");
         if (!window.navigator || !window.navigator.geolocation) {
             return;
         }
@@ -97,7 +97,7 @@ export class GeoLocationService {
             (position: Position): void => this.handlePoistionChange(position),
             (err) => {
                 this.ngZone.run(() => {
-                    this.loggingService.error("Failed to start tracking " + JSON.stringify(err));
+                    this.loggingService.error("[GeoLocation] Failed to start tracking " + JSON.stringify(err));
                     this.toastService.warning(this.resources.unableToFindYourLocation);
                     this.disable();
                 });
@@ -127,36 +127,47 @@ export class GeoLocationService {
             startForeground: true
         });
 
-        this.backgroundGeolocation.on(BackgroundGeolocationEvents.location).subscribe((location: BackgroundGeolocationResponse) => {
-            let position = this.locationToPosition(location);
-            this.handlePoistionChange(position);
+        this.backgroundGeolocation.on(BackgroundGeolocationEvents.location).subscribe(async (_: BackgroundGeolocationResponse) => {
+            let locations = await this.backgroundGeolocation.getValidLocations() as BackgroundGeolocationResponse[];
+            this.backgroundGeolocation.deleteAllLocations();
+            let positions = locations.map(l => this.locationToPosition(l));
+            if (positions.length === 0) {
+                this.loggingService.debug(`[GeoLocation] There's nothing to send - valid locations array is empty`);
+            } else if (positions.length === 1) {
+                this.loggingService.debug(`[GeoLocation] Sending a location update`);
+                this.handlePoistionChange(positions[positions.length - 1]);
+            } else {
+                this.loggingService.debug(`[GeoLocation] Sending bulk location update on each location update: ${positions.length}`);
+                this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
+                this.handlePoistionChange(positions[0]);
+            }
         });
 
         this.backgroundGeolocation.on(BackgroundGeolocationEvents.start).subscribe(
             () => {
-                this.loggingService.debug("Start geo-location service");
+                this.loggingService.debug("[GeoLocation] Start service");
             });
 
         this.backgroundGeolocation.on(BackgroundGeolocationEvents.stop).subscribe(
             () => {
-                this.loggingService.debug("Stop geo-location service");
+                this.loggingService.debug("[GeoLocation] Stop service");
             });
 
         this.backgroundGeolocation.on(BackgroundGeolocationEvents.background).subscribe(
             () => {
                 this.isBackground = true;
-                this.loggingService.debug("Geo-location now in background");
+                this.loggingService.debug("[GeoLocation] Now in background, deleteing locations");
                 this.backgroundGeolocation.deleteAllLocations();
             });
 
         this.backgroundGeolocation.on(BackgroundGeolocationEvents.foreground).subscribe(
             async () => {
                 this.isBackground = false;
-                this.loggingService.debug("Geo-location now in foreground");
+                this.loggingService.debug("[GeoLocation] Now in foreground");
                 let locations = await this.backgroundGeolocation.getValidLocations() as BackgroundGeolocationResponse[];
                 let positions = locations.map(l => this.locationToPosition(l));
                 if (positions.length > 0) {
-                    this.loggingService.debug(`Sending bulk location update: ${positions.length}`);
+                    this.loggingService.debug(`[GeoLocation] Sending bulk location update: ${positions.length}`);
                     this.currentLocation = this.positionToLatLngTime(positions[positions.length - 1]);
                     this.bulkPositionChanged.next(positions);
                 }
@@ -169,10 +180,10 @@ export class GeoLocationService {
         this.currentLocation = null;
         this.positionChanged.next(null);
         if (this.runningContextService.isCordova) {
-            this.loggingService.debug("Stopping background geo-location");
+            this.loggingService.debug("[GeoLocation] Stopping background tracking");
             await this.backgroundGeolocation.stop();
         } else {
-            this.loggingService.debug("Stopping browser geo-location: " + this.watchNumber);
+            this.loggingService.debug("[GeoLocation] Stopping browser tracking: " + this.watchNumber);
             this.stopNavigator();
         }
     }
@@ -189,7 +200,7 @@ export class GeoLocationService {
             return;
         }
         this.ngZone.run(() => {
-            this.loggingService.debug("Geo-location received position: " + JSON.stringify(this.positionToLatLngTime(position)));
+            this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
             if (this.state === "searching") {
                 this.state = "tracking";
             }
