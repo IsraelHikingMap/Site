@@ -70,9 +70,9 @@ Copy-Item -Path $preVersionIpaLocation -Destination "./IHM_signed_$env:APPVEYOR_
 Write-Host "uploading using fastlane:"
 ruby -v
 gem -v
-bundle -v
 Write-Host "updating bundler"
 bundle update --bundler
+bundle -v
 Write-Host "installing gems"
 bundle install
 Write-Host "uploading package"
