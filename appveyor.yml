@@ -15,7 +15,7 @@ environment:
   #    ANDROID_SDK_ROOT: C:\Program Files (x86)\Android\android-sdk
   #    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     - PRODUCT: ios
-      GEM_HOME:~/.gem
+      GEM_HOME: ~/.gem
       FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD:
         secure: r6Nj0KQ6BYr9IM1WaJr8z8uJ4zJkMK5MZ6GnileAJp8=
       APPVEYOR_BUILD_WORKER_IMAGE: macOS
