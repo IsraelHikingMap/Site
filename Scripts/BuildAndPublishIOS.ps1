@@ -4,7 +4,7 @@ Write-Host "Initializing ruby requirements"
 ruby -v
 gem -v
 Write-Host "installing bundler"
-gem install --local bundler:2.1.4 --quiet --no-document
+gem install bundler:2.1.4
 bundle -v
 Write-Host "installing gems"
 bundle install
