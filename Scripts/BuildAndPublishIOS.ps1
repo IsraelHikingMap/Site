@@ -62,9 +62,17 @@ Write-Host "npm run build-ipa"
 npm run build-ipa
 
 $preVersionIpaLocation = "./platforms/ios/build/device/Israel Hiking Map.ipa";
-$ipaVersioned = "./platforms/ios/build/device/IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
+$ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
-Rename-Item -Path $preVersionIpaLocation -NewName "IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
+Copy-Item -Path $preVersionIpaLocation -Destination "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
+
+
+Write-Host "uploading using fastlane"
+ruby -v
+gem -v
+bundle -v
+bundle install
+bundle exec fastlanefastlane ios upload
 
 if (-not (Test-Path -Path $ipaVersioned)) {
 	throw "Failed to create ios ipa file"
