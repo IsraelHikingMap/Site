@@ -67,12 +67,16 @@ $ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 Copy-Item -Path $preVersionIpaLocation -Destination "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
 
-Write-Host "uploading using fastlane"
+Write-Host "uploading using fastlane:"
 ruby -v
 gem -v
 bundle -v
+Write-Host "updating bundler"
+bundle update --bundler
+Write-Host "installing gems"
 bundle install
-bundle exec fastlanefastlane ios upload
+Write-Host "uploading package"
+bundle exec fastlane ios upload
 
 if (-not (Test-Path -Path $ipaVersioned)) {
 	throw "Failed to create ios ipa file"
