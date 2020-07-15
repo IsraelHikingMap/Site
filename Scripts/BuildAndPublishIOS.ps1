@@ -1,5 +1,14 @@
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
+Write-Host "Initializing ruby requirements"
+ruby -v
+gem -v
+Write-Host "installing bundler"
+gem install bundler:2.1.4
+bundle -v
+Write-Host "installing gems"
+bundle install
+
 
 #Replace version in config.xml file
 $filePath = get-ChildItem config.xml | Select-Object -first 1 | select -expand FullName
@@ -66,16 +75,7 @@ $ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
 Copy-Item -Path $preVersionIpaLocation -Destination "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
-
-Write-Host "uploading using fastlane:"
-ruby -v
-gem -v
-Write-Host "updating bundler"
-bundle update --bundler
-bundle -v
-Write-Host "installing gems"
-bundle install
-Write-Host "uploading package"
+Write-Host "uploading package using fastlane"
 bundle exec fastlane ios upload
 
 if (-not (Test-Path -Path $ipaVersioned)) {
