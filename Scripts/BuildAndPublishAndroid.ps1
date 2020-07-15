@@ -2,7 +2,7 @@ choco install gradle --version 4.10.3 --no-progress
 
 refreshenv
 
-$env:Path += ";$env:ANDROID_HOME\tools\bin\"
+$env:PATH += ";$env:ANDROID_HOME\tools\bin\"
 
 gradle --version
 

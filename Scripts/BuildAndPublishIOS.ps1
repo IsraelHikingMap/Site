@@ -2,8 +2,9 @@ Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 Write-Host "Initializing ruby requirements"
 brew install ruby
-$env:Path = "/usr/local/opt/ruby/bin:$env:PATH"
+$env:PATH = "/usr/local/opt/ruby/bin:$env:PATH"
 ruby -v
+which ruby
 gem -v
 Write-Host "installing bundler"
 gem install bundler:2.1.4
