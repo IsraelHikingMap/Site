@@ -128,6 +128,9 @@ export class GeoLocationService {
         });
 
         this.backgroundGeolocation.on(BackgroundGeolocationEvents.location).subscribe(async (_: BackgroundGeolocationResponse) => {
+            if (this.isBackground) {
+                return;
+            }
             let locations = await this.backgroundGeolocation.getValidLocations() as BackgroundGeolocationResponse[];
             this.backgroundGeolocation.deleteAllLocations();
             let positions = locations.map(l => this.locationToPosition(l));
@@ -196,9 +199,6 @@ export class GeoLocationService {
     }
 
     private handlePoistionChange(position: Position): void {
-        if (this.isBackground) {
-            return;
-        }
         this.ngZone.run(() => {
             this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
             if (this.state === "searching") {
