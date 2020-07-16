@@ -1,10 +1,10 @@
 platform :ios do
 	lane :debug_device do
-        	match(type: "development")
-        	cordova(platform: 'ios', release: false, type: 'development')
-    	end
+		match(type: "development")
+		cordova(platform: 'ios', release: false, type: 'development')
+    end
 	lane :deploy do
-    		match(type: "appstore")
+    	match(type: "appstore")
 		cordova(platform: 'ios')
 		appstore(ipa: ENV['CORDOVA_IOS_RELEASE_BUILD_PATH'])
 	end

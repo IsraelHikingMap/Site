@@ -17,6 +17,8 @@ environment:
     - PRODUCT: ios
       LC_ALL: en_US.UTF-8
       LANG: en_US.UTF-8
+      FASTLANE_PASSWORD:
+        secure: dWXjttv2cofhp2eQn9IvIXMVOUc76o+2+rKVTe5qzoY=
       FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD:
         secure: r6Nj0KQ6BYr9IM1WaJr8z8uJ4zJkMK5MZ6GnileAJp8=
       APPVEYOR_BUILD_WORKER_IMAGE: macOS
