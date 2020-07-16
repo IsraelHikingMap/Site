@@ -10,4 +10,5 @@ platform :ios do
 	end
 	lane :upload do
 		upload_to_testflight(username: 'israelhikingmap@gmail.com')
+	end
 end
