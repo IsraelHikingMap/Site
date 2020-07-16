@@ -1,20 +1,20 @@
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 Write-Host "Initializing ruby requirements"
-brew install rbenv ruby-build > /dev/null
-Write-Host "Initializing rbenv"
-rbenv init
-rbenv install 2.6.6
-rbenv global 2.6.6
+#brew install rbenv ruby-build > /dev/null
+#Write-Host "Initializing rbenv"
+#rbenv init
+#rbenv install 2.6.6
+#rbenv global 2.6.6
 ruby -v
 which ruby
 gem -v
 which gem
 Write-Host "installing bundler"
-gem install bundler:2.1.4
+sudo gem install bundler:2.1.4
 bundle -v
 Write-Host "installing gems"
-bundle install
+sudo bundle install
 
 
 #Replace version in config.xml file
