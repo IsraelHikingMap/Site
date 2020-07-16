@@ -6,7 +6,10 @@ var request = require("request");
 var md5File = require("md5-file");
 const { GettextExtractor, JsExtractors } = require("gettext-extractor");
 
-var secretsFile = process.env.APPDATA + "\\Microsoft\\UserSecrets\\a21e53dc-017c-42f4-be3d-5dbe7eaf9433\\secrets.json";
+var guid = "a21e53dc-017c-42f4-be3d-5dbe7eaf9433";
+var secretsFile = process.platform.startsWith("win")
+    ? process.env.APPDATA + `\\Microsoft\\UserSecrets\\${guid}\\secrets.json`
+    : process.env.HOME + `/.microsoft/usersecrets/${guid}/secrets.json`
 if (fs.existsSync(secretsFile)) {
     var nonPublic = require(secretsFile);
 } else {

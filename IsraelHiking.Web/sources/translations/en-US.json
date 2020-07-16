@@ -309,7 +309,7 @@
     "Remaining distance": "Remaining distance",
     "Remove Search Results": "Remove Search Results",
     "Report an issue": "Report an issue",
-    "Report an issue instructions": "Please describe the problem as best as you can.\n\n1. What happened?\n\n2. What did you do right before it happened?\n\n3. Is this the first time it happened?\n\n4. How can we reproduce the problem?",
+    "Report an issue instructions": "Please describe the problem as best as you can.\n\n1. What happened?\n\n2. When did it happen?\nIf the problem happened more than 72 hours ago, we would appreciate a report the next time it happens.\n\n3. What did you do right before it happened?\n\n4. Is this the first time it happened?\n\n5. How can we reproduce the problem?",
     "Request features and report bugs on our Github project page": "Request features and report bugs on our Github project page",
     "Residential": "Residential",
     "Restaurant": "Restaurant",
