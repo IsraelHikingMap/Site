@@ -3,7 +3,7 @@ Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 Write-Host "Initializing ruby requirements"
 brew install rbenv
 rbenv init
-$env:PATH = "/usr/local/opt/ruby/bin:$env:PATH"
+rbenv install -l
 ruby -v
 which ruby
 gem -v
