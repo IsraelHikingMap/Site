@@ -83,7 +83,7 @@ $ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 Copy-Item -Path $preVersionIpaLocation -Destination "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
 Write-Host "uploading package using fastlane"
-bundle exec fastlane ios upload
+sudo bundle exec fastlane ios upload
 
 if (-not (Test-Path -Path $ipaVersioned)) {
 	throw "Failed to create ios ipa file"
