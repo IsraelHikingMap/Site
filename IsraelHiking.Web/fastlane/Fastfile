@@ -9,6 +9,6 @@ platform :ios do
 		appstore(ipa: ENV['CORDOVA_IOS_RELEASE_BUILD_PATH'])
 	end
 	lane :upload do
-		upload_to_testflight(username: 'israelhikingmap@gmail.com')
+		upload_to_testflight(username: 'israelhikingmap@gmail.com', skip_waiting_for_build_processing: true)
 	end
 end
