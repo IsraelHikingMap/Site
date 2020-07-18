@@ -159,15 +159,16 @@ export class GeoLocationService {
         this.backgroundGeolocation.on(BackgroundGeolocationEvents.background).subscribe(
             () => {
                 this.isBackground = true;
-                this.loggingService.debug("[GeoLocation] Now in background, deleteing locations");
+                this.loggingService.debug("[GeoLocation] Now in background, deleting locations");
                 this.backgroundGeolocation.deleteAllLocations();
             });
 
         this.backgroundGeolocation.on(BackgroundGeolocationEvents.foreground).subscribe(
             async () => {
-                this.isBackground = false;
                 this.loggingService.debug("[GeoLocation] Now in foreground");
                 let locations = await this.backgroundGeolocation.getValidLocations() as BackgroundGeolocationResponse[];
+                this.backgroundGeolocation.deleteAllLocations();
+                this.isBackground = false;
                 let positions = locations.map(l => this.locationToPosition(l));
                 if (positions.length > 0) {
                     this.loggingService.debug(`[GeoLocation] Sending bulk location update: ${positions.length}`);
