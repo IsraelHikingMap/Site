@@ -1,19 +1,10 @@
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 Write-Host "Initializing ruby requirements"
-#brew install rbenv ruby-build > /dev/null
-#Write-Host "Initializing rbenv"
-#rbenv init
-#rbenv install 2.6.6
-#rbenv global 2.6.6
 ruby -v
-which ruby
 gem -v
-which gem
-Write-Host "installing bundler"
 sudo gem install bundler:2.1.4
 bundle -v
-Write-Host "installing gems"
 sudo bundle install
 
 
@@ -82,8 +73,8 @@ $ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
 Copy-Item -Path $preVersionIpaLocation -Destination "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
-Write-Host "uploading package using fastlane"
-sudo bundle exec fastlane ios upload
+#Write-Host "uploading package using fastlane"
+#sudo bundle exec fastlane ios upload
 
 if (-not (Test-Path -Path $ipaVersioned)) {
 	throw "Failed to create ios ipa file"
