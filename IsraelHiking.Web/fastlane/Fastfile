@@ -1,13 +1,15 @@
 platform :ios do
 	lane :debug_device do
-        	match(type: "development")
-        	cordova(platform: 'ios', release: false, type: 'development')
-    	end
+		match(type: "development")
+		cordova(platform: 'ios', release: false, type: 'development')
+    end
 	lane :deploy do
-    		match(type: "appstore")
+    	match(type: "appstore")
 		cordova(platform: 'ios')
 		appstore(ipa: ENV['CORDOVA_IOS_RELEASE_BUILD_PATH'])
 	end
 	lane :upload do
-		upload_to_testflight(username: 'israelhikingmap@gmail.com')
+		setup_ci(force: true)
+		upload_to_testflight(skip_waiting_for_build_processing: true, apple_id: '1451300509')
+	end
 end

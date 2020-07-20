@@ -7,16 +7,21 @@ environment:
   PASSWORD:
     secure: mqbXr4+cn3l9YNyKhOezbA==
   matrix:
-    - PRODUCT: web
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    - PRODUCT: android
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
-      ANDROID_SDK_ROOT: C:\Program Files (x86)\Android\android-sdk
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  #  - PRODUCT: web
+  #    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+  #  - PRODUCT: android
+  #    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+  #    ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
+  #    ANDROID_SDK_ROOT: C:\Program Files (x86)\Android\android-sdk
+  #    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     - PRODUCT: ios
+      LC_ALL: en_US.UTF-8
+      LANG: en_US.UTF-8
+      FASTLANE_USER: israelhikingmap@gmail.com
+      FASTLANE_PASSWORD:
+        secure: LKUpzhvCJIqG/vc4W3yP5FToKkn0nGv4XDSUiCDBoWg=
       FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD:
-        secure: r6Nj0KQ6BYr9IM1WaJr8z8uJ4zJkMK5MZ6GnileAJp8=
+        secure: oSccSp70X/744XBpfRV4UVJZKxN1jMYHxn3OHFsTSVE=
       APPVEYOR_BUILD_WORKER_IMAGE: macOS
     
 install:

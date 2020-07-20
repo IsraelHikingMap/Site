@@ -26,6 +26,11 @@ fastlane ios debug_device
 fastlane ios deploy
 ```
 
+### ios upload
+```
+fastlane ios upload
+```
+
 
 ----
 
