@@ -1,13 +1,5 @@
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
-Write-Host "Initializing ruby requirements"
-ruby -v
-gem -v
-sudo gem install bundler:2.1.4
-bundle -v
-sudo bundle install
-
-
 #Replace version in config.xml file
 $filePath = get-ChildItem config.xml | Select-Object -first 1 | select -expand FullName
 $xml = New-Object XML
@@ -73,9 +65,11 @@ $ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
 Copy-Item -Path $preVersionIpaLocation -Destination "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
-Write-Host "uploading package to the apple app store"
-#sudo bundle exec fastlane ios upload
-xcrun altool --upload-app --type ios --file $ipaVersioned --username $env:FASTLANE_USER --password $env:FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
+if ($env:APPVEYOR_REPO_TAG -eq "true")
+{
+	Write-Host "Uploading package to the apple app store"
+	xcrun altool --upload-app --type ios --file $ipaVersioned --username $env:TMS_USER --password $env:TMS_APPLE_APPLICATION_SPECIFIC_PASSWORD
+}
 
 if (-not (Test-Path -Path $ipaVersioned)) {
 	throw "Failed to create ios ipa file"
