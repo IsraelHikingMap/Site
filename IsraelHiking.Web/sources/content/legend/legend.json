@@ -316,7 +316,7 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "highway=footway or highway=path", "bicycle=no" ],
+        "osmTags": [ "highway=footway or highway=path with bicycle=no" ],
         "link": "osm-tag-link"
       },
       {
@@ -327,7 +327,7 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "highway=cycleway or highway=path", "bicycle=designated" ],
+        "osmTags": [ "highway=cycleway or highway=path with bicycle=designated" ],
         "link": "https://wiki.openstreetmap.org/wiki/Bicycle"
       },
       {
