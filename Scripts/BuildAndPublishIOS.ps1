@@ -73,8 +73,9 @@ $ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
 Copy-Item -Path $preVersionIpaLocation -Destination "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
-#Write-Host "uploading package using fastlane"
+Write-Host "uploading package to the apple app store"
 #sudo bundle exec fastlane ios upload
+xcrun altool --upload-app --type ios --file $ipaVersioned --username $env:FASTLANE_USER --password $env:FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD
 
 if (-not (Test-Path -Path $ipaVersioned)) {
 	throw "Failed to create ios ipa file"
