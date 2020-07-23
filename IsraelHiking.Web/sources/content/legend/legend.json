@@ -76,8 +76,8 @@
         },
         "zoom": 15,
         "type": "Way",
-        "osmTags": [],
-        "link": ""
+        "osmTags": ["network=rwn", "osmc:symbol=purple:white:purple_stripe relation"],
+        "link": "osm-tag-link"
       },
       {
         "key": "legendOrangeRegionalTrail",
@@ -87,8 +87,8 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [],
-        "link": ""
+        "osmTags": ["network=rwn", "osmc:symbol=orange:white:orange_stripe relation"],
+        "link": "osm-tag-link"
       }
     ]
   },
@@ -196,7 +196,7 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "mtb:scale=2", "mtb:scale=3" ],
+        "osmTags": [ "mtb:scale=2 or mtb:scale=3" ],
         "link": "osm-key-link"
       },
       {
@@ -207,7 +207,7 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "mtb:scale=4", "mtb:scale=5" ],
+        "osmTags": [ "mtb:scale=4 or mtb:scale=5" ],
         "link": "osm-key-link"
       }
     ]
@@ -223,8 +223,8 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "network=lcn", "(relation tag)" ],
-        "link": ""
+        "osmTags": [ "network=lcn relation" ],
+        "link": "osm-tag-link"
       },
       {
         "key": "legendRegionalTrail",
@@ -234,8 +234,8 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "network=rcn", "(relation tag)" ],
-        "link": ""
+        "osmTags": [ "network=rcn relation" ],
+        "link": "osm-tag-link"
       },
       {
         "key": "legendNationalTrail",
@@ -245,8 +245,8 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "network=ncn", "(relation tag)" ],
-        "link": ""
+        "osmTags": [ "network=ncn relation" ],
+        "link": "osm-tag-link"
       }
     ]
   },
@@ -261,7 +261,7 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "tracktype=grade1", "highway=track" ],
+        "osmTags": [ "tracktype=grade1 or tracktype=grade2", "highway=track" ],
         "link": "osm-key-link"
       },
       {
@@ -316,7 +316,7 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "highway=footway", " highway=path with bicycle=no" ],
+        "osmTags": [ "highway=footway or highway=path with bicycle=no" ],
         "link": "osm-tag-link"
       },
       {
@@ -327,7 +327,7 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "highway=cycleway", "or highway=path with bicycle=designated" ],
+        "osmTags": [ "highway=cycleway or highway=path with bicycle=designated" ],
         "link": "https://wiki.openstreetmap.org/wiki/Bicycle"
       },
       {
@@ -486,7 +486,7 @@
         },
         "zoom": 17,
         "type": "POI",
-        "osmTags": [ "man_made=water_tower", "man_made=storage_tank", "content=water" ],
+        "osmTags": [ "man_made=water_tower or man_made=storage_tank", "content=water" ],
         "link": "osm-tag-link"
       }
     ]
@@ -650,8 +650,8 @@
         },
         "zoom": 13,
         "type": "Way",
-        "osmTags": [ "aeroway=runway", "aeroway=taxiway" ],
-        "link": "osm-tag-link"
+        "osmTags": [ "aeroway=runway or aeroway=taxiway" ],
+        "link": "osm-key-link"
       },
       {
         "key": "legendAerialway",
@@ -661,8 +661,8 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "aerialway=cable_car" ],
-        "link": "osm-tag-link"
+        "osmTags": [ "aerialway=cable_car or aerialway=gondola" ],
+        "link": "osm-key-link"
       }
     ]
   },
@@ -798,8 +798,8 @@
         },
         "zoom": 17,
         "type": "POI",
-        "osmTags": [ "historic=memorial" ],
-        "link": "osm-tag-link"
+        "osmTags": [ "historic=memorial or historic=monumrnt" ],
+        "link": "osm-key-link"
       },
       {
         "key": "legendObservationTower",
@@ -847,8 +847,8 @@
         },
         "zoom": 16,
         "type": "POI",
-        "osmTags": [ "barrier=gate", "or access=yes" ],
-        "link": "https://wiki.openstreetmap.org/wiki/Key:barrier"
+        "osmTags": [ "barrier=gate or access=yes" ],
+        "link": "osm-tag-link"
       },
       {
         "key": "legendClosedGate",
@@ -858,8 +858,8 @@
         },
         "zoom": 16,
         "type": "POI",
-        "osmTags": [ "barrier=*", "access=no" ],
-        "link": "https://wiki.openstreetmap.org/wiki/Key:barrier"
+        "osmTags": [ "barrier=...", "access=no or access=private" ],
+        "link": "osm-key-link"
       },
       {
         "key": "legendBlock",
@@ -869,7 +869,7 @@
         },
         "zoom": 16,
         "type": "POI",
-        "osmTags": [ "barrier=block", "or motor_vehicle=no" ],
+        "osmTags": [ "barrier=block or motor_vehicle=no" ],
         "link": "osm-tag-link"
       },
       {
@@ -940,7 +940,7 @@
         },
         "zoom": 15,
         "type": "Way",
-        "osmTags": [ "boundary=protected_area" ],
+        "osmTags": [ "boundary=protected_area", "protection_title=..." ],
         "link": "osm-tag-link"
       },
       {
@@ -973,7 +973,7 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "boundary=administrative", "admin_level=4", "Relation \"שטח A\"" ],
+        "osmTags": [ "boundary=administrative", "admin_level=4", "name:en=Area A relation" ],
         "link": "https://www.openstreetmap.org/relation/3791783"
       },
       {
@@ -984,7 +984,7 @@
         },
         "zoom": 15,
         "type": "Way",
-        "osmTags": [ "boundary=administrative", "admin_level=4", "Relation \"שטח B\"" ],
+        "osmTags": [ "boundary=administrative", "admin_level=4", "name:en=Area B relation" ],
         "link": "https://www.openstreetmap.org/relation/3791784"
       },
       {
