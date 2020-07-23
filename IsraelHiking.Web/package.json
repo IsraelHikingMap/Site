@@ -48,6 +48,7 @@
     "angulartics2": "7.5.2",
     "b64-to-blob": "1.2.19",
     "base64-arraybuffer": "^0.2.0",
+    "cc.fovea.cordova.openwith": "git+https://github.com/j3k0/cordova-plugin-openwith.git",
     "cordova-android": "^8.1.0",
     "cordova-ios": "^5.1.1",
     "cordova-plugin-app-version": "^0.1.9",
@@ -148,7 +149,7 @@
     "lint": "ng lint --fix",
     "version": "node -v && npm -v && ng -v",
     "update": "ng update",
-    "add-android": "cordova plugin add cc.fovea.cordova.openwith --variable ANDROID_EXTRA_ACTIONS=\" \" --variable ANDROID_MIME_TYPE=\"application/gpx\" && cordova platform add android",
+    "add-android": "cordova platform add android",
     "run-android": "cordova run android",
     "build-apk": "cordova build android --release --no-telemetry",
     "add-ios": "cordova plugin add cordova-plugin-splashscreen && cordova platform add ios",
@@ -196,7 +197,15 @@
         "KEEP_AVAUDIOSESSION_ALWAYS_ACTIVE": "NO"
       },
       "cordova-plugin-screen-orientation": {},
-      "cordova-plugin-file-transfer": {}
+      "cordova-plugin-file-transfer": {},
+      "cc.fovea.cordova.openwith": {
+        "ANDROID_MIME_TYPE": "application/gpx",
+        "SHAREEXT_PROVISIONING_PROFILE": "8238ca05-b67a-4c26-a39e-c3d8b7b7c1d2",
+        "IOS_GROUP_IDENTIFIER": "group.il.org.osm.israelhiking",
+        "IOS_URL_SCHEME": "israelhikingmap",
+        "IOS_UNIFORM_TYPE_IDENTIFIER": "public.image",
+        "SHAREEXT_DEVELOPMENT_TEAM": "2KT88923M5"
+      }
     },
     "platforms": [
       "ios",
