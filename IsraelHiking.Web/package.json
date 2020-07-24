@@ -200,7 +200,7 @@
       "cordova-plugin-file-transfer": {},
       "cc.fovea.cordova.openwith": {
         "ANDROID_MIME_TYPE": "application/gpx",
-        "SHAREEXT_PROVISIONING_PROFILE": "8238ca05-b67a-4c26-a39e-c3d8b7b7c1d2",
+        "SHAREEXT_PROVISIONING_PROFILE": "32eb6694-d0ab-4b7a-8d34-67ec102c79bc",
         "IOS_GROUP_IDENTIFIER": "group.il.org.osm.israelhiking",
         "IOS_URL_SCHEME": "israelhikingmap",
         "IOS_UNIFORM_TYPE_IDENTIFIER": "public.image",
