@@ -9,7 +9,7 @@ $xml.Save($filePath)
 
 Write-Host "Decripting files"
 Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/appveyor.mobileprovision.enc -d -a -out ./signing/appveyor.mobileprovision"
-Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/appveyorshareext.mobileprovision.enc -d -a -out ./signing/appveyorshareext.mobileprovision"
+Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/appveyorshareextention.mobileprovision.enc -d -a -out ./signing/appveyorshareextention.mobileprovision"
 Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer"
 Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/ihm-dist.p12.enc -d -a -out ./signing/ihm-dist.p12"
 
@@ -39,7 +39,7 @@ security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k appveyor ~
 Write-Host "Copy provisioning file"
 New-Item -ItemType "directory" -Path "~/Library/MobileDevice/Provisioning Profiles"
 Copy-Item "./signing/appveyor.mobileprovision" -Destination "~/Library/MobileDevice/Provisioning Profiles/"
-Copy-Item "./signing/appveyorshareext.mobileprovision" -Destination "~/Library/MobileDevice/Provisioning Profiles/"
+Copy-Item "./signing/appveyorshareextention.mobileprovision" -Destination "~/Library/MobileDevice/Provisioning Profiles/"
 
 # Building ios:
 Write-Host "npm install --loglevel=error"
