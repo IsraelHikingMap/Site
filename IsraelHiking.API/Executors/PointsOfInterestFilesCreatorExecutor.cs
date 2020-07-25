@@ -114,7 +114,13 @@ namespace IsraelHiking.API.Executors
                         _logger.LogWarning("The following image does not exist in database: " + url + " feature: " + feature.GetId());
                         continue;
                     }
-                    items.Add(_imagesRepository.GetImageByUrl(url).Result);
+                    var item = _imagesRepository.GetImageByUrl(url).Result;
+                    if (item == null)
+                    {
+                        _logger.LogWarning("The following image exist in database but was not returned by GetImageByUrl: " + url);
+                        continue;
+                    }
+                    items.Add(item);
                 }
             });
 
