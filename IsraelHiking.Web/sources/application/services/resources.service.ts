@@ -415,7 +415,7 @@ export class ResourcesService {
     public legendPicnicArea: string;
     public legendCampsite: string;
     public legendDrinkingWater: string;
-    public legendCafé: string;
+    public legendCafe: string;
     public legendRestaurant: string;
     public legendParking: string;
     public legendFuelStation: string;
@@ -951,7 +951,7 @@ export class ResourcesService {
         this.legendPicnicArea = this.gettextCatalog.getString("Picnic Area");
         this.legendCampsite = this.gettextCatalog.getString("Campsite");
         this.legendDrinkingWater = this.gettextCatalog.getString("Drinking Water");
-        this.legendCafé = this.gettextCatalog.getString("Café");
+        this.legendCafe = this.gettextCatalog.getString("Café");
         this.legendRestaurant = this.gettextCatalog.getString("Restaurant");
         this.legendParking = this.gettextCatalog.getString("Parking");
         this.legendFuelStation = this.gettextCatalog.getString("Fuel Station");

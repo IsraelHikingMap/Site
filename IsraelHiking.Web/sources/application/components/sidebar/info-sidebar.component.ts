@@ -124,7 +124,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendBikeShop);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendFirstAid);
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendCafé);
+        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendCafe);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendRestaurant);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendConvenienceStore);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendLodging);
