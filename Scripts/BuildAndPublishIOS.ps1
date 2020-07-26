@@ -55,15 +55,15 @@ if ($lastexitcode)
 {
 	throw $lastexitcode
 }
-
+	
 Write-Host "npm run add-ios"
 npm run add-ios
 
-Write-Host "options file:"
-cat ./platforms/ios/exportOptions.plist
-
 Write-Host "npm run build-ipa"
 npm run build-ipa
+
+Write-Host "options file:"
+cat ./platforms/ios/exportOptions.plist
 
 $preVersionIpaLocation = "./platforms/ios/build/device/Israel Hiking Map.ipa";
 $ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
