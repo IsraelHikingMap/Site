@@ -59,6 +59,9 @@ if ($lastexitcode)
 Write-Host "npm run add-ios"
 npm run add-ios
 
+Write-Host "options file:"
+cat ./platforms/ios/exportOptions.plist
+
 Write-Host "npm run build-ipa"
 npm run build-ipa
 
