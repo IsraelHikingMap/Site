@@ -50,7 +50,7 @@
     "base64-arraybuffer": "^0.2.0",
     "cc.fovea.cordova.openwith": "git+https://github.com/IsraelHikingMap/cordova-plugin-openwith.git",
     "cordova-android": "^8.1.0",
-    "cordova-ios": "6.1.0",
+    "cordova-ios": "git+https://github.com/IsraelHikingMap/cordova-ios.git",
     "cordova-plugin-app-version": "^0.1.9",
     "cordova-plugin-brightness": "^0.2.0",
     "cordova-plugin-camera": "^4.0.3",
