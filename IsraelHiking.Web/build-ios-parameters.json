@@ -1,0 +1,10 @@
+﻿{
+  "ios": {
+    "relese": {
+      "developmentTeam": "2KT88923M5",
+      "codeSignIdentity": "iPhone Distribution",
+      "packageType": "app-store",
+      "provisioningProfile": "b4e6db74-c4cf-4fd3-9057-da5b0f8f3faa"
+    }
+  }
+}
