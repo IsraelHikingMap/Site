@@ -1,6 +1,6 @@
 ﻿{
   "ios": {
-    "relese": {
+    "release": {
       "developmentTeam": "2KT88923M5",
       "codeSignIdentity": "iPhone Distribution",
       "packageType": "app-store",
