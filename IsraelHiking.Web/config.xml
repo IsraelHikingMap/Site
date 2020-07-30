@@ -201,7 +201,7 @@
         <string>he</string>
       </array>
     </edit-config>
-    <edit-config target="NSExtensionActivationRule" file="ShareExtension-Info.plist" mode="overwrite">
+    <edit-config target="NSExtensionActivationRule" file="*-Info.plist" mode="overwrite">
       <string>
             SUBQUERY (
             extensionItems, $extensionItem,
@@ -215,7 +215,7 @@
             ).@count > 0
         </string>
     </edit-config>
-    <edit-config target="CFBundleDocumentTypes" file="ShareExtension-Info.plist" mode="merge">
+    <edit-config target="CFBundleDocumentTypes" file="*-Info.plist" mode="merge">
       <array>
         <dict>
             <key>CFBundleTypeIconFiles</key>
@@ -233,7 +233,7 @@
         </dict>
       </array>
     </edit-config>
-    <edit-config target="UTImportedTypeDeclarations" file="ShareExtension-Info.plist" mode="merge">
+    <edit-config target="UTImportedTypeDeclarations" file="*-Info.plist" mode="merge">
       <array>
         <dict>
             <key>UTTypeConformsTo</key>
