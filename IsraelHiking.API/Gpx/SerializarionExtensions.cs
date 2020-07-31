@@ -120,7 +120,8 @@ namespace IsraelHiking.API.Gpx
                     DefaultCreatorIfMissing = "unknown",
                     IgnoreVersionAttribute = true,
                     IgnoreBadDateTime = true,
-                    BuildWebLinksForVeryLongUriValues = true
+                    BuildWebLinksForVeryLongUriValues = true,
+                    IgnoreUnexpectedChildrenOfTopLevelElement = true
                 });
             });
             var task2 = Task.Delay(10000);
