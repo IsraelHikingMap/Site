@@ -151,7 +151,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         let response = await this.fileService
             .getStyleJsonContent(this.layerData.address, this.layerData.isOfflineOn || !this.hasInternetAccess);
         let language = this.resources.getCurrentLanguageCodeSimplified();
-        let styleJson = JSON.parse(JSON.stringify(response).replace(/name_he/g, `name_${language}`)) as Style;
+        let styleJson = JSON.parse(JSON.stringify(response).replace(/name_he/g, `name_${language}`).replace(/name:he/g, `name:${language}`)) as Style;
         this.updateSourcesAndLayers(styleJson.sources, styleJson.layers);
     }
 
