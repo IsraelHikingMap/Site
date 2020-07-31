@@ -561,9 +561,15 @@ namespace IsraelHiking.API.Executors
 
         private void MergeWebsite(Feature target, Feature source)
         {
-            var lastExsitingIndex = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)).Count();
+            var websiteUrls = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
+                .Select(key => target.Attributes[key]).ToList();
+            var lastExsitingIndex = websiteUrls.Count;
             foreach (var key in source.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)))
             {
+                if (websiteUrls.Contains(source.Attributes[key]))
+                {
+                    continue;
+                }
                 var sourceImageUrlKey = key.Replace(FeatureAttributes.WEBSITE, FeatureAttributes.POI_SOURCE_IMAGE_URL);
                 if (lastExsitingIndex == 0)
                 {
@@ -613,9 +619,15 @@ namespace IsraelHiking.API.Executors
 
         private void MergeImages(Feature target, Feature source)
         {
-            var lastExsitingIndex = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL)).Count();
+            var imagesUrls = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                .Select(key => target.Attributes[key]).ToList();
+            var lastExsitingIndex = imagesUrls.Count;
             foreach (var key in source.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL)))
             {
+                if (imagesUrls.Contains(source.Attributes[key]))
+                {
+                    continue;
+                }
                 if (lastExsitingIndex == 0)
                 {
                     target.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, source.Attributes[key]);

@@ -29,6 +29,7 @@ namespace IsraelHiking.API.Executors
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="options"></param>
         /// <param name="highwaysRepository"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         public SimplePointAdderExecutor(IOptions<ConfigurationData> options,
