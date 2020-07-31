@@ -110,29 +110,17 @@ namespace IsraelHiking.API.Gpx
         /// <returns>The <see cref="GpxFile"/></returns>
         public static GpxFile ToGpx(this byte[] gpxContent)
         {
-            var task1 = Task.Run(() =>
+            using var stream = new MemoryStream(gpxContent);
+            var reader = new XmlTextReader(stream);
+            return GpxFile.ReadFrom(reader, new GpxReaderSettings
             {
-                using var stream = new MemoryStream(gpxContent);
-                var reader = new XmlTextReader(stream);
-                return GpxFile.ReadFrom(reader, new GpxReaderSettings
-                {
-                    ExtensionReader = new IsraelHikingGpxExtensionReader(),
-                    DefaultCreatorIfMissing = "unknown",
-                    IgnoreVersionAttribute = true,
-                    IgnoreBadDateTime = true,
-                    BuildWebLinksForVeryLongUriValues = true,
-                    IgnoreUnexpectedChildrenOfTopLevelElement = true
-                });
+                ExtensionReader = new IsraelHikingGpxExtensionReader(),
+                DefaultCreatorIfMissing = "unknown",
+                IgnoreVersionAttribute = true,
+                IgnoreBadDateTime = true,
+                BuildWebLinksForVeryLongUriValues = true,
+                IgnoreUnexpectedChildrenOfTopLevelElement = true
             });
-            var task2 = Task.Delay(10000);
-            Task.WhenAny(new[] { task1, task2 }).Wait();
-            if (task1.IsCompleted)
-            {
-                return task1.Result;
-            }
-            var fileName = "Bad_File_" + DateTime.Now.ToFileTimeUtc() + ".gpx";
-            File.WriteAllBytes(fileName, gpxContent);
-            throw new Exception("!!! FATAL !!! Unable to convert a file to gpx format, sotred at: " + fileName);
         }
 
         /// <summary>
