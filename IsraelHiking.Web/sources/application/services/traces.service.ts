@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { NgRedux } from "@angular-redux/store";
 
 import { LoggingService } from "./logging.service";
-import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
+import { ResourcesService } from "./resources.service";
 import { Urls } from "../urls";
 import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducres/traces.reducer";
 import { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
@@ -11,8 +11,8 @@ import { Trace, ApplicationState, DataContainer, RouteData } from "../models/mod
 @Injectable()
 export class TracesService {
 
-    constructor(private readonly httpClient: HttpClient,
-                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+    constructor(private readonly resources: ResourcesService,
+                private readonly httpClient: HttpClient,
                 private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
     }
@@ -62,15 +62,12 @@ export class TracesService {
         return this.httpClient.post(Urls.osmTrace, formData).toPromise();
     }
 
-    public async uploadRouteAsTrace(route: RouteData): Promise<string> {
-        let data = {
-            routes: [route]
-        } as DataContainer;
-        let responseData = await this.httpClient.post(Urls.files + "?format=gpx", data).toPromise() as string;
-        let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
-        let formData = new FormData();
-        formData.append("file", blobToSave, route.name + ".gpx");
-        return this.httpClient.post(Urls.osmTrace, formData).toPromise() as Promise<string>;
+    public async uploadRouteAsTrace(route: RouteData): Promise<any> {
+        let isDefaultName = route.name.startsWith(this.resources.route) &&
+            route.name.replace(this.resources.route, "").trim().startsWith(new Date().toISOString().split("T")[0]);
+        return this.httpClient.post(Urls.osmTraceRoute, route, {
+            params: { isDefaultName: isDefaultName.toString(), language: this.resources.getCurrentLanguageCodeSimplified() }
+        }).toPromise();
     }
 
     public async updateTrace(trace: Trace): Promise<void> {
