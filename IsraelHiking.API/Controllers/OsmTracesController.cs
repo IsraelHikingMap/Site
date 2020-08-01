@@ -118,7 +118,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> PostUploadGpsTrace(IFormFile file, [FromForm]bool isDefaultName)
+        public async Task<IActionResult> PostUploadGpsTrace(IFormFile file)
         {
             if (file == null)
             {

@@ -3,6 +3,7 @@ using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -31,7 +32,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
             _cache = new UsersIdAndTokensCache(optionsProvider, Substitute.For<ILogger>(), new MemoryCache(new MemoryCacheOptions()));
-            _controller = new OsmTracesController(_clientsFactory, Substitute.For<IElevationDataStorage>(), Substitute.For<IDataContainerConverterService>(), optionsProvider, Substitute.For<IImageCreationService>(), _cache);
+            _controller = new OsmTracesController(_clientsFactory, Substitute.For<IElevationDataStorage>(), Substitute.For<IDataContainerConverterService>(), Substitute.For<IImageCreationService>(), Substitute.For<ISearchRepository>(), optionsProvider, _cache);
         }
 
         [TestMethod]
