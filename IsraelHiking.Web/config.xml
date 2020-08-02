@@ -17,7 +17,6 @@
       <path event="share" url="/share/*" />
       <path event="poi" url="/poi/*" />
       <path event="url" url="/url/*" />
-      <path event="base" url="/" />
     </host>
   </universal-links>
   <platform name="android">

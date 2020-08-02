@@ -37,7 +37,7 @@ export class OpenWithService {
             return;
         }
         universalLinks.subscribe("share", (event) => {
-            this.loggingService.info("Opening a share: " + event.path);
+            this.loggingService.info("[OpenWith] Opening a share: " + event.path);
             if (this.matDialog.openDialogs.length > 0) {
                 this.matDialog.closeAll();
             }
@@ -47,7 +47,7 @@ export class OpenWithService {
             });
         });
         universalLinks.subscribe("poi", (event) => {
-            this.loggingService.info("Opening a poi: " + event.path);
+            this.loggingService.info("[OpenWith] Opening a poi: " + event.path);
             if (this.matDialog.openDialogs.length > 0) {
                 this.matDialog.closeAll();
             }
@@ -61,7 +61,7 @@ export class OpenWithService {
             });
         });
         universalLinks.subscribe("url", (event) => {
-            this.loggingService.info("Opening a file url: " + event.path);
+            this.loggingService.info("[OpenWith] Opening a file url: " + event.path);
             if (this.matDialog.openDialogs.length > 0) {
                 this.matDialog.closeAll();
             }
@@ -72,8 +72,8 @@ export class OpenWithService {
                     { queryParams: { baseLayer: baseLayer } });
             });
         });
-        universalLinks.subscribe("base", (event) => {
-            this.loggingService.info("Opening the base url: " + event.path);
+        universalLinks.subscribe(null, (event) => {
+            this.loggingService.info("[OpenWith] Opening the null: " + event.path);
             if (this.matDialog.openDialogs.length > 0) {
                 this.matDialog.closeAll();
             }
@@ -82,7 +82,7 @@ export class OpenWithService {
             });
         });
 
-        cordova.openwith.init(() => { }, (error) => this.loggingService.error(`Open with init failed with error: ${error}`));
+        cordova.openwith.init(() => { }, (error) => this.loggingService.error(`[OpenWith] Init failed with error: ${error}`));
         cordova.openwith.addHandler((intent) => {
             if (intent.items.length <= 0) {
                 return;
@@ -101,7 +101,7 @@ export class OpenWithService {
     }
 
     private handleExternalUrl(item: Item) {
-        this.loggingService.info("Opening a shared url: " + item.uri);
+        this.loggingService.info("[OpenWith] Opening a url: " + item.uri);
         if (item.uri.indexOf("maps?q=") !== -1) {
             let coordsRegExp = /q=(\d+\.\d+),(\d+\.\d+)&z=/;
             let coords = coordsRegExp.exec(decodeURIComponent(item.uri));
@@ -151,11 +151,11 @@ export class OpenWithService {
             }
         }
         if (!blob.name) {
-            this.loggingService.warning("Unable to find file format, defaulting to twl?");
+            this.loggingService.warning("[OpenWith] Unable to find file format, defaulting to twl?");
             blob.name = "file.twl";
         }
         try {
-            this.loggingService.info("Opening a shared file: " + blob.name + ", " + item.path + ", " + item.type);
+            this.loggingService.info("[OpenWith] Opening a file: " + blob.name + ", " + item.path + ", " + item.type);
             // Do not use "new File(...)" as it breaks the functionality.
             await this.fileService.addRoutesFromFile(blob);
         } catch (ex) {
