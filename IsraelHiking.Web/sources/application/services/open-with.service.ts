@@ -37,6 +37,7 @@ export class OpenWithService {
             return;
         }
         universalLinks.subscribe("share", (event) => {
+            this.loggingService.info("Opening a share: " + event.path);
             if (this.matDialog.openDialogs.length > 0) {
                 this.matDialog.closeAll();
             }
@@ -46,6 +47,7 @@ export class OpenWithService {
             });
         });
         universalLinks.subscribe("poi", (event) => {
+            this.loggingService.info("Opening a poi: " + event.path);
             if (this.matDialog.openDialogs.length > 0) {
                 this.matDialog.closeAll();
             }
@@ -59,6 +61,7 @@ export class OpenWithService {
             });
         });
         universalLinks.subscribe("url", (event) => {
+            this.loggingService.info("Opening a file url: " + event.path);
             if (this.matDialog.openDialogs.length > 0) {
                 this.matDialog.closeAll();
             }
@@ -69,7 +72,8 @@ export class OpenWithService {
                     { queryParams: { baseLayer: baseLayer } });
             });
         });
-        universalLinks.subscribe("base", () => {
+        universalLinks.subscribe("base", (event) => {
+            this.loggingService.info("Opening the base url: " + event.path);
             if (this.matDialog.openDialogs.length > 0) {
                 this.matDialog.closeAll();
             }
