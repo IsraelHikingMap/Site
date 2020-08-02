@@ -12,6 +12,14 @@
   <allow-intent href="mailto:*" />
   <allow-intent href="geo:*" />
   <allow-intent href="whatsapp:*" />
+  <universal-links>
+    <host name="israelhiking.osm.org.il" scheme="https">
+      <path event="share" url="/share/*" />
+      <path event="poi" url="/poi/*" />
+      <path event="url" url="/url/*" />
+      <path event="base" url="/" />
+    </host>
+  </universal-links>
   <platform name="android">
     <allow-intent href="market:*" />
     <preference name="android-targetSdkVersion" value="28" />
@@ -130,6 +138,7 @@
         <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.jpeg" />
         <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.jpeg" />
       </intent-filter>
+      <!-- HM TODO: remove this!
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
@@ -141,6 +150,7 @@
         <data android:host="israelhiking.osm.org.il" android:pathPattern="/" android:scheme="https" />
         <data android:host="israelhiking.osm.org.il" android:pathPattern="" android:scheme="https" />
       </intent-filter>
+      -->
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />

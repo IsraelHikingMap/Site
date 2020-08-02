@@ -9,9 +9,9 @@ import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { RouteStrings } from "./hash.service";
-import { Urls } from "../urls";
 
 declare var cordova: any;
+declare var universalLinks: any;
 
 interface Item {
     uri: string;
@@ -36,6 +36,48 @@ export class OpenWithService {
         if (!this.runningContextService.isCordova || !cordova.openwith || !cordova.openwith.init) {
             return;
         }
+        universalLinks.subscribe("share", (event) => {
+            if (this.matDialog.openDialogs.length > 0) {
+                this.matDialog.closeAll();
+            }
+            let shareId = event.path.replace("/share/", "");
+            this.ngZone.run(() => {
+                this.router.navigate([RouteStrings.ROUTE_SHARE, shareId]);
+            });
+        });
+        universalLinks.subscribe("poi", (event) => {
+            if (this.matDialog.openDialogs.length > 0) {
+                this.matDialog.closeAll();
+            }
+            let sourceAndId = event.path.replace("/poi/", "");
+            let source = sourceAndId.split("/")[0];
+            let id = sourceAndId.split("/")[1];
+            let language = event.params.language;
+            this.ngZone.run(() => {
+                this.router.navigate([RouteStrings.ROUTE_POI, source, id],
+                    { queryParams: { language: language } });
+            });
+        });
+        universalLinks.subscribe("url", (event) => {
+            if (this.matDialog.openDialogs.length > 0) {
+                this.matDialog.closeAll();
+            }
+            let url = event.path.replace("/url/", "");
+            let baseLayer = event.params.baselayer;
+            this.ngZone.run(() => {
+                this.router.navigate([RouteStrings.ROUTE_URL, url],
+                    { queryParams: { baseLayer: baseLayer } });
+            });
+        });
+        universalLinks.subscribe("base", () => {
+            if (this.matDialog.openDialogs.length > 0) {
+                this.matDialog.closeAll();
+            }
+            this.ngZone.run(() => {
+                this.router.navigate(["/"]);
+            });
+        });
+
         cordova.openwith.init(() => { }, (error) => this.loggingService.error(`Open with init failed with error: ${error}`));
         cordova.openwith.addHandler((intent) => {
             if (intent.items.length <= 0) {
@@ -56,19 +98,6 @@ export class OpenWithService {
 
     private handleExternalUrl(item: Item) {
         this.loggingService.info("Opening a shared url: " + item.uri);
-        if (item.uri.indexOf(RouteStrings.ROUTE_SHARE + "/") !== -1 ||
-            item.uri.indexOf(RouteStrings.ROUTE_POI + "/") !== -1 ||
-            item.uri.indexOf(RouteStrings.ROUTE_URL + "/") !== -1 ||
-            item.uri.indexOf(RouteStrings.ROUTE_MAP + "/") !== -1 ||
-            item.uri.replace(/\//g, "").endsWith("israelhiking.osm.org.il")) {
-            if (this.matDialog.openDialogs.length > 0) {
-                this.matDialog.closeAll();
-            }
-            let escapedString = Urls.baseAddress.toLocaleLowerCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-            let regexpToUse = new RegExp(escapedString, "ig");
-            this.router.navigateByUrl(item.uri.replace(regexpToUse, ""));
-            return;
-        }
         if (item.uri.indexOf("maps?q=") !== -1) {
             let coordsRegExp = /q=(\d+\.\d+),(\d+\.\d+)&z=/;
             let coords = coordsRegExp.exec(decodeURIComponent(item.uri));

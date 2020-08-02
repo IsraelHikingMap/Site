@@ -221,7 +221,8 @@ namespace IsraelHiking.Web
                 {
                     FileProvider = new PhysicalFileProvider(wellKnownFolder),
                     RequestPath = new PathString("/.well-known"),
-                    ServeUnknownFileTypes = true // serve extensionless file
+                    ServeUnknownFileTypes = true, // serve extensionless file
+                    DefaultContentType = "application/json"
                 });
             }
             // wwwroot
