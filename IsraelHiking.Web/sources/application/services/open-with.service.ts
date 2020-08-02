@@ -33,9 +33,10 @@ export class OpenWithService {
                 private readonly ngZone: NgZone) { }
 
     public initialize() {
-        if (!this.runningContextService.isCordova || !cordova.openwith || !cordova.openwith.init) {
+        if (!this.runningContextService.isCordova) {
             return;
         }
+        this.loggingService.info("[OpenWith] subscribing to universal link events");
         universalLinks.subscribe("share", (event) => {
             this.loggingService.info("[OpenWith] Opening a share: " + event.path);
             if (this.matDialog.openDialogs.length > 0) {
@@ -81,7 +82,9 @@ export class OpenWithService {
                 this.router.navigate(["/"]);
             });
         });
-
+        if (!cordova.openwith || !cordova.openwith.init) {
+            return;
+        }
         cordova.openwith.init(() => { }, (error) => this.loggingService.error(`[OpenWith] Init failed with error: ${error}`));
         cordova.openwith.addHandler((intent) => {
             if (intent.items.length <= 0) {
@@ -101,6 +104,10 @@ export class OpenWithService {
     }
 
     private handleExternalUrl(item: Item) {
+        if (item.uri.toLocaleLowerCase().indexOf("israelhiking.osm.org.il") !== -1) {
+            // handled by deep links plugin
+            return;
+        }
         this.loggingService.info("[OpenWith] Opening a url: " + item.uri);
         if (item.uri.indexOf("maps?q=") !== -1) {
             let coordsRegExp = /q=(\d+\.\d+),(\d+\.\d+)&z=/;
