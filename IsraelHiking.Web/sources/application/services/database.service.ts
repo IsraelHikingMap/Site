@@ -115,6 +115,8 @@ export class DatabaseService {
         // reduce database size and memory footprint
         finalState.routes.past = [];
         finalState.routes.future = [];
+        finalState.poiState.selectedPointOfInterest = null;
+        finalState.poiState.isSidebarOpen = false;
         await this.updateState(finalState);
         for (let dbKey of this.sourceDatabases.keys()) {
             await this.closeDatabase(dbKey);
@@ -265,6 +267,7 @@ export class DatabaseService {
         storedState.inMemoryState = initialState.inMemoryState;
         if (!this.runningContext.isCordova) {
             storedState.routes = initialState.routes;
+            storedState.poiState = initialState.poiState;
         }
         if (storedState.configuration.version === "8.0") {
             this.loggingService.info("Upgrading state from version 8.0 to 9.0");
