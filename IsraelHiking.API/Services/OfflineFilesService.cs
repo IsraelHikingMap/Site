@@ -30,10 +30,18 @@ namespace IsraelHiking.API.Services
             IOptions<NonPublicConfigurationData> options,
             ILogger logger)
         {
-            _fileProvider = new PhysicalFileProvider(options.Value.OfflineFilesFolder);
+            _logger = logger;
+            if (string.IsNullOrEmpty(options.Value.OfflineFilesFolder))
+            {
+                _logger.LogWarning("offlineFilesFolder was not provided! This mean you won't be able to use this service");
+            }
+            else
+            {
+                _fileProvider = new PhysicalFileProvider(options.Value.OfflineFilesFolder);
+            }
+            
             _fileSystemHelper = fileSystemHelper;
             _receiptValidationGateway = receiptValidationGateway;
-            _logger = logger;
         }
 
         /// <inheritdoc/>
