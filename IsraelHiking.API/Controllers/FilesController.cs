@@ -144,7 +144,9 @@ namespace IsraelHiking.API.Controllers
         private async Task<DataContainerPoco> ConvertToDataContainer(byte[] data, string fileName)
         {
             var dataContainer = await _dataContainerConverterService.ToDataContainer(data, fileName);
-            foreach (var latLng in dataContainer.Routes.SelectMany(routeData => routeData.Segments.SelectMany(routeSegmentData => routeSegmentData.Latlngs)))
+            foreach (var latLng in dataContainer.Routes.SelectMany(routeData => routeData.Segments
+                    .SelectMany(routeSegmentData => routeSegmentData.Latlngs)
+                ).Where(l => l.Alt.HasValue == false || l.Alt == 0))
             {
                 latLng.Alt = await _elevationDataStorage.GetElevation(latLng.ToCoordinate());
             }
