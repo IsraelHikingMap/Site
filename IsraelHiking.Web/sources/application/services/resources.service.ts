@@ -268,6 +268,7 @@ export class ResourcesService {
     public remainingDistance: string;
     public longPressHint: string;
     public continue: string;
+    public navigateHere: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -531,7 +532,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1594898734009");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1597174235757");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -782,6 +783,7 @@ export class ResourcesService {
         this.remainingDistance = this.gettextCatalog.getString("Remaining distance");
         this.longPressHint = this.gettextCatalog.getString("Long press on any button will shows its usage");
         this.continue = this.gettextCatalog.getString("Continue");
+        this.navigateHere = this.gettextCatalog.getString("Navigate Here");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

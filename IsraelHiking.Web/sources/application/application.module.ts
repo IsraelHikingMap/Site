@@ -106,6 +106,7 @@ import { PurchaseService } from "./services/purchase.service";
 import { ApplicationInitializeService } from "./services/application-initialize.service";
 import { DeviceOrientationService } from "./services/device-orientation.service";
 import { RecordedRouteService } from "./services/recorded-route.service";
+import { NavigateHereService } from "./services/navigate-here.service";
 import { AudioPlayerFactory } from "./services/audio-player.factory";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 // interactions
@@ -184,8 +185,7 @@ export function initializeApplication(injector: Injector) {
 
 export function getWindow() { return window; }
 
-@
-    NgModule({
+@NgModule({
         imports: [
             CommonModule,
             BrowserModule,
@@ -317,6 +317,7 @@ export function getWindow() { return window; }
             ApplicationInitializeService,
             DeviceOrientationService,
             RecordedRouteService,
+            NavigateHereService,
             AudioPlayerFactory,
             BackgroundGeolocation,
             Brightness,
