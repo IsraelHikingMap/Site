@@ -58,7 +58,7 @@ export class OpenWithService {
             let language = event.params.language;
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_POI, source, id],
-                    { queryParams: { language: language } });
+                    { queryParams: { language } });
             });
         });
         universalLinks.subscribe("url", (event) => {
@@ -70,7 +70,7 @@ export class OpenWithService {
             let baseLayer = event.params.baselayer;
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_URL, url],
-                    { queryParams: { baseLayer: baseLayer } });
+                    { queryParams: { baseLayer } });
             });
         });
         universalLinks.subscribe(null, (event) => {
