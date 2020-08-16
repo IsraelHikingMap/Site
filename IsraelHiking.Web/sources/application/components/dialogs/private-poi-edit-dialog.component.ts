@@ -188,7 +188,8 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public async navigateHere() {
-        this.navigateHereService.addNavigationSegment(this.marker.latlng);
+        console.log(this.title);
+        this.navigateHereService.addNavigationSegment(this.marker.latlng, this.title);
     }
 
     @HostListener("window:keydown", ["$event"])

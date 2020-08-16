@@ -112,7 +112,7 @@ export class SelectedRouteService {
         }
     }
 
-    public createRouteName = (routeName: string = this.resources.route) => {
+    public createRouteName(routeName: string = this.resources.route): string {
         let index = 1;
         routeName = routeName.replace(/(.*) \d+/, "$1");
         let availableRouteName = `${routeName} ${index}`;
@@ -136,7 +136,7 @@ export class SelectedRouteService {
         return selectedColor;
     }
 
-    public isNameAvailable = (name: string) => {
+    public isNameAvailable(name: string) {
         let route = this.routes.find((routeToFind) => routeToFind.name === name);
         return route == null && name != null && name !== "";
     }

@@ -287,7 +287,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public navigateHere() {
-        this.navigateHereService.addNavigationSegment(this.poiExtended.location);
+        this.navigateHereService.addNavigationSegment(this.poiExtended.location, this.poiExtended.title);
     }
 
     public clear() {
