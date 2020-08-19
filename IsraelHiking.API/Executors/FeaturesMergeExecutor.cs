@@ -172,7 +172,7 @@ namespace IsraelHiking.API.Executors
         private List<Feature> MergePlaceNodes(List<Feature> osmFeatures)
         {
             var featureIdsToRemove = new ConcurrentBag<string>();
-            var containers = osmFeatures.Where(f => f.IsValidContainer()).OrderBy(f => f.Geometry.Area).ToList();
+            var containers = osmFeatures.Where(IsPlaceContainer).OrderBy(f => f.Geometry.Area).ToList();
             var places = osmFeatures.Where(f => f.Geometry is Point && f.Attributes.Exists(PLACE) && f.Attributes.Exists(FeatureAttributes.NAME)).ToList();
             WriteToBothLoggers($"Starting places merging places: {places.Count}, to containers: {containers.Count}");
             Parallel.For(0, places.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount / 2 }, (placeIndex) =>
@@ -193,9 +193,34 @@ namespace IsraelHiking.API.Executors
             return osmFeatures.Where(f => list.Contains(f.GetId()) == false).ToList();
         }
 
+        private bool IsPlaceContainer(Feature feature)
+        {
+            if (!(feature.Geometry is Polygon) && !(feature.Geometry is MultiPolygon))
+            {
+                return false;
+            }
+            if (!feature.Attributes.Exists(FeatureAttributes.NAME))
+            {
+                return false;
+            }
+            var isFeatureADecentCity = feature.Attributes.Has("boundary", "administrative") &&
+                                       feature.Attributes.Exists("admin_level") &&
+                                       int.TryParse(feature.Attributes["admin_level"].ToString(), out int adminLevel) &&
+                                       adminLevel <= 8;
+            if (isFeatureADecentCity)
+            {
+                return true;
+            }
+            if (feature.Attributes.Exists(PLACE))
+            {
+                return true;
+            }
+            return false;
+        }
+
         private List<Feature> UpdatePlacesGeometry(Feature feature, List<Feature> places)
         {
-            var placeContainers = places.Where(c => IsPlaceContainer(c, feature))
+            var placeContainers = places.Where(c => IsPlaceContainerContainsFeature(c, feature))
                 .OrderBy(f => f.Geometry.Area)
                 .ToList();
 
@@ -211,7 +236,7 @@ namespace IsraelHiking.API.Executors
             return placeContainers;
         }
 
-        private bool IsPlaceContainer(Feature container, Feature feature)
+        private bool IsPlaceContainerContainsFeature(Feature container, Feature feature)
         {
             try
             {
@@ -378,7 +403,11 @@ namespace IsraelHiking.API.Executors
             {
                 geometryContains = source.Geometry.Contains(target.Geometry);
             }
-            if (!geometryContains && source.Geometry.Distance(target.Geometry) > _options.MergePointsOfInterestThreshold)
+            var threshold = source.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
+                target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM)
+                ? _options.MergePointsOfInterestThreshold
+                : _options.MergeExternalPointsOfInterestThreshold;
+            if (!geometryContains && source.Geometry.Distance(target.Geometry) > threshold)
             {
                 // too far away to be merged
                 return false;
@@ -431,6 +460,17 @@ namespace IsraelHiking.API.Executors
                 !source.Attributes.GetNames().Contains("highway"))
             {
                 // don't merge highway with non-highway.
+                return false;
+            }
+
+            if (target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
+                target.Attributes.GetNames().Contains("highway") &&
+                source.Attributes.GetNames().Contains("highway") &&
+                (source.Geometry.OgcGeometryType == OgcGeometryType.Point ||
+                target.Geometry.OgcGeometryType == OgcGeometryType.Point) &&
+                source.Geometry.OgcGeometryType != target.Geometry.OgcGeometryType)
+            {
+                // don't merge highway points with non highway points
                 return false;
             }
             return true;

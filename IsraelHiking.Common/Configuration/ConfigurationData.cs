@@ -81,6 +81,11 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public double MergePointsOfInterestThreshold { get; set; }
         /// <summary>
+        /// This threshold in degrees that is used to determine if two points of interest are close enough to be merged
+        /// assuming one is from an external source
+        /// </summary>
+        public double MergeExternalPointsOfInterestThreshold { get; set; }
+        /// <summary>
         /// This threshold in degrees that is used to determine if two points of interest are close enough to be suggested when updating
         /// </summary>
         public double ClosestPointsOfInterestThreshold { get; set; }
@@ -157,7 +162,8 @@ namespace IsraelHiking.Common.Configuration
             MaxLengthPerLine = 3000;
             RadialSimplificationAngle = 90;
             SearchFactor = 0.5;
-            MergePointsOfInterestThreshold = 1 / 60.0; // 1 minute
+            MergePointsOfInterestThreshold = 0.001; // around 100m
+            MergeExternalPointsOfInterestThreshold = 1 / 60.0; // 1 minute
             ClosestPointsOfInterestThreshold = 0.001; // around 100m
             ClosestHighwayForGates = 0.0003; // around 30m
             ClosestNodeForGates = 0.00005; // around 5m
