@@ -606,28 +606,30 @@ namespace IsraelHiking.API.Executors
             var lastExsitingIndex = websiteUrls.Count;
             foreach (var key in source.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)))
             {
+                var sourceImageUrlKey = key.Replace(FeatureAttributes.WEBSITE, FeatureAttributes.POI_SOURCE_IMAGE_URL);
+                var targetImageUrlKey = string.Empty;
                 if (websiteUrls.Contains(source.Attributes[key]))
                 {
-                    continue;
+                    var websiteKey = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
+                        .First(key => target.Attributes[key].Equals(source.Attributes[key]));
+                    targetImageUrlKey = websiteKey.Replace(FeatureAttributes.WEBSITE, FeatureAttributes.POI_SOURCE_IMAGE_URL);
                 }
-                var sourceImageUrlKey = key.Replace(FeatureAttributes.WEBSITE, FeatureAttributes.POI_SOURCE_IMAGE_URL);
-                if (lastExsitingIndex == 0)
+                else if (lastExsitingIndex == 0)
                 {
                     target.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, source.Attributes[key]);
-                    if (source.Attributes.GetNames().Contains(sourceImageUrlKey))
-                    {
-                        target.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, source.Attributes[sourceImageUrlKey]);
-                    }
+                    targetImageUrlKey = FeatureAttributes.POI_SOURCE_IMAGE_URL;
+                    lastExsitingIndex++;
                 }
                 else
                 {
                     target.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + lastExsitingIndex, source.Attributes[key]);
-                    if (source.Attributes.GetNames().Contains(sourceImageUrlKey))
-                    {
-                        target.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL + lastExsitingIndex, source.Attributes[sourceImageUrlKey]);
-                    }
+                    targetImageUrlKey = FeatureAttributes.POI_SOURCE_IMAGE_URL + lastExsitingIndex;
+                    lastExsitingIndex++;
                 }
-                lastExsitingIndex++;
+                if (source.Attributes.GetNames().Contains(sourceImageUrlKey))
+                {
+                    target.Attributes.AddOrUpdate(targetImageUrlKey, source.Attributes[sourceImageUrlKey]);
+                }
             }
         }
 
