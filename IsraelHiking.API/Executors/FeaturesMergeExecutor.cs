@@ -603,7 +603,7 @@ namespace IsraelHiking.API.Executors
         {
             var websiteUrls = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
                 .Select(key => target.Attributes[key]).ToList();
-            var lastExsitingIndex = websiteUrls.Count;
+            var lastExisitingIndex = websiteUrls.Count;
             foreach (var key in source.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)))
             {
                 var sourceImageUrlKey = key.Replace(FeatureAttributes.WEBSITE, FeatureAttributes.POI_SOURCE_IMAGE_URL);
@@ -611,20 +611,20 @@ namespace IsraelHiking.API.Executors
                 if (websiteUrls.Contains(source.Attributes[key]))
                 {
                     var websiteKey = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
-                        .First(key => target.Attributes[key].Equals(source.Attributes[key]));
+                        .First(targetKey => target.Attributes[targetKey].Equals(source.Attributes[key]));
                     targetImageUrlKey = websiteKey.Replace(FeatureAttributes.WEBSITE, FeatureAttributes.POI_SOURCE_IMAGE_URL);
                 }
-                else if (lastExsitingIndex == 0)
+                else if (lastExisitingIndex == 0)
                 {
                     target.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, source.Attributes[key]);
                     targetImageUrlKey = FeatureAttributes.POI_SOURCE_IMAGE_URL;
-                    lastExsitingIndex++;
+                    lastExisitingIndex++;
                 }
                 else
                 {
-                    target.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + lastExsitingIndex, source.Attributes[key]);
-                    targetImageUrlKey = FeatureAttributes.POI_SOURCE_IMAGE_URL + lastExsitingIndex;
-                    lastExsitingIndex++;
+                    target.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + lastExisitingIndex, source.Attributes[key]);
+                    targetImageUrlKey = FeatureAttributes.POI_SOURCE_IMAGE_URL + lastExisitingIndex;
+                    lastExisitingIndex++;
                 }
                 if (source.Attributes.GetNames().Contains(sourceImageUrlKey))
                 {

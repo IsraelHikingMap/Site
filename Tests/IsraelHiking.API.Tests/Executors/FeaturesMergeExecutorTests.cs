@@ -751,6 +751,26 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
+        public void MergeFeatures_SecondWebsiteOfSourceIsFromExternal_ShouldMergeAndAddSourceImageUrl()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + "1", "web2");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web2");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "siu");
+            feature2.SetTitles();
+            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+
+            Assert.AreEqual(1, results.Count);
+            Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL + "1"));
+        }
+
+        [TestMethod]
         public void MergeFeatures_HasSameTitleWithSameMultipleWebsites_ShouldMergeAndAddSourceImageUrl()
         {
             var feature1 = CreateFeature("1", 0, 0);
