@@ -98,11 +98,6 @@ namespace IsraelHiking.API.Controllers
         public async Task<IActionResult> GetShareUrlForUser()
         {
             var shareUrls = await _repository.GetUrlsByUser(User.Identity.Name);
-            foreach (var shareUrl in shareUrls)
-            {
-                // reduce response size
-                shareUrl.DataContainer = null;
-            }
             return Ok(shareUrls.OrderByDescending(d => d.CreationDate));
         }
 

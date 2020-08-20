@@ -655,8 +655,14 @@ namespace IsraelHiking.DataAccess
 
         public async Task<List<ShareUrl>> GetUrlsByUser(string osmUserId)
         {
-            var response = await _elasticClient.SearchAsync<ShareUrl>(s => s.Index(SHARES).Size(1000)
-                .Query(q => q.Term(t => t.OsmUserId, osmUserId)));
+            var response = await _elasticClient.SearchAsync<ShareUrl>(s => s.Index(SHARES)
+                .Size(5000)
+                .Query(q => q.Term(t => t.OsmUserId, osmUserId))
+                .Source(src => src
+                    .IncludeAll()
+                    .Excludes(e => e.Fields(p => p.DataContainer))
+                )
+            );
             return response.Documents.ToList();
 
         }
