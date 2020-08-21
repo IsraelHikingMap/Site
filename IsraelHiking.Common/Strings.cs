@@ -68,6 +68,7 @@
         public const string POI_ITM_EAST = POI_PREFIX + "ItmEast";
         public const string POI_HAS_EXTRA_DATA = POI_PREFIX + "HasExtraData";
         public const string POI_DELETED = POI_PREFIX + "Deleted";
+        public const string POI_EXTERNAL_DESCRIPTION = POI_PREFIX + "ExternalDescription";
         public const string LAT = "lat";
         public const string LON = "lon";
 

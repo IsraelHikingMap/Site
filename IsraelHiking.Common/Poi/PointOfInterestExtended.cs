@@ -10,6 +10,7 @@ namespace IsraelHiking.Common.Poi
         public bool IsArea { get; set; }
         public double LengthInKm { get; set; }
         public string Description { get; set; }
+        public string ExternalDescription { get; set; }
         public string[] ImagesUrls { get; set; }
 
         public Reference[] References { get; set; }

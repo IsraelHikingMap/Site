@@ -14,6 +14,7 @@
   <allow-intent href="whatsapp:*" />
   <universal-links>
     <host name="israelhiking.osm.org.il" scheme="https">
+      <ios-team-id value="2KT88923M5" />
       <path event="share" url="/share/*" />
       <path event="poi" url="/poi/*" />
       <path event="url" url="/url/*" />

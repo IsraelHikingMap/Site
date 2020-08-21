@@ -583,8 +583,16 @@ namespace IsraelHiking.API.Executors
                 if (!target.Attributes.GetNames().Contains(FeatureAttributes.DESCRIPTION + languagePostfix) &&
                     source.Attributes.GetNames().Contains(FeatureAttributes.DESCRIPTION + languagePostfix))
                 {
-                    CopyKeysIfExist(target, source, 
-                        FeatureAttributes.DESCRIPTION + languagePostfix,
+                    if (!source.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM))
+                    {
+                        target.Attributes.AddOrUpdate(FeatureAttributes.POI_EXTERNAL_DESCRIPTION + languagePostfix,
+                            source.Attributes[FeatureAttributes.DESCRIPTION + languagePostfix]);
+                    }
+                    else
+                    {
+                        CopyKeysIfExist(target, source, FeatureAttributes.DESCRIPTION + languagePostfix);
+                    }
+                    CopyKeysIfExist(target, source,
                         FeatureAttributes.POI_USER_NAME,
                         FeatureAttributes.POI_USER_ADDRESS);
                 }

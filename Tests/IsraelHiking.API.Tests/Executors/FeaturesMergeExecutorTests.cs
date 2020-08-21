@@ -796,5 +796,24 @@ namespace IsraelHiking.API.Tests.Executors
             Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL + "1"));
             Assert.AreEqual(2, results.First().Attributes.GetNames().Count(n => n.StartsWith(FeatureAttributes.WEBSITE)));
         }
+
+        [TestMethod]
+        public void MergeFeatures_DescriptionOnlyExistsInExternalSource_ShouldMergeAndAddSpecialDescription()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.DeleteAttribute(FeatureAttributes.DESCRIPTION);
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION, "description");
+            feature2.SetTitles();
+            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+
+            Assert.AreEqual(1, results.Count);
+            Assert.IsFalse(results.First().Attributes.Exists(FeatureAttributes.DESCRIPTION));
+            Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_EXTERNAL_DESCRIPTION));
+        }
     }
 }

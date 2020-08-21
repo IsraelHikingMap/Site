@@ -481,6 +481,7 @@ export class PoiService {
         // references = uniqWith(references, (a, b) => a.url === b.url);
         let references = []; // no references due to offline.
         let description = f.properties["description:" + language] || f.properties.description;
+        let externalDescription = f.properties["poiExternalDescription:" + language] || f.properties.poiExternalDescription;
         let poi = {
             id: f.properties.identifier,
             category: f.properties.poiCategory,
@@ -514,6 +515,7 @@ export class PoiService {
             },
             imagesUrls,
             description,
+            externalDescription,
             title: Array.isArray(f.properties.poiNames[language]) && f.properties.poiNames[language].length !== 0
                 ? f.properties.poiNames[language][0]
                 : Array.isArray(f.properties.poiNames.all) && f.properties.poiNames.all.length !== 0

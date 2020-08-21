@@ -188,11 +188,12 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (!this.poiExtended) {
             return "";
         }
-        if (!this.poiExtended.isEditable) {
-            return this.poiExtended.description;
+        let description = this.poiExtended.description || this.poiExtended.externalDescription;
+        if (description) {
+            return description;
         }
-        if (this.poiExtended.description) {
-            return this.poiExtended.description;
+        if (!this.poiExtended.isEditable) {
+            return description;
         }
         if (this.authorizationService.isLoggedIn() === false) {
             return this.resources.noDescriptionLoginRequired;
