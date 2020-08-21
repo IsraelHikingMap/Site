@@ -15,7 +15,7 @@
     </div>
     <div mat-dialog-content id="dialogContentForScroll">
         <div *ngFor="let shareUrl of filteredShareUrls" class="item">
-            <div fxLayout="row" [ngClass]="{'active': selectedShareUrl === shareUrl}" (click)="toggleSelectedShareUrl(shareUrl)">
+            <div fxLayout="row" [ngClass]="{'active': selectedShareUrl?.id === shareUrl.id}" (click)="toggleSelectedShareUrl(shareUrl)">
                 <div class="item-image">
                     <img [src]="getImageFromShareId(shareUrl, 128, 128)" fxFill />
                 </div>

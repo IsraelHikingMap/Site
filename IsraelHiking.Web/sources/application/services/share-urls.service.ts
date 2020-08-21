@@ -9,6 +9,8 @@ import { LoggingService } from "./logging.service";
 import { Urls } from "../urls";
 import { SetShareUrlAction } from "../reducres/in-memory.reducer";
 import { ShareUrl, DataContainer, ApplicationState } from "../models/models";
+import { UpdateShareUrlAction, AddShareUrlAction, RemoveShareUrlAction } from "../reducres/share-urls.reducer";
+import { timeout } from "rxjs/operators";
 
 interface IShareUrlSocialLinks {
     facebook: string;
@@ -19,16 +21,11 @@ interface IShareUrlSocialLinks {
 
 @Injectable()
 export class ShareUrlsService {
-    // HM TODO: move to state?
-    public shareUrls: ShareUrl[];
-
     constructor(private readonly httpClient: HttpClient,
                 private readonly whatsAppService: WhatsAppService,
                 private readonly hashService: HashService,
                 private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
-
-        this.shareUrls = [];
     }
 
     public getShareUrlDisplayName(shareUrl: ShareUrl): string {
@@ -62,21 +59,30 @@ export class ShareUrlsService {
         return this.httpClient.get(Urls.urls + shareUrlId).toPromise() as Promise<ShareUrl>;
     }
 
-    public async getShareUrls(): Promise<ShareUrl[]> {
+    public async syncShareUrls(): Promise<any> {
         try {
-            let shareUrls = await this.httpClient.get(Urls.urls).toPromise() as ShareUrl[];
-            this.shareUrls.splice(0);
-            this.shareUrls.push(...shareUrls);
-            return shareUrls;
+            let shareUrls = await this.httpClient.get(Urls.urls).pipe(timeout(10000)).toPromise() as ShareUrl[];
+            let exitingShareUrls = this.ngRedux.getState().shareUrlsState.shareUrls;
+            for (let shareUrl of shareUrls) {
+                if (exitingShareUrls.find(s => s.id === shareUrl.id) != null) {
+                    this.ngRedux.dispatch(new UpdateShareUrlAction({ shareUrl }));
+                } else {
+                    this.ngRedux.dispatch(new AddShareUrlAction({ shareUrl }));
+                }
+            }
+            for (let shareUrl of exitingShareUrls) {
+                if (shareUrls.find(s => s.id === shareUrl.id) == null) {
+                    this.ngRedux.dispatch(new RemoveShareUrlAction({ shareUrl }));
+                }
+            }
         } catch {
             this.loggingService.error("Unable to get user's shares");
         }
-        return [];
     }
 
     public async createShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
         let createdShareUrl = await this.httpClient.post(Urls.urls, shareUrl).toPromise() as ShareUrl;
-        this.shareUrls.splice(0, 0, createdShareUrl);
+        this.ngRedux.dispatch(new AddShareUrlAction({ shareUrl: createdShareUrl }));
         return createdShareUrl;
     }
 
@@ -86,7 +92,7 @@ export class ShareUrlsService {
 
     public async deleteShareUrl(shareUrl: ShareUrl): Promise<void> {
         await this.httpClient.delete(Urls.urls + shareUrl.id).toPromise();
-        remove(this.shareUrls, s => s.id === shareUrl.id);
+        this.ngRedux.dispatch(new RemoveShareUrlAction({ shareUrl }));
     }
 
     public getImageFromShareId = (shareUrl: ShareUrl, width?: number, height?: number) => {

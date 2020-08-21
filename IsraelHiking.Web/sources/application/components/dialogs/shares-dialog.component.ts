@@ -1,8 +1,10 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Router } from "@angular/router";
+import { select, NgRedux } from "@angular-redux/store";
 import { SharedStorage } from "ngx-store";
 import { take } from "lodash";
+import { Observable, Subscription } from "rxjs";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -11,6 +13,7 @@ import { RouteStrings } from "../../services/hash.service";
 import { ShareUrl } from "../../models/share-url";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
+import { ApplicationState } from "../../models/models";
 
 @Component({
     selector: "shares-dialog",
@@ -18,7 +21,7 @@ import { DataContainerService } from "../../services/data-container.service";
     styleUrls: ["shares-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class SharesDialogComponent extends BaseMapComponent implements OnInit {
+export class SharesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
 
     public filteredShareUrls: ShareUrl[];
     public shareUrlInEditMode: ShareUrl;
@@ -26,39 +29,54 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
     public searchTerm: FormControl;
     public selectedShareUrl: ShareUrl;
 
+    @select((state: ApplicationState) => state.shareUrlsState.shareUrls)
+    public shareUrls$: Observable<ShareUrl[]>;
+
     @SharedStorage()
     private sessionSearchTerm = "";
 
     private page: number;
+    private subscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
                 private readonly router: Router,
                 private readonly toastService: ToastService,
                 private readonly shareUrlsService: ShareUrlsService,
-                private readonly dataContainerService: DataContainerService) {
+                private readonly dataContainerService: DataContainerService,
+                private readonly ngRedux: NgRedux<ApplicationState>
+    ) {
         super(resources);
         this.loadingShareUrls = false;
         this.shareUrlInEditMode = null;
         this.selectedShareUrl = null;
         this.page = 1;
+        this.subscriptions = [];
         this.searchTerm = new FormControl();
-        this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
+        this.subscriptions.push(this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
-        });
+        }));
         this.searchTerm.setValue(this.sessionSearchTerm);
+        this.subscriptions.push(this.shareUrls$.subscribe(() => {
+            this.updateFilteredLists(this.searchTerm.value);
+            this.loadingShareUrls = false;
+        }));
     }
 
-    public async ngOnInit() {
+    public ngOnInit() {
         this.loadingShareUrls = true;
-        await this.shareUrlsService.getShareUrls();
-        this.updateFilteredLists(this.searchTerm.value);
-        this.loadingShareUrls = false;
+        this.shareUrlsService.syncShareUrls();
+    }
+
+    public ngOnDestroy() {
+        for (let subscription of this.subscriptions) {
+            subscription.unsubscribe();
+        }
     }
 
     private updateFilteredLists(searchTerm: string) {
         searchTerm = searchTerm.trim();
         this.sessionSearchTerm = searchTerm;
-        let shares = this.shareUrlsService.shareUrls.filter((s) => this.findInShareUrl(s, searchTerm));
+        let shares = this.ngRedux.getState().shareUrlsState.shareUrls.filter((s) => this.findInShareUrl(s, searchTerm));
         this.filteredShareUrls = take(shares, this.page * 10);
     }
 
@@ -130,7 +148,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
     }
 
     public hasSelected() {
-        return this.selectedShareUrl != null && this.filteredShareUrls.indexOf(this.selectedShareUrl) !== -1;
+        return this.selectedShareUrl != null && this.filteredShareUrls.find(s => s.id === this.selectedShareUrl.id) != null;
     }
 
     public onScrollDown() {
