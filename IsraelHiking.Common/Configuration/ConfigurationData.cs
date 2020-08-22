@@ -37,9 +37,13 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public double MinimalMissingPartLength { get; set; }
         /// <summary>
-        /// The minimal legnth of a self loop part in meters
+        /// The minimal legnth of a self loop part in meters to be considered as a new segment
         /// </summary>
         public double MinimalMissingSelfLoopPartLegth { get; set; }
+        /// <summary>
+        /// The distance in meters for the radial simplification to consider a point within a radius and angle to simplify
+        /// </summary>
+        public double RadialDistanceTolerance { get; set; }
         /// <summary>
         /// The maximal distance that is considered the same line in meters
         /// </summary>
@@ -158,6 +162,7 @@ namespace IsraelHiking.Common.Configuration
             SimplificationDistanceTolerance = 3;
             MinimalMissingPartLength = 200;
             MinimalMissingSelfLoopPartLegth = MinimalDistanceToClosestPoint;
+            RadialDistanceTolerance = 10;
             MaxNumberOfPointsPerLine = 1000;
             MaxLengthPerLine = 3000;
             RadialSimplificationAngle = 90;
