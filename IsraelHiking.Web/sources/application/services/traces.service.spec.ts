@@ -32,7 +32,7 @@ describe("Traces Service", () => {
 
             let trace = { id: "123" } as Trace;
 
-            let promise = tracesService.getMissingParts(trace).then((res) => {
+            let promise = tracesService.getMissingParts(trace.id).then((res) => {
                 expect(res).not.toBeNull();
             });
 

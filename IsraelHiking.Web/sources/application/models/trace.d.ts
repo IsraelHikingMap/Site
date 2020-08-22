@@ -12,6 +12,5 @@ export interface Trace {
     timeStamp: Date;
     tagsString: string;
     visibility: TraceVisibility;
-    isInEditMode: boolean;
     dataContainer?: DataContainer;
 }

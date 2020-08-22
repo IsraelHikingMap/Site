@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { NgRedux } from "@angular-redux/store";
+import { timeout } from "rxjs/operators";
 
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
@@ -17,14 +18,14 @@ export class TracesService {
                 private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
-    public getMissingParts(trace: Trace): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
-        return this.httpClient.post(Urls.osm + "?traceId=" + trace.id, null)
+    public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
+        return this.httpClient.post(Urls.osm + "?traceId=" + traceId, null)
             .toPromise() as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     }
 
     public syncTraces = async (): Promise<void> => {
         try {
-            let response = await this.httpClient.get(Urls.osmTrace).toPromise() as Trace[];
+            let response = await this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)).toPromise() as Trace[];
             let traces = ([] as Trace[]).concat(response || []);
             let existingTraces = this.ngRedux.getState().tracesState.traces;
             for (let trace of existingTraces) {
@@ -33,7 +34,6 @@ export class TracesService {
             }
             for (let traceJson of traces) {
                 traceJson.timeStamp = new Date(traceJson.timeStamp);
-                traceJson.isInEditMode = false;
                 let existingTrace = existingTraces.find(t => t.id === traceJson.id);
                 if (existingTrace != null) {
                     traceJson.dataContainer = existingTrace.dataContainer;

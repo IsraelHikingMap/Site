@@ -47,7 +47,7 @@ export class ShareUrlsReducer {
     @ReduxAction(REMOVE_SHARE_URL)
     public removeShareUrl(lastState: ShareUrlsState, action: RemoveShareUrlAction): ShareUrlsState {
         return {
-            shareUrls: lastState.shareUrls.filter(s => s.id === action.payload.shareUrl.id)
+            shareUrls: lastState.shareUrls.filter(s => s.id !== action.payload.shareUrl.id)
         };
     }
 

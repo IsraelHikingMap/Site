@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { remove } from "lodash";
 import { NgRedux } from "@angular-redux/store";
+import { remove } from "lodash";
+import { timeout } from "rxjs/operators";
 
 import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -10,7 +11,6 @@ import { Urls } from "../urls";
 import { SetShareUrlAction } from "../reducres/in-memory.reducer";
 import { ShareUrl, DataContainer, ApplicationState } from "../models/models";
 import { UpdateShareUrlAction, AddShareUrlAction, RemoveShareUrlAction } from "../reducres/share-urls.reducer";
-import { timeout } from "rxjs/operators";
 
 interface IShareUrlSocialLinks {
     facebook: string;

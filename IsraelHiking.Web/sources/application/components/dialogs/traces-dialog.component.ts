@@ -28,14 +28,14 @@ import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducres/tra
 export class TracesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
 
     public filteredTraces: Trace[];
-    public selectedTrace: Trace;
+    public selectedTraceId: string;
+    public traceIdInEditMode: string;
     public file: File;
     public loadingTraces: boolean;
     public searchTerm: FormControl;
 
     @select((state: ApplicationState) => state.tracesState.traces)
     public traces$: Observable<Trace[]>;
-    private traces: Trace[];
 
     @SharedStorage()
     private sessionSearchTerm = "";
@@ -56,33 +56,32 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     ) {
         super(resources);
         this.loadingTraces = false;
-        this.selectedTrace = null;
+        this.selectedTraceId = null;
+        this.traceIdInEditMode = null;
         this.page = 1;
-        this.traces = [];
         this.searchTerm = new FormControl();
 
         this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
         });
         this.searchTerm.setValue(this.sessionSearchTerm);
-        this.tracesChangedSubscription = this.traces$.subscribe((traces) => {
-            this.traces = traces;
+        this.tracesChangedSubscription = this.traces$.subscribe(() => {
             this.updateFilteredLists(this.searchTerm.value);
-            this.loadingTraces = false;
         });
     }
 
-    public ngOnInit() {
-        this.loadingTraces = true;
-        this.tracesService.syncTraces();
+    public async ngOnInit() {
+        this.loadingTraces = this.ngRedux.getState().tracesState.traces.length === 0;
+        await this.tracesService.syncTraces();
+        this.loadingTraces = false;
     }
 
     public ngOnDestroy() {
         this.tracesChangedSubscription.unsubscribe();
     }
 
-    public showTrace = async (trace: Trace): Promise<DataContainer> => {
-
+    public async showTrace(): Promise<DataContainer> {
+        let trace = this.getSelectedTrace();
         if (trace.dataContainer == null) {
             trace.dataContainer = await this.tracesService.getTraceById(trace);
         }
@@ -102,40 +101,42 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         return trace.dataContainer;
     }
 
-    public editTrace() {
-        this.selectedTrace.isInEditMode = true;
+    private getSelectedTrace(): Trace {
+        return this.ngRedux.getState().tracesState.traces.find(t => t.id === this.selectedTraceId);
     }
 
     public updateTrace() {
-        this.selectedTrace.isInEditMode = false;
-        this.tracesService.updateTrace(this.selectedTrace);
+        this.traceIdInEditMode = null;
+        this.tracesService.updateTrace(this.getSelectedTrace());
     }
 
     public deleteTrace() {
-        this.selectedTrace.isInEditMode = false;
-        let message = `${this.resources.deletionOf} ${this.selectedTrace.name}, ${this.resources.areYouSure}`;
+        if (this.traceIdInEditMode === this.selectedTraceId) {
+            this.traceIdInEditMode = null;
+        }
+        let message = `${this.resources.deletionOf} ${this.getSelectedTrace().name}, ${this.resources.areYouSure}`;
         this.toastService.confirm({
             message,
             type: "YesNo",
             confirmAction: () => {
-                this.tracesService.deleteTrace(this.selectedTrace);
+                this.tracesService.deleteTrace(this.getSelectedTrace());
             },
         });
     }
 
     public editInOsm() {
         let baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
-        window.open(this.authorizationService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTrace.id));
+        window.open(this.authorizationService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTraceId));
     }
 
-    public findUnmappedRoutes = async (trace: Trace): Promise<void> => {
+    public async findUnmappedRoutes(): Promise<void> {
         try {
-            let geoJson = await this.tracesService.getMissingParts(trace);
+            let geoJson = await this.tracesService.getMissingParts(this.selectedTraceId);
             if (geoJson.features.length === 0) {
                 this.toastService.confirm({ message: this.resources.noUnmappedRoutes, type: "Ok" });
                 return;
             }
-            await this.showTrace(trace);
+            await this.showTrace();
             this.ngRedux.dispatch(new SetMissingPartsAction({ missingParts: geoJson }));
             let bounds = SpatialService.getGeoJsonBounds(geoJson);
             this.fitBoundsService.fitBounds(bounds);
@@ -163,8 +164,9 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     private updateFilteredLists(searchTerm: string) {
         searchTerm = searchTerm.trim();
         this.sessionSearchTerm = searchTerm;
-        let ordered = orderBy(this.traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
-        this.filteredTraces = take(ordered, this.page * 10);
+        let traces = this.ngRedux.getState().tracesState.traces;
+        traces = orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
+        this.filteredTraces = take(traces, this.page * 10);
     }
 
     private findInTrace(trace: Trace, searchTerm: string) {
@@ -188,22 +190,21 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public toggleSelectedTrace(trace: Trace) {
-        if (this.selectedTrace === trace && this.selectedTrace.isInEditMode) {
-            return;
-        }
-        if (this.selectedTrace === trace) {
-            this.selectedTrace = null;
+        if (this.selectedTraceId == null) {
+            this.selectedTraceId = trace.id;
+        } else if (this.selectedTraceId === trace.id && this.traceIdInEditMode !== trace.id) {
+            this.selectedTraceId = null;
         } else {
-            this.selectedTrace = trace;
+            this.selectedTraceId = trace.id;
         }
     }
 
-    public isTraceInEditMode() {
-        return this.selectedTrace != null && this.selectedTrace.isInEditMode && this.filteredTraces.indexOf(this.selectedTrace) !== -1;
+    public isTraceInEditMode(traceId: string) {
+        return this.traceIdInEditMode === traceId && this.filteredTraces.find(t => t.id === traceId);
     }
 
     public hasSelected() {
-        return this.selectedTrace != null && this.filteredTraces.indexOf(this.selectedTrace) !== -1;
+        return this.selectedTraceId != null && this.filteredTraces.find(t => t.id === this.selectedTraceId);
     }
 
     public onScrollDown() {
@@ -216,13 +217,13 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public canUploadToOsm(): boolean {
-        return this.selectedTrace != null && this.selectedTrace.visibility === "local";
+        return this.selectedTraceId != null && this.getSelectedTrace().visibility === "local";
     }
 
     public async uploadRecordingToOsm() {
-        let trace = this.selectedTrace;
-        let route = this.selectedTrace.dataContainer.routes[0];
-        this.selectedTrace = null;
+        let trace = this.getSelectedTrace();
+        let route = trace.dataContainer.routes[0];
+        this.selectedTraceId = null;
         try {
             await this.tracesService.uploadRouteAsTrace(route);
             await this.tracesService.deleteTrace(trace);
@@ -234,7 +235,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public hasNoTraces(): boolean {
-        return this.traces.length === 0 && !this.loadingTraces;
+        return !this.loadingTraces && this.ngRedux.getState().tracesState.traces.length === 0;
     }
 
     public getTraceDisplayName(trace: Trace) {
