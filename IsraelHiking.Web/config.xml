@@ -22,7 +22,7 @@
   </universal-links>
   <platform name="android">
     <allow-intent href="market:*" />
-    <preference name="android-targetSdkVersion" value="28" />
+    <preference name="android-targetSdkVersion" value="29" />
     <preference name="android-minSdkVersion" value="21" />
     <preference name="AndroidLaunchMode" value="singleInstance" />
     <icon density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />
