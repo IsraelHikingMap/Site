@@ -41,17 +41,20 @@ import {
 export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDestroy {
     public info: PointOfInterestExtended;
     public isLoading: boolean;
+    public showLocationUpdate: boolean;
+    public updateLocation: boolean;
     public sourceImageUrls: string[];
     public latlng: LatLngAlt;
     public itmCoordinates: NorthEast;
     public shareLinks: IPoiSocialLinks;
     public contribution: Contribution;
-
+    
     @select((state: ApplicationState) => state.poiState.isSidebarOpen)
     public isOpen: Observable<boolean>;
 
     private editMode: boolean;
     private poiExtended: PointOfInterestExtended;
+    private originalLocation: LatLngAlt;
     private subscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
@@ -71,6 +74,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         super(resources);
         this.sidebarService.hideWithoutChangingAddressbar();
         this.isLoading = true;
+        this.showLocationUpdate = false;
+        this.updateLocation = false;
+        this.originalLocation = null;
         this.shareLinks = {} as IPoiSocialLinks;
         this.contribution = {} as Contribution;
         this.info = { imagesUrls: [], references: [] } as PointOfInterestExtended;
@@ -132,6 +138,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 this.mergeDataIfNeededData(newPoi);
             } else {
                 let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
+                this.originalLocation = poiExtended.location;
                 this.mergeDataIfNeededData(poiExtended);
                 let features = this.poiExtended.featureCollection ? this.poiExtended.featureCollection.features : [];
                 if (features.length > 0) {
@@ -161,6 +168,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             this.ngRedux.dispatch(new SetUploadMarkerDataAction({
                 markerData: null
             }));
+            if (poiExtended.id && !poiExtended.isArea && !poiExtended.isRoute) {
+                this.showLocationUpdate = true;
+            }
         }
         this.initFromPointOfInterestExtended(poiExtended);
     }
@@ -236,6 +246,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         }
         this.isLoading = true;
         try {
+            if (!this.updateLocation) {
+                this.info.location = this.originalLocation;
+            }
+            this.originalLocation = null;
             let poiExtended = await this.poiService.uploadPoint(this.info);
             this.initFromPointOfInterestExtended(poiExtended);
             this.toastService.info(this.resources.dataUpdatedSuccessfully);

@@ -264,7 +264,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 Id = "Node_1",
                 Icon = "icon-cave",
                 Description = "new description",
-                References = new Reference[0]
+                References = new Reference[0],
+                Location = new LatLng(0,0)
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco { Routes = new List<RouteData>() });
             gateway.GetNode(1).Returns(new Node
@@ -274,7 +275,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 {
                     new Tag("historic", "archaeological_site"),
                     new Tag("natural", "cave_entrance"),
-                }
+                },
+                Latitude = 0,
+                Longitude = 0
             });
 
             var results = _adapter.UpdatePointOfInterest(pointOfInterest, gateway, "en").Result;
@@ -291,7 +294,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 ImagesUrls = new[] { "imageurl2", "imageurl1", "imageurl4" },
                 Id = "Node_1",
                 Icon = "oldIcon",
-                References = new Reference[0]
+                References = new Reference[0],
+                Location = new LatLng(0, 0)
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco {Routes = new List<RouteData>()});
             gateway.GetNode(1).Returns(new Node
@@ -301,7 +305,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 {
                     new Tag("image", "imageurl1"),
                     new Tag("image1", "imageurl3"),
-                }
+                },
+                Latitude = 0,
+                Longitude = 0
             });
 
             var results = _adapter.UpdatePointOfInterest(pointOfInterest, gateway, "en").Result;
@@ -324,7 +330,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     {
                         Url = "http://en.wikipedia.org/wiki/Literary_Hall"
                     }
-                }
+                },
+                Location = new LatLng(0, 0)
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco { Routes = new List<RouteData>() });
             gateway.GetNode(1).Returns(new Node
@@ -333,7 +340,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 Tags = new TagsCollection
                 {
                     { FeatureAttributes.DESCRIPTION, "description" }
-                }
+                },
+                Latitude = 0,
+                Longitude = 0
             });
             _wikipediaGateway.GetReference(Arg.Any<string>(), "en").Returns(new Reference { Url = "Some-Url" });
             
@@ -351,7 +360,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 ImagesUrls = new[] { "imageurl2", "imageurl1" },
                 Id = "Node_1",
                 Icon = "oldIcon",
-                References = new Reference[0]
+                References = new Reference[0],
+                Location = new LatLng(0, 0)
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco { Routes = new List<RouteData>() });
             gateway.GetNode(1).Returns(new Node
@@ -361,7 +371,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 {
                     new Tag("image", "imageurl2"),
                     new Tag("image1", "imageurl1"),
-                }
+                },
+                Latitude = 0,
+                Longitude = 0
             });
 
             _adapter.UpdatePointOfInterest(pointOfInterest, gateway, "en").Wait();
@@ -369,6 +381,35 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _pointsOfInterestRepository.DidNotReceive().UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.DidNotReceive().CreateChangeset(Arg.Any<TagsCollection>());
             gateway.DidNotReceive().CloseChangeset(Arg.Any<long>());
+        }
+
+        [TestMethod]
+        public void UpdatePoint_TwoPointWithDifferentLocation_ShouldUpdateOnlyLocation()
+        {
+            var gateway = SetupHttpFactory();
+            var pointOfInterest = new PointOfInterestExtended
+            {
+                ImagesUrls = new string[0],
+                Id = "Node_1",
+                Icon = "oldIcon",
+                References = new Reference[0],
+                Location = new LatLng(1, 1)
+            };
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainerPoco { Routes = new List<RouteData>() });
+            gateway.GetNode(1).Returns(new Node
+            {
+                Id = 1,
+                Tags = new TagsCollection { { "some", "thing" } },
+                Latitude = 0,
+                Longitude = 0
+            });
+
+            _adapter.UpdatePointOfInterest(pointOfInterest, gateway, "en").Wait();
+
+            _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
+            gateway.Received(1).CreateChangeset(Arg.Any<TagsCollection>());
+            gateway.Received(1).UpdateElement(Arg.Any<long>(), Arg.Is<Node>(n => n.Longitude == 1 && n.Latitude == 1) as ICompleteOsmGeo);
+            gateway.Received(1).CloseChangeset(Arg.Any<long>());
         }
 
         [TestMethod]
