@@ -61,7 +61,7 @@ namespace IsraelHiking.API.Executors
         {
             return pointType switch
             {
-                SimplePointType.Tap => new TagsCollection { { "amenity", "diriking_water" } },
+                SimplePointType.Tap => new TagsCollection { { "amenity", "drinking_water" } },
                 SimplePointType.Parking => new TagsCollection { { "amenity", "parking" } },
                 SimplePointType.Block => new TagsCollection {
                         { "barrier", "yes" },
