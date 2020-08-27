@@ -494,7 +494,6 @@ namespace IsraelHiking.API.Executors
                     var wikiFeatureToRemove = wikiFeatures.FirstOrDefault(f => f.Attributes.Has(key, title));
                     if (wikiFeatureToRemove != null)
                     {
-                        wikiFeatures.Remove(wikiFeatureToRemove);
                         featureIdsToRemove.Add(wikiFeatureToRemove.GetId());
                         MergeFeatures(osmWikiFeature, wikiFeatureToRemove);
                     }

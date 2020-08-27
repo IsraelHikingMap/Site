@@ -71,6 +71,7 @@
         public const string POI_EXTERNAL_DESCRIPTION = POI_PREFIX + "ExternalDescription";
         public const string LAT = "lat";
         public const string LON = "lon";
+        public const double INVALID_LOCATION = -9999;
 
     }
 
