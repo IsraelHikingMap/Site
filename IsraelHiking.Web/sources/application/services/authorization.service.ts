@@ -65,32 +65,27 @@ export class AuthorizationService {
         }
 
         this.logout();
-        let popup = this.openWindow();
-        try {
-            let data = await this.httpClient.get(Urls.osmConfiguration).toPromise() as IOsmConfiguration;
-            this.setOptions({
-                oauthConsumerKey: data.consumerKey,
-                oauthSecret: data.consumerSecret,
-                landing: Urls.emptyHtml,
-                url: data.baseAddress
-            } as IAuthorizationServiceOptions);
+        let popup = this.openWindow(); // this has to be here in order to support browsers that only open a window on click event
+        let data = await this.httpClient.get(Urls.osmConfiguration).toPromise() as IOsmConfiguration;
+        this.setOptions({
+            oauthConsumerKey: data.consumerKey,
+            oauthSecret: data.consumerSecret,
+            landing: Urls.emptyHtml,
+            url: data.baseAddress
+        } as IAuthorizationServiceOptions);
 
-            let requestTokenResponse = await this.getRequestToken();
-            let authorizeUrl = this.options.url + "/oauth/authorize?" + this.ohauth.qsString({
-                oauth_token: requestTokenResponse.oauth_token,
-                oauth_callback: this.options.landing
-            });
-            popup.location.href = authorizeUrl;
-            let urlWhenWindowsCloses = await this.getUrlWhenWindowsCloses(popup);
-            let oauthToken = this.ohauth.stringQs(urlWhenWindowsCloses.split("?")[1]);
-            let accessToken = await this.getAccessToken(oauthToken.oauth_token, requestTokenResponse.oauth_token_secret);
-            this.ngRedux.dispatch(new SetTokenAction({
-                token: accessToken.oauth_token + ";" + accessToken.oauth_token_secret
-            }));
-            await this.updateUserDetails();
-        } finally {
-            popup.close();
-        }
+        let requestTokenResponse = await this.getRequestToken();
+        let authorizeUrl = this.options.url + "/oauth/authorize?" + this.ohauth.qsString({
+            oauth_token: requestTokenResponse.oauth_token,
+            oauth_callback: this.options.landing
+        });
+        let urlWhenWindowsCloses = await this.getUrlWhenWindowsCloses(popup, authorizeUrl);
+        let oauthToken = this.ohauth.stringQs(urlWhenWindowsCloses.split("?")[1]);
+        let accessToken = await this.getAccessToken(oauthToken.oauth_token, requestTokenResponse.oauth_token_secret);
+        this.ngRedux.dispatch(new SetTokenAction({
+            token: accessToken.oauth_token + ";" + accessToken.oauth_token_secret
+        }));
+        await this.updateUserDetails();
     }
 
     private updateUserDetails = async () => {
@@ -161,7 +156,7 @@ export class AuthorizationService {
 
     private openWindow(): any {
         if (this.runningContextService.isCordova) {
-            return window.open("about:blank", "_blank");
+            return null;
         }
         // Create a 600x550 popup window in the center of the screen
         let w = 600;
@@ -177,14 +172,16 @@ export class AuthorizationService {
         return window.open("about:blank", "Authorization", settings);
     }
 
-    private getUrlWhenWindowsCloses(popup: any): Promise<any> {
+    private getUrlWhenWindowsCloses(popup: any, authorizeUrl: string): Promise<any> {
         return new Promise((resolve, reject) => {
             if (!this.runningContextService.isCordova) {
+                popup.location.href = authorizeUrl;
                 if (typeof popup.focus === "function") {
                     popup.focus();
                 }
                 setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
             } else {
+                popup = window.open(authorizeUrl, "_blank");
                 let exitListener = () => reject(new Error("The OSM sign in flow was canceled"));
 
                 popup.addEventListener("loaderror",
