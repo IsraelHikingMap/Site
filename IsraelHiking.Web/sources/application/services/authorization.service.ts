@@ -34,9 +34,9 @@ export class AuthorizationService {
     private userState: UserState;
 
     constructor(private readonly httpClient: HttpClient,
-                private readonly runningContextService: RunningContextService,
-                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+        private readonly runningContextService: RunningContextService,
+        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         this.ohauth = this.nonAngularObjectsFactory.createOhAuth();
         this.setOptions({});
         this.userState$.subscribe(us => this.userState = us);
@@ -65,29 +65,32 @@ export class AuthorizationService {
         }
 
         this.logout();
-        let data = await this.httpClient.get(Urls.osmConfiguration).toPromise() as IOsmConfiguration;
-        await this.setOptions({
-            oauthConsumerKey: data.consumerKey,
-            oauthSecret: data.consumerSecret,
-            landing: Urls.emptyHtml,
-            url: data.baseAddress
-        } as IAuthorizationServiceOptions);
+        let popup = this.openWindow();
+        try {
+            let data = await this.httpClient.get(Urls.osmConfiguration).toPromise() as IOsmConfiguration;
+            this.setOptions({
+                oauthConsumerKey: data.consumerKey,
+                oauthSecret: data.consumerSecret,
+                landing: Urls.emptyHtml,
+                url: data.baseAddress
+            } as IAuthorizationServiceOptions);
 
-        let requestTokenResponse = await this.getRequestToken();
-        let authorizeUrl = this.options.url + "/oauth/authorize?" + this.ohauth.qsString({
-            oauth_token: requestTokenResponse.oauth_token,
-            oauth_callback: this.options.landing
-        });
-
-        let urlWhenWindowsCloses = this.runningContextService.isCordova
-            ? await this.openCordovaDialog(authorizeUrl)
-            : await this.openBrowserDialog(authorizeUrl);
-        let oauthToken = this.ohauth.stringQs(urlWhenWindowsCloses.split("?")[1]);
-        let accessToken = await this.getAccessToken(oauthToken.oauth_token, requestTokenResponse.oauth_token_secret);
-        this.ngRedux.dispatch(new SetTokenAction({
-            token: accessToken.oauth_token + ";" + accessToken.oauth_token_secret
-        }));
-        await this.updateUserDetails();
+            let requestTokenResponse = await this.getRequestToken();
+            let authorizeUrl = this.options.url + "/oauth/authorize?" + this.ohauth.qsString({
+                oauth_token: requestTokenResponse.oauth_token,
+                oauth_callback: this.options.landing
+            });
+            popup.location.href = authorizeUrl;
+            let urlWhenWindowsCloses = await this.getUrlWhenWindowsCloses(popup);
+            let oauthToken = this.ohauth.stringQs(urlWhenWindowsCloses.split("?")[1]);
+            let accessToken = await this.getAccessToken(oauthToken.oauth_token, requestTokenResponse.oauth_token_secret);
+            this.ngRedux.dispatch(new SetTokenAction({
+                token: accessToken.oauth_token + ";" + accessToken.oauth_token_secret
+            }));
+            await this.updateUserDetails();
+        } finally {
+            popup.close();
+        }
     }
 
     private updateUserDetails = async () => {
@@ -116,7 +119,7 @@ export class AuthorizationService {
         return this.ohauth.stringQs(response);
     }
 
-    private async setOptions(options) {
+    private setOptions(options) {
         this.options = options;
         this.options.url = this.options.url || "https://www.openstreetmap.org";
         this.options.landing = this.options.landing || "land.html";
@@ -156,7 +159,10 @@ export class AuthorizationService {
         });
     }
 
-    private openBrowserDialog(authorizeUrl: string): Promise<any> {
+    private openWindow(): any {
+        if (this.runningContextService.isCordova) {
+            return window.open("about:blank", "_blank");
+        }
         // Create a 600x550 popup window in the center of the screen
         let w = 600;
         let h = 550;
@@ -168,14 +174,37 @@ export class AuthorizationService {
             return x.join("=");
         }).join(",");
 
-        let popup = window.open(authorizeUrl, "Authorization", settings);
+        return window.open("about:blank", "Authorization", settings);
+    }
 
+    private getUrlWhenWindowsCloses(popup: any): Promise<any> {
         return new Promise((resolve, reject) => {
-            if (typeof popup.focus === "function") {
-                popup.focus();
-            }
+            if (!this.runningContextService.isCordova) {
+                if (typeof popup.focus === "function") {
+                    popup.focus();
+                }
+                setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
+            } else {
+                let exitListener = () => reject(new Error("The OSM sign in flow was canceled"));
 
-            setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
+                popup.addEventListener("loaderror",
+                    () => {
+                        popup.removeEventListener("exit", exitListener);
+                        popup.close();
+                        reject(new Error("Error loading login page of OSM"));
+                    });
+
+                popup.addEventListener("loadstart",
+                    async (event: any) => {
+                        if (event.url.indexOf(this.options.landing) !== -1) {
+                            popup.removeEventListener("exit", exitListener);
+                            popup.close();
+                            resolve(event.url);
+                        }
+                    });
+
+                return popup.addEventListener("exit", exitListener);
+            }
         });
     }
 
@@ -190,33 +219,8 @@ export class AuthorizationService {
                 resolve(popup.location.href);
                 return;
             }
-        } catch (e) { }
+        } catch { }
         setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
-    }
-
-    protected openCordovaDialog(authorizeUrl: string) {
-        return new Promise((resolve, reject) => {
-            let browserRef = window.open(authorizeUrl, "_blank");
-            let exitListener = () => reject(new Error("The OSM sign in flow was canceled"));
-
-            browserRef.addEventListener("loaderror",
-                () => {
-                    browserRef.removeEventListener("exit", exitListener);
-                    browserRef.close();
-                    reject(new Error("Error loading login page of OSM"));
-                });
-
-            browserRef.addEventListener("loadstart",
-                async (event: any) => {
-                    if (event.url.indexOf(this.options.landing) !== -1) {
-                        browserRef.removeEventListener("exit", exitListener);
-                        browserRef.close();
-                        resolve(event.url);
-                    }
-                });
-
-            return browserRef.addEventListener("exit", exitListener);
-        });
     }
 
     public getEditOsmLocationAddress(baseLayerAddress: string, zoom: number, latitude: number, longitude: number): string {
