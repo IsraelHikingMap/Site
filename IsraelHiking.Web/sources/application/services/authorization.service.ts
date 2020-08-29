@@ -34,9 +34,9 @@ export class AuthorizationService {
     private userState: UserState;
 
     constructor(private readonly httpClient: HttpClient,
-        private readonly runningContextService: RunningContextService,
-        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly runningContextService: RunningContextService,
+                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.ohauth = this.nonAngularObjectsFactory.createOhAuth();
         this.setOptions({});
         this.userState$.subscribe(us => this.userState = us);
