@@ -1078,6 +1078,9 @@ export class ResourcesService {
             let prefix = split.join(".");
             return prefix + this.getImgurPostfix(size) + "." + extenstion;
         }
+        if (imageUrl.startsWith("File:")) {
+            return `https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/${imageUrl.replace("File:", "")}&width=${size}`;
+        }
         return imageUrl;
     }
 
