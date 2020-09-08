@@ -11,7 +11,8 @@ namespace IsraelHiking.DataAccess
 {
     public class OverpassTurboGateway : IOverpassTurboGateway
     {
-        private const string INTERPRETER_ADDRESS = "https://lz4.overpass-api.de/api/interpreter";
+        private const string INTERPRETER_ADDRESS = "https://z.overpass-api.de/api/interpreter";
+        private const string INTERPRETER_ADDRESS_2 = "https://lz4.overpass-api.de/api/interpreter";
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger _logger;
 
@@ -41,6 +42,10 @@ namespace IsraelHiking.DataAccess
                 var queryString = "[out:csv('wikipedia';false)];\nnwr  ['wikipedia'] (area:3606195356);\nout; ";
                 var postBody = new StringContent(queryString.Replace("'wikipedia'", $"'wikipedia{languagePostfix}'"));
                 var response = await client.PostAsync(INTERPRETER_ADDRESS, postBody);
+                if (!response.IsSuccessStatusCode)
+                {
+                    response = await client.PostAsync(INTERPRETER_ADDRESS_2, postBody);
+                }
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception(await response.Content.ReadAsStringAsync());
