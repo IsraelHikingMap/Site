@@ -26,7 +26,7 @@ module.exports = function (config) {
         colors: true,
         logLevel: config.LOG_INFO,
         autoWatch: true,
-        retryLimit: 4,
+        processKillTimeout: 30000,
         browsers: ["Chrome"],
         singleRun: false
     });
