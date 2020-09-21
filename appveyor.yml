@@ -24,7 +24,7 @@ environment:
     
 install:
 - ps: >-
-    Install-Product node 12.18
+    Install-Product node 10.15
 
     npm install -g npm@6.9.0 --loglevel=error
 
