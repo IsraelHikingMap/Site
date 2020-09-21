@@ -85,7 +85,7 @@ namespace IsraelHiking.DataAccess
                 }
                 if (_elasticClient.Indices.Exists(SHARES).Exists == false)
                 {
-                    _elasticClient.Indices.Create(SHARES);
+                    CreateSharesIndex();
                 }
                 if (_elasticClient.Indices.Exists(CUSTOM_USER_LAYERS).Exists == false)
                 {
@@ -476,6 +476,12 @@ namespace IsraelHiking.DataAccess
             );
         }
 
+        private Task CreateSharesIndex()
+        {
+            return _elasticClient.Indices.CreateAsync(SHARES,
+                c => c.Map<ShareUrl>(m => m.AutoMap<ShareUrl>())
+            );
+        }
         private async Task UpdateUsingPaging(List<Feature> features, string alias)
         {
             _logger.LogInformation($"Starting indexing {features.Count} records");
