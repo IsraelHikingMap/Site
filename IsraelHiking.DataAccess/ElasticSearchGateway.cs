@@ -7,7 +7,6 @@ using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Nest;
-using Nest.JsonNetSerializer;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
@@ -23,6 +22,82 @@ using Feature = NetTopologySuite.Features.Feature;
 
 namespace IsraelHiking.DataAccess
 {
+    /// <summary>
+    /// A JSON serializer that uses Json.NET for serialization and able to parse geojson objects
+    /// </summary>
+    public class GeoJsonNetSerializer : IElasticsearchSerializer
+    {
+        private static readonly Encoding ExpectedEncoding = new UTF8Encoding(false);
+
+        private readonly JsonSerializerSettings _noneIndentedSettings;
+        private readonly JsonSerializerSettings _indentedSettings;
+
+        public GeoJsonNetSerializer(IConnectionSettingsValues settings)
+        {
+            _noneIndentedSettings = CreateSettings(SerializationFormatting.None, settings);
+            _indentedSettings = CreateSettings(SerializationFormatting.Indented, settings);
+        }
+
+        private JsonSerializerSettings CreateSettings(SerializationFormatting formatting, IConnectionSettingsValues connectionSettings)
+        {
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = formatting == SerializationFormatting.Indented ? Formatting.Indented : Formatting.None,
+                DefaultValueHandling = DefaultValueHandling.Include,
+                NullValueHandling = NullValueHandling.Ignore
+            };
+            foreach (var converter in GeoJsonSerializer.Create(GeometryFactory.Default, 3).Converters)
+            {
+                settings.Converters.Add(converter);
+            }
+            return settings;
+        }
+
+        public T Deserialize<T>(Stream stream)
+        {
+            return (T)Deserialize(typeof(T), stream);
+        }
+
+        public Task<T> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var result = Deserialize<T>(stream);
+            return Task.FromResult(result);
+        }
+
+        public object Deserialize(Type type, Stream stream)
+        {
+            if (stream == null) return default;
+
+            using var streamReader = new StreamReader(stream);
+            using var jsonTextReader = new JsonTextReader(streamReader);
+            return JsonSerializer.Create(_noneIndentedSettings).Deserialize(jsonTextReader, type);
+        }
+        
+        public Task<object> DeserializeAsync(Type type, Stream stream, CancellationToken cancellationToken = default)
+        {
+            var result = Deserialize(type, stream);
+            return Task.FromResult(result);
+        }
+
+        public void Serialize<T>(T data, Stream stream, SerializationFormatting formatting = SerializationFormatting.None)
+        {
+            var serializer = formatting == SerializationFormatting.Indented
+                ? JsonSerializer.Create(_indentedSettings)
+                : JsonSerializer.Create(_noneIndentedSettings);
+
+            using var writer = new StreamWriter(stream, ExpectedEncoding, 1024, true);
+            using var jsonWriter = new JsonTextWriter(writer);
+            serializer.Serialize(jsonWriter, data);
+            writer.Flush();
+            jsonWriter.Flush();
+        }
+
+        public Task SerializeAsync<T>(T data, Stream stream, SerializationFormatting formatting = SerializationFormatting.None, CancellationToken cancellationToken = default)
+        {
+            return Task.Run(() => Serialize(data, stream, formatting), cancellationToken);
+        }
+    }
+
     public class ElasticSearchGateway :
         IInitializable,
         IPointsOfInterestRepository,
@@ -68,7 +143,7 @@ namespace IsraelHiking.DataAccess
                 var connectionString = new ConnectionSettings(
                     pool,
                     new HttpConnection(),
-                    (b, c) => new JsonNetSerializer(b, c, null, null, GeoJsonSerializer.Create(GeometryFactory.Default, 3).Converters))
+                    (b, c) => new GeoJsonNetSerializer(c))
                     .PrettyJson();
                 _elasticClient = new ElasticClient(connectionString);
                 if (_elasticClient.Indices.Exists(OSM_POIS_INDEX1).Exists == false &&
