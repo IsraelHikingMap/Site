@@ -217,9 +217,7 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public async Task<UpdatesResponse> GetPointOfInterestUpdates(DateTime lastModified)
         {
-            _logger.LogInformation("Got POIs updates request for " + lastModified.ToString());
             var response = await _pointsOfInterestProvider.GetUpdates(lastModified);
-            _logger.LogInformation("Got updates from database, getting images");
             var imageUrls = new List<string>();
             foreach (var feature in response.Features)
             {
@@ -229,7 +227,7 @@ namespace IsraelHiking.API.Controllers
                 imageUrls.AddRange(currentImageUrls.ToList());
             }
             response.Images = await _imageUrlStoreExecutor.GetAllImagesForUrls(imageUrls.ToArray());
-            _logger.LogInformation("Finished getting POIs updates, returning content to client");
+            _logger.LogInformation("Finished getting POIs updates, returning content to client " + lastModified.ToString());
             return response;
         }
 
