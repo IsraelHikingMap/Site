@@ -66,25 +66,25 @@ namespace IsraelHiking.DataAccess
         public async Task<Feature> GetRouting(RoutingGatewayRequest request)
         {
             var httpClient = _httpClientFactory.CreateClient();
-            string vehicle = "foot";
+            string profile = "foot";
             switch (request.Profile)
             {
                 case ProfileType.Foot:
-                    vehicle = "foot";
+                    profile = "foot";
                     break;
                 case ProfileType.Bike:
-                    vehicle = "bike2";
+                    profile = "mtb";
                     break;
                 case ProfileType.Car4WheelDrive:
-                    vehicle = "car4wd";
+                    profile = "car4wd";
                     break;
                 case ProfileType.Car:
-                    vehicle = "car";
+                    profile = "car";
                     break;
             }
             var fromStr = $"{request.From.Y},{request.From.X}";
             var toStr = $"{request.To.Y},{request.To.X}";
-            var requestAddress = $"{$"{_options.GraphhopperServerAddress}route?instructions=false&points_encoded=false&elevation=true&details=track_type&details=road_class&point="}{fromStr}&point={toStr}&vehicle={vehicle}";
+            var requestAddress = $"{$"{_options.GraphhopperServerAddress}route?instructions=false&points_encoded=false&elevation=true&details=track_type&details=road_class&point="}{fromStr}&point={toStr}&profile={profile}";
             var response = await httpClient.GetAsync(requestAddress);
             var content = await response.Content.ReadAsStringAsync();
             var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
