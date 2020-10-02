@@ -17,8 +17,6 @@ environment:
       GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     - PRODUCT: ios
       APPVEYOR_BUILD_WORKER_IMAGE: macOS
-      LC_ALL: en_US.UTF-8
-      LANG: en_US.UTF-8
       TMS_USER: israelhikingmap@gmail.com
       TMS_APPLE_APPLICATION_SPECIFIC_PASSWORD:
         secure: oSccSp70X/744XBpfRV4UVJZKxN1jMYHxn3OHFsTSVE=
