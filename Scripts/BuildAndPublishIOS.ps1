@@ -62,14 +62,6 @@ npm run add-ios
 Write-Host "npm run build-ipa"
 npm run build-ipa
 
-# HM TODO: remove this
-Write-Host "extension plist file:"
-cat platforms/ios/ShareExtension/ShareExtension-Info.plist
-
-# HM TODO: remove this
-Write-Host "app plist file:"
-cat "platforms/ios/Israel Hiking Map/Israel Hiking Map-Info.plist"
-
 $preVersionIpaLocation = "./platforms/ios/build/device/Israel Hiking Map.ipa";
 $ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
