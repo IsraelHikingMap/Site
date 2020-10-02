@@ -24,10 +24,10 @@ environment:
     #    secure: oSccSp70X/744XBpfRV4UVJZKxN1jMYHxn3OHFsTSVE=
     
 install:
-- cmd: nvm install 12.18
-- cmd: nvm use 12.18
-- cmd: node --version
-- cmd: npm --version
+- sh: nvm install 12.18
+- sh: nvm use 12.18
+- sh: node --version
+- sh: npm --version
 for:
   -
     matrix:
