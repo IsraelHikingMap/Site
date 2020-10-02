@@ -202,7 +202,7 @@
       "cordova-plugin-deeplinks": {},
       "cc.fovea.cordova.openwith": {
         "ANDROID_MIME_TYPE": "application/gpx",
-        "SHAREEXT_PROVISIONING_PROFILE": "\"7621407f-922b-4fe1-8b71-686f2a9d4651\"",
+        "SHAREEXT_PROVISIONING_PROFILE": "\"c41c24a2-25e4-4135-bf67-21828c89e33c\"",
         "IOS_GROUP_IDENTIFIER": "group.il.org.osm.israelhiking",
         "IOS_URL_SCHEME": "israelhikingmap",
         "IOS_UNIFORM_TYPE_IDENTIFIER": "public.image",
