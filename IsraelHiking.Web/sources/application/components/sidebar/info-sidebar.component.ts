@@ -51,7 +51,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
         if (tabIndex === 1) {
             this.initalizeLegendSections();
         }
-        this.angulartics2GoogleAnalytics.eventTrack((tabIndex === 1 ? "Legend" : "About") + " tab selected", { category: "info" });
+        this.angulartics2GoogleAnalytics.eventTrack((tabIndex === 1 ? "Legend" : "About") + " tab selected", { category: "Info" });
     }
 
     public openSection(section: ILegendSection) {
