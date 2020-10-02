@@ -25,8 +25,8 @@ environment:
     
 install:
 - ps: >-
-    Install-Product node 12.18
-        
+    nvm install 12.18
+    
     node --version
 
     npm --version
