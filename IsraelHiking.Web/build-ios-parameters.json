@@ -1,12 +1,12 @@
-﻿{
+{
   "ios": {
     "release": {
       "developmentTeam": "2KT88923M5",
       "codeSignIdentity": "iPhone Distribution",
       "packageType": "app-store",
       "provisioningProfile": {
-        "il.org.osm.israelhiking": "b4e6db74-c4cf-4fd3-9057-da5b0f8f3faa",
-        "il.org.osm.israelhiking.shareextension": "32eb6694-d0ab-4b7a-8d34-67ec102c79bc"
+        "il.org.osm.israelhiking": "f169e026-2ca9-4745-9527-b72a126f22a4",
+        "il.org.osm.israelhiking.shareextension": "7621407f-922b-4fe1-8b71-686f2a9d4651"
       }
     }
   }
