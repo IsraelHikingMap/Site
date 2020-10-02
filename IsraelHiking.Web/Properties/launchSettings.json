@@ -18,7 +18,10 @@
     },
     "IsraelHiking.Web": {
       "commandName": "Project",
-      "environmentVariables": {}
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:5000/"
     }
   }
 }

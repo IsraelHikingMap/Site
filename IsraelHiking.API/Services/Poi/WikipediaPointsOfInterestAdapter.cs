@@ -18,17 +18,21 @@ namespace IsraelHiking.API.Services.Poi
     public class WikipediaPointsOfInterestAdapter : IPointsOfInterestAdapter
     {
         private readonly IWikipediaGateway _wikipediaGateway;
+        private readonly IOverpassTurboGateway _overpassTurboGateway;
         private readonly ILogger _logger;
 
         /// <summary>
         /// Class constructor
         /// </summary>
         /// <param name="wikipediaGateway"></param>
+        /// <param name="overpassTurboGateway"></param>
         /// <param name="logger"></param>
         public WikipediaPointsOfInterestAdapter(IWikipediaGateway wikipediaGateway,
+            IOverpassTurboGateway overpassTurboGateway,
             ILogger logger)
         {
             _wikipediaGateway = wikipediaGateway;
+            _overpassTurboGateway = overpassTurboGateway;
             _logger = logger;
         }
 
@@ -39,6 +43,8 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<List<Feature>> GetAll()
         {
             _logger.LogInformation("Start getting Wikipedia pages for indexing.");
+            var allLinkedWikipedia = await _overpassTurboGateway.GetWikipediaLinkedTitles();
+            _logger.LogInformation($"Got {allLinkedWikipedia.Count} linked wikipedia titles from overpass turbo.");
             var startCoordinate = new Coordinate(34, 29);
             var endCoordinate = new Coordinate(36, 34);
             double step = 0.15; // bigger step causes wiki toobig exception...
@@ -76,6 +82,9 @@ namespace IsraelHiking.API.Services.Poi
                 var wikiFeaturesTitles = lists.SelectMany(l => l)
                     .GroupBy(f => f.GetId())
                     .Select(g => g.First().Attributes[FeatureAttributes.NAME].ToString())
+                    .Concat(allLinkedWikipedia.Where(n => n.StartsWith(language))
+                        .Select(n => n.Replace($"{language}:", string.Empty)))
+                    .Distinct()
                     .ToList();
                 _logger.LogInformation($"Got {wikiFeaturesTitles.Count} wiki pages for language: {language}, getting full data");
                 var requests = 200;
@@ -91,8 +100,9 @@ namespace IsraelHiking.API.Services.Poi
                         lists.Add(_wikipediaGateway.GetByPagesTitles(titles, language).Result);
                     });
                 }).ConfigureAwait(false);
-                allFeatures.AddRange(lists.SelectMany(l => l).GroupBy(f => f.GetId()).Select(g => g.First()).ToList());
-                _logger.LogInformation($"Finished getting full data for language: {language}");
+                var features = lists.SelectMany(l => l).GroupBy(f => f.GetId()).Select(g => g.First()).ToList();
+                allFeatures.AddRange(features);
+                _logger.LogInformation($"Finished getting full data for language: {language}, {features.Count}");
             }
             _logger.LogInformation($"Finished getting Wikipedia pages for indexing, got {allFeatures.Count} pages.");
             return allFeatures;

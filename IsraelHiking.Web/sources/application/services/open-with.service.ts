@@ -9,9 +9,9 @@ import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { RouteStrings } from "./hash.service";
-import { Urls } from "../urls";
 
 declare var cordova: any;
+declare var universalLinks: any;
 
 interface Item {
     uri: string;
@@ -33,10 +33,59 @@ export class OpenWithService {
                 private readonly ngZone: NgZone) { }
 
     public initialize() {
-        if (!this.runningContextService.isCordova || !cordova.openwith || !cordova.openwith.init) {
+        if (!this.runningContextService.isCordova) {
             return;
         }
-        cordova.openwith.init(() => { }, (error) => this.loggingService.error(`Open with init failed with error: ${error}`));
+        this.loggingService.info("[OpenWith] subscribing to universal link events");
+        universalLinks.subscribe("share", (event) => {
+            this.loggingService.info("[OpenWith] Opening a share: " + event.path);
+            if (this.matDialog.openDialogs.length > 0) {
+                this.matDialog.closeAll();
+            }
+            let shareId = event.path.replace("/share/", "");
+            this.ngZone.run(() => {
+                this.router.navigate([RouteStrings.ROUTE_SHARE, shareId]);
+            });
+        });
+        universalLinks.subscribe("poi", (event) => {
+            this.loggingService.info("[OpenWith] Opening a poi: " + event.path);
+            if (this.matDialog.openDialogs.length > 0) {
+                this.matDialog.closeAll();
+            }
+            let sourceAndId = event.path.replace("/poi/", "");
+            let source = sourceAndId.split("/")[0];
+            let id = sourceAndId.split("/")[1];
+            let language = event.params.language;
+            this.ngZone.run(() => {
+                this.router.navigate([RouteStrings.ROUTE_POI, source, id],
+                    { queryParams: { language } });
+            });
+        });
+        universalLinks.subscribe("url", (event) => {
+            this.loggingService.info("[OpenWith] Opening a file url: " + event.path);
+            if (this.matDialog.openDialogs.length > 0) {
+                this.matDialog.closeAll();
+            }
+            let url = event.path.replace("/url/", "");
+            let baseLayer = event.params.baselayer;
+            this.ngZone.run(() => {
+                this.router.navigate([RouteStrings.ROUTE_URL, url],
+                    { queryParams: { baseLayer } });
+            });
+        });
+        universalLinks.subscribe(null, (event) => {
+            this.loggingService.info("[OpenWith] Opening the null: " + event.path);
+            if (this.matDialog.openDialogs.length > 0) {
+                this.matDialog.closeAll();
+            }
+            this.ngZone.run(() => {
+                this.router.navigate(["/"]);
+            });
+        });
+        if (!cordova.openwith || !cordova.openwith.init) {
+            return;
+        }
+        cordova.openwith.init(() => { }, (error) => this.loggingService.error(`[OpenWith] Init failed with error: ${error}`));
         cordova.openwith.addHandler((intent) => {
             if (intent.items.length <= 0) {
                 return;
@@ -55,20 +104,11 @@ export class OpenWithService {
     }
 
     private handleExternalUrl(item: Item) {
-        this.loggingService.info("Opening a shared url: " + item.uri);
-        if (item.uri.indexOf(RouteStrings.ROUTE_SHARE + "/") !== -1 ||
-            item.uri.indexOf(RouteStrings.ROUTE_POI + "/") !== -1 ||
-            item.uri.indexOf(RouteStrings.ROUTE_URL + "/") !== -1 ||
-            item.uri.indexOf(RouteStrings.ROUTE_MAP + "/") !== -1 ||
-            item.uri.replace(/\//g, "").endsWith("israelhiking.osm.org.il")) {
-            if (this.matDialog.openDialogs.length > 0) {
-                this.matDialog.closeAll();
-            }
-            let escapedString = Urls.baseAddress.toLocaleLowerCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
-            let regexpToUse = new RegExp(escapedString, "ig");
-            this.router.navigateByUrl(item.uri.replace(regexpToUse, ""));
+        if (item.uri.toLocaleLowerCase().indexOf("israelhiking.osm.org.il") !== -1) {
+            // handled by deep links plugin
             return;
         }
+        this.loggingService.info("[OpenWith] Opening a url: " + item.uri);
         if (item.uri.indexOf("maps?q=") !== -1) {
             let coordsRegExp = /q=(\d+\.\d+),(\d+\.\d+)&z=/;
             let coords = coordsRegExp.exec(decodeURIComponent(item.uri));
@@ -118,11 +158,11 @@ export class OpenWithService {
             }
         }
         if (!blob.name) {
-            this.loggingService.warning("Unable to find file format, defaulting to twl?");
+            this.loggingService.warning("[OpenWith] Unable to find file format, defaulting to twl?");
             blob.name = "file.twl";
         }
         try {
-            this.loggingService.info("Opening a shared file: " + blob.name + ", " + item.path + ", " + item.type);
+            this.loggingService.info("[OpenWith] Opening a file: " + blob.name + ", " + item.path + ", " + item.type);
             // Do not use "new File(...)" as it breaks the functionality.
             await this.fileService.addRoutesFromFile(blob);
         } catch (ex) {

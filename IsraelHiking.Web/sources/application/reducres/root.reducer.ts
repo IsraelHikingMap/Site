@@ -7,6 +7,7 @@ import { routesReducer } from "./routes.reducer";
 import { routeEditingReducer } from "./route-editing-state.reducer";
 import { tracesReducer } from "./traces.reducer";
 import { layersReducer } from "./layers.reducer";
+import { shareUrlsReducer } from "./share-urls.reducer";
 import { userReducer } from "./user.reducer";
 import { pointsOfInterestReducer } from "./poi.reducer";
 import { inMemoryReducer } from "./in-memory.reducer";
@@ -19,6 +20,7 @@ export const rootReducer = combineReducers<ApplicationState>({
     routeEditingState: routeEditingReducer,
     tracesState: tracesReducer,
     layersState: layersReducer,
+    shareUrlsState: shareUrlsReducer,
     userState: userReducer,
     poiState: pointsOfInterestReducer,
     inMemoryState: inMemoryReducer,

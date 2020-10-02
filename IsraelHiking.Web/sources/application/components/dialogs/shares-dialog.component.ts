@@ -1,8 +1,10 @@
-import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Router } from "@angular/router";
+import { select, NgRedux } from "@angular-redux/store";
 import { SharedStorage } from "ngx-store";
-import { take } from "lodash";
+import { take, orderBy } from "lodash";
+import { Observable, Subscription } from "rxjs";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -11,6 +13,7 @@ import { RouteStrings } from "../../services/hash.service";
 import { ShareUrl } from "../../models/share-url";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
+import { ApplicationState } from "../../models/models";
 
 @Component({
     selector: "shares-dialog",
@@ -18,48 +21,64 @@ import { DataContainerService } from "../../services/data-container.service";
     styleUrls: ["shares-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class SharesDialogComponent extends BaseMapComponent implements OnInit {
+export class SharesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
 
     public filteredShareUrls: ShareUrl[];
-    public shareUrlInEditMode: ShareUrl;
+    public shareUrlIdInEditMode: string;
+    public selectedShareUrlId: string;
     public loadingShareUrls: boolean;
     public searchTerm: FormControl;
-    public selectedShareUrl: ShareUrl;
+
+    @select((state: ApplicationState) => state.shareUrlsState.shareUrls)
+    public shareUrls$: Observable<ShareUrl[]>;
 
     @SharedStorage()
     private sessionSearchTerm = "";
 
     private page: number;
+    private subscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
                 private readonly router: Router,
                 private readonly toastService: ToastService,
                 private readonly shareUrlsService: ShareUrlsService,
-                private readonly dataContainerService: DataContainerService) {
+                private readonly dataContainerService: DataContainerService,
+                private readonly ngRedux: NgRedux<ApplicationState>
+    ) {
         super(resources);
         this.loadingShareUrls = false;
-        this.shareUrlInEditMode = null;
-        this.selectedShareUrl = null;
+        this.shareUrlIdInEditMode = null;
+        this.selectedShareUrlId = null;
         this.page = 1;
+        this.subscriptions = [];
         this.searchTerm = new FormControl();
-        this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
+        this.subscriptions.push(this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
-        });
+        }));
         this.searchTerm.setValue(this.sessionSearchTerm);
+        this.subscriptions.push(this.shareUrls$.subscribe(() => {
+            this.updateFilteredLists(this.searchTerm.value);
+        }));
     }
 
     public async ngOnInit() {
-        this.loadingShareUrls = true;
-        await this.shareUrlsService.getShareUrls();
-        this.updateFilteredLists(this.searchTerm.value);
+        this.loadingShareUrls = this.ngRedux.getState().shareUrlsState.shareUrls.length === 0;
+        this.shareUrlsService.syncShareUrls();
         this.loadingShareUrls = false;
+    }
+
+    public ngOnDestroy() {
+        for (let subscription of this.subscriptions) {
+            subscription.unsubscribe();
+        }
     }
 
     private updateFilteredLists(searchTerm: string) {
         searchTerm = searchTerm.trim();
         this.sessionSearchTerm = searchTerm;
-        let shares = this.shareUrlsService.shareUrls.filter((s) => this.findInShareUrl(s, searchTerm));
-        this.filteredShareUrls = take(shares, this.page * 10);
+        let shareUrls = this.ngRedux.getState().shareUrlsState.shareUrls;
+        shareUrls = orderBy(shareUrls.filter((s) => this.findInShareUrl(s, searchTerm)), ["creationDate"], ["desc"]);
+        this.filteredShareUrls = take(shareUrls, this.page * 10);
     }
 
     private findInShareUrl(shareUrl: ShareUrl, searchTerm: string) {
@@ -79,10 +98,11 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
         return false;
     }
 
-    public deleteShareUrl(shareUrl: ShareUrl) {
-        if (this.shareUrlInEditMode === shareUrl) {
-            this.shareUrlInEditMode = null;
+    public deleteShareUrl() {
+        if (this.shareUrlIdInEditMode === this.selectedShareUrlId) {
+            this.shareUrlIdInEditMode = null;
         }
+        let shareUrl = this.getSelectedShareUrl();
         let displayName = this.shareUrlsService.getShareUrlDisplayName(shareUrl);
         let message = `${this.resources.deletionOf} ${displayName}, ${this.resources.areYouSure}`;
         this.toastService.confirm({
@@ -100,37 +120,43 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
         });
     }
 
-    public isShareUrlInEditMode(shareUrl: ShareUrl) {
-        return this.shareUrlInEditMode === shareUrl && this.filteredShareUrls.indexOf(shareUrl) !== -1;
+    private getSelectedShareUrl(): ShareUrl {
+        return this.ngRedux.getState().shareUrlsState.shareUrls.find(s => s.id === this.selectedShareUrlId);
+    }
+
+    public isShareUrlInEditMode(shareUrlId: string) {
+        return this.shareUrlIdInEditMode === shareUrlId && this.filteredShareUrls.find(s => s.id === shareUrlId);
     }
 
     public async updateShareUrl(shareUrl: ShareUrl) {
-        this.shareUrlInEditMode = null;
+        this.shareUrlIdInEditMode = null;
         await this.shareUrlsService.updateShareUrl(shareUrl);
         this.toastService.success(this.resources.dataUpdatedSuccessfully);
     }
 
-    public showShareUrl(shareUrl: ShareUrl) {
-        this.router.navigate([RouteStrings.ROUTE_SHARE, shareUrl.id]);
+    public showShareUrl() {
+        this.router.navigate([RouteStrings.ROUTE_SHARE, this.selectedShareUrlId]);
     }
 
-    public async addShareUrlToRoutes(shareUrl: ShareUrl) {
-        let share = await this.shareUrlsService.getShareUrl(shareUrl.id);
+    public async addShareUrlToRoutes() {
+        let share = await this.shareUrlsService.getShareUrl(this.selectedShareUrlId);
         share.dataContainer.overlays = [];
         share.dataContainer.baseLayer = null;
         this.dataContainerService.setData(share.dataContainer, true);
     }
 
-    public toggleSelectedShareUrl(shareUrl) {
-        if (this.selectedShareUrl === shareUrl) {
-            this.selectedShareUrl = null;
+    public toggleSelectedShareUrl(shareUrl: ShareUrl) {
+        if (this.selectedShareUrlId == null) {
+            this.selectedShareUrlId = shareUrl.id;
+        } else if (this.selectedShareUrlId === shareUrl.id && this.shareUrlIdInEditMode !== shareUrl.id) {
+            this.selectedShareUrlId = null;
         } else {
-            this.selectedShareUrl = shareUrl;
+            this.selectedShareUrlId = shareUrl.id;
         }
     }
 
     public hasSelected() {
-        return this.selectedShareUrl != null && this.filteredShareUrls.indexOf(this.selectedShareUrl) !== -1;
+        return this.selectedShareUrlId != null && this.filteredShareUrls.find(s => s.id === this.selectedShareUrlId);
     }
 
     public onScrollDown() {
@@ -142,7 +168,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit {
         return this.shareUrlsService.getImageFromShareId(shareUrl, width, height);
     }
 
-    public getShareSocialLinks(shareUrl) {
-        return this.shareUrlsService.getShareSocialLinks(shareUrl);
+    public getShareSocialLinks() {
+        return this.shareUrlsService.getShareSocialLinks(this.getSelectedShareUrl());
     }
 }

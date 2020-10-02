@@ -144,6 +144,7 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.AreEqual(6, dataContainer.Routes.First().Segments.First().Latlngs.Count);
             Assert.AreEqual(1, dataContainer.Routes.First().Markers.Count);
             Assert.IsTrue(dataContainer.Routes.SelectMany(r => r.Segments.SelectMany(s => s.Latlngs)).All(l => l.Alt != 0));
+            Assert.AreEqual(1, dataContainer.Routes.SelectMany(r => r.Segments.SelectMany(s => s.Latlngs)).Count(l => l.Alt == 1));
         }
     }
 }

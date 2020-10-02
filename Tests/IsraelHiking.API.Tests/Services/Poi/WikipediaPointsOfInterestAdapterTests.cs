@@ -16,13 +16,15 @@ namespace IsraelHiking.API.Tests.Services.Poi
     {
         private WikipediaPointsOfInterestAdapter _adapter;
         private IWikipediaGateway _wikipediaGateway;
+        private IOverpassTurboGateway _overpassTurboGateway;
 
         [TestInitialize]
         public void TestInialize()
         {
             InitializeSubstitues();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
-            _adapter = new WikipediaPointsOfInterestAdapter(_wikipediaGateway, Substitute.For<ILogger>());
+            _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
+            _adapter = new WikipediaPointsOfInterestAdapter(_wikipediaGateway, _overpassTurboGateway, Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -33,6 +35,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var list = new List<Feature> { feature };
             _wikipediaGateway.GetByBoundingBox(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string>()).Returns(list);
             _wikipediaGateway.GetByPagesTitles(Arg.Any<string[]>(), Arg.Any<string>()).Returns(list);
+            _overpassTurboGateway.GetWikipediaLinkedTitles().Returns(new List<string>());
 
             var points = _adapter.GetAll().Result;
             

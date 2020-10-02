@@ -18,6 +18,7 @@ import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } fro
 import { SpatialService } from "../../../services/spatial.service";
 import { RunningContextService } from "../../../services/running-context.service";
 import { SidebarService } from "../../../services/sidebar.service";
+import { NavigateHereService } from "../../../services/navigate-here.service";
 import { sidebarAnimate } from "../sidebar.component";
 import {
     RouteData,
@@ -65,6 +66,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly sidebarService: SidebarService,
                 private readonly runningContextSerivce: RunningContextService,
+                private readonly navigateHereService: NavigateHereService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.sidebarService.hideWithoutChangingAddressbar();
@@ -186,11 +188,12 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (!this.poiExtended) {
             return "";
         }
-        if (!this.poiExtended.isEditable) {
-            return this.poiExtended.description;
+        let description = this.poiExtended.description || this.poiExtended.externalDescription;
+        if (description) {
+            return description;
         }
-        if (this.poiExtended.description) {
-            return this.poiExtended.description;
+        if (!this.poiExtended.isEditable) {
+            return description;
         }
         if (this.authorizationService.isLoggedIn() === false) {
             return this.resources.noDescriptionLoginRequired;
@@ -282,6 +285,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             }
         }));
         this.clear();
+    }
+
+    public navigateHere() {
+        this.navigateHereService.addNavigationSegment(this.poiExtended.location, this.poiExtended.title);
     }
 
     public clear() {

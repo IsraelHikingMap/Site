@@ -20,6 +20,7 @@ export { ApplicationState } from "./state/application-state";
 export { Configuration } from "./state/configuration";
 export { TracesState } from "./state/traces-state";
 export { LayersState } from "./state/layers-state";
+export { ShareUrlsState } from "./state/share-urls-state";
 export { UserState } from "./state/user-state";
 export { PointsOfInterestState } from "./state/poi-state";
 export { InMemoryState } from "./state/in-memory-state";

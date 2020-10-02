@@ -20,6 +20,7 @@ namespace IsraelHiking.DataAccess
     public class INatureGateway : IINatureGateway
     {
         private const string BASE_API_ADDRESS = "https://inature.info/w/api.php";
+        private const int RETRIES = 10;
 
         private readonly ILogger _logger;
         private WikiSite _wikiSite;
@@ -38,7 +39,7 @@ namespace IsraelHiking.DataAccess
             };
             _wikiSite = new WikiSite(wikiClient, new SiteOptions(BASE_API_ADDRESS));
             await _wikiSite.Initialization;
-            _logger.LogInformation("Finished initializing iNatire service");
+            _logger.LogInformation("Finished initializing iNature service");
         }
 
         public async Task<List<Feature>> GetAll()
@@ -63,7 +64,7 @@ namespace IsraelHiking.DataAccess
 
             var imagePage = new WikiPage(_wikiSite, "File:" + WikimediaCommonGateway.GetWikiName(match.Groups[1].Value));
             var retry = 0;
-            while (retry < 10 && imagePage.LastFileRevision == null)
+            while (retry < RETRIES && imagePage.LastFileRevision == null)
             {
                 try
                 {
@@ -76,7 +77,7 @@ namespace IsraelHiking.DataAccess
                 }
             }
 
-            if (retry >= 10)
+            if (retry >= RETRIES)
             {
                 _logger.LogWarning("Failed to get image file for page after 10 retries: " + imagePage.Title);
             }
@@ -88,23 +89,22 @@ namespace IsraelHiking.DataAccess
         {
             WikiPage page = null;
             var retry = 0;
-            while (retry < 10 && page?.Content == null)
+            while (retry < RETRIES && page?.Content == null)
             {
                 try
                 {
                     page = new WikiPage(_wikiSite, title);
                     await page.RefreshAsync(PageQueryOptions.FetchContent).ConfigureAwait(false);
                 }
-                catch
+                catch (Exception ex)
                 {
                     retry++;
                     await Task.Delay(100).ConfigureAwait(false);
+                    if (retry == RETRIES)
+                    {
+                        _logger.LogWarning("Failed to get content for page after 10 retries: " + title + " " + ex.ToString());
+                    }
                 }
-            }
-
-            if (retry >= 10)
-            {
-                _logger.LogWarning("Failed to get content for page after 10 retries: " + title);
             }
             return page;
         }

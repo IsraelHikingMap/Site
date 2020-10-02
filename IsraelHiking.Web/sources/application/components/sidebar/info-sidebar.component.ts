@@ -51,7 +51,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
         if (tabIndex === 1) {
             this.initalizeLegendSections();
         }
-        this.angulartics2GoogleAnalytics.eventTrack((tabIndex === 1 ? "Legend" : "About") + " tab selected", { category: "info" });
+        this.angulartics2GoogleAnalytics.eventTrack((tabIndex === 1 ? "Legend" : "About") + " tab selected", { category: "Info" });
     }
 
     public openSection(section: ILegendSection) {
@@ -124,7 +124,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendBikeShop);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendFirstAid);
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendCafé);
+        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendCafe);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendRestaurant);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendConvenienceStore);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendLodging);

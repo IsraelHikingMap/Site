@@ -30,6 +30,7 @@ export interface PointOfInterestExtended extends PointOfInterest {
     lengthInKm: number;
     imagesUrls: string[];
     description: string;
+    externalDescription: string;
     references: Reference[];
     dataContainer: DataContainer;
     featureCollection: GeoJSON.FeatureCollection;

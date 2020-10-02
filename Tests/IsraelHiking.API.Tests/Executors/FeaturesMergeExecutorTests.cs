@@ -65,6 +65,28 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
+        public void MergeFeatures_HasSameTitleAndSameImagesAndWebsite_ShouldMergeWithoutLink()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, "images1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web1");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, "images1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL + "1", "images2");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web1");
+            feature2.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(2, results.First().Attributes.GetNames().Count(n => n.StartsWith(FeatureAttributes.IMAGE_URL)));
+            Assert.AreEqual(1, results.First().Attributes.GetNames().Count(n => n.StartsWith(FeatureAttributes.WEBSITE)));
+        }
+
+        [TestMethod]
         public void MergeFeatures_HasSameTitleButNotTheSameCategoryFamily_ShouldNotMerge()
         {
             var feature1 = CreateFeature("1", 0, 0);
@@ -119,12 +141,44 @@ namespace IsraelHiking.API.Tests.Executors
             feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":he", "11");
             feature1.SetTitles();
-            var feature2 = CreateFeature("2", 1, 1);
+            var feature2 = CreateFeature("2", 0, 0.5);
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
             feature2.SetTitles();
 
             var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+
+            Assert.AreEqual(2, results.Count);
+        }
+
+        [TestMethod]
+        public void MergeFeatures_HasSameTitleAndCloseEnoughFromExternalSource_ShouldMerge()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0.01);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
+            feature2.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+
+            Assert.AreEqual(1, results.Count);
+        }
+
+        [TestMethod]
+        public void MergeFeatures_HasSameTitleButFarAwayFromExternalSource_ShouldNotMerge()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0.2);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
+            feature2.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
 
             Assert.AreEqual(2, results.Count);
         }
@@ -640,6 +694,126 @@ namespace IsraelHiking.API.Tests.Executors
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue(results.First().Geometry.IsValid);
+        }
+
+        [TestMethod]
+        public void MergeFeatures_HasSameTitleDifferentHighwayType_ShouldNotMerge()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.AddOrUpdate("highway", "junction");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate("highway", "track");
+            feature2.SetTitles();
+            feature2.Geometry = new LineString(new Coordinate[] { new Coordinate(0, 0), new Coordinate(1, 1) });
+            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+
+            Assert.AreEqual(2, results.Count);
+        }
+
+        [TestMethod]
+        public void MergeFeatures_HasSameTitleWithSameWebsiteFromExternalSource_ShouldMergeAndAddSourceImageUrl()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "website");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "website");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "siu");
+            feature2.SetTitles();
+            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+
+            Assert.AreEqual(1, results.Count);
+            Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL));
+        }
+
+        [TestMethod]
+        public void MergeFeatures_HasSameTitleWithWebsiteOnlyFromExternalSource_ShouldMergeAndAddSourceImageUrl()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "website");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "siu");
+            feature2.SetTitles();
+            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+
+            Assert.AreEqual(1, results.Count);
+            Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL));
+        }
+
+        [TestMethod]
+        public void MergeFeatures_SecondWebsiteOfSourceIsFromExternal_ShouldMergeAndAddSourceImageUrl()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + "1", "web2");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web2");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "siu");
+            feature2.SetTitles();
+            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+
+            Assert.AreEqual(1, results.Count);
+            Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL + "1"));
+        }
+
+        [TestMethod]
+        public void MergeFeatures_HasSameTitleWithSameMultipleWebsites_ShouldMergeAndAddSourceImageUrl()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "siu");
+            feature2.SetTitles();
+            var feature3 = CreateFeature("2", 0, 0);
+            feature3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature3.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA);
+            feature3.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web2");
+            feature3.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "siu2");
+            feature3.SetTitles();
+            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2, feature3 });
+
+            Assert.AreEqual(1, results.Count);
+            Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL));
+            Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL + "1"));
+            Assert.AreEqual(2, results.First().Attributes.GetNames().Count(n => n.StartsWith(FeatureAttributes.WEBSITE)));
+        }
+
+        [TestMethod]
+        public void MergeFeatures_DescriptionOnlyExistsInExternalSource_ShouldMergeAndAddSpecialDescription()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.DeleteAttribute(FeatureAttributes.DESCRIPTION);
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION, "description");
+            feature2.SetTitles();
+            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+
+            Assert.AreEqual(1, results.Count);
+            Assert.IsFalse(results.First().Attributes.Exists(FeatureAttributes.DESCRIPTION));
+            Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_EXTERNAL_DESCRIPTION));
         }
     }
 }

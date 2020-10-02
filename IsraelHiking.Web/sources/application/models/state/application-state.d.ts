@@ -7,6 +7,7 @@ import {
     RouteEditingState,
     TracesState,
     LayersState,
+    ShareUrlsState,
     UserState,
     PointsOfInterestState,
     InMemoryState,
@@ -20,6 +21,7 @@ export interface ApplicationState {
     routeEditingState: RouteEditingState;
     tracesState: TracesState;
     layersState: LayersState;
+    shareUrlsState: ShareUrlsState;
     userState: UserState;
     poiState: PointsOfInterestState;
     inMemoryState: InMemoryState;

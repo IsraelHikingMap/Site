@@ -56,7 +56,7 @@ namespace IsraelHiking.API.Executors
                 try
                 {
                     Interlocked.Increment(ref counter);
-                    if (counter % 100 == 0)
+                    if (counter % 200 == 0)
                     {
                         _logger.LogInformation($"Indexed {counter} images of {imagesUrls.Count}");
                     }
@@ -73,6 +73,10 @@ namespace IsraelHiking.API.Executors
                     {
                         try
                         {
+                            if (imageUrl.StartsWith("File:"))
+                            {
+                                imageUrl = $"https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/{imageUrl.Replace("File:", "")}";
+                            }
                             content = _remoteFileFetcherGateway.GetFileContent(imageUrl).Result.Content;
                             break;
                         }

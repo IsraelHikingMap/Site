@@ -54,6 +54,7 @@
     "cordova-plugin-app-version": "^0.1.9",
     "cordova-plugin-brightness": "^0.2.0",
     "cordova-plugin-camera": "^4.0.3",
+    "cordova-plugin-deeplinks": "git+https://github.com/IsraelHikingMap/cordova-plugin-deeplinks.git",
     "cordova-plugin-device": "^2.0.3",
     "cordova-plugin-email-composer": "^0.9.2",
     "cordova-plugin-file": "^6.0.1",
@@ -198,6 +199,7 @@
       },
       "cordova-plugin-screen-orientation": {},
       "cordova-plugin-file-transfer": {},
+      "cordova-plugin-deeplinks": {},
       "cc.fovea.cordova.openwith": {
         "ANDROID_MIME_TYPE": "application/gpx",
         "SHAREEXT_PROVISIONING_PROFILE": "\"32eb6694-d0ab-4b7a-8d34-67ec102c79bc\"",

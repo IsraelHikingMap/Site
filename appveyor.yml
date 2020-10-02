@@ -1,6 +1,7 @@
 version: 9.3.{build}
 clone_depth: 3
 configuration: Release
+skip_branch_with_pr: true
 environment:
   STORE_PASSWORD:
     secure: ZF3GiQxQ98B1HGKZOwlnmris5yN68mvx3UF6TVsnpws=
@@ -24,11 +25,7 @@ environment:
     
 install:
 - ps: >-
-    Install-Product node 10.15
-
-    npm install -g npm@6.9.0 --loglevel=error
-
-    npm install -g increase-memory-limit
+    Install-Product node 12.18
         
     node --version
 

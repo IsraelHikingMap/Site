@@ -51,11 +51,8 @@ describe("Share Urls Service", () => {
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
 
             let shareUrl = { id: "42" } as ShareUrl;
-            shareUrlsService.shareUrls = [shareUrl];
 
-            let promise = shareUrlsService.deleteShareUrl(shareUrl).then(() => {
-                expect(shareUrlsService.shareUrls.length).toBe(0);
-            });
+            let promise = shareUrlsService.deleteShareUrl(shareUrl);
 
             mockBackend.expectOne(Urls.urls + shareUrl.id).flush({});
             return promise;

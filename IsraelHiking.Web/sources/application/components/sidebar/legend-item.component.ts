@@ -45,7 +45,7 @@ export class LegendItemComponent extends BaseMapComponent {
             return `https://wiki.openstreetmap.org/wiki/Key:${item.osmTags[0].split("=")[0]}`;
         }
         if (item.link === LegendItemComponent.OSM_TAG_LINK) {
-            return `https://wiki.openstreetmap.org/wiki/Tag:${item.osmTags[0]}`;
+            return `https://wiki.openstreetmap.org/wiki/Tag:${item.osmTags[0].split(" ")[0]}`;
         }
         return item.link;
     }

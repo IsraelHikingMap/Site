@@ -47,19 +47,33 @@ namespace IsraelHiking.DataAccess
 
         public async Task<List<Feature>> GetByPagesTitles(string[] titles, string language)
         {
-            var site = _wikiSites[language];
-            var pages = titles.Select(title => new WikiPage(site, title)).ToArray();
-            await pages.RefreshAsync(new WikiPageQueryProvider
+            try
             {
-                Properties =
+                var site = _wikiSites[language];
+                var pages = titles.Select(title => new WikiPage(site, title)).ToArray();
+                await pages.RefreshAsync(new WikiPageQueryProvider
+                {
+                    Properties =
                 {
                     new ExtractsPropertyProvider {AsPlainText = true, IntroductionOnly = true, MaxSentences = 1},
                     new PageImagesPropertyProvider {QueryOriginalImage = true},
                     new GeoCoordinatesPropertyProvider {QueryPrimaryCoordinate = true},
                     new RevisionsPropertyProvider { FetchContent = false }
                 }
-            });
-            return pages.Select(p => ConvertPageToFeature(p, language)).Where(f => f != null).ToList();
+                });
+                var features = pages.Where(p => p.Exists).Select(p => ConvertPageToFeature(p, language)).ToList();
+                if (features.Count != titles.Length)
+                {
+                    _logger.LogWarning("The following pages do not exists: " + string.Join(",", pages.Where(p => p.Exists == false).Select(p => p.Title).ToArray()));
+                }
+                return features;
+            } 
+            catch
+            {
+                _logger.LogError("Unable to get wikipedia pages for: " + string.Join(",", titles));
+            }
+            return new List<Feature>();
+            
         }
 
         /// <summary>
@@ -127,16 +141,10 @@ namespace IsraelHiking.DataAccess
 
         private Feature ConvertPageToFeature(WikiPage page, string language)
         {
-            if (page.Exists == false)
-            {
-                return null;
-            }
             var geoCoordinate = page.GetPropertyGroup<GeoCoordinatesPropertyGroup>().PrimaryCoordinate;
-            if (geoCoordinate.IsEmpty)
-            {
-                return null;
-            }
-            var coordinate = new CoordinateZ(geoCoordinate.Longitude, geoCoordinate.Latitude, double.NaN);
+            var coordinate = geoCoordinate.IsEmpty
+                ? new CoordinateZ(FeatureAttributes.INVALID_LOCATION, FeatureAttributes.INVALID_LOCATION, double.NaN)
+                : new CoordinateZ(geoCoordinate.Longitude, geoCoordinate.Latitude, double.NaN);
             var attributes = GetAttributes(coordinate, page.PageStub, language);
             attributes.Add(FeatureAttributes.DESCRIPTION + ":" + language, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
             var imageUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url ?? string.Empty;

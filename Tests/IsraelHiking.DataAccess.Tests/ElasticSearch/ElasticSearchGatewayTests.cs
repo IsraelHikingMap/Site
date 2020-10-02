@@ -140,7 +140,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         public void UpdatePointOfInterest_ShouldBeAbleToGetRightAfterAdding()
         {
             var id = "42";
-            _gateway.DeletePointOfInterestById("1", Sources.OSM).Wait();
+            _gateway.DeletePointOfInterestById(id, Sources.OSM).Wait();
             var feature = new Feature(new Point(0, 0), new AttributesTable
             {
                 { FeatureAttributes.NAME, "name" },

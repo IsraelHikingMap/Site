@@ -106,11 +106,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 return null;
             }
-            var poiItem = await FeatureToExtendedPoi(feature, language);
-            poiItem.IsRoute = feature.Geometry is LineString || feature.Geometry is MultiLineString;
-            poiItem.IsArea = feature.Geometry is Polygon || feature.Geometry is MultiPolygon;
-            poiItem.IsEditable = feature.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM);
-            return poiItem;
+            return await FeatureToExtendedPoi(feature, language);
         }
 
         /// <summary>
@@ -119,7 +115,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="feature">The features to convert</param>
         /// <param name="language">the user interface language</param>
         /// <returns></returns>
-        private async Task<PointOfInterestExtended> ConvertToPoiExtended(Feature feature, string language)
+        private async Task<PointOfInterestExtended> FeatureToExtendedPoi(Feature feature, string language)
         {
             var poiItem = ConvertToPoiItem<PointOfInterestExtended>(feature, language);
             await SetDataContainerAndLength(poiItem, feature);
@@ -131,10 +127,17 @@ namespace IsraelHiking.API.Services.Poi
                 .Where(n => !string.IsNullOrWhiteSpace(n))
                 .ToArray();
             poiItem.Description = feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
-            poiItem.IsEditable = false;
+            poiItem.ExternalDescription = feature.Attributes.GetByLanguage(FeatureAttributes.POI_EXTERNAL_DESCRIPTION, language);
+            poiItem.IsRoute = feature.Geometry is LineString || feature.Geometry is MultiLineString;
+            poiItem.IsArea = feature.Geometry is Polygon || feature.Geometry is MultiPolygon;
+            poiItem.IsEditable = feature.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM);
             poiItem.Contribution = GetContribution(feature);
             var (x, y) = _wgs84ItmMathTransform.Transform(poiItem.Location.Lng, poiItem.Location.Lat);
             poiItem.ItmCoordinates = new NorthEast { East = (int)x, North = (int)y };
+            if (string.IsNullOrWhiteSpace(poiItem.Icon))
+            {
+                poiItem.Icon = SEARCH_ICON;
+            }
             return poiItem;
         }
 
@@ -204,16 +207,6 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.Icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
             poiItem.IconColor = feature.Attributes[FeatureAttributes.POI_ICON_COLOR].ToString();
             poiItem.HasExtraData = feature.HasExtraData(language) || poiItem.Source != Sources.OSM;
-            return poiItem;
-        }
-
-        private async Task<PointOfInterestExtended> FeatureToExtendedPoi(Feature feature, string language)
-        {
-            var poiItem = await ConvertToPoiExtended(feature, language);
-            if (string.IsNullOrWhiteSpace(poiItem.Icon))
-            {
-                poiItem.Icon = SEARCH_ICON;
-            }
             return poiItem;
         }
 

@@ -198,7 +198,7 @@ class LayersReducer {
         baseLayers.splice(baseLayers.indexOf(baseLayers.find(b => b.key === action.payload.key)), 1, action.payload.layerData);
         return {
             ...lastState,
-            baseLayers
+            baseLayers: this.sort(baseLayers)
         };
     }
 
@@ -208,7 +208,7 @@ class LayersReducer {
         overlays.splice(overlays.indexOf(overlays.find(o => o.key === action.payload.key)), 1, action.payload.layerData);
         return {
             ...lastState,
-            overlays
+            overlays: this.sort(overlays) as Overlay[]
         };
     }
 

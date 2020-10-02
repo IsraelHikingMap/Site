@@ -1,17 +1,21 @@
-﻿using IsraelHiking.API.Services;
+﻿using IsraelHiking.API.Converters.ConverterFlows;
+using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
+using NetTopologySuite.Geometries;
 using OsmSharp.API;
 using OsmSharp.IO.API;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,6 +32,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IImageCreationService _imageCreationService;
+        private readonly ISearchRepository _searchRepository;
         private readonly UsersIdAndTokensCache _cache;
         private readonly ConfigurationData _options;
 
@@ -39,18 +44,21 @@ namespace IsraelHiking.API.Controllers
         /// <param name="dataContainerConverterService"></param>
         /// <param name="options"></param>
         /// <param name="imageCreationService"></param>
+        /// <param name="searchRepository"></param>
         /// <param name="cache"></param>
         public OsmTracesController(IClientsFactory clientsFactory,
             IElevationDataStorage elevationDataStorage,
             IDataContainerConverterService dataContainerConverterService,
-            IOptions<ConfigurationData> options,
             IImageCreationService imageCreationService,
+            ISearchRepository searchRepository,
+            IOptions<ConfigurationData> options,
             UsersIdAndTokensCache cache)
         {
             _clientsFactory = clientsFactory;
             _elevationDataStorage = elevationDataStorage;
             _dataContainerConverterService = dataContainerConverterService;
             _imageCreationService = imageCreationService;
+            _searchRepository = searchRepository;
             _options = options.Value;
             _cache = cache;
         }
@@ -128,6 +136,57 @@ namespace IsraelHiking.API.Controllers
             }, memoryStream);
             return Ok();
         }
+
+        /// <summary>
+        /// Allows upload of traces to OSM
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPost]
+        [Route("route")]
+        public async Task<IActionResult> PostUploadRouteData([FromBody] RouteData routeData, [FromQuery] bool isDefaultName, [FromQuery]string language)
+        {
+            var allPoints = routeData.Segments.SelectMany(s => s.Latlngs).Select(l => l.ToCoordinate()).ToList();
+            if (allPoints.Count < 2)
+            {
+                return BadRequest("There are not enough points in the route");
+            }
+            var bytes = await  _dataContainerConverterService.ToAnyFormat(new DataContainerPoco { Routes = new List<RouteData> { routeData } }, FlowFormats.GPX);
+            using var memoryStream = new MemoryStream(bytes);
+            var gateway = CreateClient();
+            var description = routeData.Name;
+            if (isDefaultName)
+            {
+                var containersStart = await _searchRepository.GetContainers(allPoints.First());
+                var containersEnd = await _searchRepository.GetContainers(allPoints.Last());
+                var containers = containersStart.Concat(containersEnd)
+                    .GroupBy(f => f.GetId())
+                    .Select(g => g.First())
+                    .OrderBy(c => c.Geometry.Area)
+                    .ToList();
+                string bestContainerName = string.Empty;
+                foreach (var container in containers)
+                {
+                    var pointsInside = allPoints.Count(c => container.Geometry.Contains(new Point(c)));
+                    if (pointsInside * 100.0 / allPoints.Count > 20.0)
+                    {
+                        container.SetTitles();
+                        description = language == "he" 
+                            ? description.Replace("מסלול", "מסלול ב" + container.GetTitle(language)) 
+                            : description.Replace("Route", "A route in " + container.GetTitle(language));
+                        break;
+                    }
+                }
+            }
+            await gateway.CreateTrace(new GpxFile
+            {
+                Name = routeData.Name + "." + FlowFormats.GPX,
+                Description = description,
+                Visibility = Visibility.Private
+            }, memoryStream);
+            return Ok();
+        }
+
 
         /// <summary>
         /// Allows update OSM trace meta data

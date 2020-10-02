@@ -1,9 +1,10 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { NgRedux } from "@angular-redux/store";
+import { timeout } from "rxjs/operators";
 
 import { LoggingService } from "./logging.service";
-import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
+import { ResourcesService } from "./resources.service";
 import { Urls } from "../urls";
 import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducres/traces.reducer";
 import { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
@@ -11,20 +12,20 @@ import { Trace, ApplicationState, DataContainer, RouteData } from "../models/mod
 @Injectable()
 export class TracesService {
 
-    constructor(private readonly httpClient: HttpClient,
-                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+    constructor(private readonly resources: ResourcesService,
+                private readonly httpClient: HttpClient,
                 private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
-    public getMissingParts(trace: Trace): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
-        return this.httpClient.post(Urls.osm + "?traceId=" + trace.id, null)
+    public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
+        return this.httpClient.post(Urls.osm + "?traceId=" + traceId, null)
             .toPromise() as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     }
 
     public syncTraces = async (): Promise<void> => {
         try {
-            let response = await this.httpClient.get(Urls.osmTrace).toPromise() as Trace[];
+            let response = await this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)).toPromise() as Trace[];
             let traces = ([] as Trace[]).concat(response || []);
             let existingTraces = this.ngRedux.getState().tracesState.traces;
             for (let trace of existingTraces) {
@@ -33,7 +34,6 @@ export class TracesService {
             }
             for (let traceJson of traces) {
                 traceJson.timeStamp = new Date(traceJson.timeStamp);
-                traceJson.isInEditMode = false;
                 let existingTrace = existingTraces.find(t => t.id === traceJson.id);
                 if (existingTrace != null) {
                     traceJson.dataContainer = existingTrace.dataContainer;
@@ -62,15 +62,12 @@ export class TracesService {
         return this.httpClient.post(Urls.osmTrace, formData).toPromise();
     }
 
-    public async uploadRouteAsTrace(route: RouteData): Promise<string> {
-        let data = {
-            routes: [route]
-        } as DataContainer;
-        let responseData = await this.httpClient.post(Urls.files + "?format=gpx", data).toPromise() as string;
-        let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
-        let formData = new FormData();
-        formData.append("file", blobToSave, route.name + ".gpx");
-        return this.httpClient.post(Urls.osmTrace, formData).toPromise() as Promise<string>;
+    public async uploadRouteAsTrace(route: RouteData): Promise<any> {
+        let isDefaultName = route.name.startsWith(this.resources.route) &&
+            route.name.replace(this.resources.route, "").trim().startsWith(new Date().toISOString().split("T")[0]);
+        return this.httpClient.post(Urls.osmTraceRoute, route, {
+            params: { isDefaultName: isDefaultName.toString(), language: this.resources.getCurrentLanguageCodeSimplified() }
+        }).toPromise();
     }
 
     public async updateTrace(trace: Trace): Promise<void> {

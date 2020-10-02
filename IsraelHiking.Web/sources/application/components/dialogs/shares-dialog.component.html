@@ -15,17 +15,17 @@
     </div>
     <div mat-dialog-content id="dialogContentForScroll">
         <div *ngFor="let shareUrl of filteredShareUrls" class="item">
-            <div fxLayout="row" [ngClass]="{'active': selectedShareUrl === shareUrl}" (click)="toggleSelectedShareUrl(shareUrl)">
+            <div fxLayout="row" [ngClass]="{'active': selectedShareUrlId === shareUrl.id}" (click)="toggleSelectedShareUrl(shareUrl)">
                 <div class="item-image">
                     <img [src]="getImageFromShareId(shareUrl, 128, 128)" fxFill />
                 </div>
                 <div class="margin-10">
-                    <div *ngIf="!isShareUrlInEditMode(shareUrl)">
+                    <div *ngIf="!isShareUrlInEditMode(shareUrl.id)">
                         {{shareUrl.title}}<br />
                         {{shareUrl.description}}<br />
                         {{shareUrl.creationDate | date:'dd/MM/yyyy'}}
                     </div>
-                    <div *ngIf="isShareUrlInEditMode(shareUrl)">
+                    <div *ngIf="isShareUrlInEditMode(shareUrl.id)">
                         <mat-form-field>
                             <input matInput type="text" [(ngModel)]="shareUrl.title" placeholder="{{resources.titlePlaceHolder}}" />
                         </mat-form-field>
@@ -42,32 +42,32 @@
     </div>
     <div mat-dialog-actions>
         <div fxLayout="row" fxFlex>
-            <div fxFlex *ngIf="!isShareUrlInEditMode(selectedShareUrl)">
-                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" (click)="shareUrlInEditMode = selectedShareUrl" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Toggle edit share"><i class="fa icon-pencil"></i></button>
+            <div fxFlex *ngIf="!isShareUrlInEditMode(selectedShareUrlId)">
+                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" (click)="shareUrlIdInEditMode = selectedShareUrlId" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Toggle edit share"><i class="fa icon-pencil"></i></button>
             </div>
-            <div fxFlex *ngIf="isShareUrlInEditMode(selectedShareUrl)">
-                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" (click)="updateShareUrl(selectedShareUrl)" matTooltip="{{resources.update}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Update share"><i class="fa icon-check"></i></button>
+            <div fxFlex *ngIf="isShareUrlInEditMode(selectedShareUrlId)">
+                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" (click)="updateShareUrl()" matTooltip="{{resources.update}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Update share"><i class="fa icon-check"></i></button>
             </div>
             <div fxFlex>
                 <mat-menu #appMenu="matMenu" [dir]="resources.direction" yPosition="above" overlapTrigger="false">
                     <div mat-menu-item disableRipple="true">
                         <div fxLayout="row">
-                            <div fxFlex><a [href]="getShareSocialLinks(selectedShareUrl).facebook" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook share"><i class="fa icon-facebook"></i></a></div>
-                            <div fxFlex><a [href]="getShareSocialLinks(selectedShareUrl).whatsapp" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp share"><i class="fa icon-whatsapp"></i></a></div>
-                            <div fxFlex><button fxFill mat-button ngxClipboard [cbContent]="getShareSocialLinks(selectedShareUrl).ihm" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard share"><i class="fa icon-clipboard"></i></button></div>
+                            <div fxFlex><a [href]="getShareSocialLinks().facebook" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook share"><i class="fa icon-facebook"></i></a></div>
+                            <div fxFlex><a [href]="getShareSocialLinks().whatsapp" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp share"><i class="fa icon-whatsapp"></i></a></div>
+                            <div fxFlex><button fxFill mat-button ngxClipboard [cbContent]="getShareSocialLinks().ihm" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard share"><i class="fa icon-clipboard"></i></button></div>
                         </div>
                     </div>
                 </mat-menu>
                 <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share open menu for share"><i class="fa icon-share-alt"></i></button>
             </div>
             <div fxFlex>
-                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" matDialogClose (click)="showShareUrl(selectedShareUrl)" matTooltip="{{resources.presentShare}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Present share"><i class="fa icon-eye"></i></button>
+                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" matDialogClose (click)="showShareUrl()" matTooltip="{{resources.presentShare}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Present share"><i class="fa icon-eye"></i></button>
             </div>
             <div fxFlex>
-                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" matDialogClose (click)="addShareUrlToRoutes(selectedShareUrl)" matTooltip="{{resources.addToRoutes}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Add share to routes"><i class="fa icon-plus"></i></button>
+                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" matDialogClose (click)="addShareUrlToRoutes()" matTooltip="{{resources.addToRoutes}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Add share to routes"><i class="fa icon-plus"></i></button>
             </div>
             <div fxFlex>
-                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" (click)="deleteShareUrl(selectedShareUrl)" matTooltip="{{resources.delete}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Delete share"><i class="fa icon-trash"></i></button>
+                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" (click)="deleteShareUrl()" matTooltip="{{resources.delete}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Delete share"><i class="fa icon-trash"></i></button>
             </div>
         </div>
         </div>

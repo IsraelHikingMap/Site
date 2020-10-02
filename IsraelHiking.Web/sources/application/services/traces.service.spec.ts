@@ -4,13 +4,15 @@ import { HttpClientTestingModule, HttpTestingController } from "@angular/common/
 import { NgRedux } from "@angular-redux/store";
 
 import { TracesService } from "./traces.service";
-import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { LoggingService } from "./logging.service";
 import { Urls } from "../urls";
 import { Trace } from "../models/models";
+import { ToastServiceMockCreator } from "./toast.service.spec";
+import { ResourcesService } from "./resources.service";
 
 describe("Traces Service", () => {
     beforeEach(() => {
+        let mock = new ToastServiceMockCreator();
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -19,7 +21,7 @@ describe("Traces Service", () => {
             providers: [
                 NgRedux,
                 TracesService,
-                { provide: NonAngularObjectsFactory, useValue: null },
+                { provide: ResourcesService, useValue: mock.resourcesService },
                 { provide: LoggingService, useValue: {} },
             ]
         });
@@ -30,7 +32,7 @@ describe("Traces Service", () => {
 
             let trace = { id: "123" } as Trace;
 
-            let promise = tracesService.getMissingParts(trace).then((res) => {
+            let promise = tracesService.getMissingParts(trace.id).then((res) => {
                 expect(res).not.toBeNull();
             });
 

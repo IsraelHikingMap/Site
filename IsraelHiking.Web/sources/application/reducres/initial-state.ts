@@ -111,6 +111,9 @@ export const initialState =
                 visible: true
             }]
         },
+        shareUrlsState: {
+            shareUrls: []
+        },
         userState: {
             userInfo: null,
             token: null

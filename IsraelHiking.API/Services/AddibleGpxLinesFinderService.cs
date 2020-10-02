@@ -162,7 +162,7 @@ namespace IsraelHiking.API.Services
                 {
                     continue;
                 }
-                simpleLine = RadialDistanceByAngleSimplifier.Simplify(simpleLine, _options.MinimalMissingSelfLoopPartLegth, _options.RadialSimplificationAngle);
+                simpleLine = RadialDistanceByAngleSimplifier.Simplify(simpleLine, _options.RadialDistanceTolerance, _options.RadialSimplificationAngle);
                 if (simpleLine == null)
                 {
                     continue;

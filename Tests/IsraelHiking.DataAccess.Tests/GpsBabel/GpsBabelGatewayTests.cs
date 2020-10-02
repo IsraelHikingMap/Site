@@ -23,20 +23,20 @@ namespace IsraelHiking.DataAccess.Tests.GpsBabel
         [TestMethod]
         public void ConvertFileFromat_FromGpxToKmlWithUTF8_ShouldSucceed()
         {
-            var content = File.ReadAllBytes(@"TestData\test.gpx");
+            var content = File.ReadAllBytes(Path.Combine("TestData","test.gpx"));
 
             var outputContent = _gpsBabelGateway.ConvertFileFromat(content, "gpx", "kml").Result;
 
             var stream = new MemoryStream(outputContent);
             var actualKmlDoc = XDocument.Load(stream);
-            var expectedKmlDoc = XDocument.Load(new FileStream(@"TestData\test.kml", FileMode.Open, FileAccess.Read));
+            var expectedKmlDoc = XDocument.Load(new FileStream(Path.Combine("TestData","test.kml"), FileMode.Open, FileAccess.Read));
             Assert.AreEqual(expectedKmlDoc.Descendants().Count(x => x.Name.LocalName == "LookAt"), actualKmlDoc.Descendants().Count(x => x.Name.LocalName == "LookAt"));
         }
 
         [TestMethod]
         public void ConvertFileFromat_FromGpxTWLAndBack_ShouldSucceed()
         {
-            var content = File.ReadAllBytes(@"TestData\test.gpx");
+            var content = File.ReadAllBytes(Path.Combine("TestData","test.gpx"));
             var referenceGpx = content.ToGpx();
             var outputContent = _gpsBabelGateway.ConvertFileFromat(content, "gpx", FlowFormats.TWL_BABEL_FORMAT).Result;
             outputContent = _gpsBabelGateway.ConvertFileFromat(outputContent, FlowFormats.TWL_BABEL_FORMAT, FlowFormats.GPX_BABEL_FORMAT).Result;

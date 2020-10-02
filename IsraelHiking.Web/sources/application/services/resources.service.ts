@@ -268,6 +268,7 @@ export class ResourcesService {
     public remainingDistance: string;
     public longPressHint: string;
     public continue: string;
+    public navigateHere: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -415,7 +416,7 @@ export class ResourcesService {
     public legendPicnicArea: string;
     public legendCampsite: string;
     public legendDrinkingWater: string;
-    public legendCafé: string;
+    public legendCafe: string;
     public legendRestaurant: string;
     public legendParking: string;
     public legendFuelStation: string;
@@ -531,7 +532,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1594898734009");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1597174235757");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -782,6 +783,7 @@ export class ResourcesService {
         this.remainingDistance = this.gettextCatalog.getString("Remaining distance");
         this.longPressHint = this.gettextCatalog.getString("Long press on any button will shows its usage");
         this.continue = this.gettextCatalog.getString("Continue");
+        this.navigateHere = this.gettextCatalog.getString("Navigate Here");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -951,7 +953,7 @@ export class ResourcesService {
         this.legendPicnicArea = this.gettextCatalog.getString("Picnic Area");
         this.legendCampsite = this.gettextCatalog.getString("Campsite");
         this.legendDrinkingWater = this.gettextCatalog.getString("Drinking Water");
-        this.legendCafé = this.gettextCatalog.getString("Café");
+        this.legendCafe = this.gettextCatalog.getString("Café");
         this.legendRestaurant = this.gettextCatalog.getString("Restaurant");
         this.legendParking = this.gettextCatalog.getString("Parking");
         this.legendFuelStation = this.gettextCatalog.getString("Fuel Station");
@@ -1075,6 +1077,9 @@ export class ResourcesService {
             let extenstion = split.pop();
             let prefix = split.join(".");
             return prefix + this.getImgurPostfix(size) + "." + extenstion;
+        }
+        if (imageUrl.startsWith("File:")) {
+            return `https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/${imageUrl.replace("File:", "")}&width=${size}`;
         }
         return imageUrl;
     }

@@ -172,7 +172,7 @@ namespace IsraelHiking.API.Executors
         private List<Feature> MergePlaceNodes(List<Feature> osmFeatures)
         {
             var featureIdsToRemove = new ConcurrentBag<string>();
-            var containers = osmFeatures.Where(f => f.IsValidContainer()).OrderBy(f => f.Geometry.Area).ToList();
+            var containers = osmFeatures.Where(IsPlaceContainer).OrderBy(f => f.Geometry.Area).ToList();
             var places = osmFeatures.Where(f => f.Geometry is Point && f.Attributes.Exists(PLACE) && f.Attributes.Exists(FeatureAttributes.NAME)).ToList();
             WriteToBothLoggers($"Starting places merging places: {places.Count}, to containers: {containers.Count}");
             Parallel.For(0, places.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount / 2 }, (placeIndex) =>
@@ -193,9 +193,34 @@ namespace IsraelHiking.API.Executors
             return osmFeatures.Where(f => list.Contains(f.GetId()) == false).ToList();
         }
 
+        private bool IsPlaceContainer(Feature feature)
+        {
+            if (!(feature.Geometry is Polygon) && !(feature.Geometry is MultiPolygon))
+            {
+                return false;
+            }
+            if (!feature.Attributes.Exists(FeatureAttributes.NAME))
+            {
+                return false;
+            }
+            var isFeatureADecentCity = feature.Attributes.Has("boundary", "administrative") &&
+                                       feature.Attributes.Exists("admin_level") &&
+                                       int.TryParse(feature.Attributes["admin_level"].ToString(), out int adminLevel) &&
+                                       adminLevel <= 8;
+            if (isFeatureADecentCity)
+            {
+                return true;
+            }
+            if (feature.Attributes.Exists(PLACE))
+            {
+                return true;
+            }
+            return false;
+        }
+
         private List<Feature> UpdatePlacesGeometry(Feature feature, List<Feature> places)
         {
-            var placeContainers = places.Where(c => IsPlaceContainer(c, feature))
+            var placeContainers = places.Where(c => IsPlaceContainerContainsFeature(c, feature))
                 .OrderBy(f => f.Geometry.Area)
                 .ToList();
 
@@ -211,7 +236,7 @@ namespace IsraelHiking.API.Executors
             return placeContainers;
         }
 
-        private bool IsPlaceContainer(Feature container, Feature feature)
+        private bool IsPlaceContainerContainsFeature(Feature container, Feature feature)
         {
             try
             {
@@ -378,7 +403,11 @@ namespace IsraelHiking.API.Executors
             {
                 geometryContains = source.Geometry.Contains(target.Geometry);
             }
-            if (!geometryContains && source.Geometry.Distance(target.Geometry) > _options.MergePointsOfInterestThreshold)
+            var threshold = source.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
+                target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM)
+                ? _options.MergePointsOfInterestThreshold
+                : _options.MergeExternalPointsOfInterestThreshold;
+            if (!geometryContains && source.Geometry.Distance(target.Geometry) > threshold)
             {
                 // too far away to be merged
                 return false;
@@ -433,6 +462,17 @@ namespace IsraelHiking.API.Executors
                 // don't merge highway with non-highway.
                 return false;
             }
+
+            if (target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
+                target.Attributes.GetNames().Contains("highway") &&
+                source.Attributes.GetNames().Contains("highway") &&
+                (source.Geometry.OgcGeometryType == OgcGeometryType.Point ||
+                target.Geometry.OgcGeometryType == OgcGeometryType.Point) &&
+                source.Geometry.OgcGeometryType != target.Geometry.OgcGeometryType)
+            {
+                // don't merge highway points with non highway points
+                return false;
+            }
             return true;
         }
 
@@ -454,7 +494,6 @@ namespace IsraelHiking.API.Executors
                     var wikiFeatureToRemove = wikiFeatures.FirstOrDefault(f => f.Attributes.Has(key, title));
                     if (wikiFeatureToRemove != null)
                     {
-                        wikiFeatures.Remove(wikiFeatureToRemove);
                         featureIdsToRemove.Add(wikiFeatureToRemove.GetId());
                         MergeFeatures(osmWikiFeature, wikiFeatureToRemove);
                     }
@@ -543,8 +582,16 @@ namespace IsraelHiking.API.Executors
                 if (!target.Attributes.GetNames().Contains(FeatureAttributes.DESCRIPTION + languagePostfix) &&
                     source.Attributes.GetNames().Contains(FeatureAttributes.DESCRIPTION + languagePostfix))
                 {
-                    CopyKeysIfExist(target, source, 
-                        FeatureAttributes.DESCRIPTION + languagePostfix,
+                    if (!source.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM))
+                    {
+                        target.Attributes.AddOrUpdate(FeatureAttributes.POI_EXTERNAL_DESCRIPTION + languagePostfix,
+                            source.Attributes[FeatureAttributes.DESCRIPTION + languagePostfix]);
+                    }
+                    else
+                    {
+                        CopyKeysIfExist(target, source, FeatureAttributes.DESCRIPTION + languagePostfix);
+                    }
+                    CopyKeysIfExist(target, source,
                         FeatureAttributes.POI_USER_NAME,
                         FeatureAttributes.POI_USER_ADDRESS);
                 }
@@ -561,27 +608,35 @@ namespace IsraelHiking.API.Executors
 
         private void MergeWebsite(Feature target, Feature source)
         {
-            var lastExsitingIndex = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)).Count();
+            var websiteUrls = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
+                .Select(key => target.Attributes[key]).ToList();
+            var lastExisitingIndex = websiteUrls.Count;
             foreach (var key in source.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)))
             {
                 var sourceImageUrlKey = key.Replace(FeatureAttributes.WEBSITE, FeatureAttributes.POI_SOURCE_IMAGE_URL);
-                if (lastExsitingIndex == 0)
+                var targetImageUrlKey = string.Empty;
+                if (websiteUrls.Contains(source.Attributes[key]))
+                {
+                    var websiteKey = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
+                        .First(targetKey => target.Attributes[targetKey].Equals(source.Attributes[key]));
+                    targetImageUrlKey = websiteKey.Replace(FeatureAttributes.WEBSITE, FeatureAttributes.POI_SOURCE_IMAGE_URL);
+                }
+                else if (lastExisitingIndex == 0)
                 {
                     target.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, source.Attributes[key]);
-                    if (source.Attributes.GetNames().Contains(sourceImageUrlKey))
-                    {
-                        target.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, source.Attributes[sourceImageUrlKey]);
-                    }
+                    targetImageUrlKey = FeatureAttributes.POI_SOURCE_IMAGE_URL;
+                    lastExisitingIndex++;
                 }
                 else
                 {
-                    target.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + lastExsitingIndex, source.Attributes[key]);
-                    if (source.Attributes.GetNames().Contains(sourceImageUrlKey))
-                    {
-                        target.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL + lastExsitingIndex, source.Attributes[sourceImageUrlKey]);
-                    }
+                    target.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + lastExisitingIndex, source.Attributes[key]);
+                    targetImageUrlKey = FeatureAttributes.POI_SOURCE_IMAGE_URL + lastExisitingIndex;
+                    lastExisitingIndex++;
                 }
-                lastExsitingIndex++;
+                if (source.Attributes.GetNames().Contains(sourceImageUrlKey))
+                {
+                    target.Attributes.AddOrUpdate(targetImageUrlKey, source.Attributes[sourceImageUrlKey]);
+                }
             }
         }
 
@@ -613,9 +668,15 @@ namespace IsraelHiking.API.Executors
 
         private void MergeImages(Feature target, Feature source)
         {
-            var lastExsitingIndex = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL)).Count();
+            var imagesUrls = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                .Select(key => target.Attributes[key]).ToList();
+            var lastExsitingIndex = imagesUrls.Count;
             foreach (var key in source.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL)))
             {
+                if (imagesUrls.Contains(source.Attributes[key]))
+                {
+                    continue;
+                }
                 if (lastExsitingIndex == 0)
                 {
                     target.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, source.Attributes[key]);

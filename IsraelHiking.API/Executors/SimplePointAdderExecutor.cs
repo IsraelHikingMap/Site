@@ -29,6 +29,7 @@ namespace IsraelHiking.API.Executors
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="options"></param>
         /// <param name="highwaysRepository"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         public SimplePointAdderExecutor(IOptions<ConfigurationData> options,
@@ -60,7 +61,7 @@ namespace IsraelHiking.API.Executors
         {
             return pointType switch
             {
-                SimplePointType.Tap => new TagsCollection { { "amenity", "diriking_water" } },
+                SimplePointType.Tap => new TagsCollection { { "amenity", "drinking_water" } },
                 SimplePointType.Parking => new TagsCollection { { "amenity", "parking" } },
                 SimplePointType.Block => new TagsCollection {
                         { "barrier", "yes" },

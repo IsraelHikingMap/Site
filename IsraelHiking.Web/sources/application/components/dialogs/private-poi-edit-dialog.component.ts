@@ -6,6 +6,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ImageResizeService } from "../../services/image-resize.service";
+import { NavigateHereService } from "../../services/navigate-here.service";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { LinkData, MarkerData, ApplicationState } from "../../models/models";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducres/routes.reducer";
@@ -59,6 +60,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                 private readonly imageResizeService: ImageResizeService,
                 private readonly matDialog: MatDialog,
                 private readonly dialogRef: MatDialogRef<PrivatePoiEditDialogComponent>,
+                private readonly navigateHereService: NavigateHereService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 @Inject(MAT_DIALOG_DATA) data) {
         super(resources);
@@ -183,6 +185,11 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
 
     public removeUrl() {
         this.url = null;
+    }
+
+    public async navigateHere() {
+        console.log(this.title);
+        this.navigateHereService.addNavigationSegment(this.marker.latlng, this.title);
     }
 
     @HostListener("window:keydown", ["$event"])
