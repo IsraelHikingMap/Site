@@ -359,13 +359,12 @@ namespace IsraelHiking.DataAccess
                     .Size(5000)
                     .Query(
                         q => q.GeoShape(g => 
-                            g.Shape(s => s.Envelope(ConvertCoordinate(northEast), ConvertCoordinate(southWest)))
+                            g.Shape(s => s.Envelope(ConvertCoordinate(new Coordinate(southWest.X, northEast.Y)), ConvertCoordinate(new Coordinate(northEast.X, southWest.Y))))
                             .Field(f => f.Geometry)
                             .Relation(GeoShapeRelation.Intersects)
                         )
                     )
             );
-            var json = response.DebugInformation;
             return response.Documents.ToList();
         }
 
@@ -717,7 +716,7 @@ namespace IsraelHiking.DataAccess
                 ).Query(q => q.MatchAll())
             );
             var list = GetAllItemsByScrolling(response);
-            return list.SelectMany(i => i.ImageUrls).ToList();
+            return list.SelectMany(i => i.ImageUrls ?? new List<String>()).ToList();
         }
 
         public Task StoreImage(ImageItem imageItem)
