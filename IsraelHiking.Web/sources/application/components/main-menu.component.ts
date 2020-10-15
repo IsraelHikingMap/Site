@@ -1,39 +1,37 @@
-import { Component, OnDestroy } from "@angular/core";
+﻿import { Component, OnDestroy } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material";
-import { select } from "@angular-redux/store";
+import { NgRedux, select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
-import { Observable, Subscription } from "rxjs";
-import { EmailComposer } from "@ionic-native/email-composer/ngx";
+import { Subscription, Observable } from "rxjs";
 import { Device } from "@ionic-native/device/ngx";
 import { AppVersion } from "@ionic-native/app-version/ngx";
+import { EmailComposer } from "@ionic-native/email-composer/ngx";
 
-import { ResourcesService } from "../services/resources.service";
-import { AuthorizationService } from "../services/authorization.service";
-import { ToastService } from "../services/toast.service";
-import { LoggingService } from "../services/logging.service";
-import { RunningContextService } from "../services/running-context.service";
-import { FileService } from "../services/file.service";
-import { GeoLocationService } from "../services/geo-location.service";
 import { BaseMapComponent } from "./base-map.component";
-import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
-import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
+import { ResourcesService } from "application/services/resources.service";
+import { AuthorizationService } from "application/services/authorization.service";
+import { RunningContextService } from "application/services/running-context.service";
+import { GeoLocationService } from "application/services/geo-location.service";
+import { LoggingService } from "application/services/logging.service";
+import { ToastService } from "application/services/toast.service";
+import { FileService } from "application/services/file.service";
+import { LayersService } from "application/services/layers/layers.service";
+import { SidebarService } from "application/services/sidebar.service";
+import { TempStateService } from "application/services/temp-state.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
+import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
+import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
+import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
 import { UserInfo, ApplicationState } from "../models/models";
 
-interface IRank {
-    name: string;
-    points: number;
-}
-
 @Component({
-    selector: "osm-user",
-    templateUrl: "./osm-user.component.html",
-    styleUrls: ["./osm-user.component.scss"]
+    selector: "main-menu",
+    templateUrl: "./main-menu.component.html",
+    styleUrls: ["./main-menu.component.scss"]
 })
-export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
+export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
 
-    private ranks: IRank[];
     private subscription: Subscription;
 
     public userInfo: UserInfo;
@@ -45,7 +43,7 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
     public agreedToTheTermsOfService = false;
 
     constructor(resources: ResourcesService,
-                private readonly emailComposer: EmailComposer,
+        private readonly emailComposer: EmailComposer,
                 private readonly device: Device,
                 private readonly appVersion: AppVersion,
                 private readonly authorizationService: AuthorizationService,
@@ -54,10 +52,13 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
                 private readonly toastService: ToastService,
                 private readonly fileService: FileService,
                 private readonly geoLocationService: GeoLocationService,
-                private readonly loggingService: LoggingService) {
+                private readonly layersService: LayersService,
+                private readonly sidebarService: SidebarService,
+                private readonly loggingService: LoggingService,
+                private readonly temp: TempStateService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
-        this.initializeRanks();
-        resources.languageChanged.subscribe(() => this.initializeRanks());
+        this.userInfo = null;
         this.subscription = this.userInfo$.subscribe(userInfo => this.userInfo = userInfo);
     }
 
@@ -65,29 +66,16 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
         this.subscription.unsubscribe();
     }
 
-    private initializeRanks() {
-        this.ranks = [
-            {
-                name: this.resources.junior,
-                points: 10
-            },
-            {
-                name: this.resources.partner,
-                points: 100
-            },
-            {
-                name: this.resources.master,
-                points: 1000
-            },
-            {
-                name: this.resources.guru,
-                points: Infinity
-            }
-        ];
+    public isLoggedIn() {
+        return this.userInfo != null;
     }
 
-    public isLoggedIn() {
-        return this.authorizationService.isLoggedIn();
+    public isOffline() {
+        return !this.runningContextService.isOnline;
+    }
+
+    public isApp() {
+        return this.runningContextService.isCordova;
     }
 
     public login() {
@@ -113,46 +101,24 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
         this.authorizationService.logout();
     }
 
-    public openTraces() {
-        this.dialog.open(TracesDialogComponent, { width: "480px" } as MatDialogConfig);
+    public selectSearch() {
+        this.temp.toggle("search");
     }
 
-    public openShares() {
-        this.dialog.open(SharesDialogComponent, { width: "480px" } as MatDialogConfig);
+    public selectDrawing() {
+        this.temp.toggle("drawing");
     }
 
-    public openConfigurationDialog() {
-        this.dialog.open(ConfigurationDialogComponent, { width: "480px" } as MatDialogConfig);
+    public selectLayers() {
+        this.sidebarService.toggle("layers");
     }
 
-    public getRank() {
-        let rankIndex = 0;
-        while (this.authorizationService.getUserInfo().changeSets > this.ranks[rankIndex].points) {
-            rankIndex++;
-        }
-        return this.ranks[rankIndex];
+    public selectSharesAndFiles() {
+        this.dialog.open(FilesSharesDialogComponent, { width: "480px" } as MatDialogConfig);
     }
 
-    public getRankPercentage() {
-        let rank = this.getRank();
-        if (rank === this.ranks[this.ranks.length - 1]) {
-            return 100;
-        }
-        return ((this.authorizationService.getUserInfo().changeSets / rank.points) * 100);
-    }
-
-    public getProgressbarType() {
-        if (this.getRankPercentage() < 5) {
-            return "warn";
-        }
-        if (this.getRankPercentage() < 30) {
-            return "accent";
-        }
-        return "primary";
-    }
-
-    public isApp() {
-        return this.runningContextService.isCordova;
+    public selectLegendAndAbout() {
+        this.sidebarService.toggle("info");
     }
 
     public async reportAnIssue() {
@@ -189,7 +155,40 @@ export class OsmUserComponent extends BaseMapComponent implements OnDestroy {
         }
     }
 
-    public isOnline(): boolean {
-        return this.runningContextService.isOnline;
+    public openLanguage() {
+        this.dialog.open(LanguageDialogComponent);
+    }
+
+    public isShowEditOsmButton() {
+        return !this.runningContextService.isCordova &&
+            !this.runningContextService.isMobile &&
+            !this.runningContextService.isIFrame;
+    }
+
+    public getOsmAddress() {
+        let poiState = this.ngRedux.getState().poiState;
+        let baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
+        if (poiState.isSidebarOpen &&
+            poiState.selectedPointOfInterest != null &&
+            poiState.selectedPointOfInterest.source.toLocaleLowerCase() === "osm") {
+            return this.authorizationService.getEditElementOsmAddress(baseLayerAddress, poiState.selectedPointOfInterest.id);
+        }
+        let currentLocation = this.ngRedux.getState().location;
+        return this.authorizationService.getEditOsmLocationAddress(baseLayerAddress,
+            currentLocation.zoom + 1,
+            currentLocation.latitude,
+            currentLocation.longitude);
+    }
+
+    public openTraces() {
+        this.dialog.open(TracesDialogComponent, { width: "480px" } as MatDialogConfig);
+    }
+
+    public openShares() {
+        this.dialog.open(TracesDialogComponent, { width: "480px" } as MatDialogConfig);
+    }
+
+    public openConfigurationDialog() {
+        this.dialog.open(ConfigurationDialogComponent, { width: "480px" } as MatDialogConfig);
     }
 }

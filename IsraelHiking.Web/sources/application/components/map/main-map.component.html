@@ -15,18 +15,11 @@
             <layers-view></layers-view>
             <routes></routes>
             <traces></traces>
-            <zoom #topLeftControl></zoom>
+            <zoom *ngIf="!isMobile() && !isApp()" #topLeftControl></zoom>
             <location #topLeftControl *ngIf="isMobile() || !isIFrame()"></location>
-            <layers #topLeftControl></layers>
-            <file #topLeftControl></file>
-            <file-save-as #topLeftControl *ngIf="!isIFrame()"></file-save-as>
-            <edit-osm #topLeftControl *ngIf="!isMobile() && !isIFrame()"></edit-osm>
-            <info #topLeftControl></info>
-            <osm-user #topRightControl *ngIf="!isIFrame()"></osm-user>
+            <main-menu #topRightControl></main-menu>
             <search #topRightControl *ngIf="!isIFrame()"></search>
             <drawing #topRightControl *ngIf="!isIFrame()"></drawing>
-            <share #topRightControl></share>
-            <language #topRightControl></language>
             <route-statistics #bottomRightControl></route-statistics>
             <ihm-link *ngIf="!isApp()" #bottomLeftControl></ihm-link>
         </mgl-map>

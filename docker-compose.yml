@@ -15,7 +15,7 @@ services:
     container_name: elasticsearch
     environment:
       - node.name=elasticsearch
-      - cluster.initial_master_nodes=1
+      - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
     volumes:
       - esdata:/usr/share/elasticsearch/data:rw

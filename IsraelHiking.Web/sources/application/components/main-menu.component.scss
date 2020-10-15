@@ -1,4 +1,4 @@
-﻿@import "~scss/_variables.scss";
+@import "~scss/_variables.scss";
 
 .table {
     display: table
@@ -24,4 +24,13 @@
 .margin-sides {
     margin-left: 10px;
     margin-right: 10px;
+}
+
+.fa.mat-icon {
+    width: 24px;
+}
+
+.profile-image { 
+    max-width: 80%; 
+    margin: 10%;
 }

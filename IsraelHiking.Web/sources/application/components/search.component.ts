@@ -3,6 +3,7 @@ import {
     HostListener,
     ViewEncapsulation,
     AfterViewInit,
+    OnDestroy,
     ViewChild,
     ViewChildren,
     ElementRef,
@@ -27,6 +28,7 @@ import { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt } from "../m
 import { RoutesFactory } from "../services/layers/routelayers/routes.factory";
 import { AddRouteAction } from "../reducres/routes.reducer";
 import { SpatialService } from "../services/spatial.service";
+import { TempStateService } from "application/services/temp-state.service";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
 
 export interface ISearchContext {
@@ -82,6 +84,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 private readonly toastService: ToastService,
                 private readonly routesFactory: RoutesFactory,
                 private readonly router: Router,
+                private readonly temp: TempStateService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
@@ -139,6 +142,10 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             return;
         }
         this.directional.overlayLocation = null;
+    }
+
+    public isShow() {
+        return this.temp.isSelected("search");
     }
 
     public ngAfterViewInit() {
