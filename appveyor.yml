@@ -22,7 +22,8 @@ environment:
         secure: oSccSp70X/744XBpfRV4UVJZKxN1jMYHxn3OHFsTSVE=
     
 install:
-- sh: nvm install 12.18
+#- sh: nvm install 12.18
+- ps: Install-Product node 12.18
 for:
   -
     matrix:

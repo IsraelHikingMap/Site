@@ -30,7 +30,7 @@ npm run test -- --code-coverage --watch=false
 
 # Locate Tests results files
 
-$WebResultsFile = Get-ChildItem TESTS-Headless*.xml -recurse | select-object -first 1 | select -expand FullName
+$WebResultsFile = Get-ChildItem TESTS-*.xml -recurse | select-object -first 1 | select -expand FullName
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/Tests/IsraelHiking.API.Tests"
 $APIResultsFile = Get-ChildItem *.trx -recurse | select-object -first 1 | select -expand FullName
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/Tests/IsraelHiking.DataAccess.Tests"
