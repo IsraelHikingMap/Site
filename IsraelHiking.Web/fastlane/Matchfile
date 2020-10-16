@@ -1,7 +1,0 @@
-git_url("https://github.com/IsraelHikingMap/Fastlane")
-storage_mode("git")
-type("development") # The default type, can be: appstore, adhoc, enterprise or development
-shallow_clone(true)
-clone_branch_directly(true)
-username("israelhikingmap@gmail.com")
-app_identifier(["il.org.osm.israelhiking"])

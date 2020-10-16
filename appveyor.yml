@@ -10,18 +10,16 @@ environment:
   matrix:
     - PRODUCT: web
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-    #- PRODUCT: android
-    #  APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    #  ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
-    #  ANDROID_SDK_ROOT: C:\Program Files (x86)\Android\android-sdk
-    #  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-    #- PRODUCT: ios
-    #  APPVEYOR_BUILD_WORKER_IMAGE: macOS
-    #  LC_ALL: en_US.UTF-8
-    #  LANG: en_US.UTF-8
-    #  TMS_USER: israelhikingmap@gmail.com
-    #  TMS_APPLE_APPLICATION_SPECIFIC_PASSWORD:
-    #    secure: oSccSp70X/744XBpfRV4UVJZKxN1jMYHxn3OHFsTSVE=
+    - PRODUCT: android
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
+      ANDROID_SDK_ROOT: C:\Program Files (x86)\Android\android-sdk
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    - PRODUCT: ios
+      APPVEYOR_BUILD_WORKER_IMAGE: macOS
+      TMS_USER: israelhikingmap@gmail.com
+      TMS_APPLE_APPLICATION_SPECIFIC_PASSWORD:
+        secure: oSccSp70X/744XBpfRV4UVJZKxN1jMYHxn3OHFsTSVE=
     
 install:
 - sh: nvm install 12.18

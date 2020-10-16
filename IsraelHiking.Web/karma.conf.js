@@ -24,16 +24,13 @@ module.exports = function (config) {
         reporters: ["progress", "kjhtml", "junit", "coverage-istanbul"],
         port: 9876,
         colors: true,
+        captureTimeout: 300000,
+        browserNoActivityTimeout: 300000,
+        processKillTimeout: 60000,
+        browserSocketTimeout: 300000,
         logLevel: config.LOG_INFO,
         autoWatch: true,
-        browsers: ['ChromeNoSandbox'],
-        captureTimeout: 120000,
-        customLaunchers: {
-            ChromeNoSandbox: {
-                base: 'ChromeHeadless',
-                flags: ['--no-sandbox'],
-            },
-        },
+        browsers: ["Chrome"],
         singleRun: false
     });
 };
