@@ -9,7 +9,7 @@ environment:
     secure: mqbXr4+cn3l9YNyKhOezbA==
   matrix:
     - PRODUCT: web
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     - PRODUCT: android
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
