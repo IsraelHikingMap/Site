@@ -65,14 +65,6 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetSupportedFileTypes_ShouldGetThem()
-        {
-            var results = _controller.GetSupportedFileTypes();
-
-            Assert.IsTrue(results.Count > 0);
-        }
-
-        [TestMethod]
         public void GetRemoteFile_ConvertKmlToGeoJson_ShouldReturnOnePointAndOneLineString()
         {
             var url = "someurl";
