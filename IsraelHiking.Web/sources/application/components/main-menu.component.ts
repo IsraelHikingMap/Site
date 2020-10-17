@@ -19,6 +19,7 @@ import { LayersService } from "application/services/layers/layers.service";
 import { SidebarService } from "application/services/sidebar.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
+import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
@@ -32,12 +33,25 @@ import { SetUIComponentVisibilityAction } from "application/reducres/ui-componen
 })
 export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
 
-    private subscription: Subscription;
+    private subscriptions: Subscription[];
 
     public userInfo: UserInfo;
+    public searchVisible: boolean;
+    public drawingVisible: boolean;
+    public statisticsVisible: boolean;
+    public isShowMore: boolean;
 
     @select((state: ApplicationState) => state.userState.userInfo)
     public userInfo$: Observable<UserInfo>;
+
+    @select((state: ApplicationState) => state.uiComponentsState.searchVisible)
+    public searchVisible$: Observable<boolean>;
+
+    @select((state: ApplicationState) => state.uiComponentsState.drawingVisible)
+    public drawingVisible$: Observable<boolean>;
+
+    @select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
+    public statisticsVisible$: Observable<boolean>;
 
     @LocalStorage()
     public agreedToTheTermsOfService = false;
@@ -57,12 +71,19 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
+        this.isShowMore = false;
         this.userInfo = null;
-        this.subscription = this.userInfo$.subscribe(userInfo => this.userInfo = userInfo);
+        this.subscriptions = [];
+        this.subscriptions.push(this.userInfo$.subscribe(userInfo => this.userInfo = userInfo));
+        this.subscriptions.push(this.searchVisible$.subscribe(v => this.searchVisible = v));
+        this.subscriptions.push(this.drawingVisible$.subscribe(v => this.drawingVisible = v));
+        this.subscriptions.push(this.statisticsVisible$.subscribe(v => this.statisticsVisible = v));
     }
 
     public ngOnDestroy(): void {
-        this.subscription.unsubscribe();
+        for (let subscription of this.subscriptions) {
+            subscription.unsubscribe();
+        }
     }
 
     public isLoggedIn() {
@@ -75,6 +96,11 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
 
     public isApp() {
         return this.runningContextService.isCordova;
+    }
+
+    public toggleShowMore($event: Event) {
+        this.isShowMore = !this.isShowMore;
+        $event.stopPropagation();
     }
 
     public login() {
@@ -119,7 +145,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public selectSharesAndFiles() {
-        this.dialog.open(FilesSharesDialogComponent, { width: "480px" } as MatDialogConfig);
+        this.dialog.open(FilesSharesDialogComponent);
     }
 
     public selectLegendAndAbout() {
@@ -194,7 +220,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public openShares() {
-        this.dialog.open(TracesDialogComponent, { width: "480px" } as MatDialogConfig);
+        this.dialog.open(SharesDialogComponent, { width: "480px" } as MatDialogConfig);
     }
 
     public openConfigurationDialog() {

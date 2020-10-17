@@ -123,7 +123,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 this.isVisible = true;
             }
         });
-        // HM TODO: make sure it is closed on initial load?
     }
 
     private configureInputFormControl(input: FormControl, context: ISearchContext) {
@@ -154,15 +153,10 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public ngAfterViewInit() {
-        if (this.isVisible) {
-            setTimeout(() => {
-                this.searchFromInput.nativeElement.focus();
-                this.search(this.fromContext);
-            }, 100);
-        }
+        this.isVisible = false;
     }
 
-    public toggleVisibility = () => {
+    public toggleVisibility() {
         this.isVisible = !this.isVisible;
         if (this.isVisible) {
             // allow DOM make the input visible
@@ -176,11 +170,11 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         }
     }
 
-    public toggleDirectional = () => {
+    public toggleDirectional() {
         this.directional.isOn = !this.directional.isOn;
     }
 
-    public search = (searchContext: ISearchContext) => {
+    public search(searchContext: ISearchContext) {
         if (searchContext.searchTerm.length <= 2) {
             searchContext.searchResults = [];
             return;
@@ -192,7 +186,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         return results ? results.displayName : "";
     }
 
-    public moveToResults = (searchResults: ISearchResultsPointOfInterest) => {
+    public moveToResults(searchResults: ISearchResultsPointOfInterest) {
         if (this.isVisible) {
             this.toggleVisibility();
         }
@@ -200,18 +194,18 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
 
-    private selectResults = (searchContext: ISearchContext, searchResult: ISearchResultsPointOfInterest) => {
+    private selectResults(searchContext: ISearchContext, searchResult: ISearchResultsPointOfInterest) {
         searchContext.selectedSearchResults = searchResult;
         if (!this.directional.isOn) {
             this.moveToResults(searchResult);
         }
     }
 
-    public setRouting = (routingType: RoutingType) => {
+    public setRouting(routingType: RoutingType) {
         this.routingType = routingType;
     }
 
-    public searchRoute = async () => {
+    public async searchRoute() {
         if (!this.fromContext.selectedSearchResults) {
             this.toastService.warning(this.resources.pleaseSelectFrom);
             return;
@@ -300,7 +294,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         return false;
     }
 
-    private internalSearch = async (searchContext: ISearchContext) => {
+    private async internalSearch(searchContext: ISearchContext) {
         let searchTerm = searchContext.searchTerm;
         this.requestsQueue.push({
             searchTerm

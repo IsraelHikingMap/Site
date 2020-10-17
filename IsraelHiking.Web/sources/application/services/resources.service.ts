@@ -272,6 +272,8 @@ export class ResourcesService {
     public files: string;
     public attribution: string;
     public routePlanning: string;
+    public createShare: string;
+    public uploadToCloudAndShare: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -535,7 +537,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1602794821432");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1602969129010");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -790,6 +792,8 @@ export class ResourcesService {
         this.files = this.gettextCatalog.getString("Files");
         this.attribution = this.gettextCatalog.getString("Attribution");
         this.routePlanning = this.gettextCatalog.getString("Route Planning");
+        this.createShare = this.gettextCatalog.getString("Create Share");
+        this.uploadToCloudAndShare = this.gettextCatalog.getString("Upload to Cloud and Share");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

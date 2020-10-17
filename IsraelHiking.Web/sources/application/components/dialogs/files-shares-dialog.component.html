@@ -10,7 +10,7 @@
     <div mat-dialog-content>
         <div fxLayout="row">
             <button mat-button (click)="openShare()" matDialogClose angulartics2On="click" angularticsCategory="Share" angularticsAction="Share open">
-                <span><i class="fa fa-lg icon-share-alt"></i> {{resources.share}}</span>
+                <span><i class="fa fa-lg icon-share-alt mat-icon"></i> {{resources.uploadToCloudAndShare}}</span>
             </button>
         </div>
         <div fxLayout="row">
@@ -22,7 +22,7 @@
             </label>
         </div>
         <div fxLayout="row">
-            <button mat-button (click)="save()" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save to file">
+            <button mat-button (click)="save()" matDialogClose angulartics2On="click" angularticsCategory="Files" angularticsAction="Save to file">
                 <span><i class="fa icon-floppy-o fa-lg mat-icon"></i> {{resources.save}}</span>
             </button>
         </div>
@@ -33,7 +33,7 @@
         </div>
         <div *ngIf="isSaveAsOpen">
             <div fxLayout="row" *ngFor="let format of formats">
-                <button mat-button (click)="saveAs(format)" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as format {{format.label}}">
+                <button mat-button (click)="saveAs(format)" matDialogClose angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as format {{format.label}}">
                     <span class="text-small" dir="ltr">{{format.label}}</span>
                 </button>
             </div>

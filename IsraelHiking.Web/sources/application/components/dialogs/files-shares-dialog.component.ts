@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { MatDialog, MatDialogConfig } from "@angular/material";
+import { MatDialog, MatDialogRef } from "@angular/material";
 import { NgRedux } from "@angular-redux/store";
 import { every } from "lodash";
 
@@ -24,6 +24,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         private readonly dialog: MatDialog,
+        private readonly matDialogRef: MatDialogRef<FilesSharesDialogComponent>,
         private readonly dataContainerService: DataContainerService,
         private readonly fileService: FileService,
         private readonly toastService: ToastService,
@@ -63,6 +64,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         }
         try {
             await this.fileService.addRoutesFromFile(file);
+            this.matDialogRef.close();
         } catch (ex) {
             this.toastService.error(this.resources.unableToLoadFromFile);
         }
@@ -71,6 +73,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
     public async save() {
         let data = this.dataContainerService.getDataForFileExport();
         if (!this.isDataSaveable(data)) {
+            this.toastService.error(this.resources.unableToSaveToFile);
             return;
         }
         try {
@@ -91,6 +94,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             data = this.dataContainerService.getData();
         }
         if (!this.isDataSaveable(data)) {
+            this.toastService.error(this.resources.unableToSaveToFile);
             return;
         }
         let name = this.getName(data);

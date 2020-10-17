@@ -57,13 +57,6 @@ export class DownloadDialogComponent extends BaseMapComponent {
         return this.sanitizer.bypassSecurityTrustUrl(href);
     }
 
-    public getMobileInstallationInstructions = (app: ApplicationType) => {
-        if (app === "Locus") {
-            return this.resources.installationInstructionsMobileLocus;
-        }
-        return this.resources.installationInstructionsMobileOruxMaps;
-    }
-
     public getDesktopInstallationInstructions = (app: ApplicationType) => {
         if (app === "Locus") {
             return this.resources.installationInstructionsDesktopLocus;

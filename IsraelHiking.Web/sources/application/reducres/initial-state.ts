@@ -134,8 +134,8 @@ export const initialState =
             lastModifiedDate: null
         },
         uiComponentsState: {
-            drawingVisible: true,
-            searchVisible: true,
-            statisticsVisible: true
+            drawingVisible: false,
+            searchVisible: false,
+            statisticsVisible: false
         }
     } as ApplicationState;
