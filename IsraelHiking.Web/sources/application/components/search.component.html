@@ -1,7 +1,7 @@
-﻿<div class="side-control mapboxgl-ctrl" *ngIf="!isVisible && isShow()" [dir]="resources.direction">
+﻿<div class="side-control mapboxgl-ctrl" *ngIf="!isVisible && (searchVisible$ | async)" [dir]="resources.direction">
     <button mat-button (click)="toggleVisibility()" matTooltip="{{resources.search}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search toggle"><i class="fa icon-search fa-lg"></i></button>
 </div>
-<div *ngIf="isVisible && isShow()">
+<div *ngIf="isVisible && (searchVisible$ | async)">
     <div class="side-control mapboxgl-ctrl" fxLayout="row">
         <button mat-button class="pull-right" (click)="toggleDirectional()" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle directional search on"><i class="fa fa-lg" [ngClass]="{'icon-plus': !directional.isOn, 'icon-minus': directional.isOn}"></i></button>
         <div [dir]="resources.direction">

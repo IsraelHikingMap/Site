@@ -132,5 +132,10 @@ export const initialState =
         offlineState: {
             isOfflineAvailable: false,
             lastModifiedDate: null
+        },
+        uiComponentsState: {
+            drawingVisible: true,
+            searchVisible: true,
+            statisticsVisible: true
         }
     } as ApplicationState;

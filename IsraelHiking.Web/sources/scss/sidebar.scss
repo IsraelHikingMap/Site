@@ -12,9 +12,8 @@
     overflow-y: auto;
     color: black;
     direction: ltr;
-    padding-left: $app-left-buttons;
     background: mat-color($app-background, card);
-    z-index: $app-left-z-index - 5;
+    z-index: $app-left-z-index + 5;
 }
 
 

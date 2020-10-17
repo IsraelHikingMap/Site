@@ -15,7 +15,8 @@ import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
 import { remove } from "lodash";
 import { PointLike } from "mapbox-gl";
-import { NgRedux } from "@angular-redux/store";
+import { NgRedux, select } from "@angular-redux/store";
+import { Observable } from "rxjs";
 
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
@@ -28,7 +29,6 @@ import { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt } from "../m
 import { RoutesFactory } from "../services/layers/routelayers/routes.factory";
 import { AddRouteAction } from "../reducres/routes.reducer";
 import { SpatialService } from "../services/spatial.service";
-import { TempStateService } from "application/services/temp-state.service";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
 
 export interface ISearchContext {
@@ -77,6 +77,9 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     @ViewChildren(MatAutocompleteTrigger)
     public matAutocompleteTriggers: QueryList<MatAutocompleteTrigger>;
 
+    @select((state: ApplicationState) => state.uiComponentsState.searchVisible)
+    public searchVisible$: Observable<boolean>;
+
     constructor(resources: ResourcesService,
                 private readonly searchResultsProvider: SearchResultsProvider,
                 private readonly routerService: RouterService,
@@ -84,7 +87,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 private readonly toastService: ToastService,
                 private readonly routesFactory: RoutesFactory,
                 private readonly router: Router,
-                private readonly temp: TempStateService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
@@ -115,6 +117,13 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.searchTo = new FormControl();
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
+
+        this.searchVisible$.subscribe(visible => {
+            if (visible) { 
+                this.isVisible = true;
+            }
+        });
+        // HM TODO: make sure it is closed on initial load?
     }
 
     private configureInputFormControl(input: FormControl, context: ISearchContext) {
@@ -142,10 +151,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             return;
         }
         this.directional.overlayLocation = null;
-    }
-
-    public isShow() {
-        return this.temp.isSelected("search");
     }
 
     public ngAfterViewInit() {

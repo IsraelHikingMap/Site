@@ -17,13 +17,13 @@ import { ToastService } from "application/services/toast.service";
 import { FileService } from "application/services/file.service";
 import { LayersService } from "application/services/layers/layers.service";
 import { SidebarService } from "application/services/sidebar.service";
-import { TempStateService } from "application/services/temp-state.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
 import { UserInfo, ApplicationState } from "../models/models";
+import { SetUIComponentVisibilityAction } from "application/reducres/ui-components.reducer";
 
 @Component({
     selector: "main-menu",
@@ -55,7 +55,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 private readonly layersService: LayersService,
                 private readonly sidebarService: SidebarService,
                 private readonly loggingService: LoggingService,
-                private readonly temp: TempStateService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.userInfo = null;
@@ -102,11 +101,17 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public selectSearch() {
-        this.temp.toggle("search");
+        this.ngRedux.dispatch(new SetUIComponentVisibilityAction({
+            component: "search",
+            isVisible: !this.ngRedux.getState().uiComponentsState.searchVisible
+        }));
     }
 
     public selectDrawing() {
-        this.temp.toggle("drawing");
+        this.ngRedux.dispatch(new SetUIComponentVisibilityAction({
+            component: "drawing",
+            isVisible: !this.ngRedux.getState().uiComponentsState.drawingVisible
+        }));
     }
 
     public selectLayers() {
@@ -131,9 +136,13 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             let logBase64zipped = await this.fileService.zipAndStoreFile(logs);
             logs = await this.geoLocationService.getLog();
             let logBase64zippedGeoLocation = await this.fileService.zipAndStoreFile(logs);
+            let userInfo = this.userInfo || {
+                displayName: "non-registered user",
+                id: "----"
+            } as UserInfo;
             let infoString = ["----------------------------------------------------",
-                `User ID: ${this.userInfo.id}`,
-                `Username: ${this.userInfo.displayName}`,
+                `User ID: ${userInfo.id}`,
+                `Username: ${userInfo.displayName}`,
                 `Manufacture: ${this.device.manufacturer}`,
                 `Model: ${this.device.model}`,
                 `Platform: ${this.device.platform}`,
@@ -142,7 +151,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             ].join("\n");
             this.emailComposer.open({
                 to: ["israelhikingmap@gmail.com"],
-                subject: "Issue reported by " + this.userInfo.displayName,
+                subject: "Issue reported by " + userInfo.displayName,
                 body: this.resources.reportAnIssueInstructions + "\n\n" + infoString,
                 attachments: [
                     "base64:log.zip//" + logBase64zipped,

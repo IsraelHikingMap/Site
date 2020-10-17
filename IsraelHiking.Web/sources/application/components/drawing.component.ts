@@ -7,7 +7,6 @@ import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { ToastService } from "../services/toast.service";
-import { TempStateService } from "application/services/temp-state.service";
 import {
     ChangeEditStateAction,
     ReplaceSegmentsAction,
@@ -30,7 +29,6 @@ export class DrawingComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly toastService: ToastService,
-                private readonly temp: TempStateService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
     }
@@ -55,7 +53,7 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public isShow() {
-        return this.temp.isSelected("drawing");
+        return this.ngRedux.getState().uiComponentsState.drawingVisible;
     }
 
     public clearRoute() {
