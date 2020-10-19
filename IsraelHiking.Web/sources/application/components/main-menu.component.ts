@@ -140,6 +140,13 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         }));
     }
 
+    public selectStatistics() {
+        this.ngRedux.dispatch(new SetUIComponentVisibilityAction({
+            component: "statistics",
+            isVisible: !this.ngRedux.getState().uiComponentsState.statisticsVisible
+        }));
+    }
+
     public selectLayers() {
         this.sidebarService.toggle("layers");
     }

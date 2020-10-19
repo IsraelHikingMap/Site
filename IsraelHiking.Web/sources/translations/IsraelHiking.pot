@@ -2,1847 +2,1855 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: sources/application/services/resources.service.ts:550
+#: sources/application/services/resources.service.ts:552
 msgid "4x4 Routing"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:642
+#: sources/application/services/resources.service.ts:644
 msgid "A few words about what you are sharing."
 msgstr ""
 
-#: sources/application/services/resources.service.ts:716
+#: sources/application/services/resources.service.ts:718
 msgid "A link to a website"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:616
+#: sources/application/services/resources.service.ts:618
 msgid "A name to be displayed in the layers controller"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:542
+#: sources/application/services/resources.service.ts:544
 msgid "About"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:676
+#: sources/application/services/resources.service.ts:678
 msgid "Activity"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:562
+#: sources/application/services/resources.service.ts:564
 msgid "Add Base Layer"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:746
+#: sources/application/services/resources.service.ts:749
 msgid "Add link"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:564
+#: sources/application/services/resources.service.ts:566
 msgid "Add Overlay"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:712
+#: sources/application/services/resources.service.ts:714
 msgid "Add Point"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:770
+#: sources/application/services/resources.service.ts:773
 msgid "Add point to active route"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:622
+#: sources/application/services/resources.service.ts:624
 msgid "Add Point to Route"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:566
+#: sources/application/services/resources.service.ts:568
 msgid "Add Route"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:689
+#: sources/application/services/resources.service.ts:691
 msgid "Add This Route to OSM"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:761
+#: sources/application/services/resources.service.ts:764
 msgid "Add to routes"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:580
+#: sources/application/services/resources.service.ts:582
 msgid "Address"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1025
+#: sources/application/services/resources.service.ts:1029
 msgid "Advanced"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:771
+#: sources/application/services/resources.service.ts:774
 msgid "Advanced Settings"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:961
+#: sources/application/services/resources.service.ts:965
 msgid "Aerialway"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:862
+#: sources/application/services/resources.service.ts:866
 msgid "All files are up-to-date :-)"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:925
+#: sources/application/services/resources.service.ts:929
 msgid "All Vehicles"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:776
+#: sources/application/services/resources.service.ts:779
 msgid "Allows you to automatically upload a recorded route when you finish recording"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1009
+#: sources/application/services/resources.service.ts:1013
 msgid "Amenities"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:988
+#: sources/application/services/resources.service.ts:992
 msgid "Antenna"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:645
+#: sources/application/services/resources.service.ts:647
 msgid "Application"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:978
+#: sources/application/services/resources.service.ts:982
 msgid "Archeological Site"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:849
+#: sources/application/services/resources.service.ts:853
 msgid "Are you sure you want to delete all routes?"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:856
+#: sources/application/services/resources.service.ts:860
 msgid "Are you sure you want to stop the current recording?"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:740
+#: sources/application/services/resources.service.ts:743
 msgid "Are you sure?"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1004
+#: sources/application/services/resources.service.ts:1008
 msgid "Area A"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1005
+#: sources/application/services/resources.service.ts:1009
 msgid "Area B"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1030
+#: sources/application/services/resources.service.ts:1034
 msgid "Areas"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:779
+#: sources/application/services/resources.service.ts:782
 msgid "Asks you to classify missing routes on the map after you upload a recording"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:980
+#: sources/application/services/resources.service.ts:984
 msgid "Attraction"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:793
+#: sources/application/services/resources.service.ts:796
 msgid "Attribution"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:775
+#: sources/application/services/resources.service.ts:778
 msgid "Automatic upload of recording"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:765
+#: sources/application/services/resources.service.ts:768
 msgid "Average speed"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:991
+#: sources/application/services/resources.service.ts:995
 msgid "Barriers"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:839
+#: sources/application/services/resources.service.ts:843
 msgid "Base layer and overlay are overlapping."
 msgstr ""
 
-#: sources/application/services/resources.service.ts:561
+#: sources/application/services/resources.service.ts:563
 msgid "Base Layer Properties"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:747
+#: sources/application/services/resources.service.ts:750
 msgid "Base Layers"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:871
+#: sources/application/services/resources.service.ts:875
 msgid "Basic instructions on using this site"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:773
+#: sources/application/services/resources.service.ts:776
 msgid "Battery optimization"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:722
+#: sources/application/services/resources.service.ts:725
 msgid "Bicycle"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:931
+#: sources/application/services/resources.service.ts:935
 msgid "Bicycle Path"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1027
+#: sources/application/services/resources.service.ts:1031
 msgid "Bicycle Trails"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1000
+#: sources/application/services/resources.service.ts:1004
 msgid "Bike Park"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:549
+#: sources/application/services/resources.service.ts:551
 msgid "Bike Routing"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1010
+#: sources/application/services/resources.service.ts:1014
 msgid "Bike Shop"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:920
+#: sources/application/services/resources.service.ts:924
 msgid "Black Marked Trail"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:994
+#: sources/application/services/resources.service.ts:998
 msgid "Block"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:918
+#: sources/application/services/resources.service.ts:922
 msgid "Blue Marked Trail"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:999
+#: sources/application/services/resources.service.ts:1003
 msgid "Borders"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:954
+#: sources/application/services/resources.service.ts:958
 msgid "Bridge"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:966
+#: sources/application/services/resources.service.ts:970
 msgid "Café"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:751
+#: sources/application/services/resources.service.ts:754
 msgid "Camera"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:708
+#: sources/application/services/resources.service.ts:710
 msgid "Camping"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:964
+#: sources/application/services/resources.service.ts:968
 msgid "Campsite"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:739
+#: sources/application/services/resources.service.ts:742
 msgid "Cancel"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:700
+#: sources/application/services/resources.service.ts:702
 msgid "Categories"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:995
+#: sources/application/services/resources.service.ts:999
 msgid "Cattle Grid"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:979
+#: sources/application/services/resources.service.ts:983
 msgid "Cave"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1040
+#: sources/application/services/resources.service.ts:1044
 msgid "Cemetery"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1026
+#: sources/application/services/resources.service.ts:1030
 msgid "Challenging with Direction"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:891
+#: sources/application/services/resources.service.ts:895
 msgid "Change language"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:887
+#: sources/application/services/resources.service.ts:891
 msgid "Change routing from single segment to all segments"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:670
+#: sources/application/services/resources.service.ts:672
 msgid "Changes"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:983
+#: sources/application/services/resources.service.ts:987
 msgid "Church"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:942
+#: sources/application/services/resources.service.ts:946
 msgid "Cistern"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1031
+#: sources/application/services/resources.service.ts:1035
 msgid "City, Settlement"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:545
+#: sources/application/services/resources.service.ts:547
 msgid "Clear"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:878
+#: sources/application/services/resources.service.ts:882
 msgid "Clear all points"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:755
+#: sources/application/services/resources.service.ts:758
 msgid "Clear Both"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:754
+#: sources/application/services/resources.service.ts:757
 msgid "Clear Points"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:753
+#: sources/application/services/resources.service.ts:756
 msgid "Clear Route"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:850
+#: sources/application/services/resources.service.ts:854
 msgid "Click back again to close the app"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:643
+#: sources/application/services/resources.service.ts:645
 msgid "Click on the frowny-face to login to OSM. We'll make it worth your while!"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:718
+#: sources/application/services/resources.service.ts:720
 msgid "Click to Edit"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:717
+#: sources/application/services/resources.service.ts:719
 msgid "Click to Upload"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:998
+#: sources/application/services/resources.service.ts:1002
 msgid "Cliff"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:611
+#: sources/application/services/resources.service.ts:613
 msgid "Close"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:993
+#: sources/application/services/resources.service.ts:997
 msgid "Closed Gate"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:756
+#: sources/application/services/resources.service.ts:759
 msgid "Collapse"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:585
+#: sources/application/services/resources.service.ts:587
 msgid "Color"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:702
+#: sources/application/services/resources.service.ts:704
 msgid "Coming Soon!"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1042
+#: sources/application/services/resources.service.ts:1046
 msgid "Construction Site"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:790
+#: sources/application/services/resources.service.ts:793
 msgid "Continue"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:970
+#: sources/application/services/resources.service.ts:974
 msgid "Convenience Store"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:621
+#: sources/application/services/resources.service.ts:623
 msgid "Convert to Route"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:588
+#: sources/application/services/resources.service.ts:590
 msgid "Coordinates for {{link}}Wikipedia{{linkend}}"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:681
+#: sources/application/services/resources.service.ts:683
 msgid "Copy Link"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:732
+#: sources/application/services/resources.service.ts:735
 msgid "Create new hike in Nakeb"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:795
+#: sources/application/services/resources.service.ts:798
 msgid "Create Share"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1033
+#: sources/application/services/resources.service.ts:1037
 msgid "Crop"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:764
+#: sources/application/services/resources.service.ts:767
 msgid "Current speed"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:609
+#: sources/application/services/resources.service.ts:611
 msgid "Custom"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:682
+#: sources/application/services/resources.service.ts:684
 msgid "Delete"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:888
+#: sources/application/services/resources.service.ts:892
 msgid "Delete a layer"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:759
+#: sources/application/services/resources.service.ts:762
 msgid "Delete All Routes"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:559
+#: sources/application/services/resources.service.ts:561
 msgid "Delete Layer"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:586
+#: sources/application/services/resources.service.ts:588
 msgid "Delete POI"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:571
+#: sources/application/services/resources.service.ts:573
 msgid "Delete Route"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:741
+#: sources/application/services/resources.service.ts:744
 msgid "Deletion of"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:641
+#: sources/application/services/resources.service.ts:643
 msgid "Description"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:836
+#: sources/application/services/resources.service.ts:840
 msgid "Description in {{translation language}}"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:650
+#: sources/application/services/resources.service.ts:652
 msgid "Details Level"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:928
+#: sources/application/services/resources.service.ts:932
 msgid "Difficult 4WD"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:672
+#: sources/application/services/resources.service.ts:674
 msgid "Difficulty"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:774
+#: sources/application/services/resources.service.ts:777
 msgid "Dims display when there's no user interaction"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:631
+#: sources/application/services/resources.service.ts:633
 msgid "Directional Search"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:688
+#: sources/application/services/resources.service.ts:690
 msgid "Dirt Road"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:599
+#: sources/application/services/resources.service.ts:601
 msgid "Distance"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:603
+#: sources/application/services/resources.service.ts:605
 msgid "Distance (Km)"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:848
+#: sources/application/services/resources.service.ts:852
 msgid "Don't show this message again"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:859
+#: sources/application/services/resources.service.ts:863
 msgid "Download finished successfully!"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:909
+#: sources/application/services/resources.service.ts:913
 msgid "Download Map for Offline Use"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:910
+#: sources/application/services/resources.service.ts:914
 msgid "Download old raster maps for offline use in OruxMaps and Locus"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:866
+#: sources/application/services/resources.service.ts:870
 msgid "Downloading points of interest for offline usage..."
 msgstr ""
 
-#: sources/application/services/resources.service.ts:965
+#: sources/application/services/resources.service.ts:969
 msgid "Drinking Water"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1039
+#: sources/application/services/resources.service.ts:1043
 msgid "Dry Riverbed"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:766
+#: sources/application/services/resources.service.ts:769
 msgid "Duration"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:613
+#: sources/application/services/resources.service.ts:615
 msgid "E"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:673
+#: sources/application/services/resources.service.ts:675
 msgid "Easy"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1023
+#: sources/application/services/resources.service.ts:1027
 msgid "Easy with Direction"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:679
+#: sources/application/services/resources.service.ts:681
 msgid "Edit"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:546
+#: sources/application/services/resources.service.ts:548
 msgid "Edit POI"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:547
+#: sources/application/services/resources.service.ts:549
 msgid "Edit Route"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:683
+#: sources/application/services/resources.service.ts:685
 msgid "Edit Route Details"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:882
+#: sources/application/services/resources.service.ts:886
 msgid "Edit the map in OSM"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:554
+#: sources/application/services/resources.service.ts:556
 msgid "Edit This Map Using OSM"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:724
+#: sources/application/services/resources.service.ts:727
 msgid "Elaborated terms of service of this site, OSM and wikimedia"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:619
+#: sources/application/services/resources.service.ts:621
 msgid "Elevation"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:605
+#: sources/application/services/resources.service.ts:607
 msgid "Embed Size"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:729
+#: sources/application/services/resources.service.ts:732
 msgid "ESRI"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:908
+#: sources/application/services/resources.service.ts:912
 msgid "F.A.Q"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:996
+#: sources/application/services/resources.service.ts:1000
 msgid "Fence"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:804
+#: sources/application/services/resources.service.ts:808
 msgid "File saved successfully"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:822
+#: sources/application/services/resources.service.ts:826
 msgid "File uploaded successfully, It will take some time to add it to OSM database."
 msgstr ""
 
-#: sources/application/services/resources.service.ts:792
+#: sources/application/services/resources.service.ts:795
 msgid "Files"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:778
+#: sources/application/services/resources.service.ts:781
 msgid "Find missing routes after upload"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:686
+#: sources/application/services/resources.service.ts:688
 msgid "Find Unmapped Routes"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:855
+#: sources/application/services/resources.service.ts:859
 msgid "Finished opening file! :-)"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1011
+#: sources/application/services/resources.service.ts:1015
 msgid "First Aid"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:733
+#: sources/application/services/resources.service.ts:736
 msgid "Flowers"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:930
+#: sources/application/services/resources.service.ts:934
 msgid "Foot Path"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:629
+#: sources/application/services/resources.service.ts:631
 msgid "From"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:969
+#: sources/application/services/resources.service.ts:973
 msgid "Fuel Station"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:594
+#: sources/application/services/resources.service.ts:596
 msgid "Gain"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:752
+#: sources/application/services/resources.service.ts:755
 msgid "Gallery"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:992
+#: sources/application/services/resources.service.ts:996
 msgid "Gate"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:574
+#: sources/application/services/resources.service.ts:576
 msgid "Generate A URL To Share With Your Friends!"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:735
+#: sources/application/services/resources.service.ts:738
 msgid "Generate markers for all route points"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:578
+#: sources/application/services/resources.service.ts:580
 msgid "GO!"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1015
+#: sources/application/services/resources.service.ts:1019
 msgid "Golan Trail"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:626
+#: sources/application/services/resources.service.ts:628
 msgid "Google Earth"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:781
+#: sources/application/services/resources.service.ts:784
 msgid "Got lost warnings"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1035
+#: sources/application/services/resources.service.ts:1039
 msgid "Grass"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:919
+#: sources/application/services/resources.service.ts:923
 msgid "Green Marked Trail"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:974
+#: sources/application/services/resources.service.ts:978
 msgid "Guidepost"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:669
+#: sources/application/services/resources.service.ts:671
 msgid "Guru"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1017
+#: sources/application/services/resources.service.ts:1021
 msgid "Haifa Wadis Trail"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:675
+#: sources/application/services/resources.service.ts:677
 msgid "Hard"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:913
+#: sources/application/services/resources.service.ts:917
 msgid "Harel, Zeev and Guy"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:600
+#: sources/application/services/resources.service.ts:602
 msgid "Height"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:602
+#: sources/application/services/resources.service.ts:604
 msgid "Height (m)"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:543
+#: sources/application/services/resources.service.ts:545
 msgid "Help"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:898
+#: sources/application/services/resources.service.ts:902
 msgid "Helpful links:"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:885
+#: sources/application/services/resources.service.ts:889
 msgid "Hide layer"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:548
+#: sources/application/services/resources.service.ts:550
 msgid "Hike Routing"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:721
+#: sources/application/services/resources.service.ts:724
 msgid "Hiking"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:627
+#: sources/application/services/resources.service.ts:629
 msgid "Hiking Trails"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:714
+#: sources/application/services/resources.service.ts:716
 msgid "Historic"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:985
+#: sources/application/services/resources.service.ts:989
 msgid "Holy Place"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:762
+#: sources/application/services/resources.service.ts:765
 msgid "hr"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:610
+#: sources/application/services/resources.service.ts:612
 msgid "HTML"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:727
+#: sources/application/services/resources.service.ts:730
 msgid "I have read and agree to the terms"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:973
+#: sources/application/services/resources.service.ts:977
 msgid "Information Center"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:652
+#: sources/application/services/resources.service.ts:654
 msgid "Installation Instructions"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:662
+#: sources/application/services/resources.service.ts:664
 msgid "Installation instructions for Locus on desktop - surround each new line with <li></li>"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:658
+#: sources/application/services/resources.service.ts:660
 msgid "Installation instructions for Locus on mobile - surround each new line with <li></li>"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:660
+#: sources/application/services/resources.service.ts:662
 msgid "Installation instructions for OruxMaps on desktop - surround each new line with <li></li>"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:656
+#: sources/application/services/resources.service.ts:658
 msgid "Installation instructions for OruxMaps on mobile - surround each new line with <li></li>"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:903
+#: sources/application/services/resources.service.ts:907
 msgid "Interact with other users in our Facebook group"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1006
+#: sources/application/services/resources.service.ts:1010
 msgid "International Border"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:625
+#: sources/application/services/resources.service.ts:627
 msgid "Israel Hiking Map"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:624
+#: sources/application/services/resources.service.ts:626
 msgid "Israel MTB Map"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:922
+#: sources/application/services/resources.service.ts:926
 msgid "Israel Trail"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:703
+#: sources/application/services/resources.service.ts:705
 msgid "Its your time to shine!"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1013
+#: sources/application/services/resources.service.ts:1017
 msgid "Jerusalem Trail"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:666
+#: sources/application/services/resources.service.ts:668
 msgid "Junior"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1018
+#: sources/application/services/resources.service.ts:1022
 msgid "Kinneret Bicycle Trail"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1016
+#: sources/application/services/resources.service.ts:1020
 msgid "Kinneret Trail"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:598
+#: sources/application/services/resources.service.ts:600
 msgid "Km"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:767
+#: sources/application/services/resources.service.ts:770
 msgid "km per hour"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:596
+#: sources/application/services/resources.service.ts:598
 msgid "Km POIs"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:937
+#: sources/application/services/resources.service.ts:941
 msgid "Lake, Reservoir"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:618
+#: sources/application/services/resources.service.ts:620
 msgid "Language"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:608
+#: sources/application/services/resources.service.ts:610
 msgid "Large"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:844
+#: sources/application/services/resources.service.ts:848
 msgid "Last recording did not end well, would you like to continue it?"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:787
+#: sources/application/services/resources.service.ts:790
 msgid "Last updated on"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:649
+#: sources/application/services/resources.service.ts:651
 msgid "Last Viewed"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:614
+#: sources/application/services/resources.service.ts:616
 msgid "Lat"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:560
+#: sources/application/services/resources.service.ts:562
 msgid "Layers"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:883
+#: sources/application/services/resources.service.ts:887
 msgid "Layers controller (left side)"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:893
+#: sources/application/services/resources.service.ts:897
 msgid "Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}."
 msgstr ""
 
-#: sources/application/services/resources.service.ts:906
+#: sources/application/services/resources.service.ts:910
 msgid "Learn Israel-specific mapping rules at the Israel OSM Wiki Project"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:544
+#: sources/application/services/resources.service.ts:546
 msgid "Legend"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:593
+#: sources/application/services/resources.service.ts:595
 msgid "Length"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:782
-msgid "Lets you know when the your planned route is more than 50 meters from your current position"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:926
-msgid "Light 4WD Vehicles"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:706
-msgid "Loading..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:757
-msgid "Local"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1028
-msgid "Local Trail"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:971
-msgid "Lodging"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:743
-msgid "Login"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:744
-msgid "Logout"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:615
-msgid "Lon"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:789
-msgid "Long press on any button will shows its usage"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:595
-msgid "Loss"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:952
-msgid "Low-Speed Street"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:597
-msgid "m"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:646
-msgid "Map"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:665
-msgid "Maps are updated every two days"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:916
-msgid "Marked Trails"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:668
-msgid "Master"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:582
-msgid "Max Zoom"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:607
-msgid "Medium"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:986
-msgid "Memorial"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:694
-msgid "Merge"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1002
-msgid "Military Area"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1003
-msgid "Military Training"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:763
-msgid "min"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:581
-msgid "Min Zoom"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1024
-#: sources/application/services/resources.service.ts:674
-msgid "Moderate"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:699
-msgid "More map addresses can be found here, look for TMS"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:719
-msgid "More..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:984
-msgid "Mosque"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:946
-msgid "Motorway"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:873
-msgid "Move the map to your current location"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:633
-msgid "Move to Route"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:742
-msgid "My profile"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:637
-msgid "My Shares"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:635
-msgid "My Traces"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:612
-msgid "N"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:692
-msgid "Nakeb"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:579
-msgid "Name"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:835
-msgid "Name in {{translation language}}"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1029
-msgid "National Trail"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:707
-msgid "Natural"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1001
-msgid "Nature Reserve, National Park"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:791
-msgid "Navigate Here"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:784
-msgid "Navigate with Waze"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:737
-msgid "No"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1043
-msgid "No legend for this map..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:860
-msgid "No offline files available, please press the download button below."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:638
-msgid "No shares, now is the time to start sharing your work!"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:698
-msgid "No Tags"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:636
-msgid "No traces, you should really upload some to OSM."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:817
-msgid "No unmapped routes! :-)"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:687
-msgid "Non-Marked Trail"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:758
-msgid "North-Up"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:705
-msgid "Not worth it..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:987
-msgid "Observation Tower"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:738
-msgid "OK"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:584
-msgid "Opacity"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:874
-msgid "Open a file"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:555
-msgid "Open a File"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:745
-msgid "Open in a new window"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:886
-msgid "Open layer properties"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:854
-msgid "Opening file, this might take a while, please don't close the app..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1020
-msgid "Orange Regional Trail"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1032
-msgid "Orchard"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:725
-msgid "OSM terms of service"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:709
-msgid "Other"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:563
-msgid "Overlay Properties"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:748
-msgid "Overlays"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:968
-msgid "Parking"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:667
-msgid "Partner"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:929
-msgid "Path"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:976
-msgid "Peak"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:963
-msgid "Picnic Area"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:990
-msgid "Playground"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:802
-msgid "Please add points to route..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:813
-msgid "Please add points to the route..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:845
-msgid "Please make sure the battery optimization is turned off for this application. Go to application setting to do so."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:827
-msgid "Please note that you did not save your work before closing the popup..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:812
-msgid "Please select a route..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:799
-msgid "Please select from..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:800
-msgid "Please select to..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:962
-msgid "Points of Interest"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:989
-msgid "Power Line"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:853
-msgid "Preparing data for issue report"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:760
-msgid "Present share"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:948
-msgid "Primary"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:558
-msgid "Print"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:876
-msgid "Print the map"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:914
-msgid "Privacy Policy and Terms of Service"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:696
-msgid "Private"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:749
-msgid "Private Routes"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:695
-msgid "Public"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:786
-msgid "Purchase maps for offline use"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1019
-msgid "Purple Regional Trail"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1041
-msgid "Quarry"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:957
-msgid "Railway"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:959
-msgid "Railway Station"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:958
-msgid "Railway Tunnel"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:917
-msgid "Red Marked Trail"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:819
-msgid "Redirecting to secure site."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:923
-msgid "Regional Trail"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1012
-msgid "Regional Trails"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:632
-msgid "Regular Search"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:788
-msgid "Remaining distance"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:623
-msgid "Remove Search Results"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:768
-msgid "Report an issue"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:769
-msgid "Report an issue instructions"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:904
-msgid "Request features and report bugs on our Github project page"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:953
-msgid "Residential"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:967
-msgid "Restaurant"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:568
-msgid "Reverse Route"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:889
-msgid "Reverse route's direction"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:936
-msgid "River"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:945
-msgid "Roads"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:628
-msgid "Route"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:820
-msgid "Route added successfully, It will take some time for the map to update."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:801
-msgid "Route is hidden..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:794
-msgid "Route Planning"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:565
-msgid "Route Properties"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:815
-msgid "Route sent successfully."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:552
-msgid "Route Statistics"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:720
-msgid "Routes"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:811
-msgid "Routing failed:"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:977
-msgid "Ruins"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:750
-msgid "Running in the background"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:960
-msgid "Runway and Taxiway"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1037
-msgid "Sand"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:730
-msgid "Satellite Imagery"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:557
-msgid "Save"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:556
-msgid "Save As..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:890
-msgid "Save layer properties"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:567
-msgid "Save Route to File"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:875
-msgid "Save your work to a file"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1036
-msgid "Scrub"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1014
-msgid "Sea to Sea Trail"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:572
-msgid "Search"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:938
-msgid "Seasonal Lake, Reservoir, or Riverbed"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:949
-msgid "Secondary"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:691
-msgid "Select Icon"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:677
-msgid "Send!"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:573
-msgid "Share"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:684
-msgid "Share With Facebook"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:685
-msgid "Share With WhatsApp"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:881
-msgid "Share your work"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:617
-msgid "Share Your Work"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:587
-msgid "Show Coordinates"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:577
-msgid "Show Me Where I am"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:772
-msgid "Shows more options and feature that are normally hidden"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1021
-msgid "Singles"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:620
-msgid "Slope"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:606
-msgid "Small"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:693
-msgid "Split"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:713
-msgid "Spring"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:939
-msgid "Spring, Pond"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:647
-msgid "Start Download"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:932
-msgid "Steps"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:551
-msgid "Straight Lines"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:934
-msgid "Stream"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:927
-msgid "Strong 4WD Vehicles"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:728
-msgid "Submit"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:731
-msgid "Suggest as public track"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:982
-msgid "Synagogue"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:697
-msgid "Tags"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:723
-msgid "Terms of Service"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:950
-msgid "Tertiary"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:912
-msgid "Thank you for your support!"
+#: sources/application/services/resources.service.ts:722
+msgid "Less..."
 msgstr ""
 
 #: sources/application/services/resources.service.ts:785
-msgid "Thanks for purchasing! download instructions here..."
+msgid "Lets you know when the your planned route is more than 50 meters from your current position"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:829
-msgid "The data was updated successfully!"
+#: sources/application/services/resources.service.ts:930
+msgid "Light 4WD Vehicles"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:653
-msgid "The download may take several minutes, and afterwards you can enjoy the map with no need for a network connection."
+#: sources/application/services/resources.service.ts:708
+msgid "Loading..."
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1007
-msgid "The Green Line"
+#: sources/application/services/resources.service.ts:760
+msgid "Local"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:864
-msgid "The offline database has been upgraded..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1008
-msgid "The Purple Line"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:807
-msgid "The route's name was altered since it is in use..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:640
-msgid "The title for your share."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:832
-msgid "There's no description :-(. To add one you'll need to login to OSM first, please use the button in the upper right corner to login."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:863
-msgid "There's so much more you can do with our app"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:872
-msgid "This dialog"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:899
-msgid "This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:838
-msgid "This name is already in use"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:639
-msgid "Title"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:630
-msgid "To"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:884
-msgid "Toggle advanced layers usage"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:877
-msgid "Toggle drawing. Use escape to stop and click to edit a point"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:879
-msgid "Toggle POI drawing"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:570
-msgid "Toggle Routing Type Per Segment"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:569
-msgid "Toggle Visibility"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:972
-msgid "Toilettes"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:924
-msgid "Trails"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:956
-msgid "Transportation"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:981
-msgid "Tree"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:947
-msgid "Trunk"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:955
-msgid "Tunnel"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:604
-msgid "Type to search..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:852
-msgid "Unable to delete the share..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:805
-msgid "Unable to extract geographic information from the file..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:840
-msgid "Unable to find the required point of interest..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:818
-msgid "Unable to find your location..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:808
-msgid "Unable to generate URL, please try again later..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:810
-msgid "Unable to get data for snapping..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:809
-msgid "Unable to get elevation data:"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:798
-msgid "Unable to get search results..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:806
-msgid "Unable to load from URL..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:814
-msgid "Unable to login..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:825
-msgid "Unable to save an empty route, Please try and select a different one from the layers control on your left."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:837
-msgid "Unable to save data, please try again later..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:803
-msgid "Unable to save to file..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:816
-msgid "Unable to send route..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:824
-msgid "Unable to upload the file..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:921
-msgid "Unarked Trail"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:951
-msgid "Unclassified"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:553
-msgid "Undo"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:880
-msgid "Undo last action"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1022
-msgid "Unknown Scale"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:634
-msgid "Unknown User"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:651
-msgid "Up to zoom"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:680
-msgid "Update"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:734
-msgid "Update current share"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:711
-msgid "Update Point"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:690
-msgid "Upload a trace"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:710
-msgid "Upload Point"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:796
-msgid "Upload to Cloud and Share"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:867
-msgid "Use the cloud icon to go offline"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:671
-msgid "User E-Mail"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:678
-msgid "View"
+#: sources/application/services/resources.service.ts:1032
+msgid "Local Trail"
 msgstr ""
 
 #: sources/application/services/resources.service.ts:975
-msgid "Viewpoint"
+msgid "Lodging"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:746
+msgid "Login"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:747
+msgid "Logout"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:617
+msgid "Lon"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:792
+msgid "Long press on any button will shows its usage"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:597
+msgid "Loss"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:956
+msgid "Low-Speed Street"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:599
+msgid "m"
 msgstr ""
 
 #: sources/application/services/resources.service.ts:648
-msgid "Views"
+msgid "Map"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:935
-msgid "Wadi"
+#: sources/application/services/resources.service.ts:667
+msgid "Maps are updated every two days"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:997
-msgid "Wall"
+#: sources/application/services/resources.service.ts:920
+msgid "Marked Trails"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:933
-msgid "Water"
+#: sources/application/services/resources.service.ts:670
+msgid "Master"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:944
-msgid "Water Tower or Water Tank"
+#: sources/application/services/resources.service.ts:584
+msgid "Max Zoom"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:941
-msgid "Water Well"
+#: sources/application/services/resources.service.ts:609
+msgid "Medium"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:943
-msgid "Waterfall"
+#: sources/application/services/resources.service.ts:990
+msgid "Memorial"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:940
-msgid "Waterhole"
+#: sources/application/services/resources.service.ts:696
+msgid "Merge"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:715
-msgid "Website"
+#: sources/application/services/resources.service.ts:1006
+msgid "Military Area"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:1038
-msgid "Wetland"
+#: sources/application/services/resources.service.ts:1007
+msgid "Military Training"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:601
-msgid "Width"
+#: sources/application/services/resources.service.ts:766
+msgid "min"
 msgstr ""
 
 #: sources/application/services/resources.service.ts:583
-msgid "Width (px)"
+msgid "Min Zoom"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:726
-msgid "Wikimedia terms of service"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:592
-msgid "Wikipedia"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:1034
-msgid "Woods"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:704
-msgid "Worth it!"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:842
-msgid "Would you like to update the point without the title?"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:841
-msgid "Would you like to update:"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:851
-msgid "Wrapping things up, please wait a few seconds..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:736
-msgid "Yes"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:868
-msgid "You are about to download large files, you can change to wifi before clicking continue..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:892
-msgid "You can drag-and-drop files or URLs onto the map to load them."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:865
-msgid "You can't edit while offline..."
-msgstr ""
-
-#: sources/application/services/resources.service.ts:857
-msgid "You need to login in order to see your traces, click the frowning face at the top"
-msgstr ""
-
-#: sources/application/services/resources.service.ts:830
-msgid "You need to login to OSM first, please use the button in the upper right corner to login."
+#: sources/application/services/resources.service.ts:1028
+#: sources/application/services/resources.service.ts:676
+msgid "Moderate"
 msgstr ""
 
 #: sources/application/services/resources.service.ts:701
-msgid "You should add your description here! Click the edit button above."
+msgid "More map addresses can be found here, look for TMS"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:721
+msgid "More..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:988
+msgid "Mosque"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:950
+msgid "Motorway"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:877
+msgid "Move the map to your current location"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:635
+msgid "Move to Route"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:745
+msgid "My profile"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:639
+msgid "My Shares"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:637
+msgid "My Traces"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:614
+msgid "N"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:694
+msgid "Nakeb"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:581
+msgid "Name"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:839
+msgid "Name in {{translation language}}"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1033
+msgid "National Trail"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:709
+msgid "Natural"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1005
+msgid "Nature Reserve, National Park"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:794
+msgid "Navigate Here"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:787
+msgid "Navigate with Waze"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:740
+msgid "No"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1047
+msgid "No legend for this map..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:864
+msgid "No offline files available, please press the download button below."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:640
+msgid "No shares, now is the time to start sharing your work!"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:700
+msgid "No Tags"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:638
+msgid "No traces, you should really upload some to OSM."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:821
+msgid "No unmapped routes! :-)"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:689
+msgid "Non-Marked Trail"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:761
+msgid "North-Up"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:707
+msgid "Not worth it..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:991
+msgid "Observation Tower"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:741
+msgid "OK"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:586
+msgid "Opacity"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:878
+msgid "Open a file"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:557
+msgid "Open a File"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:748
+msgid "Open in a new window"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:890
+msgid "Open layer properties"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:858
+msgid "Opening file, this might take a while, please don't close the app..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1024
+msgid "Orange Regional Trail"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1036
+msgid "Orchard"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:728
+msgid "OSM terms of service"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:711
+msgid "Other"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:565
+msgid "Overlay Properties"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:751
+msgid "Overlays"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:972
+msgid "Parking"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:669
+msgid "Partner"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:933
+msgid "Path"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:980
+msgid "Peak"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:967
+msgid "Picnic Area"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:994
+msgid "Playground"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:806
+msgid "Please add points to route..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:817
+msgid "Please add points to the route..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:849
+msgid "Please make sure the battery optimization is turned off for this application. Go to application setting to do so."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:831
+msgid "Please note that you did not save your work before closing the popup..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:816
+msgid "Please select a route..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:803
+msgid "Please select from..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:804
+msgid "Please select to..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:966
+msgid "Points of Interest"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:993
+msgid "Power Line"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:857
+msgid "Preparing data for issue report"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:763
+msgid "Present share"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:952
+msgid "Primary"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:560
+msgid "Print"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:880
+msgid "Print the map"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:918
+msgid "Privacy Policy and Terms of Service"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:698
+msgid "Private"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:752
+msgid "Private Routes"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:697
+msgid "Public"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:789
+msgid "Purchase maps for offline use"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1023
+msgid "Purple Regional Trail"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1045
+msgid "Quarry"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:961
+msgid "Railway"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:963
+msgid "Railway Station"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:962
+msgid "Railway Tunnel"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:921
+msgid "Red Marked Trail"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:823
+msgid "Redirecting to secure site."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:927
+msgid "Regional Trail"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1016
+msgid "Regional Trails"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:634
+msgid "Regular Search"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:791
+msgid "Remaining distance"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:625
+msgid "Remove Search Results"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:771
+msgid "Report an issue"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:772
+msgid "Report an issue instructions"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:908
+msgid "Request features and report bugs on our Github project page"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:957
+msgid "Residential"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:971
+msgid "Restaurant"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:570
+msgid "Reverse Route"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:893
+msgid "Reverse route's direction"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:940
+msgid "River"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:949
+msgid "Roads"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:630
+msgid "Route"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:824
+msgid "Route added successfully, It will take some time for the map to update."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:805
+msgid "Route is hidden..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:797
+msgid "Route Planning"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:567
+msgid "Route Properties"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:819
+msgid "Route sent successfully."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:554
+msgid "Route Statistics"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:723
+msgid "Routes"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:815
+msgid "Routing failed:"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:981
+msgid "Ruins"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:753
+msgid "Running in the background"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:964
+msgid "Runway and Taxiway"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1041
+msgid "Sand"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:733
+msgid "Satellite Imagery"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:559
+msgid "Save"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:558
+msgid "Save As..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:894
+msgid "Save layer properties"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:569
+msgid "Save Route to File"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:879
+msgid "Save your work to a file"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1040
+msgid "Scrub"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1018
+msgid "Sea to Sea Trail"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:574
+msgid "Search"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:942
+msgid "Seasonal Lake, Reservoir, or Riverbed"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:953
+msgid "Secondary"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:693
+msgid "Select Icon"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:679
+msgid "Send!"
 msgstr ""
 
 #: sources/application/services/resources.service.ts:575
+msgid "Share"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:686
+msgid "Share With Facebook"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:687
+msgid "Share With WhatsApp"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:885
+msgid "Share your work"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:619
+msgid "Share Your Work"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:589
+msgid "Show Coordinates"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:579
+msgid "Show Me Where I am"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:775
+msgid "Shows more options and feature that are normally hidden"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1025
+msgid "Singles"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:622
+msgid "Slope"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:608
+msgid "Small"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:695
+msgid "Split"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:715
+msgid "Spring"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:943
+msgid "Spring, Pond"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:649
+msgid "Start Download"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:800
+msgid "Statistics and Height Chart"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:936
+msgid "Steps"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:553
+msgid "Straight Lines"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:938
+msgid "Stream"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:931
+msgid "Strong 4WD Vehicles"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:731
+msgid "Submit"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:734
+msgid "Suggest as public track"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:986
+msgid "Synagogue"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:699
+msgid "Tags"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:726
+msgid "Terms of Service"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:954
+msgid "Tertiary"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:916
+msgid "Thank you for your support!"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:788
+msgid "Thanks for purchasing! download instructions here..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:833
+msgid "The data was updated successfully!"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:655
+msgid "The download may take several minutes, and afterwards you can enjoy the map with no need for a network connection."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1011
+msgid "The Green Line"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:868
+msgid "The offline database has been upgraded..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1012
+msgid "The Purple Line"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:811
+msgid "The route's name was altered since it is in use..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:642
+msgid "The title for your share."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:836
+msgid "There's no description :-(. To add one you'll need to login to OSM first, please use the button in the upper right corner to login."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:867
+msgid "There's so much more you can do with our app"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:876
+msgid "This dialog"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:903
+msgid "This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:842
+msgid "This name is already in use"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:641
+msgid "Title"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:632
+msgid "To"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:888
+msgid "Toggle advanced layers usage"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:881
+msgid "Toggle drawing. Use escape to stop and click to edit a point"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:883
+msgid "Toggle POI drawing"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:572
+msgid "Toggle Routing Type Per Segment"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:571
+msgid "Toggle Visibility"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:976
+msgid "Toilettes"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:928
+msgid "Trails"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:960
+msgid "Transportation"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:985
+msgid "Tree"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:951
+msgid "Trunk"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:959
+msgid "Tunnel"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:606
+msgid "Type to search..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:856
+msgid "Unable to delete the share..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:809
+msgid "Unable to extract geographic information from the file..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:844
+msgid "Unable to find the required point of interest..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:822
+msgid "Unable to find your location..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:812
+msgid "Unable to generate URL, please try again later..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:814
+msgid "Unable to get data for snapping..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:813
+msgid "Unable to get elevation data:"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:802
+msgid "Unable to get search results..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:810
+msgid "Unable to load from URL..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:818
+msgid "Unable to login..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:829
+msgid "Unable to save an empty route, Please try and select a different one from the layers control on your left."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:841
+msgid "Unable to save data, please try again later..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:807
+msgid "Unable to save to file..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:820
+msgid "Unable to send route..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:828
+msgid "Unable to upload the file..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:925
+msgid "Unarked Trail"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:955
+msgid "Unclassified"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:555
+msgid "Undo"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:884
+msgid "Undo last action"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1026
+msgid "Unknown Scale"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:636
+msgid "Unknown User"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:653
+msgid "Up to zoom"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:682
+msgid "Update"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:737
+msgid "Update current share"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:713
+msgid "Update Point"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:692
+msgid "Upload a trace"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:712
+msgid "Upload Point"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:799
+msgid "Upload to Cloud and Share"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:871
+msgid "Use the cloud icon to go offline"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:673
+msgid "User E-Mail"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:680
+msgid "View"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:979
+msgid "Viewpoint"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:650
+msgid "Views"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:939
+msgid "Wadi"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1001
+msgid "Wall"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:937
+msgid "Water"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:948
+msgid "Water Tower or Water Tank"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:945
+msgid "Water Well"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:947
+msgid "Waterfall"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:944
+msgid "Waterhole"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:717
+msgid "Website"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1042
+msgid "Wetland"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:603
+msgid "Width"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:585
+msgid "Width (px)"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:729
+msgid "Wikimedia terms of service"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:594
+msgid "Wikipedia"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:1038
+msgid "Woods"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:706
+msgid "Worth it!"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:846
+msgid "Would you like to update the point without the title?"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:845
+msgid "Would you like to update:"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:855
+msgid "Wrapping things up, please wait a few seconds..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:739
+msgid "Yes"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:872
+msgid "You are about to download large files, you can change to wifi before clicking continue..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:896
+msgid "You can drag-and-drop files or URLs onto the map to load them."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:869
+msgid "You can't edit while offline..."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:861
+msgid "You need to login in order to see your traces, click the frowning face at the top"
+msgstr ""
+
+#: sources/application/services/resources.service.ts:834
+msgid "You need to login to OSM first, please use the button in the upper right corner to login."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:703
+msgid "You should add your description here! Click the edit button above."
+msgstr ""
+
+#: sources/application/services/resources.service.ts:577
 msgid "Zoom In"
 msgstr ""
 
-#: sources/application/services/resources.service.ts:576
+#: sources/application/services/resources.service.ts:578
 msgid "Zoom Out"
 msgstr ""

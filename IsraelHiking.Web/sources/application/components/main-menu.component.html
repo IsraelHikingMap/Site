@@ -22,13 +22,17 @@
         <mat-menu #appMenu="matMenu" xPosition="before">
             <ng-template matMenuContent>
                 <div [dir]="resources.direction">
-                    <button mat-menu-item (click)="selectSearch()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show search button">
+                    <button mat-menu-item (click)="selectSearch()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show search buttons">
                         <span><i class="fa fa-lg icon-search mat-icon"></i> {{resources.search}}</span>
-                        <span style="float: left"><i class="fa fa-lg mat-icon" [ngClass]="{ 'icon-eye' : searchVisible, 'icon-eye-slash': !searchVisible}"></i></span>
+                        <span class="eye-end"><i class="fa fa-lg mat-icon" [ngClass]="{ 'icon-eye' : searchVisible, 'icon-eye-slash': !searchVisible}"></i></span>
                     </button>
                     <button mat-menu-item (click)="selectDrawing()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show drawing buttons">
                         <span><i class="fa fa-lg icon-pencil mat-icon"></i> {{resources.routePlanning}}</span>
-                        <span style="float: left"><i class="fa fa-lg icon-eye mat-icon" [ngClass]="{ 'icon-eye' : drawingVisible, 'icon-eye-slash': !drawingVisible}"></i></span>
+                        <span class="eye-end"><i class="fa fa-lg icon-eye mat-icon" [ngClass]="{ 'icon-eye' : drawingVisible, 'icon-eye-slash': !drawingVisible}"></i></span>
+                    </button>
+                    <button mat-menu-item (click)="selectStatistics()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show statistics buttons">
+                        <span><i class="fa fa-lg icon-area-chart mat-icon"></i> {{resources.statisticsAndHeightChart}}</span>
+                        <span class="eye-end"><i class="fa fa-lg icon-eye mat-icon" [ngClass]="{ 'icon-eye' : statisticsVisible, 'icon-eye-slash': !statisticsVisible}"></i></span>
                     </button>
                     <button mat-menu-item (click)="selectLayers()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show layers">
                         <span><i class="fa fa-lg icon-layers mat-icon"></i> {{resources.layers}}</span>
@@ -58,6 +62,9 @@
                         <a *ngIf="isShowEditOsmButton" mat-menu-item [href]="getOsmAddress()" [target]="'_blank'" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Edit in OSM">
                             <span><i class="fa icon-map-editing fa-lg mat-icon"></i> {{resources.editThisMapUsingOsm}}</span>
                         </a>
+                        <button mat-menu-item (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show less">
+                            <span>{{resources.less}}</span>
+                        </button>
                     </div>
                 </div>
             </ng-template>

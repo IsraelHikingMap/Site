@@ -30,3 +30,13 @@
     max-width: 80%; 
     margin: 10%;
 }
+
+.eye-end {
+    float: left;
+    margin-right: 10px;
+}
+
+[dir=ltr] .eye-end {
+    float: right;
+    margin-left: 10px;
+}

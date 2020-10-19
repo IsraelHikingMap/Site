@@ -2,8 +2,6 @@ import {
     Component,
     HostListener,
     ViewEncapsulation,
-    AfterViewInit,
-    OnDestroy,
     ViewChild,
     ViewChildren,
     ElementRef,
@@ -17,6 +15,7 @@ import { remove } from "lodash";
 import { PointLike } from "mapbox-gl";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
+import { skip } from "rxjs/operators";
 
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
@@ -56,9 +55,9 @@ interface IDirectionalContext {
     styleUrls: ["./search.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class SearchComponent extends BaseMapComponent implements AfterViewInit {
+export class SearchComponent extends BaseMapComponent {
 
-    public isVisible: boolean;
+    public isOpen: boolean;
     public fromContext: ISearchContext;
     public toContext: ISearchContext;
     public routingType: RoutingType;
@@ -99,7 +98,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             showResults: false,
             routeSegments: []
         };
-        this.isVisible = false;
+        this.isOpen = false;
         this.routingType = "Hike";
         this.selectFirstSearchResults = false;
         this.fromContext = {
@@ -112,15 +111,17 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             searchResults: [],
             selectedSearchResults: null
         } as ISearchContext;
-        this.isVisible = false;
         this.searchFrom = new FormControl();
         this.searchTo = new FormControl();
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
 
-        this.searchVisible$.subscribe(visible => {
-            if (visible) { 
-                this.isVisible = true;
+        this.searchVisible$.pipe(skip(1)).subscribe(visible => {
+            // ignore the first value since it always emit one and we want to get the changes only...
+            if (visible && this.isOpen) {
+                this.focusOnSearchInput();
+            } else if (visible) {
+                this.toggleOpen();
             }
         });
     }
@@ -152,22 +153,22 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.directional.overlayLocation = null;
     }
 
-    public ngAfterViewInit() {
-        this.isVisible = false;
-    }
-
-    public toggleVisibility() {
-        this.isVisible = !this.isVisible;
-        if (this.isVisible) {
-            // allow DOM make the input visible
-            setTimeout(() => {
-                this.searchFromInput.nativeElement.focus();
-                this.searchFromInput.nativeElement.select();
-            },
-                100);
+    public toggleOpen() {
+        this.isOpen = !this.isOpen;
+        if (this.isOpen) {
+            this.focusOnSearchInput();
         } else {
             this.matAutocompleteTriggers.forEach(trigger => trigger.closePanel());
         }
+    }
+
+    private focusOnSearchInput() {
+        // ChangeDetectionRef doesn't work well for some reason...
+        setTimeout(() => {
+            this.searchFromInput.nativeElement.focus();
+            this.searchFromInput.nativeElement.select();
+        }, 100);
+        
     }
 
     public toggleDirectional() {
@@ -187,8 +188,8 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public moveToResults(searchResults: ISearchResultsPointOfInterest) {
-        if (this.isVisible) {
-            this.toggleVisibility();
+        if (this.isOpen) {
+            this.toggleOpen();
         }
         this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
@@ -263,7 +264,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         }
         switch ($event.key.toLowerCase()) {
             case "f":
-                this.toggleVisibility();
+                this.toggleOpen();
                 break;
             default:
                 return true;
