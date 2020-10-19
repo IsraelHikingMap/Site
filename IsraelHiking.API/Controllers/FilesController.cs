@@ -45,56 +45,6 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Returns all the supported formats
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("formats")]
-        [Obsolete("This will no longer be used in later versions")]
-        // GET api/files/fromats
-        public List<FileFormatViewModel> GetSupportedFileTypes()
-        {
-            return new List<FileFormatViewModel> {
-                new FileFormatViewModel
-                {
-                    Label = "GPX version 1.1",
-                    Extension = FlowFormats.GPX,
-                    OutputFormat = FlowFormats.GPX
-                },
-                new FileFormatViewModel
-                {
-                    Label = "Single track GPX",
-                    Extension = FlowFormats.GPX,
-                    OutputFormat = FlowFormats.GPX_SINGLE_TRACK
-                },
-                new FileFormatViewModel
-                {
-                    Label = "Single route GPX",
-                    Extension = FlowFormats.GPX,
-                    OutputFormat = FlowFormats.GPX_ROUTE
-                },
-                new FileFormatViewModel
-                {
-                    Label = "Keyhole markup language",
-                    Extension = FlowFormats.KML,
-                    OutputFormat = FlowFormats.KML
-                },
-                new FileFormatViewModel
-                {
-                    Label = "Comma-separated values",
-                    Extension = FlowFormats.CSV_BABEL_FORMAT,
-                    OutputFormat = FlowFormats.CSV_BABEL_FORMAT
-                },
-                 new FileFormatViewModel
-                {
-                    Label = "Naviguide binary route file",
-                    Extension = FlowFormats.TWL,
-                    OutputFormat = FlowFormats.TWL
-                }
-            };
-        }
-
-        /// <summary>
         /// Gets a file from an external Url and converts it to <see cref="DataContainerPoco"/>
         /// </summary>
         /// <param name="url">The url to fetch the file from</param>
