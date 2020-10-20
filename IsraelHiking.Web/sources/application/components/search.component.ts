@@ -2,7 +2,6 @@ import {
     Component,
     HostListener,
     ViewEncapsulation,
-    AfterViewInit,
     ViewChild,
     ViewChildren,
     ElementRef,
@@ -14,7 +13,9 @@ import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
 import { remove } from "lodash";
 import { PointLike } from "mapbox-gl";
-import { NgRedux } from "@angular-redux/store";
+import { NgRedux, select } from "@angular-redux/store";
+import { Observable } from "rxjs";
+import { skip } from "rxjs/operators";
 
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
@@ -54,9 +55,9 @@ interface IDirectionalContext {
     styleUrls: ["./search.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class SearchComponent extends BaseMapComponent implements AfterViewInit {
+export class SearchComponent extends BaseMapComponent {
 
-    public isVisible: boolean;
+    public isOpen: boolean;
     public fromContext: ISearchContext;
     public toContext: ISearchContext;
     public routingType: RoutingType;
@@ -74,6 +75,9 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
     @ViewChildren(MatAutocompleteTrigger)
     public matAutocompleteTriggers: QueryList<MatAutocompleteTrigger>;
+
+    @select((state: ApplicationState) => state.uiComponentsState.searchVisible)
+    public searchVisible$: Observable<boolean>;
 
     constructor(resources: ResourcesService,
                 private readonly searchResultsProvider: SearchResultsProvider,
@@ -94,7 +98,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             showResults: false,
             routeSegments: []
         };
-        this.isVisible = false;
+        this.isOpen = false;
         this.routingType = "Hike";
         this.selectFirstSearchResults = false;
         this.fromContext = {
@@ -107,11 +111,19 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             searchResults: [],
             selectedSearchResults: null
         } as ISearchContext;
-        this.isVisible = false;
         this.searchFrom = new FormControl();
         this.searchTo = new FormControl();
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
+
+        this.searchVisible$.pipe(skip(1)).subscribe(visible => {
+            // ignore the first value since it always emit one and we want to get the changes only...
+            if (visible && this.isOpen) {
+                this.focusOnSearchInput();
+            } else if (visible) {
+                this.toggleOpen();
+            }
+        });
     }
 
     private configureInputFormControl(input: FormControl, context: ISearchContext) {
@@ -141,34 +153,29 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.directional.overlayLocation = null;
     }
 
-    public ngAfterViewInit() {
-        if (this.isVisible) {
-            setTimeout(() => {
-                this.searchFromInput.nativeElement.focus();
-                this.search(this.fromContext);
-            }, 100);
-        }
-    }
-
-    public toggleVisibility = () => {
-        this.isVisible = !this.isVisible;
-        if (this.isVisible) {
-            // allow DOM make the input visible
-            setTimeout(() => {
-                this.searchFromInput.nativeElement.focus();
-                this.searchFromInput.nativeElement.select();
-            },
-                100);
+    public toggleOpen() {
+        this.isOpen = !this.isOpen;
+        if (this.isOpen) {
+            this.focusOnSearchInput();
         } else {
             this.matAutocompleteTriggers.forEach(trigger => trigger.closePanel());
         }
     }
 
-    public toggleDirectional = () => {
+    private focusOnSearchInput() {
+        // ChangeDetectionRef doesn't work well for some reason...
+        setTimeout(() => {
+            this.searchFromInput.nativeElement.focus();
+            this.searchFromInput.nativeElement.select();
+        }, 100);
+        
+    }
+
+    public toggleDirectional() {
         this.directional.isOn = !this.directional.isOn;
     }
 
-    public search = (searchContext: ISearchContext) => {
+    public search(searchContext: ISearchContext) {
         if (searchContext.searchTerm.length <= 2) {
             searchContext.searchResults = [];
             return;
@@ -180,26 +187,26 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         return results ? results.displayName : "";
     }
 
-    public moveToResults = (searchResults: ISearchResultsPointOfInterest) => {
-        if (this.isVisible) {
-            this.toggleVisibility();
+    public moveToResults(searchResults: ISearchResultsPointOfInterest) {
+        if (this.isOpen) {
+            this.toggleOpen();
         }
         this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
 
-    private selectResults = (searchContext: ISearchContext, searchResult: ISearchResultsPointOfInterest) => {
+    private selectResults(searchContext: ISearchContext, searchResult: ISearchResultsPointOfInterest) {
         searchContext.selectedSearchResults = searchResult;
         if (!this.directional.isOn) {
             this.moveToResults(searchResult);
         }
     }
 
-    public setRouting = (routingType: RoutingType) => {
+    public setRouting(routingType: RoutingType) {
         this.routingType = routingType;
     }
 
-    public searchRoute = async () => {
+    public async searchRoute() {
         if (!this.fromContext.selectedSearchResults) {
             this.toastService.warning(this.resources.pleaseSelectFrom);
             return;
@@ -257,7 +264,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         }
         switch ($event.key.toLowerCase()) {
             case "f":
-                this.toggleVisibility();
+                this.toggleOpen();
                 break;
             default:
                 return true;
@@ -288,7 +295,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         return false;
     }
 
-    private internalSearch = async (searchContext: ISearchContext) => {
+    private async internalSearch(searchContext: ISearchContext) {
         let searchTerm = searchContext.searchTerm;
         this.requestsQueue.push({
             searchTerm

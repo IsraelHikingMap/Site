@@ -84,7 +84,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public isSlopeOn: boolean;
     public isExpanded: boolean;
     public isTable: boolean;
-    public isVisible: boolean;
+    public isOpen: boolean;
     public isFollowing: boolean;
     public kmMarkersSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public chartHoverSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
@@ -101,6 +101,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     @select((state: ApplicationState) => state.location.zoom)
     private zoom$: Observable<number>;
+
+    @select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
+    public statisticsVisible$: Observable<boolean>;
 
     private statistics: IRouteStatistics;
     private chartElements: IChartElements;
@@ -124,7 +127,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.isKmMarkersOn = false;
         this.isSlopeOn = false;
         this.isExpanded = false;
-        this.isVisible = false;
+        this.isOpen = false;
         this.isTable = false;
         this.isFollowing = false;
         this.statistics = null;
@@ -284,8 +287,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public toggle(): void {
-        this.isVisible = !this.isVisible;
-        if (this.isVisible) {
+        this.isOpen = !this.isOpen;
+        if (this.isOpen) {
             this.redrawChart();
         } else {
             this.clearSubRouteSelection();
@@ -306,7 +309,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (!this.getRouteForChart()) {
             return;
         }
-        if (this.isVisible) {
+        if (this.isOpen) {
             this.clearSubRouteSelection();
             this.setRouteColorToChart();
             this.setDataToChart(this.getDataFromStatistics());
@@ -317,7 +320,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     public redrawChart = () => {
         this.changeDetectorRef.detectChanges();
-        if (!this.isVisible) {
+        if (!this.isOpen) {
             return;
         }
         if (!this.lineChartContainer || !this.lineChartContainer.nativeElement) {
@@ -664,7 +667,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private setDataToChart(data: [number, number][]) {
-        if (!this.isVisible) {
+        if (!this.isOpen) {
             return;
         }
         let d3 = this.d3Service.getD3();
@@ -827,7 +830,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private onSelectedRouteHover = (latlng: LatLngAlt) => {
-        if (!this.isVisible) {
+        if (!this.isOpen) {
             return;
         }
         let point = this.getPointFromLatLng(latlng);

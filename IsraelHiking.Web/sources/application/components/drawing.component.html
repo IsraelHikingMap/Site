@@ -1,4 +1,4 @@
-﻿<div class="side-control mapboxgl-ctrl">
+﻿<div class="side-control mapboxgl-ctrl" *ngIf="isShow()">
     <button mat-button (click)="toggleEditPoi()" [ngClass]="{active : isPoiEditActive()}" [ngStyle]="{'color': getRouteColor()}" matTooltip="{{resources.editPoi}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw POI toggle"><i class="fa icon-map-marker fa-lg"></i></button>
     <button mat-button (click)="toggleEditRoute()" [disabled]="isRouteEditDisabled()" [ngClass]="{active : isRouteEditActive() }" [style.color]="isRouteEditDisabled() ? '' : getRouteColor()" matTooltip="{{resources.editRoute}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw route toggle"><i class="fa icon-pencil fa-lg"></i></button>
     <button mat-button *ngIf="isRouteEditActive()" (click)="setRouting('Hike')" [ngClass]="{active : getRoutingType() == 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Routing Hike"><i class="fa icon-hike fa-lg"></i></button>
@@ -12,6 +12,6 @@
         <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="clearBoth()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Clear both"><i class="fa icon-close"></i> {{resources.clearBoth}}</button>
         <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="deleteAllRoutes()" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Delete all routes"><i class="fa icon-trash"></i> {{resources.deleteAllRoutes}}</button>
     </mat-menu>
-    <button mat-button *ngIf="isEditActive()" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.clear}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw clear"><i class="fa icon-close fa-lg"></i></button>
+    <button mat-button *ngIf="isEditActive()" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.clear}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Draw clear"><i class="fa icon-trash fa-lg"></i></button>
     <button mat-button *ngIf="!isEditActive()" (click)="deleteAllRoutes()" matTooltip="{{resources.deleteAllRoutes}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Delete all routes"><i class="fa icon-trash fa-lg"></i></button>
 </div>
