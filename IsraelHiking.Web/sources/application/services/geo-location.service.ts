@@ -116,7 +116,7 @@ export class GeoLocationService {
         this.wasInitialized = true;
         this.backgroundGeolocation.configure({
             locationProvider: BackgroundGeolocationLocationProvider.RAW_PROVIDER,
-            desiredAccuracy: 0, // BackgroundGeolocationAccuracy.HIGH,
+            desiredAccuracy: 10, // BackgroundGeolocationAccuracy.MEDIUM,
             stationaryRadius: 10,
             distanceFilter: 5,
             notificationTitle: this.resources.israelHikingMap,
