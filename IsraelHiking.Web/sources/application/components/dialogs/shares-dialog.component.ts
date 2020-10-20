@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewEncapsulation, OnDestroy } from "@angular/core";
+import { MatDialog } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { Router } from "@angular/router";
 import { select, NgRedux } from "@angular-redux/store";
@@ -7,6 +8,7 @@ import { take, orderBy } from "lodash";
 import { Observable, Subscription } from "rxjs";
 
 import { BaseMapComponent } from "../base-map.component";
+import { ShareDialogComponent } from "./share-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { RouteStrings } from "../../services/hash.service";
@@ -39,6 +41,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     private subscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
+                private readonly dialog: MatDialog,
                 private readonly router: Router,
                 private readonly toastService: ToastService,
                 private readonly shareUrlsService: ShareUrlsService,
@@ -71,6 +74,10 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         for (let subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
+    }
+
+    public createShare() {
+        this.dialog.open(ShareDialogComponent);
     }
 
     private updateFilteredLists(searchTerm: string) {

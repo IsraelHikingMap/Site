@@ -44,10 +44,7 @@
         </div>
         <h4>{{resources.installationInstructions}}</h4>
         <p>{{resources.offlineMapBenefits}}</p>
-        <div class="visible-sm visible-xs">
-            <ul [innerHtml]="getMobileInstallationInstructions(app)"></ul>
-        </div>
-        <div class="hidden-sm hidden-xs">
+        <div>
             <ul [innerHtml]="getDesktopInstallationInstructions(app)"></ul>
         </div>
     </div>

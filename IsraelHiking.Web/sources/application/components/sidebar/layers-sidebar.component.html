@@ -1,11 +1,4 @@
 ﻿<div [dir]="resources.direction">
-    <div fxLayout="row" fxLayoutAlign="none none">
-        <div fxFlex>
-            <div fxLayout="column" fxFill>
-                <span fxFill fxLayoutAlign="end start" class="cursor-pointer" (click)="closeSidebar()"><i class="fa icon-close"></i></span>
-            </div>
-        </div>
-    </div>
     <mat-accordion multi="true">
         <mat-expansion-panel [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')" (closed)="collapse('Base Layers')">
             <mat-expansion-panel-header>

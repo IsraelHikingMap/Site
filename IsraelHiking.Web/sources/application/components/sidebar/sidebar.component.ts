@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { transition, trigger, style, animate } from "@angular/animations";
 
-import { SidebarService } from "../../services/sidebar.service";
+import { SidebarService, SidebarView } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
 
@@ -39,11 +39,24 @@ export class SidebarComponent extends BaseMapComponent {
         super(resources);
     }
 
-    public isSidebarVisible() {
+    public isSidebarVisible(): boolean {
         return this.sidebarService.isVisible;
     }
 
-    public getViewName() {
+    public getViewName(): SidebarView {
         return this.sidebarService.viewName;
+    }
+
+    public getTitle(): string {
+        switch (this.sidebarService.viewName) {
+            case "layers":
+                return this.resources.layers;
+            case "info":
+                return this.resources.about + " - " + this.resources.legend;
+        }
+    }
+
+    public close() {
+        this.sidebarService.hide();
     }
 }

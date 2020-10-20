@@ -52,6 +52,10 @@ export class DrawingComponent extends BaseMapComponent {
         }
     }
 
+    public isShow() {
+        return this.ngRedux.getState().uiComponentsState.drawingVisible;
+    }
+
     public clearRoute() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.ngRedux.dispatch(new ReplaceSegmentsAction({
@@ -132,7 +136,7 @@ export class DrawingComponent extends BaseMapComponent {
 
     public undo = () => {
         this.ngRedux.dispatch(ActionCreators.undo());
-        // Undo can change the route editing state but doesn't affect the elected route...
+        // Undo can change the route editing state but doesn't affect the selected route...
         // HM TODO: should selected route be part of the routes undo object?
         this.selectedRouteService.syncSelectedRouteWithEditingRoute();
     }

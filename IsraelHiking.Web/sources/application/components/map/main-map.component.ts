@@ -129,8 +129,7 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         this.bottomRightControls.forEach(c => {
             this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-right");
         });
-        this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" }), "bottom-right");
-        this.mapComponent.mapInstance.addControl(new AttributionControl({ compact: true }), "bottom-right");
+        this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" }), "bottom-left");
     }
 
     public isMobile() {
