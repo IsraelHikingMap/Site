@@ -9,7 +9,7 @@ environment:
     secure: mqbXr4+cn3l9YNyKhOezbA==
   matrix:
     - PRODUCT: web
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
     - PRODUCT: android
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
@@ -21,14 +21,13 @@ environment:
       TMS_APPLE_APPLICATION_SPECIFIC_PASSWORD:
         secure: oSccSp70X/744XBpfRV4UVJZKxN1jMYHxn3OHFsTSVE=
     
-install:
-#- sh: nvm install 12.18
-- ps: Install-Product node 12.18
 for:
   -
     matrix:
       only: 
         - PRODUCT: web
+    install:
+      - sh: nvm install 12.18
     before_build:
       - ps: dotnet restore
     dotnet_csproj:
@@ -56,6 +55,8 @@ for:
     matrix:
       only:
         - PRODUCT: android
+    install:
+      - ps: Install-Product node 12.18    
     build_script:
     - ps: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
@@ -69,6 +70,8 @@ for:
       only:
         - PRODUCT: ios
       fast_finish: true
+    install:
+      - sh: nvm install 12.18
     build_script: 
     - ps: >-
         $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishIOS.ps1"
