@@ -270,6 +270,7 @@ export class ResourcesService {
     public longPressHint: string;
     public continue: string;
     public navigateHere: string;
+    public updateLocation: string;
     public files: string;
     public attribution: string;
     public routePlanning: string;
@@ -792,6 +793,7 @@ export class ResourcesService {
         this.longPressHint = this.gettextCatalog.getString("Long press on any button will shows its usage");
         this.continue = this.gettextCatalog.getString("Continue");
         this.navigateHere = this.gettextCatalog.getString("Navigate Here");
+        this.updateLocation = this.gettextCatalog.getString("Update the point's location");
         this.files = this.gettextCatalog.getString("Files");
         this.attribution = this.gettextCatalog.getString("Attribution");
         this.routePlanning = this.gettextCatalog.getString("Route Planning");

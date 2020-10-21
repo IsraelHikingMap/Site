@@ -397,7 +397,7 @@ export class PoiService {
     public async getPoint(id: string, source: string, language?: string): Promise<PointOfInterestExtended> {
         let itemInCache = this.poisCache.find(p => p.id === id && p.source === source);
         if (itemInCache) {
-            return { ...itemInCache };
+            return JSON.parse(JSON.stringify(itemInCache));
         }
         if (!this.runningContextService.isOnline) {
             let feature = await this.databaseService.getPoiById(`${source}_${id}`);
@@ -411,7 +411,7 @@ export class PoiService {
             .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
         let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params }).toPromise() as PointOfInterestExtended;
         this.poisCache.splice(0, 0, poi);
-        return { ...poi };
+        return JSON.parse(JSON.stringify(poi));
     }
 
     public async uploadPoint(poiExtended: PointOfInterestExtended): Promise<PointOfInterestExtended> {

@@ -252,7 +252,9 @@ namespace IsraelHiking.API.Services.Poi
                 AddTagsByIcon(completeOsmGeo.Tags, pointOfInterest.Icon);
             }
             RemoveEmptyTags(completeOsmGeo.Tags);
-            if (Enumerable.SequenceEqual(oldTags, completeOsmGeo.Tags.ToArray()))
+            var locationWasUpdated = UpdateLocationIfNeeded(completeOsmGeo, pointOfInterest);
+            if (Enumerable.SequenceEqual(oldTags, completeOsmGeo.Tags.ToArray()) && 
+                !locationWasUpdated)
             {
                 return pointOfInterest;
             }
@@ -262,6 +264,28 @@ namespace IsraelHiking.API.Services.Poi
 
             var featureToReturn = await UpdateElasticSearch(completeOsmGeo, pointOfInterest.Title);
             return await FeatureToExtendedPoi(featureToReturn, language);
+        }
+
+        /// <summary>
+        /// Updates the location in case the OSM element is of type node and the location change is not too little
+        /// </summary>
+        /// <param name="completeOsmGeo"></param>
+        /// <param name="pointOfInterestExtended"></param>
+        /// <returns>True if the location was updated, false otherwise</returns>
+        private bool UpdateLocationIfNeeded(ICompleteOsmGeo completeOsmGeo, PointOfInterestExtended pointOfInterestExtended)
+        {
+            var node = completeOsmGeo as Node;
+            if (node == null)
+            {
+                return false;
+            }
+            if (new Coordinate(node.Longitude.Value, node.Latitude.Value).Equals2D(pointOfInterestExtended.Location.ToCoordinate(), 0.00001))
+            {
+                return false;
+            }
+            node.Latitude = pointOfInterestExtended.Location.Lat;
+            node.Longitude = pointOfInterestExtended.Location.Lng;
+            return true;
         }
 
         /// <inheritdoc />

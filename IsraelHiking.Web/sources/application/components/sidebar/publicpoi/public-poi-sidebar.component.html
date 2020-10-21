@@ -38,10 +38,15 @@
         </div>
         <mat-spinner *ngIf="isLoading"></mat-spinner>
         <div *ngIf="isEditMode()">
-            <public-poi-edit [info]="info"></public-poi-edit>
+            <mat-card class="mat-elevation-z0">
+                <public-poi-edit [info]="info"></public-poi-edit>
+                <div fxLayout="row" *ngIf="showLocationUpdate">
+                    <mat-checkbox color="primary" [(ngModel)]="updateLocation">{{resources.updateLocation}}</mat-checkbox>
+                </div>
+            </mat-card>
             <div fxLayout="row">
-                <div fxFlex *ngIf="isEditMode()">
-                    <button mat-button fxFill class="no-padding" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
+                <div fxFlex>
+                    <button mat-button fxFill class="no-padding" (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
                 </div>
                 <div fxFlex>
                     <button mat-button fxFill class="no-padding" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>
