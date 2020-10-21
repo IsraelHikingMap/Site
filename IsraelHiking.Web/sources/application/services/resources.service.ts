@@ -200,6 +200,7 @@ export class ResourcesService {
     public clickToUpload: string;
     public clickToEdit: string;
     public more: string;
+    public less: string;
     public routes: string;
     public hiking: string;
     public bicycle: string;
@@ -270,6 +271,12 @@ export class ResourcesService {
     public continue: string;
     public navigateHere: string;
     public updateLocation: string;
+    public files: string;
+    public attribution: string;
+    public routePlanning: string;
+    public createShare: string;
+    public uploadToCloudAndShare: string;
+    public statisticsAndHeightChart: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -533,7 +540,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1598431943274");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1603137987562");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -713,6 +720,7 @@ export class ResourcesService {
         this.clickToUpload = this.gettextCatalog.getString("Click to Upload");
         this.clickToEdit = this.gettextCatalog.getString("Click to Edit");
         this.more = this.gettextCatalog.getString("More...");
+        this.less = this.gettextCatalog.getString("Less...");
         this.routes = this.gettextCatalog.getString("Routes");
         this.hiking = this.gettextCatalog.getString("Hiking");
         this.bicycle = this.gettextCatalog.getString("Bicycle");
@@ -786,6 +794,12 @@ export class ResourcesService {
         this.continue = this.gettextCatalog.getString("Continue");
         this.navigateHere = this.gettextCatalog.getString("Navigate Here");
         this.updateLocation = this.gettextCatalog.getString("Update the point's location");
+        this.files = this.gettextCatalog.getString("Files");
+        this.attribution = this.gettextCatalog.getString("Attribution");
+        this.routePlanning = this.gettextCatalog.getString("Route Planning");
+        this.createShare = this.gettextCatalog.getString("Create Share");
+        this.uploadToCloudAndShare = this.gettextCatalog.getString("Upload to Cloud and Share");
+        this.statisticsAndHeightChart = this.gettextCatalog.getString("Statistics and Height Chart");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -1079,6 +1093,9 @@ export class ResourcesService {
             let extenstion = split.pop();
             let prefix = split.join(".");
             return prefix + this.getImgurPostfix(size) + "." + extenstion;
+        }
+        if (imageUrl.startsWith("File:")) {
+            return `https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/${imageUrl.replace("File:", "")}&width=${size}`;
         }
         return imageUrl;
     }

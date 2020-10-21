@@ -7,108 +7,18 @@ using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Nest;
+using Nest.JsonNetSerializer;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Feature = NetTopologySuite.Features.Feature;
 
 namespace IsraelHiking.DataAccess
 {
-    /// <summary>
-	/// A JSON serializer that uses Json.NET for serialization and able to parse geojson objects
-	/// </summary>
-	public class GeoJsonNetSerializer : IElasticsearchSerializer
-    {
-        private static readonly Encoding ExpectedEncoding = new UTF8Encoding(false);
-
-        private readonly ConcurrentDictionary<string, IPropertyMapping> Properties = new ConcurrentDictionary<string, IPropertyMapping>();
-        private readonly JsonSerializerSettings _noneIndentedSettings;
-        private readonly JsonSerializerSettings _indentedSettings;
-
-        public GeoJsonNetSerializer(IConnectionSettingsValues settings)
-        {
-            _noneIndentedSettings = CreateSettings(SerializationFormatting.None, settings);
-            _indentedSettings = CreateSettings(SerializationFormatting.Indented, settings);
-        }
-
-        public IPropertyMapping CreatePropertyMapping(MemberInfo memberInfo)
-        {
-            var memberInfoString = $"{memberInfo.DeclaringType?.FullName}.{memberInfo.Name}";
-            if (Properties.TryGetValue(memberInfoString, out var mapping))
-                return mapping;
-
-            mapping = PropertyMappingFromAttributes(memberInfo);
-            Properties.TryAdd(memberInfoString, mapping);
-            return mapping;
-        }
-
-        public T Deserialize<T>(Stream stream)
-        {
-            if (stream == null) return default;
-
-            using var streamReader = new StreamReader(stream);
-            using var jsonTextReader = new JsonTextReader(streamReader);
-            return JsonSerializer.Create(_noneIndentedSettings).Deserialize<T>(jsonTextReader);
-        }
-
-        public Task<T> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            //Json.NET does not support reading a stream asynchronously :(
-            var result = Deserialize<T>(stream);
-            return Task.FromResult(result);
-        }
-
-        public void Serialize(object data, Stream writableStream, SerializationFormatting formatting = SerializationFormatting.Indented)
-        {
-            var serializer = formatting == SerializationFormatting.Indented
-                ? JsonSerializer.Create(_indentedSettings)
-                : JsonSerializer.Create(_noneIndentedSettings);
-
-            using var writer = new StreamWriter(writableStream, ExpectedEncoding, 1024, true);
-            using var jsonWriter = new JsonTextWriter(writer);
-            serializer.Serialize(jsonWriter, data);
-            writer.Flush();
-            jsonWriter.Flush();
-        }
-
-        private static IPropertyMapping PropertyMappingFromAttributes(MemberInfo memberInfo)
-        {
-            var jsonProperty = memberInfo.GetCustomAttribute<JsonPropertyAttribute>(true);
-            var dataMember = memberInfo.GetCustomAttribute<DataMemberAttribute>(true);
-            var ignoreProperty = memberInfo.GetCustomAttribute<JsonIgnoreAttribute>(true);
-            if (jsonProperty == null && ignoreProperty == null && dataMember == null) return null;
-
-            return new PropertyMapping { Name = jsonProperty?.PropertyName ?? dataMember?.Name, Ignore = ignoreProperty != null };
-        }
-
-        private JsonSerializerSettings CreateSettings(SerializationFormatting formatting, IConnectionSettingsValues connectionSettings)
-        {
-            var settings = new JsonSerializerSettings()
-            {
-                Formatting = formatting == SerializationFormatting.Indented ? Formatting.Indented : Formatting.None,
-                ContractResolver = new ElasticContractResolver(connectionSettings, null),
-                DefaultValueHandling = DefaultValueHandling.Include,
-                NullValueHandling = NullValueHandling.Ignore
-            };
-            foreach(var converter in GeoJsonSerializer.Create(GeometryFactory.Default, 3).Converters)
-            {
-                settings.Converters.Add(converter);
-            }
-            return settings;
-        }
-    }
-
     public class ElasticSearchGateway :
         IInitializable,
         IPointsOfInterestRepository,
@@ -154,30 +64,30 @@ namespace IsraelHiking.DataAccess
                 var connectionString = new ConnectionSettings(
                     pool,
                     new HttpConnection(),
-                    new SerializerFactory(s => new GeoJsonNetSerializer(s)))
+                    (b, c) => new JsonNetSerializer(b, c, null, null, GeoJsonSerializer.Create(GeometryFactory.Default, 3).Converters))
                     .PrettyJson();
                 _elasticClient = new ElasticClient(connectionString);
-                if (_elasticClient.IndexExists(OSM_POIS_INDEX1).Exists == false &&
-                    _elasticClient.IndexExists(OSM_POIS_INDEX2).Exists == false)
+                if (_elasticClient.Indices.Exists(OSM_POIS_INDEX1).Exists == false &&
+                    _elasticClient.Indices.Exists(OSM_POIS_INDEX2).Exists == false)
                 {
                     CreatePointsOfInterestIndex(OSM_POIS_INDEX1);
-                    _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_POIS_ALIAS).Index(OSM_POIS_INDEX1)));
+                    _elasticClient.Indices.BulkAlias(a => a.Add(add => add.Alias(OSM_POIS_ALIAS).Index(OSM_POIS_INDEX1)));
                 }
-                if (_elasticClient.IndexExists(OSM_HIGHWAYS_INDEX1).Exists == false &&
-                    _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists == false)
+                if (_elasticClient.Indices.Exists(OSM_HIGHWAYS_INDEX1).Exists == false &&
+                    _elasticClient.Indices.Exists(OSM_HIGHWAYS_INDEX2).Exists == false)
                 {
                     CreateHighwaysIndex(OSM_HIGHWAYS_INDEX1);
-                    _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_HIGHWAYS_ALIAS).Index(OSM_HIGHWAYS_INDEX1)));
+                    _elasticClient.Indices.BulkAlias(a => a.Add(add => add.Alias(OSM_HIGHWAYS_ALIAS).Index(OSM_HIGHWAYS_INDEX1)));
                 }
-                if (_elasticClient.IndexExists(SHARES).Exists == false)
+                if (_elasticClient.Indices.Exists(SHARES).Exists == false)
                 {
-                    _elasticClient.CreateIndex(SHARES);
+                    CreateSharesIndex();
                 }
-                if (_elasticClient.IndexExists(CUSTOM_USER_LAYERS).Exists == false)
+                if (_elasticClient.Indices.Exists(CUSTOM_USER_LAYERS).Exists == false)
                 {
-                    _elasticClient.CreateIndex(CUSTOM_USER_LAYERS);
+                    _elasticClient.Indices.Create(CUSTOM_USER_LAYERS);
                 }
-                if (_elasticClient.IndexExists(IMAGES).Exists == false)
+                if (_elasticClient.Indices.Exists(IMAGES).Exists == false)
                 {
                     CreateImagesIndex();
                 }
@@ -278,8 +188,8 @@ namespace IsraelHiking.DataAccess
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(100)
                     .Query(q =>
-                        q.GeoShapePoint(g =>
-                            g.Coordinates(ConvertCoordinate(coordinate))
+                        q.GeoShape(g =>
+                            g.Shape(s => s.Point(ConvertCoordinate(coordinate)))
                                 .Field(f => f.Geometry)
                                 .Relation(GeoShapeRelation.Contains))
                         && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CONTAINER}").Value(true)))
@@ -301,11 +211,11 @@ namespace IsraelHiking.DataAccess
 
         private async Task SwitchIndices(string currentIndex, string newIndex, string alias)
         {
-            await _elasticClient.AliasAsync(a => a
+            await _elasticClient.Indices.BulkAliasAsync(a => a
                 .Remove(i => i.Alias(alias).Index(currentIndex))
                 .Add(i => i.Alias(alias).Index(newIndex))
             );
-            await _elasticClient.DeleteIndexAsync(currentIndex);
+            await _elasticClient.Indices.DeleteAsync(currentIndex);
         }
 
         public async Task UpdateHighwaysZeroDownTime(List<Feature> highways)
@@ -369,17 +279,13 @@ namespace IsraelHiking.DataAccess
                 s => s.Index(OSM_HIGHWAYS_ALIAS)
                     .Size(5000)
                     .Query(
-                        q => q.GeoShapeEnvelope(
-                            e => e.Coordinates(new[]
-                                {
-                                    ConvertCoordinate(northEast),
-                                    ConvertCoordinate(southWest),
-                                }).Field(f => f.Geometry)
-                                .Relation(GeoShapeRelation.Intersects)
+                        q => q.GeoShape(g => 
+                            g.Shape(s => s.Envelope(ConvertCoordinate(new Coordinate(southWest.X, northEast.Y)), ConvertCoordinate(new Coordinate(northEast.X, southWest.Y))))
+                            .Field(f => f.Geometry)
+                            .Relation(GeoShapeRelation.Intersects)
                         )
                     )
             );
-            var json = response.DebugInformation;
             return response.Documents.ToList();
         }
 
@@ -407,7 +313,7 @@ namespace IsraelHiking.DataAccess
 
         public async Task<List<Feature>> GetAllPointsOfInterest(bool withDeleted)
         {
-            _elasticClient.Refresh(OSM_POIS_ALIAS);
+            _elasticClient.Indices.Refresh(OSM_POIS_ALIAS);
             var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
             var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000)
@@ -491,7 +397,7 @@ namespace IsraelHiking.DataAccess
 
         public async Task AddExternalPois(List<Feature> features)
         {
-            if (_elasticClient.IndexExists(EXTERNAL_POIS).Exists == false)
+            if (_elasticClient.Indices.Exists(EXTERNAL_POIS).Exists == false)
             {
                 await CreateExternalPoisIndex();
             }
@@ -510,16 +416,11 @@ namespace IsraelHiking.DataAccess
 
         private Task CreateHighwaysIndex(string highwaysIndexName)
         {
-            return _elasticClient.CreateIndexAsync(highwaysIndexName,
-                c => c.Mappings(ms =>
-                    ms.Map<Feature>(m =>
-                        m.Properties(ps =>
-                            ps.GeoShape(g =>
-                                g.Name(f => f.Geometry)
-                                .Tree(GeoTree.Geohash)
-                                .TreeLevels(10)
-                                .DistanceErrorPercentage(0.2)
-                            )
+            return _elasticClient.Indices.CreateAsync(highwaysIndexName,
+                c => c.Map<Feature>(m =>
+                    m.Properties(ps =>
+                        ps.GeoShape(g =>
+                            g.Name(f => f.Geometry)
                         )
                     )
                 )
@@ -528,20 +429,15 @@ namespace IsraelHiking.DataAccess
 
         private Task CreatePointsOfInterestIndex(string poisIndexName)
         {
-            return _elasticClient.CreateIndexAsync(poisIndexName,
-                c => c.Mappings(ms =>
-                    ms.Map<Feature>(m =>
-                        m.Properties(ps =>
-                            ps.Object<AttributesTable>(o => o
-                                .Name(PROPERTIES)
-                                .Properties(p => p.GeoPoint(s => s.Name(FeatureAttributes.POI_GEOLOCATION)))
-                                .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
-                            ).GeoShape(g =>
-                                g.Name(f => f.Geometry)
-                                .Tree(GeoTree.Geohash)
-                                .TreeLevels(10)
-                                .DistanceErrorPercentage(0.2)
-                            )
+            return _elasticClient.Indices.CreateAsync(poisIndexName,
+                c => c.Map<Feature>(m =>
+                    m.Properties(ps =>
+                        ps.Object<AttributesTable>(o => o
+                            .Name(PROPERTIES)
+                            .Properties(p => p.GeoPoint(s => s.Name(FeatureAttributes.POI_GEOLOCATION)))
+                            .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
+                        ).GeoShape(g =>
+                            g.Name(f => f.Geometry)
                         )
                     )
                 ).Settings(s => s.Setting("index.mapping.total_fields.limit", 10000))
@@ -550,14 +446,12 @@ namespace IsraelHiking.DataAccess
 
         private Task CreateExternalPoisIndex()
         {
-            return _elasticClient.CreateIndexAsync(EXTERNAL_POIS,
-                c => c.Mappings(ms =>
-                    ms.Map<Feature>(m =>
-                        m.Properties(fp =>
-                            fp.Object<AttributesTable>(a => a
-                                .Name(PROPERTIES)
-                                .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
-                            )
+            return _elasticClient.Indices.CreateAsync(EXTERNAL_POIS,
+                c => c.Map<Feature>(m =>
+                    m.Properties(fp =>
+                        fp.Object<AttributesTable>(a => a
+                            .Name(PROPERTIES)
+                            .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
                         )
                     )
                 ).Settings(s => s.Setting("index.mapping.total_fields.limit", 10000))
@@ -566,19 +460,23 @@ namespace IsraelHiking.DataAccess
 
         private Task CreateImagesIndex()
         {
-            return _elasticClient.CreateIndexAsync(IMAGES, c =>
-                c.Mappings(ms =>
-                    ms.Map<ImageItem>(m =>
-                        m.Properties(p =>
-                            p.Keyword(k => k.Name(ii => ii.Hash))
-                             .Keyword(s => s.Name(n => n.ImageUrls))
-                             .Binary(a => a.Name(i => i.Thumbnail))
-                        )
+            return _elasticClient.Indices.CreateAsync(IMAGES, c =>
+                c.Map<ImageItem>(m =>
+                    m.Properties(p =>
+                        p.Keyword(k => k.Name(ii => ii.Hash))
+                            .Keyword(s => s.Name(n => n.ImageUrls))
+                            .Binary(a => a.Name(i => i.Thumbnail))
                     )
                 )
             );
         }
 
+        private Task CreateSharesIndex()
+        {
+            return _elasticClient.Indices.CreateAsync(SHARES,
+                c => c.Map<ShareUrl>(m => m.AutoMap<ShareUrl>())
+            );
+        }
         private async Task UpdateUsingPaging(List<Feature> features, string alias)
         {
             _logger.LogInformation($"Starting indexing {features.Count} records");
@@ -729,7 +627,7 @@ namespace IsraelHiking.DataAccess
         }
         public async Task<List<string>> GetAllUrls()
         {
-            _elasticClient.Refresh(IMAGES);
+            _elasticClient.Indices.Refresh(IMAGES);
             var response = await _elasticClient.SearchAsync<ImageItem>(
                 s => s.Index(IMAGES)
                     .Size(10000)
@@ -739,7 +637,7 @@ namespace IsraelHiking.DataAccess
                 ).Query(q => q.MatchAll())
             );
             var list = GetAllItemsByScrolling(response);
-            return list.SelectMany(i => i.ImageUrls).ToList();
+            return list.SelectMany(i => i.ImageUrls ?? new List<String>()).ToList();
         }
 
         public Task StoreImage(ImageItem imageItem)
@@ -769,7 +667,7 @@ namespace IsraelHiking.DataAccess
                     .Query(q => q.Term(t => t.Field(r => r.Succeeded).Value(true)))
                     .Aggregations(a => a.Max(MAX_DATE, m => m.Field(r => r.StartTime)))
                     );
-            if (DateTime.TryParse(response.Aggs.Max(MAX_DATE).ValueAsString, out var date))
+            if (DateTime.TryParse(response.Aggregations.Max(MAX_DATE).ValueAsString, out var date))
             {
                 return date;
             }

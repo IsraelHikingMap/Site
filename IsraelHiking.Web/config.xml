@@ -22,7 +22,7 @@
   </universal-links>
   <platform name="android">
     <allow-intent href="market:*" />
-    <preference name="android-targetSdkVersion" value="28" />
+    <preference name="android-targetSdkVersion" value="29" />
     <preference name="android-minSdkVersion" value="21" />
     <preference name="AndroidLaunchMode" value="singleInstance" />
     <icon density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />
@@ -33,6 +33,7 @@
     <icon density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
     <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/uses-permission" xmlns:android="http://schemas.android.com/apk/res/android">
       <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+      <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     </edit-config>
     <config-file parent="/manifest/application/activity" target="AndroidManifest.xml">
       <intent-filter>
@@ -209,6 +210,63 @@
       <array>
         <string>en</string>
         <string>he</string>
+      </array>
+    </edit-config>
+    <edit-config target="NSExtensionActivationRule" file="*-Info.plist" mode="overwrite">
+      <string>
+            SUBQUERY (
+            extensionItems, $extensionItem,
+            SUBQUERY (
+            $extensionItem.attachments, $attachment,
+              ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.plain-text"
+                || ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.jpeg"
+                || ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.jpeg-2000"
+                || ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.xml"
+            ).@count >= 1
+            ).@count > 0
+        </string>
+    </edit-config>
+    <edit-config target="CFBundleDocumentTypes" file="*-Info.plist" mode="merge">
+      <array>
+        <dict>
+            <key>CFBundleTypeIconFiles</key>
+            <array/>
+            <key>CFBundleTypeName</key>
+            <string>GPS Exchange Format (GPX)</string>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSHandlerRank</key>
+            <string>Owner</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>com.topografix.gpx</string>
+            </array>
+        </dict>
+      </array>
+    </edit-config>
+    <edit-config target="UTImportedTypeDeclarations" file="*-Info.plist" mode="merge">
+      <array>
+        <dict>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.xml</string>
+            </array>
+            <key>UTTypeDescription</key>
+            <string>GPS Exchange Format (GPX)</string>
+            <key>UTTypeIdentifier</key>
+            <string>com.topografix.gpx</string>
+            <key>UTTypeReferenceURL</key>
+            <string>http://www.topografix.com/GPX/1/1</string>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>gpx</string>
+                </array>
+                <key>public.mime-type</key>
+                <string>application/gpx+xml</string>
+            </dict>
+        </dict>
       </array>
     </edit-config>
     <preference name="WKWebViewOnly" value="true" />

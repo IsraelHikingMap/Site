@@ -19,6 +19,7 @@ declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
 @Injectable()
 export class GeoLocationService {
     private static readonly TIME_OUT = 30000;
+    private static readonly SHORT_TIME_OUT = 10000; // Only for first position for good UX
 
     private state: GeoLocationServiceState;
     private watchNumber: number;
@@ -77,6 +78,12 @@ export class GeoLocationService {
 
     private startWatching() {
         this.state = "searching";
+        if (window.navigator && window.navigator.geolocation) {
+            // Upon starting location watching get the current position as fast as we can, even if not accurate.
+            window.navigator.geolocation.getCurrentPosition((position: Position) => {
+                this.handlePoistionChange(position);
+            }, () => {}, { timeout: GeoLocationService.SHORT_TIME_OUT });
+        }
         if (this.runningContextService.isCordova) {
             this.startBackgroundGeolocation();
 

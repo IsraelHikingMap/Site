@@ -112,7 +112,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private createRasterLayer() {
         let address = this.layerData.address;
         let scheme = "xyz";
-        if (this.layerData.address.toLocaleLowerCase().endsWith("/mapserver")) {
+        if (this.layerData.address.match(/\/MapServer(\/\d+)?$/i) != null) {
             address += "/export?dpi=96&transparent=true&format=png32&bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&f=image";
         } else if (this.layerData.address.indexOf("{-y}") !== -1) {
             address = address.replace("{-y}", "{y}");
@@ -151,8 +151,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         let response = await this.fileService
             .getStyleJsonContent(this.layerData.address, this.layerData.isOfflineOn || !this.hasInternetAccess);
         let language = this.resources.getCurrentLanguageCodeSimplified();
-        let styleJson = JSON.parse(JSON.stringify(response).replace(/name_he/g, `name_${language}`)
-            .replace(/name:he/g, `name:${language}`)) as Style;
+        let styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as Style;
         this.updateSourcesAndLayers(styleJson.sources, styleJson.layers);
     }
 

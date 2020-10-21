@@ -14,6 +14,9 @@
         </div>
     </div>
     <div mat-dialog-content id="dialogContentForScroll">
+        <div fxLayout="row">
+            <button fxFill mat-raised-button color="primary" matDialogClose (click)="createShare()" angulartics2On="click" angularticsCategory="Share" angularticsAction="Create share from shares dialog"><i class="fa icon-plus fa-lg"></i> {{resources.createShare}}</button>
+        </div>
         <div *ngFor="let shareUrl of filteredShareUrls" class="item">
             <div fxLayout="row" [ngClass]="{'active': selectedShareUrlId === shareUrl.id}" (click)="toggleSelectedShareUrl(shareUrl)">
                 <div class="item-image">

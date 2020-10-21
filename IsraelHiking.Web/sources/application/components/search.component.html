@@ -1,9 +1,9 @@
-﻿<div class="side-control mapboxgl-ctrl" *ngIf="!isVisible" [dir]="resources.direction">
-    <button mat-button (click)="toggleVisibility()" matTooltip="{{resources.search}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search toggle"><i class="fa icon-search fa-lg"></i></button>
+﻿<div class="side-control mapboxgl-ctrl" *ngIf="!isOpen && (searchVisible$ | async)" [dir]="resources.direction">
+    <button mat-button (click)="toggleOpen()" matTooltip="{{resources.search}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search open"><i class="fa icon-search fa-lg"></i></button>
 </div>
-<div *ngIf="isVisible">
+<div *ngIf="isOpen && (searchVisible$ | async)">
     <div class="side-control mapboxgl-ctrl" fxLayout="row">
-        <button mat-button class="pull-right" (click)="toggleDirectional()" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle directional search on"><i class="fa fa-lg" [ngClass]="{'icon-plus': !directional.isOn, 'icon-minus': directional.isOn}"></i></button>
+        <button mat-button class="pull-right" (click)="toggleDirectional()" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle directional search"><i class="fa fa-lg" [ngClass]="{'icon-plus': !directional.isOn, 'icon-minus': directional.isOn}"></i></button>
         <div [dir]="resources.direction">
             <mat-form-field class="search-input-container">
                 <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="hasFocus = true" (blur)="hasFocus = false">
@@ -15,7 +15,7 @@
                 </mat-option>
             </mat-autocomplete>
         </div>
-        <button mat-button class="pull-right" (click)="toggleVisibility()"><i class="fa icon-search fa-lg"></i></button>
+        <button mat-button class="pull-right" (click)="toggleOpen()" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search close"><i class="fa icon-search fa-lg"></i></button>
     </div>
     <div class="side-control mapboxgl-ctrl pull-left-important" fxLayout="row" *ngIf="directional.isOn" [style.float]="'left'">
         <button mat-button class="pull-right" (click)="setRouting('Hike')" [ngClass]="{active : routingType == 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></button>
@@ -37,7 +37,7 @@
                 </mat-option>
             </mat-autocomplete>
         </div>
-        <button mat-button class="pull-right" (click)="toggleVisibility()"><i class="fa icon-search fa-lg"></i></button>
+        <button mat-button class="pull-right" (click)="toggleOpen()" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search close"><i class="fa icon-search fa-lg"></i></button>
     </div>
 </div>
 <div *ngIf="directional.showResults && directional.routeCoordinates.length > 0">
@@ -78,7 +78,7 @@
                 <button mat-button fxFill (click)="directionalCleared()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Remove search route from map"><i class="fa icon-eye-slash"></i></button>
             </div>
             <div fxFlex>
-                <button mat-button fxFill (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
+                <button mat-button fxFill (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i></button>
             </div>
         </div>
         <div *ngIf="!hideCoordinates">

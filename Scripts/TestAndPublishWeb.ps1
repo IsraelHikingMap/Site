@@ -14,7 +14,7 @@ if ($LastExitCode) {
 
 # Run tests using Karma and export results as JUnit and Lcov format
 
-Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 Write-Host "npm install --loglevel=error"
 npm install --loglevel=error
@@ -25,15 +25,15 @@ increase-memory-limit
 Write-Host "run lint - send warnings to appveyor"
 npm run lint | Select-String -Pattern 'ERROR:' | ForEach-Object { Add-AppveyorCompilationMessage -Message $_.line -Category Warning; }
 
-Write-Host "npm run test -- --no-progress --code-coverage --watch=false"
-npm run test -- --no-progress --code-coverage --watch=false
+Write-Host "npm run test -- --code-coverage --watch=false"
+npm run test -- --code-coverage --watch=false
 
 # Locate Tests results files
 
-$WebResultsFile = Get-ChildItem tests-chrome*.xml -recurse | select-object -first 1 | select -expand FullName
-Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.API.Tests"
+$WebResultsFile = Get-ChildItem TESTS-*.xml -recurse | select-object -first 1 | select -expand FullName
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/Tests/IsraelHiking.API.Tests"
 $APIResultsFile = Get-ChildItem *.trx -recurse | select-object -first 1 | select -expand FullName
-Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.DataAccess.Tests"
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/Tests/IsraelHiking.DataAccess.Tests"
 $DataAccessResultsFile = Get-ChildItem *.trx -recurse | select-object -first 1 | select -expand FullName
 
 # Upload test resutls
@@ -52,24 +52,24 @@ if ($LastExitCode) {
 	$anyFailures = $TRUE
 }
 
-# Locate codecov
-
-$CodeCov = get-childitem "C:\Users\$($env:UserName)\.nuget\packages\" codecov.exe -recurse | select-object -first 1 | select -expand FullName
+# Install codecov using .Net core
+Write-Host "Installing codecov tool..."
+dotnet tool install --global Codecov.Tool
 
 # Locate coverage files
 
-$APICoverage = "$($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.API.Tests\coverage.info"
-$WebCoverage = "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web\coverage\lcov.info"
+$APICoverage = "$($env:APPVEYOR_BUILD_FOLDER)/Tests/IsraelHiking.API.Tests/coverage.info"
+$WebCoverage = "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web/coverage/lcov.info"
 
 # Run codecov
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 $CodeCovToken = "fc1bea1d-f43a-437e-84d3-baef07be7454"
 
-$CodeCovCmd = "$($CodeCov) -f $APICoverage -t $CodeCovToken"
+$CodeCovCmd = "codecov -f $APICoverage -t $CodeCovToken"
 Write-Host $CodeCovCmd
 Invoke-Expression $CodeCovCmd
-$CodeCovCmd = "$($CodeCov) -f $WebCoverage -t $CodeCovToken"
+$CodeCovCmd = "codecov -f $WebCoverage -t $CodeCovToken"
 Write-Host $CodeCovCmd
 Invoke-Expression $CodeCovCmd
 
@@ -77,7 +77,7 @@ if ($LastExitCode) {
 	$anyFailures = $TRUE
 }
 
-Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 Write-Host "npm run build -- --prod --no-progress"
 npm run build -- --prod --no-progress
@@ -88,8 +88,6 @@ if ($lastexitcode)
 	throw $lastexitcode
 }
 
-Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
-
 Write-Host "dotnet publish"
 dotnet publish
 
@@ -97,7 +95,7 @@ $binFolder = get-ChildItem netcore* -recurse | Select-Object -first 1 | select -
 
 $artifactsFileName = "IsraelHiking_$env:APPVEYOR_BUILD_VERSION.zip"
 
-7z a $artifactsFileName $binFolder\publish\IsraelHiking*.*
+7z a $artifactsFileName $binFolder/publish/IsraelHiking*.*
 7z a $artifactsFileName wwwroot
 Push-AppveyorArtifact $artifactsFileName
 

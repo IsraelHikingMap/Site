@@ -186,6 +186,9 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         if ((trace.tagsString || "").toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
+        if ((trace.timeStamp.toISOString() || "").toLowerCase().includes(lowerSearchTerm)) {
+            return true;
+        }
         return false;
     }
 
@@ -248,6 +251,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                 return this.resources.private;
             case "public":
             case "identifiable":
+            case "trackable":
                 return this.resources.public;
             case "local":
                 return this.resources.local;

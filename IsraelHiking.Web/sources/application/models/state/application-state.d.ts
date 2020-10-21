@@ -11,7 +11,8 @@ import {
     UserState,
     PointsOfInterestState,
     InMemoryState,
-    OfflineState
+    OfflineState,
+    UICompoentsState
 } from "../models";
 
 export interface ApplicationState {
@@ -26,4 +27,5 @@ export interface ApplicationState {
     poiState: PointsOfInterestState;
     inMemoryState: InMemoryState;
     offlineState: OfflineState;
+    uiComponentsState: UICompoentsState;
 }

@@ -66,14 +66,6 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetColors()
-        {
-            var results = _controller.GetColors();
-
-            Assert.AreEqual(new ConfigurationData().Colors.Count, results.Count);
-        }
-
-        [TestMethod]
         public void PostDataContainer_ShouldCreateImage()
         {
             var dataContainer = new DataContainerPoco();

@@ -39,7 +39,7 @@ namespace IsraelHiking.DataAccess
             };
             _wikiSite = new WikiSite(wikiClient, new SiteOptions(BASE_API_ADDRESS));
             await _wikiSite.Initialization;
-            _logger.LogInformation("Finished initializing iNatire service");
+            _logger.LogInformation("Finished initializing iNature service");
         }
 
         public async Task<List<Feature>> GetAll()

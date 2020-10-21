@@ -1,0 +1,42 @@
+<div [dir]="resources.direction">
+    <div matDialogTitle>
+        <div>
+            {{resources.files}} - {{resources.share}}
+        </div>
+        <div>
+            <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+        </div>
+    </div>
+    <div mat-dialog-content>
+        <div fxLayout="row">
+            <button mat-button (click)="openShare()" matDialogClose angulartics2On="click" angularticsCategory="Share" angularticsAction="Share open">
+                <span><i class="fa fa-lg icon-share-alt mat-icon"></i> {{resources.uploadToCloudAndShare}}</span>
+            </button>
+        </div>
+        <div fxLayout="row">
+            <label>
+                <a mat-button angulartics2On="click" angularticsCategory="Files" angularticsAction="Open from file">
+                    <span><i class="fa icon-folder-open fa-lg mat-icon"></i> {{resources.openAFile}}</span>
+                </a>
+                <input type="file" name="file" id="openFile" #openFile (change)="open($event)" [style.display]="'none'" />
+            </label>
+        </div>
+        <div fxLayout="row">
+            <button mat-button (click)="save()" matDialogClose angulartics2On="click" angularticsCategory="Files" angularticsAction="Save to file">
+                <span><i class="fa icon-floppy-o fa-lg mat-icon"></i> {{resources.save}}</span>
+            </button>
+        </div>
+        <div fxLayout="row">
+            <button mat-button (click)="toggleSaveAs()" angulartics2On="click" angularticsCategory="Files" angularticsAction="Toggle save as">
+                <span><i class="fa icon-save-as fa-lg mat-icon"></i> {{resources.saveAs}}</span>
+            </button>
+        </div>
+        <div *ngIf="isSaveAsOpen">
+            <div fxLayout="row" *ngFor="let format of formats">
+                <button mat-button (click)="saveAs(format)" matDialogClose angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as format {{format.label}}">
+                    <span class="text-small" dir="ltr">{{format.label}}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

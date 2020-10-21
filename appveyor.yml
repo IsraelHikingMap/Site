@@ -1,6 +1,7 @@
 version: 9.3.{build}
 clone_depth: 3
 configuration: Release
+skip_branch_with_pr: true
 environment:
   STORE_PASSWORD:
     secure: ZF3GiQxQ98B1HGKZOwlnmris5yN68mvx3UF6TVsnpws=
@@ -16,23 +17,13 @@ environment:
       GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     - PRODUCT: ios
       APPVEYOR_BUILD_WORKER_IMAGE: macOS
-      LC_ALL: en_US.UTF-8
-      LANG: en_US.UTF-8
       TMS_USER: israelhikingmap@gmail.com
       TMS_APPLE_APPLICATION_SPECIFIC_PASSWORD:
         secure: oSccSp70X/744XBpfRV4UVJZKxN1jMYHxn3OHFsTSVE=
     
 install:
-- ps: >-
-    Install-Product node 10.15
-
-    npm install -g npm@6.9.0 --loglevel=error
-
-    npm install -g increase-memory-limit
-        
-    node --version
-
-    npm --version
+#- sh: nvm install 12.18
+- ps: Install-Product node 12.18
 for:
   -
     matrix:

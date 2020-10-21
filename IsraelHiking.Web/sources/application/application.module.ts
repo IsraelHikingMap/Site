@@ -122,7 +122,6 @@ import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { MainMapComponent } from "./components/map/main-map.component";
 import { ZoomComponent } from "./components/zoom.component";
 import { LocationComponent } from "./components/location.component";
-import { LayersComponent } from "./components/layers.component";
 import { LayersSidebarComponent } from "./components/sidebar/layers-sidebar.component";
 import { BaseLayerAddDialogComponent } from "./components/dialogs/layers/base-layer-add-dialog.component";
 import { BaseLayerEditDialogComponent } from "./components/dialogs/layers/base-layer-edit-dialog.component";
@@ -131,13 +130,8 @@ import { OverlayEditDialogComponent } from "./components/dialogs/layers/overlay-
 import { RouteAddDialogComponent } from "./components/dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "./components/dialogs/routes/route-edit-dialog.component";
 import { RouteStatisticsComponent } from "./components/route-statistics.component";
-import { FileComponent } from "./components/file.component";
-import { FileSaveAsComponent } from "./components/file-save-as.component";
-import { EditOSMComponent } from "./components/edit-osm.component";
-import { OsmUserComponent } from "./components/osm-user.component";
 import { TracesDialogComponent } from "./components/dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./components/dialogs/shares-dialog.component";
-import { LanguageComponent } from "./components/language.component";
 import { LanguageDialogComponent } from "./components/dialogs/language-dialog.component";
 import { DrawingComponent } from "./components/drawing.component";
 import { CoordinatesComponent } from "./components/coordinates.component";
@@ -148,10 +142,8 @@ import { GpsLocationOverlayComponent } from "./components/overlays/gps-location-
 import { ClearableOverlayComponent } from "./components/overlays/clearable-overlay.component";
 import { MissingPartOverlayComponent } from "./components/overlays/missing-part-overlay.component";
 import { SearchComponent } from "./components/search.component";
-import { InfoComponent } from "./components/info.component";
 import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.component";
 import { DownloadDialogComponent } from "./components/dialogs/download-dialog.component";
-import { ShareComponent } from "./components/share.component";
 import { ShareDialogComponent } from "./components/dialogs/share-dialog.component";
 import { TermsOfServiceDialogComponent } from "./components/dialogs/terms-of-service-dialog.component";
 import { IhmLinkComponent } from "./components/ihm-link.component";
@@ -173,7 +165,8 @@ import { ProgressDialogComponent } from "./components/dialogs/progress-dialog.co
 import { UseAppDialogComponent } from "./components/dialogs/use-app-dialog.component";
 import { CategoriesGroupComponent } from "./components/sidebar/categories-group.component";
 import { AddSimplePoiDialogComponent } from "./components/dialogs/add-simple-poi-dialog.component";
-
+import { MainMenuComponent } from "./components/main-menu.component";
+import { FilesSharesDialogComponent } from "./components/dialogs/files-shares-dialog.component";
 // variables and functions
 import { routes } from "./routes";
 
@@ -264,7 +257,8 @@ export function getWindow() { return window; }
             ProgressDialogComponent,
             UseAppDialogComponent,
             CategoriesGroupComponent,
-            AddSimplePoiDialogComponent
+            AddSimplePoiDialogComponent,
+            FilesSharesDialogComponent
         ],
         providers: [
             GestureConfig,
@@ -344,7 +338,6 @@ export function getWindow() { return window; }
             LayersSidebarComponent,
             ZoomComponent,
             LocationComponent,
-            LayersComponent,
             BaseLayerAddDialogComponent,
             BaseLayerEditDialogComponent,
             OverlayAddDialogComponent,
@@ -352,13 +345,8 @@ export function getWindow() { return window; }
             RouteAddDialogComponent,
             RouteEditDialogComponent,
             RouteStatisticsComponent,
-            FileComponent,
-            FileSaveAsComponent,
-            EditOSMComponent,
-            OsmUserComponent,
             TracesDialogComponent,
             SharesDialogComponent,
-            LanguageComponent,
             LanguageDialogComponent,
             DrawingComponent,
             CoordinatesComponent,
@@ -369,10 +357,8 @@ export function getWindow() { return window; }
             ClearableOverlayComponent,
             MissingPartOverlayComponent,
             SearchComponent,
-            InfoComponent,
             InfoSidebarComponent,
             DownloadDialogComponent,
-            ShareComponent,
             ShareDialogComponent,
             TermsOfServiceDialogComponent,
             IhmLinkComponent,
@@ -394,6 +380,8 @@ export function getWindow() { return window; }
             UseAppDialogComponent,
             CategoriesGroupComponent,
             AddSimplePoiDialogComponent,
+            MainMenuComponent,
+            FilesSharesDialogComponent,
             NameInUseValidatorDirective,
             ImageCaptureDirective,
             OfflineImagePipe

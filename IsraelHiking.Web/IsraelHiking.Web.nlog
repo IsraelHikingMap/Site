@@ -13,20 +13,20 @@
     <!-- write logs to file -->
     <target xsi:type="File" 
             name="error" 
-            fileName="Logs\${shortdate}-errors.log"
+            fileName="Logs/${shortdate}-errors.log"
             maxArchiveFiles="10"
             layout="${longdate} |${pad:padding=3:fixedLength:true:inner=${threadid}} |${pad:padding=-5:inner=${level:uppercase=true}}| ${logger} | ${message} ${exception:format=ToString}" />
 
     <!-- another file log, only site logs  -->
     <target xsi:type="File" 
             name="site" 
-            fileName="Logs\${shortdate}-site.log"
+            fileName="Logs/${shortdate}-site.log"
             maxArchiveFiles="10"
             layout="${longdate} |${pad:padding=3:fixedLength:true:inner=${threadid}} |${pad:padding=-5:inner=${level:uppercase=true}}| ${message} ${exception}" />
 
     <target xsi:type="File"
             name="mergereport"
-            fileName="Logs\${shortdate}-merge-report.html"
+            fileName="Logs/${shortdate}-merge-report.html"
             maxArchiveFiles="10"
             layout="${message}" />
 

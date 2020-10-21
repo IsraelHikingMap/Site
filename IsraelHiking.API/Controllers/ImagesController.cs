@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -107,18 +106,6 @@ namespace IsraelHiking.API.Controllers
             }
             var imageData = await _imageCreationService.Create(url.DataContainer, width ?? 600, height ?? 315);
             return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
-        }
-
-        /// <summary>
-        /// Get available route colors defined in the configurations
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("colors")]
-        [Obsolete("This will no longer be used in later versions")]
-        public List<string> GetColors()
-        {
-            return _options.Colors;
         }
 
         /// <summary>
