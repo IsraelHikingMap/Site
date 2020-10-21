@@ -19,9 +19,6 @@ Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 Write-Host "npm install --loglevel=error"
 npm install --loglevel=error
 
-Write-Host "increase-memory-limit"
-increase-memory-limit
-
 Write-Host "run lint - send warnings to appveyor"
 npm run lint | Select-String -Pattern 'ERROR:' | ForEach-Object { Add-AppveyorCompilationMessage -Message $_.line -Category Warning; }
 

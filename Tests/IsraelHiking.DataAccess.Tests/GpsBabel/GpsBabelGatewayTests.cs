@@ -21,6 +21,7 @@ namespace IsraelHiking.DataAccess.Tests.GpsBabel
         }
 
         [TestMethod]
+        [Ignore]
         public void ConvertFileFromat_FromGpxToKmlWithUTF8_ShouldSucceed()
         {
             var content = File.ReadAllBytes(Path.Combine("TestData","test.gpx"));
@@ -34,6 +35,7 @@ namespace IsraelHiking.DataAccess.Tests.GpsBabel
         }
 
         [TestMethod]
+        [Ignore]
         public void ConvertFileFromat_FromGpxTWLAndBack_ShouldSucceed()
         {
             var content = File.ReadAllBytes(Path.Combine("TestData","test.gpx"));
@@ -46,6 +48,7 @@ namespace IsraelHiking.DataAccess.Tests.GpsBabel
         }
 
         [TestMethod]
+        [Ignore]
         public void ConvertFileFormat_SameInputOutput_ShouldReturnTheSameContent()
         {
             var content = new byte[] {1};

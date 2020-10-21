@@ -45,9 +45,6 @@ Copy-Item "./signing/appveyorshareextention.mobileprovision" -Destination "~/Lib
 Write-Host "npm install --loglevel=error"
 npm install --loglevel=error
 
-Write-Host "increase-memory-limit"
-increase-memory-limit
-
 Write-Host "npm run build:cordova -- --no-progress"
 npm run build:cordova -- --no-progress
 
