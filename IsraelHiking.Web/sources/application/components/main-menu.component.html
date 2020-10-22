@@ -59,7 +59,7 @@
                         <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open language selection">
                             <span><i class="fa fa-lg icon-language mat-icon"></i> {{resources.language}}</span>
                         </button>
-                        <a *ngIf="isShowEditOsmButton" mat-menu-item [href]="getOsmAddress()" [target]="'_blank'" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Edit in OSM">
+                        <a *ngIf="isShowEditOsmButton()" mat-menu-item [href]="getOsmAddress()" [target]="'_blank'" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Edit in OSM">
                             <span><i class="fa icon-map-editing fa-lg mat-icon"></i> {{resources.editThisMapUsingOsm}}</span>
                         </a>
                         <button mat-menu-item (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show less">
