@@ -278,6 +278,7 @@ export class ResourcesService {
     public uploadToCloudAndShare: string;
     public statisticsAndHeightChart: string;
     public backgroundLocationDisclosure: string;
+    public shareMapOverlays: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -541,7 +542,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1603454350832");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1603480277694");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -802,6 +803,7 @@ export class ResourcesService {
         this.uploadToCloudAndShare = this.gettextCatalog.getString("Upload to Cloud and Share");
         this.statisticsAndHeightChart = this.gettextCatalog.getString("Statistics and Height Chart");
         this.backgroundLocationDisclosure = this.gettextCatalog.getString("The app is unsing GPS location in the background...");
+        this.shareMapOverlays = this.gettextCatalog.getString("Share maps overlays");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

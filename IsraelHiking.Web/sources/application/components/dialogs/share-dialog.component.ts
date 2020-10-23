@@ -1,7 +1,6 @@
 import { Component, AfterViewInit } from "@angular/core";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 
-import { LocalStorage } from "ngx-store";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
@@ -28,9 +27,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     public lastShareUrl: ShareUrl;
     public canUpdate: boolean;
     public updateCurrentShare: boolean;
-
-    @LocalStorage()
-    public storedUserEmail = "";
+    public shareOverlays: boolean;
 
     constructor(resources: ResourcesService,
                 private readonly sanitizer: DomSanitizer,
@@ -53,6 +50,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.lastShareUrl = null;
         let shareUrl = this.shareUrlsService.getSelectedShareUrl();
         this.updateCurrentShare = false;
+        this.shareOverlays = false;
         this.canUpdate = false;
         if (shareUrl != null) {
             this.title = shareUrl.title;
@@ -79,7 +77,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         return this.shareUrlsService.getDisplayNameFromTitleAndDescription(this.title, this.description);
     }
 
-    public uploadShareUrl = async () => {
+    public async uploadShareUrl() {
         this.isLoading = true;
         let shareUrlToSend = this.createShareUrlObject();
 
@@ -112,10 +110,13 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 filteredData.routes.splice(routeIndex, 1);
             }
         }
+        if (!this.shareOverlays) {
+            filteredData.overlays = [];
+        }
         return filteredData;
     }
 
-    private createShareUrlObject = (): ShareUrl => {
+    private createShareUrlObject(): ShareUrl {
         let selectedShare = this.shareUrlsService.getSelectedShareUrl();
         let id = selectedShare ? selectedShare.id : "";
         let shareUrl = {
