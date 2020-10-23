@@ -247,7 +247,7 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation("Added deleted features to new ones: " + deletedFeatures.Length);
             await _pointsOfInterestRepository.StorePointsOfInterestDataToSecondaryIndex(features.Concat(deletedFeatures).ToList());
             _logger.LogInformation("Getting all features added since rebuild started: " + rebuildContext.StartTime.ToLongTimeString());
-            var addedFeaturesAfterRebuildStart = await _pointsOfInterestRepository.GetPointsOfInterestUpdates(rebuildContext.StartTime);
+            var addedFeaturesAfterRebuildStart = await _pointsOfInterestRepository.GetPointsOfInterestUpdates(rebuildContext.StartTime, DateTime.Now);
             _logger.LogInformation("Got all features added since rebuild started: " + addedFeaturesAfterRebuildStart.Count);
             await _pointsOfInterestRepository.StorePointsOfInterestDataToSecondaryIndex(addedFeaturesAfterRebuildStart);
             _logger.LogInformation("Finished storing all features");

@@ -87,7 +87,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _pointsOfInterestAdapterFactory.GetBySource(Arg.Any<string>()).Returns(adapter);
             _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns(new List<Feature>());
             _pointsOfInterestRepository.GetAllPointsOfInterest(Arg.Any<bool>()).Returns(new List<Feature>());
-            _pointsOfInterestRepository.GetPointsOfInterestUpdates(Arg.Any<DateTime>()).Returns(new List<Feature>());
+            _pointsOfInterestRepository.GetPointsOfInterestUpdates(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<Feature>());
             _featuresMergeExecutor.Merge(Arg.Any<List<Feature>>(), Arg.Any<List<Feature>>()).Returns(new List<Feature>());
             _pointsOfInterestProvider.GetAll().Returns(new List<Feature>());
             

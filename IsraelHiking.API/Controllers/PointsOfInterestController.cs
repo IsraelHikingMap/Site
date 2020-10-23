@@ -211,13 +211,14 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Get a POI by id and source
         /// </summary>
-        /// <param name="lastModified"></param>
+        /// <param name="lastModified">Start date for updates</param>
+        /// <param name="modifiedUntil">End date for updates</param>
         /// <returns></returns>
-        [Route("updates/{lastModified}")]
+        [Route("updates/{lastModified}/{modifiedUntil?}")]
         [HttpGet]
-        public async Task<UpdatesResponse> GetPointOfInterestUpdates(DateTime lastModified)
+        public async Task<UpdatesResponse> GetPointOfInterestUpdates(DateTime lastModified, DateTime? modifiedUntil)
         {
-            var response = await _pointsOfInterestProvider.GetUpdates(lastModified);
+            var response = await _pointsOfInterestProvider.GetUpdates(lastModified, modifiedUntil ?? DateTime.Now);
             var imageUrls = new List<string>();
             foreach (var feature in response.Features)
             {
@@ -227,7 +228,7 @@ namespace IsraelHiking.API.Controllers
                 imageUrls.AddRange(currentImageUrls.ToList());
             }
             response.Images = await _imageUrlStoreExecutor.GetAllImagesForUrls(imageUrls.ToArray());
-            _logger.LogInformation("Finished getting POIs updates, returning content to client " + lastModified.ToString());
+            _logger.LogInformation($"Finished getting POIs updates for {lastModified} - {modifiedUntil}. Features: {response.Features.Length}, Images: {response.Images.Length}");
             return response;
         }
 

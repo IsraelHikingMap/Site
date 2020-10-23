@@ -513,11 +513,11 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public async Task<UpdatesResponse> GetUpdates(DateTime lastMoidifiedDate)
+        public async Task<UpdatesResponse> GetUpdates(DateTime lastMoidifiedDate, DateTime modifiedUntil)
         {
             var results = (lastMoidifiedDate == DateTime.MinValue)
                 ? await _pointsOfInterestRepository.GetAllPointsOfInterest(false)
-                : await _pointsOfInterestRepository.GetPointsOfInterestUpdates(lastMoidifiedDate);
+                : await _pointsOfInterestRepository.GetPointsOfInterestUpdates(lastMoidifiedDate, modifiedUntil);
             var lastModified = await _pointsOfInterestRepository.GetLastSuccessfulRebuildTime();
             return new UpdatesResponse
             {

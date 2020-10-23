@@ -337,14 +337,14 @@ namespace IsraelHiking.DataAccess
             ).Field($"{PROPERTIES}.{FeatureAttributes.POI_GEOLOCATION}");
         }
 
-        public async Task<List<Feature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate)
+        public async Task<List<Feature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate, DateTime modifiedUntil)
         {
             var list = new List<Feature>();
             var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
             var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000)
                     .Scroll("10s")
-                    .Query(q => q.DateRange(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_LAST_MODIFIED}").GreaterThan(lastModifiedDate))
+                    .Query(q => q.DateRange(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_LAST_MODIFIED}").GreaterThan(lastModifiedDate).LessThanOrEquals(modifiedUntil))
                         && q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories))
                     ));
             return GetAllItemsByScrolling(response);
@@ -436,6 +436,7 @@ namespace IsraelHiking.DataAccess
                             .Name(PROPERTIES)
                             .Properties(p => p.GeoPoint(s => s.Name(FeatureAttributes.POI_GEOLOCATION)))
                             .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
+                            .Properties(p => p.Date(s => s.Name(FeatureAttributes.POI_LAST_MODIFIED)))
                         ).GeoShape(g =>
                             g.Name(f => f.Geometry)
                         )
