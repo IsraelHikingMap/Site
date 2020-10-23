@@ -189,7 +189,7 @@ export class PoiService {
         try {
             let lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
             if (lastModified != null) {
-                lastModified = new Date(lastModified); // deserialize from
+                lastModified = new Date(lastModified); // deserialize from json
             }
             this.loggingService.info(`[POIs] Getting POIs for: ${lastModified ? lastModified.toUTCString() : null} from server`);
             if (lastModified == null || Date.now() - lastModified.getTime() > 1000 * 60 * 60 * 24 * 180) {
@@ -232,10 +232,10 @@ export class PoiService {
         do {
             lastModified = modifiedUntil;
             modifiedUntil = new Date(lastModified.getTime() + 3 * 24 * 60 * 60 * 1000); // last modified + 3 days
-            this.loggingService.info(`[POIs] Getting POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toISOString()}`);
+            this.loggingService.info(`[POIs] Getting POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()}`);
             let updates = await this.httpClient.get(`${Urls.poiUpdates}${lastModified.toISOString()}/${modifiedUntil.toISOString()}`)
                 .pipe(timeout(60000)).toPromise() as IUpdatesResponse;
-            this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toISOString()}, got: ${updates.features.length}`);
+            this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()}, got: ${updates.features.length}`);
             let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => f.properties.poiId);
             do {
                 await this.databaseService.storePois(updates.features.splice(0, 500));
@@ -244,7 +244,7 @@ export class PoiService {
             let imageAndData = this.imageItemToUrl(updates.images);
             this.loggingService.info(`[POIs] Storing images: ${imageAndData.length}`);
             this.databaseService.storeImages(imageAndData);
-            let minDate = new Date(Math.min(updates.lastModified.getTime(), modifiedUntil.getTime()));
+            let minDate = new Date(Math.min(new Date(updates.lastModified).getTime(), modifiedUntil.getTime()));
             this.loggingService.info(`[POIs] Updating last modified to: ${minDate}`);
             this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: minDate }));
         } while (modifiedUntil < new Date())
