@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <DebugType>full</DebugType>
+    <DebugType>portable</DebugType>
     <UserSecretsId>a21e53dc-017c-42f4-be3d-5dbe7eaf9433</UserSecretsId>
     <Version>1.0.0</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
