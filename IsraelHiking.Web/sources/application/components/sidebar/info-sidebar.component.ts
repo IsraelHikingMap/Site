@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { MatDialog } from "@angular/material";
 import { remove } from "lodash";
 import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 
@@ -7,8 +8,9 @@ import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { BaseMapComponent } from "../base-map.component";
+import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
 import { ILegendItem } from "./legend-item.component";
-import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP, SATELLITE } from "../../reducres/initial-state";
+import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducres/initial-state";
 import legendSectionsJson from "../../../content/legend/legend.json";
 
 export interface ILegendSection {
@@ -28,6 +30,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     private selectedSection: ILegendSection;
 
     constructor(resources: ResourcesService,
+                private readonly dialog: MatDialog,
                 private readonly angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
                 private readonly sidebarService: SidebarService,
                 private readonly layersService: LayersService,
@@ -68,6 +71,11 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
     public isMobile(): boolean {
         return this.runningContext.isMobile;
+    }
+
+    public openDownloadDialog(event: Event) {
+        event.preventDefault();
+        this.dialog.open(DownloadDialogComponent);
     }
 
     private initalizeLegendSections() {
