@@ -30,7 +30,7 @@
             </div>
             <div class="input-wrapper-spacer"></div>
             <div fxLayout="row">
-                <button mat-raised-button color="primary" (click)="uploadShareUrl()" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}{{shareOverlays ? ' with overlays'}}">{{updateCurrentShare ? resources.update : resources.generateUrlToShareWithYourFriends}}</button>
+                <button mat-raised-button color="primary" (click)="uploadShareUrl()" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}{{shareOverlays ? ' with overlays' : ''}}">{{updateCurrentShare ? resources.update : resources.generateUrlToShareWithYourFriends}}</button>
             </div>
         </div>
         <div *ngIf="shareAddress">
