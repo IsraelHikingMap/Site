@@ -246,7 +246,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         }
         this.isLoading = true;
         try {
-            if (!this.updateLocation) {
+            if (!this.updateLocation && this.info.id) {
                 this.info.location = this.originalLocation;
             }
             this.originalLocation = null;
