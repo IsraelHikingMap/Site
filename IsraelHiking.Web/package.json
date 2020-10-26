@@ -58,7 +58,7 @@
     "cordova-plugin-device": "^2.0.3",
     "cordova-plugin-email-composer": "^0.9.2",
     "cordova-plugin-file": "^6.0.1",
-    "cordova-plugin-file-transfer": "git+https://github.com/apache/cordova-plugin-file-transfer.git",
+    "cordova-plugin-file-transfer": "git+https://github.com/christiaan/cordova-plugin-file-transfer.git#master_fix-ios-headers",
     "cordova-plugin-inappbrowser": "^4.0.0",
     "cordova-plugin-ionic-webview": "5.0.0",
     "cordova-plugin-media": "^5.0.3",
