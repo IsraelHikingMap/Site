@@ -295,12 +295,4 @@
     <icon src="www/content/favicons/icon-small@3x.png" height="87" width="87" />
     <icon src="www/content/favicons/icon-1024.png" height="1024" width="1024" />
   </platform>
-  <plugin name="cordova-plugin-mauron85-background-geolocation" spec="@mauron85/cordova-plugin-background-geolocation@~3.0.6">
-    <variable name="GOOGLE_PLAY_SERVICES_VERSION" value="11+" />
-    <variable name="ANDROID_SUPPORT_LIBRARY_VERSION" value="26+" />
-    <variable name="ICON" value="@mipmap/ic_launcher" />
-    <variable name="SMALL_ICON" value="@mipmap/ic_launcher" />
-    <variable name="ALWAYS_USAGE_DESCRIPTION" value="App requires background tracking " />
-    <variable name="MOTION_USAGE_DESCRIPTION" value="App requires motion detection" />
-  </plugin>
 </widget>
