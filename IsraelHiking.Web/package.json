@@ -69,7 +69,6 @@
     "ngx-store": "2.1.0",
     "ngx-window-token": "2.0.1",
     "ohauth": "1.0.0",
-    "phonegap-plugin-mobile-accessibility": "^1.0.5",
     "piexifjs": "1.0.6",
     "redux": "4.0.1",
     "redux-undo": "1.0.0-beta9-9-7",
@@ -127,6 +126,7 @@
     "md5-file": "^4.0.0",
     "open": "6.3.0",
     "patch-package": "^6.2.2",
+    "phonegap-plugin-mobile-accessibility": "^1.0.5",
     "po2json": "0.4.5",
     "protractor": "^5.3.2",
     "ts-node": "8.3.0",
@@ -197,7 +197,7 @@
         "SHAREEXT_DEVELOPMENT_TEAM": "\"2KT88923M5\"",
         "ANDROID_EXTRA_ACTIONS": " "
       },
-      "cordova-plugin-background-geolocation": {
+      "@mauron85/cordova-plugin-background-geolocation": {
         "GOOGLE_PLAY_SERVICES_VERSION": "11+",
         "ANDROID_SUPPORT_LIBRARY_VERSION": "26+",
         "ICON": "@mipmap/icon",
