@@ -159,6 +159,7 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest("Title must not be more than 255 characters...");
             }
+            _logger.LogInformation($"Adding a POI of type {pointOfInterest.Icon} with id {pointOfInterest.Id} at {pointOfInterest.Location.Lat}, {pointOfInterest.Location.Lng}");
             var osmGateway = CreateOsmGateway();
             var user = await osmGateway.GetUserDetails();
             var imageUrls = pointOfInterest.ImagesUrls ?? new string[0];
@@ -242,7 +243,7 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         public Task AddSimplePoint([FromBody]AddSimplePointOfInterestRequest request)
         {
-            _logger.LogInformation($"Adding a simple POI at of type {request.PointType} at {request.LatLng.Lat}, {request.LatLng.Lng}");
+            _logger.LogInformation($"Adding a simple POI of type {request.PointType} at {request.LatLng.Lat}, {request.LatLng.Lng}");
             var osmGateway = CreateOsmGateway();
             return _simplePointAdderExecutor.Add(osmGateway, request);
         }

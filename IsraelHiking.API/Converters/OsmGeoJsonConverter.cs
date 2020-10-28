@@ -81,6 +81,10 @@ namespace IsraelHiking.API.Converters
                 table.Add(FeatureAttributes.POI_USER_NAME, osmObject.UserName);
                 table.Add(FeatureAttributes.POI_USER_ADDRESS, $"https://www.openstreetmap.org/user/{Uri.EscapeUriString(osmObject.UserName)}");
             }
+            if (osmObject.Version.HasValue)
+            {
+                table.Add(FeatureAttributes.POI_VERSION, osmObject.Version.Value);
+            }
             return table;
         }
 
