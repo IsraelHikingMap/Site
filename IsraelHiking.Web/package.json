@@ -106,7 +106,7 @@
     "cordova-plugin-ionic-webview": "5.0.0",
     "cordova-plugin-media": "^5.0.3",
     "cordova-plugin-network-information": "git+https://github.com/apache/cordova-plugin-network-information.git",
-    "cordova-plugin-purchase": "10.1.1",
+    "cordova-plugin-purchase": "10.3.0",
     "cordova-plugin-screen-orientation": "^3.0.2",
     "cordova-plugin-statusbar": "^2.4.3",
     "cordova-plugin-vibration": "^3.1.1",
