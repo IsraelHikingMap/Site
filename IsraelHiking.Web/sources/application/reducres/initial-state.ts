@@ -22,7 +22,7 @@ export const initialState =
             isAutomaticRecordingUpload: true,
             // isFindMissingRoutesAfterUpload: false,
             isGotLostWarnings: false,
-            version: "9.3"
+            version: "9.6"
         } as Configuration,
         location: {
             longitude: 35.12,
