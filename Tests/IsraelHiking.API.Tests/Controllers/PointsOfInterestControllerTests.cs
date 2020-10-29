@@ -138,7 +138,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void UploadPointOfInterest_IdDoesNotExists_ShouldAdd()
         {
             _controller.SetupIdentity(_cache);
-            var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "" };
+            var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "", Location = new LatLng() };
 
             var result = _controller.UploadPointOfInterest(poi, "he").Result as OkObjectResult;
 
@@ -150,7 +150,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void UploadPointOfInterest_IdExists_ShouldUpdate()
         {
             _controller.SetupIdentity(_cache);
-            var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "1" };
+            var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "1", Location = new LatLng() };
 
             var result = _controller.UploadPointOfInterest(poi, "he").Result as OkObjectResult;
 
