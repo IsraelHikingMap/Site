@@ -47,7 +47,7 @@
                         <span><i class="fa fa-lg icon-power-off mat-icon"></i> {{resources.exit}}</span>
                     </button>
                     <button *ngIf="!isShowMore" mat-menu-item (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show more">
-                        <span><i class="fa fa-lg icon-ellipsis-v mat-icon"></i> {{resources.more}}</span>
+                        <span><i class="fa fa-lg icon-chevron-down mat-icon"></i> {{resources.more}}</span>
                     </button>
                     <div *ngIf="isShowMore">
                         <button mat-menu-item (click)="selectLegendAndAbout()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show legend and info">
@@ -66,7 +66,7 @@
                             <span><i class="fa icon-map-editing fa-lg mat-icon"></i> {{resources.editThisMapUsingOsm}}</span>
                         </a>
                         <button mat-menu-item (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show less">
-                            <span><i class="fa fa-lg icon-ellipsis-v mat-icon"></i> {{resources.less}}</span>
+                            <span><i class="fa fa-lg icon-chevron-up mat-icon"></i> {{resources.less}}</span>
                         </button>
                     </div>
                 </div>
