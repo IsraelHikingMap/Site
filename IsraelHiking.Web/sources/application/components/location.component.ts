@@ -187,8 +187,7 @@ export class LocationComponent extends BaseMapComponent {
                 type: "YesNo",
                 confirmAction: () => {
                     this.recordedRouteService.stopRecording();
-                },
-                declineAction: () => { },
+                }
             });
         } else {
             if (this.showBatteryConfirmation) {

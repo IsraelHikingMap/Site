@@ -17,14 +17,15 @@ import { ToastService } from "application/services/toast.service";
 import { FileService } from "application/services/file.service";
 import { LayersService } from "application/services/layers/layers.service";
 import { SidebarService } from "application/services/sidebar.service";
+import { ApplicationExitService } from '../services/application-exit.service';
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
-import { UserInfo, ApplicationState } from "../models/models";
 import { SetUIComponentVisibilityAction } from "application/reducres/ui-components.reducer";
+import { UserInfo, ApplicationState } from "../models/models";
 
 @Component({
     selector: "main-menu",
@@ -68,6 +69,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 private readonly geoLocationService: GeoLocationService,
                 private readonly layersService: LayersService,
                 private readonly sidebarService: SidebarService,
+                private readonly applicationExitService: ApplicationExitService,
                 private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
@@ -220,6 +222,10 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             currentLocation.zoom + 1,
             currentLocation.latitude,
             currentLocation.longitude);
+    }
+
+    public exitApp() {
+        this.applicationExitService.exitApp();
     }
 
     public openTraces() {

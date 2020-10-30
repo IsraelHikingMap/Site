@@ -69,32 +69,55 @@ export class ApplicationExitService {
                             this.loggingService.info("Stop recording using the back button");
                             this.recordingRouteService.stopRecording();
                         },
-                        declineAction: () => { }
                     });
                     return;
                 }
                 setTimeout(() => { this.state = "None"; }, 5000);
                 if (this.state === "FirstClick") {
                     this.state = "SecondClick";
-                    this.toastService.info(this.resources.wrappingThingsUp);
-                    this.loggingService.debug("Starting IHM Application Exit");
-                    await this.databaseService.close();
-                    let disablePromise = this.geoLocationService.disable();
-                    let timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(), 2000));
-                    await Promise.race([
-                        disablePromise,
-                        timeoutPromise
-                    ]);
-                    this.loggingService.debug("Finished IHM Application Exit");
-                    await this.loggingService.close();
-                    navigator.app.exitApp();
+                    this.finalizeApp();
                 } else if (this.state === "None") {
                     this.state = "FirstClick";
                     this.toastService.info(this.resources.clickBackAgainToCloseTheApp);
-                    // ionic webview doesn't change the internal addressbar...
-                    // history.back();
                 }
             });
         }, false);
+    }
+
+    private async finalizeApp() {
+        this.toastService.info(this.resources.wrappingThingsUp);
+        this.loggingService.debug("Starting IHM Application Exit");
+        await this.databaseService.close();
+        let disablePromise = this.geoLocationService.disable();
+        let timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(), 2000));
+        await Promise.race([
+            disablePromise,
+            timeoutPromise
+        ]);
+        this.loggingService.debug("Finished IHM Application Exit");
+        await this.loggingService.close();
+        navigator.app.exitApp();
+    }
+
+    public exitApp() {
+        if (this.recordingRouteService.isRecording()) {
+            this.toastService.confirm({
+                message: this.resources.areYouSureYouWantToStopRecording,
+                type: "YesNo",
+                confirmAction: () => {
+                    this.loggingService.info("Stop recording using exit app button");
+                    this.recordingRouteService.stopRecording();
+                    this.finalizeApp();
+                }
+            });
+            return;
+        }
+        this.toastService.confirm({
+            message: this.resources.areYouSure,
+            type: "YesNo",
+            confirmAction: () => {
+                this.finalizeApp();
+            }
+        });
     }
 }
