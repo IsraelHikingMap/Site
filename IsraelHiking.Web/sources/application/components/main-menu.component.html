@@ -40,13 +40,13 @@
                     <button mat-menu-item (click)="selectSharesAndFiles()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open search and files">
                         <span><i class="fa fa-lg icon-share-alt mat-icon"></i> {{resources.share}} - {{resources.files}}</span>
                     </button>
-                    <button *ngIf="!isLoggedIn()" mat-menu-item (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
+                    <button mat-menu-item *ngIf="!isLoggedIn()" (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
                         <span><i class="fa fa-lg icon-sign-in mat-icon"></i> {{resources.login}}</span>
                     </button>
-                    <button *ngIf="isApp()" (click)="exitApp()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Exit app">
+                    <button mat-menu-item *ngIf="isApp()" (click)="exitApp()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Exit app">
                         <span><i class="fa fa-lg icon-power-off mat-icon"></i> {{resources.exit}}</span>
                     </button>
-                    <button *ngIf="!isShowMore" mat-menu-item (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show more">
+                    <button mat-menu-item *ngIf="!isShowMore"  (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show more">
                         <span><i class="fa fa-lg icon-chevron-down mat-icon"></i> {{resources.more}}</span>
                     </button>
                     <div *ngIf="isShowMore">
@@ -62,7 +62,7 @@
                         <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open language selection">
                             <span><i class="fa fa-lg icon-language mat-icon"></i> {{resources.language}}</span>
                         </button>
-                        <a *ngIf="isShowEditOsmButton()" mat-menu-item [href]="getOsmAddress()" [target]="'_blank'" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Edit in OSM">
+                        <a mat-menu-item *ngIf="isShowEditOsmButton()" [href]="getOsmAddress()" [target]="'_blank'" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Edit in OSM">
                             <span><i class="fa icon-map-editing fa-lg mat-icon"></i> {{resources.editThisMapUsingOsm}}</span>
                         </a>
                         <button mat-menu-item (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show less">
