@@ -43,7 +43,7 @@
                     <button *ngIf="!isLoggedIn()" mat-menu-item (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
                         <span><i class="fa fa-lg icon-sign-in mat-icon"></i> {{resources.login}}</span>
                     </button>
-                    <button *ngIf="!isApp()" (click)="exitApp()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Exit app">
+                    <button *ngIf="isApp()" (click)="exitApp()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Exit app">
                         <span><i class="fa fa-lg icon-power-off mat-icon"></i> {{resources.exit}}</span>
                     </button>
                     <button *ngIf="!isShowMore" mat-menu-item (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show more">
