@@ -26,9 +26,6 @@ export class LocationComponent extends BaseMapComponent {
     @LocalStorage()
     private showBatteryConfirmation = true;
 
-    @LocalStorage()
-    private showLocationConfirmation = true;
-
     private isPanned: boolean;
     private lastSpeed: number;
     private lastSpeedTime: number;
@@ -140,18 +137,7 @@ export class LocationComponent extends BaseMapComponent {
             return;
         }
         if (this.isDisabled()) {
-            if (this.showLocationConfirmation) {
-                this.toastService.confirm({
-                    confirmAction: () => {
-                        this.enableLocation();
-                        this.showLocationConfirmation = false;
-                    },
-                    type: "Ok",
-                    message: this.resources.backgroundLocationDisclosure,
-                });
-            } else {
-                this.enableLocation();
-            }
+            this.enableLocation();
             return;
         }
         // is active must be true

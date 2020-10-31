@@ -277,7 +277,6 @@ export class ResourcesService {
     public createShare: string;
     public uploadToCloudAndShare: string;
     public statisticsAndHeightChart: string;
-    public backgroundLocationDisclosure: string;
     public shareMapOverlays: string;
     public exit: string;
     // Toasts: Errors/Warnings/Success
@@ -803,7 +802,6 @@ export class ResourcesService {
         this.createShare = this.gettextCatalog.getString("Create Share");
         this.uploadToCloudAndShare = this.gettextCatalog.getString("Upload to Cloud and Share");
         this.statisticsAndHeightChart = this.gettextCatalog.getString("Statistics and Height Chart");
-        this.backgroundLocationDisclosure = this.gettextCatalog.getString("The app is unsing GPS location in the background...");
         this.shareMapOverlays = this.gettextCatalog.getString("Share maps overlays");
         this.exit = this.gettextCatalog.getString("Exit");
         // Toasts: Errors/Warnings/Success
