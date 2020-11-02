@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material";
 import { FormControl } from "@angular/forms";
-import { Router } from "@angular/router";
 import { select, NgRedux } from "@angular-redux/store";
 import { SharedStorage } from "ngx-store";
 import { take, orderBy } from "lodash";
@@ -11,7 +10,6 @@ import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
-import { RouteStrings } from "../../services/hash.service";
 import { ShareUrl } from "../../models/share-url";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
@@ -42,7 +40,6 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
 
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
-                private readonly router: Router,
                 private readonly toastService: ToastService,
                 private readonly shareUrlsService: ShareUrlsService,
                 private readonly dataContainerService: DataContainerService,
@@ -141,8 +138,15 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         this.toastService.success(this.resources.dataUpdatedSuccessfully);
     }
 
-    public showShareUrl() {
-        this.router.navigate([RouteStrings.ROUTE_SHARE, this.selectedShareUrlId]);
+    public async showShareUrl() {
+        this.toastService.confirm({
+            message: this.resources.thisWillDeteleAllCurrentRoutesAreYouSure,
+            confirmAction: async () => {
+                let share = await this.shareUrlsService.setShareUrlById(this.selectedShareUrlId);
+                this.dataContainerService.setData(share.dataContainer, false);
+            },
+            type: "YesNo"
+        });
     }
 
     public async addShareUrlToRoutes() {

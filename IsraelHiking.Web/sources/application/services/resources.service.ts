@@ -339,6 +339,7 @@ export class ResourcesService {
     public downloadingPoisForOfflineUsage: string;
     public useTheCloudIconToGoOffline: string;
     public largeFilesUseWifi: string;
+    public thisWillDeteleAllCurrentRoutesAreYouSure: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -542,7 +543,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1604041456782");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1604349005320");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -877,6 +878,8 @@ export class ResourcesService {
         this.useTheCloudIconToGoOffline = this.gettextCatalog.getString("Use the cloud icon to go offline");
         this.largeFilesUseWifi = this.gettextCatalog
             .getString("You are about to download large files, you can change to wifi before clicking continue...");
+        this.thisWillDeteleAllCurrentRoutesAreYouSure = this.gettextCatalog
+            .getString("This will delete all current routes. Are you sure?");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

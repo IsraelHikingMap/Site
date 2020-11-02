@@ -45,7 +45,7 @@ export class DataContainerService {
         this.ngRedux.dispatch(new BulkReplaceRoutesAction({
             routesData
         }));
-        if (routesData.length > 0) {
+        if (routesData.length > 0 && this.selectedRouteService.getSelectedRoute() == null) {
             this.ngRedux.dispatch(new SetSelectedRouteAction({
                 routeId: routesData[0].id
             }));
@@ -58,7 +58,7 @@ export class DataContainerService {
         }
     }
 
-    public getData = (): DataContainer => {
+    public getData(): DataContainer {
         let layersContainer = this.layersService.getData();
 
         let bounds = SpatialService.getMapBounds(this.mapService.map);
@@ -83,7 +83,7 @@ export class DataContainerService {
         } as DataContainer;
     }
 
-    public setFileUrlAfterNavigation = async (url: string, baseLayer: string) => {
+    public async setFileUrlAfterNavigation(url: string, baseLayer: string) {
         try {
             let data = await this.fileService.openFromUrl(url);
             this.ngRedux.dispatch(new SetFileUrlAndBaseLayerAction({
@@ -91,20 +91,20 @@ export class DataContainerService {
                 baseLayer
             }));
             data.baseLayer = this.stringToBaseLayer(baseLayer);
-            this.setData(data, false);
+            this.setData(data, this.runningContextService.isCordova);
         } catch (ex) {
             this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
         }
     }
 
-    public setShareUrlAfterNavigation = async (shareId) => {
+    public async setShareUrlAfterNavigation(shareId) {
         let shareUrl = this.shareUrlsService.getSelectedShareUrl();
         if (shareUrl && shareUrl.id === shareId) {
             return;
         }
         try {
             shareUrl = await this.shareUrlsService.setShareUrlById(shareId);
-            this.setData(shareUrl.dataContainer, false);
+            this.setData(shareUrl.dataContainer, this.runningContextService.isCordova);
             if (!this.runningContextService.isIFrame) {
                 this.toastService.info(shareUrl.description, shareUrl.title);
             }
