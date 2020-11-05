@@ -35,6 +35,12 @@ services:
       - 8989:8989
     command: -i - -c /data/gh-config.yml -o /data/default-gh/
     restart: always
+  gpsbabel:
+    image: israelhikingmap/gpsbabelwebapi
+    container_name: gpsbabel
+    ports:
+      - 11987:80
+    restart: always
 volumes:
   esdata:
     driver: local
