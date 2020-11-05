@@ -1,10 +1,14 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Xml.Linq;
 using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
+using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace IsraelHiking.DataAccess.Tests.GpsBabel
 {
@@ -17,7 +21,11 @@ namespace IsraelHiking.DataAccess.Tests.GpsBabel
         public void TestInitialize()
         {
             var logger = new TraceLogger();
-            _gpsBabelGateway = new GpsBabelGateway(logger);
+            var factory = Substitute.For<IHttpClientFactory>();
+            factory.CreateClient().Returns(new HttpClient());
+            var options = Substitute.For<IOptions<ConfigurationData>>();
+            options.Value.Returns(new ConfigurationData());
+            _gpsBabelGateway = new GpsBabelGateway(logger, factory, options);
         }
 
         [TestMethod]
