@@ -27,6 +27,7 @@
     "@ionic-native/media": "^5.25.0",
     "@ionic-native/mobile-accessibility": "^5.21.5",
     "@ionic-native/network": "^5.21.5",
+    "@ionic-native/social-sharing": "^5.29.0",
     "@ionic-native/sqlite": "^5.23.0",
     "@ionic-native/status-bar": "^5.21.5",
     "@ionic-native/zip": "^5.21.6",
@@ -52,7 +53,6 @@
     "d3-regression": "^1.3.4",
     "deepmerge": "3.3.0",
     "dexie": "^2.0.4",
-    "es6-promise-plugin": "^4.2.2",
     "file-saver": "2.0.2",
     "font-awesome": "4.7.0",
     "hammerjs": "2.0.8",
@@ -112,8 +112,10 @@
     "cordova-plugin-statusbar": "^2.4.3",
     "cordova-plugin-vibration": "^3.1.1",
     "cordova-plugin-whitelist": "^1.3.4",
+    "cordova-plugin-x-socialsharing": "^6.0.2",
     "cordova-plugin-zip": "^3.1.0",
     "cordova-sqlite-ext": "^5.0.0",
+    "es6-promise-plugin": "^4.2.2",
     "gettext-extractor": "3.4.3",
     "jasmine-core": "^3.4.0",
     "jasmine-spec-reporter": "^4.2.1",
@@ -211,6 +213,10 @@
         "CONTENT_AUTHORITY": "$PACKAGE_NAME",
         "ALWAYS_USAGE_DESCRIPTION": "App requires background tracking",
         "MOTION_USAGE_DESCRIPTION": "App requires motion detection"
+      },
+      "cordova-plugin-x-socialsharing": {
+        "PHOTO_LIBRARY_ADD_USAGE_DESCRIPTION": "This app requires photo library access to function properly.",
+        "PHOTO_LIBRARY_USAGE_DESCRIPTION": "This app requires photo library access to function properly."
       }
     },
     "platforms": [

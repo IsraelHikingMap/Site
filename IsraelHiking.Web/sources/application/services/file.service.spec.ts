@@ -5,6 +5,7 @@ import { Device } from "@ionic-native/device/ngx";
 import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
+import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 
 import { FileService } from "./file.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
@@ -14,6 +15,7 @@ import { DataContainer, MarkerData, RouteData } from "../models/models";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
+import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { LoggingService } from "./logging.service";
 
 describe("FileService", () => {
@@ -54,6 +56,8 @@ describe("FileService", () => {
                 LoggingService,
                 // tslint:disable-next-line
                 FileTransfer,
+                SocialSharing,
+                GpxDataContainerConverterService,
                 { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: SelectedRouteService, useValue: selectedRouteService },
                 { provide: NonAngularObjectsFactory, useValue: nonAngularObjectsFactory },
@@ -93,10 +97,16 @@ describe("FileService", () => {
                 expect(selectedRouteService.addRoutes).toHaveBeenCalled();
             }, fail);
 
-            mockBackend.expectOne(Urls.openFile).flush({
-                northEast: { lat: 0, lng: 0 },
-                southWest: { lat: 1, lng: 1 }
-            } as DataContainer);
+            setTimeout(() => {
+                mockBackend.expectOne(Urls.openFile).flush({
+                    northEast: { lat: 0, lng: 0 },
+                    southWest: { lat: 1, lng: 1 },
+                    routes: [{
+                        markers: [{}],
+                    }]
+                } as DataContainer);
+            }, 1000);
+
             return promise;
         }));
 

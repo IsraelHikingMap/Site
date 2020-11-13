@@ -77,10 +77,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             return;
         }
         try {
-            let showToast = await this.fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data);
-            if (showToast) {
-                this.toastService.success(this.resources.fileSavedSuccessfully);
-            }
+            await this.fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data);
         } catch (ex) {
             this.toastService.error(this.resources.unableToSaveToFile);
         }
@@ -99,10 +96,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         }
         let name = this.getName(data);
         try {
-            let showToast = await this.fileService.saveToFile(`${name}.${format.extension}`, outputFormat, data);
-            if (showToast) {
-                this.toastService.success(this.resources.fileSavedSuccessfully);
-            }
+            await this.fileService.saveToFile(`${name}.${format.extension}`, outputFormat, data);
         } catch (ex) {
             this.toastService.error(this.resources.unableToSaveToFile);
         }
