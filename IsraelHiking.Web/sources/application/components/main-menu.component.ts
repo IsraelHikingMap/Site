@@ -1,4 +1,4 @@
-﻿import { Component, OnDestroy } from "@angular/core";
+import { Component, OnDestroy } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material";
 import { NgRedux, select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
@@ -57,7 +57,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     public agreedToTheTermsOfService = false;
 
     constructor(resources: ResourcesService,
-        private readonly emailComposer: EmailComposer,
+                private readonly emailComposer: EmailComposer,
                 private readonly device: Device,
                 private readonly appVersion: AppVersion,
                 private readonly authorizationService: AuthorizationService,

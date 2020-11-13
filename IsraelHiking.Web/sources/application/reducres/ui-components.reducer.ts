@@ -3,13 +3,13 @@ import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-actio
 import { UICompoentsState } from "../models/models";
 import { initialState } from "./initial-state";
 
-const SET_UI_COMPONENT_VISIBILITY = "SET_UI_COMPONENT_VISIBILITY"
+const SET_UI_COMPONENT_VISIBILITY = "SET_UI_COMPONENT_VISIBILITY";
 
 export type UIComponentType = "search" | "drawing" | "statistics";
 
 export interface SetUIComponentVisibilityPayload {
     isVisible: boolean;
-    component: UIComponentType
+    component: UIComponentType;
 }
 
 export class SetUIComponentVisibilityAction extends BaseAction<SetUIComponentVisibilityPayload> {
@@ -26,10 +26,10 @@ export class UIComponentsReducer {
             case "drawing":
                 newState.drawingVisible = action.payload.isVisible;
                 break;
-            case "search": 
+            case "search":
                 newState.searchVisible = action.payload.isVisible;
                 break;
-            case "statistics": 
+            case "statistics":
                 newState.statisticsVisible = action.payload.isVisible;
                 break;
         }

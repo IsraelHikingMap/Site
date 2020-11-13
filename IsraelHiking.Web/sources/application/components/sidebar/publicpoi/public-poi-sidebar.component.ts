@@ -48,7 +48,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public itmCoordinates: NorthEast;
     public shareLinks: IPoiSocialLinks;
     public contribution: Contribution;
-    
+
     @select((state: ApplicationState) => state.poiState.isSidebarOpen)
     public isOpen: Observable<boolean>;
 

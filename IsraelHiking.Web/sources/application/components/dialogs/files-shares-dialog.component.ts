@@ -23,13 +23,13 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
     public formats: IFormatViewModel[];
 
     constructor(resources: ResourcesService,
-        private readonly dialog: MatDialog,
-        private readonly matDialogRef: MatDialogRef<FilesSharesDialogComponent>,
-        private readonly dataContainerService: DataContainerService,
-        private readonly fileService: FileService,
-        private readonly toastService: ToastService,
-        private readonly databaseService: DatabaseService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly dialog: MatDialog,
+                private readonly matDialogRef: MatDialogRef<FilesSharesDialogComponent>,
+                private readonly dataContainerService: DataContainerService,
+                private readonly fileService: FileService,
+                private readonly toastService: ToastService,
+                private readonly databaseService: DatabaseService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.isSaveAsOpen = false;
         this.formats = this.fileService.formats;

@@ -1,16 +1,16 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { minBy, maxBy, flatten, last } from "lodash";
 import { parseString, Builder } from "isomorphic-xml2js";
 import { DataContainer, RouteData, RouteSegmentData, ILatLngTime, MarkerData, LinkData } from "../models/models";
 
 interface Link {
-    $: { href: string; }
+    $: { href: string; };
     text: string;
     type: string;
 }
 
 interface Wpt {
-    $: { lat: string; lon: string; }
+    $: { lat: string; lon: string; };
     name?: string;
     ele: string;
     time?: string;
@@ -48,7 +48,7 @@ interface Trk {
 }
 
 interface Bounds {
-    $: { minlat: string; minlon: string; maxlat: string; maxlon: string; }
+    $: { minlat: string; minlon: string; maxlat: string; maxlon: string; };
 }
 
 interface Metadata {
@@ -87,8 +87,8 @@ export class GpxDataContainerConverterService {
             rte: [],
             trk: []
         } as Gpx;
-        var containerRoutes = dataContainer.routes || [];
-        var nonEmptyRoutes = containerRoutes.filter(r => r.segments.find(s => s.latlngs.length > 0) != null);
+        let containerRoutes = dataContainer.routes || [];
+        let nonEmptyRoutes = containerRoutes.filter(r => r.segments.find(s => s.latlngs.length > 0) != null);
         for (let route of containerRoutes) {
             gpx.wpt.concat(route.markers.map(m => {
                 return {
@@ -109,7 +109,7 @@ export class GpxDataContainerConverterService {
                             type: u.mimeType
                         } as Link;
                     })
-                } as Wpt
+                } as Wpt;
             }));
         }
         for (let route of nonEmptyRoutes) {
@@ -137,19 +137,19 @@ export class GpxDataContainerConverterService {
                                 },
                                 ele: l.alt.toString(),
                                 time: l.timestamp.toISOString()
-                            } as Wpt
+                            } as Wpt;
                         }),
                         extensions: {
                             RoutingType: {
                                 _: s.routingType
                             }
                         }
-                    } as TrkSeg
+                    } as TrkSeg;
                 })
             } as Trk);
         }
         this.updateBoundingBox(gpx);
-        //allDatesToISOString(gpx);
+        // allDatesToISOString(gpx);
         return builder.buildObject(gpx);
     }
 
@@ -235,10 +235,10 @@ export class GpxDataContainerConverterService {
 
     private updateBoundingBox(gpx: Gpx) {
         if (gpx.metadata != null && gpx.metadata.bounds != null &&
-            +gpx.metadata.bounds.$.minlat != 0.0 &&
-            +gpx.metadata.bounds.$.maxlat != 0.0 &&
-            +gpx.metadata.bounds.$.minlon != 0.0 &&
-            +gpx.metadata.bounds.$.maxlon != 0.0) {
+            +gpx.metadata.bounds.$.minlat !== 0.0 &&
+            +gpx.metadata.bounds.$.maxlat !== 0.0 &&
+            +gpx.metadata.bounds.$.minlon !== 0.0 &&
+            +gpx.metadata.bounds.$.maxlon !== 0.0) {
             return;
         }
         let points = flatten((gpx.rte || []).filter(r => r.rtept != null).map(r => r.rtept));
@@ -285,7 +285,12 @@ export class GpxDataContainerConverterService {
             segments: t.trkseg.filter(s => s != null && s.trkpt != null && s.trkpt.length > 1).map(s => ({
                 latlngs: s.trkpt.map(p => ({ alt: +p.ele, lat: +p.$.lat, lng: +p.$.lon, timestamp: new Date(p.time) } as ILatLngTime)),
                 routingType: (s.extensions || { RoutingType: { _: "Hike" } }).RoutingType._,
-                routePoint: last(s.trkpt.map(p => ({ alt: +p.ele, lat: +p.$.lat, lng: +p.$.lon, timestamp: new Date(p.time) } as ILatLngTime)))
+                routePoint: last(s.trkpt.map(p => ({
+                    alt: +p.ele,
+                    lat: +p.$.lat,
+                    lng: +p.$.lon,
+                    timestamp: new Date(p.time)
+                } as ILatLngTime)))
             } as RouteSegmentData))
         } as RouteData));
     }

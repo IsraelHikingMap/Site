@@ -235,7 +235,8 @@ export class PoiService {
             this.loggingService.info(`[POIs] Getting POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()}`);
             let updates = await this.httpClient.get(`${Urls.poiUpdates}${lastModified.toISOString()}/${modifiedUntil.toISOString()}`)
                 .pipe(timeout(60000)).toPromise() as IUpdatesResponse;
-            this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()}, got: ${updates.features.length}`);
+            this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()},` +
+                `got: ${ updates.features.length }`);
             let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => f.properties.poiId);
             do {
                 await this.databaseService.storePois(updates.features.splice(0, 500));
@@ -247,7 +248,7 @@ export class PoiService {
             let minDate = new Date(Math.min(new Date(updates.lastModified).getTime(), modifiedUntil.getTime()));
             this.loggingService.info(`[POIs] Updating last modified to: ${minDate}`);
             this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: minDate }));
-        } while (modifiedUntil < new Date())
+        } while (modifiedUntil < new Date());
     }
 
     public async openPoisFile(blob: Blob, progressCallback: (percentage: number, text?: string) => void): Promise<Date> {

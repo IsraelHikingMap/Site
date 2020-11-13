@@ -3,7 +3,7 @@ import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from "@angular/material";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { LoggingService } from '../../services/logging.service';
+import { LoggingService } from "../../services/logging.service";
 
 export type ProgressCallback = (value: number, text?: string) => void;
 

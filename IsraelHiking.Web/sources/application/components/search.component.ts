@@ -168,7 +168,7 @@ export class SearchComponent extends BaseMapComponent {
             this.searchFromInput.nativeElement.focus();
             this.searchFromInput.nativeElement.select();
         }, 100);
-        
+
     }
 
     public toggleDirectional() {
