@@ -15,6 +15,7 @@ import { SelectedRouteService } from "./layers/routelayers/selected-route.servic
 import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
+import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { DataContainer } from "../models/models";
 
 export interface IFormatViewModel {
@@ -37,6 +38,7 @@ export class FileService {
                 private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly fitBoundsService: FitBoundsService,
+                private readonly gpxDataContainerConverterService: GpxDataContainerConverterService,
                 private readonly loggingService: LoggingService) {
         this.formats = [
             {
@@ -151,18 +153,23 @@ export class FileService {
     }
 
     public async addRoutesFromFile(file: File): Promise<void> {
+        let dataContainer = null;
         if (file.type === ImageResizeService.JPEG) {
-            let container = await this.imageResizeService.resizeImageAndConvert(file);
-            if (container.routes.length === 0 || container.routes[0].markers.length === 0) {
-                throw new Error("no geographic information found in file...");
+            dataContainer = await this.imageResizeService.resizeImageAndConvert(file);
+        } else {
+            let fileConent = await this.getFileContent(file);
+            if (this.gpxDataContainerConverterService.canConvert(fileConent)) {
+                dataContainer = await this.gpxDataContainerConverterService.toDataContainer(fileConent);
+            } else {
+                let formData = new FormData();
+                formData.append("file", file, file.name);
+                dataContainer = await this.httpClient.post(Urls.openFile, formData).toPromise() as DataContainer;
             }
-            this.addRoutesFromContainer(container);
-            return;
         }
-        let formData = new FormData();
-        formData.append("file", file, file.name);
-        let fileContainer = await this.httpClient.post(Urls.openFile, formData).toPromise() as DataContainer;
-        this.addRoutesFromContainer(fileContainer);
+        if (dataContainer.routes.length === 0 || dataContainer.routes[0].markers.length === 0) {
+            throw new Error("no geographic information found in file...");
+        }
+        this.addRoutesFromContainer(dataContainer);
     }
 
     public openFromUrl = (url: string): Promise<DataContainer> => {
@@ -260,6 +267,16 @@ export class FileService {
             this.loggingService.warning("Unable to get file from cache: " + ex.message);
             return null;
         }
+    }
+
+    private getFileContent(file: File): Promise<string> {
+        return new Promise((resolve, reject) => {
+            let reader = new FileReader();
+            reader.onload = (event: any) => {
+                resolve(event.target.result);
+            };
+            reader.readAsText(file);
+        });
     }
 
     public storeFileToCache(fileName: string, content: string) {
