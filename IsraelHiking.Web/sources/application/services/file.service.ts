@@ -81,20 +81,6 @@ export class FileService {
         ];
     }
 
-    private async createIHMDirectoryIfNeeded(): Promise<string> {
-        let folder = this.runningContextService.isIos
-            ? this.fileSystemWrapper.documentsDirectory
-            : this.fileSystemWrapper.externalRootDirectory;
-        await this.fileSystemWrapper.createDir(folder, "IsraelHikingMap", true);
-        return `${folder}/IsraelHikingMap`;
-    }
-
-    private async createIHMReportsDirectoryIfNeeded(): Promise<string> {
-        let ihmFolder = await this.createIHMDirectoryIfNeeded();
-        await this.fileSystemWrapper.createDir(ihmFolder, "Reports", true);
-        return `${ihmFolder}/Reports`;
-    }
-
     public getFileFromEvent(e: any): File {
         let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
         if (!file) {
@@ -162,7 +148,6 @@ export class FileService {
             fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
         let contentType = format === "gpx" ? "application/gpx+xml" : "application/octet-stream";
         this.socialSharing.shareWithOptions({
-            message: "Export to...",
             files: [`df:${fileName};data:${contentType};base64,${responseData}`]
         });
     }
@@ -218,14 +203,6 @@ export class FileService {
         let zip = new JSZip();
         zip.file("log.txt", content);
         let data = await zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });
-        try {
-            let blob = this.nonAngularObjectsFactory.b64ToBlob(data, "application/zip");
-            let fullFileName = "Report_" + new Date().toISOString().split(":").join("-").replace("T", "_").replace("Z", "_") + ".zip";
-            let path = await this.createIHMReportsDirectoryIfNeeded();
-            await this.fileSystemWrapper.writeFile(path, fullFileName, blob);
-        } catch {
-            // no need to do anything
-        }
         return data;
     }
 
