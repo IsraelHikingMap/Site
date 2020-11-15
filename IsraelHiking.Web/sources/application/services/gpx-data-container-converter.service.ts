@@ -1,6 +1,8 @@
 import { Injectable } from "@angular/core";
 import { minBy, maxBy, flatten, last } from "lodash";
 import { parseString, Builder } from "isomorphic-xml2js";
+import { encode } from "base64-arraybuffer";
+
 import { DataContainer, RouteData, RouteSegmentData, ILatLngTime, MarkerData, LinkData } from "../models/models";
 
 interface Link {
@@ -66,11 +68,11 @@ interface Gpx {
 @Injectable()
 export class GpxDataContainerConverterService {
     public canConvert(gpxXmlString: string) {
-        let subString = gpxXmlString.substr(0, 100).toLocaleLowerCase();
+        let subString = gpxXmlString.substr(0, 400).toLocaleLowerCase();
         return (subString.indexOf("<gpx") !== -1 && subString.indexOf("http://www.topografix.com/GPX/1/1") !== -1);
     }
 
-    public toGpx(dataContainer: DataContainer): string {
+    public async toGpx(dataContainer: DataContainer): Promise<string> {
         let options = { rootName: "gpx" };
 
         let builder = new Builder(options);
@@ -136,7 +138,7 @@ export class GpxDataContainerConverterService {
                                     lon: l.lng.toString()
                                 },
                                 ele: l.alt.toString(),
-                                time: l.timestamp.toISOString()
+                                time: l.timestamp ? l.timestamp.toISOString() : null
                             } as Wpt;
                         }),
                         extensions: {
@@ -148,9 +150,20 @@ export class GpxDataContainerConverterService {
                 })
             } as Trk);
         }
+        if (dataContainer.northEast && dataContainer.southWest) {
+            gpx.metadata = {
+                bounds: {
+                    $: {
+                        maxlat: dataContainer.northEast.lat.toString(),
+                        maxlon: dataContainer.northEast.lng.toString(),
+                        minlat: dataContainer.southWest.lat.toString(),
+                        minlon: dataContainer.southWest.lng.toString(),
+                    }
+                }
+            };
+        }
         this.updateBoundingBox(gpx);
-        // allDatesToISOString(gpx);
-        return builder.buildObject(gpx);
+        return encode(await new Response(builder.buildObject(gpx)).arrayBuffer());
     }
 
     public async toDataContainer(gpxXmlString: string): Promise<DataContainer> {
@@ -256,10 +269,10 @@ export class GpxDataContainerConverterService {
         }
         gpx.metadata.bounds = {
             $: {
-                maxlat: maxBy(points, p => + p.$.lat).toString(),
-                maxlon: maxBy(points, p => +p.$.lon).toString(),
-                minlat: minBy(points, p => +p.$.lat).toString(),
-                minlon: minBy(points, p => +p.$.lon).toString()
+                maxlat: maxBy(points, p => + p.$.lat).$.lat.toString(),
+                maxlon: maxBy(points, p => +p.$.lon).$.lon.toString(),
+                minlat: minBy(points, p => +p.$.lat).$.lat.toString(),
+                minlon: minBy(points, p => +p.$.lon).$.lon.toString()
             }
         };
     }

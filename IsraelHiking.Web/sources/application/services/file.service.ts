@@ -136,8 +136,10 @@ export class FileService {
     }
 
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {
-        // HM TODO: do this locally in case of simple GPX
-        let responseData = await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
+        let responseData = format === "gpx"
+            ? await this.gpxDataContainerConverterService.toGpx(dataContainer)
+            : await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
+
         if (!this.runningContextService.isCordova) {
             let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
             this.nonAngularObjectsFactory.saveAsWrapper(blobToSave, fileName, { autoBom: false });
