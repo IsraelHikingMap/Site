@@ -138,19 +138,6 @@
         <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.jpeg" />
         <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.jpeg" />
       </intent-filter>
-      <!-- HM TODO: remove this!
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data android:host="israelhiking.osm.org.il" android:pathPattern="/share/.*" android:scheme="https" />
-        <data android:host="israelhiking.osm.org.il" android:pathPattern="/poi/.*" android:scheme="https" />
-        <data android:host="israelhiking.osm.org.il" android:pathPattern="/url/.*" android:scheme="https" />
-        <data android:host="israelhiking.osm.org.il" android:pathPattern="/map/.*" android:scheme="https" />
-        <data android:host="israelhiking.osm.org.il" android:pathPattern="/" android:scheme="https" />
-        <data android:host="israelhiking.osm.org.il" android:pathPattern="" android:scheme="https" />
-      </intent-filter>
-      -->
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
@@ -198,12 +185,6 @@
     </edit-config>
     <edit-config target="NSMotionUsageDescription" file="*-Info.plist" mode="merge">
       <string>We need to access your motion direction in order to be able to show it on the map while navigating</string>
-    </edit-config>
-    <edit-config target="UIFileSharingEnabled" file="*-Info.plist" mode="overwrite">
-      <true/>
-    </edit-config>
-    <edit-config target="LSSupportsOpeningDocumentsInPlace" file="*-Info.plist" mode="overwrite">
-      <true/>
     </edit-config>
     <edit-config target="CFBundleLocalizations" file="*-Info.plist" mode="overwrite">
       <array>

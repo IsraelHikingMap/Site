@@ -4,6 +4,7 @@ import { Style } from "mapbox-gl";
 import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
 import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
+import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { last } from "lodash";
 import JSZip from "jszip";
 
@@ -39,6 +40,7 @@ export class FileService {
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly gpxDataContainerConverterService: GpxDataContainerConverterService,
+                private readonly socialSharing: SocialSharing,
                 private readonly loggingService: LoggingService) {
         this.formats = [
             {
@@ -77,20 +79,6 @@ export class FileService {
                 outputFormat: "all_gpx_single_track"
             }
         ];
-    }
-
-    private async createIHMDirectoryIfNeeded(): Promise<string> {
-        let folder = this.runningContextService.isIos
-            ? this.fileSystemWrapper.documentsDirectory
-            : this.fileSystemWrapper.externalRootDirectory;
-        await this.fileSystemWrapper.createDir(folder, "IsraelHikingMap", true);
-        return `${folder}/IsraelHikingMap`;
-    }
-
-    private async createIHMReportsDirectoryIfNeeded(): Promise<string> {
-        let ihmFolder = await this.createIHMDirectoryIfNeeded();
-        await this.fileSystemWrapper.createDir(ihmFolder, "Reports", true);
-        return `${ihmFolder}/Reports`;
     }
 
     public getFileFromEvent(e: any): File {
@@ -147,13 +135,25 @@ export class FileService {
         return this.httpClient.get(this.getDataUrl(url)).toPromise() as Promise<Style>;
     }
 
-    public saveToFile = async (fileName: string, format: string, dataContainer: DataContainer): Promise<boolean> => {
+    public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {
+        // HM TODO: do this locally in case of simple GPX
         let responseData = await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
-        return await this.saveBytesResponseToFile(responseData, fileName);
+        if (!this.runningContextService.isCordova) {
+            let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
+            this.nonAngularObjectsFactory.saveAsWrapper(blobToSave, fileName, { autoBom: false });
+            return;
+        }
+        let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
+            .replace("Z", "_") +
+            fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
+        let contentType = format === "gpx" ? "application/gpx+xml" : "application/octet-stream";
+        this.socialSharing.shareWithOptions({
+            files: [`df:${fileName};data:${contentType};base64,${responseData}`]
+        });
     }
 
     public async addRoutesFromFile(file: File): Promise<void> {
-        let dataContainer = null;
+        let dataContainer: DataContainer = null;
         if (file.type === ImageResizeService.JPEG) {
             dataContainer = await this.imageResizeService.resizeImageAndConvert(file);
         } else {
@@ -166,7 +166,8 @@ export class FileService {
                 dataContainer = await this.httpClient.post(Urls.openFile, formData).toPromise() as DataContainer;
             }
         }
-        if (dataContainer.routes.length === 0 || dataContainer.routes[0].markers.length === 0) {
+        if (dataContainer.routes.length === 0 ||
+            (dataContainer.routes[0].markers.length === 0 && dataContainer.routes[0].segments.length === 0)) {
             throw new Error("no geographic information found in file...");
         }
         this.addRoutesFromContainer(dataContainer);
@@ -186,32 +187,6 @@ export class FileService {
         this.fitBoundsService.fitBounds(SpatialService.getBounds([container.southWest, container.northEast]));
     }
 
-    private saveBytesResponseToFile = async (data: string, fileName: string): Promise<boolean> => {
-        let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(data, "application/octet-stream");
-        return await this.saveAsWorkAround(blobToSave, fileName);
-    }
-
-    /**
-     * This is an ugly workaround suggested here:
-     * https://github.com/eligrey/FileSaver.js/issues/330
-     * Plus cordova file save.
-     * Return true if there's a need to show a toast message.
-     * @param blob - the file to save
-     * @param fileName - the file name
-     */
-    private async saveAsWorkAround(blob: Blob, fileName: string): Promise<boolean> {
-        if (!this.runningContextService.isCordova) {
-            this.nonAngularObjectsFactory.saveAsWrapper(blob, fileName, { autoBom: false });
-            return false;
-        }
-        let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
-            .replace("Z", "_") +
-            fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
-        let path = await this.createIHMDirectoryIfNeeded();
-        await this.fileSystemWrapper.writeFile(path, fullFileName, blob);
-        return true;
-    }
-
     public async writeStyles(blob: Blob) {
         let zip = new JSZip();
         await zip.loadAsync(blob);
@@ -228,14 +203,6 @@ export class FileService {
         let zip = new JSZip();
         zip.file("log.txt", content);
         let data = await zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });
-        try {
-            let blob = this.nonAngularObjectsFactory.b64ToBlob(data, "application/zip");
-            let fullFileName = "Report_" + new Date().toISOString().split(":").join("-").replace("T", "_").replace("Z", "_") + ".zip";
-            let path = await this.createIHMReportsDirectoryIfNeeded();
-            await this.fileSystemWrapper.writeFile(path, fullFileName, blob);
-        } catch {
-            // no need to do anything
-        }
         return data;
     }
 

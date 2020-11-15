@@ -67,10 +67,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
             routes: [this.routeData]
         } as DataContainer;
         try {
-            let showToast = await this.fileService.saveToFile(this.routeData.name + ".gpx", "gpx", data);
-            if (showToast) {
-                this.toastService.success(this.resources.fileSavedSuccessfully);
-            }
+            await this.fileService.saveToFile(this.routeData.name + ".gpx", "gpx", data);
         } catch (ex) {
             this.toastService.error(this.resources.unableToSaveToFile);
         }
