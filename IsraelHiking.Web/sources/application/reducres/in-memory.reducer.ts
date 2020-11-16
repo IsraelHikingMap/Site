@@ -8,7 +8,6 @@ const TOGGLE_DISTNACE = "TOGGLE_DISTNACE";
 const SET_SHARE_URL = "SET_SHARE_URL";
 const SET_FILE_URL_AND_BASE_LAYER = "SET_FILE_URL_AND_BASE_LAYER";
 
-
 export interface SetShareUrlPayload {
     shareUrl: ShareUrl;
 }
@@ -21,7 +20,7 @@ export interface SetFileUrlAndBaseLayerPayload {
 export class ToggleDistanceAction implements Action {
     public type: string;
     constructor() {
-        this.type = TOGGLE_DISTNACE
+        this.type = TOGGLE_DISTNACE;
     }
 }
 

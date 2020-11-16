@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 import { NgRedux, select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
 import { MapComponent } from "ngx-mapbox-gl";
-import { Observable } from 'rxjs';
+import { Observable } from "rxjs";
 
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -347,6 +347,6 @@ export class LocationComponent extends BaseMapComponent {
                     coordinates: SpatialService.toCoordinate(center)
                 }
             }]
-        }
+        };
     }
 }
