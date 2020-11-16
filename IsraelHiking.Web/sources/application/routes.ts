@@ -20,10 +20,6 @@ export const routes = [
         component: PublicPoiSidebarComponent
     },
     {
-        path: `${RouteStrings.DOWNLOAD}`,
-        component: ApplicationStateComponent
-    },
-    {
         path: "",
         component: ApplicationStateComponent,
         pathMatch: "full"

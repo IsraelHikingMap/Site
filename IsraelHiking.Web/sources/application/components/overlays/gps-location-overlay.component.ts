@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { MatDialog } from "@angular/material";
-import { NgRedux } from "@angular-redux/store";
+import { NgRedux, select } from "@angular-redux/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
@@ -9,6 +9,8 @@ import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { AddPrivatePoiAction } from "../../reducres/routes.reducer";
 import { ApplicationState, LatLngAlt } from "../../models/models";
+import { ToggleDistanceAction } from '../../reducres/in-memory.reducer';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: "gps-location-overlay",
@@ -22,7 +24,12 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     @Output()
     public closed = new EventEmitter();
 
+    @select((state: ApplicationState) => state.inMemoryState.distance)
+    public distance$: Observable<boolean>;
+
     public hideCoordinates: boolean;
+
+
 
     constructor(resources: ResourcesService,
                 private readonly matDialog: MatDialog,
@@ -58,6 +65,11 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
             markerType: "star",
             title: ""
         });
+        this.closed.emit();
+    }
+
+    public toggleDistance() {
+        this.ngRedux.dispatch(new ToggleDistanceAction());
         this.closed.emit();
     }
 }

@@ -81,17 +81,6 @@ describe("HashService", () => {
                     { queryParams: { baselayer: "www.layer.com" }, replaceUrl: true });
             }));
 
-    it("Should allow download parameter in hash",
-        inject([Router, Window, NgRedux],
-            (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
-
-                windowMock.location.hash = "#!/?download";
-
-                hashService = new HashService(router, windowMock, null, ngRedux);
-
-                expect(router.navigate).toHaveBeenCalledWith([RouteStrings.ROUTE_DOWNLOAD], { replaceUrl: true });
-            }));
-
     it("Should return base url",
         inject([Router, Window],
             (router: Router, windowMock: Window) => {

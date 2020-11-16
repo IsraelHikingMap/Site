@@ -4,7 +4,7 @@
  * this state should be clean every time the app starts
  */
 export interface InMemoryState {
-    download: boolean;
+    distance: boolean;
     baseLayer: string;
     fileUrl: string;
     shareUrl: ShareUrl;

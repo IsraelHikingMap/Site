@@ -18,13 +18,11 @@ export class RouteStrings {
     public static readonly SHARE = "share";
     public static readonly URL = "url";
     public static readonly POI = "poi";
-    public static readonly DOWNLOAD = "download";
     public static readonly ROUTE_ROOT = "/";
     public static readonly ROUTE_MAP = `/${RouteStrings.MAP}`;
     public static readonly ROUTE_SHARE = `/${RouteStrings.SHARE}`;
     public static readonly ROUTE_URL = `/${RouteStrings.URL}`;
     public static readonly ROUTE_POI = `/${RouteStrings.POI}`;
-    public static readonly ROUTE_DOWNLOAD = `/${RouteStrings.DOWNLOAD}`;
 
     public static readonly LAT = "lat";
     public static readonly LON = "lon";
@@ -100,11 +98,6 @@ export class HashService {
         let externalUrl = searchParams.get(HashService.URL);
         if (externalUrl) {
             this.router.navigate([RouteStrings.ROUTE_URL, externalUrl], { queryParams: { baselayer: baseLayer }, replaceUrl: true });
-            return;
-        }
-        let download = searchParams.has(HashService.DOWNLOAD);
-        if (download) {
-            this.router.navigate([RouteStrings.ROUTE_DOWNLOAD], { replaceUrl: true });
             return;
         }
         let shareUrlId = searchParams.get(HashService.SITE_SHARE);

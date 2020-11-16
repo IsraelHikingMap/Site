@@ -49,3 +49,47 @@
 <mgl-popup *ngIf="locationLatLng" [lngLat]="locationLatLng" (close)="locationLatLng = null">
     <gps-location-overlay [latlng]="locationLatLng" (closed)="locationLatLng = null"></gps-location-overlay>
 </mgl-popup>
+
+<mgl-geojson-source id="distance-source" [data]="distanceFeatures"></mgl-geojson-source>
+<mgl-layer *ngIf="showDistance" id="distance-line"
+           type="line"
+           source="distance-source"
+           [filter]="['==', '$type', 'LineString']"
+           [layout]="{
+                'line-cap': 'butt',
+                'line-join': 'bevel'
+           }"
+           [paint]="{
+                'line-color': 'black',
+                'line-width': 5
+            }">
+</mgl-layer>
+<mgl-layer *ngIf="showDistance" id="distance-line-text"
+            type="symbol"
+            source="distance-source"
+            [filter]="['==', '$type', 'LineString']"
+            [layout]="{
+                'symbol-placement': 'line-center',
+                'text-font': ['Open Sans Regular'],
+                'text-field': ['get', 'distance'],
+                'text-size': 18,
+                'text-allow-overlap': true,
+                'text-ignore-placement': false,
+                'text-offset': [0, 0.75]
+            }"
+           [paint]="{
+                'text-halo-width': 2,
+                'text-halo-color': 'rgba(255,255,255,0.75)'
+            }">
+</mgl-layer>
+<mgl-layer *ngIf="showDistance" id="distance-end"
+           type="circle"
+           source="distance-source"
+           [filter]="['==', '$type', 'Point']"
+           [paint]="{
+                'circle-radius': 12,
+                'circle-stroke-color': 'black',
+                'circle-stroke-width': 2,
+                'circle-opacity': 0
+            }">
+</mgl-layer>

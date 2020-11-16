@@ -279,6 +279,7 @@ export class ResourcesService {
     public statisticsAndHeightChart: string;
     public shareMapOverlays: string;
     public exit: string;
+    public measureDistanceFromCurrentLocation: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -543,7 +544,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1604349005320");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1605562239666");
 
         this.about = this.gettextCatalog.getString("About");
         this.help = this.gettextCatalog.getString("Help");
@@ -805,6 +806,7 @@ export class ResourcesService {
         this.statisticsAndHeightChart = this.gettextCatalog.getString("Statistics and Height Chart");
         this.shareMapOverlays = this.gettextCatalog.getString("Share maps overlays");
         this.exit = this.gettextCatalog.getString("Exit");
+        this.measureDistanceFromCurrentLocation = this.gettextCatalog.getString("Measure distance from current location");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

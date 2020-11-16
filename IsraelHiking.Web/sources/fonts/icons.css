@@ -1,10 +1,9 @@
 @font-face {
   font-family: 'IsraelHikingMap';
-  src:  url('IsraelHikingMap.eot?xofrtf');
-  src:  url('IsraelHikingMap.eot?xofrtf#iefix') format('embedded-opentype'),
-    url('IsraelHikingMap.ttf?xofrtf') format('truetype'),
-    url('IsraelHikingMap.woff?xofrtf') format('woff'),
-    url('IsraelHikingMap.svg?xofrtf#IsraelHikingMap') format('svg');
+  src:
+    url('IsraelHikingMap.ttf?pq32nj') format('truetype'),
+    url('IsraelHikingMap.woff?pq32nj') format('woff'),
+    url('IsraelHikingMap.svg?pq32nj#IsraelHikingMap') format('svg');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -25,153 +24,155 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-tap:before {
-  content: "\e930";
-}
-.icon-parking:before {
-  content: "\e92c";
-}
-.icon-bollards:before {
-  content: "\e92d";
-}
-.icon-cattle-grid:before {
-  content: "\e92e";
-}
-.icon-gate:before {
-  content: "\e92f";
-}
-.icon-online:before {
-  content: "\e92b";
-}
-.icon-waze:before {
-  content: "\e92a";
-  color: #333665;
-}
-.icon-offline:before {
-  content: "\e929";
-}
-.icon-merge:before {
-  content: "\e928";
-}
-.icon-avg-speed:before {
-  content: "\e926";
-}
-.icon-speed:before {
-  content: "\e927";
-}
-.icon-north:before {
-  content: "\e925";
-}
-.icon-follow-me:before {
+.icon-measure:before {
   content: "\e900";
 }
-.icon-recordings:before {
+.icon-follow-me:before {
   content: "\e901";
 }
-.icon-routes:before {
+.icon-recordings:before {
   content: "\e902";
 }
-.icon-jeepolog:before {
+.icon-routes:before {
   content: "\e903";
 }
-.icon-kaldanei-hashetakh:before {
+.icon-jeepolog:before {
   content: "\e904";
 }
-.icon-loveil:before {
+.icon-kaldanei-hashetakh:before {
   content: "\e905";
 }
-.icon-bike:before {
+.icon-loveil:before {
   content: "\e906";
 }
-.icon-hike:before {
+.icon-bike:before {
   content: "\e907";
 }
-.icon-none:before {
+.icon-hike:before {
   content: "\e908";
 }
-.icon-map-editing:before {
+.icon-none:before {
   content: "\e909";
 }
-.icon-layers:before {
+.icon-map-editing:before {
   content: "\e90a";
 }
-.icon-map-marker:before {
+.icon-layers:before {
   content: "\e90b";
 }
-.icon-four-by-four:before {
+.icon-map-marker:before {
   content: "\e90c";
 }
-.icon-save-as:before {
+.icon-four-by-four:before {
   content: "\e90d";
 }
-.icon-routing-local:before {
+.icon-save-as:before {
   content: "\e90e";
 }
-.icon-routing-global:before {
+.icon-routing-local:before {
   content: "\e90f";
 }
-.icon-nakeb:before {
+.icon-routing-global:before {
   content: "\e910";
 }
-.icon-off-road:before {
+.icon-nakeb:before {
   content: "\e911";
 }
-.icon-map-marker-rect:before {
+.icon-off-road:before {
   content: "\e912";
 }
-.icon-bus-stop:before {
+.icon-map-marker-rect:before {
   content: "\e913";
 }
-.icon-campsite:before {
+.icon-bus-stop:before {
   content: "\e914";
 }
-.icon-cave:before {
+.icon-campsite:before {
   content: "\e915";
 }
-.icon-nature-reserve:before {
+.icon-cave:before {
   content: "\e916";
 }
-.icon-peak:before {
+.icon-nature-reserve:before {
   content: "\e917";
 }
-.icon-picnic:before {
+.icon-peak:before {
   content: "\e918";
 }
-.icon-ruins:before {
+.icon-picnic:before {
   content: "\e919";
 }
-.icon-viewpoint:before {
+.icon-ruins:before {
   content: "\e91a";
 }
-.icon-flowers:before {
+.icon-viewpoint:before {
   content: "\e91b";
 }
-.icon-archaeological:before {
+.icon-flowers:before {
   content: "\e91c";
 }
-.icon-cistern:before {
+.icon-archaeological:before {
   content: "\e91d";
 }
-.icon-memorial:before {
+.icon-cistern:before {
   content: "\e91e";
 }
-.icon-monument:before {
+.icon-memorial:before {
   content: "\e91f";
 }
-.icon-waterhole:before {
+.icon-monument:before {
   content: "\e920";
 }
-.icon-water-well:before {
+.icon-waterhole:before {
   content: "\e921";
 }
-.icon-waterfall:before {
+.icon-water-well:before {
   content: "\e922";
 }
-.icon-map-marker-group:before {
+.icon-waterfall:before {
   content: "\e923";
 }
-.icon-inature:before {
+.icon-map-marker-group:before {
   content: "\e924";
+}
+.icon-inature:before {
+  content: "\e925";
+}
+.icon-north:before {
+  content: "\e926";
+}
+.icon-avg-speed:before {
+  content: "\e927";
+}
+.icon-speed:before {
+  content: "\e928";
+}
+.icon-merge:before {
+  content: "\e929";
+}
+.icon-offline:before {
+  content: "\e92a";
+}
+.icon-waze:before {
+  content: "\e92b";
+}
+.icon-online:before {
+  content: "\e92c";
+}
+.icon-parking:before {
+  content: "\e92d";
+}
+.icon-bollards:before {
+  content: "\e92e";
+}
+.icon-cattle-grid:before {
+  content: "\e92f";
+}
+.icon-gate:before {
+  content: "\e930";
+}
+.icon-tap:before {
+  content: "\e931";
 }
 .icon-glass:before {
   content: "\f000";

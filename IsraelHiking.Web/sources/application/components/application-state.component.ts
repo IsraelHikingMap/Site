@@ -7,7 +7,7 @@ import { RouteStrings } from "../services/hash.service";
 import { SidebarService } from "../services/sidebar.service";
 import { DataContainerService } from "../services/data-container.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
-import { SetDownloadAction, SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducres/in-memory.reducer";
+import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducres/in-memory.reducer";
 import { ApplicationState } from "../models/models";
 
 @Component({
@@ -39,12 +39,9 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL)) {
                 this.dataContainerService.setFileUrlAfterNavigation(params[RouteStrings.ID],
                     this.route.snapshot.queryParamMap.get(RouteStrings.BASE_LAYER));
-            } else if (this.router.url.startsWith(RouteStrings.ROUTE_DOWNLOAD)) {
-                this.ngRedux.dispatch(new SetDownloadAction({ download: true }));
             } else if (this.router.url === RouteStrings.ROUTE_ROOT) {
                 this.ngRedux.dispatch(new SetFileUrlAndBaseLayerAction({ fileUrl: null, baseLayer: null }));
                 this.ngRedux.dispatch(new SetShareUrlAction({ shareUrl: null }));
-                // HM TODO: clear POI?
                 this.sidebarService.hideWithoutChangingAddressbar();
             }
         });

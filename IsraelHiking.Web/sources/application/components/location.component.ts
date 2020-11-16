@@ -1,6 +1,8 @@
 import { Component } from "@angular/core";
+import { NgRedux, select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
 import { MapComponent } from "ngx-mapbox-gl";
+import { Observable } from 'rxjs';
 
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -12,7 +14,7 @@ import { SelectedRouteService } from "../services/layers/routelayers/selected-ro
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
-import { LatLngAlt } from "../models/models";
+import { LatLngAlt, ApplicationState } from "../models/models";
 
 @Component({
     selector: "location",
@@ -26,14 +28,19 @@ export class LocationComponent extends BaseMapComponent {
     @LocalStorage()
     private showBatteryConfirmation = true;
 
+    @select((state: ApplicationState) => state.inMemoryState.distance)
+    public distance$: Observable<boolean>;
+
     private isPanned: boolean;
     private lastSpeed: number;
     private lastSpeedTime: number;
 
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+    public distanceFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public isFollowing: boolean;
     public isKeepNorthUp: boolean;
     public locationLatLng: LatLngAlt;
+    public showDistance: boolean;
 
     constructor(resources: ResourcesService,
                 private readonly geoLocationService: GeoLocationService,
@@ -43,7 +50,8 @@ export class LocationComponent extends BaseMapComponent {
                 private readonly cancelableTimeoutService: CancelableTimeoutService,
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly deviceOrientationService: DeviceOrientationService,
-                private readonly host: MapComponent) {
+                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly mapComponent: MapComponent) {
         super(resources);
 
         this.isFollowing = true;
@@ -54,8 +62,13 @@ export class LocationComponent extends BaseMapComponent {
         this.lastSpeedTime = null;
         this.clearLocationFeatureCollection();
 
-        this.host.load.subscribe(() => {
-            this.host.mapInstance.on("dragstart",
+        this.distance$.subscribe(distance => {
+            this.showDistance = distance;
+            this.updateDistanceFeatureCollection();
+        });
+
+        this.mapComponent.load.subscribe(() => {
+            this.mapComponent.mapInstance.on("dragstart",
                 () => {
                     if (!this.isActive()) {
                         return;
@@ -71,6 +84,9 @@ export class LocationComponent extends BaseMapComponent {
                         LocationComponent.NOT_FOLLOWING_TIMEOUT,
                         "panned");
                 });
+            this.mapComponent.mapInstance.on("move", () => {
+                this.updateDistanceFeatureCollection();
+            });
         });
 
         this.geoLocationService.positionChanged.subscribe(
@@ -95,7 +111,7 @@ export class LocationComponent extends BaseMapComponent {
             let center = this.getCenterFromLocationFeatureCollection();
             let radius = this.getRadiusFromLocationFeatureCollection();
             this.updateLocationFeatureCollection(center, radius, bearing);
-            if (!this.host.mapInstance.isMoving() && this.isFollowingLocation()) {
+            if (!this.mapComponent.mapInstance.isMoving() && this.isFollowingLocation()) {
                 this.moveMapToGpsPosition();
             }
         });
@@ -120,15 +136,15 @@ export class LocationComponent extends BaseMapComponent {
     public toggleKeepNorthUp() {
         this.isKeepNorthUp = !this.isKeepNorthUp;
         if (this.isKeepNorthUp) {
-           this.host.mapInstance.rotateTo(0);
+           this.mapComponent.mapInstance.rotateTo(0);
         }
     }
 
     public getRotationAngle() {
-        if (this.host.mapInstance == null) {
+        if (this.mapComponent.mapInstance == null) {
             return 0;
         }
-        return `rotate(${-this.host.mapInstance.getBearing()}deg)`;
+        return `rotate(${-this.mapComponent.mapInstance.getBearing()}deg)`;
     }
 
     public toggleTracking() {
@@ -218,7 +234,7 @@ export class LocationComponent extends BaseMapComponent {
             lng: position.coords.longitude,
             alt: position.coords.altitude
         }, position.coords.accuracy, heading);
-        if (!this.host.mapInstance.isMoving() && this.isFollowingLocation()) {
+        if (!this.mapComponent.mapInstance.isMoving() && this.isFollowingLocation()) {
             this.moveMapToGpsPosition();
         }
     }
@@ -244,7 +260,7 @@ export class LocationComponent extends BaseMapComponent {
         let bearing = this.isKeepNorthUp
             ? 0
             : this.getBrearingFromLocationFeatureCollection();
-        this.fitBoundsService.moveTo(center, this.host.mapInstance.getZoom(), bearing);
+        this.fitBoundsService.moveTo(center, this.mapComponent.mapInstance.getZoom(), bearing);
     }
 
     private getCenterFromLocationFeatureCollection(): LatLngAlt {
@@ -256,7 +272,7 @@ export class LocationComponent extends BaseMapComponent {
     private getBrearingFromLocationFeatureCollection(): number {
         let pointFeature = this.locationFeatures.features.find(f => f.geometry.type === "Point");
         return pointFeature == null
-            ? this.host.mapInstance.getBearing()
+            ? this.mapComponent.mapInstance.getBearing()
             : pointFeature.properties.heading;
     }
 
@@ -273,6 +289,7 @@ export class LocationComponent extends BaseMapComponent {
             type: "FeatureCollection",
             features: []
         };
+        this.clearDistanceFeatureCollection();
     }
 
     private updateLocationFeatureCollection(center: LatLngAlt, radius: number, heading: number) {
@@ -291,5 +308,45 @@ export class LocationComponent extends BaseMapComponent {
             type: "FeatureCollection",
             features
         };
+        this.updateDistanceFeatureCollection();
+    }
+
+    private clearDistanceFeatureCollection() {
+        this.distanceFeatures = {
+            type: "FeatureCollection",
+            features: []
+        };
+    }
+
+    private updateDistanceFeatureCollection() {
+        if (!this.isActive() || !this.showDistance) {
+            this.clearDistanceFeatureCollection();
+            return;
+        }
+
+        let center = this.mapComponent.mapInstance.getCenter();
+        let gps = this.getCenterFromLocationFeatureCollection();
+        let distance = SpatialService.getDistanceInMeters(center, gps);
+        this.distanceFeatures = {
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: {
+                    distance: (distance / 1000.0).toFixed(2) + " " + this.resources.kmUnit
+                },
+                geometry: {
+                    type: "LineString",
+                    coordinates: [SpatialService.toCoordinate(gps), SpatialService.toCoordinate(center)]
+                }
+            },
+            {
+                type: "Feature",
+                properties: {},
+                geometry: {
+                    type: "Point",
+                    coordinates: SpatialService.toCoordinate(center)
+                }
+            }]
+        }
     }
 }

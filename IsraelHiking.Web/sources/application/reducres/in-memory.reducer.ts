@@ -1,15 +1,13 @@
-import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
+import { Action } from "redux";
 
+import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
 import { ShareUrl, InMemoryState } from "../models/models";
 import { initialState } from "./initial-state";
 
-const SET_DOWNLOAD = "SET_DOWNLOAD";
+const TOGGLE_DISTNACE = "TOGGLE_DISTNACE";
 const SET_SHARE_URL = "SET_SHARE_URL";
 const SET_FILE_URL_AND_BASE_LAYER = "SET_FILE_URL_AND_BASE_LAYER";
 
-export interface SetDownloadPayload {
-    download: boolean;
-}
 
 export interface SetShareUrlPayload {
     shareUrl: ShareUrl;
@@ -20,9 +18,10 @@ export interface SetFileUrlAndBaseLayerPayload {
     baseLayer: string;
 }
 
-export class SetDownloadAction extends BaseAction<SetDownloadPayload> {
-    constructor(payload: SetDownloadPayload) {
-        super(SET_DOWNLOAD, payload);
+export class ToggleDistanceAction implements Action {
+    public type: string;
+    constructor() {
+        this.type = TOGGLE_DISTNACE
     }
 }
 
@@ -39,11 +38,11 @@ export class SetFileUrlAndBaseLayerAction extends BaseAction<SetFileUrlAndBaseLa
 }
 
 export class InMemoryReducer {
-    @ReduxAction(SET_DOWNLOAD)
-    public setDownload(lastState: InMemoryState, action: SetDownloadAction): InMemoryState {
+    @ReduxAction(TOGGLE_DISTNACE)
+    public toggleDistance(lastState: InMemoryState, action: ToggleDistanceAction): InMemoryState {
         return {
             ...lastState,
-            download: action.payload.download
+            distance: !lastState.distance
         };
     }
 

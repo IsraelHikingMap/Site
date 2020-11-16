@@ -124,7 +124,7 @@ export const initialState =
             isSidebarOpen: false
         },
         inMemoryState: {
-            download: false,
+            distance: false,
             shareUrl: null,
             fileUrl: null,
             baseLayer: null
