@@ -319,6 +319,9 @@ export class PoiService {
             let feature = await this.databaseService.getPoiById(id);
             let point = this.featureToPoint(feature);
             results.push(point);
+            if (results.length === 10) {
+                return results;
+            }
         }
         return results;
     }
