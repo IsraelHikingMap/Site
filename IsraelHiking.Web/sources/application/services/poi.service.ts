@@ -102,10 +102,10 @@ export class PoiService {
             features: []
         };
         this.miniSearch = new MiniSearch({
-            idField: "poiId",
+            idField: "properties.poiId",
             extractField: (p: GeoJSON.Feature<GeoJSON.Geometry>, fieldName) => p.properties.poiNames[fieldName],
             fields: ["he", "en"], // fields to index for full-text search
-            storeFields: ["poiId"]
+            storeFields: ["properties.poiId"]
         });
     }
 
