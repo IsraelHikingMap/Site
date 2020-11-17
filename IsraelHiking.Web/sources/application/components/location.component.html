@@ -56,30 +56,12 @@
            source="distance-source"
            [filter]="['==', '$type', 'LineString']"
            [layout]="{
-                'line-cap': 'butt',
+                'line-cap': 'round',
                 'line-join': 'bevel'
            }"
            [paint]="{
-                'line-color': 'black',
+                'line-color': 'magenta',
                 'line-width': 5
-            }">
-</mgl-layer>
-<mgl-layer *ngIf="showDistance" id="distance-line-text"
-            type="symbol"
-            source="distance-source"
-            [filter]="['==', '$type', 'LineString']"
-            [layout]="{
-                'symbol-placement': 'line-center',
-                'text-font': ['Open Sans Regular'],
-                'text-field': ['get', 'distance'],
-                'text-size': 18,
-                'text-allow-overlap': true,
-                'text-ignore-placement': false,
-                'text-offset': [0, 0.75]
-            }"
-           [paint]="{
-                'text-halo-width': 2,
-                'text-halo-color': 'rgba(255,255,255,0.75)'
             }">
 </mgl-layer>
 <mgl-layer *ngIf="showDistance" id="distance-end"
@@ -88,8 +70,27 @@
            [filter]="['==', '$type', 'Point']"
            [paint]="{
                 'circle-radius': 12,
-                'circle-stroke-color': 'black',
+                'circle-stroke-color': 'magenta',
                 'circle-stroke-width': 2,
                 'circle-opacity': 0
+            }">
+</mgl-layer>
+<mgl-layer *ngIf="showDistance" id="distance-line-text"
+           type="symbol"
+           source="distance-source"
+           [filter]="['==', '$type', 'Point']"
+           [layout]="{
+                'symbol-placement': 'point',
+                'text-font': ['Open Sans Regular'],
+                'text-field': ['get', 'distance'],
+                'text-size': 18,
+                'text-allow-overlap': true,
+                'text-ignore-placement': false,
+                'text-offset': [0, -1.5]
+            }"
+           [paint]="{
+                'text-color': 'magenta',
+                'text-halo-width': 2,
+                'text-halo-color': 'rgba(255,255,255,0.75)'
             }">
 </mgl-layer>

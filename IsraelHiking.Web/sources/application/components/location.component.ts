@@ -331,9 +331,7 @@ export class LocationComponent extends BaseMapComponent {
             type: "FeatureCollection",
             features: [{
                 type: "Feature",
-                properties: {
-                    distance: (distance / 1000.0).toFixed(2) + " " + this.resources.kmUnit
-                },
+                properties: {},
                 geometry: {
                     type: "LineString",
                     coordinates: [SpatialService.toCoordinate(gps), SpatialService.toCoordinate(center)]
@@ -341,7 +339,9 @@ export class LocationComponent extends BaseMapComponent {
             },
             {
                 type: "Feature",
-                properties: {},
+                properties: {
+                    distance: (distance / 1000.0).toFixed(2) + " " + this.resources.kmUnit
+                },
                 geometry: {
                     type: "Point",
                     coordinates: SpatialService.toCoordinate(center)
