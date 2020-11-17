@@ -5,6 +5,7 @@ import { uniq } from "lodash";
 import { Observable, fromEvent } from "rxjs";
 import { timeout, throttleTime } from "rxjs/operators";
 import JSZip from "jszip";
+import MiniSearch from "minisearch";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, IPoiRouterData } from "./hash.service";
@@ -62,7 +63,7 @@ export interface ISelectableCategory extends Category {
 export class PoiService {
     private poisCache: PointOfInterestExtended[];
     private poisGeojson: GeoJSON.FeatureCollection<GeoJSON.Point>;
-    private searchTermMap: Map<string, string[]>;
+    private miniSearch: MiniSearch;
 
     public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public poisChanged: EventEmitter<void>;
@@ -100,8 +101,12 @@ export class PoiService {
             type: "FeatureCollection",
             features: []
         };
-
-        this.searchTermMap = new Map<string, string[]>();
+        this.miniSearch = new MiniSearch({
+            idField: "poiId",
+            extractField: (p: GeoJSON.Feature<GeoJSON.Geometry>, fieldName) => p.properties.poiNames[fieldName],
+            fields: ["he", "en"], // fields to index for full-text search
+            storeFields: ["poiId"]
+        });
     }
 
     public async initialize() {
@@ -169,19 +174,7 @@ export class PoiService {
 
     private async rebuildPois() {
         this.poisGeojson.features = await this.databaseService.getPoisForClustering();
-        for (let feature of this.poisGeojson.features) {
-            let language = this.resources.getCurrentLanguageCodeSimplified();
-            if (!feature.properties.poiNames[language] || feature.properties.poiNames[language].length === 0) {
-                continue;
-            }
-            for (let name of feature.properties.poiNames[language]) {
-                if (this.searchTermMap.has(name)) {
-                    this.searchTermMap.get(name).push(feature.properties.poiId);
-                } else {
-                    this.searchTermMap.set(name, [feature.properties.poiId]);
-                }
-            }
-        }
+        this.miniSearch.addAllAsync(this.poisGeojson.features);
         this.updatePois();
     }
 
@@ -310,10 +303,7 @@ export class PoiService {
     }
 
     public async getSerchResults(searchTerm: string): Promise<PointOfInterestExtended[]> {
-        let ids = this.searchTermMap.get(searchTerm);
-        if (!ids) {
-            return [];
-        }
+        let ids = this.miniSearch.search(searchTerm).map(r => r.id);
         let results = [];
         for (let id of uniq(ids)) {
             let feature = await this.databaseService.getPoiById(id);
