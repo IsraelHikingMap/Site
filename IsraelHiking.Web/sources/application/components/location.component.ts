@@ -4,8 +4,8 @@ import { LocalStorage } from "ngx-store";
 import { MapComponent } from "ngx-mapbox-gl";
 import { Observable } from "rxjs";
 
-import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
+import { ResourcesService } from "../services/resources.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToastService } from "../services/toast.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
@@ -14,6 +14,7 @@ import { SelectedRouteService } from "../services/layers/routelayers/selected-ro
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
+import { ToggleDistanceAction } from "../reducres/in-memory.reducer";
 import { LatLngAlt, ApplicationState } from "../models/models";
 
 @Component({
@@ -77,6 +78,9 @@ export class LocationComponent extends BaseMapComponent {
                     this.cancelableTimeoutService.clearTimeoutByGroup("panned");
                     this.cancelableTimeoutService.setTimeoutByGroup(() => {
                         this.isPanned = false;
+                        if (this.showDistance) {
+                            this.ngRedux.dispatch(new ToggleDistanceAction());
+                        }
                         if (this.isFollowingLocation()) {
                             this.moveMapToGpsPosition();
                         }
@@ -160,6 +164,9 @@ export class LocationComponent extends BaseMapComponent {
         if (!this.isFollowing || this.isPanned) {
             this.isFollowing = true;
             this.isPanned = false;
+            if (this.showDistance) {
+                this.ngRedux.dispatch(new ToggleDistanceAction());
+            }
             this.moveMapToGpsPosition();
             return;
         }
