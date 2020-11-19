@@ -38,22 +38,10 @@ export class RouteStrings {
 export class HashService {
 
     private static readonly PERSICION = 4;
-    private static readonly BASE_LAYER = "baselayer";
-    private static readonly URL = "url";
-    private static readonly DOWNLOAD = "download";
-    private static readonly SITE_SHARE = "s";
-    private static readonly HASH = "#!/";
-    private static readonly LOCATION_REGEXP = /\/(\d+)\/([-+]?[0-9]*\.?[0-9]+)\/([-+]?[0-9]*\.?[0-9]+)/;
-
-    private readonly window: Window;
 
     constructor(private readonly router: Router,
-                @Inject("Window") window: any, // bug in angular aot
                 private readonly mapService: MapService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
-
-        this.window = window;
-        this.backwardCompatibilitySupport();
     }
 
     public resetAddressbar(): void {
@@ -86,45 +74,6 @@ export class HashService {
             location.longitude.toFixed(HashService.PERSICION)
         ],
             { replaceUrl: true });
-    }
-
-    private backwardCompatibilitySupport() {
-        if (this.window.location.hash.indexOf(HashService.HASH) < 0) {
-            return;
-        }
-        let simplifiedHash = this.window.location.hash.replace(HashService.LOCATION_REGEXP, "").replace(`${HashService.HASH}?`, "");
-        let searchParams = new HttpParams({ fromString: simplifiedHash });
-        let baseLayer = searchParams.get(HashService.BASE_LAYER);
-        let externalUrl = searchParams.get(HashService.URL);
-        if (externalUrl) {
-            this.router.navigate([RouteStrings.ROUTE_URL, externalUrl], { queryParams: { baselayer: baseLayer }, replaceUrl: true });
-            return;
-        }
-        let shareUrlId = searchParams.get(HashService.SITE_SHARE);
-        if (shareUrlId) {
-            this.router.navigate([RouteStrings.ROUTE_SHARE, shareUrlId], { replaceUrl: true });
-            return;
-        }
-        let latLng = this.parsePathToGeoLocation();
-        if (latLng != null) {
-            this.router.navigate([RouteStrings.ROUTE_MAP, latLng.alt + 1, latLng.lat, latLng.lng], { replaceUrl: true });
-            return;
-        }
-        // no flags - navigate to root
-        this.router.navigate([RouteStrings.ROUTE_ROOT], { replaceUrl: true });
-    }
-
-    private parsePathToGeoLocation(): LatLngAlt {
-        let path = this.window.location.hash;
-        if (!HashService.LOCATION_REGEXP.test(path)) {
-            return null;
-        }
-        let array = HashService.LOCATION_REGEXP.exec(path);
-        return {
-            lat: +array[2],
-            lng: +array[3],
-            alt: +array[1] - 1
-        };
     }
 
     public getHref(): string {

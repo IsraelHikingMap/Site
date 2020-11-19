@@ -178,8 +178,6 @@ export function initializeApplication(injector: Injector) {
     };
 }
 
-export function getWindow() { return window; }
-
 @NgModule({
         imports: [
             CommonModule,
@@ -268,7 +266,6 @@ export function getWindow() { return window; }
             LocalStorageService,
             AuthorizationService,
             { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
-            { provide: "Window", useFactory: getWindow },
             { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [Injector], multi: true },
             { provide: ErrorHandler, useClass: GlobalErrorHandler },
             NgxD3Service,
