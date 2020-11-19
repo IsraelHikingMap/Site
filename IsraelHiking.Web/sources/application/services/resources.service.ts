@@ -213,7 +213,6 @@ export class ResourcesService {
     public continue: string;
     public navigateHere: string;
     public updateLocation: string;
-    public files: string;
     public attribution: string;
     public routePlanning: string;
     public createShare: string;
@@ -646,7 +645,6 @@ export class ResourcesService {
         this.continue = this.gettextCatalog.getString("Continue");
         this.navigateHere = this.gettextCatalog.getString("Navigate Here");
         this.updateLocation = this.gettextCatalog.getString("Update the point's location");
-        this.files = this.gettextCatalog.getString("Files");
         this.attribution = this.gettextCatalog.getString("Attribution");
         this.routePlanning = this.gettextCatalog.getString("Route Planning");
         this.createShare = this.gettextCatalog.getString("Create Share");

@@ -38,7 +38,7 @@
                         <span><i class="fa fa-lg icon-layers mat-icon"></i> {{resources.layers}}</span>
                     </button>
                     <button mat-menu-item (click)="selectSharesAndFiles()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open search and files">
-                        <span><i class="fa fa-lg icon-share-alt mat-icon"></i> {{resources.share}} - {{resources.files}}</span>
+                        <span><i class="fa fa-lg icon-share-alt mat-icon"></i> {{resources.save}} - {{resources.share}} - {{resources.export}}</span>
                     </button>
                     <button mat-menu-item *ngIf="!isLoggedIn()" (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
                         <span><i class="fa fa-lg icon-sign-in mat-icon"></i> {{resources.login}}</span>
