@@ -33,7 +33,6 @@ export class ResourcesService {
     // All the text in the app //
     /////////////////////////////
     public about: string;
-    public help: string;
     public legend: string;
     public clear: string;
     public editPoi: string;
@@ -48,7 +47,6 @@ export class ResourcesService {
     public openAFile: string;
     public saveAs: string;
     public save: string;
-    public print: string;
     public deleteLayer: string;
     public layers: string;
     public baseLayerProperties: string;
@@ -59,8 +57,6 @@ export class ResourcesService {
     public addRoute: string;
     public saveRouteToFile: string;
     public reverseRoute: string;
-    public toggleVisibility: string;
-    public toggleRoutingPerSegment: string;
     public deleteRoute: string;
     public search: string;
     public share: string;
@@ -68,18 +64,13 @@ export class ResourcesService {
     public zoomIn: string;
     public zoomOut: string;
     public showMeWhereIAm: string;
-    public excitedGo: string;
     public name: string;
     public address: string;
     public minZoom: string;
     public maxZoom: string;
-    public widthInPixels: string;
-    public color: string;
     public opacity: string;
     public deletePoi: string;
     public showCoordinates: string;
-    public coordinatesForWikipedia: string;
-    public wikipedia: string;
     public length: string;
     public gain: string;
     public loss: string;
@@ -92,37 +83,20 @@ export class ResourcesService {
     public heightInMeters: string;
     public distanceInKm: string;
     public searchPlaceHolder: string;
-    public embedSize: string;
-    public small: string;
-    public medium: string;
-    public large: string;
-    public custom: string;
-    public html: string;
     public close: string;
-    public northAbbreviation: string;
-    public eastAbbreviation: string;
-    public latitudeAbbreviation: string;
-    public longitudeAbbreviation: string;
     public layerNamePlaceHolder: string;
-    public shareYourWork: string;
     public language: string;
     public elevation: string;
     public slope: string;
     public convertToRoute: string;
     public addPointToRoute: string;
-    public removeSearchResults: string;
     public israelMTBMap: string;
     public israelHikingMap: string;
-    public googleEarth: string;
+    public satelliteImagery: string;
     public hikingTrails: string;
-    public wiki: string;
     public route: string;
-    public from: string;
-    public to: string;
     public directionalSearch: string;
-    public regularSearch: string;
     public moveToRoute: string;
-    public unknownUser: string;
     public myTraces: string;
     public noTraces: string;
     public myShares: string;
@@ -131,33 +105,15 @@ export class ResourcesService {
     public titlePlaceHolder: string;
     public description: string;
     public descriptionPlaceHolder: string;
-    public osmLoginExplanation: string;
     public application: string;
     public map: string;
     public startDownload: string;
-    public views: string;
-    public lastViewed: string;
     public detailsLevel: string;
     public upToZoom: string;
     public installationInstructions: string;
     public offlineMapBenefits: string;
-    public installationInstructionsMobileOruxMaps: string;
-    public installationInstructionsMobileLocus: string;
     public installationInstructionsDesktopOruxMaps: string;
     public installationInstructionsDesktopLocus: string;
-    public mapsAreUpdatedEveryTwoDays: string;
-    public junior: string;
-    public partner: string;
-    public master: string;
-    public guru: string;
-    public changes: string;
-    public userEmail: string;
-    public difficulty: string;
-    public easy: string;
-    public moderate: string;
-    public hard: string;
-    public activity: string;
-    public send: string;
     public view: string;
     public edit: string;
     public update: string;
@@ -172,7 +128,6 @@ export class ResourcesService {
     public addThisRouteToOsm: string;
     public uploadFileToOsm: string;
     public selectIcon: string;
-    public nakeb: string;
     public split: string;
     public merge: string;
     public public: string;
@@ -182,39 +137,28 @@ export class ResourcesService {
     public moreMapAddresses: string;
     public categories: string;
     public emptyPoiDescription: string;
-    public comingSoon: string;
-    public itsYourTimeToShine: string;
-    public worthIt: string;
-    public notWorthIt: string;
-    public loading: string;
     public natural: string;
     public camping: string;
     public other: string;
-    public uploadPoint: string;
-    public updatePoint: string;
-    public addPoint: string;
     public spring: string;
     public historic: string;
-    public website: string;
-    public aLinkToAWebsite: string;
-    public clickToUpload: string;
-    public clickToEdit: string;
-    public more: string;
-    public less: string;
+    public flowers: string;
+    public wikipedia: string;
     public routes: string;
     public hiking: string;
     public bicycle: string;
+    public uploadPoint: string;
+    public website: string;
+    public aLinkToAWebsite: string;
+    public more: string;
+    public less: string;
     public termsOfService: string;
     public termsOfServiceElaborated: string;
     public osmTermsOfService: string;
     public wikimediaTermsOfService: string;
     public iHaveReadAndAgree: string;
     public submit: string;
-    public esri: string;
-    public satelliteImagery: string;
-    public suggestAsPublicTrack: string;
     public createNakebHike: string;
-    public flowers: string;
     public updateCurrentShare: string;
     public generateMarkersForAllPoints: string;
     public yes: string;
@@ -223,7 +167,6 @@ export class ResourcesService {
     public cancel: string;
     public areYouSure: string;
     public deletionOf: string;
-    public myProfile: string;
     public login: string;
     public logout: string;
     public openInANewWindow: string;
@@ -237,7 +180,6 @@ export class ResourcesService {
     public clearRoute: string;
     public clearPois: string;
     public clearBoth: string;
-    public collapse: string;
     public local: string;
     public northUp: string;
     public deleteAllRoutes: string;
@@ -253,7 +195,6 @@ export class ResourcesService {
     public reportAnIssueInstructions: string;
     public addPointToActiveRoute: string;
     public advancedSettings: string;
-    public advancedSettingsHint: string;
     public batteryOptimization: string;
     public batteryOptimizationHint: string;
     public automaticRecordingUpload: string;
@@ -278,8 +219,8 @@ export class ResourcesService {
     public uploadToCloudAndShare: string;
     public statisticsAndHeightChart: string;
     public shareMapOverlays: string;
-    public exit: string;
     public measureDistanceFromCurrentLocation: string;
+    public thereSoMuchMoreYouCanDoWithOurApp: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -287,27 +228,20 @@ export class ResourcesService {
     public routeIsHidden: string;
     public pleaseAddPointsToRoute: string;
     public unableToSaveToFile: string;
-    public fileSavedSuccessfully: string;
     public unableToLoadFromFile: string;
     public unableToLoadFromUrl: string;
     public routeNameAlreadyInUse: string;
     public unableToGenerateUrl: string;
     public unableToGetElevationData: string;
-    public unableToGetDataForSnapping: string;
     public routingFailed: string;
-    public pleaseSelectARoute: string;
-    public pleaseAddRoutePoints: string;
     public unableToLogin: string;
-    public routeSentSuccessfully: string;
     public unableToSendRoute: string;
     public noUnmappedRoutes: string;
     public unableToFindYourLocation: string;
-    public redirectingToSecuredSite: string;
     public routeAddedSuccessfullyItWillTakeTime: string;
     public fileUploadedSuccessfullyItWillTakeTime: string;
     public unableToUploadFile: string;
     public unableToSaveAnEmptyRoute: string;
-    public closeWhileInEditMode: string;
     public dataUpdatedSuccessfully: string;
     public loginRequired: string;
     public noDescriptionLoginRequired: string;
@@ -334,37 +268,12 @@ export class ResourcesService {
     public downloadFinishedSuccessfully: string;
     public noOfflineFilesPleaseDownload: string;
     public allFilesAreUpToDate: string;
-    public thereSoMuchMoreYouCanDoWithOurApp: string;
     public databaseUpgrade: string;
     public cantEditWhileOffline: string;
     public downloadingPoisForOfflineUsage: string;
     public useTheCloudIconToGoOffline: string;
     public largeFilesUseWifi: string;
     public thisWillDeteleAllCurrentRoutesAreYouSure: string;
-    // Help
-    public helpSubheader: string;
-    public helpInfo: string;
-    public helpLocation: string;
-    public helpOpen: string;
-    public helpSave: string;
-    public helpPrint: string;
-    public helpPencil: string;
-    public helpClear: string;
-    public helpMapMarker: string;
-    public helpUndo: string;
-    public helpShare: string;
-    public helpEditOsm: string;
-    public helpLayersSubHeader: string;
-    public helpGear: string;
-    public helpEyeSlash: string;
-    public helpWrench: string;
-    public helpRoutePerSegment: string;
-    public helpTrash: string;
-    public helpReverse: string;
-    public helpCheck: string;
-    public helpLanguage: string;
-    public helpDragDrop: string;
-    public helpYoutubeLink: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -544,10 +453,9 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1605562239666");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1605780773762");
 
         this.about = this.gettextCatalog.getString("About");
-        this.help = this.gettextCatalog.getString("Help");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
         this.editPoi = this.gettextCatalog.getString("Edit POI");
@@ -562,7 +470,6 @@ export class ResourcesService {
         this.openAFile = this.gettextCatalog.getString("Open a File");
         this.saveAs = this.gettextCatalog.getString("Save As...");
         this.save = this.gettextCatalog.getString("Save");
-        this.print = this.gettextCatalog.getString("Print");
         this.deleteLayer = this.gettextCatalog.getString("Delete Layer");
         this.layers = this.gettextCatalog.getString("Layers");
         this.baseLayerProperties = this.gettextCatalog.getString("Base Layer Properties");
@@ -573,8 +480,6 @@ export class ResourcesService {
         this.addRoute = this.gettextCatalog.getString("Add Route");
         this.saveRouteToFile = this.gettextCatalog.getString("Save Route to File");
         this.reverseRoute = this.gettextCatalog.getString("Reverse Route");
-        this.toggleVisibility = this.gettextCatalog.getString("Toggle Visibility");
-        this.toggleRoutingPerSegment = this.gettextCatalog.getString("Toggle Routing Type Per Segment");
         this.deleteRoute = this.gettextCatalog.getString("Delete Route");
         this.search = this.gettextCatalog.getString("Search");
         this.share = this.gettextCatalog.getString("Share");
@@ -582,19 +487,13 @@ export class ResourcesService {
         this.zoomIn = this.gettextCatalog.getString("Zoom In");
         this.zoomOut = this.gettextCatalog.getString("Zoom Out");
         this.showMeWhereIAm = this.gettextCatalog.getString("Show Me Where I am");
-        this.excitedGo = this.gettextCatalog.getString("GO!");
         this.name = this.gettextCatalog.getString("Name");
         this.address = this.gettextCatalog.getString("Address");
         this.minZoom = this.gettextCatalog.getString("Min Zoom");
         this.maxZoom = this.gettextCatalog.getString("Max Zoom");
-        this.widthInPixels = this.gettextCatalog.getString("Width (px)");
         this.opacity = this.gettextCatalog.getString("Opacity");
-        this.color = this.gettextCatalog.getString("Color");
         this.deletePoi = this.gettextCatalog.getString("Delete POI");
         this.showCoordinates = this.gettextCatalog.getString("Show Coordinates");
-        this.coordinatesForWikipedia = this.gettextCatalog.getString("Coordinates for {{link}}Wikipedia{{linkend}}")
-            .replace("{{link}}", `<a href="https://${this.currentLanguage.code.split("-")[0]}.wikipedia.org/" target="_blank">`)
-            .replace("{{linkend}}", "</a>");
         // end
         this.wikipedia = this.gettextCatalog.getString("Wikipedia");
         this.length = this.gettextCatalog.getString("Length");
@@ -609,36 +508,19 @@ export class ResourcesService {
         this.heightInMeters = this.gettextCatalog.getString("Height (m)");
         this.distanceInKm = this.gettextCatalog.getString("Distance (Km)");
         this.searchPlaceHolder = this.gettextCatalog.getString("Type to search...");
-        this.embedSize = this.gettextCatalog.getString("Embed Size");
-        this.small = this.gettextCatalog.getString("Small");
-        this.medium = this.gettextCatalog.getString("Medium");
-        this.large = this.gettextCatalog.getString("Large");
-        this.custom = this.gettextCatalog.getString("Custom");
-        this.html = this.gettextCatalog.getString("HTML");
         this.close = this.gettextCatalog.getString("Close");
-        this.northAbbreviation = this.gettextCatalog.getString("N");
-        this.eastAbbreviation = this.gettextCatalog.getString("E");
-        this.latitudeAbbreviation = this.gettextCatalog.getString("Lat");
-        this.longitudeAbbreviation = this.gettextCatalog.getString("Lon");
         this.layerNamePlaceHolder = this.gettextCatalog.getString("A name to be displayed in the layers controller");
-        this.shareYourWork = this.gettextCatalog.getString("Share Your Work");
         this.language = this.gettextCatalog.getString("Language");
         this.elevation = this.gettextCatalog.getString("Elevation");
         this.slope = this.gettextCatalog.getString("Slope");
         this.convertToRoute = this.gettextCatalog.getString("Convert to Route");
         this.addPointToRoute = this.gettextCatalog.getString("Add Point to Route");
-        this.removeSearchResults = this.gettextCatalog.getString("Remove Search Results");
         this.israelMTBMap = this.gettextCatalog.getString("Israel MTB Map");
         this.israelHikingMap = this.gettextCatalog.getString("Israel Hiking Map");
-        this.googleEarth = this.gettextCatalog.getString("Google Earth");
         this.hikingTrails = this.gettextCatalog.getString("Hiking Trails");
         this.route = this.gettextCatalog.getString("Route");
-        this.from = this.gettextCatalog.getString("From");
-        this.to = this.gettextCatalog.getString("To");
         this.directionalSearch = this.gettextCatalog.getString("Directional Search");
-        this.regularSearch = this.gettextCatalog.getString("Regular Search");
         this.moveToRoute = this.gettextCatalog.getString("Move to Route");
-        this.unknownUser = this.gettextCatalog.getString("Unknown User");
         this.myTraces = this.gettextCatalog.getString("My Traces");
         this.noTraces = this.gettextCatalog.getString("No traces, you should really upload some to OSM.");
         this.myShares = this.gettextCatalog.getString("My Shares");
@@ -647,41 +529,20 @@ export class ResourcesService {
         this.titlePlaceHolder = this.gettextCatalog.getString("The title for your share.");
         this.description = this.gettextCatalog.getString("Description");
         this.descriptionPlaceHolder = this.gettextCatalog.getString("A few words about what you are sharing.");
-        this.osmLoginExplanation = this.gettextCatalog
-            .getString("Click on the frowny-face to login to OSM. We'll make it worth your while!");
         this.application = this.gettextCatalog.getString("Application");
         this.map = this.gettextCatalog.getString("Map");
         this.startDownload = this.gettextCatalog.getString("Start Download");
-        this.views = this.gettextCatalog.getString("Views");
-        this.lastViewed = this.gettextCatalog.getString("Last Viewed");
         this.detailsLevel = this.gettextCatalog.getString("Details Level");
         this.upToZoom = this.gettextCatalog.getString("Up to zoom");
         this.installationInstructions = this.gettextCatalog.getString("Installation Instructions");
         this.offlineMapBenefits = this.gettextCatalog
             .getString("The download may take several minutes, " +
                 "and afterwards you can enjoy the map with no need for a network connection.");
-        this.installationInstructionsMobileOruxMaps = this.gettextCatalog
-            .getString("Installation instructions for OruxMaps on mobile - surround each new line with <li></li>");
-        this.installationInstructionsMobileLocus = this.gettextCatalog
-            .getString("Installation instructions for Locus on mobile - surround each new line with <li></li>");
         this.installationInstructionsDesktopOruxMaps = this.gettextCatalog
             .getString("Installation instructions for OruxMaps on desktop - surround each new line with <li></li>");
         this.installationInstructionsDesktopLocus = this.gettextCatalog
             .getString("Installation instructions for Locus on desktop - surround each new line with <li></li>");
         // end
-        this.mapsAreUpdatedEveryTwoDays = this.gettextCatalog.getString("Maps are updated every two days");
-        this.junior = this.gettextCatalog.getString("Junior");
-        this.partner = this.gettextCatalog.getString("Partner");
-        this.master = this.gettextCatalog.getString("Master");
-        this.guru = this.gettextCatalog.getString("Guru");
-        this.changes = this.gettextCatalog.getString("Changes");
-        this.userEmail = this.gettextCatalog.getString("User E-Mail");
-        this.difficulty = this.gettextCatalog.getString("Difficulty");
-        this.easy = this.gettextCatalog.getString("Easy");
-        this.moderate = this.gettextCatalog.getString("Moderate");
-        this.hard = this.gettextCatalog.getString("Hard");
-        this.activity = this.gettextCatalog.getString("Activity");
-        this.send = this.gettextCatalog.getString("Send!");
         this.view = this.gettextCatalog.getString("View");
         this.edit = this.gettextCatalog.getString("Edit");
         this.update = this.gettextCatalog.getString("Update");
@@ -696,7 +557,6 @@ export class ResourcesService {
         this.addThisRouteToOsm = this.gettextCatalog.getString("Add This Route to OSM");
         this.uploadFileToOsm = this.gettextCatalog.getString("Upload a trace");
         this.selectIcon = this.gettextCatalog.getString("Select Icon");
-        this.nakeb = this.gettextCatalog.getString("Nakeb");
         this.split = this.gettextCatalog.getString("Split");
         this.merge = this.gettextCatalog.getString("Merge");
         this.public = this.gettextCatalog.getString("Public");
@@ -706,23 +566,14 @@ export class ResourcesService {
         this.moreMapAddresses = this.gettextCatalog.getString("More map addresses can be found here, look for TMS");
         this.categories = this.gettextCatalog.getString("Categories");
         this.emptyPoiDescription = this.gettextCatalog.getString("You should add your description here! Click the edit button above.");
-        this.comingSoon = this.gettextCatalog.getString("Coming Soon!");
-        this.itsYourTimeToShine = this.gettextCatalog.getString("Its your time to shine!");
-        this.worthIt = this.gettextCatalog.getString("Worth it!");
-        this.notWorthIt = this.gettextCatalog.getString("Not worth it...");
-        this.loading = this.gettextCatalog.getString("Loading...");
         this.natural = this.gettextCatalog.getString("Natural");
         this.camping = this.gettextCatalog.getString("Camping");
         this.other = this.gettextCatalog.getString("Other");
         this.uploadPoint = this.gettextCatalog.getString("Upload Point");
-        this.updatePoint = this.gettextCatalog.getString("Update Point");
-        this.addPoint = this.gettextCatalog.getString("Add Point");
         this.spring = this.gettextCatalog.getString("Spring");
         this.historic = this.gettextCatalog.getString("Historic");
         this.website = this.gettextCatalog.getString("Website");
         this.aLinkToAWebsite = this.gettextCatalog.getString("A link to a website");
-        this.clickToUpload = this.gettextCatalog.getString("Click to Upload");
-        this.clickToEdit = this.gettextCatalog.getString("Click to Edit");
         this.more = this.gettextCatalog.getString("More...");
         this.less = this.gettextCatalog.getString("Less...");
         this.routes = this.gettextCatalog.getString("Routes");
@@ -734,9 +585,7 @@ export class ResourcesService {
         this.wikimediaTermsOfService = this.gettextCatalog.getString("Wikimedia terms of service");
         this.iHaveReadAndAgree = this.gettextCatalog.getString("I have read and agree to the terms");
         this.submit = this.gettextCatalog.getString("Submit");
-        this.esri = this.gettextCatalog.getString("ESRI");
         this.satelliteImagery = this.gettextCatalog.getString("Satellite Imagery");
-        this.suggestAsPublicTrack = this.gettextCatalog.getString("Suggest as public track");
         this.createNakebHike = this.gettextCatalog.getString("Create new hike in Nakeb");
         this.flowers = this.gettextCatalog.getString("Flowers");
         this.updateCurrentShare = this.gettextCatalog.getString("Update current share");
@@ -747,7 +596,6 @@ export class ResourcesService {
         this.cancel = this.gettextCatalog.getString("Cancel");
         this.areYouSure = this.gettextCatalog.getString("Are you sure?");
         this.deletionOf = this.gettextCatalog.getString("Deletion of");
-        this.myProfile = this.gettextCatalog.getString("My profile");
         this.login = this.gettextCatalog.getString("Login");
         this.logout = this.gettextCatalog.getString("Logout");
         this.openInANewWindow = this.gettextCatalog.getString("Open in a new window");
@@ -761,7 +609,6 @@ export class ResourcesService {
         this.clearRoute = this.gettextCatalog.getString("Clear Route");
         this.clearPois = this.gettextCatalog.getString("Clear Points");
         this.clearBoth = this.gettextCatalog.getString("Clear Both");
-        this.collapse = this.gettextCatalog.getString("Collapse");
         this.local = this.gettextCatalog.getString("Local");
         this.northUp = this.gettextCatalog.getString("North-Up");
         this.deleteAllRoutes = this.gettextCatalog.getString("Delete All Routes");
@@ -777,7 +624,6 @@ export class ResourcesService {
         this.reportAnIssueInstructions = this.gettextCatalog.getString("Report an issue instructions");
         this.addPointToActiveRoute = this.gettextCatalog.getString("Add point to active route");
         this.advancedSettings = this.gettextCatalog.getString("Advanced Settings");
-        this.advancedSettingsHint = this.gettextCatalog.getString("Shows more options and feature that are normally hidden");
         this.batteryOptimization = this.gettextCatalog.getString("Battery optimization");
         this.batteryOptimizationHint = this.gettextCatalog.getString("Dims display when there's no user interaction");
         this.automaticRecordingUpload = this.gettextCatalog.getString("Automatic upload of recording");
@@ -805,7 +651,6 @@ export class ResourcesService {
         this.uploadToCloudAndShare = this.gettextCatalog.getString("Upload to Cloud and Share");
         this.statisticsAndHeightChart = this.gettextCatalog.getString("Statistics and Height Chart");
         this.shareMapOverlays = this.gettextCatalog.getString("Share maps overlays");
-        this.exit = this.gettextCatalog.getString("Exit");
         this.measureDistanceFromCurrentLocation = this.gettextCatalog.getString("Measure distance from current location");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
@@ -814,22 +659,16 @@ export class ResourcesService {
         this.routeIsHidden = this.gettextCatalog.getString("Route is hidden...");
         this.pleaseAddPointsToRoute = this.gettextCatalog.getString("Please add points to route...");
         this.unableToSaveToFile = this.gettextCatalog.getString("Unable to save to file...");
-        this.fileSavedSuccessfully = this.gettextCatalog.getString("File saved successfully");
         this.unableToLoadFromFile = this.gettextCatalog.getString("Unable to extract geographic information from the file...");
         this.unableToLoadFromUrl = this.gettextCatalog.getString("Unable to load from URL...");
         this.routeNameAlreadyInUse = this.gettextCatalog.getString("The route's name was altered since it is in use...");
         this.unableToGenerateUrl = this.gettextCatalog.getString("Unable to generate URL, please try again later...");
         this.unableToGetElevationData = this.gettextCatalog.getString("Unable to get elevation data:");
-        this.unableToGetDataForSnapping = this.gettextCatalog.getString("Unable to get data for snapping...");
         this.routingFailed = this.gettextCatalog.getString("Routing failed:");
-        this.pleaseSelectARoute = this.gettextCatalog.getString("Please select a route...");
-        this.pleaseAddRoutePoints = this.gettextCatalog.getString("Please add points to the route...");
         this.unableToLogin = this.gettextCatalog.getString("Unable to login...");
-        this.routeSentSuccessfully = this.gettextCatalog.getString("Route sent successfully.");
         this.unableToSendRoute = this.gettextCatalog.getString("Unable to send route...");
         this.noUnmappedRoutes = this.gettextCatalog.getString("No unmapped routes! :-)");
         this.unableToFindYourLocation = this.gettextCatalog.getString("Unable to find your location...");
-        this.redirectingToSecuredSite = this.gettextCatalog.getString("Redirecting to secure site.");
         this.routeAddedSuccessfullyItWillTakeTime = this.gettextCatalog
             .getString("Route added successfully, It will take some time for the map to update.");
         this.fileUploadedSuccessfullyItWillTakeTime = this.gettextCatalog
@@ -837,8 +676,6 @@ export class ResourcesService {
         this.unableToUploadFile = this.gettextCatalog.getString("Unable to upload the file...");
         this.unableToSaveAnEmptyRoute = this.gettextCatalog
             .getString("Unable to save an empty route, Please try and select a different one from the layers control on your left.");
-        this.closeWhileInEditMode = this.gettextCatalog
-            .getString("Please note that you did not save your work before closing the popup...");
         this.dataUpdatedSuccessfully = this.gettextCatalog.getString("The data was updated successfully!");
         this.loginRequired = this.gettextCatalog
             .getString("You need to login to OSM first, please use the button in the upper right corner to login.");
@@ -882,33 +719,6 @@ export class ResourcesService {
             .getString("You are about to download large files, you can change to wifi before clicking continue...");
         this.thisWillDeteleAllCurrentRoutesAreYouSure = this.gettextCatalog
             .getString("This will delete all current routes. Are you sure?");
-        // Help
-        this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
-        this.helpInfo = this.gettextCatalog.getString("This dialog");
-        this.helpLocation = this.gettextCatalog.getString("Move the map to your current location");
-        this.helpOpen = this.gettextCatalog.getString("Open a file");
-        this.helpSave = this.gettextCatalog.getString("Save your work to a file");
-        this.helpPrint = this.gettextCatalog.getString("Print the map");
-        this.helpPencil = this.gettextCatalog.getString("Toggle drawing. Use escape to stop and click to edit a point");
-        this.helpClear = this.gettextCatalog.getString("Clear all points");
-        this.helpMapMarker = this.gettextCatalog.getString("Toggle POI drawing");
-        this.helpUndo = this.gettextCatalog.getString("Undo last action");
-        this.helpShare = this.gettextCatalog.getString("Share your work");
-        this.helpEditOsm = this.gettextCatalog.getString("Edit the map in OSM");
-        this.helpLayersSubHeader = this.gettextCatalog.getString("Layers controller (left side)");
-        this.helpGear = this.gettextCatalog.getString("Toggle advanced layers usage");
-        this.helpEyeSlash = this.gettextCatalog.getString("Hide layer");
-        this.helpWrench = this.gettextCatalog.getString("Open layer properties");
-        this.helpRoutePerSegment = this.gettextCatalog.getString("Change routing from single segment to all segments");
-        this.helpTrash = this.gettextCatalog.getString("Delete a layer");
-        this.helpReverse = this.gettextCatalog.getString("Reverse route's direction");
-        this.helpCheck = this.gettextCatalog.getString("Save layer properties");
-        this.helpLanguage = this.gettextCatalog.getString("Change language");
-        this.helpDragDrop = this.gettextCatalog.getString("You can drag-and-drop files or URLs onto the map to load them.");
-        this.helpYoutubeLink = this.gettextCatalog
-            .getString("Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}.")
-            .replace("{{link}}", "<a href='https://www.youtube.com/playlist?list=PL8pYDecWd7EjQIyJpPAwSH3UbeZzzQpNo' target='_blank'>")
-            .replace("{{linkend}}", "</a>");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

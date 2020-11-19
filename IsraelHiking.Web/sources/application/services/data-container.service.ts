@@ -23,7 +23,7 @@ export class DataContainerService {
     constructor(private readonly shareUrlsService: ShareUrlsService,
                 private readonly layersService: LayersService,
                 private readonly fileService: FileService,
-                private readonly resourcesService: ResourcesService,
+                private readonly resources: ResourcesService,
                 private readonly toastService: ToastService,
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly selectedRouteService: SelectedRouteService,
@@ -93,7 +93,7 @@ export class DataContainerService {
             data.baseLayer = this.stringToBaseLayer(baseLayer);
             this.setData(data, this.runningContextService.isCordova);
         } catch (ex) {
-            this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
+            this.toastService.warning(this.resources.unableToLoadFromUrl);
         }
     }
 
@@ -110,7 +110,7 @@ export class DataContainerService {
             }
         } catch (ex) {
             this.shareUrlsService.setShareUrl(null);
-            this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
+            this.toastService.warning(this.resources.unableToLoadFromUrl);
         }
     }
 

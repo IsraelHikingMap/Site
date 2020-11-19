@@ -10,7 +10,7 @@ import { LatLngAlt } from "../models/models";
 export class ElevationProvider {
 
     constructor(private readonly httpClient: HttpClient,
-                private readonly resourcesService: ResourcesService,
+                private readonly resources: ResourcesService,
                 private readonly toastService: ToastService,
     ) { }
 
@@ -36,7 +36,7 @@ export class ElevationProvider {
             }
             return latlngs;
         } catch (ex) {
-            this.toastService.error(this.resourcesService.unableToGetElevationData);
+            this.toastService.error(this.resources.unableToGetElevationData);
             throw ex;
         }
     }

@@ -65,7 +65,7 @@ export class LayersService {
     @select((state: ApplicationState) => state.userState.userInfo)
     public userInfo$: Observable<UserInfo>;
 
-    constructor(private readonly resourcesService: ResourcesService,
+    constructor(private readonly resources: ResourcesService,
                 private readonly authorizationService: AuthorizationService,
                 private readonly httpClient: HttpClient,
                 private readonly toastService: ToastService,
@@ -100,7 +100,7 @@ export class LayersService {
         if (!baseLayerAddress) {
             return defaultAddress;
         }
-        let language = this.resourcesService.currentLanguage.code === "he" ? "Hebrew" : "English";
+        let language = this.resources.currentLanguage.code === "he" ? "Hebrew" : "English";
         let tiles = "tiles";
         if (baseLayerAddress.endsWith(".json")) {
             let styleKey = baseLayerAddress.replace(".json", "").split("/").splice(-1)[0];
@@ -350,7 +350,7 @@ export class LayersService {
                 this.selectedBaseLayerKey === ISRAEL_HIKING_MAP) ||
                 (overlay.key === BICYCLE_TRAILS &&
                 this.selectedBaseLayerKey === ISRAEL_MTB_MAP)) {
-                this.toastService.warning(this.resourcesService.baseLayerAndOverlayAreOverlapping);
+                this.toastService.warning(this.resources.baseLayerAndOverlayAreOverlapping);
             }
         }
     }

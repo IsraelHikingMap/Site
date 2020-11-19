@@ -11,7 +11,7 @@ import { LatLngAlt, RoutingType, RouteSegmentData } from "../models/models";
 @Injectable()
 export class RouterService {
     constructor(private readonly httpClient: HttpClient,
-                private readonly resourcesService: ResourcesService,
+                private readonly resources: ResourcesService,
                 private readonly geoJsonParser: GeoJsonParser,
                 private readonly toastService: ToastService) { }
 
@@ -21,7 +21,7 @@ export class RouterService {
         try {
             let geojson = await this.httpClient.get(address).pipe(timeout(4500)).toPromise();
             let data = this.geoJsonParser.toDataContainer(geojson as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>,
-                this.resourcesService.getCurrentLanguageCodeSimplified());
+                this.resources.getCurrentLanguageCodeSimplified());
             if (!data || data.routes.length === 0 || data.routes[0].segments.length < 2) {
                 throw new Error("Empty data");
             } else {
@@ -30,7 +30,7 @@ export class RouterService {
         } catch (ex) {
             let coordinatesString = ` (${latlngStart.lat.toFixed(3)}°, ${latlngStart.lng.toFixed(3)}°)` +
                 ` - (${latlngEnd.lat.toFixed(3)}°, ${latlngEnd.lng.toFixed(3)}°)`;
-            this.toastService.error(this.resourcesService.routingFailed + coordinatesString);
+            this.toastService.error(this.resources.routingFailed + coordinatesString);
             return this.getEmptyRoute(latlngStart, latlngEnd);
         }
     }
