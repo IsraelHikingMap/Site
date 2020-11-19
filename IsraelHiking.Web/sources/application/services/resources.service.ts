@@ -45,8 +45,9 @@ export class ResourcesService {
     public undo: string;
     public editThisMapUsingOsm: string;
     public openAFile: string;
-    public saveAs: string;
     public save: string;
+    public export: string;
+    public exportAs: string;
     public deleteLayer: string;
     public layers: string;
     public baseLayerProperties: string;
@@ -453,7 +454,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1605780773762");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1605781587939");
 
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
@@ -468,8 +469,9 @@ export class ResourcesService {
         this.undo = this.gettextCatalog.getString("Undo");
         this.editThisMapUsingOsm = this.gettextCatalog.getString("Edit This Map Using OSM");
         this.openAFile = this.gettextCatalog.getString("Open a File");
-        this.saveAs = this.gettextCatalog.getString("Save As...");
         this.save = this.gettextCatalog.getString("Save");
+        this.exportAs = this.gettextCatalog.getString("Export As...");
+        this.export = this.gettextCatalog.getString("Export");
         this.deleteLayer = this.gettextCatalog.getString("Delete Layer");
         this.layers = this.gettextCatalog.getString("Layers");
         this.baseLayerProperties = this.gettextCatalog.getString("Base Layer Properties");
