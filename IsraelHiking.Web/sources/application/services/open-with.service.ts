@@ -166,6 +166,7 @@ export class OpenWithService {
             // Do not use "new File(...)" as it breaks the functionality.
             await this.fileService.addRoutesFromFile(blob);
         } catch (ex) {
+            this.loggingService.error("Unable to open file from link: " + ex.toString());
             this.toastService.error(this.resources.unableToLoadFromFile);
         }
     }

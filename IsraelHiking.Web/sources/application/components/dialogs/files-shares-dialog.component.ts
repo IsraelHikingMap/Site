@@ -3,15 +3,16 @@ import { MatDialog, MatDialogRef } from "@angular/material";
 import { NgRedux } from "@angular-redux/store";
 import { every } from "lodash";
 
+import { BaseMapComponent } from "../base-map.component";
+import { ShareDialogComponent } from "./share-dialog.component";
 import { DataContainerService } from "application/services/data-container.service";
 import { DatabaseService } from "application/services/database.service";
 import { FileService, IFormatViewModel } from "application/services/file.service";
 import { ResourcesService } from "application/services/resources.service";
 import { ToastService } from "application/services/toast.service";
-import { BaseMapComponent } from "../base-map.component";
+import { LoggingService } from '../../services/logging.service';
 import { SetOfflineLastModifiedAction } from "application/reducres/offline.reducer";
 import { ApplicationState, DataContainer } from "../../models/models";
-import { ShareDialogComponent } from "./share-dialog.component";
 
 @Component({
     selector: "files-share-dialog",
@@ -29,6 +30,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
                 private readonly fileService: FileService,
                 private readonly toastService: ToastService,
                 private readonly databaseService: DatabaseService,
+                private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.isSaveAsOpen = false;
@@ -66,6 +68,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             await this.fileService.addRoutesFromFile(file);
             this.matDialogRef.close();
         } catch (ex) {
+            this.loggingService.error("Unable to open a file: " + ex.toString());
             this.toastService.error(this.resources.unableToLoadFromFile);
         }
     }
@@ -79,6 +82,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         try {
             await this.fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data);
         } catch (ex) {
+            this.loggingService.error("Unable to save file: " + ex.toString());
             this.toastService.error(this.resources.unableToSaveToFile);
         }
     }
@@ -98,6 +102,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         try {
             await this.fileService.saveToFile(`${name}.${format.extension}`, outputFormat, data);
         } catch (ex) {
+            this.loggingService.error("Unable to save as file: " + ex.toString());
             this.toastService.error(this.resources.unableToSaveToFile);
         }
     }

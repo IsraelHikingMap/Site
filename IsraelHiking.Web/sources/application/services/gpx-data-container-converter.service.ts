@@ -68,11 +68,11 @@ interface Gpx {
 @Injectable()
 export class GpxDataContainerConverterService {
     public canConvert(gpxXmlString: string) {
-        let subString = gpxXmlString.substr(0, 400).toLocaleLowerCase();
-        return (subString.indexOf("<gpx") !== -1 && subString.indexOf("http://www.topografix.com/GPX/1/1") !== -1);
+        let subString = gpxXmlString.substr(0, 500).toLocaleLowerCase();
+        return (subString.indexOf("<gpx") !== -1 && subString.indexOf("http://www.topografix.com/gpx/1/1") !== -1);
     }
 
-    public async toGpx(dataContainer: DataContainer): Promise<string> {
+    public async toGpx(dataContainer: DataContainer): Promise<string> {
         let options = { rootName: "gpx" };
 
         let builder = new Builder(options);
@@ -92,15 +92,14 @@ export class GpxDataContainerConverterService {
         let containerRoutes = dataContainer.routes || [];
         let nonEmptyRoutes = containerRoutes.filter(r => r.segments.find(s => s.latlngs.length > 0) != null);
         for (let route of containerRoutes) {
-            gpx.wpt.concat(route.markers.map(m => {
-                return {
+            gpx.wpt = gpx.wpt.concat(route.markers.map(m => {
+                let wpt = {
                     $: {
                         lat: m.latlng.lat.toString(),
                         lon: m.latlng.lng.toString()
                     },
-                    ele: m.latlng.alt.toString(),
-                    desc: m.description,
                     name: m.title,
+                    desc: m.description,
                     type: m.type,
                     link: m.urls.map(u => {
                         return {
@@ -112,37 +111,59 @@ export class GpxDataContainerConverterService {
                         } as Link;
                     })
                 } as Wpt;
+                if (m.latlng.alt && !isNaN(m.latlng.alt)) {
+                    wpt.ele = m.latlng.alt
+                }
+                return wpt;
             }));
         }
         for (let route of nonEmptyRoutes) {
             gpx.trk.push({
-                desc: route.description,
                 name: route.name,
+                desc: route.description,
                 extensions: {
                     Color: {
+                        $: {
+                            xmlns: ""
+                        },
                         _: route.color.toString()
                     },
                     Opacity: {
+                        $: {
+                            xmlns: ""
+                        },
                         _: route.opacity.toString()
                     },
                     Weight: {
+                        $: {
+                            xmlns: ""
+                        },
                         _: route.weight.toString()
                     }
                 },
                 trkseg: route.segments.map(s => {
                     return {
                         trkpt: s.latlngs.map(l => {
-                            return {
+                            let wpt = {
                                 $: {
                                     lat: l.lat.toString(),
                                     lon: l.lng.toString()
-                                },
-                                ele: l.alt.toString(),
-                                time: l.timestamp ? l.timestamp.toISOString() : null
+                                }
                             } as Wpt;
+                            if (l.alt && !isNaN(l.alt)) {
+                                wpt.ele = l.alt
+                            }
+                            if (l.timestamp) {
+                                wpt.time = new Date(l.timestamp).toISOString().split('.').shift() + "Z"; // remove milliseconds
+                            }
+                            
+                            return wpt;
                         }),
                         extensions: {
                             RoutingType: {
+                                $: {
+                                    xmlns: ""
+                                },
                                 _: s.routingType
                             }
                         }
@@ -181,8 +202,6 @@ export class GpxDataContainerConverterService {
         let dataContainer = {
             overlays: [],
             baseLayer: null,
-            northEast: { lat: 0, lng: 0 },
-            southWest: { lat: 0, lng: 0 },
             routes: this.convertRoutesToRoutesData(gpxJsonObject.rte)
         } as DataContainer;
         dataContainer.routes = dataContainer.routes.concat(this.convertTracksToRouteData(gpxJsonObject.trk));
@@ -284,27 +303,29 @@ export class GpxDataContainerConverterService {
             segments: [{
                 latlngs: r.rtept.map(p => ({ lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele })),
                 routePoint: last(r.rtept.map(p => ({ lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele })))
-            }]
+            }],
+            markers: []
         } as RouteData));
     }
 
     private convertTracksToRouteData(trks: Trk[]): RouteData[] {
         return trks.filter(t => t.trkseg != null && t.trkseg.length > 0).map(t => ({
             name: t.name,
-            description: t.desc,
+            description: t.desc,
             color: (t.extensions || { Color: { _: null } }).Color._,
             opacity: +(t.extensions || { Opacity: { _: null } }).Opacity._,
             weight: +(t.extensions || { Weight: { _: null } }).Weight._,
             segments: t.trkseg.filter(s => s != null && s.trkpt != null && s.trkpt.length > 1).map(s => ({
-                latlngs: s.trkpt.map(p => ({ alt: +p.ele, lat: +p.$.lat, lng: +p.$.lon, timestamp: new Date(p.time) } as ILatLngTime)),
+                latlngs: s.trkpt.map(p => ({ alt: +p.ele, lat: +p.$.lat, lng: +p.$.lon, timestamp: p.time ? new Date(p.time) : undefined } as ILatLngTime)),
                 routingType: (s.extensions || { RoutingType: { _: "Hike" } }).RoutingType._,
                 routePoint: last(s.trkpt.map(p => ({
                     alt: +p.ele,
                     lat: +p.$.lat,
                     lng: +p.$.lon,
-                    timestamp: new Date(p.time)
+                    timestamp: p.time ? new Date(p.time) : undefined
                 } as ILatLngTime)))
-            } as RouteSegmentData))
+            } as RouteSegmentData)),
+            markers: []
         } as RouteData));
     }
  }
