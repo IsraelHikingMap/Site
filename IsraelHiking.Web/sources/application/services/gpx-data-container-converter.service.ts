@@ -308,29 +308,36 @@ export class GpxDataContainerConverterService {
         } as RouteData));
     }
 
-    private convertTracksToRouteData(trks: Trk[]): RouteData[] {
-        return trks.filter(t => t.trkseg != null && t.trkseg.length > 0).map(t => ({
-            name: t.name,
-            description: t.desc,
-            color: (t.extensions || { Color: { _: null } }).Color._,
-            opacity: +(t.extensions || { Opacity: { _: null } }).Opacity._,
-            weight: +(t.extensions || { Weight: { _: null } }).Weight._,
-            segments: t.trkseg.filter(s => s != null && s.trkpt != null && s.trkpt.length > 1).map(s => ({
-                latlngs: s.trkpt.map(p => ({
-                    alt: +p.ele,
-                    lat: +p.$.lat,
-                    lng: +p.$.lon,
-                    timestamp: p.time ? new Date(p.time) : undefined
-                } as ILatLngTime)),
-                routingType: (s.extensions || { RoutingType: { _: "Hike" } }).RoutingType._,
-                routePoint: last(s.trkpt.map(p => ({
-                    alt: +p.ele,
-                    lat: +p.$.lat,
-                    lng: +p.$.lon,
-                    timestamp: p.time ? new Date(p.time) : undefined
-                } as ILatLngTime)))
-            } as RouteSegmentData)),
-            markers: []
-        } as RouteData));
+    private convertTracksToRouteData(trks: Trk[]): RouteData[] {
+        return trks.filter(t => t.trkseg != null && t.trkseg.length > 0).map(t => {
+            let extensions = Object.assign({
+                Color: { _: null },
+                Opacity: { _: null },
+                Weight: { _: null }
+            }, t.extensions);
+            return {
+                name: t.name,
+                description: t.desc,
+                color: extensions.Color._,
+                opacity: +extensions.Opacity._,
+                weight: +extensions.Weight._,
+                segments: t.trkseg.filter(s => s != null && s.trkpt != null && s.trkpt.length > 1).map(s => ({
+                    latlngs: s.trkpt.map(p => ({
+                        alt: +p.ele,
+                        lat: +p.$.lat,
+                        lng: +p.$.lon,
+                        timestamp: p.time ? new Date(p.time) : undefined
+                    } as ILatLngTime)),
+                    routingType: Object.assign({ RoutingType: { _: "Hike" } }, s.extensions).RoutingType._,
+                    routePoint: last(s.trkpt.map(p => ({
+                        alt: +p.ele,
+                        lat: +p.$.lat,
+                        lng: +p.$.lon,
+                        timestamp: p.time ? new Date(p.time) : undefined
+                    } as ILatLngTime)))
+                } as RouteSegmentData)),
+                markers: []
+            } as RouteData;
+        });
     }
  }
