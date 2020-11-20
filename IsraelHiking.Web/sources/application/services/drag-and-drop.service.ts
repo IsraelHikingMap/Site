@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
-import { LoggingService } from './logging.service';
+import { LoggingService } from "./logging.service";
 
 @Injectable()
 export class DragAndDropService {
@@ -28,7 +28,7 @@ export class DragAndDropService {
                         try {
                             await this.fileService.addRoutesFromFile(file);
                         } catch (ex) {
-                            this.loggingService.error("Unable to drag-and-drop file: " + ex.toString())
+                            this.loggingService.error("Unable to drag-and-drop file: " + ex.toString());
                             this.toastService.error(this.resources.unableToLoadFromFile + `: ${file.name}`);
                         }
                     }

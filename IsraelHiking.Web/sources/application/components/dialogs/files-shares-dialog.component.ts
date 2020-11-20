@@ -10,7 +10,7 @@ import { DatabaseService } from "application/services/database.service";
 import { FileService, IFormatViewModel } from "application/services/file.service";
 import { ResourcesService } from "application/services/resources.service";
 import { ToastService } from "application/services/toast.service";
-import { LoggingService } from '../../services/logging.service';
+import { LoggingService } from "../../services/logging.service";
 import { SetOfflineLastModifiedAction } from "application/reducres/offline.reducer";
 import { ApplicationState, DataContainer } from "../../models/models";
 

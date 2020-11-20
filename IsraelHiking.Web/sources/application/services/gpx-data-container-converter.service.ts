@@ -112,7 +112,7 @@ export class GpxDataContainerConverterService {
                     })
                 } as Wpt;
                 if (m.latlng.alt && !isNaN(m.latlng.alt)) {
-                    wpt.ele = m.latlng.alt
+                    wpt.ele = m.latlng.alt.toString();
                 }
                 return wpt;
             }));
@@ -151,12 +151,12 @@ export class GpxDataContainerConverterService {
                                 }
                             } as Wpt;
                             if (l.alt && !isNaN(l.alt)) {
-                                wpt.ele = l.alt
+                                wpt.ele = l.alt.toString();
                             }
                             if (l.timestamp) {
-                                wpt.time = new Date(l.timestamp).toISOString().split('.').shift() + "Z"; // remove milliseconds
+                                wpt.time = new Date(l.timestamp).toISOString().split(".").shift() + "Z"; // remove milliseconds
                             }
-                            
+
                             return wpt;
                         }),
                         extensions: {
@@ -316,7 +316,12 @@ export class GpxDataContainerConverterService {
             opacity: +(t.extensions || { Opacity: { _: null } }).Opacity._,
             weight: +(t.extensions || { Weight: { _: null } }).Weight._,
             segments: t.trkseg.filter(s => s != null && s.trkpt != null && s.trkpt.length > 1).map(s => ({
-                latlngs: s.trkpt.map(p => ({ alt: +p.ele, lat: +p.$.lat, lng: +p.$.lon, timestamp: p.time ? new Date(p.time) : undefined } as ILatLngTime)),
+                latlngs: s.trkpt.map(p => ({
+                    alt: +p.ele,
+                    lat: +p.$.lat,
+                    lng: +p.$.lon,
+                    timestamp: p.time ? new Date(p.time) : undefined
+                } as ILatLngTime)),
                 routingType: (s.extensions || { RoutingType: { _: "Hike" } }).RoutingType._,
                 routePoint: last(s.trkpt.map(p => ({
                     alt: +p.ele,

@@ -8,7 +8,7 @@ import { Subject } from "rxjs";
 import { HashService, RouteStrings } from "./hash.service";
 import { Urls } from "../urls";
 import { ApplicationState } from "../models/models";
-import { MapService } from './map.service';
+import { MapService } from "./map.service";
 
 describe("HashService", () => {
     beforeEach(() => {
