@@ -3,9 +3,9 @@ import { HttpParams } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { NgRedux } from "@angular-redux/store";
 
-import { Urls } from "../urls";
-import { LatLngAlt, ApplicationState } from "../models/models";
 import { MapService } from "./map.service";
+import { Urls } from "../urls";
+import { ApplicationState } from "../models/models";
 
 export interface IPoiRouterData {
     source: string;

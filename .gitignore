@@ -193,6 +193,7 @@ _Pvt_Extensions/
 ModelManifest.xml
 /.vs/config
 *.sqlite
+*.DS_Store
 /IsraelHiking.Web/wwwroot/**/*.*
 /IsraelHiking.Web/sources/translations/*.po
 /IsraelHiking.Web/sources/translations/*.pot
