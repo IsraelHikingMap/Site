@@ -221,6 +221,7 @@ export class ResourcesService {
     public shareMapOverlays: string;
     public measureDistanceFromCurrentLocation: string;
     public thereSoMuchMoreYouCanDoWithOurApp: string;
+    public files: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -453,7 +454,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1605810093272");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1605940168544");
 
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
@@ -652,6 +653,9 @@ export class ResourcesService {
         this.statisticsAndHeightChart = this.gettextCatalog.getString("Statistics and Height Chart");
         this.shareMapOverlays = this.gettextCatalog.getString("Share maps overlays");
         this.measureDistanceFromCurrentLocation = this.gettextCatalog.getString("Measure distance from current location");
+        this.thisWillDeteleAllCurrentRoutesAreYouSure = this.gettextCatalog
+            .getString("This will delete all current routes. Are you sure?");
+        this.files = this.gettextCatalog.getString("Files");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -717,8 +721,6 @@ export class ResourcesService {
         this.useTheCloudIconToGoOffline = this.gettextCatalog.getString("Use the cloud icon to go offline");
         this.largeFilesUseWifi = this.gettextCatalog
             .getString("You are about to download large files, you can change to wifi before clicking continue...");
-        this.thisWillDeteleAllCurrentRoutesAreYouSure = this.gettextCatalog
-            .getString("This will delete all current routes. Are you sure?");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog
