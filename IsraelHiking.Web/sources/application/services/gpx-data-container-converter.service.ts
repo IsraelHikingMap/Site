@@ -214,8 +214,8 @@ export class GpxDataContainerConverterService {
         } as MarkerData));
         if (markers.length > 0) {
             if (dataContainer.routes.length === 0) {
-                let name = (markers.length === 1 ? markers[0].title : "Markers") || "Markers";
-                dataContainer.routes.push({ name, description: markers[0].description } as RouteData);
+                let name = (markers.length === 1 ? markers[0].title : "Markers") || "Markers";
+                dataContainer.routes.push({ name, description: markers[0].description, segments: [] } as RouteData);
             }
             dataContainer.routes[0].markers = markers;
         }
