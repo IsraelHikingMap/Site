@@ -8,7 +8,7 @@
                 </div>
             </div>
         </div>
-        <div class="pull-right" *ngIf="!isOffline() && !isLoggedIn()">
+        <div class="pull-right" *ngIf="!isOffline() && !isLoggedIn() && !isIFrame()">
             <div class="control-container-item gutters">
                 <div class="table-cell button-height">
                     <span class="pull-right space-after cursor-pointer" (click)="login()"><i class="fa icon-frown-o fa-lg"></i> </span>
@@ -40,7 +40,7 @@
                     <button mat-menu-item (click)="selectSharesAndFiles()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open search and files">
                         <span><i class="fa fa-lg icon-share-alt mat-icon"></i> {{resources.save}} - {{resources.share}} - {{resources.files}}</span>
                     </button>
-                    <button mat-menu-item *ngIf="!isLoggedIn()" (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
+                    <button mat-menu-item *ngIf="!isLoggedIn() && !isIFrame()" (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
                         <span><i class="fa fa-lg icon-sign-in mat-icon"></i> {{resources.login}}</span>
                     </button>
                     <button mat-menu-item *ngIf="!isShowMore"  (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show more">
@@ -50,10 +50,10 @@
                         <button mat-menu-item (click)="selectLegendAndAbout()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show legend and info">
                             <span><i class="fa fa-lg icon-info mat-icon"></i> {{resources.about}} - {{resources.legend}}</span>
                         </button>
-                        <button mat-menu-item *ngIf="isApp()" (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Report an issue">
+                        <button mat-menu-item *ngIf="isApp() && !isIFrame()" (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Report an issue">
                             <span><i class="fa fa-lg icon-envelope mat-icon"></i> {{resources.reportAnIssue}}</span>
                         </button>
-                        <a mat-menu-item *ngIf="!isApp()" href="https://github.com/IsraelHikingMap/Site/issues/new" target="_blank" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Report an issue github">
+                        <a mat-menu-item *ngIf="!isApp() && !isIFrame()" href="https://github.com/IsraelHikingMap/Site/issues/new" target="_blank" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Report an issue github">
                             <span><i class="fa fa-lg icon-envelope mat-icon"></i> {{resources.reportAnIssue}}</span>
                         </a>
                         <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open language selection">

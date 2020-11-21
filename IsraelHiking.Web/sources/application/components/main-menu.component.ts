@@ -98,6 +98,10 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         return this.runningContextService.isCordova;
     }
 
+    public isIFrame() {
+        return this.runningContextService.isIFrame;
+    }
+
     public toggleShowMore($event: Event) {
         this.isShowMore = !this.isShowMore;
         $event.stopPropagation();
