@@ -33,6 +33,7 @@ import {
 @Component({
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
+    styleUrls: ["./public-poi-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None,
     animations: [
         sidebarAnimate
