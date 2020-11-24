@@ -19,7 +19,7 @@
 </mgl-geojson-source>
 <mgl-markers-for-clusters source="poi-cluster-source">
     <ng-template mglPoint let-feature>
-        <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="openPoi(feature.properties.poiId, $event)" (mouseover)="setHoverFeature(feature)" (mouseout)="hoverFeature = null">
+        <span class="fa-stack fa-lg cursor-pointer marker-icon semi-transparent" (click)="openPoi(feature.properties.poiId, $event)" (mouseover)="setHoverFeature(feature)" (mouseout)="hoverFeature = null">
             <span *ngIf="feature.properties.hasExtraData" class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
             <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
             <i class="fa {{feature.properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large" [style.color]="feature.properties.poiIconColor"></i>
@@ -38,7 +38,7 @@
     <span [dir]="resources.getDirection(hoverFeature.properties.title)">{{hoverFeature.properties.title}}</span>
 </mgl-popup>
 <mgl-marker *ngIf="selectedPoiFeature" [lngLat]="selectedPoiFeature.geometry.coordinates" anchor="bottom">
-    <span class="fa-stack fa-lg cursor-pointer" (click)="openPoi(selectedPoiFeature.properties.poiId, $event)" (mouseover)="setHoverFeature(selectedPoiFeature)" (mouseout)="hoverFeature = null">
+    <span class="fa-stack fa-lg cursor-pointer semi-transparent" (click)="openPoi(selectedPoiFeature.properties.poiId, $event)" (mouseover)="setHoverFeature(selectedPoiFeature)" (mouseout)="hoverFeature = null">
         <span *ngIf="selectedPoiFeature.properties.hasExtraData" class="has-extra-data" [style.background]="selectedPoiFeature.properties.poiIconColor"></span>
         <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
         <i class="fa {{selectedPoiFeature.properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large" [style.color]="selectedPoiFeature.properties.poiIconColor"></i>
