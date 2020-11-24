@@ -1,6 +1,6 @@
 ﻿<div [dir]="resources.direction">
     <div *ngFor="let point of points" fxLayout="row" [dir]="resources.getDirection(point.title)">
-        <a fxFill mat-button (click)="clickOnItem(point)" [ngClass]="resources.getTextAlignment(point.title)">
+        <a fxFill mat-button (click)="clickOnItem(point)" [ngClass]="resources.getTextAlignment(point.title)" class="break-button-text">
             <i class="fa {{point.icon}}" [style.color]="point.iconColor"></i> {{point.title}}
         </a><br/>
     </div>

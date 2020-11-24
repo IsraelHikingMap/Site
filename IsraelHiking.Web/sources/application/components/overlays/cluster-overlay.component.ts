@@ -8,7 +8,8 @@ import { BaseMapComponent } from "../base-map.component";
 
 @Component({
     selector: "cluster-overlay",
-    templateUrl: "./cluster-overlay.component.html"
+    templateUrl: "./cluster-overlay.component.html",
+    styleUrls: ["./cluster-overlay.component.scss"]
 })
 export class ClusterOverlayComponent extends BaseMapComponent {
 
