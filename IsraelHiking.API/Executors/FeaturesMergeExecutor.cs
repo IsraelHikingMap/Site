@@ -89,7 +89,7 @@ namespace IsraelHiking.API.Executors
             osmFeatures = MergePlaceNodes(osmFeatures);
             var groupedByName = osmFeatures.Where(f => f.Attributes.Exists(FeatureAttributes.NAME))
                 .GroupBy(f => f.Attributes[FeatureAttributes.NAME].ToString()).ToList();
-            _logger.LogInformation($"Finished grouping by name: {groupedByName.Count}");
+            _logger.LogInformation($"Finished grouping by name: {groupedByName.Count}, staring to merge on {Environment.ProcessorCount / 2} processors");
             Parallel.For(0, groupedByName.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount / 2 }, (groupIndex) =>
             {
                 var features = groupedByName[groupIndex].ToList();

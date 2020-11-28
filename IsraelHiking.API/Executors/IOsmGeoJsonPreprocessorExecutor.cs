@@ -12,9 +12,9 @@ namespace IsraelHiking.API.Executors
         /// <summary>
         /// Preprocess OSM geometry into geojson features
         /// </summary>
-        /// <param name="osmNamesDictionary"></param>
+        /// <param name="osmEntities"></param>
         /// <returns>a list of preprocessed features</returns>
-        List<Feature> Preprocess(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary);
+        List<Feature> Preprocess(List<ICompleteOsmGeo> osmEntities);
         /// <summary>
         /// Preprocess highways into features - line strings
         /// </summary>

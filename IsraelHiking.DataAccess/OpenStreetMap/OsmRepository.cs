@@ -22,21 +22,20 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             _logger = logger;
         }
 
-        public Task<Dictionary<string, List<ICompleteOsmGeo>>> GetElementsWithName(Stream osmFileStream)
+        public Task<List<ICompleteOsmGeo>> GetElementsWithName(Stream osmFileStream)
         {
             return Task.Run(() =>
             {
-                _logger.LogInformation("Extracting elements with name from OSM stream.");
+                _logger.LogInformation("Starting extracting elements with name from OSM stream.");
                 osmFileStream.Seek(0, SeekOrigin.Begin);
                 var source = new PBFOsmStreamSource(osmFileStream);
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
-                var namesDictionary = completeSource
+                var elements = completeSource
                     .Where(o => !o.Tags.Contains("highway", "construction"))
                     .Where(o => string.IsNullOrWhiteSpace(o.Tags.GetName()) == false)
-                    .GroupBy(o => o.Tags.GetName())
-                    .ToDictionary(g => g.Key, g => g.ToList());
-                _logger.LogInformation("Finished grouping data by name. " + namesDictionary.Values.Count);
-                return namesDictionary;
+                    .ToList();
+                _logger.LogInformation("Finished extracting elements with name: " + elements.Count);
+                return elements;
             });
         }
 

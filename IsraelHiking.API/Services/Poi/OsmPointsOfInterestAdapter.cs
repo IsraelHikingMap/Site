@@ -229,7 +229,7 @@ namespace IsraelHiking.API.Services.Poi
             node.Id = await osmGateway.CreateElement(changesetId, node);
             await osmGateway.CloseChangeset(changesetId);
 
-            var feature = await UpdateElasticSearch(node, pointOfInterest.Title);
+            var feature = await UpdateElasticSearch(node);
             return await FeatureToExtendedPoi(feature, language);
         }
 
@@ -238,7 +238,7 @@ namespace IsraelHiking.API.Services.Poi
         {
             var id = pointOfInterest.Id;
             ICompleteOsmGeo completeOsmGeo = await osmGateway.GetCompleteElement(GeoJsonExtensions.GetOsmId(id), GeoJsonExtensions.GetOsmType(id));
-            var featureBeforeUpdate = ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title);
+            var featureBeforeUpdate = ConvertOsmToFeature(completeOsmGeo);
             var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.POI_ICON].ToString();
             var oldTags = completeOsmGeo.Tags.ToArray();
 
@@ -262,7 +262,7 @@ namespace IsraelHiking.API.Services.Poi
             await osmGateway.UpdateElement(changesetId, completeOsmGeo);
             await osmGateway.CloseChangeset(changesetId);
 
-            var featureToReturn = await UpdateElasticSearch(completeOsmGeo, pointOfInterest.Title);
+            var featureToReturn = await UpdateElasticSearch(completeOsmGeo);
             return await FeatureToExtendedPoi(featureToReturn, language);
         }
 
@@ -293,11 +293,11 @@ namespace IsraelHiking.API.Services.Poi
         {
             _logger.LogInformation("Starting getting OSM points of interest");
             using var stream = _latestFileFetcherExecutor.Get();
-            var osmNamesDictionary = await _osmRepository.GetElementsWithName(stream);
+            var osmEntities = await _osmRepository.GetElementsWithName(stream);
             var relevantTagsDictionary = _tagsHelper.GetAllTags();
             var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(stream, relevantTagsDictionary);
-            osmNamesDictionary.Add(string.Empty, namelessNodes.Cast<ICompleteOsmGeo>().ToList());
-            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
+            osmEntities.AddRange(namelessNodes.Cast<ICompleteOsmGeo>().ToList());
+            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmEntities);
             _logger.LogInformation("Finished getting OSM points of interest: " + features.Count);
             return features;
         }
@@ -326,19 +326,15 @@ namespace IsraelHiking.API.Services.Poi
             }
         }
 
-        private Feature ConvertOsmToFeature(ICompleteOsmGeo osm, string name)
+        private Feature ConvertOsmToFeature(ICompleteOsmGeo osm)
         {
-            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(
-                new Dictionary<string, List<ICompleteOsmGeo>>
-                {
-                    {name ?? string.Empty, new List<ICompleteOsmGeo> {osm}}
-                });
+            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(new List<ICompleteOsmGeo> {osm});
             return features.Any() ? features.First() : null;
         }
 
-        private async Task<Feature> UpdateElasticSearch(ICompleteOsmGeo osm, string name)
+        private async Task<Feature> UpdateElasticSearch(ICompleteOsmGeo osm)
         {
-            var feature = ConvertOsmToFeature(osm, name);
+            var feature = ConvertOsmToFeature(osm);
             if (feature == null)
             {
                 return null;

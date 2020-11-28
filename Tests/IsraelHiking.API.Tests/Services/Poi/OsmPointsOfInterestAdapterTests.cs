@@ -417,7 +417,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             var features = new List<Feature>();
             _latestFileFetcherExecutor.Get().Returns(new MemoryStream());
-            _osmRepository.GetElementsWithName(Arg.Any<Stream>()).Returns(new Dictionary<string, List<ICompleteOsmGeo>>());
+            _osmRepository.GetElementsWithName(Arg.Any<Stream>()).Returns(new List<ICompleteOsmGeo>());
             _osmRepository.GetPointsWithNoNameByTags(Arg.Any<Stream>(), Arg.Any<List<KeyValuePair<string, string>>>())
                 .Returns(new List<Node>());
 

@@ -102,7 +102,7 @@ namespace IsraelHiking.API.Converters
             while (waysToGroup.Any())
             {
                 var wayToGroup = waysToGroup.FirstOrDefault(w =>
-                    nodesGroups.Any(g => CanBeLinked(w.Nodes, g.ToArray())));
+                    nodesGroups.Any(g => CanBeMerged(w.Nodes, g)));
 
                 if (wayToGroup == null)
                 {
@@ -112,10 +112,17 @@ namespace IsraelHiking.API.Converters
                 }
                 var currentNodes = new List<Node>(wayToGroup.Nodes);
                 waysToGroup.Remove(wayToGroup);
-                var group = nodesGroups.First(g => CanBeLinked(currentNodes.ToArray(), g.ToArray()));
-                if (currentNodes.First().Id == group.First().Id || currentNodes.Last().Id == group.Last().Id)
+                var group = nodesGroups.First(g => CanBeMerged(currentNodes, g));
+                if (CanBeReverseMerged(group, currentNodes))
                 {
-                    currentNodes.Reverse(); // direction of this way is incompatible with other ways.
+                    if (wayToGroup.Tags != null && wayToGroup.Tags.ContainsKey("oneway") && wayToGroup.Tags["oneway"] == "true")
+                    {
+                        group.Reverse();
+                    }
+                    else
+                    {
+                        currentNodes.Reverse(); // direction of this way is incompatible with other ways.
+                    }
                 }
                 if (currentNodes.First().Id == group.Last().Id)
                 {
@@ -129,12 +136,17 @@ namespace IsraelHiking.API.Converters
             return nodesGroups.Select(g => SplitListByLoops(g).Select(g => GetGeometryFromNodes(g.ToArray()))).SelectMany(g => g).ToList();
         }
 
-        private bool CanBeLinked(Node[] nodes1, Node[] nodes2)
+        private bool CanBeMerged(IEnumerable<Node> nodes1, IEnumerable<Node> nodes2)
         {
-            return nodes1.Last().Id == nodes2.First().Id
-                   || nodes1.First().Id == nodes2.Last().Id
-                   || nodes1.First().Id == nodes2.First().Id
-                   || nodes1.Last().Id == nodes2.Last().Id;
+            return nodes1.Last().Id == nodes2.First().Id ||
+                   nodes1.First().Id == nodes2.Last().Id ||
+                   CanBeReverseMerged(nodes1, nodes2);
+        }
+
+        private bool CanBeReverseMerged(IEnumerable<Node> nodes1, IEnumerable<Node> nodes2)
+        {
+            return nodes1.First().Id == nodes2.First().Id ||
+                   nodes1.Last().Id == nodes2.Last().Id;
         }
 
         private Feature ConvertRelation(CompleteRelation relation)
@@ -145,7 +157,7 @@ namespace IsraelHiking.API.Converters
             }
 
             var nodes = relation.Members.Select(m => m.Member).OfType<Node>().ToList();
-            if (nodes.Any())
+            if (nodes.Any() && nodes.Count == relation.Members.Length)
             {
                 var multiPoint = _geometryFactory.CreateMultiPoint(nodes.Select(n => _geometryFactory.CreatePoint(ConvertNode(n))).ToArray());
                 return new Feature(multiPoint, ConvertTags(relation));

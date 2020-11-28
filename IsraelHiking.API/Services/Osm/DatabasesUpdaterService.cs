@@ -140,8 +140,7 @@ namespace IsraelHiking.API.Services.Osm
                 updateTasks.Add(task);
             }
             var allElemets = await Task.WhenAll(updateTasks);
-            var osmNamesDictionary = allElemets.GroupBy(e => e.Tags.GetName()).ToDictionary(g => g.Key, g => g.ToList());
-            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
+            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(allElemets.ToList());
 
             foreach (var poiToUpdate in changes.Modify
                 .Where(o => IsRelevantPointOfInterest(o, relevantTagsDictionary)))

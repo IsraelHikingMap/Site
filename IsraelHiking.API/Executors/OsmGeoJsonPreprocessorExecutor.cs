@@ -7,11 +7,9 @@ using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Valid;
-using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.Tags;
 using ProjNet.CoordinateSystems.Transformations;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -61,66 +59,83 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc />
-        public List<Feature> Preprocess(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary)
+        public List<Feature> Preprocess(List<ICompleteOsmGeo> osmEntities)
         {
-            _logger.LogInformation("Preprocessing OSM data to GeoJson, total distinct names: " + osmNamesDictionary.Keys.Count);
-            var geoJsonNamesDictionary = new Dictionary<string, List<Feature>>();
-            foreach (var pair in osmNamesDictionary)
-            {
-                var features = MergeOsmElements(pair.Value)
-                        .Select(e =>
-                        {
-                            var feature = _osmGeoJsonConverter.ToGeoJson(e);
-                            if (feature == null)
-                            {
-                                _logger.LogError("Unable to convert " + e.ToString());
-                            }
-                            return feature;
-                        })
-                        .Where(f => f != null)
-                        .ToList();
-                if (!features.Any())
-                {
-                    continue;
-                }
-                AddAttributes(features);
-                geoJsonNamesDictionary[pair.Key] = features;
-            }
-
-            geoJsonNamesDictionary.Values.SelectMany(v => v).ToList().ForEach(g =>
-            {
-                var isValidOp = new IsValidOp(g.Geometry);
-                if (!isValidOp.IsValid)
-                {
-                    _logger.LogError($"{g.Geometry.GeometryType} with ID: {g.Attributes[FeatureAttributes.ID]} {isValidOp.ValidationError.Message} ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
-                }
-                if (g.Geometry.IsEmpty)
-                {
-                    _logger.LogError($"{g.Geometry.GeometryType} with ID: {g.Attributes[FeatureAttributes.ID]} is an empty geometry - check for non-closed relations.");
-                }
-            });
-            _logger.LogInformation("Finished GeoJson conversion");
-            var featuresToReturn = geoJsonNamesDictionary.SelectMany(v => v.Value).ToList();
+            _logger.LogInformation("Preprocessing OSM data to GeoJson, total entities: " + osmEntities.Count);
+            osmEntities = RemoveDuplicateWaysThatExistInRelations(osmEntities);
+            var featuresToReturn = osmEntities.Select(ConvertToFeature).Where(f => f != null).ToList();
             ChangeLwnHikingRoutesToNoneCategory(featuresToReturn);
+            _logger.LogInformation("Finished GeoJson conversion: " + featuresToReturn.Count);
             return featuresToReturn;
         }
 
-        private void AddAttributes(List<Feature> features)
+        /// <summary>
+        /// This function removes ways from the list that are covered by a relation.
+        /// </summary>
+        /// <param name="osmEntities"></param>
+        /// <returns></returns>
+        private List<ICompleteOsmGeo> RemoveDuplicateWaysThatExistInRelations(List<ICompleteOsmGeo> osmEntities)
         {
-            foreach (var feature in features)
+            var relations = osmEntities.OfType<CompleteRelation>();
+            var osmByIdDictionary = osmEntities.ToDictionary(o => o.GetId(), o => o);
+            foreach (var relation in relations)
             {
-                (var searchFactor, var iconColorCategory) = _tagsHelper.GetInfo(feature.Attributes);
-                feature.Attributes.Add(FeatureAttributes.POI_SEARCH_FACTOR, searchFactor);
-                feature.Attributes.Add(FeatureAttributes.POI_ICON, iconColorCategory.Icon);
-                feature.Attributes.Add(FeatureAttributes.POI_ICON_COLOR, iconColorCategory.Color);
-                feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
-                feature.Attributes.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
-                feature.Attributes.Add(FeatureAttributes.POI_LANGUAGE, Languages.ALL);
-                feature.Attributes.Add(FeatureAttributes.POI_CONTAINER, feature.IsValidContainer());
-                feature.SetTitles();
-                feature.SetId();
-                UpdateLocation(feature);
+                if (relation.Tags == null || !relation.Tags.Any())
+                {
+                    continue;
+                }
+                var ways = OsmGeoJsonConverter.GetAllWays(relation);
+                foreach (var way in ways)
+                {
+                    if (way.Tags == null || !way.Tags.Any())
+                    {
+                        continue;
+                    }
+                    if (!osmByIdDictionary.ContainsKey(way.GetId()))
+                    {
+                        continue;
+                    }
+                    if (way.Tags.GetName().Equals(relation.Tags.GetName()))
+                    {
+                        osmByIdDictionary.Remove(way.GetId());
+                    }
+                }
             }
+            return osmByIdDictionary.Values.ToList();
+        }
+
+        private Feature ConvertToFeature(ICompleteOsmGeo osmEntity)
+        {
+            var feature = _osmGeoJsonConverter.ToGeoJson(osmEntity);
+            if (feature == null)
+            {
+                _logger.LogError("Unable to convert " + osmEntity.ToString());
+                return null;
+            }
+            var isValidOp = new IsValidOp(feature.Geometry);
+            if (!isValidOp.IsValid)
+            {
+                _logger.LogError($"{feature.Geometry.GeometryType} with ID: {feature.Attributes[FeatureAttributes.ID]} {isValidOp.ValidationError.Message} ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                return null;
+            }
+            if (feature.Geometry.IsEmpty)
+            {
+                _logger.LogError($"{feature.Geometry.GeometryType} with ID: {feature.Attributes[FeatureAttributes.ID]} is an empty geometry - check for non-closed relations.");
+                return null;
+            }
+
+            (var searchFactor, var iconColorCategory) = _tagsHelper.GetInfo(feature.Attributes);
+            feature.Attributes.Add(FeatureAttributes.POI_SEARCH_FACTOR, searchFactor);
+            feature.Attributes.Add(FeatureAttributes.POI_ICON, iconColorCategory.Icon);
+            feature.Attributes.Add(FeatureAttributes.POI_ICON_COLOR, iconColorCategory.Color);
+            feature.Attributes.Add(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
+            feature.Attributes.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
+            feature.Attributes.Add(FeatureAttributes.POI_LANGUAGE, Languages.ALL);
+            feature.Attributes.Add(FeatureAttributes.POI_CONTAINER, feature.IsValidContainer());
+            feature.SetTitles();
+            feature.SetId();
+            UpdateLocation(feature);
+            return feature;
         }
 
         private void ChangeLwnHikingRoutesToNoneCategory(List<Feature> features)
@@ -129,132 +144,6 @@ namespace IsraelHiking.API.Executors
                                                               feature.Attributes.Has("route", "hiking")))
             {
                 feature.Attributes[FeatureAttributes.POI_CATEGORY] = Categories.NONE;
-            }
-        }
-
-        private IEnumerable<ICompleteOsmGeo> MergeOsmElements(IReadOnlyCollection<ICompleteOsmGeo> elements)
-        {
-            if (elements.Count == 1)
-            {
-                return elements;
-            }
-            var nodes = elements.OfType<Node>().ToList();
-            var ways = elements.OfType<CompleteWay>().ToList();
-            var relations = elements.OfType<CompleteRelation>().ToList();
-            if (nodes.Count == elements.Count || relations.Count == elements.Count)
-            {
-                return elements;
-            }
-            ways = MergeWaysInRelations(relations, ways);
-            ways = MergeWays(ways);
-            var mergedElements = new List<ICompleteOsmGeo>();
-            mergedElements.AddRange(nodes);
-            mergedElements.AddRange(ways);
-            mergedElements.AddRange(relations);
-            return mergedElements;
-        }
-
-        private List<CompleteWay> MergeWaysInRelations(IEnumerable<CompleteRelation> relations, ICollection<CompleteWay> ways)
-        {
-            var waysToKeep = ways.ToList();
-            foreach (var relation in relations)
-            {
-                foreach (var way in OsmGeoJsonConverter.GetAllWays(relation))
-                {
-                    var wayToRemove = waysToKeep.FirstOrDefault(w => w.Id == way.Id);
-                    if (wayToRemove == null)
-                    {
-                        continue;
-                    }
-                    MergeTags(way, relation);
-                    waysToKeep.Remove(wayToRemove);
-                }
-            }
-            return waysToKeep;
-        }
-
-        /// <summary>
-        /// This method create a new list of ways based on the given list. 
-        /// The merge is done by looking into the ways' nodes and combine ways which start or end with the same node. 
-        /// </summary>
-        /// <param name="ways">The ways to merge</param>
-        /// <returns>The merged ways</returns>
-        private List<CompleteWay> MergeWays(List<CompleteWay> ways)
-        {
-            if (ways.Any() == false)
-            {
-                return new List<CompleteWay>();
-            }
-            var mergedWays = new List<CompleteWay> { ways.First() };
-            var waysToMerge = new List<CompleteWay>(ways.Skip(1));
-            while (waysToMerge.Any())
-            {
-                var foundAWayToMergeTo = false;
-                for (var index = waysToMerge.Count - 1; index >= 0; index--)
-                {
-                    var wayToMerge = waysToMerge[index];
-                    var wayToMergeTo = mergedWays.FirstOrDefault(mw => CanBeMerged(mw, wayToMerge));
-                    if (wayToMergeTo == null)
-                    {
-                        continue;
-                    }
-                    if (CanBeReverseMerged(wayToMergeTo, wayToMerge))
-                    {
-                        if (wayToMerge.Tags.ContainsKey("oneway") && wayToMerge.Tags["oneway"] == "true")
-                        {
-                            wayToMergeTo.Nodes = wayToMergeTo.Nodes.Reverse().ToArray();
-                        }
-                        else
-                        {
-                            wayToMerge.Nodes = wayToMerge.Nodes.Reverse().ToArray();
-                        }
-                    }
-                    var nodes = wayToMerge.Nodes.ToList();
-                    if (nodes.Last().Id == wayToMergeTo.Nodes.First().Id)
-                    {
-                        nodes.Remove(nodes.Last());
-                        wayToMergeTo.Nodes = nodes.Concat(wayToMergeTo.Nodes).ToArray();
-                    }
-                    else if (nodes.First().Id == wayToMergeTo.Nodes.Last().Id)
-                    {
-                        nodes.Remove(nodes.First());
-                        wayToMergeTo.Nodes = wayToMergeTo.Nodes.Concat(nodes).ToArray();
-                    }
-
-                    MergeTags(wayToMerge, wayToMergeTo);
-                    waysToMerge.Remove(wayToMerge);
-                    foundAWayToMergeTo = true;
-                }
-
-                if (foundAWayToMergeTo)
-                {
-                    continue;
-                }
-
-                mergedWays.Add(waysToMerge.First());
-                waysToMerge.RemoveAt(0);
-            }
-            return mergedWays;
-        }
-
-        private bool CanBeMerged(CompleteWay way1, CompleteWay way2)
-        {
-            return way1.Nodes.Last().Id == way2.Nodes.First().Id ||
-                   way1.Nodes.First().Id == way2.Nodes.Last().Id ||
-                   CanBeReverseMerged(way1, way2);
-        }
-
-        private bool CanBeReverseMerged(CompleteWay way1, CompleteWay way2)
-        {
-            return way1.Nodes.First().Id == way2.Nodes.First().Id ||
-                   way1.Nodes.Last().Id == way2.Nodes.Last().Id;
-        }
-
-        private void MergeTags(ICompleteOsmGeo fromItem, ICompleteOsmGeo toItem)
-        {
-            foreach (var tag in fromItem.Tags.Except(toItem.Tags, new TagKeyComparer()))
-            {
-                toItem.Tags.Add(tag);
             }
         }
 

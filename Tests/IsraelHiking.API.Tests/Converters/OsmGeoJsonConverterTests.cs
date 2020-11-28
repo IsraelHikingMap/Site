@@ -234,7 +234,7 @@ namespace IsraelHiking.API.Tests.Converters
         }
 
         [TestMethod]
-        public void ToGeoJson_RelationWithoutWays_ShouldReturnMultiPoint()
+        public void ToGeoJson_RelationWithoutMembers_ShouldReturnNull()
         {
             var relation = new CompleteRelation { Id = 3, Tags = new TagsCollection(), Members = new CompleteRelationMember[0] };
             relation.Tags.Add(NAME, NAME);
@@ -512,6 +512,38 @@ namespace IsraelHiking.API.Tests.Converters
             Assert.AreEqual(1, multiLineString.Geometries.Length);
             var lineString = multiLineString.Geometries.First();
             Assert.AreEqual(4, lineString.Coordinates.Length);
+        }
+
+        [TestMethod]
+        public void ToGeoJson_UnsortedRelationWithDirection_ShouldReturnMultiLineStringAfterGrouping()
+        {
+            var node1 = CreateNode(1);
+            var node2 = CreateNode(2);
+            var node3 = CreateNode(3);
+            var node4 = CreateNode(4);
+            var wayPartOfLineString1 = new CompleteWay { Id = 8 };
+            var wayPartOfLineString2 = new CompleteWay { Id = 9 };
+            var wayPartOfLineString3 = new CompleteWay { Id = 10 };
+            wayPartOfLineString1.Nodes = new[] { node1, node2 };
+            wayPartOfLineString2.Nodes = new[] { node3, node4 };
+            wayPartOfLineString3.Nodes = new[] { node3, node2 };
+            wayPartOfLineString3.Tags = new TagsCollection() { { "oneway", "true" } };
+            var relation = new CompleteRelation { Id = 11, Tags = new TagsCollection() };
+            relation.Tags.Add(NAME, NAME);
+            relation.Members = new[] {
+                new CompleteRelationMember { Member = wayPartOfLineString1 },
+                new CompleteRelationMember { Member = wayPartOfLineString2 },
+                new CompleteRelationMember { Member = wayPartOfLineString3 }
+            };
+
+            var feature = _converter.ToGeoJson(relation);
+            var multiLineString = feature.Geometry as MultiLineString;
+
+            Assert.IsNotNull(multiLineString);
+            Assert.AreEqual(1, multiLineString.Geometries.Length);
+            var lineString = multiLineString.Geometries.First();
+            Assert.AreEqual(4, lineString.Coordinates.Length);
+            Assert.AreEqual(node4.Longitude, lineString.Coordinates.First().X);
         }
 
         [TestMethod]

@@ -104,7 +104,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         {
             var changes = new OsmChange { Create = new OsmGeo[0], Modify = new OsmGeo[0], Delete = new OsmGeo[0] };
             _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<Dictionary<string, List<ICompleteOsmGeo>>>(x => x.Values.Count == 0))
+                .Preprocess(Arg.Is<List<ICompleteOsmGeo>>(x => x.Count == 0))
                 .Returns(new List<Feature>());
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 0))
@@ -128,7 +128,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             new Way() { Id = 1, Tags = new TagsCollection { { "highway", "track" } } } }
             };
             _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<Dictionary<string, List<ICompleteOsmGeo>>>(x => x.Values.Count == 0))
+                .Preprocess(Arg.Is<List<ICompleteOsmGeo>>(x => x.Count == 0))
                 .Returns(new List<Feature>());
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 0))
@@ -158,7 +158,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             };
             var list = new List<Feature> { new Feature(new LineString(new Coordinate[0]), new AttributesTable()) };
             _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<Dictionary<string, List<ICompleteOsmGeo>>>(x => x.Values.Count == 1))
+                .Preprocess(Arg.Is<List<ICompleteOsmGeo>>(x => x.Count == 1))
                     .Returns(list);
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 1))
@@ -200,7 +200,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             wayFeatureInDatabase.SetId();
             var list = new List<Feature> { wayFeature };
             _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<Dictionary<string, List<ICompleteOsmGeo>>>(x => x.Values.Count == 1))
+                .Preprocess(Arg.Is<List<ICompleteOsmGeo>>(x => x.Count == 1))
                     .Returns(list);
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 1))
