@@ -1,6 +1,8 @@
 import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material";
+import { WebIntent, Intent } from "@ionic-native/web-intent/ngx";
+import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
 
 import { RunningContextService } from "./running-context.service";
 import { FileService } from "./file.service";
@@ -10,7 +12,6 @@ import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { RouteStrings } from "./hash.service";
 
-declare var cordova: any;
 declare var universalLinks: any;
 
 interface Item {
@@ -30,6 +31,8 @@ export class OpenWithService {
                 private readonly matDialog: MatDialog,
                 private readonly router: Router,
                 private readonly loggingService: LoggingService,
+                private readonly webIntent: WebIntent,
+                private readonly fileSystemWrapper: FileSystemWrapper,
                 private readonly ngZone: NgZone) { }
 
     public initialize() {
@@ -82,52 +85,69 @@ export class OpenWithService {
                 this.router.navigate(["/"]);
             });
         });
-        if (!cordova.openwith || !cordova.openwith.init) {
-            return;
-        }
-        cordova.openwith.init(() => { }, (error) => this.loggingService.error(`[OpenWith] Init failed with error: ${error}`));
-        cordova.openwith.addHandler((intent) => {
-            if (intent.items.length <= 0) {
-                return;
-            }
-            cordova.openwith.load(intent.items[0],
-                (data: string, item: Item) => {
-                    this.ngZone.run(async () => {
-                        if (data.length === 0) {
-                            this.handleExternalUrl(item);
-                        } else {
-                            this.handleFile(data, item);
-                        }
-                    });
+        (window as any).handleOpenURL = (url: string) => {
+            this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
+            setTimeout(async () => {
+                let entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
+                entry.file((file) => {
+                    this.fileService.addRoutesFromFile(file);
                 });
+            }, 0);
+        };
+        this.webIntent.getIntent().then(intent => this.handleIntent(intent));
+
+        this.webIntent.onIntent().subscribe((intent) => {
+            this.handleIntent(intent);
+            
         });
     }
 
-    private handleExternalUrl(item: Item) {
-        if (item.uri.toLocaleLowerCase().indexOf("israelhiking.osm.org.il") !== -1) {
+    private handleIntent(intent: Intent) {
+        alert(JSON.stringify(intent));
+        this.ngZone.run(async () => {
+            let data = intent["data"] as string;
+            if (!data) {
+                if (!intent.action.endsWith("MAIN")) {
+                    this.loggingService.warning("[OpenWith] Could not extract data from intent: " + JSON.stringify(intent));
+                }
+                return;
+            }
+            if (data.startsWith("http") || data.startsWith("geo")) {
+                this.handleExternalUrl(data);
+            } else {
+                let entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(data) as FileEntry;
+                entry.file((file) => {
+                    this.fileService.addRoutesFromFile(file);
+                });
+            }
+        });
+    }
+
+    private handleExternalUrl(uri: string) {
+        if (uri.toLocaleLowerCase().indexOf("israelhiking.osm.org.il") !== -1) {
             // handled by deep links plugin
             return;
         }
-        this.loggingService.info("[OpenWith] Opening a url: " + item.uri);
-        if (item.uri.indexOf("maps?q=") !== -1) {
+        this.loggingService.info("[OpenWith] Opening a url: " + uri);
+        if (uri.indexOf("maps?q=") !== -1) {
             let coordsRegExp = /q=(\d+\.\d+),(\d+\.\d+)&z=/;
-            let coords = coordsRegExp.exec(decodeURIComponent(item.uri));
+            let coords = coordsRegExp.exec(decodeURIComponent(uri));
             this.moveToCoordinates(coords);
             return;
         }
-        if (item.uri.indexOf("maps/place") !== -1) {
+        if (uri.indexOf("maps/place") !== -1) {
             let coordsRegExp = /\@(\d+\.\d+),(\d+\.\d+),/;
-            let coords = coordsRegExp.exec(item.uri);
+            let coords = coordsRegExp.exec(uri);
             this.moveToCoordinates(coords);
             return;
         }
-        if (item.uri.indexOf("geo:") !== -1) {
-            let coordsRegExp = /:(\d+\.\d+),(\d+\.\d+)/;
-            let coords = coordsRegExp.exec(item.uri);
+        if (uri.indexOf("geo:") !== -1) {
+            let coordsRegExp = /:(-?\d+\.\d+),(-?\d+\.\d+)/;
+            let coords = coordsRegExp.exec(uri);
             this.moveToCoordinates(coords);
             return;
         }
-        this.router.navigate([RouteStrings.ROUTE_URL, item.uri]);
+        this.router.navigate([RouteStrings.ROUTE_URL, uri]);
     }
 
     private moveToCoordinates(coords: string[]) {

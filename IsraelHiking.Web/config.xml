@@ -168,45 +168,31 @@
     <preference name="SplashScreenDelay" value="0" />
     <preference name="FadeSplashScreenDuration" value="0" />
     <splash src="www/content/favicons/Default@2x~universal~anyany.png" />
-    <edit-config target="NSCameraUsageDescription" file="*-Info.plist" mode="merge">
+    <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
       <string>We need the camera in order to take a picture</string>
-    </edit-config>
-    <edit-config target="NSPhotoLibraryUsageDescription" file="*-Info.plist" mode="merge">
+    </config-file>
+    <config-file target="*-Info.plist" parent="NSPhotoLibraryUsageDescription">
       <string>We need access to the photo library to get pictures from there</string>
-    </edit-config>
-    <edit-config target="NSPhotoLibraryAddUsageDescription" file="*-Info.plist" mode="merge">
+    </config-file>
+    <config-file target="*-Info.plist" parent="NSPhotoLibraryAddUsageDescription">
       <string>We need access to the photo library to save pictures there</string>
-    </edit-config>
-    <edit-config target="NSLocationAlwaysUsageDescription" file="*-Info.plist" mode="merge">
+    </config-file>
+    <config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
       <string>We need to access your location in order to be able to show it on the map while navigating</string>
-    </edit-config>
-    <edit-config target="NSLocationWhenInUseUsageDescription" file="*-Info.plist" mode="merge">
+    </config-file>
+    <config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription">
       <string>We need to access your location in order to be able to show it on the map while navigating</string>
-    </edit-config>
-    <edit-config target="NSMotionUsageDescription" file="*-Info.plist" mode="merge">
+    </config-file>
+    <config-file target="*-Info.plist" parent="NSMotionUsageDescription">
       <string>We need to access your motion direction in order to be able to show it on the map while navigating</string>
-    </edit-config>
-    <edit-config target="CFBundleLocalizations" file="*-Info.plist" mode="overwrite">
+    </config-file>
+    <config-file target="*-Info.plist" parent="CFBundleLocalizations">
       <array>
         <string>en</string>
         <string>he</string>
       </array>
-    </edit-config>
-    <edit-config target="NSExtensionActivationRule" file="*-Info.plist" mode="overwrite">
-      <string>
-            SUBQUERY (
-            extensionItems, $extensionItem,
-            SUBQUERY (
-            $extensionItem.attachments, $attachment,
-              ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.plain-text"
-                || ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.jpeg"
-                || ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.jpeg-2000"
-                || ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.xml"
-            ).@count >= 1
-            ).@count > 0
-        </string>
-    </edit-config>
-    <edit-config target="CFBundleDocumentTypes" file="*-Info.plist" mode="merge">
+    </config-file>
+    <config-file target="*-Info.plist" parent="CFBundleDocumentTypes">
       <array>
         <dict>
             <key>CFBundleTypeIconFiles</key>
@@ -223,8 +209,8 @@
             </array>
         </dict>
       </array>
-    </edit-config>
-    <edit-config target="UTImportedTypeDeclarations" file="*-Info.plist" mode="merge">
+    </config-file>
+    <config-file target="*-Info.plist" parent="UTImportedTypeDeclarations">
       <array>
         <dict>
             <key>UTTypeConformsTo</key>
@@ -248,7 +234,7 @@
             </dict>
         </dict>
       </array>
-    </edit-config>
+    </config-file>
     <preference name="WKWebViewOnly" value="true" />
     <preference name="WKSuspendInBackground" value="false" />
     <preference name="StatusBarOverlaysWebView" value="false" />
