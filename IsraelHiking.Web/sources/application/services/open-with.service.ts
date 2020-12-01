@@ -86,8 +86,13 @@ export class OpenWithService {
         (window as any).handleOpenURL = (url: string) => {
             this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
             setTimeout(async () => {
-                let file = await this.fileService.getFileFromUrl(url)
-                this.fileService.addRoutesFromFile(file);
+                try {
+                    let file = await this.fileService.getFileFromUrl(url);
+                    this.fileService.addRoutesFromFile(file);
+                } catch (ex) {
+                    this.loggingService.error(ex.message);
+                    this.toastService.error(this.resources.unableToLoadFromFile);
+                }  
             }, 0);
         };
         this.webIntent.getIntent().then(intent => this.handleIntent(intent));
@@ -121,7 +126,7 @@ export class OpenWithService {
                     this.fileService.addRoutesFromFile(file);
                 }
             } catch (ex) {
-                this.loggingService.error(ex.toString());
+                this.loggingService.error(ex.message);
                 this.toastService.error(this.resources.unableToLoadFromFile);
             }            
         });

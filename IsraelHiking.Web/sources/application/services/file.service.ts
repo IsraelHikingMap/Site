@@ -157,7 +157,15 @@ export class FileService {
     public async getFileFromUrl(url: string): Promise<File> {
         let entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
         let file = await new Promise((resolve, reject) => {
-            entry.file(resolve, reject);
+            entry.file((file) => {
+                var reader = new FileReader();
+                reader.onload = (event: any) => {
+                    var blob = new Blob([event.target.result], { type: "application/" + url.split(".").pop() }) as any;
+                    blob.name = url.split("/").pop();
+                    resolve(blob);
+                };
+                reader.readAsArrayBuffer(file);
+            }, reject);
         }) as File;
         return file; 
     }
