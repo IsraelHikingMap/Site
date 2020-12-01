@@ -39,6 +39,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
 
     public addPointToRoute() {
         let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        let markerIndex = selectedRoute.markers.length;
         let markerData = {
             latlng: { ...this.latlng },
             title: "",
@@ -51,7 +52,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
             markerData
         }));
         PrivatePoiEditDialogComponent.openDialog(
-            this.matDialog, markerData, selectedRoute.id, selectedRoute.markers.length - 1);
+            this.matDialog, markerData, selectedRoute.id, markerIndex);
         this.closed.emit();
     }
 
