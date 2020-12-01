@@ -105,7 +105,7 @@ export class OpenWithService {
     private handleIntent(intent: Intent) {
         alert(JSON.stringify(intent));
         this.ngZone.run(async () => {
-            let data = intent["data"] as string;
+            let data = (intent as any).data as string;
             if (!data) {
                 if (!intent.action.endsWith("MAIN")) {
                     this.loggingService.warning("[OpenWith] Could not extract data from intent: " + JSON.stringify(intent));
