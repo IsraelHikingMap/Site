@@ -154,6 +154,14 @@ export class FileService {
         });
     }
 
+    public async getFileFromUrl(url: string): Promise<File> {
+        let entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
+        let file = await new Promise((resolve, reject) => {
+            entry.file(resolve, reject);
+        }) as File;
+        return file; 
+    }
+
     public async addRoutesFromFile(file: File): Promise<void> {
         let dataContainer: DataContainer = null;
         if (file.type === ImageResizeService.JPEG) {

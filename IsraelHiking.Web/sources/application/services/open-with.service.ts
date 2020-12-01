@@ -2,7 +2,6 @@ import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material";
 import { WebIntent, Intent } from "@ionic-native/web-intent/ngx";
-import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
 
 import { RunningContextService } from "./running-context.service";
 import { FileService } from "./file.service";
@@ -32,7 +31,6 @@ export class OpenWithService {
                 private readonly router: Router,
                 private readonly loggingService: LoggingService,
                 private readonly webIntent: WebIntent,
-                private readonly fileSystemWrapper: FileSystemWrapper,
                 private readonly ngZone: NgZone) { }
 
     public initialize() {
@@ -88,10 +86,8 @@ export class OpenWithService {
         (window as any).handleOpenURL = (url: string) => {
             this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
             setTimeout(async () => {
-                let entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
-                entry.file((file) => {
-                    this.fileService.addRoutesFromFile(file);
-                });
+                let file = await this.fileService.getFileFromUrl(url)
+                this.fileService.addRoutesFromFile(file);
             }, 0);
         };
         this.webIntent.getIntent().then(intent => this.handleIntent(intent));
@@ -103,23 +99,25 @@ export class OpenWithService {
     }
 
     private handleIntent(intent: Intent) {
-        alert(JSON.stringify(intent));
         this.ngZone.run(async () => {
-            let data = (intent as any).data as string;
-            if (!data) {
-                if (!intent.action.endsWith("MAIN")) {
-                    this.loggingService.warning("[OpenWith] Could not extract data from intent: " + JSON.stringify(intent));
+            try {
+                // HM TODO: clipItmes!
+                let data = (intent as any).data as string;
+                if (!data) {
+                    if (!intent.action.endsWith("MAIN")) {
+                        this.loggingService.warning("[OpenWith] Could not extract data from intent: " + JSON.stringify(intent));
+                    }
+                    return;
                 }
-                return;
-            }
-            if (data.startsWith("http") || data.startsWith("geo")) {
-                this.handleExternalUrl(data);
-            } else {
-                let entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(data) as FileEntry;
-                entry.file((file) => {
+                if (data.startsWith("http") || data.startsWith("geo")) {
+                    this.handleExternalUrl(data);
+                } else {
+                    let file = await this.fileService.getFileFromUrl(data);
                     this.fileService.addRoutesFromFile(file);
-                });
-            }
+                }
+            } catch (ex) {
+                this.loggingService.error(ex.toString());
+            }            
         });
     }
 
