@@ -112,7 +112,9 @@ export class OpenWithService {
                 if (data.startsWith("http") || data.startsWith("geo")) {
                     this.handleExternalUrl(data);
                 } else {
+                    this.loggingService.info("[OpenWith] Opening an intent with data: " + data);
                     let file = await this.fileService.getFileFromUrl(data);
+                    this.loggingService.info("[OpenWith] Translated the data to a file: " + file.name);
                     this.fileService.addRoutesFromFile(file);
                 }
             } catch (ex) {
