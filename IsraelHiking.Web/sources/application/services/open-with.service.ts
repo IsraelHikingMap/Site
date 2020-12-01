@@ -101,13 +101,16 @@ export class OpenWithService {
     private handleIntent(intent: Intent) {
         this.ngZone.run(async () => {
             try {
-                // HM TODO: clipItmes!
                 let data = (intent as any).data as string;
-                if (!data) {
+                let clipData = (intent as any).clipItems as { uri: string }[];
+                if (!data && !clipData) {
                     if (!intent.action.endsWith("MAIN")) {
                         this.loggingService.warning("[OpenWith] Could not extract data from intent: " + JSON.stringify(intent));
                     }
                     return;
+                }
+                if (clipData && Array.isArray(clipData) && clipData.length > 0) {
+                    data = clipData[0].uri;
                 }
                 if (data.startsWith("http") || data.startsWith("geo")) {
                     this.handleExternalUrl(data);
@@ -119,6 +122,7 @@ export class OpenWithService {
                 }
             } catch (ex) {
                 this.loggingService.error(ex.toString());
+                this.toastService.error(this.resources.unableToLoadFromFile);
             }            
         });
     }
