@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { minBy, maxBy, flatten, last } from "lodash";
 import { parseString, Builder } from "isomorphic-xml2js";
 import { encode } from "base64-arraybuffer";
+import XmlBeautify from "xml-beautify";
 
 import { DataContainer, RouteData, RouteSegmentData, ILatLngTime, MarkerData, LinkData } from "../models/models";
 
@@ -184,7 +185,9 @@ export class GpxDataContainerConverterService {
             };
         }
         this.updateBoundingBox(gpx);
-        return encode(await new Response(builder.buildObject(gpx)).arrayBuffer());
+        let gpxString = builder.buildObject(gpx);
+        gpxString = new XmlBeautify().beautify(gpxString);
+        return encode(await new Response(gpxString).arrayBuffer());
     }
 
     public async toDataContainer(gpxXmlString: string): Promise<DataContainer> {
