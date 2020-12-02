@@ -216,6 +216,10 @@
             <array/>
             <key>CFBundleTypeName</key>
             <string>Google Earth KML Document</string>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSHandlerRank</key>
+            <string>Owner</string>
             <key>LSItemContentTypes</key>
             <array>
                 <string>com.google.earth.kml</string>
