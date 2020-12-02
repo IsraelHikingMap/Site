@@ -5,26 +5,18 @@ import { WebIntent, Intent } from "@ionic-native/web-intent/ngx";
 
 import { RunningContextService } from "./running-context.service";
 import { FileService } from "./file.service";
-import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
+import { ImageResizeService } from "./image-resize.service";
 import { RouteStrings } from "./hash.service";
 
 declare var universalLinks: any;
-
-interface Item {
-    uri: string;
-    path: string;
-    base64: string;
-    type: string;
-}
 
 @Injectable()
 export class OpenWithService {
     constructor(private readonly resources: ResourcesService,
                 private readonly runningContextService: RunningContextService,
-                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
                 private readonly fileService: FileService,
                 private readonly toastService: ToastService,
                 private readonly matDialog: MatDialog,
@@ -87,7 +79,7 @@ export class OpenWithService {
             this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
             setTimeout(async () => {
                 try {
-                    let file = await this.fileService.getFileFromUrl(url);
+                    let file = await this.fileService.getFileFromUrl(url, this.getTypeFromUrl(url));
                     this.fileService.addRoutesFromFile(file);
                 } catch (ex) {
                     this.loggingService.error(ex.message);
@@ -99,7 +91,6 @@ export class OpenWithService {
 
         this.webIntent.onIntent().subscribe((intent) => {
             this.handleIntent(intent);
-            
         });
     }
 
@@ -107,29 +98,45 @@ export class OpenWithService {
         this.ngZone.run(async () => {
             try {
                 let data = (intent as any).data as string;
-                let clipData = (intent as any).clipItems as { uri: string }[];
-                if (!data && !clipData) {
+                if (!data && !intent.clipItems) {
                     if (!intent.action.endsWith("MAIN")) {
                         this.loggingService.warning("[OpenWith] Could not extract data from intent: " + JSON.stringify(intent));
                     }
                     return;
                 }
-                if (clipData && Array.isArray(clipData) && clipData.length > 0) {
-                    data = clipData[0].uri;
+                if (intent.clipItems && intent.clipItems.length > 0) {
+                    data = intent.clipItems[0].uri;
                 }
                 if (data.startsWith("http") || data.startsWith("geo")) {
                     this.handleExternalUrl(data);
                 } else {
-                    this.loggingService.info("[OpenWith] Opening an intent with data: " + data);
-                    let file = await this.fileService.getFileFromUrl(data);
-                    this.loggingService.info("[OpenWith] Translated the data to a file: " + file.name);
-                    this.fileService.addRoutesFromFile(file);
+                    this.loggingService.info("[OpenWith] Opening an intent with data: " + data + " type: " + intent.type);
+                    if (intent.type && intent.type.startsWith("image/")) {
+                        intent.type = ImageResizeService.JPEG; // this is hacking, but there's no good way to get the real file name when an image is shared...
+                    }
+                    let file = await this.fileService.getFileFromUrl(data, intent.type || this.getTypeFromUrl(data));
+                    this.loggingService.info("[OpenWith] Translated the data to a file: " + file.name + " " + file.type);
+                    await this.fileService.addRoutesFromFile(file);
                 }
             } catch (ex) {
                 this.loggingService.error(ex.message);
                 this.toastService.error(this.resources.unableToLoadFromFile);
             }            
         });
+    }
+
+    private getTypeFromUrl(url: string) {
+        let fileExtension = url.split("/").pop().split(".").pop().toLocaleLowerCase();
+        if (fileExtension === "gpx") {
+            return "application/gpx+xml";
+        }
+        if (fileExtension === "kml") {
+            return "application/kml+xml";
+        }
+        if (fileExtension === "jpg" || fileExtension === "jpeg") {
+            return ImageResizeService.JPEG;
+        }
+        return "appliction/" + fileExtension;
     }
 
     private handleExternalUrl(uri: string) {
@@ -162,52 +169,5 @@ export class OpenWithService {
     private moveToCoordinates(coords: string[]) {
         this.router.navigate([RouteStrings.ROUTE_POI, "Coordinates", `${(+coords[1]).toFixed(4)}_${(+coords[2]).toFixed(4)}`],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
-    }
-
-    private async handleFile(data: string, item: Item) {
-        let stringValue = atob(data);
-        let blob = this.nonAngularObjectsFactory.b64ToBlob(data, item.type) as any;
-        if (!item.type || item.type === "application/octet-stream") {
-            blob.name = this.getFormatStringValue(stringValue);
-        } else if (item.path) {
-            blob.name = item.path.split("/").slice(-1)[0];
-        } else {
-            if (item.type.indexOf("kml") !== -1) {
-                blob.name = "file.kml";
-            } else if (item.type.indexOf("kmz") !== -1) {
-                blob.name = "file.kmz";
-            } else if (item.type.indexOf("gpx") !== -1) {
-                blob.name = "file.gpx";
-            } else if (item.type.indexOf("twl") !== -1) {
-                blob.name = "file.twl";
-            } else if (item.type.indexOf("jpg") !== -1 || item.type.indexOf("jpeg") !== -1) {
-                blob.name = "file.jpg";
-            } else {
-                blob.name = this.getFormatStringValue(stringValue);
-            }
-        }
-        if (!blob.name) {
-            this.loggingService.warning("[OpenWith] Unable to find file format, defaulting to twl?");
-            blob.name = "file.twl";
-        }
-        try {
-            this.loggingService.info("[OpenWith] Opening a file: " + blob.name + ", " + item.path + ", " + item.type);
-            // Do not use "new File(...)" as it breaks the functionality.
-            await this.fileService.addRoutesFromFile(blob);
-        } catch (ex) {
-            this.loggingService.error("Unable to open file from link: " + ex.toString());
-            this.toastService.error(this.resources.unableToLoadFromFile);
-        }
-    }
-
-    private getFormatStringValue(stringValue: string): string {
-        if (stringValue.startsWith("PK")) {
-            return "file.kmz";
-        } else if (stringValue.toLowerCase().indexOf("<gpx") !== -1) {
-            return "file.gpx";
-        } else if (stringValue.toLowerCase().indexOf("<kml") !== -1) {
-            return "file.kml";
-        }
-        return "";
     }
 }
