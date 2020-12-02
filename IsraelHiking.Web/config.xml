@@ -198,6 +198,19 @@
     <config-file target="*-Info.plist" parent="CFBundleDocumentTypes">
       <array>
         <dict>
+          <key>CFBundleTypeName</key>
+          <string>JPEG image</string>
+          <key>CFBundleTypeRole</key>
+          <string>Editor</string>
+          <key>LSHandlerRank</key>
+          <string>Owner</string>
+          <key>LSItemContentTypes</key>
+          <array>
+              <string>public.jpeg</string>
+              <string>public.jpg</string>
+          </array>
+        </dict>
+        <dict>
             <key>CFBundleTypeIconFiles</key>
             <array/>
             <key>CFBundleTypeName</key>
