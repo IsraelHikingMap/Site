@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import piexif from "piexifjs";
 
-import { LoggingService } from './logging.service';
 import { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models/models";
 
 export interface IPiexifGPSHelper {
@@ -31,8 +30,6 @@ export interface IPiexif {
     dump(exifObject: IPiexifObject): any[];
     insert(exifBytes: any[], binaryStringData: string): string;
 }
-
-
 
 @Injectable()
 export class ImageResizeService {
@@ -83,6 +80,9 @@ export class ImageResizeService {
             exifData.GPS[piexif.GPSIFD.GPSLatitudeRef]);
         let lng = piexif.GPSHelper.dmsRationalToDeg(exifData.GPS[piexif.GPSIFD.GPSLongitude],
             exifData.GPS[piexif.GPSIFD.GPSLongitudeRef]);
+        if (isNaN(lat) || isNaN(lng)) {
+            return null;
+        }
         return { lat, lng };
     }
 
