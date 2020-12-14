@@ -216,8 +216,8 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         let baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
         if (poiState.isSidebarOpen &&
             poiState.selectedPointOfInterest != null &&
-            poiState.selectedPointOfInterest.source.toLocaleLowerCase() === "osm") {
-            return this.authorizationService.getEditElementOsmAddress(baseLayerAddress, poiState.selectedPointOfInterest.id);
+            poiState.selectedPointOfInterest.properties.poiSource.toLocaleLowerCase() === "osm") {
+            return this.authorizationService.getEditElementOsmAddress(baseLayerAddress, poiState.selectedPointOfInterest.properties.identifier);
         }
         let currentLocation = this.ngRedux.getState().location;
         return this.authorizationService.getEditOsmLocationAddress(baseLayerAddress,

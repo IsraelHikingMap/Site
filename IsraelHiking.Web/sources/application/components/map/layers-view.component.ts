@@ -9,7 +9,7 @@ import { LayersService } from "../../services/layers/layers.service";
 import { RouteStrings } from "../../services/hash.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { ApplicationState, Overlay, PointOfInterest, PointOfInterestExtended } from "../../models/models";
+import { ApplicationState, Overlay, PointOfInterest } from "../../models/models";
 
 @Component({
     selector: "layers-view",
@@ -30,7 +30,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     public overlays: Observable<Overlay[]>;
 
     @select((state: ApplicationState) => state.poiState.selectedPointOfInterest)
-    public selectedPoi$: Observable<PointOfInterestExtended>;
+    public selectedPoi$: Observable<GeoJSON.Feature>;
 
     constructor(resources: ResourcesService,
                 private readonly router: Router,
@@ -59,17 +59,19 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         this.selectedPoi$.subscribe((poi) => this.onSelectedPoiChanged(poi));
     }
 
-    private onSelectedPoiChanged = (poi: PointOfInterestExtended) => {
-        if (poi == null) {
-            this.selectedPoiFeature = null;
-            this.selectedPoiGeoJson = {
-                type: "FeatureCollection",
-                features: []
-            };
-            return;
-        }
-        this.selectedPoiFeature = this.poiService.pointToFeature(poi);
-        this.selectedPoiGeoJson = poi.featureCollection;
+    private onSelectedPoiChanged = (poi: GeoJSON.Feature) => {
+        this.selectedPoiFeature = !poi ? null : {
+            type: "Feature",
+            properties: poi.properties,
+            geometry: {
+                type: "Point",
+                coordinates: [poi.properties.poiGeolocation.lon, poi.properties.poiGeolocation.lat]
+            }
+        };
+        this.selectedPoiGeoJson = {
+            type: "FeatureCollection",
+            features: poi == null ? [] : [poi]
+        };
     }
 
     public openPoi(id, e: Event) {

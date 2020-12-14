@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
+import { cloneDeep } from "lodash";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -19,13 +20,13 @@ import { SpatialService } from "../../../services/spatial.service";
 import { RunningContextService } from "../../../services/running-context.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { NavigateHereService } from "../../../services/navigate-here.service";
+import { GeoJsonParser } from '../../../services/geojson.parser';
 import { sidebarAnimate } from "../sidebar.component";
 import {
-    RouteData,
     LinkData,
     LatLngAlt,
     ApplicationState,
-    PointOfInterestExtended,
+    EditablePublicPointData,
     Contribution,
     NorthEast
 } from "../../../models/models";
@@ -40,7 +41,7 @@ import {
     ]
 })
 export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDestroy {
-    public info: PointOfInterestExtended;
+    public info: EditablePublicPointData;
     public isLoading: boolean;
     public showLocationUpdate: boolean;
     public updateLocation: boolean;
@@ -54,7 +55,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public isOpen: Observable<boolean>;
 
     private editMode: boolean;
-    private poiExtended: PointOfInterestExtended;
+    private poiExtended: GeoJSON.Feature;
     private originalLocation: LatLngAlt;
     private subscriptions: Subscription[];
 
@@ -71,6 +72,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 private readonly sidebarService: SidebarService,
                 private readonly runningContextSerivce: RunningContextService,
                 private readonly navigateHereService: NavigateHereService,
+                private readonly geoJsonParser: GeoJsonParser,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.sidebarService.hideWithoutChangingAddressbar();
@@ -80,7 +82,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.originalLocation = null;
         this.shareLinks = {} as IPoiSocialLinks;
         this.contribution = {} as Contribution;
-        this.info = { imagesUrls: [], references: [] } as PointOfInterestExtended;
+        this.info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
         this.subscriptions = [];
         this.subscriptions.push(this.route.paramMap.subscribe(async (_) => {
             if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
@@ -128,25 +130,25 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 isOpen: true
             }));
             if (data.source === "new") {
-                let newPoi = {
-                    imagesUrls: [],
-                    source: "OSM",
-                    id: "",
-                    references: [],
-                    isEditable: true,
-                    dataContainer: { routes: [] },
-                } as PointOfInterestExtended;
-                this.mergeDataIfNeededData(newPoi);
+                let newFeature = {
+                    type: "Feature",
+                    properties: {
+                        poiSource: "OSM",
+                        poiId: "",
+                        identifier: ""
+                    },
+                    geometry: {
+                        type: "Point",
+                        coordinates: [0, 0]
+                    }
+                } as GeoJSON.Feature;
+                this.mergeDataIfNeededData(newFeature);
             } else {
-                let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
-                this.originalLocation = poiExtended.location;
-                this.mergeDataIfNeededData(poiExtended);
-                let features = this.poiExtended.featureCollection ? this.poiExtended.featureCollection.features : [];
-                if (features.length > 0) {
-                    let feature = features.find(f => f.geometry.type !== "Point") || features[0];
-                    let bounds = SpatialService.getBoundsForFeature(feature);
-                    this.fitBoundsService.fitBounds(bounds);
-                }
+                let feature = await this.poiService.getPoint(data.id, data.source, data.language);
+                this.originalLocation = this.poiService.getLocation(feature);
+                this.mergeDataIfNeededData(feature);
+                let bounds = SpatialService.getBoundsForFeature(feature);
+                this.fitBoundsService.fitBounds(bounds);
                 this.ngRedux.dispatch(new SetSelectedPoiAction({
                     poi: this.poiExtended
                 }));
@@ -162,36 +164,46 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         }
     }
 
-    private async mergeDataIfNeededData(poiExtended: PointOfInterestExtended) {
+    private async mergeDataIfNeededData(feature: GeoJSON.Feature) {
         let uploadMarkerData = this.ngRedux.getState().poiState.uploadMarkerData;
         if (uploadMarkerData != null) {
-            this.poiService.mergeWithPoi(poiExtended, uploadMarkerData);
+            this.poiService.mergeWithPoi(feature, uploadMarkerData);
             this.ngRedux.dispatch(new SetUploadMarkerDataAction({
                 markerData: null
             }));
-            if (poiExtended.id && !poiExtended.isArea && !poiExtended.isRoute) {
+            if (feature.properties.poiId && feature.geometry.type === "Point") {
                 this.showLocationUpdate = true;
             }
         }
-        this.initFromPointOfInterestExtended(poiExtended);
+        this.initFromFeature(feature);
     }
 
-    private initFromPointOfInterestExtended = (poiExtended: PointOfInterestExtended) => {
-        this.poiExtended = poiExtended;
-        this.latlng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng, alt: poiExtended.location.alt};
-        this.sourceImageUrls = poiExtended.references.map(r => r.sourceImageUrl);
-        this.shareLinks = this.poiService.getPoiSocialLinks(poiExtended);
-        this.contribution = this.poiExtended.contribution || {} as Contribution;
-        this.itmCoordinates = this.poiExtended.itmCoordinates;
-        // clone:
-        this.info = JSON.parse(JSON.stringify(this.poiExtended));
-        this.info.icon = this.info.icon;
+    private initFromFeature(feature: GeoJSON.Feature) {
+        this.poiExtended = feature;
+        this.latlng = this.poiService.getLocation(feature);
+        this.sourceImageUrls = Object.keys(feature.properties).filter(k => k.startsWith("poiSourceImageUrl")).map(k => feature.properties[k]);
+        this.shareLinks = this.poiService.getPoiSocialLinks(feature);
+        this.contribution = this.poiService.getContribution(feature);
+        this.itmCoordinates = this.poiService.getItmCoordinates(feature);
+        
+        let language = this.resources.getCurrentLanguageCodeSimplified();
+        this.info = {
+            id: feature.properties.poiId,
+            category: this.poiExtended.properties.poiCategory,
+            description: this.poiService.getDescription(feature, language),
+            title: this.poiService.getTitle(feature, language),
+            icon: feature.properties.poiIcon,
+            iconColor: feature.properties.poiIconColor,
+            imagesUrls: Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => feature.properties[k]),
+            urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
+            isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint"
+        }
     }
 
     public isHideEditMode(): boolean {
         return !this.authorizationService.isLoggedIn() ||
             !this.poiExtended ||
-            !this.poiExtended.isEditable ||
+            !this.isEditable() ||
             this.editMode;
     }
 
@@ -199,11 +211,13 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (!this.poiExtended) {
             return "";
         }
-        let description = this.poiExtended.description || this.poiExtended.externalDescription;
+        let language = this.resources.getCurrentLanguageCodeSimplified();
+        let description = this.poiService.getDescription(this.poiExtended, language) ||
+            this.poiService.getExternalDescription(this.poiExtended, language);
         if (description) {
             return description;
         }
-        if (!this.poiExtended.isEditable) {
+        if (!this.isEditable()) {
             return description;
         }
         if (this.authorizationService.isLoggedIn() === false) {
@@ -225,17 +239,21 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             this.toastService.warning(this.resources.cantEditWhileOffline);
             return;
         }
-        this.router.navigate([RouteStrings.ROUTE_POI, this.poiExtended.source, this.poiExtended.id],
+        this.router.navigate([RouteStrings.ROUTE_POI, this.poiExtended.properties.poiSource, this.poiExtended.properties.identifier],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
     }
 
+    public isEditable() {
+        return this.poiExtended && this.poiExtended.properties.poiSource === "OSM";
+    }
+
     public isRoute() {
-        return this.poiExtended && this.poiExtended.isRoute;
+        return this.poiExtended && (this.poiExtended.geometry.type === "LineString" || this.poiExtended.geometry.type === "MultiLineString");
     }
 
     public getIcon() {
-        if (this.poiExtended && this.poiExtended.isEditable === false) {
-            return this.poiExtended.icon;
+        if (!this.isEditable()) {
+            return this.poiExtended.properties.poiIcon;
         }
         return "icon-camera";
     }
@@ -247,14 +265,22 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         }
         this.isLoading = true;
         try {
+            let language = this.resources.getCurrentLanguageCodeSimplified();
+            let featureToUpload = cloneDeep(this.poiExtended);
             if (!this.updateLocation && this.info.id) {
-                this.info.location = this.originalLocation;
+                this.poiService.setLocation(featureToUpload, this.originalLocation);
             }
+            this.poiService.setDescription(featureToUpload, this.info.description, language);
+            this.poiService.setTitle(featureToUpload, this.info.title, language);
+            // HM TODO: set icon...
+            // HM TODO: set images...
+            // HM TODO: set urls...
+            // HM TODO: check ids throught the app with this change
             this.originalLocation = null;
-            let poiExtended = await this.poiService.uploadPoint(this.info);
-            this.initFromPointOfInterestExtended(poiExtended);
+            let feature = await this.poiService.uploadPoint(featureToUpload);
+            this.initFromFeature(feature);
             this.toastService.info(this.resources.dataUpdatedSuccessfully);
-            this.router.navigate([RouteStrings.ROUTE_POI, this.poiExtended.source, this.poiExtended.id],
+            this.router.navigate([RouteStrings.ROUTE_POI, this.poiExtended.properties.poiSource, this.poiExtended.properties.identifier],
                 { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
         } catch (ex) {
             this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });
@@ -264,7 +290,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public convertToRoute() {
-        let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes)) as RouteData[];
+        let routesCopy = this.geoJsonParser.toDataContainer({
+            type: "FeatureCollection",
+            features: [this.poiExtended]
+        }).routes;
         for (let routeData of routesCopy) {
             let name = this.selectedRouteService.createRouteName(routeData.name);
             let newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
@@ -284,8 +313,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         let icon = "icon-star";
         let id = "";
         if (this.poiExtended) {
-            icon = this.poiExtended.icon;
-            id = this.poiExtended.id;
+            icon = this.poiExtended.properties.poiIcon;
+            id = this.poiExtended.properties.identifier;
         }
         let urls = this.getUrls();
         this.ngRedux.dispatch(new AddPrivatePoiAction({
@@ -303,7 +332,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public navigateHere() {
-        this.navigateHereService.addNavigationSegment(this.poiExtended.location, this.poiExtended.title);
+        let location = this.poiService.getLocation(this.poiExtended);
+        let title = this.poiService.getTitle(this.poiExtended, this.resources.getCurrentLanguageCodeSimplified());
+        this.navigateHereService.addNavigationSegment(location, title);
     }
 
     public clear() {
@@ -317,21 +348,23 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     private getUrls(): LinkData[] {
         let urls = [] as LinkData[];
-        for (let reference of this.info.references) {
+        for (let url of this.info.urls) {
             urls.push({
                 mimeType: "text/html",
                 text: this.info.title,
-                url: reference.url
+                url
             });
         }
-        if (this.poiExtended && this.poiExtended.imagesUrls.length > 0) {
-            for (let imageUrl of this.poiExtended.imagesUrls) {
-                urls.push({
-                    mimeType: `image/${imageUrl.split(".").pop().replace("jpg", "jpeg")}`,
-                    text: "",
-                    url: imageUrl
-                });
-            }
+        if (!this.poiExtended) {
+            return urls;
+        }
+        let imageUrls = Object.keys(this.poiExtended.properties).filter(k => k.startsWith("image")).map(k => this.poiExtended.properties[k]);
+        for (let imageUrl of imageUrls) {
+            urls.push({
+                mimeType: `image/${imageUrl.split(".").pop().replace("jpg", "jpeg")}`,
+                text: "",
+                url: imageUrl
+            });
         }
         return urls;
     }
@@ -348,9 +381,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (!this.poiExtended) {
             return null;
         }
-        if (this.poiExtended.source.toLocaleLowerCase() !== "osm") {
+        if (!this.isEditable()) {
             return null;
         }
-        return this.authorizationService.getElementOsmAddress(this.poiExtended.id);
+        return this.authorizationService.getElementOsmAddress(this.poiExtended.properties.identifier);
     }
 }

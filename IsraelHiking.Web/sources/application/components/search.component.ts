@@ -17,23 +17,23 @@ import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { skip } from "rxjs/operators";
 
+import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
 import { RouterService } from "../services/router.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { ToastService } from "../services/toast.service";
-import { SearchResultsProvider, ISearchResultsPointOfInterest } from "../services/search-results.provider";
-import { BaseMapComponent } from "./base-map.component";
-import { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt } from "../models/models";
+import { SpatialService } from "../services/spatial.service";
+import { SearchResultsProvider } from "../services/search-results.provider";
 import { RoutesFactory } from "../services/layers/routelayers/routes.factory";
 import { AddRouteAction } from "../reducres/routes.reducer";
-import { SpatialService } from "../services/spatial.service";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
+import { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt, SearchResultsPointOfInterest } from "../models/models";
 
 export interface ISearchContext {
     searchTerm: string;
-    searchResults: ISearchResultsPointOfInterest[];
-    selectedSearchResults: ISearchResultsPointOfInterest;
+    searchResults: SearchResultsPointOfInterest[];
+    selectedSearchResults: SearchResultsPointOfInterest;
 }
 
 interface ISearchRequestQueueItem {
@@ -183,11 +183,11 @@ export class SearchComponent extends BaseMapComponent {
         this.internalSearch(searchContext);
     }
 
-    public displayResults(results: ISearchResultsPointOfInterest) {
+    public displayResults(results: SearchResultsPointOfInterest) {
         return results ? results.displayName : "";
     }
 
-    public moveToResults(searchResults: ISearchResultsPointOfInterest) {
+    public moveToResults(searchResults: SearchResultsPointOfInterest) {
         if (this.isOpen) {
             this.toggleOpen();
         }
@@ -195,7 +195,7 @@ export class SearchComponent extends BaseMapComponent {
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
 
-    private selectResults(searchContext: ISearchContext, searchResult: ISearchResultsPointOfInterest) {
+    private selectResults(searchContext: ISearchContext, searchResult: SearchResultsPointOfInterest) {
         searchContext.selectedSearchResults = searchResult;
         if (!this.directional.isOn) {
             this.moveToResults(searchResult);

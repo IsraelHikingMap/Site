@@ -16,7 +16,6 @@ import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { SQLite } from "@ionic-native/sqlite/ngx";
 import { Urls } from "../urls";
-import { PointOfInterestExtended } from "../models/models";
 import { NgReduxTestingModule, MockNgRedux } from "@angular-redux/store/testing";
 import { MapService } from "./map.service";
 
@@ -101,7 +100,7 @@ describe("Poi Service", () => {
         inject([PoiService, HttpTestingController],
             async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-                let poiExtended = { imagesUrls: ["http://link.com"] } as PointOfInterestExtended;
+                let poiExtended = {} as GeoJSON.Feature;
                 let promise = poiService.uploadPoint(poiExtended).then((res) => {
                     expect(res).not.toBeNull();
                 });

@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
@@ -24,11 +23,12 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
+    [Obsolete("Should be removed by May 2021")]
     /// <summary>
     /// This controller allows viewing, editing and filtering of points of interest (POI)
     /// </summary>
-    [Route("api/points")]
-    public class PointsOfInterestController : ControllerBase
+    [Route("api/poi")]
+    public class ObsoletePointsOfInterestController : ControllerBase
     {
         private readonly IClientsFactory _clientsFactory;
         private readonly ITagsHelper _tagsHelper;
@@ -54,7 +54,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="logger"></param>
         /// <param name="options"></param>
         /// <param name="cache"></param>
-        public PointsOfInterestController(IClientsFactory clientsFactory,
+        public ObsoletePointsOfInterestController(IClientsFactory clientsFactory,
             ITagsHelper tagsHelper,
             IWikimediaCommonGateway wikimediaCommonGateway,
             IPointsOfInterestProvider pointsOfInterestProvider,
@@ -99,18 +99,17 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of GeoJSON features</returns>
         [Route("")]
         [HttpGet]
-        public async Task<Feature[]> GetPointsOfInterest(string northEast, string southWest, string categories,
+        public async Task<PointOfInterest[]> GetPointsOfInterest(string northEast, string southWest, string categories,
             string language = "")
         {
-            // HM TODO: return only point geometry!
             if (string.IsNullOrWhiteSpace(categories))
             {
-                return new Feature[0];
+                return new PointOfInterest[0];
             }
             var categoriesArray = categories.Split(',').Select(f => f.Trim()).ToArray();
             var northEastCoordinate = northEast.ToCoordinate();
             var southWestCoordinate = southWest.ToCoordinate();
-            return await _pointsOfInterestProvider.GetFeatures(northEastCoordinate, southWestCoordinate, categoriesArray, language);
+            return await _pointsOfInterestProvider.GetPointsOfInterest(northEastCoordinate, southWestCoordinate, categoriesArray, language);
         }
 
         /// <summary>
@@ -127,24 +126,9 @@ namespace IsraelHiking.API.Controllers
             if (source.Equals(Sources.COORDINATES, StringComparison.InvariantCultureIgnoreCase))
             {
                 var latLng = SearchResultsPointOfInterestConverter.GetLatLngFromId(id);
-                var feautre = new Feature(new Point(latLng.Lng, latLng.Lat), new AttributesTable
-                {
-                    { FeatureAttributes.NAME, id },
-                    { FeatureAttributes.POI_ICON, OsmPointsOfInterestAdapter.SEARCH_ICON },
-                    { FeatureAttributes.POI_ICON_COLOR, "black" },
-                    { FeatureAttributes.POI_GEOLOCATION, new AttributesTable
-                        {
-                            {FeatureAttributes.LAT, latLng.Lat },
-                            {FeatureAttributes.LON, latLng.Lng }
-                        }
-                    },
-                    { FeatureAttributes.POI_CATEGORY, Categories.NONE },
-                    { FeatureAttributes.POI_SOURCE, Sources.COORDINATES },
-                });
-                feautre.SetTitles();
-                return Ok(feautre);
+                return Ok(SearchResultsPointOfInterestConverter.FromLatlng(latLng, id));
             }
-            var poiItem = await _pointsOfInterestProvider.GetFeatureById(source, id, language);
+            var poiItem = await _pointsOfInterestProvider.GetPointOfInterestById(source, id, language);
             if (poiItem == null)
             {
                 return NotFound();
@@ -155,42 +139,36 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Update a POI by id and source, upload the image to wikimedia commons if needed.
         /// </summary>
-        /// <param name="feature"></param>
+        /// <param name="pointOfInterest"></param>
         /// <param name="language">The language code</param>
         /// <returns></returns>
         [Route("")]
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> UploadPointOfInterest([FromBody]Feature feature,
+        public async Task<IActionResult> UploadPointOfInterest([FromBody]PointOfInterestExtended pointOfInterest,
             [FromQuery] string language)
         {
-            if (!feature.Attributes[FeatureAttributes.POI_SOURCE].ToString().Equals(Sources.OSM, StringComparison.InvariantCultureIgnoreCase))
+            if (!pointOfInterest.Source.Equals(Sources.OSM, StringComparison.InvariantCultureIgnoreCase))
             {
                 return BadRequest("OSM is the only supported source for this action...");
             }
-            if (feature.GetDescription(language).Length > 255)
+            if ((pointOfInterest.Description?.Length ?? 0) > 255)
             {
                 return BadRequest("Description must not be more than 255 characters...");
             }
-            if (feature.GetTitle(language).Length > 255)
+            if ((pointOfInterest.Title?.Length ?? 0) > 255)
             {
                 return BadRequest("Title must not be more than 255 characters...");
             }
-            var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
-            var location = feature.GetLocation();
-            _logger.LogInformation($"Adding a POI of type {icon} with id {feature.GetId()}" +
-                $" at {location.Y}, {location.X}");
+            _logger.LogInformation($"Adding a POI of type {pointOfInterest.Icon} with id {pointOfInterest.Id} at {pointOfInterest.Location.Lat}, {pointOfInterest.Location.Lng}");
             var osmGateway = CreateOsmGateway();
             var user = await osmGateway.GetUserDetails();
-            var imageUrls = feature.Attributes.GetNames()
-                    .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
-                    .Select(p => feature.Attributes[p].ToString())
-                    .ToArray();
+            var imageUrls = pointOfInterest.ImagesUrls ?? new string[0];
             for (var urlIndex = 0; urlIndex < imageUrls.Length; urlIndex++)
             {
-                var fileName = string.IsNullOrWhiteSpace(feature.GetTitle(language))
-                    ? icon.Replace("icon-", "")
-                    : feature.GetTitle(language);
+                var fileName = string.IsNullOrWhiteSpace(pointOfInterest.Title)
+                    ? pointOfInterest.Icon.Replace("icon-", "")
+                    : pointOfInterest.Title;
                 var file = _base64ImageConverter.ConvertToFile(imageUrls[urlIndex], fileName);
                 if (file == null)
                 {
@@ -204,17 +182,18 @@ namespace IsraelHiking.API.Controllers
                     continue;
                 }
                 using var memoryStream = new MemoryStream(file.Content);
-                var imageName = await _wikimediaCommonGateway.UploadImage(feature.GetTitle(language),
-                    feature.GetDescription(language), user.DisplayName, file.FileName, memoryStream, location);
+                var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title,
+                    pointOfInterest.Description, user.DisplayName, file.FileName, memoryStream,
+                    pointOfInterest.Location.ToCoordinate());
                 imageUrls[urlIndex] = await _wikimediaCommonGateway.GetImageUrl(imageName);
                 await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrls[urlIndex]);
             }
 
-            if (string.IsNullOrWhiteSpace(feature.GetId()))
+            if (string.IsNullOrWhiteSpace(pointOfInterest.Id))
             {
-                return Ok(await _pointsOfInterestProvider.AddFeature(feature, osmGateway, language));
+                return Ok(await _pointsOfInterestProvider.AddPointOfInterest(pointOfInterest, osmGateway, language));
             }
-            return Ok(await _pointsOfInterestProvider.UpdateFeature(feature, osmGateway, language));
+            return Ok(await _pointsOfInterestProvider.UpdatePointOfInterest(pointOfInterest, osmGateway, language));
         }
 
         /// <summary>

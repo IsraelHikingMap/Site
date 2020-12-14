@@ -4,11 +4,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { RunningContextService } from "./running-context.service";
 import { PoiService } from "./poi.service";
 import { Urls } from "../urls";
-import { PointOfInterestExtended } from "../models/models";
-
-export interface ISearchResultsPointOfInterest extends PointOfInterestExtended {
-    displayName: string;
-}
+import { SearchResultsPointOfInterest } from "../models/models";
 
 @Injectable()
 export class SearchResultsProvider {
@@ -18,18 +14,17 @@ export class SearchResultsProvider {
                 private readonly poiService: PoiService) {
     }
 
-    public getResults = async (searchTerm: string, isHebrew: boolean): Promise<ISearchResultsPointOfInterest[]> => {
+    public getResults = async (searchTerm: string, isHebrew: boolean): Promise<SearchResultsPointOfInterest[]> => {
         let params = new HttpParams();
         let language = isHebrew ? "he" : "en";
         params = params.set("language", language);
         let searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ");
         if (!this.runningContextService.isOnline) {
-            let results = await this.poiService.getSerchResults(searchWithoutBadCharacters);
-            return results.map(p => ({ ...p, displayName: p.title } as ISearchResultsPointOfInterest));
+            return await this.poiService.getSerchResults(searchWithoutBadCharacters);
         }
         let response = await this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
             params
-        }).toPromise() as ISearchResultsPointOfInterest[];
+        }).toPromise() as SearchResultsPointOfInterest[];
         return response;
     }
 }

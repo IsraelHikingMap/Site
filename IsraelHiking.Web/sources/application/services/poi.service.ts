@@ -24,12 +24,14 @@ import { Urls } from "../urls";
 import {
     MarkerData,
     LatLngAlt,
-    PointOfInterestExtended,
     ApplicationState,
     Category,
     IconColorLabel,
     CategoriesGroup,
-    PointOfInterest
+    PointOfInterest,
+    SearchResultsPointOfInterest,
+    Contribution,
+    NorthEast
 } from "../models/models";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block";
@@ -61,7 +63,7 @@ export interface ISelectableCategory extends Category {
 
 @Injectable()
 export class PoiService {
-    private poisCache: PointOfInterestExtended[];
+    private poisCache: GeoJSON.Feature[];
     private poisGeojson: GeoJSON.FeatureCollection<GeoJSON.Point>;
     private miniSearch: MiniSearch;
 
@@ -156,8 +158,7 @@ export class PoiService {
             .set("southWest", bounds.southWest.lat + "," + bounds.southWest.lng)
             .set("categories", visibleCategories.join(","))
             .set("language", language);
-        let pointsOfInterest = await this.httpClient.get(Urls.poi, { params }).pipe(timeout(10000)).toPromise() as PointOfInterest[];
-        this.poisGeojson.features = pointsOfInterest.map(p => this.pointToFeature(p));
+        this.poisGeojson.features = await this.httpClient.get(Urls.poi, { params }).pipe(timeout(10000)).toPromise() as GeoJSON.Feature<GeoJSON.Point>[];
         return this.poisGeojson.features;
     }
 
@@ -312,12 +313,20 @@ export class PoiService {
         return imageAndData;
     }
 
-    public async getSerchResults(searchTerm: string): Promise<PointOfInterestExtended[]> {
+    public async getSerchResults(searchTerm: string): Promise<SearchResultsPointOfInterest[]> {
         let ids = this.miniSearch.search(searchTerm).map(r => r.id);
         let results = [];
         for (let id of uniq(ids)) {
             let feature = await this.databaseService.getPoiById(id);
-            let point = this.featureToPoint(feature);
+            let title = this.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
+            let point = {
+                description: feature.properties.description,
+                title,
+                displayName: title,
+                icon: feature.properties.poiIcon,
+                iconColor: feature.properties.poiIconColor,
+                location: this.getLocation(feature)
+            } as SearchResultsPointOfInterest;
             results.push(point);
             if (results.length === 10) {
                 return results;
@@ -408,8 +417,8 @@ export class PoiService {
         return selectableCategories;
     }
 
-    public async getPoint(id: string, source: string, language?: string): Promise<PointOfInterestExtended> {
-        let itemInCache = this.poisCache.find(p => p.id === id && p.source === source);
+    public async getPoint(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
+        let itemInCache = this.poisCache.find(f => f.properties.poiId === id && f.properties.source === source);
         if (itemInCache) {
             return JSON.parse(JSON.stringify(itemInCache));
         }
@@ -418,51 +427,70 @@ export class PoiService {
             if (feature == null) {
                 throw new Error("Failed to load POI from offline database.");
             }
-            let point = this.featureToPoint(feature);
-            return point;
+            return feature;
         }
         let params = new HttpParams()
             .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-        let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params }).toPromise() as PointOfInterestExtended;
+        let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params }).toPromise() as GeoJSON.Feature;
         this.poisCache.splice(0, 0, poi);
         return JSON.parse(JSON.stringify(poi));
     }
 
-    public async uploadPoint(poiExtended: PointOfInterestExtended): Promise<PointOfInterestExtended> {
+    public async uploadPoint(feature: GeoJSON.Feature): Promise<GeoJSON.Feature> {
         let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
         this.poisCache = [];
-        let poi = await this.httpClient.post(uploadAddress, poiExtended).toPromise() as PointOfInterestExtended;
+        let poi = await this.httpClient.post(uploadAddress, feature).toPromise() as GeoJSON.Feature;
         if (this.runningContextService.isCordova) {
-            this.databaseService.storePois(poi.featureCollection.features);
+            this.databaseService.storePois([poi]);
         }
         return poi;
     }
 
-    public getPoiSocialLinks(poiExtended: PointOfInterestExtended): IPoiSocialLinks {
+    public getPoiSocialLinks(feature: GeoJSON.Feature): IPoiSocialLinks {
+        let language = this.resources.getCurrentLanguageCodeSimplified(); 
         let poiLink = this.hashService.getFullUrlFromPoiId({
-            source: poiExtended.source,
-            id: poiExtended.id,
-            language: this.resources.getCurrentLanguageCodeSimplified()
+            source: feature.properties.poiSource,
+            id: feature.properties.identifier,
+            language
         } as IPoiRouterData);
         let escaped = encodeURIComponent(poiLink);
+        let location = this.getLocation(feature);
         return {
             poiLink,
             facebook: `${Urls.facebook}${escaped}`,
-            whatsapp: this.whatsappService.getUrl(poiExtended.title, escaped) as string,
-            waze: `${Urls.waze}${poiExtended.location.lat},${poiExtended.location.lng}`
+            whatsapp: this.whatsappService.getUrl(this.getTitle(feature, language), escaped) as string,
+            waze: `${Urls.waze}${location.lat},${location.lng}`
         };
     }
 
-    public mergeWithPoi(poiExtended: PointOfInterestExtended, markerData: MarkerData) {
-        poiExtended.title = poiExtended.title || markerData.title;
-        poiExtended.description = poiExtended.description || markerData.description;
-        poiExtended.location = poiExtended.location || markerData.latlng;
-        poiExtended.icon = poiExtended.icon || `icon-${markerData.type || "star"}`;
-
+    public mergeWithPoi(feature: GeoJSON.Feature, markerData: MarkerData) {
+        let language = this.resources.getCurrentLanguageCodeSimplified();
+        this.setTitle(feature, feature.properties["name:" + language] || markerData.title, language);
+        this.setDescription(feature, feature.properties["description:" + language] || markerData.description, language);
+        this.setLocation(feature, markerData.latlng);
+        feature.properties.poiIcon = feature.properties.poiIcon || `icon-${markerData.type || "star"}`;
+        let lastIndex = Math.max(-1, ...Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => +k.replace("image", "")));
         markerData.urls.filter(u => u.mimeType.startsWith("image")).map(u => u.url).forEach(url => {
-            poiExtended.imagesUrls.push(url);
+            let name = "image" + ++lastIndex;
+            if (name === "image0") {
+                name = "image";
+            }
+            feature.properties[name] = url;
         });
-        return poiExtended;
+        return feature;
+    }
+
+    public setDescription(feature: GeoJSON.Feature, value: string, language: string) {
+        feature.properties["description:" + language] = value;
+    }
+
+    public setTitle(feature: GeoJSON.Feature, value: string, language: string) {
+        feature.properties["name:" + language] = value;
+    }
+
+    public setLocation(feature: GeoJSON.Feature, value: LatLngAlt) {
+        feature.properties.poiGeoLocation.lat = value.lat;
+        feature.properties.poiGeoLocation.lon = value.lng;
     }
 
     public pointToFeature(p: PointOfInterest): GeoJSON.Feature<GeoJSON.Point> {
@@ -484,62 +512,43 @@ export class PoiService {
         };
     }
 
-    private featureToPoint(f: GeoJSON.Feature): PointOfInterestExtended {
-        let language = this.resources.getCurrentLanguageCodeSimplified();
-        let imagesUrls = uniq(Object.keys(f.properties).filter(k => k.toLowerCase().startsWith("image")).map(k => f.properties[k]));
-        // HM TODO: remove this?
-        // let references = Object.keys(f.properties).filter(k => k.toLowerCase().startsWith("website")).map(k => ({
-        //     url: f.properties[k],
-        //     sourceImageUrl: f.properties["poiSourceImageUrl" + k.replace("website", "")]
-        // }));
-        // references = uniqWith(references, (a, b) => a.url === b.url);
-        let references = []; // no references due to offline.
-        let description = f.properties["description:" + language] || f.properties.description;
-        let externalDescription = f.properties["poiExternalDescription:" + language] || f.properties.poiExternalDescription;
-        let poi = {
-            id: f.properties.identifier,
-            category: f.properties.poiCategory,
-            hasExtraData: description != null || imagesUrls.length > 0,
-            icon: f.properties.poiIcon,
-            iconColor: f.properties.poiIconColor,
-            location: {
-                lat: f.properties.poiGeolocation.lat,
-                lng: f.properties.poiGeolocation.lon,
-                alt: f.properties.poiAlt
-            },
-            itmCoordinates: {
-                east: f.properties.poiItmEast,
-                north: f.properties.poiItmNorth,
-            },
-            source: f.properties.poiSource,
-            isEditable: f.properties.poiSource === "OSM",
-            isRoute: f.geometry.type === "LineString" || f.geometry.type === "MultiLineString",
-            isArea: f.geometry.type === "Polygon" || f.geometry.type === "MultiPolygon",
-            lengthInKm: SpatialService.getLengthInMetersForGeometry(f.geometry) / 1000,
-            dataContainer: null,
-            featureCollection: {
-                type: "FeatureCollection",
-                features: [f]
-            } as GeoJSON.FeatureCollection,
-            references,
-            contribution: {
-                lastModifiedDate: new Date(f.properties.poiLastModified),
-                userAddress: f.properties.poiUserAddress,
-                userName: f.properties.poiUserName
-            },
-            imagesUrls,
-            description,
-            externalDescription,
-            title: Array.isArray(f.properties.poiNames[language]) && f.properties.poiNames[language].length !== 0
-                ? f.properties.poiNames[language][0]
-                : Array.isArray(f.properties.poiNames.all) && f.properties.poiNames.all.length !== 0
-                    ? f.properties.poiNames.all[0]
-                    : ""
+    public getTitle(feature: GeoJSON.Feature, language: string) {
+        return Array.isArray(feature.properties.poiNames[language]) && feature.properties.poiNames[language].length !== 0
+            ? feature.properties.poiNames[language][0]
+            : Array.isArray(feature.properties.poiNames.all) && feature.properties.poiNames.all.length !== 0
+                ? feature.properties.poiNames.all[0]
+                : ""
+    }
+
+    public getDescription(feature: GeoJSON.Feature, language: string) {
+        return feature.properties["description:" + language] || feature.properties.description
+    }
+
+    public getExternalDescription(feature: GeoJSON.Feature, language: string) {
+        return feature.properties["poiExternalDescription:" + language] || feature.properties.poiExternalDescription;
+    }
+
+    public getLocation(feature: GeoJSON.Feature): LatLngAlt {
+        return {
+            lat: feature.properties.poiGeolocation.lat,
+            lng: feature.properties.poiGeolocation.lon,
+            alt: feature.properties.poiAlt
         };
-        if (!poi.title && !poi.hasExtraData) {
-            return null;
-        }
-        return poi;
+    }
+
+    public getContribution(feature: GeoJSON.Feature): Contribution {
+        return {
+            lastModifiedDate: new Date(feature.properties.poiLastModified),
+            userAddress: feature.properties.poiUserAddress,
+            userName: feature.properties.poiUserName
+        } as Contribution;
+    }
+
+    public getItmCoordinates(f: GeoJSON.Feature): NorthEast {
+        return {
+            east: f.properties.poiItmEast,
+            north: f.properties.poiItmNorth,
+        } as NorthEast;
     }
 
     public async getClosestPoint(location: LatLngAlt, source?: string, language?: string): Promise<MarkerData> {

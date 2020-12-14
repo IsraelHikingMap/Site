@@ -219,7 +219,7 @@ namespace IsraelHiking.API.Services.Poi
                 Longitude = pointOfInterest.Location.Lng,
                 Tags = new TagsCollection()
             };
-            SetWebsiteUrl(node.Tags, pointOfInterest);
+            SetWebsiteUrl(node.Tags, pointOfInterest.References.Select(r => r.Url).ToList());
             SetMultipleValuesForTag(node.Tags, FeatureAttributes.IMAGE_URL, pointOfInterest.ImagesUrls);
             SetTagByLanguage(node.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
@@ -242,7 +242,7 @@ namespace IsraelHiking.API.Services.Poi
             var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.POI_ICON].ToString();
             var oldTags = completeOsmGeo.Tags.ToArray();
 
-            SetWebsiteUrl(completeOsmGeo.Tags, pointOfInterest);
+            SetWebsiteUrl(completeOsmGeo.Tags, pointOfInterest.References.Select(r => r.Url).ToList());
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             SyncImages(completeOsmGeo.Tags, pointOfInterest.ImagesUrls);
@@ -252,7 +252,7 @@ namespace IsraelHiking.API.Services.Poi
                 AddTagsByIcon(completeOsmGeo.Tags, pointOfInterest.Icon);
             }
             RemoveEmptyTags(completeOsmGeo.Tags);
-            var locationWasUpdated = UpdateLocationIfNeeded(completeOsmGeo, pointOfInterest);
+            var locationWasUpdated = UpdateLocationIfNeeded(completeOsmGeo, pointOfInterest.Location);
             if (Enumerable.SequenceEqual(oldTags, completeOsmGeo.Tags.ToArray()) && 
                 !locationWasUpdated)
             {
@@ -272,19 +272,19 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="completeOsmGeo"></param>
         /// <param name="pointOfInterestExtended"></param>
         /// <returns>True if the location was updated, false otherwise</returns>
-        private bool UpdateLocationIfNeeded(ICompleteOsmGeo completeOsmGeo, PointOfInterestExtended pointOfInterestExtended)
+        private bool UpdateLocationIfNeeded(ICompleteOsmGeo completeOsmGeo, LatLng location)
         {
             var node = completeOsmGeo as Node;
             if (node == null)
             {
                 return false;
             }
-            if (new Coordinate(node.Longitude.Value, node.Latitude.Value).Equals2D(pointOfInterestExtended.Location.ToCoordinate(), 0.00001))
+            if (new Coordinate(node.Longitude.Value, node.Latitude.Value).Equals2D(location.ToCoordinate(), 0.00001))
             {
                 return false;
             }
-            node.Latitude = pointOfInterestExtended.Location.Lat;
-            node.Longitude = pointOfInterestExtended.Location.Lng;
+            node.Latitude = location.Lat;
+            node.Longitude = location.Lng;
             return true;
         }
 
@@ -458,11 +458,11 @@ namespace IsraelHiking.API.Services.Poi
                         .ToArray();
         }
 
-        private void SetWebsiteUrl(TagsCollectionBase tags, PointOfInterestExtended pointOfInterest)
+        private void SetWebsiteUrl(TagsCollectionBase tags, List<string> urls)
         {
             var regexp = new Regex(@"((https?://)|^)([a-z]+)(\.m)?\.wikipedia.org/wiki/(.*)");
             var nonWikipediaUrls = new List<string>();
-            foreach (var url in pointOfInterest.References.Select(r => r.Url))
+            foreach (var url in urls)
             {
                 var match = regexp.Match(url ?? string.Empty);
                 if (!match.Success)
@@ -521,6 +521,90 @@ namespace IsraelHiking.API.Services.Poi
                 LastModified = lastModified
             };
             
+        }
+
+        public Task<Feature> GetFeatureById(string source, string id, string language = "")
+        {
+            return _pointsOfInterestRepository.GetPointOfInterestById(id, source);
+        }
+
+        public async Task<Feature[]> GetFeatures(Coordinate northEast, Coordinate southWest, string[] categories, string language)
+        {
+            var features = await _pointsOfInterestRepository.GetPointsOfInterest(northEast, southWest, categories, language);
+            var points = features.Where(f => f.IsProperPoi(language)).ToArray();
+            foreach (var pointOfInterest in points.Where(p => string.IsNullOrWhiteSpace(p.Attributes[FeatureAttributes.POI_ICON]?.ToString())))
+            {
+                pointOfInterest.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, SEARCH_ICON);
+            }
+            return points;
+        }
+
+        public async Task<Feature> AddFeature(Feature feature, IAuthClient osmGateway, string language)
+        {
+            var location = feature.GetLocation();
+            var node = new Node
+            {
+                Latitude = location.Y,
+                Longitude = location.X,
+                Tags = new TagsCollection()
+            };
+            SetWebsiteUrl(node.Tags, feature.Attributes.GetNames()
+                    .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
+                    .Select(p => feature.Attributes[p].ToString())
+                    .ToList());
+            SetMultipleValuesForTag(node.Tags, FeatureAttributes.IMAGE_URL, feature.Attributes.GetNames()
+                    .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                    .Select(p => feature.Attributes[p].ToString())
+                    .ToArray());
+            SetTagByLanguage(node.Tags, FeatureAttributes.NAME, feature.GetTitle(language), language);
+            SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, feature.GetDescription(language), language);
+            AddTagsByIcon(node.Tags, feature.Attributes[FeatureAttributes.POI_ICON].ToString());
+            RemoveEmptyTags(node.Tags);
+            var changesetId = await osmGateway.CreateChangeset($"Added {feature.GetTitle(language)} using IsraelHiking.osm.org.il");
+            node.Id = await osmGateway.CreateElement(changesetId, node);
+            await osmGateway.CloseChangeset(changesetId);
+
+            return await UpdateElasticSearch(node);
+        }
+
+        public async Task<Feature> UpdateFeature(Feature feature, IAuthClient osmGateway, string language)
+        {
+            // HM TODO: 3-way diff update?
+            ICompleteOsmGeo completeOsmGeo = await osmGateway.GetCompleteElement(feature.GetOsmId(), feature.GetOsmType());
+            var featureBeforeUpdate = ConvertOsmToFeature(completeOsmGeo);
+            var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.POI_ICON].ToString();
+            var oldTags = completeOsmGeo.Tags.ToArray();
+
+            SetWebsiteUrl(completeOsmGeo.Tags, feature.Attributes.GetNames()
+                    .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
+                    .Select(p => feature.Attributes[p].ToString())
+                    .ToList());
+            SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, feature.GetTitle(language), language);
+            SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, feature.GetDescription(language), language);
+            SyncImages(completeOsmGeo.Tags, feature.Attributes.GetNames()
+                    .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                    .Select(p => feature.Attributes[p].ToString())
+                    .ToArray());
+            var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
+            if (icon != oldIcon && icon != SEARCH_ICON)
+            {
+                RemoveTagsByIcon(completeOsmGeo.Tags, oldIcon);
+                AddTagsByIcon(completeOsmGeo.Tags, icon);
+            }
+            RemoveEmptyTags(completeOsmGeo.Tags);
+            var coordinate = feature.GetLocation();
+            var location = new LatLng(coordinate.Y, coordinate.X);
+            var locationWasUpdated = UpdateLocationIfNeeded(completeOsmGeo, location);
+            if (Enumerable.SequenceEqual(oldTags, completeOsmGeo.Tags.ToArray()) &&
+                !locationWasUpdated)
+            {
+                return feature;
+            }
+            var changesetId = await osmGateway.CreateChangeset($"Updated {feature.GetTitle(language)} using IsraelHiking.osm.org.il");
+            await osmGateway.UpdateElement(changesetId, completeOsmGeo);
+            await osmGateway.CloseChangeset(changesetId);
+
+            return await UpdateElasticSearch(completeOsmGeo);
         }
     }
 }

@@ -1,7 +1,7 @@
-﻿import { PointOfInterestExtended, MarkerData } from "../models";
+﻿import { MarkerData } from "../models";
 
 export interface PointsOfInterestState {
-    selectedPointOfInterest: PointOfInterestExtended;
+    selectedPointOfInterest: GeoJSON.Feature;
     uploadMarkerData: MarkerData;
     isSidebarOpen: boolean;
 }

@@ -164,6 +164,20 @@ namespace IsraelHiking.Common.Extensions
 
         }
 
+        public static string GetDescription(this IFeature feature, string language)
+        {
+            if (feature.Attributes.Exists(FeatureAttributes.DESCRIPTION + ":" + language))
+            {
+                return feature.Attributes[FeatureAttributes.DESCRIPTION + ":" + language].ToString();
+            }
+            if (feature.Attributes.Exists(FeatureAttributes.DESCRIPTION))
+            {
+                return feature.Attributes[FeatureAttributes.DESCRIPTION].ToString();
+            }
+            return string.Empty;
+
+        }
+
         public static string[] GetTitles(this IFeature feature)
         {
             if (!(feature.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable titleByLanguage))
@@ -251,6 +265,22 @@ namespace IsraelHiking.Common.Extensions
         public static void SetLastModified(this IAttributesTable table, DateTime dateTime)
         {
             table.AddOrUpdate(FeatureAttributes.POI_LAST_MODIFIED, dateTime.ToString("o"));
+        }
+
+        public static Coordinate GetLocation(this IFeature feature)
+        {
+            var locationTable = feature.Attributes[FeatureAttributes.POI_GEOLOCATION] as AttributesTable;
+            if (locationTable == null)
+            {
+                throw new InvalidOperationException($"Missing location for feature with id {feature.GetId()}");
+            }
+            var location = new Coordinate();
+            if (locationTable != null)
+            {
+                location.Y = double.Parse(locationTable[FeatureAttributes.LAT].ToString());
+                location.X = double.Parse(locationTable[FeatureAttributes.LON].ToString());
+            }
+            return location;
         }
     }
 }
