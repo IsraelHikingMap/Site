@@ -11,7 +11,7 @@ using OsmSharp;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 
-namespace IsraelHiking.DataAccess.OpenStreetMap
+namespace IsraelHiking.DataAccess
 {
     public class OsmRepository : IOsmRepository
     {

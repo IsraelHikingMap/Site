@@ -41,6 +41,12 @@ services:
     ports:
       - 11987:80
     restart: always
+  osmctools:
+    image: israelhikingmap/osmctoolswebapi
+    container_name: osmctools
+    ports:
+      - 11911:80
+    restart: always
 volumes:
   esdata:
     driver: local

@@ -1,12 +1,12 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.API.Executors
+namespace IsraelHiking.DataAccessInterfaces
 {
     /// <summary>
-    /// this fetcher will make sure the latest OSM file is in cache
+    /// this gateway will allow getting the latest OSM pbf file
     /// </summary>
-    public interface IOsmLatestFileFetcherExecutor
+    public interface IOsmLatestFileGateway
     {
         /// <summary>
         /// Updates the osm file to latest version
@@ -20,12 +20,13 @@ namespace IsraelHiking.API.Executors
         /// Gets a stream to the OSM file
         /// </summary>
         /// <returns>The OSM file stream</returns>
-        Stream Get();
+        Task<Stream> Get();
 
         /// <summary>
-        /// This method returns a stream with the updates
+        /// This method returns a stream with the updates after updating the file to the latest version
+        /// i.e. it will get the updates between this call and the last call
         /// </summary>
-        /// <returns>A Stream containting all the updates made since last "Get" was called</returns>
+        /// <returns>A Stream containting all the updates made since last "Update" was called</returns>
         Task<Stream> GetUpdates();
     }
 }

@@ -118,6 +118,10 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public string GpsBabelServerAddress { get; set; }
         /// <summary>
+        /// GPSBabel server address
+        /// </summary>
+        public string OsmCToolsServerAddress { get; set; }
+        /// <summary>
         /// The address of the OSM file to download for daily rebuild
         /// </summary>
         public string OsmFileAddress { get; set; }
@@ -180,6 +184,7 @@ namespace IsraelHiking.Common.Configuration
             GraphhopperServerAddress = "http://localhost:8989/";
             ElasticsearchServerAddress = "http://localhost:9200/";
             GpsBabelServerAddress = "http://localhost:11987/";
+            OsmCToolsServerAddress = "http://localhost:11911/";
             OsmFileAddress = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine-latest.osm.pbf";
             OsmFileTimeStampAddress = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine.state.txt";
             OsmMinutsFileBaseAddress = "http://download.openstreetmap.fr/replication/asia/israel_and_palestine";
