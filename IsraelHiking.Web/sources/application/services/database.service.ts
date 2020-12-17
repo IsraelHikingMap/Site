@@ -124,7 +124,7 @@ export class DatabaseService {
     }
 
     public async closeDatabase(dbKey: string) {
-        this.loggingService.info("Closing database: " + dbKey);
+        this.loggingService.info("[Database] Closing database: " + dbKey);
         let db = this.sourceDatabases.get(dbKey);
         if (db != null) {
             await db.close();
@@ -219,7 +219,7 @@ export class DatabaseService {
     }
 
     public async getPoisForClustering(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
-        this.loggingService.debug("Getting POIs for clutering from DB");
+        this.loggingService.debug("[Database] Getting POIs for clutering from DB");
         let features = await this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).toArray();
         let slimPois = features.map((feature: GeoJSON.Feature) => {
             let geoLocation = feature.properties.poiGeolocation;
@@ -270,7 +270,7 @@ export class DatabaseService {
             storedState.poiState = initialState.poiState;
         }
         if (storedState.configuration.version === "8.0") {
-            this.loggingService.info("Upgrading state from version 8.0 to 9.0");
+            this.loggingService.info("[Database] Upgrading state from version 8.0 to 9.0");
             storedState.configuration.version = "9.0";
             for (let key of [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP]) {
                 let layer = storedState.layersState.baseLayers.find(l => l.key === key);

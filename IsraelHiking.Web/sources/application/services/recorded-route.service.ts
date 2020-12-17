@@ -38,19 +38,19 @@ export class RecordedRouteService {
     public initialize() {
         let lastRecordedRoute = this.selectedRouteService.getRecordingRoute();
         if (lastRecordedRoute != null) {
-            this.loggingService.info("Recording was interrupted");
+            this.loggingService.info("[Record] Recording was interrupted");
             this.resources.languageChanged.pipe(first()).toPromise().then(() => {
                 // let resources service get the strings
                 this.toastService.confirm({
                     message: this.resources.continueRecording,
                     type: "YesNo",
                     confirmAction: () => {
-                        this.loggingService.info("User choose to continue recording");
+                        this.loggingService.info("[Record] User choose to continue recording");
                         this.geoLocationService.enable();
                         this.selectedRouteService.setSelectedRoute(lastRecordedRoute.id);
                     },
                     declineAction: () => {
-                        this.loggingService.info("User choose to stop recording");
+                        this.loggingService.info("[Record] User choose to stop recording");
                         this.stopRecording();
                     },
                 });
@@ -70,7 +70,7 @@ export class RecordedRouteService {
     }
 
     public startRecording() {
-        this.loggingService.debug("Starting recording");
+        this.loggingService.info("[Record] Starting recording");
         this.rejectedPosition = null;
         let date = new Date();
         let name = this.resources.route + " " + date.toISOString().split("T")[0];
@@ -106,7 +106,7 @@ export class RecordedRouteService {
     }
 
     public stopRecording() {
-        this.loggingService.debug("Stop recording");
+        this.loggingService.info("[Record] Stop recording");
         let recordingRoute = this.selectedRouteService.getRecordingRoute();
         this.ngRedux.dispatch(new StopRecordingAction({
             routeId: recordingRoute.id
@@ -183,25 +183,25 @@ export class RecordedRouteService {
     private validateRecordingAndUpdateState(position: Position, lastValidLocation: ILatLngTime): boolean {
         let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
-            this.loggingService.debug("Valid position, updating: (" + position.coords.latitude + ", " + position.coords.longitude + ")");
+            this.loggingService.debug("[Record] Valid position, updating: (" + position.coords.latitude + ", " + position.coords.longitude + ")");
             this.rejectedPosition = null;
             return true;
         }
         if (this.rejectedPosition == null) {
             this.rejectedPosition = this.geoLocationService.positionToLatLngTime(position);
-            this.loggingService.debug("Rejecting position: " + JSON.stringify(this.geoLocationService.positionToLatLngTime(position)) +
+            this.loggingService.debug("[Record] Rejecting position: " + JSON.stringify(this.geoLocationService.positionToLatLngTime(position)) +
                 " reason:" + nonValidReason);
             return false;
         }
         nonValidReason = this.isValid(this.rejectedPosition, position);
         if (nonValidReason === "") {
-            this.loggingService.debug("Validating a rejected position: " +
+            this.loggingService.debug("[Record] Validating a rejected position: " +
                 JSON.stringify(this.geoLocationService.positionToLatLngTime(position)));
             this.rejectedPosition = null;
             return true;
         }
         this.rejectedPosition = this.geoLocationService.positionToLatLngTime(position);
-        this.loggingService.debug("Rejecting position for rejected: " + JSON.stringify(position) + " reason: " + nonValidReason);
+        this.loggingService.debug("[Record] Rejecting position for rejected: " + JSON.stringify(position) + " reason: " + nonValidReason);
         return false;
     }
 

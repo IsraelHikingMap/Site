@@ -19,6 +19,7 @@ export class TracesService {
     }
 
     public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
+        this.loggingService.info(`[Traces] Getting missing parts for ${traceId}`);
         return this.httpClient.post(Urls.osm + "?traceId=" + traceId, null)
             .toPromise() as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     }
@@ -48,34 +49,39 @@ export class TracesService {
                 }
             }
         } catch (ex) {
-            this.loggingService.error("Unable to get user's traces.");
+            this.loggingService.error("[Traces] Unable to get user's traces.");
         }
     }
 
     public getTraceById(trace: Trace): Promise<DataContainer> {
+        this.loggingService.info(`[Traces] Getting trace by id ${trace.id}`);
         return this.httpClient.get(Urls.osmTrace + trace.id).toPromise() as Promise<DataContainer>;
     }
 
     public uploadTrace(file: File): Promise<any> {
         let formData = new FormData();
         formData.append("file", file, file.name);
-        return this.httpClient.post(Urls.osmTrace, formData).toPromise();
+        this.loggingService.info(`[Traces] Uploading a trace with file name ${file.name}`);
+        return this.httpClient.post(Urls.osmTrace, formData).pipe(timeout(10 * 60 * 1000)).toPromise();
     }
 
     public async uploadRouteAsTrace(route: RouteData): Promise<any> {
         let isDefaultName = route.name.startsWith(this.resources.route) &&
             route.name.replace(this.resources.route, "").trim().startsWith(new Date().toISOString().split("T")[0]);
+        this.loggingService.info(`[Traces] Uploading a route as trace with name ${route.name}, default: ${isDefaultName}`);
         return this.httpClient.post(Urls.osmTraceRoute, route, {
             params: { isDefaultName: isDefaultName.toString(), language: this.resources.getCurrentLanguageCodeSimplified() }
-        }).toPromise();
+        }).pipe(timeout(10*60*1000)).toPromise();
     }
 
     public async updateTrace(trace: Trace): Promise<void> {
+        this.loggingService.info(`[Traces] Updating a trace with id ${trace.id}`);
         await this.httpClient.put(Urls.osmTrace + trace.id, trace).toPromise();
         this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace }));
     }
 
     public async deleteTrace(trace: Trace): Promise<void> {
+        this.loggingService.info(`[Traces] Deleting a trace with id ${trace.id}, visibility: ${trace.visibility}`);
         if (trace.visibility !== "local") {
             await this.httpClient.delete(Urls.osmTrace + trace.id).toPromise();
         }
