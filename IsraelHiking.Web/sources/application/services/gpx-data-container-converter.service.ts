@@ -4,7 +4,7 @@ import { parseString, Builder } from "isomorphic-xml2js";
 import { encode } from "base64-arraybuffer";
 import XmlBeautify from "xml-beautify";
 
-import { DataContainer, RouteData, RouteSegmentData, ILatLngTime, MarkerData, LinkData } from "../models/models";
+import { DataContainer, RouteData, RouteSegmentData, ILatLngTime, MarkerData, LinkData, LatLngAlt } from "../models/models";
 
 interface Link {
     $: { href: string; };
@@ -55,7 +55,7 @@ interface Bounds {
 }
 
 interface Metadata {
-   bounds: Bounds;
+    bounds: Bounds;
 }
 
 interface Gpx {
@@ -191,7 +191,6 @@ export class GpxDataContainerConverterService {
     }
 
     public async toDataContainer(gpxXmlString: string): Promise<DataContainer> {
-        // HM TODO: split route in case this is not an IHM file?
         let gpxJsonObject: Gpx = await new Promise<Gpx>((resolve, reject) => {
             parseString(gpxXmlString, { explicitArray: false }, (err, res) => {
                 if (err) {
@@ -225,6 +224,21 @@ export class GpxDataContainerConverterService {
 
         dataContainer.northEast = { lat: +gpxJsonObject.metadata.bounds.$.maxlat, lng: +gpxJsonObject.metadata.bounds.$.maxlon };
         dataContainer.southWest = { lat: +gpxJsonObject.metadata.bounds.$.minlat, lng: +gpxJsonObject.metadata.bounds.$.minlon };
+
+        if (gpxJsonObject.$.creator === "IsraelHikingMap") {
+            return dataContainer;
+        }
+        for (let route of dataContainer.routes) {
+            if (route.segments.length === 0 || route.segments[0].latlngs.length === 0) {
+                continue;
+            }
+            let firstLatlng = route.segments[0].latlngs[0];
+            route.segments.splice(0, 0, {
+                latlngs: [firstLatlng, firstLatlng],
+                routePoint: firstLatlng as LatLngAlt,
+                routingType: "Hike"
+            } as RouteSegmentData)
+        }
 
         return dataContainer;
     }
