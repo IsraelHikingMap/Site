@@ -13,7 +13,7 @@
 </div>
 
 <mgl-geojson-source id="location-source" [data]="locationFeatures"></mgl-geojson-source>
-<mgl-layer *ngIf="locationFeatures.features.length > 0" id="location-icon"
+<mgl-layer *ngIf="locationFeatures.features.length > 0" [id]="resources.locationIcon"
            type="symbol"
            source="location-source"
            [filter]="['==', '$type', 'Point']"

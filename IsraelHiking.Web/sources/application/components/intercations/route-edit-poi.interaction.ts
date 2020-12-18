@@ -34,6 +34,18 @@ export class RouteEditPoiInteraction {
     }
 
     private handleClick = (event: MapMouseEvent) => {
+        if (this.geoLocationService.getState() === "tracking") {
+            let latLng = event.lngLat;
+            let point = event.target.project(latLng);
+            let th = 10;
+            let gpsMarker = event.target.queryRenderedFeatures([[point.x - th, point.y - th], [point.x + th, point.y + th]],
+                {
+                    layers: [this.resources.locationIcon],
+                });
+            if (gpsMarker.length != 0) {
+                return;
+            }
+        }
         this.ngZone.run(() => {
             let selectedRoute = this.selectedRouteService.getSelectedRoute();
             if (selectedRoute == null) {

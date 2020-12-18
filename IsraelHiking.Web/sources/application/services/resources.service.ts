@@ -30,6 +30,7 @@ export class ResourcesService {
     public endOfRoutes = "end-of-routes";
     public editRoutePoints = "editing-route-layer-points";
     public editRouteLines = "editing-route-layer-lines";
+    public locationIcon = "location-icon-layer";
     // All the text in the app //
     /////////////////////////////
     public about: string;

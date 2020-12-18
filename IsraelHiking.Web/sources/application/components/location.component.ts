@@ -131,7 +131,7 @@ export class LocationComponent extends BaseMapComponent {
             return;
         }
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        if (selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
+        if (selectedRoute != null && selectedRoute.state === "Route") {
             return;
         }
         this.locationLatLng = this.getCenterFromLocationFeatureCollection();
