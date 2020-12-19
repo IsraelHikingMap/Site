@@ -45,6 +45,7 @@ export class GeoLocationService {
         this.wasInitialized = false;
     }
 
+    // HM TODO: move this to application state
     public getState(): GeoLocationServiceState {
         return this.state;
     }

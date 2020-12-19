@@ -14,7 +14,7 @@ import { SelectedRouteService } from "../services/layers/routelayers/selected-ro
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
-import { ToggleDistanceAction } from "../reducres/in-memory.reducer";
+import { ToggleDistanceAction, SetPannedAction } from "../reducres/in-memory.reducer";
 import { LatLngAlt, ApplicationState } from "../models/models";
 
 @Component({
@@ -32,9 +32,12 @@ export class LocationComponent extends BaseMapComponent {
     @select((state: ApplicationState) => state.inMemoryState.distance)
     public distance$: Observable<boolean>;
 
-    private isPanned: boolean;
+    @select((state: ApplicationState) => state.inMemoryState.isPanned)
+    public isPanned$: Observable<boolean>;
+
     private lastSpeed: number;
     private lastSpeedTime: number;
+    private isPanned: boolean;
 
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public distanceFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
@@ -56,7 +59,6 @@ export class LocationComponent extends BaseMapComponent {
         super(resources);
 
         this.isFollowing = true;
-        this.isPanned = false;
         this.isKeepNorthUp = false;
         this.locationLatLng = null;
         this.lastSpeed = null;
@@ -68,26 +70,23 @@ export class LocationComponent extends BaseMapComponent {
             this.updateDistanceFeatureCollection();
         });
 
+        this.isPanned$.subscribe(isPanned => {
+            this.isPanned = isPanned;
+            if (isPanned) {
+                return;
+            }
+            if (!this.isActive()) {
+                return;
+            }
+            if (this.showDistance) {
+                this.ngRedux.dispatch(new ToggleDistanceAction());
+            }
+            if (this.isFollowingLocation()) {
+                this.moveMapToGpsPosition();
+            }
+        });
+
         this.mapComponent.load.subscribe(() => {
-            this.mapComponent.mapInstance.on("dragstart",
-                () => {
-                    if (!this.isActive()) {
-                        return;
-                    }
-                    this.isPanned = true;
-                    this.cancelableTimeoutService.clearTimeoutByGroup("panned");
-                    this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                        this.isPanned = false;
-                        if (this.showDistance) {
-                            this.ngRedux.dispatch(new ToggleDistanceAction());
-                        }
-                        if (this.isFollowingLocation()) {
-                            this.moveMapToGpsPosition();
-                        }
-                    },
-                        LocationComponent.NOT_FOLLOWING_TIMEOUT,
-                        "panned");
-                });
             this.mapComponent.mapInstance.on("move", () => {
                 this.updateDistanceFeatureCollection();
             });
@@ -163,7 +162,7 @@ export class LocationComponent extends BaseMapComponent {
         // is active must be true
         if (!this.isFollowing || this.isPanned) {
             this.isFollowing = true;
-            this.isPanned = false;
+            this.ngRedux.dispatch(new SetPannedAction({ isPanned: false }));
             if (this.showDistance) {
                 this.ngRedux.dispatch(new ToggleDistanceAction());
             }
@@ -256,7 +255,7 @@ export class LocationComponent extends BaseMapComponent {
         this.geoLocationService.enable();
         this.deviceOrientationService.enable();
         this.isFollowing = true;
-        this.isPanned = false;
+        this.ngRedux.dispatch(new SetPannedAction({ isPanned: false }));
     }
 
     private moveMapToGpsPosition() {

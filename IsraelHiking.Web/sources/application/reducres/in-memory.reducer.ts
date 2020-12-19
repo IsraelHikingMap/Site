@@ -5,8 +5,13 @@ import { ShareUrl, InMemoryState } from "../models/models";
 import { initialState } from "./initial-state";
 
 const TOGGLE_DISTNACE = "TOGGLE_DISTNACE";
+const SET_PANNED = "SET_PANNED";
 const SET_SHARE_URL = "SET_SHARE_URL";
 const SET_FILE_URL_AND_BASE_LAYER = "SET_FILE_URL_AND_BASE_LAYER";
+
+export interface SetPannedPayload {
+    isPanned: boolean;
+}
 
 export interface SetShareUrlPayload {
     shareUrl: ShareUrl;
@@ -21,6 +26,12 @@ export class ToggleDistanceAction implements Action {
     public type: string;
     constructor() {
         this.type = TOGGLE_DISTNACE;
+    }
+}
+
+export class SetPannedAction extends BaseAction<SetPannedPayload> {
+    constructor(payload: SetPannedPayload) {
+        super(SET_PANNED, payload);
     }
 }
 
@@ -42,6 +53,14 @@ export class InMemoryReducer {
         return {
             ...lastState,
             distance: !lastState.distance
+        };
+    }
+
+    @ReduxAction(SET_PANNED)
+    public setPanned(lastState: InMemoryState, action: SetPannedAction): InMemoryState {
+        return {
+            ...lastState,
+            isPanned: action.payload.isPanned
         };
     }
 
