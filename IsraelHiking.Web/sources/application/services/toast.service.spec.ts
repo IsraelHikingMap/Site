@@ -1,7 +1,7 @@
 import { MatSnackBar, MatDialog } from "@angular/material";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { LoggingService } from './logging.service';
+import { LoggingService } from "./logging.service";
 import { GetTextCatalogMockCreator } from "./resources.service.spec";
 
 export class ToastServiceMockCreator {

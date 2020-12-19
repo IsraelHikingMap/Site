@@ -6,7 +6,7 @@ import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { Urls } from "../urls";
 import { LatLngAlt } from "../models/models";
-import { LoggingService } from './logging.service';
+import { LoggingService } from "./logging.service";
 
 @Injectable()
 export class ElevationProvider {

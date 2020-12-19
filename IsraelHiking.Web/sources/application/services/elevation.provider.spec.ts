@@ -6,7 +6,7 @@ import { ResourcesService } from "./resources.service";
 import { ElevationProvider } from "./elevation.provider";
 import { ToastService } from "./toast.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
-import { LoggingService } from './logging.service';
+import { LoggingService } from "./logging.service";
 
 describe("ElevationProvider", () => {
 
