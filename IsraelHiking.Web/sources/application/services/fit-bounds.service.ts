@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
-import { NgRedux } from '@angular-redux/store';
+import { NgRedux } from "@angular-redux/store";
 
 import { SidebarService } from "./sidebar.service";
 import { Bounds, LatLngAlt, ApplicationState } from "../models/models";
 import { MapService } from "./map.service";
 import { SpatialService } from "./spatial.service";
-import { SetPannedAction } from '../reducres/in-memory.reducer';
+import { SetPannedAction } from "../reducres/in-memory.reducer";
 
 @Injectable()
 export class FitBoundsService {
@@ -13,8 +13,8 @@ export class FitBoundsService {
     public isFlying: boolean;
 
     constructor(private readonly sidebarService: SidebarService,
-        private readonly mapService: MapService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly mapService: MapService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.isFlying = false;
     }
 

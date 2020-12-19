@@ -86,7 +86,6 @@ export class ImageResizeService {
         return { lat, lng };
     }
 
-    
     private resizeImageWithExif(image: HTMLImageElement, exifData): string {
         let canvas = document.createElement("canvas") as HTMLCanvasElement;
 

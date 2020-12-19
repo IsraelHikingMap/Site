@@ -237,7 +237,7 @@ export class GpxDataContainerConverterService {
                 latlngs: [firstLatlng, firstLatlng],
                 routePoint: firstLatlng as LatLngAlt,
                 routingType: "Hike"
-            } as RouteSegmentData)
+            } as RouteSegmentData);
         }
 
         return dataContainer;

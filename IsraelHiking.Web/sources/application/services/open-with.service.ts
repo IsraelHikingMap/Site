@@ -84,7 +84,7 @@ export class OpenWithService {
                 } catch (ex) {
                     this.loggingService.error(ex.message);
                     this.toastService.error(this.resources.unableToLoadFromFile);
-                }  
+                }
             }, 0);
         };
         this.webIntent.getIntent().then(intent => this.handleIntent(intent));
@@ -112,7 +112,8 @@ export class OpenWithService {
                 } else {
                     this.loggingService.info("[OpenWith] Opening an intent with data: " + data + " type: " + intent.type);
                     if (intent.type && intent.type.startsWith("image/")) {
-                        intent.type = ImageResizeService.JPEG; // this is hacking, but there's no good way to get the real file name when an image is shared...
+                        // this is hacking, but there's no good way to get the real file name when an image is shared...
+                        intent.type = ImageResizeService.JPEG;
                     }
                     let file = await this.fileService.getFileFromUrl(data, intent.type || this.getTypeFromUrl(data));
                     this.loggingService.info("[OpenWith] Translated the data to a file: " + file.name + " " + file.type);
@@ -121,7 +122,7 @@ export class OpenWithService {
             } catch (ex) {
                 this.loggingService.error(ex.message);
                 this.toastService.error(this.resources.unableToLoadFromFile);
-            }            
+            }
         });
     }
 

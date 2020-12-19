@@ -42,7 +42,7 @@ export class RouteEditPoiInteraction {
                 {
                     layers: [this.resources.locationIcon],
                 });
-            if (gpsMarker.length != 0) {
+            if (gpsMarker.length !== 0) {
                 return;
             }
         }

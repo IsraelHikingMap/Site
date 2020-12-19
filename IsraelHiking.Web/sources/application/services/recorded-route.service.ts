@@ -183,14 +183,14 @@ export class RecordedRouteService {
     private validateRecordingAndUpdateState(position: Position, lastValidLocation: ILatLngTime): boolean {
         let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
-            this.loggingService.debug("[Record] Valid position, updating: (" + position.coords.latitude + ", " + position.coords.longitude + ")");
+            this.loggingService.debug(`[Record] Valid position, updating: (${position.coords.latitude}, ${position.coords.longitude})`);
             this.rejectedPosition = null;
             return true;
         }
         if (this.rejectedPosition == null) {
             this.rejectedPosition = this.geoLocationService.positionToLatLngTime(position);
-            this.loggingService.debug("[Record] Rejecting position: " + JSON.stringify(this.geoLocationService.positionToLatLngTime(position)) +
-                " reason:" + nonValidReason);
+            this.loggingService.debug(`[Record] Rejecting position, reason: ${nonValidReason}` +
+                JSON.stringify(this.geoLocationService.positionToLatLngTime(position)));
             return false;
         }
         nonValidReason = this.isValid(this.rejectedPosition, position);

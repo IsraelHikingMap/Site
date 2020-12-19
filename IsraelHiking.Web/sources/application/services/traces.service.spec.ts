@@ -13,6 +13,9 @@ import { ResourcesService } from "./resources.service";
 describe("Traces Service", () => {
     beforeEach(() => {
         let mock = new ToastServiceMockCreator();
+        let loggignMock = {
+            info: () => { }
+        };
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -22,7 +25,7 @@ describe("Traces Service", () => {
                 NgRedux,
                 TracesService,
                 { provide: ResourcesService, useValue: mock.resourcesService },
-                { provide: LoggingService, useValue: {} },
+                { provide: LoggingService, useValue: loggignMock },
             ]
         });
     });

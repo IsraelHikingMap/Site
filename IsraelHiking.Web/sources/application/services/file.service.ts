@@ -157,17 +157,17 @@ export class FileService {
     public async getFileFromUrl(url: string, type: string): Promise<File> {
         let entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
         let file = await new Promise((resolve, reject) => {
-            entry.file((file) => {
-                var reader = new FileReader();
+            entry.file((fileContent) => {
+                let reader = new FileReader();
                 reader.onload = (event: any) => {
-                    var blob = new Blob([event.target.result], { type }) as any;
+                    let blob = new Blob([event.target.result], { type }) as any;
                     blob.name = entry.name;
                     resolve(blob);
                 };
-                reader.readAsArrayBuffer(file);
+                reader.readAsArrayBuffer(fileContent);
             }, reject);
         }) as File;
-        return file; 
+        return file;
     }
 
     public async addRoutesFromFile(file: File): Promise<void> {

@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
 import { Map } from "mapbox-gl";
-import { NgRedux, select } from '@angular-redux/store';
+import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
-import { ApplicationState } from '../models/models';
-import { SetPannedAction, SetPannedPayload } from '../reducres/in-memory.reducer';
+import { ApplicationState } from "../models/models";
+import { SetPannedAction, SetPannedPayload } from "../reducres/in-memory.reducer";
 
 @Injectable()
 export class MapService {
@@ -20,7 +20,7 @@ export class MapService {
     public isPanned$: Observable<boolean>;
 
     constructor(private readonly cancelableTimeoutService: CancelableTimeoutService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.initializationPromise = new Promise((resolve) => { this.resolve = resolve; });
     }
 

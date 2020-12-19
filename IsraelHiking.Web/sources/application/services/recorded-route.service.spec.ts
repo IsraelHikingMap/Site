@@ -101,9 +101,9 @@ describe("RecordedRouteService", () => {
                 }
             ]);
 
-            expect(spy.calls.all()[0].args[0].startsWith("Valid position")).toBeTruthy(spy.calls.all()[0].args[0]);
-            expect(spy.calls.all()[1].args[0].startsWith("Rejecting position:")).toBeTruthy(spy.calls.all()[1].args[0]);
-            expect(spy.calls.all()[2].args[0].startsWith("Validating a rejected position")).toBeTruthy(spy.calls.all()[2].args[0]);
-            expect(spy.calls.all()[3].args[0].startsWith("Valid position")).toBeTruthy(spy.calls.all()[3].args[0]);
+            expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy(spy.calls.all()[0].args[0]);
+            expect(spy.calls.all()[1].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy(spy.calls.all()[1].args[0]);
+            expect(spy.calls.all()[2].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy(spy.calls.all()[2].args[0]);
+            expect(spy.calls.all()[3].args[0].startsWith("[Record] Valid position")).toBeTruthy(spy.calls.all()[3].args[0]);
         }));
 });
