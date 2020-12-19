@@ -5,6 +5,7 @@ import { timeout } from "rxjs/operators";
 
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
+import { RunningContextService } from "./running-context.service";
 import { Urls } from "../urls";
 import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducres/traces.reducer";
 import { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
@@ -15,6 +16,7 @@ export class TracesService {
     constructor(private readonly resources: ResourcesService,
                 private readonly httpClient: HttpClient,
                 private readonly loggingService: LoggingService,
+                private readonly runningContextService: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
@@ -24,7 +26,28 @@ export class TracesService {
             .toPromise() as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     }
 
-    public syncTraces = async (): Promise<void> => {
+    public async initialize(): Promise<void> {
+        let state = this.ngRedux.getState();
+        if (!state.configuration.isAutomaticRecordingUpload) {
+            return;
+        }
+        if (!this.runningContextService.isOnline) {
+            return;
+        }
+        let localTraces = state.tracesState.traces.filter(t => t.visibility === "local");
+        if (localTraces.length === 0) {
+            return;
+        }
+        this.loggingService.info(`[Traces] There are ${localTraces.length} local traces that are about to be uploaded`);
+        for (let localTrace of localTraces) {
+            await this.uploadRouteAsTrace(localTrace.dataContainer.routes[0]);
+            await this.deleteTrace(localTrace);
+        }
+        await this.syncTraces();
+        this.loggingService.info(`[Traces] Finished uploading ${localTraces.length} local traces to server`);
+    }
+
+    public async syncTraces(): Promise<void> {
         try {
             let response = await this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)).toPromise() as Trace[];
             let traces = ([] as Trace[]).concat(response || []);
