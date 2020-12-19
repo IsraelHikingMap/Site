@@ -82,8 +82,7 @@ export class OpenWithService {
                     let file = await this.fileService.getFileFromUrl(url, this.getTypeFromUrl(url));
                     this.fileService.addRoutesFromFile(file);
                 } catch (ex) {
-                    this.loggingService.error(ex.message);
-                    this.toastService.error(this.resources.unableToLoadFromFile);
+                    this.toastService.error(ex, this.resources.unableToLoadFromFile);
                 }
             }, 0);
         };
@@ -120,8 +119,7 @@ export class OpenWithService {
                     await this.fileService.addRoutesFromFile(file);
                 }
             } catch (ex) {
-                this.loggingService.error(ex.message);
-                this.toastService.error(this.resources.unableToLoadFromFile);
+                this.toastService.error(ex, this.resources.unableToLoadFromFile);
             }
         });
     }

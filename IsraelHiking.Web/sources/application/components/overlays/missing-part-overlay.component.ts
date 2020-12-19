@@ -57,7 +57,7 @@ export class MissingPartOverlayComponent extends ClosableOverlayComponent {
             this.toastService.success(this.resources.routeAddedSuccessfullyItWillTakeTime);
             this.remove();
         } catch (ex) {
-            this.toastService.error(this.resources.unableToSendRoute);
+            this.toastService.error(ex, this.resources.unableToSendRoute);
         }
     }
 

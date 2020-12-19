@@ -52,7 +52,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
                 await this.fileService.writeStyles(file);
                 this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             } catch (ex) {
-                this.toastService.error(ex.message);
+                this.toastService.error(ex, ex.message);
             }
             return;
         }
@@ -68,22 +68,20 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             await this.fileService.addRoutesFromFile(file);
             this.matDialogRef.close();
         } catch (ex) {
-            this.loggingService.error("Unable to open a file: " + ex.toString());
-            this.toastService.error(this.resources.unableToLoadFromFile);
+            this.toastService.error(ex, this.resources.unableToLoadFromFile);
         }
     }
 
     public async save() {
         let data = this.dataContainerService.getDataForFileExport();
         if (!this.isDataSaveable(data)) {
-            this.toastService.error(this.resources.unableToSaveToFile);
+            this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
         try {
             await this.fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data);
         } catch (ex) {
-            this.loggingService.error("Unable to save file: " + ex.toString());
-            this.toastService.error(this.resources.unableToSaveToFile);
+            this.toastService.error(ex, this.resources.unableToSaveToFile);
         }
     }
 
@@ -95,15 +93,14 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             data = this.dataContainerService.getData();
         }
         if (!this.isDataSaveable(data)) {
-            this.toastService.error(this.resources.unableToSaveToFile);
+            this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
         let name = this.getName(data);
         try {
             await this.fileService.saveToFile(`${name}.${format.extension}`, outputFormat, data);
         } catch (ex) {
-            this.loggingService.error("Unable to save as file: " + ex.toString());
-            this.toastService.error(this.resources.unableToSaveToFile);
+            this.toastService.error(ex, this.resources.unableToSaveToFile);
         }
     }
 

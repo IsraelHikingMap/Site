@@ -3,6 +3,7 @@ import { MatSnackBar, MatDialog } from "@angular/material";
 import { ResourcesService } from "./resources.service";
 import { ConfirmDialogComponent, ConfirmType } from "../components/dialogs/confirm-dialog.component";
 import { ProgressDialogComponent, IProgressDialogConfig } from "../components/dialogs/progress-dialog.component";
+import { LoggingService } from "./logging.service";
 
 export interface IConfirmOptions {
     message: string;
@@ -17,26 +18,28 @@ export interface IConfirmOptions {
 
 @Injectable()
 export class ToastService {
-    private duration: number;
+    private static readonly DURATION = 6000;
 
     constructor(private readonly resources: ResourcesService,
                 private readonly matDialog: MatDialog,
-                private readonly snackbar: MatSnackBar) {
-        this.duration = 6000;
+                private readonly snackbar: MatSnackBar,
+                private readonly loggingService: LoggingService) {
     }
 
-    public error(message: string, title?: string) {
+    public error(ex: Error, message: string, title?: string) {
+        this.loggingService.error(message + ": " + ex.message);
         this.snackbar.open(message, title, {
             direction: this.resources.direction,
-            duration: this.duration,
+            duration: ToastService.DURATION,
             panelClass: ["mat-toolbar", "mat-warn"] // for some reason warn is red
         });
+
     }
 
     public warning(message: string, title?: string) {
         this.snackbar.open(message, title, {
             direction: this.resources.direction,
-            duration: this.duration,
+            duration: ToastService.DURATION,
             panelClass: ["mat-toolbar", "mat-accent"] // for some reason accent is yellow
         });
     }
@@ -44,7 +47,7 @@ export class ToastService {
     public success(message: string, title?: string) {
         this.snackbar.open(message, title, {
             direction: this.resources.direction,
-            duration: this.duration,
+            duration: ToastService.DURATION,
             panelClass: ["mat-toolbar", "mat-primary"]
         });
     }
@@ -52,7 +55,7 @@ export class ToastService {
     public info(message: string, title?: string) {
         this.snackbar.open(message, title, {
             direction: this.resources.direction,
-            duration: this.duration
+            duration: ToastService.DURATION
         });
     }
 

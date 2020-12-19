@@ -60,7 +60,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     public async saveRouteToFile() {
         let latLngs = this.getLatlngs();
         if (latLngs.length === 0) {
-            this.toastService.error(this.resources.pleaseAddPointsToRoute);
+            this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
         let data = {
@@ -69,14 +69,14 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         try {
             await this.fileService.saveToFile(this.routeData.name + ".gpx", "gpx", data);
         } catch (ex) {
-            this.toastService.error(this.resources.unableToSaveToFile);
+            this.toastService.error(ex, this.resources.unableToSaveToFile);
         }
     }
 
     public moveToRoute = () => {
         let latLngs = this.getLatlngs();
         if (latLngs.length === 0) {
-            this.toastService.error(this.resources.pleaseAddPointsToRoute);
+            this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
         let bounds = SpatialService.getBounds(latLngs);

@@ -95,7 +95,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
             this.facebookShareAddress = links.facebook;
             this.nakebCreateHikeAddress = links.nakeb;
         } catch (ex) {
-            this.toastService.error(this.resources.unableToGenerateUrl);
+            this.toastService.error(ex, this.resources.unableToGenerateUrl);
         } finally {
             this.isLoading = false;
         }

@@ -36,7 +36,7 @@ export class ElevationProvider {
             }
             return latlngs;
         } catch (ex) {
-            this.toastService.error(this.resources.unableToGetElevationData);
+            this.toastService.error(ex, this.resources.unableToGetElevationData);
             throw ex;
         }
     }

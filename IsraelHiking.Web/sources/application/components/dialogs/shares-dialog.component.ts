@@ -116,7 +116,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
                     await this.shareUrlsService.deleteShareUrl(shareUrl);
                     this.updateFilteredLists(this.searchTerm.value);
                 } catch (ex) {
-                    this.toastService.error(this.resources.unableToDeleteShare);
+                    this.toastService.error(ex, this.resources.unableToDeleteShare);
                 }
 
             },

@@ -157,7 +157,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
             this.tracesService.syncTraces();
         } catch (ex) {
-            this.toastService.error(this.resources.unableToUploadFile);
+            this.toastService.error(ex, this.resources.unableToUploadFile);
         }
     }
 
@@ -233,7 +233,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             await this.tracesService.syncTraces();
             this.toastService.info(this.resources.fileUploadedSuccessfullyItWillTakeTime);
         } catch (ex) {
-            this.toastService.error(this.resources.unableToUploadFile);
+            this.toastService.error(ex, this.resources.unableToUploadFile);
         }
     }
 

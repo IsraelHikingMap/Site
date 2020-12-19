@@ -28,8 +28,7 @@ export class DragAndDropService {
                         try {
                             await this.fileService.addRoutesFromFile(file);
                         } catch (ex) {
-                            this.loggingService.error("Unable to drag-and-drop file: " + ex.toString());
-                            this.toastService.error(this.resources.unableToLoadFromFile + `: ${file.name}`);
+                            this.toastService.error(ex, this.resources.unableToLoadFromFile + `: ${file.name}`);
                         }
                     }
                 }, 25);
@@ -38,8 +37,8 @@ export class DragAndDropService {
 
             let url = e.dataTransfer.getData("text");
             if (url) {
-                this.fileService.addRoutesFromUrl(url).then(() => { }, () => {
-                    this.toastService.error(this.resources.unableToLoadFromUrl + `: ${url}`);
+                this.fileService.addRoutesFromUrl(url).then(() => { }, (ex) => {
+                    this.toastService.error(ex, this.resources.unableToLoadFromUrl + `: ${url}`);
                 });
             }
         });

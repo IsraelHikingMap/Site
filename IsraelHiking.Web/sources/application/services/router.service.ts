@@ -30,7 +30,7 @@ export class RouterService {
         } catch (ex) {
             let coordinatesString = ` (${latlngStart.lat.toFixed(3)}°, ${latlngStart.lng.toFixed(3)}°)` +
                 ` - (${latlngEnd.lat.toFixed(3)}°, ${latlngEnd.lng.toFixed(3)}°)`;
-            this.toastService.error(this.resources.routingFailed + coordinatesString);
+            this.toastService.error(ex, this.resources.routingFailed + coordinatesString);
             return this.getEmptyRoute(latlngStart, latlngEnd);
         }
     }
