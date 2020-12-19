@@ -6,6 +6,7 @@ import { ResourcesService } from "./resources.service";
 import { ElevationProvider } from "./elevation.provider";
 import { ToastService } from "./toast.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
+import { LoggingService } from './logging.service';
 
 describe("ElevationProvider", () => {
 
@@ -19,6 +20,7 @@ describe("ElevationProvider", () => {
             providers: [
                 { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
                 { provide: ToastService, useValue: toastMockCreator.toastService },
+                { provide: LoggingService, useValue: { warning: () => { } } },
                 ElevationProvider
             ]
         });
@@ -51,11 +53,12 @@ describe("ElevationProvider", () => {
         async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, toastService: ToastService) => {
 
             let latlngs = [{ lat: 0, lng: 0, alt: 0 }];
-            spyOn(toastService, "error");
+            spyOn(toastService, "warning");
 
-            let promise = elevationProvider.updateHeights(latlngs).then(() => fail(), () => {
-                expect(toastService.error).toHaveBeenCalled();
-            });
+            let promise = elevationProvider.updateHeights(latlngs);
+            promise.then(() => {
+                expect(toastService.warning).toHaveBeenCalled();
+            }, () => fail());
 
             mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
             return promise;
