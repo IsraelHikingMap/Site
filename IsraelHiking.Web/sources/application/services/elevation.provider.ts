@@ -1,10 +1,12 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
+import { timeout } from "rxjs/operators";
 
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { Urls } from "../urls";
 import { LatLngAlt } from "../models/models";
+import { LoggingService } from './logging.service';
 
 @Injectable()
 export class ElevationProvider {
@@ -12,9 +14,9 @@ export class ElevationProvider {
     constructor(private readonly httpClient: HttpClient,
                 private readonly resources: ResourcesService,
                 private readonly toastService: ToastService,
-    ) { }
+                private readonly loggingService: LoggingService) { }
 
-    public updateHeights = async (latlngs: LatLngAlt[]): Promise<LatLngAlt[]> => {
+    public async updateHeights(latlngs: LatLngAlt[]): Promise<LatLngAlt[]> {
         let relevantIndexes = [] as number[];
         let points = [] as string[];
         for (let i = 0; i < latlngs.length; i++) {
@@ -30,14 +32,14 @@ export class ElevationProvider {
         }
         try {
             let params = new HttpParams().set("points", points.join("|"));
-            let response = await this.httpClient.get(Urls.elevation, { params }).toPromise();
+            let response = await this.httpClient.get(Urls.elevation, { params }).pipe(timeout(1000)).toPromise();
             for (let index = 0; index < relevantIndexes.length; index++) {
                 latlngs[relevantIndexes[index]].alt = response[index];
             }
-            return latlngs;
         } catch (ex) {
-            this.toastService.error(ex, this.resources.unableToGetElevationData);
-            throw ex;
+            this.loggingService.warning(`Unable to get elevation data for ${latlngs.length} points. ` + ex.message);
+            this.toastService.warning(this.resources.unableToGetElevationData);
         }
+        return latlngs;
     }
 }
