@@ -1,4 +1,10 @@
 ﻿<div [dir]="resources.direction">
+    <div fxLayout="row" *ngIf="isPurchaseAvailable()">
+        <button mat-raised-button color="primary" fxFill (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Purchase offline maps"><i class="fa icon-dollar"></i> {{resources.purchaseOfflineMaps}}</button>
+    </div>
+    <div fxLayout="row" *ngIf="isOfflineDownloadAvailable()">
+        <button mat-raised-button color="primary" fxFill (click)="downloadOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download offline maps"><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
+    </div>
     <mat-accordion multi="true">
         <mat-expansion-panel [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')" (closed)="collapse('Base Layers')">
             <mat-expansion-panel-header>
@@ -76,14 +82,8 @@
             </div>
         </mat-expansion-panel>
     </mat-accordion>
-    <div fxLayout="row" *ngIf="isPurchaseAvailable()">
-        <button mat-raised-button color="primary" fxFill (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Purchase offline maps"><i class="fa icon-dollar"></i> {{resources.purchaseOfflineMaps}}</button>
-    </div>
-    <div fxLayout="row" *ngIf="isOfflineDownloadAvailable()">
-        <button mat-raised-button color="primary" fxFill (click)="downloadOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download offline maps"><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
-    </div>
     <div fxLayout="row" *ngIf="isOfflineDownloadAvailable() && (lastModified | async)">
-        <div fxFill class="margin-10">{{resources.lastUpdatedOn}} {{lastModified | async | date:'dd/MM/yyyy'}}</div> 
+        <div fxFill class="margin-10">{{resources.lastUpdatedOn}} {{lastModified | async | date:'dd/MM/yyyy'}}</div>
     </div>
     <p class="margin-10" *ngIf="isOfflineDownloadAvailable()">{{resources.offlinePurchaseGraditude}}</p>
 </div>
