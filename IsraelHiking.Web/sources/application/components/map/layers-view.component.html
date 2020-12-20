@@ -35,7 +35,7 @@
     <cluster-overlay [points]="clusterPoints" (closed)="clearSelectedClusterPopup()"></cluster-overlay>
 </mgl-popup>
 <mgl-popup *ngIf="hoverFeature" [lngLat]="hoverFeature.geometry.coordinates" [closeButton]="false" [offset]="[0, -20]">
-    <span [dir]="resources.getDirection(hoverFeature.properties.title)">{{hoverFeature.properties.title}}</span>
+    <span [dir]="resources.getDirection(hoverFeature.properties.title)">{{hoverFeature.properties.title}} <i class="icon-eye-slash" (click)="clearSelectedPoi()"></i></span>
 </mgl-popup>
 <mgl-marker *ngIf="selectedPoiFeature" [lngLat]="selectedPoiFeature.geometry.coordinates" anchor="bottom">
     <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="openPoi(selectedPoiFeature.properties.poiId, $event)" (mouseover)="setHoverFeature(selectedPoiFeature)" (mouseout)="hoverFeature = null">

@@ -2,13 +2,15 @@ import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { GeoJSONSourceComponent } from "ngx-mapbox-gl";
-import { select } from "@angular-redux/store";
+import { select, NgRedux } from "@angular-redux/store";
 
+import { BaseMapComponent } from "../base-map.component";
 import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { RouteStrings } from "../../services/hash.service";
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
+import { RunningContextService } from "../../services/running-context.service";
+import { SetSelectedPoiAction } from "../../reducres/poi.reducer";
 import { ApplicationState, Overlay, PointOfInterest, PointOfInterestExtended } from "../../models/models";
 
 @Component({
@@ -35,7 +37,9 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     constructor(resources: ResourcesService,
                 private readonly router: Router,
                 private readonly layersService: LayersService,
-                private readonly poiService: PoiService
+                private readonly poiService: PoiService,
+                private readonly runnningContextService: RunningContextService,
+                private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
         this.selectedCluster = null;
@@ -121,5 +125,13 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         if (selectedPoi.properties.title) {
             this.hoverFeature = selectedPoi;
         }
+    }
+
+    public isApp() {
+        return this.runnningContextService.isCordova;
+    }
+
+    public clearSelectedPoi() {
+        this.ngRedux.dispatch(new SetSelectedPoiAction({ poi: null }));
     }
 }
