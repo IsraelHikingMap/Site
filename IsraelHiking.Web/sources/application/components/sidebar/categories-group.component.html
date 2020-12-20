@@ -1,9 +1,15 @@
 ﻿<mat-expansion-panel [expanded]="getExpandState()" (opened)="expand()" (closed)="collapse()">
     <mat-expansion-panel-header>
-        <button mat-button (click)="toggleVisibility()" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle visiblity of category layer {{categoriesGroup.type}}">
-            <i class="fa fa-lg" [ngClass]="{'icon-eye': categoriesGroup.visible, 'icon-eye-slash': !categoriesGroup.visible}"></i>
-        </button>
-        <p>{{resources.translate(categoriesGroup.type)}}</p>
+        <div fxFill fxLayout="row">
+            <div fxFlex>
+                <p fxFill>{{resources.translate(categoriesGroup.type)}}</p>
+            </div>
+            <div fxFlex="20">
+                <button fxFill mat-button (click)="toggleVisibility()" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle visiblity of category layer {{categoriesGroup.type}}">
+                    <i class="fa fa-lg" [ngClass]="{'icon-eye': categoriesGroup.visible, 'icon-eye-slash': !categoriesGroup.visible}"></i>
+                </button>
+            </div>
+        </div>
     </mat-expansion-panel-header>
     <div *ngFor="let category of categoriesGroup.categories">
         <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleCategory(category)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle category visibility {{category.name}}">

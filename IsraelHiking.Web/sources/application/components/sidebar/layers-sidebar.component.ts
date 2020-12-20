@@ -132,6 +132,18 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.layersService.toggleOverlay(overlay);
     }
 
+    public isAllOverlaysHidden(): boolean {
+        return this.layersService.isAllOverlaysHidden();
+    }
+
+    public hideAllOverlays(event: Event) {
+        if (this.isAllOverlaysHidden()) {
+            return;
+        }
+        event.stopPropagation();
+        this.layersService.hideAllOverlays();
+    }
+
     public showOfflineButton(layer: EditableLayer) {
         let offlineState = this.ngRedux.getState().offlineState;
         return layer.isOfflineAvailable &&

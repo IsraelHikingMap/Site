@@ -9,8 +9,11 @@
         <mat-expansion-panel [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')" (closed)="collapse('Base Layers')">
             <mat-expansion-panel-header>
                 <mat-panel-title>
-                    <button mat-button (click)="addBaseLayer($event)" matTooltip="{{resources.addBaseLayer}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add base layer"><i class="fa fa-lg icon-plus"></i></button>
-                    <p>{{resources.baseLayers}}</p>
+                    <div fxFill fxLayout="row">
+                        <div fxFlex>
+                            <p fxFill>{{resources.baseLayers}}</p>
+                        </div>
+                    </div>
                 </mat-panel-title>
             </mat-expansion-panel-header>
             <div *ngFor="let baseLayer of (baseLayers | async)">
@@ -30,11 +33,18 @@
                     </div>
                 </div>
             </div>
+            <button mat-button (click)="addBaseLayer($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add base layer"><i class="fa fa-lg icon-plus"></i> {{resources.addBaseLayer}}</button>
         </mat-expansion-panel>
         <mat-expansion-panel [expanded]="getExpandState('Overlays')" (opened)="expand('Overlays')" (closed)="collapse('Overlays')">
             <mat-expansion-panel-header>
-                <button mat-button (click)="addOverlay($event)" matTooltip="{{resources.addOverlay}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add overlay"><i class="fa fa-lg icon-plus"></i></button>
-                <p>{{resources.overlays}}</p>
+                <div fxFill fxLayout="row">
+                    <div fxFlex>
+                        <p fxFill>{{resources.overlays}}</p>
+                    </div>
+                    <div fxFlex="20">
+                        <button fxFill mat-button (click)="hideAllOverlays($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Hide all overlays"><i class="fa fa-lg" [ngClass]="isAllOverlaysHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
+                    </div>
+                </div>
             </mat-expansion-panel-header>
             <div *ngFor="let overlay of (overlays | async)">
                 <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleVisibility(overlay)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle overlay visiblity {{overlay.key}}">
@@ -53,14 +63,18 @@
                     </div>
                 </div>
             </div>
+            <button mat-button (click)="addOverlay($event)" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add overlay"><i class="fa fa-lg icon-plus"></i> {{resources.addOverlay}} </button>
         </mat-expansion-panel>
         <ng-container *ngFor="let categoriesGroup of (categoriesGroups | async)">
             <categories-group [categoriesGroup]="categoriesGroup"></categories-group>
         </ng-container>
         <mat-expansion-panel [expanded]="getExpandState('Private Routes')" (opened)="expand('Private Routes')" (closed)="collapse('Private Routes')">
             <mat-expansion-panel-header>
-                <button mat-button (click)="addRoute($event)" matTooltip="{{resources.addRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add route"><i class="fa fa-lg icon-plus"></i></button>
-                <p>{{resources.privateRoutes}}</p>
+                <div fxFill fxLayout="row">
+                    <div fxFlex>
+                        <p fxFill>{{resources.privateRoutes}}</p>
+                    </div>
+                </div>
             </mat-expansion-panel-header>
             <div cdkDropList (cdkDropListDropped)="dropRoute($event)">
                 <div *ngFor="let route of (routes | async); let i = index" cdkDrag>
@@ -80,6 +94,7 @@
                     </div>
                 </div>
             </div>
+            <button mat-button (click)="addRoute($event)" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add route"><i class="fa fa-lg icon-plus"></i> {{resources.addRoute}}</button>
         </mat-expansion-panel>
     </mat-accordion>
     <div fxLayout="row" *ngIf="isOfflineDownloadAvailable() && (lastModified | async)">

@@ -355,6 +355,17 @@ export class LayersService {
         }
     }
 
+    public isAllOverlaysHidden() {
+        return this.overlays.filter(o => o.visible).length === 0;
+    }
+
+    public hideAllOverlays() {
+        let visibleOverlays = this.overlays.filter(o => o.visible);
+        for (let overlay of visibleOverlays) {
+            this.toggleOverlay(overlay);
+        }
+    }
+
     public addExternalBaseLayer = (layerData: LayerData) => {
         if (layerData == null || (layerData.address === "" && layerData.key === "")) {
             return;
