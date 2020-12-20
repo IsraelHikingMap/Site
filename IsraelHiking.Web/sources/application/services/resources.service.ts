@@ -223,6 +223,7 @@ export class ResourcesService {
     public measureDistanceFromCurrentLocation: string;
     public thereSoMuchMoreYouCanDoWithOurApp: string;
     public files: string;
+    public shareLocation: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -455,7 +456,7 @@ export class ResourcesService {
     public setLanguage = async (language: ILanguage): Promise<void> => {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1608454008453");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1608475154598");
 
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
@@ -657,6 +658,7 @@ export class ResourcesService {
         this.thisWillDeteleAllCurrentRoutesAreYouSure = this.gettextCatalog
             .getString("This will delete all current routes. Are you sure?");
         this.files = this.gettextCatalog.getString("Files");
+        this.shareLocation = this.gettextCatalog.getString("Share Location");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

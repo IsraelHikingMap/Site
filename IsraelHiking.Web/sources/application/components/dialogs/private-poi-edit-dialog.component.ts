@@ -1,15 +1,17 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, Inject } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from "@angular/material";
+import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ImageResizeService } from "../../services/image-resize.service";
 import { NavigateHereService } from "../../services/navigate-here.service";
+import { RunningContextService } from "../../services/running-context.service";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
-import { LinkData, MarkerData, ApplicationState } from "../../models/models";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducres/routes.reducer";
+import { LinkData, MarkerData, ApplicationState } from "../../models/models";
 
 interface IIconsGroup {
     icons: string[];
@@ -61,6 +63,8 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                 private readonly matDialog: MatDialog,
                 private readonly dialogRef: MatDialogRef<PrivatePoiEditDialogComponent>,
                 private readonly navigateHereService: NavigateHereService,
+                private readonly runningContextService: RunningContextService,
+                private readonly socialSharing: SocialSharing,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 @Inject(MAT_DIALOG_DATA) data) {
         super(resources);
@@ -188,8 +192,17 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public async navigateHere() {
-        console.log(this.title);
-        this.navigateHereService.addNavigationSegment(this.marker.latlng, this.title);
+        await this.navigateHereService.addNavigationSegment(this.marker.latlng, this.title);
+    }
+
+    public isApp() {
+        return this.runningContextService.isCordova;
+    }
+
+    public shareLocation() {
+        this.socialSharing.shareWithOptions({
+            url: `geo:${this.latlng.lat},${this.latlng.lng}`
+        });
     }
 
     @HostListener("window:keydown", ["$event"])

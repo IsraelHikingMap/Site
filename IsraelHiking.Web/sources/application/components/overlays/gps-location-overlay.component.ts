@@ -2,12 +2,14 @@ import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { MatDialog } from "@angular/material";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
+import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { AddSimplePoiDialogComponent } from "../dialogs/add-simple-poi-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { RunningContextService } from "../../services/running-context.service";
 import { AddPrivatePoiAction } from "../../reducres/routes.reducer";
 import { ToggleDistanceAction } from "../../reducres/in-memory.reducer";
 import { ApplicationState, LatLngAlt } from "../../models/models";
@@ -32,6 +34,8 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
                 private readonly matDialog: MatDialog,
                 private readonly selectedRouteService: SelectedRouteService,
+                private readonly runningContextService: RunningContextService,
+                private readonly socialSharing: SocialSharing,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.hideCoordinates = true;
@@ -69,6 +73,17 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
 
     public toggleDistance() {
         this.ngRedux.dispatch(new ToggleDistanceAction());
+        this.closed.emit();
+    }
+
+    public isApp() {
+        return this.runningContextService.isCordova;
+    }
+
+    public shareMyLocation() {
+        this.socialSharing.shareWithOptions({
+            url: `geo:${this.latlng.lat},${this.latlng.lng}`
+        });
         this.closed.emit();
     }
 }

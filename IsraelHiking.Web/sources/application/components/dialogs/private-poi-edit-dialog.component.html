@@ -70,6 +70,7 @@
                 <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="showIcons = !showIcons" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Toggle select icon"><i class="fa icon-{{markerType}}"></i> {{resources.selectIcon}}</button>
                 <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="addUrl()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Add link"><i class="fa icon-external-link"></i> {{resources.aLinkToAWebsite}}</button>
                 <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="navigateHere()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Navigate here"><i class="fa icon-recordings"></i> {{resources.navigateHere}}</button>
+                <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="shareLocation()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Share location" *ngIf="isApp()"><i class="fa icon-share-alt"></i> {{resources.shareLocation}}</button>
             </mat-menu>
             <button mat-button [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="More"><i class="fa icon-ellipsis-v fa-lg"></i></button>
         </div>
