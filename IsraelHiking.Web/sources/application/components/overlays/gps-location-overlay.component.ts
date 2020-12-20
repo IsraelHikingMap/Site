@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { MatDialog } from "@angular/material";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { WebIntent } from '@ionic-native/web-intent/ngx';
 
 import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
@@ -35,7 +35,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
                 private readonly matDialog: MatDialog,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly runningContextService: RunningContextService,
-                private readonly socialSharing: SocialSharing,
+                private readonly webIntent: WebIntent,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.hideCoordinates = true;
@@ -76,12 +76,13 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
         this.closed.emit();
     }
 
-    public isApp() {
-        return this.runningContextService.isCordova;
+    public canShareLocation() {
+        return this.runningContextService.isCordova && !this.runningContextService.isIos;
     }
 
     public shareMyLocation() {
-        this.socialSharing.shareWithOptions({
+        this.webIntent.startActivity({
+            action: this.webIntent.ACTION_VIEW,
             url: `geo:${this.latlng.lat},${this.latlng.lng}`
         });
         this.closed.emit();

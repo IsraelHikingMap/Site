@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, Inject } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from "@angular/material";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { WebIntent } from '@ionic-native/web-intent/ngx';
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -64,7 +64,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                 private readonly dialogRef: MatDialogRef<PrivatePoiEditDialogComponent>,
                 private readonly navigateHereService: NavigateHereService,
                 private readonly runningContextService: RunningContextService,
-                private readonly socialSharing: SocialSharing,
+                private readonly webIntent: WebIntent,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 @Inject(MAT_DIALOG_DATA) data) {
         super(resources);
@@ -195,12 +195,13 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         await this.navigateHereService.addNavigationSegment(this.marker.latlng, this.title);
     }
 
-    public isApp() {
-        return this.runningContextService.isCordova;
+    public canShareLocation() {
+        return this.runningContextService.isCordova && !this.runningContextService.isIos;
     }
 
     public shareLocation() {
-        this.socialSharing.shareWithOptions({
+        this.webIntent.startActivity({
+            action: this.webIntent.ACTION_VIEW,
             url: `geo:${this.marker.latlng.lat},${this.marker.latlng.lng}`
         });
     }
