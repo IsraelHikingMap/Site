@@ -9,7 +9,6 @@ import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
-import { RunningContextService } from "../../services/running-context.service";
 import { SetSelectedPoiAction } from "../../reducres/poi.reducer";
 import { ApplicationState, Overlay, PointOfInterest, PointOfInterestExtended } from "../../models/models";
 
@@ -38,7 +37,6 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
                 private readonly router: Router,
                 private readonly layersService: LayersService,
                 private readonly poiService: PoiService,
-                private readonly runnningContextService: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
@@ -80,6 +78,11 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         e.stopPropagation();
         this.selectedCluster = null;
         let sourceAndId = this.getSourceAndId(id);
+        if (sourceAndId.source === "Coordinates" && this.ngRedux.getState().poiState.selectedPointOfInterest.id === sourceAndId.id) {
+            this.ngRedux.dispatch(new SetSelectedPoiAction({ poi: null }));
+            this.hoverFeature = null;
+            return;
+        }
         this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
 
@@ -125,13 +128,5 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         if (selectedPoi.properties.title) {
             this.hoverFeature = selectedPoi;
         }
-    }
-
-    public isApp() {
-        return this.runnningContextService.isCordova;
-    }
-
-    public clearSelectedPoi() {
-        this.ngRedux.dispatch(new SetSelectedPoiAction({ poi: null }));
     }
 }
