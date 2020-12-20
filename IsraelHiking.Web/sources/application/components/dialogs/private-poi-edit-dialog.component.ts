@@ -201,7 +201,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
 
     public shareLocation() {
         this.socialSharing.shareWithOptions({
-            url: `geo:${this.latlng.lat},${this.latlng.lng}`
+            url: `geo:${this.marker.latlng.lat},${this.marker.latlng.lng}`
         });
     }
 
