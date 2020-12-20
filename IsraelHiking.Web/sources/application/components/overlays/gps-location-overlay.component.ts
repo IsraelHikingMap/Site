@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { MatDialog } from "@angular/material";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
-import { WebIntent } from '@ionic-native/web-intent/ngx';
+import { WebIntent } from "@ionic-native/web-intent/ngx";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";

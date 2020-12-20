@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, Inject } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from "@angular/material";
-import { WebIntent } from '@ionic-native/web-intent/ngx';
+import { WebIntent } from "@ionic-native/web-intent/ngx";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
