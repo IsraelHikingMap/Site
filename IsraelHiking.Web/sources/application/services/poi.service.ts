@@ -550,7 +550,12 @@ export class PoiService {
             .set("location", location.lat + "," + location.lng)
             .set("source", source)
             .set("language", language);
-        let feature = await this.httpClient.get(Urls.poiClosest, { params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>;
+        let feature = null;
+        try {
+            feature = await this.httpClient.get(Urls.poiClosest, { params }).pipe(timeout(1000)).toPromise() as GeoJSON.Feature;
+        } catch (ex) {
+            this.loggingService.warning(`Unable to get closest POI: ${ex.message}`);
+        }
         if (feature == null) {
             return null;
         }
