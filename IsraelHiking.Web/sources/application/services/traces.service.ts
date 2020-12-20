@@ -85,7 +85,7 @@ export class TracesService {
         let formData = new FormData();
         formData.append("file", file, file.name);
         this.loggingService.info(`[Traces] Uploading a trace with file name ${file.name}`);
-        return this.httpClient.post(Urls.osmTrace, formData).pipe(timeout(10 * 60 * 1000)).toPromise();
+        return this.httpClient.post(Urls.osmTrace, formData).pipe(timeout(3 * 60 * 1000)).toPromise();
     }
 
     public async uploadRouteAsTrace(route: RouteData): Promise<any> {
@@ -94,7 +94,7 @@ export class TracesService {
         this.loggingService.info(`[Traces] Uploading a route as trace with name ${route.name}, default: ${isDefaultName}`);
         return this.httpClient.post(Urls.osmTraceRoute, route, {
             params: { isDefaultName: isDefaultName.toString(), language: this.resources.getCurrentLanguageCodeSimplified() }
-        }).pipe(timeout(10 * 60 * 1000)).toPromise();
+        }).pipe(timeout(3 * 60 * 1000)).toPromise();
     }
 
     public async updateTrace(trace: Trace): Promise<void> {
