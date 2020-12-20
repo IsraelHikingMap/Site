@@ -5,10 +5,11 @@ import { NgRedux } from "@angular-redux/store";
 
 import { TracesService } from "./traces.service";
 import { LoggingService } from "./logging.service";
-import { Urls } from "../urls";
-import { Trace } from "../models/models";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
+import { RunningContextService } from "./running-context.service";
+import { Urls } from "../urls";
+import { Trace } from "../models/models";
 
 describe("Traces Service", () => {
     beforeEach(() => {
@@ -26,6 +27,7 @@ describe("Traces Service", () => {
                 TracesService,
                 { provide: ResourcesService, useValue: mock.resourcesService },
                 { provide: LoggingService, useValue: loggignMock },
+                { provide: RunningContextService, useValue: null },
             ]
         });
     });
