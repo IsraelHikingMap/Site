@@ -27,7 +27,7 @@ namespace IsraelHiking.API.Converters.ConverterFlows
                 name: t.Name,
                 description: t.Description,
                 comment: t.Comment,
-                segments: new[] { new GpxTrackSegment(new ImmutableGpxWaypointTable(t.Segments.SelectMany(s => s.Waypoints)), null) }.ToImmutableArray(),
+                segments: new[] { new GpxTrackSegment(RemoveDuplicatePoints(t.Segments.SelectMany(s => s.Waypoints)), null) }.ToImmutableArray(),
                 source: t.Source,
                 links: t.Links,
                 number: t.Number,
@@ -35,6 +35,26 @@ namespace IsraelHiking.API.Converters.ConverterFlows
                 extensions: t.Extensions)));
             singleTrackGpx.UpdateBounds();
             return singleTrackGpx.ToBytes();
+        }
+
+        public static ImmutableGpxWaypointTable RemoveDuplicatePoints(IEnumerable<GpxWaypoint> points)
+        {
+            var newPoints = new List<GpxWaypoint>();
+            if (points.Count() == 0)
+            {
+                return new ImmutableGpxWaypointTable(newPoints);
+            }
+            newPoints.Add(points.First());
+            foreach (var point in points.Skip(1))
+            {
+                if (point.Latitude.Value != newPoints.Last().Latitude.Value ||
+                    point.Longitude.Value != newPoints.Last().Longitude.Value)
+                {
+                    newPoints.Add(point);
+                }
+            }
+            return new ImmutableGpxWaypointTable(newPoints);
+
         }
     }
 }
