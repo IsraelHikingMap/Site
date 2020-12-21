@@ -64,6 +64,7 @@ import { Media } from "@ionic-native/media/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { WebIntent } from "@ionic-native/web-intent/ngx";
+import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -333,6 +334,7 @@ export function initializeApplication(injector: Injector) {
             FileTransfer,
             SocialSharing,
             WebIntent,
+            DeviceOrientation,
             RouteEditPoiInteraction,
             RouteEditRouteInteraction
         ],
