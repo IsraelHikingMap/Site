@@ -1,7 +1,7 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, Inject } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from "@angular/material";
-import { WebIntent } from "@ionic-native/web-intent/ngx";
+import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -9,6 +9,7 @@ import { FileService } from "../../services/file.service";
 import { ImageResizeService } from "../../services/image-resize.service";
 import { NavigateHereService } from "../../services/navigate-here.service";
 import { RunningContextService } from "../../services/running-context.service";
+import { HashService } from "../../services/hash.service";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducres/routes.reducer";
 import { LinkData, MarkerData, ApplicationState } from "../../models/models";
@@ -64,7 +65,8 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                 private readonly dialogRef: MatDialogRef<PrivatePoiEditDialogComponent>,
                 private readonly navigateHereService: NavigateHereService,
                 private readonly runningContextService: RunningContextService,
-                private readonly webIntent: WebIntent,
+                private readonly socialSharing: SocialSharing,
+                private readonly hashService: HashService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 @Inject(MAT_DIALOG_DATA) data) {
         super(resources);
@@ -196,13 +198,13 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public canShareLocation() {
-        return this.runningContextService.isCordova && !this.runningContextService.isIos;
+        return this.runningContextService.isCordova;
     }
 
     public shareLocation() {
-        this.webIntent.startActivity({
-            action: this.webIntent.ACTION_VIEW,
-            url: `geo:${this.marker.latlng.lat},${this.marker.latlng.lng}`
+        let ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.marker.latlng);
+        this.socialSharing.shareWithOptions({
+            message: `geo:${this.marker.latlng.lat},${this.marker.latlng.lng}\n${ihmCoordinateUrl}`
         });
     }
 

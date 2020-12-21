@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { MatDialog } from "@angular/material";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
-import { WebIntent } from "@ionic-native/web-intent/ngx";
+import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
@@ -10,6 +10,7 @@ import { AddSimplePoiDialogComponent } from "../dialogs/add-simple-poi-dialog.co
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
+import { HashService } from "../../services/hash.service";
 import { AddPrivatePoiAction } from "../../reducres/routes.reducer";
 import { ToggleDistanceAction } from "../../reducres/in-memory.reducer";
 import { ApplicationState, LatLngAlt } from "../../models/models";
@@ -35,7 +36,8 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
                 private readonly matDialog: MatDialog,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly runningContextService: RunningContextService,
-                private readonly webIntent: WebIntent,
+                private readonly socialSharing: SocialSharing,
+                private readonly hashService: HashService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.hideCoordinates = true;
@@ -77,13 +79,13 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     }
 
     public canShareLocation() {
-        return this.runningContextService.isCordova && !this.runningContextService.isIos;
+        return this.runningContextService.isCordova;
     }
 
     public shareMyLocation() {
-        this.webIntent.startActivity({
-            action: this.webIntent.ACTION_VIEW,
-            url: `geo:${this.latlng.lat},${this.latlng.lng}`
+        let ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.latlng);
+        this.socialSharing.shareWithOptions({
+            message: `geo:${this.latlng.lat},${this.latlng.lng}\n${ihmCoordinateUrl}`
         });
         this.closed.emit();
     }

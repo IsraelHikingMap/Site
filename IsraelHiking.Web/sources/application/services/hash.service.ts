@@ -5,7 +5,7 @@ import { NgRedux } from "@angular-redux/store";
 
 import { MapService } from "./map.service";
 import { Urls } from "../urls";
-import { ApplicationState } from "../models/models";
+import { ApplicationState, LatLngAlt } from "../models/models";
 
 export interface IPoiRouterData {
     source: string;
@@ -86,6 +86,14 @@ export class HashService {
             return this.getFullUrlFromShareId(inMemoryState.shareUrl.id);
         }
         return Urls.baseAddress;
+    }
+
+    public getFullUrlFromLatLng(latlng: LatLngAlt) {
+        return this.getFullUrlFromPoiId({
+            id: `${latlng.lat.toFixed(4)}_${latlng.lng.toFixed(4)}`,
+            source: "Coordinates",
+            language: null
+        });
     }
 
     public getFullUrlFromPoiId(poiSourceAndId: IPoiRouterData) {
