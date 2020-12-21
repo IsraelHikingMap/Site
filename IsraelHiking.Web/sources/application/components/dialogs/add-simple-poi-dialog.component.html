@@ -52,6 +52,12 @@
         </div>
         <div fxLayout="row">
             <div fxFlex>
+                <button mat-button matDialogClose fxFill class="no-padding" (click)="addSimplePoint('PicnicSite')" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add picnic site to OSM">
+                    <i class="fa icon-picnic" [style.color]="'#734a08'"></i><br />
+                    {{resources.legendPicnicArea}}
+                </button>
+            </div>
+            <div fxFlex>
                 <button mat-button matDialogClose fxFill (click)="addComplexPoint()" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add complex point to OSM">
                     {{resources.more}}
                 </button>

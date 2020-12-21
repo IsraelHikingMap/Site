@@ -76,6 +76,7 @@ namespace IsraelHiking.API.Executors
                         { "barrier", "gate" },
                         { "access", "yes" }
                     },
+                SimplePointType.PicnicSite => new TagsCollection { { "tourism", "picnic_site" } },
                 _ => throw new Exception("Invalid point type " + pointType),
             };
         }

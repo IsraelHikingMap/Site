@@ -32,7 +32,7 @@ import {
     PointOfInterest
 } from "../models/models";
 
-export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block";
+export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite";
 
 interface IImageItem {
     thumbnail: string;
