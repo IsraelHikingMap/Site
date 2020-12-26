@@ -154,20 +154,51 @@ export class FileService {
         });
     }
 
-    public async getFileFromUrl(url: string, type: string): Promise<File> {
+    public async getFileFromUrl(url: string, type?: string): Promise<File> {
         let entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
         let file = await new Promise((resolve, reject) => {
             entry.file((fileContent) => {
                 let reader = new FileReader();
                 reader.onload = (event: any) => {
+                    type = type || this.getTypeFromUrl(url);
                     let blob = new Blob([event.target.result], { type }) as any;
                     blob.name = entry.name;
+                    if (blob.name.indexOf(".") === -1) {
+                        blob.name += this.getExtensionFromType(type);
+                    }
                     resolve(blob);
                 };
                 reader.readAsArrayBuffer(fileContent);
             }, reject);
         }) as File;
         return file;
+    }
+    
+    private getTypeFromUrl(url: string): string {
+        let fileExtension = url.split("/").pop().split(".").pop().toLocaleLowerCase();
+        if (fileExtension === "gpx") {
+            return "application/gpx+xml";
+        }
+        if (fileExtension === "kml") {
+            return "application/kml+xml";
+        }
+        if (fileExtension === "jpg" || fileExtension === "jpeg") {
+            return ImageResizeService.JPEG;
+        }
+        return "appliction/" + fileExtension;
+    }
+
+    private getExtensionFromType(type: string): string {
+        if (type.indexOf("gpx") !== -1) {
+            return ".gpx";
+        }
+        if (type.indexOf("kml") !== -1) {
+            return ".kml";
+        }
+        if (type.indexOf("jpg") !== -1 || type.indexOf("jpeg") !== -1) {
+            return ".jpg";
+        }
+        return "." + type.split("/").pop();
     }
 
     public async addRoutesFromFile(file: File): Promise<void> {

@@ -93,7 +93,7 @@ export class OpenWithService {
         this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
             setTimeout(async () => {
                 try {
-                    let file = await this.fileService.getFileFromUrl(url, this.getTypeFromUrl(url));
+                    let file = await this.fileService.getFileFromUrl(url);
                     this.fileService.addRoutesFromFile(file);
                 } catch (ex) {
                     this.toastService.error(ex, this.resources.unableToLoadFromFile);
@@ -122,7 +122,7 @@ export class OpenWithService {
                         // this is hacking, but there's no good way to get the real file name when an image is shared...
                         intent.type = ImageResizeService.JPEG;
                     }
-                    let file = await this.fileService.getFileFromUrl(data, intent.type || this.getTypeFromUrl(data));
+                    let file = await this.fileService.getFileFromUrl(data, intent.type);
                     this.loggingService.info("[OpenWith] Translated the data to a file: " + file.name + " " + file.type);
                     await this.fileService.addRoutesFromFile(file);
                 }
@@ -130,20 +130,6 @@ export class OpenWithService {
                 this.toastService.error(ex, this.resources.unableToLoadFromFile);
             }
         });
-    }
-
-    private getTypeFromUrl(url: string) {
-        let fileExtension = url.split("/").pop().split(".").pop().toLocaleLowerCase();
-        if (fileExtension === "gpx") {
-            return "application/gpx+xml";
-        }
-        if (fileExtension === "kml") {
-            return "application/kml+xml";
-        }
-        if (fileExtension === "jpg" || fileExtension === "jpeg") {
-            return ImageResizeService.JPEG;
-        }
-        return "appliction/" + fileExtension;
     }
 
     private handleExternalUrl(uri: string) {
