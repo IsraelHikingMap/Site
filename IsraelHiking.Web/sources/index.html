@@ -131,7 +131,7 @@
     <main-map></main-map>
     <script>
         window.handleOpenURL = (url) => {
-            if (window.handleExternalUrl == "function") {
+            if (typeof(window.handleExternalUrl) === "function") {
                 window.handleExternalUrl(url);
             } else {
                 window.externalUrl = url;
