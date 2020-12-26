@@ -69,8 +69,8 @@ interface Gpx {
 @Injectable()
 export class GpxDataContainerConverterService {
     public canConvert(gpxXmlString: string) {
-        let subString = gpxXmlString.substr(0, 500).toLocaleLowerCase();
-        return (subString.indexOf("<gpx") !== -1 && subString.indexOf("http://www.topografix.com/gpx/1/1") !== -1);
+        let subString = gpxXmlString.substr(0, 200).toLocaleLowerCase();
+        return (subString.indexOf("<gpx") !== -1);
     }
 
     public async toGpx(dataContainer: DataContainer): Promise<string> {
@@ -192,7 +192,9 @@ export class GpxDataContainerConverterService {
 
     public async toDataContainer(gpxXmlString: string): Promise<DataContainer> {
         let gpxJsonObject: Gpx = await new Promise<Gpx>((resolve, reject) => {
-            parseString(gpxXmlString, { explicitArray: false }, (err, res) => {
+            // removing namespace since they can be invalid
+            gpxXmlString = gpxXmlString.replace(/xmlns=\"(.*?)\"/g, "");
+            parseString(gpxXmlString, { explicitArray: false, }, (err, res) => {
                 if (err) {
                     reject(err);
                 }
@@ -327,11 +329,11 @@ export class GpxDataContainerConverterService {
 
     private convertTracksToRouteData(trks: Trk[]): RouteData[] {
         return trks.filter(t => t.trkseg != null && t.trkseg.length > 0).map(t => {
-            let extensions = Object.assign({
+            let extensions = this.convertExtensionAfterXmlnsRemoval(t.extensions, {
                 Color: { _: null },
                 Opacity: { _: null },
                 Weight: { _: null }
-            }, t.extensions);
+            });
             return {
                 name: t.name,
                 description: t.desc,
@@ -345,7 +347,7 @@ export class GpxDataContainerConverterService {
                         lng: +p.$.lon,
                         timestamp: p.time ? new Date(p.time) : undefined
                     } as ILatLngTime)),
-                    routingType: Object.assign({ RoutingType: { _: "Hike" } }, s.extensions).RoutingType._,
+                    routingType: this.convertExtensionAfterXmlnsRemoval(s.extensions, { RoutingType: { _: "Hike" } }).RoutingType._,
                     routePoint: last(s.trkpt.map(p => ({
                         alt: +p.ele,
                         lat: +p.$.lat,
@@ -356,5 +358,15 @@ export class GpxDataContainerConverterService {
                 markers: []
             } as RouteData;
         });
+    }
+
+    private convertExtensionAfterXmlnsRemoval<T>(extensions: any, defaultValue: T): T {
+        extensions = Object.assign(defaultValue, extensions);
+        for (let key in extensions) {
+            if (typeof extensions[key] === "string") {
+                extensions[key] = { _: extensions[key] };
+            }
+        }
+        return extensions;
     }
  }
