@@ -75,7 +75,7 @@ export class OpenWithService {
                 this.router.navigate(["/"]);
             });
         });
-        
+
         if ((window as any).externalUrl) {
             this.handleUrl((window as any).externalUrl);
             delete (window as any).externalUrl;
@@ -91,7 +91,7 @@ export class OpenWithService {
 
     private handleUrl(url: string) {
         this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
-            setTimeout(async () => {
+        setTimeout(async () => {
                 try {
                     let file = await this.fileService.getFileFromUrl(url);
                     this.fileService.addRoutesFromFile(file);

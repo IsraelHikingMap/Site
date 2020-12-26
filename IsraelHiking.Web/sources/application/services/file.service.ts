@@ -173,7 +173,7 @@ export class FileService {
         }) as File;
         return file;
     }
-    
+
     private getTypeFromUrl(url: string): string {
         let fileExtension = url.split("/").pop().split(".").pop().toLocaleLowerCase();
         if (fileExtension === "gpx") {
