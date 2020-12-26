@@ -75,8 +75,22 @@ export class OpenWithService {
                 this.router.navigate(["/"]);
             });
         });
-        (window as any).handleOpenURL = (url: string) => {
-            this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
+        
+        if ((window as any).externalUrl) {
+            this.handleUrl((window as any).externalUrl);
+            delete (window as any).externalUrl;
+        }
+        (window as any).handleExternalUrl = (url: string) => this.handleUrl(url);
+
+        this.webIntent.getIntent().then(intent => this.handleIntent(intent));
+
+        this.webIntent.onIntent().subscribe((intent) => {
+            this.handleIntent(intent);
+        });
+    }
+
+    private handleUrl(url: string) {
+        this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
             setTimeout(async () => {
                 try {
                     let file = await this.fileService.getFileFromUrl(url, this.getTypeFromUrl(url));
@@ -85,12 +99,6 @@ export class OpenWithService {
                     this.toastService.error(ex, this.resources.unableToLoadFromFile);
                 }
             }, 0);
-        };
-        this.webIntent.getIntent().then(intent => this.handleIntent(intent));
-
-        this.webIntent.onIntent().subscribe((intent) => {
-            this.handleIntent(intent);
-        });
     }
 
     private handleIntent(intent: Intent) {
