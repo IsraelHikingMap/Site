@@ -19,7 +19,7 @@
             <div fxFlex *ngIf="!isEditMode()">
                 <button mat-button fxFill class="no-padding" (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
             </div>
-            <div fxFlex *ngIf="shareLinks.poiLink && !isEditMode()">
+            <div fxFlex *ngIf="shareLinks.poiLink && !isEditMode() && !isApp()">
                 <mat-menu #appMenu="matMenu" [dir]="resources.direction">
                     <div mat-menu-item disableRipple="true">
                         <div fxLayout="row">
@@ -31,6 +31,9 @@
                     </div>
                 </mat-menu>
                 <button mat-button fxFill class="no-padding" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
+            </div>
+            <div fxFlex *ngIf="!isEditMode() && isApp()">
+                <button mat-button fxFill class="no-padding" (click)=share() matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
             </div>
             <div fxFlex>
                 <button mat-button fxFill class="no-padding" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>

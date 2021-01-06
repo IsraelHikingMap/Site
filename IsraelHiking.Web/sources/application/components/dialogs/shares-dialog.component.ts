@@ -2,6 +2,7 @@ import { Component, OnInit, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { select, NgRedux } from "@angular-redux/store";
+import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { SharedStorage } from "ngx-store";
 import { take, orderBy } from "lodash";
 import { Observable, Subscription } from "rxjs";
@@ -10,10 +11,10 @@ import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
-import { ShareUrl } from "../../models/share-url";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
-import { ApplicationState } from "../../models/models";
+import { RunningContextService } from "application/services/running-context.service";
+import { ApplicationState, ShareUrl } from "../../models/models";
 
 @Component({
     selector: "shares-dialog",
@@ -43,6 +44,8 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
                 private readonly toastService: ToastService,
                 private readonly shareUrlsService: ShareUrlsService,
                 private readonly dataContainerService: DataContainerService,
+                private readonly socialSharing: SocialSharing,
+                private readonly runningContextService: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
@@ -71,6 +74,16 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         for (let subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
+    }
+
+    public isApp(): boolean {
+        return this.runningContextService.isCordova;
+    }
+
+    public share() {
+        this.socialSharing.shareWithOptions({
+            url: this.getShareSocialLinks().ihm
+        });
     }
 
     public createShare() {

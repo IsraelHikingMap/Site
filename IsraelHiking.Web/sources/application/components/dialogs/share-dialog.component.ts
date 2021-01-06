@@ -1,5 +1,6 @@
 import { Component, AfterViewInit } from "@angular/core";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
+import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
@@ -8,6 +9,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { AuthorizationService } from "../../services/authorization.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
+import { RunningContextService } from "application/services/running-context.service";
 import { DataContainer, ShareUrl } from "../../models/models";
 
 @Component({
@@ -35,7 +37,9 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 private readonly dataContainerService: DataContainerService,
                 private readonly shareUrlsService: ShareUrlsService,
                 private readonly toastService: ToastService,
-                private readonly authorizationService: AuthorizationService
+                private readonly authorizationService: AuthorizationService,
+                private readonly socialSharing: SocialSharing,
+                private readonly runningContextService: RunningContextService
     ) {
         super(resources);
 
@@ -73,6 +77,16 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.imageUrl = this.sanitizer.bypassSecurityTrustUrl(imageUrl) as string;
     }
 
+    public isApp(): boolean {
+        return this.runningContextService.isCordova;
+    }
+
+    public share() {
+        this.socialSharing.shareWithOptions({
+            url: this.shareAddress
+        });
+    }
+
     public getDisplayName() {
         return this.shareUrlsService.getDisplayNameFromTitleAndDescription(this.title, this.description);
     }
@@ -90,6 +104,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
             this.shareUrlsService.setShareUrl(shareUrl);
             this.imageUrl = this.shareUrlsService.getImageFromShareId(shareUrl);
             let links = this.shareUrlsService.getShareSocialLinks(shareUrl);
+            this.toastService.success(this.resources.dataUpdatedSuccessfully);
             this.shareAddress = links.ihm;
             this.whatsappShareAddress = links.whatsapp;
             this.facebookShareAddress = links.facebook;

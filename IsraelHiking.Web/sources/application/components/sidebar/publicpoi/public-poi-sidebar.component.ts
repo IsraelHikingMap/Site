@@ -1,8 +1,8 @@
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
-import { Subscription } from "rxjs";
 import { NgRedux, select } from "@angular-redux/store";
-import { Observable } from "rxjs";
+import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { Subscription, Observable } from "rxjs";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -71,6 +71,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 private readonly sidebarService: SidebarService,
                 private readonly runningContextSerivce: RunningContextService,
                 private readonly navigateHereService: NavigateHereService,
+                private readonly socialSharing: SocialSharing,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.sidebarService.hideWithoutChangingAddressbar();
@@ -120,6 +121,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         for (let subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
+    }
+
+    public isApp(): boolean {
+        return this.runningContextSerivce.isCordova;
     }
 
     private async getExtendedData(data: IPoiRouterData) {
@@ -352,5 +357,11 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             return null;
         }
         return this.authorizationService.getElementOsmAddress(this.poiExtended.id);
+    }
+
+    public share() {
+        this.socialSharing.shareWithOptions({
+            url: this.shareLinks.poiLink
+        });
     }
 }

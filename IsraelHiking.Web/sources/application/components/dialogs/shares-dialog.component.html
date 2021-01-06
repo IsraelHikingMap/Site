@@ -51,7 +51,7 @@
             <div fxFlex *ngIf="isShareUrlInEditMode(selectedShareUrlId)">
                 <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" (click)="updateShareUrl()" matTooltip="{{resources.update}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Update share"><i class="fa icon-check"></i></button>
             </div>
-            <div fxFlex>
+            <div fxFlex *ngIf="!isApp()">
                 <mat-menu #appMenu="matMenu" [dir]="resources.direction" yPosition="above" overlapTrigger="false">
                     <div mat-menu-item disableRipple="true">
                         <div fxLayout="row">
@@ -62,6 +62,9 @@
                     </div>
                 </mat-menu>
                 <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share open menu for share"><i class="fa icon-share-alt"></i></button>
+            </div>
+            <div fxFlex *ngIf="isApp()">
+                <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" (click)="share()" angulartics2On="click" angularticsCategory="Share" angularticsAction="Mobile social share"><i class="fa icon-share-alt"></i></button>
             </div>
             <div fxFlex>
                 <button mat-button fxFill class="no-padding" [disabled]="!hasSelected()" matDialogClose (click)="showShareUrl()" matTooltip="{{resources.presentShare}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Present share"><i class="fa icon-eye"></i></button>
