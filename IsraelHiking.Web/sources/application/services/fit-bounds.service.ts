@@ -26,7 +26,7 @@ export class FitBoundsService {
         if (noPadding) {
             padding = 0;
         }
-        this.ngRedux.dispatch(new SetPannedAction({ isPanned: true }));
+        this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: new Date() }));
         if (this.sidebarService.isSidebarOpen() && window.innerWidth >= 768) {
             this.mapService.map.fitBounds(mbBounds,
                 {
@@ -50,7 +50,7 @@ export class FitBoundsService {
             // this happens due to route percision reduce which causes another map move.
             return;
         }
-        this.ngRedux.dispatch(new SetPannedAction({ isPanned: true }));
+        this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: new Date() }));
         this.mapService.map.flyTo({ center: latLng, zoom });
     }
 

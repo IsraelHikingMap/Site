@@ -10,7 +10,7 @@ const SET_SHARE_URL = "SET_SHARE_URL";
 const SET_FILE_URL_AND_BASE_LAYER = "SET_FILE_URL_AND_BASE_LAYER";
 
 export interface SetPannedPayload {
-    isPanned: boolean;
+    pannedTimestamp: Date;
 }
 
 export interface SetShareUrlPayload {
@@ -60,7 +60,7 @@ export class InMemoryReducer {
     public setPanned(lastState: InMemoryState, action: SetPannedAction): InMemoryState {
         return {
             ...lastState,
-            isPanned: action.payload.isPanned
+            pannedTimestamp: action.payload.pannedTimestamp
         };
     }
 

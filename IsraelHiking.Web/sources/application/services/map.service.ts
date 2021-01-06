@@ -16,8 +16,8 @@ export class MapService {
 
     private resolve: (value?: void | PromiseLike<void>) => void;
 
-    @select((state: ApplicationState) => state.inMemoryState.isPanned)
-    public isPanned$: Observable<boolean>;
+    @select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
+    public pannedTimestamp$: Observable<Date>;
 
     constructor(private readonly cancelableTimeoutService: CancelableTimeoutService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -27,17 +27,17 @@ export class MapService {
     public setMap(map: Map) {
         this.map = map;
         this.resolve();
-        this.isPanned$.subscribe(isPanned => {
+        this.pannedTimestamp$.subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByGroup("panned");
-            if (isPanned) {
+            if (pannedTimestamp) {
                 this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                    this.ngRedux.dispatch(new SetPannedAction({ isPanned: false }));
+                    this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: null }));
                 }, MapService.NOT_FOLLOWING_TIMEOUT, "panned");
             }
         });
 
         this.map.on("dragstart", () => {
-            this.ngRedux.dispatch(new SetPannedAction({ isPanned: true }));
+            this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: new Date() }));
         });
     }
 }

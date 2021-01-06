@@ -5,7 +5,7 @@
  */
 export interface InMemoryState {
     distance: boolean;
-    isPanned: boolean;
+    pannedTimestamp: Date;
     baseLayer: string;
     fileUrl: string;
     shareUrl: ShareUrl;

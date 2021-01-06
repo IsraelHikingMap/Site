@@ -1,8 +1,9 @@
 import { Component, ViewChild, AfterViewInit, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
 import { NgxImageGalleryComponent } from "ngx-image-gallery";
-import { NgRedux } from "@angular-redux/store";
+import { NgRedux, select } from "@angular-redux/store";
 import { MapComponent, CustomControl } from "ngx-mapbox-gl";
-import { Style, setRTLTextPlugin, AttributionControl, ScaleControl } from "mapbox-gl";
+import { Style, setRTLTextPlugin, ScaleControl } from "mapbox-gl";
+import { Observable } from "rxjs";
 
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
@@ -12,8 +13,8 @@ import { SetLocationAction } from "../../reducres/location.reducer";
 import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { SnappingService } from "../../services/snapping.service";
 import { DefaultStyleService } from "../../services/default-style.service";
+import { SetPannedAction } from "application/reducres/in-memory.reducer";
 
 @Component({
     selector: "main-map",
@@ -31,21 +32,25 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
 
     @ViewChildren("topLeftControl", { read: ElementRef })
     public topLeftControls: QueryList<ElementRef>;
+
     @ViewChildren("topRightControl", { read: ElementRef })
     public topRightControls: QueryList<ElementRef>;
+
     @ViewChildren("bottomLeftControl", { read: ElementRef })
     public bottomLeftControls: QueryList<ElementRef>;
+
     @ViewChildren("bottomRightControl", { read: ElementRef })
     public bottomRightControls: QueryList<ElementRef>;
 
-    public location: Location;
+    @select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
+    public pannedTimestamp$: Observable<Date>;
 
+    public location: Location;
     public initialStyle: Style;
 
     constructor(resources: ResourcesService,
                 public readonly imageGalleryService: ImageGalleryService,
                 private readonly mapService: MapService,
-                private readonly snappingService: SnappingService,
                 private readonly hashService: HashService,
                 private readonly runningContextService: RunningContextService,
                 private readonly defaultStyleService: DefaultStyleService,
@@ -142,5 +147,9 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
 
     public isApp() {
         return this.runningContextService.isCordova;
+    }
+
+    public centerMe() {
+        this.ngRedux.dispatch(new SetPannedAction({pannedTimestamp: null}));
     }
 }

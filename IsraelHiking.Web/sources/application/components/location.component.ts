@@ -32,8 +32,8 @@ export class LocationComponent extends BaseMapComponent {
     @select((state: ApplicationState) => state.inMemoryState.distance)
     public distance$: Observable<boolean>;
 
-    @select((state: ApplicationState) => state.inMemoryState.isPanned)
-    public isPanned$: Observable<boolean>;
+    @select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
+    public pannedTimestamp$: Observable<Date>;
 
     private lastSpeed: number;
     private lastSpeedTime: number;
@@ -70,9 +70,9 @@ export class LocationComponent extends BaseMapComponent {
             this.updateDistanceFeatureCollection();
         });
 
-        this.isPanned$.subscribe(isPanned => {
-            this.isPanned = isPanned;
-            if (isPanned) {
+        this.pannedTimestamp$.subscribe(pannedTimestamp => {
+            this.isPanned = pannedTimestamp != null;
+            if (this.isPanned) {
                 return;
             }
             if (!this.isActive()) {
@@ -162,7 +162,7 @@ export class LocationComponent extends BaseMapComponent {
         // is active must be true
         if (!this.isFollowing || this.isPanned) {
             this.isFollowing = true;
-            this.ngRedux.dispatch(new SetPannedAction({ isPanned: false }));
+            this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: null }));
             if (this.showDistance) {
                 this.ngRedux.dispatch(new ToggleDistanceAction());
             }
@@ -255,7 +255,7 @@ export class LocationComponent extends BaseMapComponent {
         this.geoLocationService.enable();
         this.deviceOrientationService.enable();
         this.isFollowing = true;
-        this.ngRedux.dispatch(new SetPannedAction({ isPanned: false }));
+        this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: null }));
     }
 
     private moveMapToGpsPosition() {

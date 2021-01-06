@@ -1,5 +1,5 @@
-﻿<div class="control-container side-control mapboxgl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()">
-    <div *ngIf="isOpen && (statisticsVisible$ | async)" [@animateChart] class="chart-control-container" [ngClass]="{'expanded' : isExpanded, 'sidebar': isSidebarVisible() }">
+﻿<div class="control-container side-control mapboxgl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()" *ngIf="(statisticsVisible$ | async)">
+    <div *ngIf="isOpen" [@animateChart] class="chart-control-container" [ngClass]="{'expanded' : isExpanded, 'sidebar': isSidebarVisible() }">
         <div *ngIf="isTable" class="chart-container">
             <mat-grid-list cols="3" rowHeight="fit" class="chart-table">
                 <mat-grid-tile *ngIf="!isFollowing" matTooltip="{{resources.gain}}" matTooltipPosition="below">
@@ -81,7 +81,7 @@
         </mat-menu>
         <button mat-button class="chart-button chart-more-button" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="More"><i class="fa icon-ellipsis-v fa-lg"></i></button>        
     </div>
-    <div *ngIf="!isOpen && (statisticsVisible$ | async)" (click)="toggle()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Route statistics open">
+    <div *ngIf="!isOpen" (click)="toggle()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Route statistics open">
         <button mat-button class="pull-right" [class.active]="isOpen" matTooltip="{{resources.routeStatistics}}" matTooltipPosition="above"><i class="fa {{isTable ? 'icon-table' : 'icon-area-chart'}} fa-lg"></i></button>
         <div *ngIf="!isFollowing" class="pull-right" matTooltip="{{resources.gain}}" matTooltipPosition="above">
             <span class="control-container-item gutters"><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span></span>

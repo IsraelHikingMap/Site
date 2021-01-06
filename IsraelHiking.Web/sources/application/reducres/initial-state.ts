@@ -125,7 +125,7 @@ export const initialState =
         },
         inMemoryState: {
             distance: false,
-            isPanned: false,
+            pannedTimestamp: null,
             shareUrl: null,
             fileUrl: null,
             baseLayer: null
