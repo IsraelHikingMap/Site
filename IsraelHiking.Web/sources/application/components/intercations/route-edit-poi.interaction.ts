@@ -34,7 +34,7 @@ export class RouteEditPoiInteraction {
     }
 
     private handleClick = (event: MapMouseEvent) => {
-        if (this.geoLocationService.getState() === "tracking") {
+        if (this.ngRedux.getState().inMemoryState.geoLocation === "tracking") {
             let latLng = event.lngLat;
             let point = event.target.project(latLng);
             let th = 10;
@@ -90,7 +90,7 @@ export class RouteEditPoiInteraction {
     }
 
     private async getSnappingForPoint(latlng: LatLngAlt): Promise<ISnappingPointResponse> {
-        if (this.geoLocationService.getState() === "tracking") {
+        if (this.ngRedux.getState().inMemoryState.geoLocation === "tracking") {
             let snappingPointResponse = this.snappingService.snapToPoint(latlng,
                 [
                     {

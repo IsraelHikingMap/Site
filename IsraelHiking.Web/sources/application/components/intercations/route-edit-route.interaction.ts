@@ -387,7 +387,7 @@ export class RouteEditRouteInteraction {
     }
 
     private getSnappingForRoute(latlng: LatLngAlt, additionalLatlngs: LatLngAlt[]): LatLngAlt {
-        if (this.geoLocationService.getState() === "tracking") {
+        if (this.ngRedux.getState().inMemoryState.geoLocation === "tracking") {
             additionalLatlngs.push(this.geoLocationService.currentLocation);
         }
         // private POIs + Geo Location + Additional Point:

@@ -171,6 +171,8 @@ import { CategoriesGroupComponent } from "./components/sidebar/categories-group.
 import { AddSimplePoiDialogComponent } from "./components/dialogs/add-simple-poi-dialog.component";
 import { MainMenuComponent } from "./components/main-menu.component";
 import { FilesSharesDialogComponent } from "./components/dialogs/files-shares-dialog.component";
+import { CenterMeComponent } from "./components/center-me.component";
+
 // variables and functions
 import { routes } from "./routes";
 
@@ -387,6 +389,7 @@ export function initializeApplication(injector: Injector) {
             AddSimplePoiDialogComponent,
             MainMenuComponent,
             FilesSharesDialogComponent,
+            CenterMeComponent,
             NameInUseValidatorDirective,
             ImageCaptureDirective,
             OfflineImagePipe

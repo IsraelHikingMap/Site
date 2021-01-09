@@ -1,4 +1,5 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
+import { NgRedux } from "@angular-redux/store";
 import {
     BackgroundGeolocation,
     BackgroundGeolocationEvents,
@@ -12,16 +13,14 @@ import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
-import { ILatLngTime } from "../models/models";
-
-declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
+import { ApplicationState, ILatLngTime } from "../models/models";
+import { SetGeoLocationStateAction } from "application/reducres/in-memory.reducer";
 
 @Injectable()
 export class GeoLocationService {
     private static readonly TIME_OUT = 30000;
     private static readonly SHORT_TIME_OUT = 10000; // Only for first position for good UX
 
-    private state: GeoLocationServiceState;
     private watchNumber: number;
     private isBackground: boolean;
     private wasInitialized: boolean;
@@ -35,23 +34,18 @@ export class GeoLocationService {
                 private readonly runningContextService: RunningContextService,
                 private readonly loggingService: LoggingService,
                 private readonly toastService: ToastService,
-                private readonly ngZone: NgZone) {
+                private readonly ngZone: NgZone,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.watchNumber = -1;
         this.positionChanged = new EventEmitter<Position>();
         this.bulkPositionChanged = new EventEmitter<Position[]>();
-        this.state = "disabled";
         this.isBackground = false;
         this.currentLocation = null;
         this.wasInitialized = false;
     }
 
-    // HM TODO: move this to application state
-    public getState(): GeoLocationServiceState {
-        return this.state;
-    }
-
     public enable() {
-        switch (this.state) {
+        switch (this.ngRedux.getState().inMemoryState.geoLocation) {
             case "disabled":
                 this.startWatching();
                 return;
@@ -63,7 +57,7 @@ export class GeoLocationService {
     }
 
     public async disable() {
-        switch (this.state) {
+        switch (this.ngRedux.getState().inMemoryState.geoLocation) {
             case "disabled":
                 return;
             case "searching":
@@ -74,11 +68,12 @@ export class GeoLocationService {
     }
 
     public canRecord(): boolean {
-        return this.state === "tracking" && this.currentLocation != null && this.runningContextService.isCordova;
+        return this.ngRedux.getState().inMemoryState.geoLocation === "tracking"
+            && this.currentLocation != null && this.runningContextService.isCordova;
     }
 
     private startWatching() {
-        this.state = "searching";
+        this.ngRedux.dispatch(new SetGeoLocationStateAction({ state: "searching"}));
         if (window.navigator && window.navigator.geolocation) {
             // Upon starting location watching get the current position as fast as we can, even if not accurate.
             window.navigator.geolocation.getCurrentPosition((position: Position) => {
@@ -188,7 +183,7 @@ export class GeoLocationService {
     }
 
     private async stopWatching() {
-        this.state = "disabled";
+        this.ngRedux.dispatch(new SetGeoLocationStateAction({ state: "disabled"}));
         this.currentLocation = null;
         this.positionChanged.next(null);
         if (this.runningContextService.isCordova) {
@@ -210,10 +205,10 @@ export class GeoLocationService {
     private handlePoistionChange(position: Position): void {
         this.ngZone.run(() => {
             this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
-            if (this.state === "searching") {
-                this.state = "tracking";
+            if (this.ngRedux.getState().inMemoryState.geoLocation === "searching") {
+                this.ngRedux.dispatch(new SetGeoLocationStateAction({ state: "tracking"}));
             }
-            if (this.state !== "tracking") {
+            if (this.ngRedux.getState().inMemoryState.geoLocation !== "tracking") {
                 return;
             }
             this.currentLocation = this.positionToLatLngTime(position);

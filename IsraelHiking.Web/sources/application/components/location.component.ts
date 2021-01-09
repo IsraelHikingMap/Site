@@ -9,7 +9,6 @@ import { ResourcesService } from "../services/resources.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToastService } from "../services/toast.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
-import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
@@ -23,8 +22,6 @@ import { LatLngAlt, ApplicationState } from "../models/models";
     styleUrls: ["./location.component.scss"]
 })
 export class LocationComponent extends BaseMapComponent {
-
-    private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
 
     @LocalStorage()
     private showBatteryConfirmation = true;
@@ -51,7 +48,6 @@ export class LocationComponent extends BaseMapComponent {
                 private readonly toastService: ToastService,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly recordedRouteService: RecordedRouteService,
-                private readonly cancelableTimeoutService: CancelableTimeoutService,
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly deviceOrientationService: DeviceOrientationService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
@@ -214,15 +210,15 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public isDisabled() {
-        return this.geoLocationService.getState() === "disabled";
+        return this.ngRedux.getState().inMemoryState.geoLocation === "disabled";
     }
 
     public isActive() {
-        return this.geoLocationService.getState() === "tracking";
+        return this.ngRedux.getState().inMemoryState.geoLocation === "tracking";
     }
 
     public isLoading() {
-        return this.geoLocationService.getState() === "searching";
+        return this.ngRedux.getState().inMemoryState.geoLocation === "searching";
     }
 
     private handlePositionChange(position: Position) {

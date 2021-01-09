@@ -1,9 +1,8 @@
 import { Component, ViewChild, AfterViewInit, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
 import { NgxImageGalleryComponent } from "ngx-image-gallery";
-import { NgRedux, select } from "@angular-redux/store";
+import { NgRedux } from "@angular-redux/store";
 import { MapComponent, CustomControl } from "ngx-mapbox-gl";
 import { Style, setRTLTextPlugin, ScaleControl } from "mapbox-gl";
-import { Observable } from "rxjs";
 
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
@@ -14,7 +13,6 @@ import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
-import { SetPannedAction } from "application/reducres/in-memory.reducer";
 
 @Component({
     selector: "main-map",
@@ -41,9 +39,6 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
 
     @ViewChildren("bottomRightControl", { read: ElementRef })
     public bottomRightControls: QueryList<ElementRef>;
-
-    @select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
-    public pannedTimestamp$: Observable<Date>;
 
     public location: Location;
     public initialStyle: Style;
@@ -149,7 +144,4 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         return this.runningContextService.isCordova;
     }
 
-    public centerMe() {
-        this.ngRedux.dispatch(new SetPannedAction({pannedTimestamp: null}));
-    }
 }

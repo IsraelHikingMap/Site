@@ -128,7 +128,8 @@ export const initialState =
             pannedTimestamp: null,
             shareUrl: null,
             fileUrl: null,
-            baseLayer: null
+            baseLayer: null,
+            geoLocation: "disabled"
         },
         offlineState: {
             isOfflineAvailable: false,

@@ -1,13 +1,14 @@
 import { Action } from "redux";
 
 import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
-import { ShareUrl, InMemoryState } from "../models/models";
+import { ShareUrl, InMemoryState, GeoLocationStateType } from "../models/models";
 import { initialState } from "./initial-state";
 
 const TOGGLE_DISTNACE = "TOGGLE_DISTNACE";
 const SET_PANNED = "SET_PANNED";
 const SET_SHARE_URL = "SET_SHARE_URL";
 const SET_FILE_URL_AND_BASE_LAYER = "SET_FILE_URL_AND_BASE_LAYER";
+const SET_GEO_LOCATION = "SET_GEO_LOCATION";
 
 export interface SetPannedPayload {
     pannedTimestamp: Date;
@@ -29,6 +30,10 @@ export class ToggleDistanceAction implements Action {
     }
 }
 
+export interface SetGeoLocationPayload {
+    state: GeoLocationStateType;
+}
+
 export class SetPannedAction extends BaseAction<SetPannedPayload> {
     constructor(payload: SetPannedPayload) {
         super(SET_PANNED, payload);
@@ -44,6 +49,12 @@ export class SetShareUrlAction extends BaseAction<SetShareUrlPayload> {
 export class SetFileUrlAndBaseLayerAction extends BaseAction<SetFileUrlAndBaseLayerPayload> {
     constructor(payload: SetFileUrlAndBaseLayerPayload) {
         super(SET_FILE_URL_AND_BASE_LAYER, payload);
+    }
+}
+
+export class SetGeoLocationStateAction extends BaseAction<SetGeoLocationPayload> {
+    constructor(payload: SetGeoLocationPayload) {
+        super(SET_GEO_LOCATION, payload);
     }
 }
 
@@ -78,6 +89,14 @@ export class InMemoryReducer {
             ...lastState,
             fileUrl: action.payload.fileUrl,
             baseLayer: action.payload.baseLayer
+        };
+    }
+
+    @ReduxAction(SET_GEO_LOCATION)
+    public setGeoLocationState(lastState: InMemoryState, action: SetGeoLocationStateAction): InMemoryState {
+        return {
+            ...lastState,
+            geoLocation: action.payload.state
         };
     }
 }

@@ -21,11 +21,7 @@
             <search #topRightControl *ngIf="!isIFrame()"></search>
             <drawing #topRightControl *ngIf="!isIFrame()"></drawing>
             <route-statistics #bottomRightControl></route-statistics>
-            <div #bottomRightControl>
-                <div class="side-control mapboxgl-ctrl" *ngIf="(pannedTimestamp$ | async) != null">
-                    <button mat-button (click)="centerMe()" angulartics2On="click" angularticsCategory="Location" angularticsAction="Center me"><i class="fa fa-lg icon-follow-me"></i></button>
-                </div>
-            </div>
+            <center-me #bottomRightControl></center-me>
             <ihm-link *ngIf="!isApp()" #bottomLeftControl></ihm-link>
         </mgl-map>
     </div>
