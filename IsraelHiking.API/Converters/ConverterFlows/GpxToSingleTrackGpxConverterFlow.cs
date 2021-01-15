@@ -37,6 +37,11 @@ namespace IsraelHiking.API.Converters.ConverterFlows
             return singleTrackGpx.ToBytes();
         }
 
+        /// <summary>
+        /// This is a helper function to remove duplicate points from a GPX collection
+        /// </summary>
+        /// <param name="points"></param>
+        /// <returns></returns>
         public static ImmutableGpxWaypointTable RemoveDuplicatePoints(IEnumerable<GpxWaypoint> points)
         {
             var newPoints = new List<GpxWaypoint>();
