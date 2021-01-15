@@ -54,8 +54,8 @@
         }
 
         .lds-ellipsis {
-            margin-left: 68px;
-            margin-right: 68px;
+            margin-left: auto;
+            margin-right: auto;
             display: block;
             position: relative;
             width: 64px;
@@ -127,6 +127,21 @@
     <div class="preloader">
         <img src="content/logo.png" />
         <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+        <br/>
+        <div id="delayed" style="display:none">
+            <p dir="rtl">אם אתם מספיקים לקרוא את כל מה שבפסקה הזו יש שתי אפשרויות:
+                <ol dir="rtl">
+                    <li>שאתם מנסים להשתמש במפות ללא חיבור לרשת, ואת זה ניתן לפתור ע״י רכישת מנוי למפות לא מקוונות בתפריט של מפות ושכבות</li>
+                    <li>שיש בעיה עם אחת השכבות שלכם - במקרה כזה אנחנו ממליצים לכבות את כל השכבות השקופות ולמחוק את זו שעושה בעיות</li>
+                </ol>
+            </p>
+            <p>If you manage to read this paragraph there are two options:
+                <ol>
+                    <li>That you are trying to use the map without a network connection, this can be solved by purchasing a subscription to offline maps in the layer menu</li>
+                    <li>That there's a problem with one of your layers - in such case we reccomend turning off all the overlay layers and delete the one that's causing the issue</li>
+                </ol>
+            </p>
+        </div>
     </div>
     <main-map></main-map>
     <script>
@@ -137,6 +152,9 @@
                 window.externalUrl = url;
             }
         }
+        setTimeout(() => {
+            document.getElementById("delayed").style.display = null;
+        }, 7000);
     </script>
     <script type="text/javascript" src="cordova.js"></script>
 </body>
