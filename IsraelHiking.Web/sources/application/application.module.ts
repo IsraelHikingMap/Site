@@ -172,6 +172,7 @@ import { AddSimplePoiDialogComponent } from "./components/dialogs/add-simple-poi
 import { MainMenuComponent } from "./components/main-menu.component";
 import { FilesSharesDialogComponent } from "./components/dialogs/files-shares-dialog.component";
 import { CenterMeComponent } from "./components/center-me.component";
+import { FacebookWarningDialogComponent } from "./components/dialogs/facebook-warning-dialog.component";
 
 // variables and functions
 import { routes } from "./routes";
@@ -262,7 +263,8 @@ export function initializeApplication(injector: Injector) {
             UseAppDialogComponent,
             CategoriesGroupComponent,
             AddSimplePoiDialogComponent,
-            FilesSharesDialogComponent
+            FilesSharesDialogComponent,
+            FacebookWarningDialogComponent
         ],
         providers: [
             GestureConfig,
@@ -390,6 +392,7 @@ export function initializeApplication(injector: Injector) {
             MainMenuComponent,
             FilesSharesDialogComponent,
             CenterMeComponent,
+            FacebookWarningDialogComponent,
             NameInUseValidatorDirective,
             ImageCaptureDirective,
             OfflineImagePipe

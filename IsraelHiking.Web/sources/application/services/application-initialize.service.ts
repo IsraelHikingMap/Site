@@ -1,13 +1,14 @@
 import { Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material";
 
+import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
+import { FacebookWarningDialogComponent } from "application/components/dialogs/facebook-warning-dialog.component";
 import { LoggingService } from "./logging.service";
 import { ScreenService } from "./screen.service";
 import { DatabaseService } from "./database.service";
 import { ApplicationExitService } from "./application-exit.service";
 import { OpenWithService } from "./open-with.service";
 import { PurchaseService } from "./purchase.service";
-import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { RunningContextService } from "./running-context.service";
 import { DragAndDropService } from "./drag-and-drop.service";
 import { PoiService } from "./poi.service";
@@ -47,7 +48,11 @@ export class ApplicationInitializeService {
             if (this.runnincContextService.isMobile
                 && !this.runnincContextService.isCordova
                 && !this.runnincContextService.isIFrame) {
-                UseAppDialogComponent.openDialog(this.dialog);
+                    if (this.runnincContextService.isFacebook) {
+                        FacebookWarningDialogComponent.openDialog(this.dialog);
+                    } else {
+                        UseAppDialogComponent.openDialog(this.dialog);
+                    }
             }
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();

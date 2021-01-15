@@ -1,0 +1,17 @@
+<div [dir]="resources.direction">
+    <div matDialogTitle>
+        <div>
+            <i class="fa fa-lg icon-exclamation-triangle" [style.color]="'orange'"></i> {{resources.facebookWarning}}
+        </div>
+        <div>
+            <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
+        </div>
+    </div>
+    <div mat-dialog-actions>
+        <div fxLayout="row" fxFlex>
+            <div fxFlex>
+                <a mat-button href="https://www.technologyhint.com/in-app-browser/" target="_blank" fxFill mat-dialog-close angulartics2On="click" angularticsCategory="Application" angularticsAction="Facebook disable in app info"><i class="fa fa-lg icon-info"></i> {{resources.moreInfoFacebook}}</a>
+            </div>
+        </div>
+    </div>
+</div>
