@@ -111,6 +111,7 @@ import { DeviceOrientationService } from "./services/device-orientation.service"
 import { RecordedRouteService } from "./services/recorded-route.service";
 import { NavigateHereService } from "./services/navigate-here.service";
 import { GpxDataContainerConverterService } from "./services/gpx-data-container-converter.service";
+import { OfflineFilesDownloadService } from "./services/offline-files-download.service";
 import { AudioPlayerFactory } from "./services/audio-player.factory";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 // interactions
@@ -318,6 +319,7 @@ export function initializeApplication(injector: Injector) {
             RecordedRouteService,
             NavigateHereService,
             GpxDataContainerConverterService,
+            OfflineFilesDownloadService,
             AudioPlayerFactory,
             BackgroundGeolocation,
             Brightness,

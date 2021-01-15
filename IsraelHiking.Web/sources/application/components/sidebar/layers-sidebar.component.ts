@@ -1,5 +1,4 @@
 import { Component, ViewEncapsulation } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 import { MatDialog } from "@angular/material";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { select, NgRedux } from "@angular-redux/store";
@@ -18,15 +17,11 @@ import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.co
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SetSelectedRouteAction } from "../../reducres/route-editing-state.reducer";
 import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction } from "../../reducres/routes.reducer";
-import { ExpandGroupAction, CollapseGroupAction, ToggleOfflineAction } from "../../reducres/layers.reducer";
-import { SetOfflineLastModifiedAction } from "../../reducres/offline.reducer";
+import { ExpandGroupAction, CollapseGroupAction } from "../../reducres/layers.reducer";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
-import { FileService } from "../../services/file.service";
-import { DatabaseService } from "../../services/database.service";
-import { LoggingService } from "../../services/logging.service";
-import { Urls } from "../../urls";
+import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
 import { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
 
 @Component({
@@ -54,16 +49,13 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
-                private readonly httpClient: HttpClient,
                 private readonly purchaseService: PurchaseService,
                 private readonly layersService: LayersService,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly sidebarService: SidebarService,
                 private readonly runningContextService: RunningContextService,
                 private readonly toastService: ToastService,
-                private readonly fileService: FileService,
-                private readonly databaseService: DatabaseService,
-                private readonly loggingService: LoggingService,
+                private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
     }
@@ -178,67 +170,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
             return;
         }
 
-        let fileNames = await this.getFilesToDownloadDictionary();
-        if (Object.keys(fileNames).length === 0) {
-            this.loggingService.info("All offline files are up-to-date");
-            this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
-            return;
-        }
-        this.loggingService.info("Starting downloading offline files, last update: " +
-            this.ngRedux.getState().offlineState.lastModifiedDate);
-        this.toastService.progress({
-            action: (progress) => this.downloadOfflineFilesProgressAction(progress, fileNames),
-            showContinueButton: true,
-            continueText: this.resources.largeFilesUseWifi
-        });
-    }
-
-    private async downloadOfflineFilesProgressAction(reportProgress: (progressValue: number) => void, fileNames: {}): Promise<void> {
-        this.sidebarService.hide();
-        let setBackToOffline = false;
-        if (this.layersService.getSelectedBaseLayer().isOfflineOn) {
-            this.ngRedux.dispatch(new ToggleOfflineAction({ key: this.layersService.getSelectedBaseLayer().key, isOverlay: false }));
-            setBackToOffline = true;
-        }
-        try {
-            let newestFileDate = new Date(0);
-            let length = Object.keys(fileNames).length;
-            for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
-                let fileName = Object.keys(fileNames)[fileNameIndex];
-                let fileDate = new Date(fileNames[fileName]);
-                newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
-                let token = this.ngRedux.getState().userState.token;
-                if (fileName.endsWith(".mbtiles")) {
-                    await this.databaseService.closeDatabase(fileName.replace(".mbtiles", ""));
-                    await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`, fileName, token,
-                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
-                    this.loggingService.info(`Finished downloading ${fileName}`);
-                } else {
-                    let fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
-                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
-                    this.loggingService.info(`Finished downloading ${fileName}`);
-                    await this.fileService.writeStyles(fileContent as Blob);
-                }
-            }
-            this.loggingService.info("Finished downloading offline files, update date to: " + newestFileDate.toUTCString());
-            this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: newestFileDate }));
-            this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
-            this.sidebarService.show("layers");
-        } finally {
-            if (setBackToOffline) {
-                this.ngRedux.dispatch(new ToggleOfflineAction({ key: this.layersService.getSelectedBaseLayer().key, isOverlay: false }));
-            }
-        }
-    }
-
-    private async getFilesToDownloadDictionary(): Promise<{}> {
-        let lastModified = this.ngRedux.getState().offlineState.lastModifiedDate;
-        return await this.httpClient.get(Urls.offlineFiles, {
-            params: {
-                lastModified: lastModified ? lastModified.toUTCString() : null,
-                mbTiles: "true"
-            }
-        }).toPromise() as {};
+        this.offlineFilesDownloadService.downloadOfflineMaps();
     }
 
     public toggleOffline(event: Event, layer: EditableLayer, isOverlay: boolean) {

@@ -15,6 +15,7 @@ import { PoiService } from "./poi.service";
 import { RecordedRouteService } from "./recorded-route.service";
 import { DeviceOrientationService } from "./device-orientation.service";
 import { TracesService } from "./traces.service";
+import { OfflineFilesDownloadService } from "./offline-files-download.service";
 
 @Injectable()
 export class ApplicationInitializeService {
@@ -30,7 +31,8 @@ export class ApplicationInitializeService {
                 private readonly poiService: PoiService,
                 private readonly deviceOrientationService: DeviceOrientationService,
                 private readonly recordedRouteService: RecordedRouteService,
-                private readonly tracesService: TracesService
+                private readonly tracesService: TracesService,
+                private readonly OfflineFilesDownloadService: OfflineFilesDownloadService
     ) {
     }
 
@@ -58,6 +60,7 @@ export class ApplicationInitializeService {
             this.recordedRouteService.initialize();
             this.deviceOrientationService.initialize();
             this.tracesService.initialize(); // no need to wait for it to complete
+            this.OfflineFilesDownloadService.initialize(); // no need to wait for it to complete
             await this.loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
             if (ex.toString().indexOf("A mutation operation was attempted on a database that did not allow mutations") !== -1) {
