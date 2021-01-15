@@ -29,11 +29,7 @@ export class ShareUrlsService {
     }
 
     public getShareUrlDisplayName(shareUrl: ShareUrl): string {
-        return this.getDisplayNameFromTitleAndDescription(shareUrl.title, shareUrl.description);
-    }
-
-    public getDisplayNameFromTitleAndDescription(title: string, description: string): string {
-        return description ? `${title} - ${description}` : title;
+        return shareUrl.description ? `${shareUrl.title} - ${shareUrl.description}` : shareUrl.title;
     }
 
     public getShareSocialLinks(shareUrl: ShareUrl): IShareUrlSocialLinks {

@@ -87,10 +87,6 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         });
     }
 
-    public getDisplayName() {
-        return this.shareUrlsService.getDisplayNameFromTitleAndDescription(this.title, this.description);
-    }
-
     public async uploadShareUrl() {
         this.isLoading = true;
         let shareUrlToSend = this.createShareUrlObject();

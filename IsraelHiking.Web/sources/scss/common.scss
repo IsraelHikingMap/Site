@@ -171,6 +171,10 @@ ngx-image-gallery .image {
     justify-content: center;
 }
 
+.break-lines {
+    white-space: pre-line;
+}
+
 /* Progressbar override */
 .ng-bar {
     background-color: mat-color($app-primary) !important;

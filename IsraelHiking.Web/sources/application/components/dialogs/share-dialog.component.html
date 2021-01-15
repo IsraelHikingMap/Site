@@ -34,8 +34,8 @@
             </div>
         </div>
         <div *ngIf="shareAddress && !isApp()">
-            <div fxLayout="row">
-                <h4>{{getDisplayName()}}</h4>
+            <div fxLayout="row" class="break-lines">
+                <span fxFill [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">{{description}}</span>
             </div>
             <div fxLayout="row">
                 <a [href]="shareAddress" class="text-left chrome-wordwrap-fix" [target]="'_blank'" fxFill angulartics2On="click" angularticsCategory="Share" angularticsAction="Share text address">{{shareAddress}}</a>
@@ -57,8 +57,8 @@
             </div>
         </div>
         <div *ngIf="shareAddress && isApp()">
-            <div fxLayout="row">
-                <h4>{{getDisplayName()}}</h4>
+            <div fxLayout="row" class="break-lines">
+                <span fxFill [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">{{description}}</span>
             </div>
             <div fxLayout="row">
                 <button mat-button fxFill (click)="share()" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share mobile button"><i class="fa fa-lg icon-share-alt"></i></button>

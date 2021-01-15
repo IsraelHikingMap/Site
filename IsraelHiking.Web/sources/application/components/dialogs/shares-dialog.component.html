@@ -23,7 +23,7 @@
                     <img [src]="getImageFromShareId(shareUrl, 128, 128)" fxFill />
                 </div>
                 <div class="margin-10">
-                    <div *ngIf="!isShareUrlInEditMode(shareUrl.id)">
+                    <div *ngIf="!isShareUrlInEditMode(shareUrl.id)" class="break-lines">
                         {{shareUrl.title}}<br />
                         {{shareUrl.description}}<br />
                         {{shareUrl.creationDate | date:'dd/MM/yyyy'}}
