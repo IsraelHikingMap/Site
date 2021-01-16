@@ -1,9 +1,8 @@
 import { LoggingService } from "./logging.service";
-import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
+import { TestBed, inject } from "@angular/core/testing";
 import { RunningContextService } from "./running-context.service";
 
 describe("LoggingService", () => {
-    let loggingService: LoggingService;
 
     beforeEach(() => {
         let runningContextServiceMock = {
@@ -17,12 +16,11 @@ describe("LoggingService", () => {
                 LoggingService
             ]
         });
-        loggingService = TestBed.get<LoggingService>(LoggingService);
     });
 
-    it("should init logger instance", () => {
+    it("should init logger instance", inject([LoggingService], (loggingService: LoggingService) => {
         let spy = spyOn(console, "log");
         loggingService.info("debug");
         expect(console.log).toHaveBeenCalled();
-    });
+    }));
 });

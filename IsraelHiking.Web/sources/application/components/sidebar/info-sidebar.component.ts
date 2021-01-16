@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material/dialog";
 import { remove } from "lodash";
 import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 

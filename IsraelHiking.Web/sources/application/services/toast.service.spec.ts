@@ -1,4 +1,5 @@
-import { MatSnackBar, MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material/dialog";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";

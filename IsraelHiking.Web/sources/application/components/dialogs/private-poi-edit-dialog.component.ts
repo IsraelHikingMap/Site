@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, Inject } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
-import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from "@angular/material";
+import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 
 import { BaseMapComponent } from "../base-map.component";

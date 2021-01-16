@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material/dialog";
 
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { FacebookWarningDialogComponent } from "application/components/dialogs/facebook-warning-dialog.component";
@@ -32,7 +32,7 @@ export class ApplicationInitializeService {
                 private readonly deviceOrientationService: DeviceOrientationService,
                 private readonly recordedRouteService: RecordedRouteService,
                 private readonly tracesService: TracesService,
-                private readonly OfflineFilesDownloadService: OfflineFilesDownloadService
+                private readonly offlineFilesDownloadService: OfflineFilesDownloadService
     ) {
     }
 
@@ -60,7 +60,7 @@ export class ApplicationInitializeService {
             this.recordedRouteService.initialize();
             this.deviceOrientationService.initialize();
             this.tracesService.initialize(); // no need to wait for it to complete
-            this.OfflineFilesDownloadService.initialize(); // no need to wait for it to complete
+            this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
             await this.loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
             if (ex.toString().indexOf("A mutation operation was attempted on a database that did not allow mutations") !== -1) {

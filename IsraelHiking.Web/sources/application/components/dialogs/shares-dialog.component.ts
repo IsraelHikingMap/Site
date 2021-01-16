@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewEncapsulation, OnDestroy } from "@angular/core";
-import { MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
 import { select, NgRedux } from "@angular-redux/store";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";

@@ -1,5 +1,5 @@
 import { Component, ViewEncapsulation } from "@angular/core";
-import { MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { select, NgRedux } from "@angular-redux/store";
 import { Observable } from "rxjs";

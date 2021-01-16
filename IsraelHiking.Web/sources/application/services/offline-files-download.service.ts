@@ -18,14 +18,14 @@ import { Urls } from "../urls";
 @Injectable()
 export class OfflineFilesDownloadService {
     constructor(private readonly resources: ResourcesService,
-        private readonly sidebarService: SidebarService,
-        private readonly layersService: LayersService,
-        private readonly databaseService: DatabaseService,
-        private readonly fileService: FileService,
-        private readonly loggingService: LoggingService,
-        private readonly httpClient: HttpClient,
-        private readonly toastService: ToastService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly sidebarService: SidebarService,
+                private readonly layersService: LayersService,
+                private readonly databaseService: DatabaseService,
+                private readonly fileService: FileService,
+                private readonly loggingService: LoggingService,
+                private readonly httpClient: HttpClient,
+                private readonly toastService: ToastService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
     public async initialize(): Promise<void> {
@@ -36,7 +36,7 @@ export class OfflineFilesDownloadService {
             this.ngRedux.getState().userState.userInfo == null) {
                 return;
             }
-            return await this.downloadOfflineMaps();
+        return await this.downloadOfflineMaps();
     }
 
     public async downloadOfflineMaps(): Promise<void> {
@@ -82,7 +82,8 @@ export class OfflineFilesDownloadService {
                 }
                 this.loggingService.info(`[Offline Download] Finished downloading ${fileName}`);
             }
-            this.loggingService.info("[Offline Download] Finished downloading offline files, update date to: " + newestFileDate.toUTCString());
+            this.loggingService.info("[Offline Download] Finished downloading offline files, update date to: "
+                + newestFileDate.toUTCString());
             this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: newestFileDate }));
             this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
             this.sidebarService.show("layers");

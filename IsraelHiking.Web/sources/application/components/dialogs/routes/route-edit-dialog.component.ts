@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, Inject } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
-import { MAT_DIALOG_DATA } from "@angular/material";
+import { MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";

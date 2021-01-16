@@ -1,35 +1,32 @@
 // 3rd party
 import { NgModule, APP_INITIALIZER, Injector, ErrorHandler } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { BrowserModule } from "@angular/platform-browser";
+import { BrowserModule, HammerModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { RouterModule } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { DragDropModule } from "@angular/cdk/drag-drop";
-import {
-    GestureConfig,
-    MatDialogModule,
-    MatButtonModule,
-    MatInputModule,
-    MatSliderModule,
-    MatSnackBarModule,
-    MatAutocompleteModule,
-    MatSlideToggleModule,
-    MatTooltipModule,
-    MatSelectModule,
-    MatProgressBarModule,
-    MatProgressSpinnerModule,
-    MatTabsModule,
-    MatRadioModule,
-    MatCheckboxModule,
-    MatToolbarModule,
-    MatMenuModule,
-    MatExpansionModule,
-    MatDividerModule,
-    MatCardModule,
-    MatGridListModule
-} from "@angular/material";
+import { MatAutocompleteModule } from "@angular/material/autocomplete";
+import { MatButtonModule } from "@angular/material/button";
+import { MatCardModule } from "@angular/material/card";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatDialogModule } from "@angular/material/dialog";
+import { MatDividerModule } from "@angular/material/divider";
+import { MatExpansionModule } from "@angular/material/expansion";
+import { MatGridListModule } from "@angular/material/grid-list";
+import { MatInputModule } from "@angular/material/input";
+import { MatMenuModule } from "@angular/material/menu";
+import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatRadioModule } from "@angular/material/radio";
+import { MatSelectModule } from "@angular/material/select";
+import { MatSlideToggleModule } from "@angular/material/slide-toggle";
+import { MatSliderModule } from "@angular/material/slider";
+import { MatSnackBarModule } from "@angular/material/snack-bar";
+import { MatTabsModule } from "@angular/material/tabs";
+import { MatToolbarModule } from "@angular/material/toolbar";
+import { MatTooltipModule } from "@angular/material/tooltip";
 import { FlexLayoutModule } from "@angular/flex-layout";
 import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
 import { ClipboardModule } from "ngx-clipboard";
@@ -226,49 +223,10 @@ export function initializeApplication(injector: Injector) {
             InfiniteScrollModule,
             NgReduxModule,
             NgxMapboxGLModule.withConfig({ accessToken: "no-token" }),
-            NgIdleModule.forRoot()
-        ],
-        entryComponents: [
-            LayersSidebarComponent,
-            BaseLayerAddDialogComponent,
-            BaseLayerEditDialogComponent,
-            OverlayAddDialogComponent,
-            OverlayEditDialogComponent,
-            RouteAddDialogComponent,
-            RouteEditDialogComponent,
-            TracesDialogComponent,
-            SharesDialogComponent,
-            LanguageDialogComponent,
-            CoordinatesComponent,
-            RoutePointOverlayComponent,
-            PrivatePoiOverlayComponent,
-            ClusterOverlayComponent,
-            GpsLocationOverlayComponent,
-            ClearableOverlayComponent,
-            MissingPartOverlayComponent,
-            InfoSidebarComponent,
-            DownloadDialogComponent,
-            ShareDialogComponent,
-            TermsOfServiceDialogComponent,
-            ConfirmDialogComponent,
-            LegendItemComponent,
-            PublicPoiSidebarComponent,
-            PublicPointOfInterestEditComponent,
-            ImageScrollerComponent,
-            ApplicationStateComponent,
-            PrivatePoiEditDialogComponent,
-            PrivatePoiShowDialogComponent,
-            AutomaticLayerPresentationComponent,
-            ConfigurationDialogComponent,
-            ProgressDialogComponent,
-            UseAppDialogComponent,
-            CategoriesGroupComponent,
-            AddSimplePoiDialogComponent,
-            FilesSharesDialogComponent,
-            FacebookWarningDialogComponent
+            NgIdleModule.forRoot(),
+            HammerModule
         ],
         providers: [
-            GestureConfig,
             SessionStorageService,
             LocalStorageService,
             AuthorizationService,

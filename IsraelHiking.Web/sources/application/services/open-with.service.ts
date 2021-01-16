@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
-import { MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material/dialog";
 import { WebIntent, Intent } from "@ionic-native/web-intent/ngx";
 
 import { RunningContextService } from "./running-context.service";

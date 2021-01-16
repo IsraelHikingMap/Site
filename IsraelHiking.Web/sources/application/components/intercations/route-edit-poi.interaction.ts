@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from "@angular/core";
 import { MapMouseEvent, Map } from "mapbox-gl";
-import { MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material/dialog";
 import { NgRedux } from "@angular-redux/store";
 
 import { AddPrivatePoiAction, UpdatePrivatePoiAction } from "../../reducres/routes.reducer";

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { MatDialogRef } from "@angular/material";
+import { MatDialogRef } from "@angular/material/dialog";
 import { SharedStorage } from "ngx-store";
 import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash";

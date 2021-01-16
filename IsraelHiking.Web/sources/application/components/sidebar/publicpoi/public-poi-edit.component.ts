@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from "@angular/core";
-import { MatSelectChange } from "@angular/material";
+import { MatSelectChange } from "@angular/material/select";
 
 import { PoiService, ISelectableCategory } from "../../../services/poi.service";
 import { BaseMapComponent } from "../../base-map.component";

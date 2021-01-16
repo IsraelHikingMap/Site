@@ -8,7 +8,7 @@ import {
     QueryList
 } from "@angular/core";
 import { Router } from "@angular/router";
-import { MatAutocompleteTrigger } from "@angular/material";
+import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
 import { remove } from "lodash";

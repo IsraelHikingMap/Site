@@ -6,7 +6,7 @@ import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { ToastService } from "./toast.service";
-import { MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material/dialog";
 import { SidebarService } from "./sidebar.service";
 import { SetSidebarAction } from "../reducres/poi.reducer";
 import { GeoLocationService } from "./geo-location.service";

@@ -2,7 +2,6 @@ import { enableProdMode } from "@angular/core";
 import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
 import { ApplicationModule } from "./application/application.module";
 import { environment } from "./environments/environment";
-import "hammerjs";
 
 declare var cordova: any;
 

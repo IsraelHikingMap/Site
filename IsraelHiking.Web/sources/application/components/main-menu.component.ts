@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from "@angular/core";
-import { MatDialog, MatDialogConfig } from "@angular/material";
+import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { NgRedux, select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
 import { Subscription, Observable } from "rxjs";

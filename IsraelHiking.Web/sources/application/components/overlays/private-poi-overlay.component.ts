@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
-import { MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material/dialog";
 
 import { MarkerData, LinkData } from "../../models/models";
 import { ResourcesService } from "../../services/resources.service";
