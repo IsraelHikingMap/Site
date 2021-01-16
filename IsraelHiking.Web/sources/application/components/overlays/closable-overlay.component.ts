@@ -1,10 +1,11 @@
-import { Input, Output, EventEmitter, Directive } from "@angular/core";
+import { Input, Output, EventEmitter, Component } from "@angular/core";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { LatLngAlt } from "../../models/models";
 
-export abstract class ClosableOverlayComponent extends BaseMapComponent {
+@Component({ template: '' })
+export class ClosableOverlayComponent extends BaseMapComponent {
     @Input()
     public isOpen: boolean;
 
