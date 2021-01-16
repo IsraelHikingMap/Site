@@ -70,7 +70,7 @@ export class SearchComponent extends BaseMapComponent {
     private requestsQueue: ISearchRequestQueueItem[];
     private selectFirstSearchResults: boolean;
 
-    @ViewChild("searchFromInput", { static: false })
+    @ViewChild("searchFromInput")
     public searchFromInput: ElementRef;
 
     @ViewChildren(MatAutocompleteTrigger)

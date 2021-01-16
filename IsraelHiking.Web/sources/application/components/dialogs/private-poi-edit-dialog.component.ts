@@ -39,7 +39,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     public description: string;
     public iconsGroups: IIconsGroup[];
 
-    @ViewChild("titleInput", { static: false })
+    @ViewChild("titleInput")
     public titleInput: ElementRef;
 
     public static openDialog(matDialog: MatDialog, marker: MarkerData, routeId: string, index: number) {

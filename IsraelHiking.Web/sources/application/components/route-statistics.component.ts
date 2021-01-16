@@ -90,7 +90,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public chartHoverSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public subRouteRange: IChartSubRouteRange;
 
-    @ViewChild("lineChartContainer", { static: false })
+    @ViewChild("lineChartContainer")
     public lineChartContainer: ElementRef;
 
     @select((state: ApplicationState) => state.routes.present)

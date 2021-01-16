@@ -1,3 +1,4 @@
+import { Injectable } from "@angular/core";
 import { last } from "lodash";
 
 import { SpatialService } from "./spatial.service";
@@ -37,6 +38,7 @@ export interface IRouteStatistics {
     remainingDistance: number;
 }
 
+@Injectable()
 export class RouteStatisticsService {
     public getStatisticsByRange(route: RouteData, start: IRouteStatisticsPoint, end: IRouteStatisticsPoint) {
         let routeStatistics = {

@@ -9,7 +9,7 @@
     "sources/polyfills.ts"
   ],
   "include": [
-    "sources/**/*.ts"
+    "sources/**/*.d.ts"
   ],
   "exclude": [
     "sources/test.ts",

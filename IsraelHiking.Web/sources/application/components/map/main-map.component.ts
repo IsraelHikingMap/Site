@@ -22,10 +22,10 @@ import { DefaultStyleService } from "../../services/default-style.service";
 })
 export class MainMapComponent extends BaseMapComponent implements AfterViewInit {
 
-    @ViewChild(NgxImageGalleryComponent, { static: false })
+    @ViewChild(NgxImageGalleryComponent)
     public ngxImageGallery: NgxImageGalleryComponent;
 
-    @ViewChild(MapComponent, { static: false })
+    @ViewChild(MapComponent)
     public mapComponent: MapComponent;
 
     @ViewChildren("topLeftControl", { read: ElementRef })
