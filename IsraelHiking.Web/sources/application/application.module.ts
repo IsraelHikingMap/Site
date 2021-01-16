@@ -34,7 +34,6 @@ import { Angulartics2Module } from "angulartics2";
 import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 import { NgProgressModule } from "@ngx-progressbar/core";
 import { NgProgressHttpModule } from "@ngx-progressbar/http";
-import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { NgxImageGalleryModule } from "ngx-image-gallery";
 import { NgxD3Service } from "@katze/ngx-d3";
@@ -216,7 +215,6 @@ export function initializeApplication(injector: Injector) {
             Angulartics2Module.forRoot(),
             NgProgressModule,
             NgProgressHttpModule,
-            NgxPaginationModule,
             ScrollToModule.forRoot(),
             DragDropModule,
             NgxImageGalleryModule,

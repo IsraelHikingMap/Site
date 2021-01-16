@@ -4,7 +4,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { LatLngAlt } from "../../models/models";
 
-@Component({ template: '' })
+@Component({ template: "" })
 export class ClosableOverlayComponent extends BaseMapComponent {
     @Input()
     public isOpen: boolean;

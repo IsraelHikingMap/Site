@@ -16,7 +16,7 @@ export class SecuredImageComponent implements OnChanges {
     // or even when the component gets destroyed
     // So basically turn src into src$
     @Input()
-    private src: string = "";
+    private src = "";
 
     private src$ = new BehaviorSubject(this.src);
 
