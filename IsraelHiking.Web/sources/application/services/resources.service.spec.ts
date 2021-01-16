@@ -1,4 +1,4 @@
-import { TestBed, async, inject } from "@angular/core/testing";
+import { TestBed, inject, waitForAsync } from "@angular/core/testing";
 import { ResourcesService } from "./resources.service";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 
@@ -27,15 +27,16 @@ describe("ResourcesService", () => {
         expect(service.availableLanguages.length).toBeGreaterThan(0);
     }));
 
-    it("Should faciliate language change to english and raise event", async(inject([ResourcesService], (service: ResourcesService) => {
+    it("Should faciliate language change to english and raise event", inject([ResourcesService], (service: ResourcesService) => {
         let eventRaied = false;
         service.languageChanged.subscribe(() => { eventRaied = true; });
 
-        service.setLanguage(service.availableLanguages[1]).then(() => {
+        let promise = service.setLanguage(service.availableLanguages[1]).then(() => {
             expect(service.currentLanguage.code).toBe(service.availableLanguages[1].code);
             expect(eventRaied).toBeTruthy();
         });
-    })));
+        return promise;
+    }));
 
     it("Should faciliate translation", inject([ResourcesService, GetTextCatalogService],
         (service: ResourcesService, getText: GetTextCatalogService) => {
