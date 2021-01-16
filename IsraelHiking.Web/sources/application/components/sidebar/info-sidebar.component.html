@@ -81,7 +81,7 @@
             </div>
             <mat-accordion>
                 <mat-expansion-panel *ngFor="let section of legendSections" [id]="section.key" (opened)="openSection(section)">
-                    <mat-expansion-panel-header [ngx-scroll-to]="section.key">
+                    <mat-expansion-panel-header [ngxScrollTo]="section.key">
                         {{section.title}}
                     </mat-expansion-panel-header>
                     <div *ngIf="isSectionOpen(section)">
