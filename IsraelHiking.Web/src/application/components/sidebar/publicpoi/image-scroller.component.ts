@@ -101,6 +101,6 @@ export class ImageScrollerComponent extends BaseMapComponent {
             let imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1600);
             imagesUrls.push(imageUrlToPush);
         }
-        this.imageGalleryService.setImages(imagesUrls);
+        this.imageGalleryService.open(imagesUrls, this.currentIndex);
     }
 }

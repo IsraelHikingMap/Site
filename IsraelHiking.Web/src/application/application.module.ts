@@ -35,7 +35,7 @@ import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 import { NgProgressModule } from "@ngx-progressbar/core";
 import { NgProgressHttpModule } from "@ngx-progressbar/http";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
-import { NgxImageGalleryModule } from "ngx-image-gallery";
+import { IvyGalleryModule } from 'angular-gallery';
 import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule } from "@angular-redux/store";
@@ -217,7 +217,7 @@ export function initializeApplication(injector: Injector) {
             NgProgressHttpModule,
             ScrollToModule.forRoot(),
             DragDropModule,
-            NgxImageGalleryModule,
+            IvyGalleryModule,
             InfiniteScrollModule,
             NgReduxModule,
             NgxMapboxGLModule.withConfig({ accessToken: "no-token" }),

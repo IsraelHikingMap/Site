@@ -1,5 +1,4 @@
-import { Component, ViewChild, AfterViewInit, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
-import { NgxImageGalleryComponent } from "ngx-image-gallery";
+import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 import { MapComponent, CustomControl } from "ngx-mapbox-gl";
 import { Style, setRTLTextPlugin, ScaleControl } from "mapbox-gl";
@@ -20,10 +19,7 @@ import { DefaultStyleService } from "../../services/default-style.service";
     styleUrls: ["./main-map.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class MainMapComponent extends BaseMapComponent implements AfterViewInit {
-
-    @ViewChild(NgxImageGalleryComponent)
-    public ngxImageGallery: NgxImageGalleryComponent;
+export class MainMapComponent extends BaseMapComponent {
 
     @ViewChild(MapComponent)
     public mapComponent: MapComponent;
@@ -109,9 +105,6 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         this.hashService.resetAddressbar();
     }
 
-    public ngAfterViewInit(): void {
-        this.imageGalleryService.setGalleryComponent(this.ngxImageGallery);
-    }
     public mapLoaded() {
         setRTLTextPlugin("./mapbox-gl-rtl-text.js", () => {});
 
