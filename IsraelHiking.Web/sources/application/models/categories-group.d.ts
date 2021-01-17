@@ -11,7 +11,7 @@ export interface Category {
     icon: string;
     color: string;
     visible: boolean;
-    items: { iconColorCategory: IIconColorLabel; tags: any[] }[];
+    items: { iconColorCategory: IconColorLabel; tags: any[] }[];
 }
 
 export interface CategoriesGroup {
