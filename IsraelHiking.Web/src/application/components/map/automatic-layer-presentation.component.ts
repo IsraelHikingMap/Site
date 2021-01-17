@@ -38,7 +38,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private hasInternetAccess: boolean;
 
     constructor(resources: ResourcesService,
-                private readonly host: MapComponent,
+                private readonly mapComponent: MapComponent,
                 private readonly fileService: FileService,
                 private readonly connectionSerive: ConnectionService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -54,8 +54,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     public async ngOnInit() {
-        if (this.host.mapInstance == null) {
-            this.subscriptions.push(this.host.load.subscribe(async () => {
+        if (this.mapComponent.mapInstance == null) {
+            this.subscriptions.push(this.mapComponent.mapLoad.subscribe(async () => {
                 await this.createLayer();
                 this.sourceAdded = true;
             }));
@@ -127,7 +127,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             tileSize: 256,
             attribution: AutomaticLayerPresentationComponent.ATTRIBUTION
         } as RasterSource;
-        this.host.mapInstance.addSource(this.rasterSourceId, source);
+        this.mapComponent.mapInstance.addSource(this.rasterSourceId, source);
         let layer = {
             id: this.rasterLayerId,
             type: "raster",
@@ -139,12 +139,12 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 "raster-opacity": this.layerData.opacity || 1.0
             }
         } as Layer;
-        this.host.mapInstance.addLayer(layer, this.before);
+        this.mapComponent.mapInstance.addLayer(layer, this.before);
     }
 
     private removeRasterLayer() {
-        this.host.mapInstance.removeLayer(this.rasterLayerId);
-        this.host.mapInstance.removeSource(this.rasterSourceId);
+        this.mapComponent.mapInstance.removeLayer(this.rasterLayerId);
+        this.mapComponent.mapInstance.removeSource(this.rasterSourceId);
     }
 
     private async createJsonLayer() {
@@ -168,7 +168,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                     attributiuonUpdated = true;
                 }
                 this.jsonSourcesIds.push(sourceKey);
-                this.host.mapInstance.addSource(sourceKey, source);
+                this.mapComponent.mapInstance.addSource(sourceKey, source);
             }
         }
         for (let layer of layers) {
@@ -178,18 +178,18 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                     layer.source = this.layerData.key + "_" + layer.source;
                 }
                 this.jsonLayersIds.push(layer.id);
-                this.host.mapInstance.addLayer(layer, this.before);
+                this.mapComponent.mapInstance.addLayer(layer, this.before);
             }
         }
     }
 
     private removeJsonLayer() {
         for (let layerId of this.jsonLayersIds) {
-            this.host.mapInstance.removeLayer(layerId);
+            this.mapComponent.mapInstance.removeLayer(layerId);
         }
         this.jsonLayersIds = [];
         for (let sourceId of this.jsonSourcesIds) {
-            this.host.mapInstance.removeSource(sourceId);
+            this.mapComponent.mapInstance.removeSource(sourceId);
         }
         this.jsonSourcesIds = [];
     }
@@ -201,7 +201,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             await this.createJsonLayer();
         }
         if (this.isBaselayer) {
-            this.host.mapInstance.setMinZoom(Math.max(this.layerData.minZoom - 1, 0));
+            this.mapComponent.mapInstance.setMinZoom(Math.max(this.layerData.minZoom - 1, 0));
         }
     }
 

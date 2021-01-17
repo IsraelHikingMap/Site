@@ -82,7 +82,7 @@ export class LocationComponent extends BaseMapComponent {
             }
         });
 
-        this.mapComponent.load.subscribe(() => {
+        this.mapComponent.mapLoad.subscribe(() => {
             this.mapComponent.mapInstance.on("move", () => {
                 this.updateDistanceFeatureCollection();
             });

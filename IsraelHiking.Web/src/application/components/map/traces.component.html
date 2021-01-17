@@ -41,7 +41,7 @@
             <i class='fa icon-cog fa-stack-1x stack-icon-top' style='color:blue;'></i>
         </span>
     </mgl-marker>
-    <mgl-popup [marker]="tracesConfigMarker" (close)="isConfigOpen = false">
+    <mgl-popup [marker]="tracesConfigMarker" (popupClose)="isConfigOpen = false">
         <clearable-overlay [latlng]="selectedTraceStart"
                            [title]="visibleTrace.name"
                            (cleared)="clearTrace()"

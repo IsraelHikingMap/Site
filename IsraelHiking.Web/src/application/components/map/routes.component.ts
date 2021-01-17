@@ -50,7 +50,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
                 private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
                 private readonly fileService: FileService,
-                private readonly host: MapComponent
+                private readonly mapComponent: MapComponent
     ) {
         super(resources);
         this.routesGeoJson = {
@@ -225,22 +225,22 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     private setInteractionAccordingToState() {
-        if (this.host.mapInstance == null) {
+        if (this.mapComponent.mapInstance == null) {
             return;
         }
-        this.routeEditPoiInteraction.setActive(false, this.host.mapInstance);
-        this.routeEditRouteInteraction.setActive(false, this.host.mapInstance);
+        this.routeEditPoiInteraction.setActive(false, this.mapComponent.mapInstance);
+        this.routeEditRouteInteraction.setActive(false, this.mapComponent.mapInstance);
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        this.host.mapInstance.getCanvas().style.cursor = "";
+        this.mapComponent.mapInstance.getCanvas().style.cursor = "";
         if (selectedRoute == null) {
             return;
         }
         if (selectedRoute.state === "Poi") {
-            this.routeEditPoiInteraction.setActive(true, this.host.mapInstance);
-            this.host.mapInstance.getCanvas().style.cursor = "pointer";
+            this.routeEditPoiInteraction.setActive(true, this.mapComponent.mapInstance);
+            this.mapComponent.mapInstance.getCanvas().style.cursor = "pointer";
         } else if (selectedRoute.state === "Route") {
-            this.routeEditRouteInteraction.setActive(true, this.host.mapInstance);
-            this.host.mapInstance.getCanvas().style.cursor = "pointer";
+            this.routeEditRouteInteraction.setActive(true, this.mapComponent.mapInstance);
+            this.mapComponent.mapInstance.getCanvas().style.cursor = "pointer";
         }
     }
 
@@ -249,11 +249,11 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public ngAfterViewInit(): void {
-        this.host.load.subscribe(() => {
+        this.mapComponent.mapLoad.subscribe(() => {
             this.setInteractionAccordingToState();
             let fullFilePath = this.fileService.getFullFilePath("content/arrow.png");
-            this.host.mapInstance.loadImage(fullFilePath, (_, image) => {
-                this.host.mapInstance.addImage("arrow", image, { sdf: true });
+            this.mapComponent.mapInstance.loadImage(fullFilePath, (_, image) => {
+                this.mapComponent.mapInstance.addImage("arrow", image, { sdf: true });
             });
         });
     }
@@ -278,7 +278,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public routeLineMouseEnter(event) {
-        this.host.mapInstance.getCanvas().style.cursor = "pointer";
+        this.mapComponent.mapInstance.getCanvas().style.cursor = "pointer";
         this.routeLineMouseOver(event);
     }
 
@@ -299,7 +299,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     public routeLineMouseLeave() {
         this.selectedRouteService.raiseHoverSelectedRoute(null);
         if (!this.isEditMode()) {
-            this.host.mapInstance.getCanvas().style.cursor = "";
+            this.mapComponent.mapInstance.getCanvas().style.cursor = "";
         }
     }
 

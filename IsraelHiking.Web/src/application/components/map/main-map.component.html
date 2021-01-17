@@ -6,7 +6,7 @@
                  [center]="[location.longitude, location.latitude]"
                  [style]="initialStyle"
                  (moveEnd)="moveEnd($event)"
-                 (load)="mapLoaded()"
+                 (mapLoad)="mapLoaded()"
                  [doubleClickZoom]="false"
                  [attributionControl]="false">
             <layers-view></layers-view>

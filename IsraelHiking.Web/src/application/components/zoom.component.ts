@@ -10,15 +10,15 @@ import { ResourcesService } from "../services/resources.service";
 })
 export class ZoomComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
-                private readonly host: MapComponent) {
+                private readonly mapComponent: MapComponent) {
         super(resources);
     }
 
     public zoomIn() {
-        this.host.mapInstance.zoomTo(Math.round(this.host.mapInstance.getZoom() + 1));
+        this.mapComponent.mapInstance.zoomTo(Math.round(this.mapComponent.mapInstance.getZoom() + 1));
     }
 
     public zoomOut() {
-        this.host.mapInstance.zoomTo(Math.round(this.host.mapInstance.getZoom() - 1));
+        this.mapComponent.mapInstance.zoomTo(Math.round(this.mapComponent.mapInstance.getZoom() - 1));
     }
 }

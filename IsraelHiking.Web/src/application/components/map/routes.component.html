@@ -13,10 +13,10 @@
                 'line-width': ['get', 'weight'],
                 'line-opacity': ['get', 'opacity']
             }"
-            (mouseEnter)="routeLineMouseEnter($event)"
-            (mouseMove)="routeLineMouseOver($event)"
-            (mouseLeave)="routeLineMouseLeave()"
-            (click)="routeLineClick($event)">
+            (layerMouseEnter)="routeLineMouseEnter($event)"
+            (layerMouseMove)="routeLineMouseOver($event)"
+            (layerMouseLeave)="routeLineMouseLeave()"
+            (layerClick)="routeLineClick($event)">
 </mgl-layer>
 <mgl-layer id="route-line-direction"
            type="symbol"
@@ -74,7 +74,7 @@
 
 <mgl-popup *ngIf="routePointPopupData != null"
            [lngLat]="[routePointPopupData.latlng.lng, routePointPopupData.latlng.lat]"
-           (close)="closeRoutePointPopup()">
+           (popupClose)="closeRoutePointPopup()">
     <route-point-overlay [latlng]="routePointPopupData.latlng" [segmentIndex]="routePointPopupData.segmentIndex" (closed)="closeRoutePointPopup()"></route-point-overlay>
 </mgl-popup>
 

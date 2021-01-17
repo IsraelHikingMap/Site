@@ -25,7 +25,7 @@
                 'icon-ignore-placement': true,
                 'icon-allow-overlap': true
             }"
-           (click)="openLocationPopup()">
+           (layerClick)="openLocationPopup()">
 </mgl-layer>
 <mgl-layer *ngIf="locationFeatures.features.length > 0" id="location-circle"
            type="fill"
@@ -46,7 +46,7 @@
                 'line-width': 2
             }">
 </mgl-layer>
-<mgl-popup *ngIf="locationLatLng" [lngLat]="locationLatLng" (close)="locationLatLng = null">
+<mgl-popup *ngIf="locationLatLng" [lngLat]="locationLatLng" (popupClose)="locationLatLng = null">
     <gps-location-overlay [latlng]="locationLatLng" (closed)="locationLatLng = null"></gps-location-overlay>
 </mgl-popup>
 
