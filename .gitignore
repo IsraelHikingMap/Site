@@ -195,8 +195,8 @@ ModelManifest.xml
 *.sqlite
 *.DS_Store
 /IsraelHiking.Web/wwwroot/**/*.*
-/IsraelHiking.Web/sources/translations/*.po
-/IsraelHiking.Web/sources/translations/*.pot
+/IsraelHiking.Web/src/translations/*.po
+/IsraelHiking.Web/src/translations/*.pot
 /IsraelHiking.Web/coverage
 /IsraelHiking.Web/TESTS-*
 /IsraelHiking.Web/www

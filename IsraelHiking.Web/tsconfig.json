@@ -2,7 +2,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "outDir": "./wwwroot/out-tsc",
-    "baseUrl": "sources",
+    "baseUrl": "src",
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,

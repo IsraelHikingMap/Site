@@ -16,7 +16,7 @@ if (fs.existsSync(secretsFile)) {
     throw new Error("The following file is needed: " + secretsFile + "\n" +
         "see 'https://github.com/IsraelHikingMap/Site/wiki/Adding-New-Text-and-Updating-the-Translations' for more information");
 }
-var potFilePath = "./sources/translations/IsraelHiking.pot";
+var potFilePath = "./src/translations/IsraelHiking.pot";
 
 // Extract to POT:
 var extractor = new GettextExtractor();
@@ -28,7 +28,7 @@ extractor.createJsParser([
                 context: 1
             }
         })
-]).parseFilesGlob("./sources/**/*.@(ts|js|tsx|jsx)");
+]).parseFilesGlob("./src/**/*.@(ts|js|tsx|jsx)");
 
 extractor.savePotFile(potFilePath);
 
