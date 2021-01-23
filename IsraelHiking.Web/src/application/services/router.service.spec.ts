@@ -8,7 +8,7 @@ import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 
-describe("RouterService", () => {
+describe("Router Service", () => {
     beforeEach(() => {
         let toastMockCreator = new ToastServiceMockCreator();
         TestBed.configureTestingModule({

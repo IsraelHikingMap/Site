@@ -1,7 +1,9 @@
 import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
+import { select } from "@angular-redux/store";
 import { remove } from "lodash";
 import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
+import { Observable } from "rxjs";
 
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -11,6 +13,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
 import { ILegendItem } from "./legend-item.component";
 import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducres/initial-state";
+import { ApplicationState, Language } from "../../models/models";
 import legendSectionsJson from "../../../content/legend/legend.json";
 
 export interface ILegendSection {
@@ -29,6 +32,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
     public selectedTabIndex: number;
     private selectedSection: ILegendSection;
 
+    @select((state: ApplicationState) => state.configuration.language)
+    private language$: Observable<Language>;
+
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
                 private readonly angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
@@ -41,7 +47,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.selectedSection = null;
         this.legendSections = [];
 
-        this.resources.languageChanged.subscribe(() => {
+        this.language$.subscribe(() => {
             this.initalizeLegendSections();
         });
     }

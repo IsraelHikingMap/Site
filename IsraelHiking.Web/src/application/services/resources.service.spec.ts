@@ -1,6 +1,9 @@
-import { TestBed, inject, waitForAsync } from "@angular/core/testing";
+import { TestBed, inject } from "@angular/core/testing";
+import { MockNgRedux, NgReduxTestingModule } from "@angular-redux/store/testing";
+
 import { ResourcesService } from "./resources.service";
 import { GetTextCatalogService } from "./gettext-catalog.service";
+import { NgModuleResolver } from "@angular/compiler";
 
 export class GetTextCatalogMockCreator {
     public getTextCatalogService: GetTextCatalogService;
@@ -16,6 +19,7 @@ describe("ResourcesService", () => {
     beforeEach(() => {
         let mockCreator = new GetTextCatalogMockCreator();
         TestBed.configureTestingModule({
+            imports: [NgReduxTestingModule],
             providers: [
                 { provide: GetTextCatalogService, useValue: mockCreator.getTextCatalogService },
                 ResourcesService
@@ -23,17 +27,21 @@ describe("ResourcesService", () => {
         });
     });
 
-    it("Should have available languages on startup", inject([ResourcesService], (service: ResourcesService) => {
-        expect(service.availableLanguages.length).toBeGreaterThan(0);
-    }));
-
     it("Should faciliate language change to english and raise event", inject([ResourcesService], (service: ResourcesService) => {
         let eventRaied = false;
-        service.languageChanged.subscribe(() => { eventRaied = true; });
 
-        let promise = service.setLanguage(service.availableLanguages[1]).then(() => {
-            expect(service.currentLanguage.code).toBe(service.availableLanguages[1].code);
-            expect(eventRaied).toBeTruthy();
+        MockNgRedux.getInstance().getState = () => ({
+            configuration: {
+                language: {
+                    code: "he"
+                }
+            }
+        });
+        let spy = spyOn(MockNgRedux.getInstance(), "dispatch");
+
+        let promise = service.setLanguage({ code: "he", label: "label", rtl: true}).then(() => {
+            expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
+            expect(spy).toHaveBeenCalled();
         });
         return promise;
     }));

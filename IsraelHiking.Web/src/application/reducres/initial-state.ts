@@ -22,8 +22,13 @@ export const initialState =
             isAutomaticRecordingUpload: true,
             // isFindMissingRoutesAfterUpload: false,
             isGotLostWarnings: false,
-            version: "9.6"
-        } as Configuration,
+            isShowBatteryConfirmation: true,
+            version: "9.6",
+            language: {
+                code: "he",
+                rtl: true
+            }
+        },
         location: {
             longitude: 35.12,
             latitude: 31.773,

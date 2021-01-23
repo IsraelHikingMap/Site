@@ -3,7 +3,6 @@ import { MatDialog } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
 import { select, NgRedux } from "@angular-redux/store";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
-import { SharedStorage } from "ngx-store";
 import { take, orderBy } from "lodash";
 import { Observable, Subscription } from "rxjs";
 
@@ -13,7 +12,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
-import { RunningContextService } from "application/services/running-context.service";
+import { RunningContextService } from "../../services/running-context.service";
 import { ApplicationState, ShareUrl } from "../../models/models";
 
 @Component({
@@ -33,9 +32,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     @select((state: ApplicationState) => state.shareUrlsState.shareUrls)
     public shareUrls$: Observable<ShareUrl[]>;
 
-    @SharedStorage()
     private sessionSearchTerm = "";
-
     private page: number;
     private subscriptions: Subscription[];
 

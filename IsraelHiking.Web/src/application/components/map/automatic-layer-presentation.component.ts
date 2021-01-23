@@ -1,14 +1,14 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
+import { NgRedux, select } from "@angular-redux/store";
 import { MapComponent } from "ngx-mapbox-gl";
 import { RasterSource, RasterLayout, Layer, Style, Sources } from "mapbox-gl";
-import { Subscription } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 
+import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
-import { BaseMapComponent } from "../base-map.component";
 import { ConnectionService } from "../../services/connection.service";
-import { NgRedux } from "@angular-redux/store";
-import { ApplicationState, EditableLayer } from "../../models/models";
+import { ApplicationState, EditableLayer, Language } from "../../models/models";
 
 @Component({
     selector: "auto-layer",
@@ -29,13 +29,16 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     @Input()
     public layerData: EditableLayer;
 
-    private rasterSourceId;
-    private rasterLayerId;
+    private rasterSourceId: string;
+    private rasterLayerId: string;
     private sourceAdded: boolean;
     private subscriptions: Subscription[];
     private jsonSourcesIds: string[];
     private jsonLayersIds: string[];
     private hasInternetAccess: boolean;
+
+    @select((state: ApplicationState) => state.configuration.language)
+    private language$: Observable<Language>;
 
     constructor(resources: ResourcesService,
                 private readonly mapComponent: MapComponent,
@@ -63,7 +66,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             await this.createLayer();
             this.sourceAdded = true;
         }
-        this.subscriptions.push(this.resources.languageChanged.subscribe(async () => {
+        this.subscriptions.push(this.language$.subscribe(async () => {
             if (this.sourceAdded) {
                 this.removeLayer(this.layerData.address);
                 await this.createLayer();

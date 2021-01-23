@@ -49,7 +49,7 @@
                     <a mat-button fxFill [href]="whatsappShareAddress" [target]="'_blank'" matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp"><i class="fa icon-whatsapp fa-lg"></i></a>
                 </div>
                 <div fxFlex>
-                    <button mat-button fxFill ngxClipboard [cbContent]="shareAddress" matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard"><i class="fa icon-clipboard fa-lg"></i></button>
+                    <button mat-button fxFill [cdkCopyToClipboard]="shareAddress" matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard"><i class="fa icon-clipboard fa-lg"></i></button>
                 </div>
                 <div fxFlex>
                     <a mat-button fxFill [href]="nakebCreateHikeAddress" [target]="'_blank'" matTooltip="{{resources.createNakebHike}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share nakeb"><i class="fa icon-nakeb fa-lg"></i></a>

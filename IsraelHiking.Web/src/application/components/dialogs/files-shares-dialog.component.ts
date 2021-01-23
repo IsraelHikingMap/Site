@@ -5,13 +5,13 @@ import { every } from "lodash";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
-import { DataContainerService } from "application/services/data-container.service";
-import { DatabaseService } from "application/services/database.service";
-import { FileService, IFormatViewModel } from "application/services/file.service";
-import { ResourcesService } from "application/services/resources.service";
-import { ToastService } from "application/services/toast.service";
+import { DataContainerService } from "../../services/data-container.service";
+import { DatabaseService } from "../../services/database.service";
+import { FileService, IFormatViewModel } from "../../services/file.service";
+import { ResourcesService } from "../../services/resources.service";
+import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
-import { SetOfflineLastModifiedAction } from "application/reducres/offline.reducer";
+import { SetOfflineLastModifiedAction } from "../../reducres/offline.reducer";
 import { ApplicationState, DataContainer } from "../../models/models";
 
 @Component({

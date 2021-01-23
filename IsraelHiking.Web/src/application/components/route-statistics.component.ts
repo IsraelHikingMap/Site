@@ -14,7 +14,7 @@ import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
-import { LatLngAlt, RouteData, ApplicationState } from "../models/models";
+import { LatLngAlt, RouteData, ApplicationState, Language } from "../models/models";
 
 declare type DragState = "start" | "drag" | "none";
 
@@ -104,6 +104,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     @select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
     public statisticsVisible$: Observable<boolean>;
+
+    @select((state: ApplicationState) => state.configuration.language)
+    public language$: Observable<Language>;
 
     private statistics: IRouteStatistics;
     private chartElements: IChartElements;
@@ -230,7 +233,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.componentSubscriptions.push(this.selectedRouteId$.subscribe(() => {
             this.routeChanged();
         }));
-        this.componentSubscriptions.push(this.resources.languageChanged.subscribe(() => {
+        this.componentSubscriptions.push(this.language$.subscribe(() => {
             this.redrawChart();
         }));
         this.componentSubscriptions.push(this.geoLocationService.positionChanged.subscribe(p => {

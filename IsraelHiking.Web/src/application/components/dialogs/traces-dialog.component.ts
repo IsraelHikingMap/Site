@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material/dialog";
-import { SharedStorage } from "ngx-store";
 import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash";
 import { NgRedux, select } from "@angular-redux/store";
@@ -37,9 +36,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     @select((state: ApplicationState) => state.tracesState.traces)
     public traces$: Observable<Trace[]>;
 
-    @SharedStorage()
     private sessionSearchTerm = "";
-
     private page: number;
     private tracesChangedSubscription: Subscription;
 

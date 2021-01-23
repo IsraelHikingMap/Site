@@ -1,29 +1,29 @@
 import { Component, OnDestroy } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { NgRedux, select } from "@angular-redux/store";
-import { LocalStorage } from "ngx-store";
 import { Subscription, Observable } from "rxjs";
 import { Device } from "@ionic-native/device/ngx";
 import { AppVersion } from "@ionic-native/app-version/ngx";
 import { EmailComposer } from "@ionic-native/email-composer/ngx";
 
 import { BaseMapComponent } from "./base-map.component";
-import { ResourcesService } from "application/services/resources.service";
-import { AuthorizationService } from "application/services/authorization.service";
-import { RunningContextService } from "application/services/running-context.service";
-import { GeoLocationService } from "application/services/geo-location.service";
-import { LoggingService } from "application/services/logging.service";
-import { ToastService } from "application/services/toast.service";
-import { FileService } from "application/services/file.service";
-import { LayersService } from "application/services/layers/layers.service";
-import { SidebarService } from "application/services/sidebar.service";
+import { ResourcesService } from "../services/resources.service";
+import { AuthorizationService } from "../services/authorization.service";
+import { RunningContextService } from "../services/running-context.service";
+import { GeoLocationService } from "../services/geo-location.service";
+import { LoggingService } from "../services/logging.service";
+import { ToastService } from "../services/toast.service";
+import { FileService } from "../services/file.service";
+import { LayersService } from "../services/layers/layers.service";
+import { SidebarService } from "../services/sidebar.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
-import { SetUIComponentVisibilityAction } from "application/reducres/ui-components.reducer";
+import { SetUIComponentVisibilityAction } from "../reducres/ui-components.reducer";
+import { SetAgreeToTermsAction } from "../reducres/user.reducer";
 import { UserInfo, ApplicationState } from "../models/models";
 
 @Component({
@@ -52,9 +52,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
 
     @select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
     public statisticsVisible$: Observable<boolean>;
-
-    @LocalStorage()
-    public agreedToTheTermsOfService = false;
 
     constructor(resources: ResourcesService,
                 private readonly emailComposer: EmailComposer,
@@ -112,11 +109,11 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             this.toastService.warning(this.resources.unableToLogin);
             return;
         }
-        if (!this.agreedToTheTermsOfService) {
+        if (!this.ngRedux.getState().userState.agreedToTheTermsOfService) {
             let component = this.dialog.open(TermsOfServiceDialogComponent);
             component.afterClosed().subscribe((results: string) => {
                 if (results === "true") {
-                    this.agreedToTheTermsOfService = true;
+                    this.ngRedux.dispatch(new SetAgreeToTermsAction({agree: true}));
                 }
             });
         } else {

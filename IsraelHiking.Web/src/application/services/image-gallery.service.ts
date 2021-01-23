@@ -9,9 +9,9 @@ export class ImageGalleryService {
     public open(urls: string[], index?: number) {
         let images = [];
         // direction of next image is opposite from current UI implementation - thus reverting order
-        for (let url of urls) {            
+        for (let url of urls) {
             images.unshift({ path: url } as Image);
         }
-        this.gallery.load({ images, index: urls.length -1 -index });
+        this.gallery.load({ images, index: urls.length - 1 - index });
     }
 }

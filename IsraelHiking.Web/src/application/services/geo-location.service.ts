@@ -13,8 +13,8 @@ import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
+import { SetGeoLocationStateAction } from "../reducres/in-memory.reducer";
 import { ApplicationState, ILatLngTime } from "../models/models";
-import { SetGeoLocationStateAction } from "application/reducres/in-memory.reducer";
 
 @Injectable()
 export class GeoLocationService {

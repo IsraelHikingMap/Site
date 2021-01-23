@@ -2,8 +2,8 @@ import { Component } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 
 import { BaseMapComponent } from "./base-map.component";
-import { ResourcesService } from "application/services/resources.service";
-import { SetPannedAction } from "application/reducres/in-memory.reducer";
+import { ResourcesService } from "../services/resources.service";
+import { SetPannedAction } from "../reducres/in-memory.reducer";
 import { ApplicationState } from "../models/models";
 
 @Component({

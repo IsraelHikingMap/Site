@@ -26,7 +26,7 @@
                             <div fxFlex><a [href]="shareLinks.facebook" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook poi"><i class="fa icon-facebook"></i></a></div>
                             <div fxFlex><a [href]="shareLinks.whatsapp" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp poi"><i class="fa icon-whatsapp"></i></a></div>
                             <div fxFlex><a [href]="shareLinks.waze" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Navigate with waze"><i class="fa icon-waze"></i></a></div>
-                            <div fxFlex><button fxFill mat-button ngxClipboard [cbContent]="shareLinks.poiLink" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard poi"><i class="fa icon-clipboard"></i></button></div>
+                            <div fxFlex><button fxFill mat-button [cdkCopyToClipboard]="shareLinks.poiLink" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard poi"><i class="fa icon-clipboard"></i></button></div>
                         </div>
                     </div>
                 </mat-menu>

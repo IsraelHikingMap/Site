@@ -1,24 +1,14 @@
 import { Injectable } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
-import { ReplaySubject } from "rxjs";
-import { LocalStorage } from "ngx-store";
-import { GetTextCatalogService } from "./gettext-catalog.service";
-import { Urls } from "../urls";
-export type LanguageCode = "en-US" | "he";
+import { NgRedux } from "@angular-redux/store";
 
-export interface ILanguage {
-    code: LanguageCode;
-    rtl: boolean;
-    label: string;
-    tilesFolder: string;
-}
+import { GetTextCatalogService } from "./gettext-catalog.service";
+import { SetLanguageAction } from "../reducres/configuration.reducer";
+import { ApplicationState, Language } from "../models/models";
+import { Urls } from "../urls";
 
 @Injectable()
 export class ResourcesService {
-    @LocalStorage()
-    public currentLanguage: ILanguage = null;
-    public availableLanguages: ILanguage[];
-    public languageChanged: ReplaySubject<any>;
 
     public direction: Direction;
     public start: string;
@@ -31,6 +21,7 @@ export class ResourcesService {
     public editRoutePoints = "editing-route-layer-points";
     public editRouteLines = "editing-route-layer-lines";
     public locationIcon = "location-icon-layer";
+
     // All the text in the app //
     /////////////////////////////
     public about: string;
@@ -421,26 +412,12 @@ export class ResourcesService {
     public legendQuarry: string;
     public legendEmpty: string;
 
-    constructor(private gettextCatalog: GetTextCatalogService) {
-        this.availableLanguages = [
-            {
-                code: "he",
-                rtl: true,
-                label: "עברית",
-                tilesFolder: "/Hebrew"
-            },
-            {
-                code: "en-US",
-                rtl: false,
-                label: "English",
-                tilesFolder: "/English"
-            }
-        ];
-        this.languageChanged = new ReplaySubject<{}>();
-        if (!this.currentLanguage) {
-            this.currentLanguage = this.availableLanguages[0];
-        }
-        this.setLanguage(this.currentLanguage);
+    constructor(private readonly gettextCatalog: GetTextCatalogService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
+    }
+
+    public async initialize() {
+        await this.setLanguage(this.ngRedux.getState().configuration.language);
     }
 
     private setRtl = (rtl: boolean) => {
@@ -455,11 +432,8 @@ export class ResourcesService {
         }
     }
 
-    public setLanguage = async (language: ILanguage): Promise<void> => {
-        this.setRtl(language.rtl);
-        this.gettextCatalog.setCurrentLanguage(language.code);
+    public setLanguage = async (language: Language): Promise<void> => {
         await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1610713268062");
-
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -876,8 +850,9 @@ export class ResourcesService {
         this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
         this.legendEmpty = this.gettextCatalog.getString("No legend for this map...");
 
-        this.currentLanguage = language;
-        this.languageChanged.next(this.currentLanguage);
+        this.setRtl(language.rtl);
+        this.gettextCatalog.setCurrentLanguage(language.code);
+        this.ngRedux.dispatch(new SetLanguageAction({language}));
     }
 
     public translate(word: string): string {
@@ -904,7 +879,7 @@ export class ResourcesService {
     }
 
     public getCurrentLanguageCodeSimplified = (): string => {
-        return this.currentLanguage.code.split("-")[0];
+        return this.ngRedux.getState().configuration.language.code.split("-")[0];
     }
 
     public getResizedImageUrl(imageUrl: string, size: number) {

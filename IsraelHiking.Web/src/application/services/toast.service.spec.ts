@@ -12,7 +12,8 @@ export class ToastServiceMockCreator {
         let snackBar = { open: () => null } as any as MatSnackBar;
         let matDialog = { open: () => null } as any as MatDialog;
         let loggingService = { error: () => { }, info: () => { } } as any as LoggingService;
-        this.resourcesService = new ResourcesService(new GetTextCatalogMockCreator().getTextCatalogService);
+        this.resourcesService = new ResourcesService(new GetTextCatalogMockCreator().getTextCatalogService,
+            { getState: () => ({ configuration: { language: {code: "he" } as any}} as any)} as any);
         this.toastService = new ToastService(this.resourcesService, matDialog, snackBar, loggingService);
     }
 }

@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
-import { FacebookWarningDialogComponent } from "application/components/dialogs/facebook-warning-dialog.component";
+import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-warning-dialog.component";
 import { LoggingService } from "./logging.service";
 import { ScreenService } from "./screen.service";
 import { DatabaseService } from "./database.service";
@@ -16,10 +16,12 @@ import { RecordedRouteService } from "./recorded-route.service";
 import { DeviceOrientationService } from "./device-orientation.service";
 import { TracesService } from "./traces.service";
 import { OfflineFilesDownloadService } from "./offline-files-download.service";
+import { ResourcesService } from "./resources.service";
 
 @Injectable()
 export class ApplicationInitializeService {
     constructor(private readonly dialog: MatDialog,
+                private readonly resources: ResourcesService,
                 private readonly loggingService: LoggingService,
                 private readonly screenService: ScreenService,
                 private readonly databaseService: DatabaseService,
@@ -43,6 +45,7 @@ export class ApplicationInitializeService {
             await this.loggingService.info("Starting IHM Application Initialization");
             this.screenService.initialize();
             await this.databaseService.initialize();
+            await this.resources.initialize();
             this.applicationExitService.initialize();
             this.openWithService.initialize();
             this.purchaseService.initialize();

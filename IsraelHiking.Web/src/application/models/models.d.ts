@@ -15,6 +15,7 @@ export { UserInfo } from "./user-info";
 export { PointOfInterestExtended, PointOfInterest, Contribution } from "./point-of-interest";
 export { NorthEast } from "./north-east";
 export { CategoriesGroup, Category, IconColorLabel, CategoriesGroupType } from "./categories-group";
+export { Language, LanguageCode } from "./language";
 // states:
 export { ApplicationState } from "./state/application-state";
 export { Configuration } from "./state/configuration";

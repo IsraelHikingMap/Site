@@ -9,7 +9,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { AuthorizationService } from "../../services/authorization.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
-import { RunningContextService } from "application/services/running-context.service";
+import { RunningContextService } from "../../services/running-context.service";
 import { DataContainer, ShareUrl } from "../../models/models";
 
 @Component({

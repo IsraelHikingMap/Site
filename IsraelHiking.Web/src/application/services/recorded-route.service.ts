@@ -39,21 +39,18 @@ export class RecordedRouteService {
         let lastRecordedRoute = this.selectedRouteService.getRecordingRoute();
         if (lastRecordedRoute != null) {
             this.loggingService.info("[Record] Recording was interrupted");
-            this.resources.languageChanged.pipe(first()).toPromise().then(() => {
-                // let resources service get the strings
-                this.toastService.confirm({
-                    message: this.resources.continueRecording,
-                    type: "YesNo",
-                    confirmAction: () => {
-                        this.loggingService.info("[Record] User choose to continue recording");
-                        this.geoLocationService.enable();
-                        this.selectedRouteService.setSelectedRoute(lastRecordedRoute.id);
-                    },
-                    declineAction: () => {
-                        this.loggingService.info("[Record] User choose to stop recording");
-                        this.stopRecording();
-                    },
-                });
+            this.toastService.confirm({
+                message: this.resources.continueRecording,
+                type: "YesNo",
+                confirmAction: () => {
+                    this.loggingService.info("[Record] User choose to continue recording");
+                    this.geoLocationService.enable();
+                    this.selectedRouteService.setSelectedRoute(lastRecordedRoute.id);
+                },
+                declineAction: () => {
+                    this.loggingService.info("[Record] User choose to stop recording");
+                    this.stopRecording();
+                },
             });
         }
 

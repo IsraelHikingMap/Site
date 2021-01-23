@@ -3,4 +3,5 @@
 export interface UserState {
     userInfo: UserInfo;
     token: string;
+    agreedToTheTermsOfService: boolean;
 }

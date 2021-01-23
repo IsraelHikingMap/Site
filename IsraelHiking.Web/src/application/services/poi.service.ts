@@ -29,7 +29,8 @@ import {
     Category,
     IconColorLabel,
     CategoriesGroup,
-    PointOfInterest
+    PointOfInterest,
+    Language
 } from "../models/models";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite";
@@ -71,6 +72,9 @@ export class PoiService {
     @select((state: ApplicationState) => state.layersState.categoriesGroups)
     private categoriesGroups: Observable<CategoriesGroup[]>;
 
+    @select((state: ApplicationState) => state.configuration.language)
+    private language$: Observable<Language>;
+
     constructor(private readonly resources: ResourcesService,
                 private readonly httpClient: HttpClient,
                 private readonly ngZone: NgZone,
@@ -87,10 +91,6 @@ export class PoiService {
     ) {
         this.poisCache = [];
         this.poisChanged = new EventEmitter();
-
-        this.resources.languageChanged.subscribe(() => {
-            this.poisCache = [];
-        });
 
         this.poiGeojsonFiltered = {
             type: "FeatureCollection",
@@ -120,7 +120,10 @@ export class PoiService {
     }
 
     public async initialize() {
-        this.resources.languageChanged.subscribe(() => this.updatePois());
+        this.language$.subscribe(() => {
+            this.poisCache = [];
+            this.updatePois();
+        });
         this.categoriesGroups.subscribe(() => this.updatePois());
         await this.syncCategories();
         if (this.runningContextService.isCordova) {

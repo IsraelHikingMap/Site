@@ -27,15 +27,14 @@ import { MatSnackBarModule } from "@angular/material/snack-bar";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatTooltipModule } from "@angular/material/tooltip";
+import { ClipboardModule } from "@angular/cdk/clipboard";
 import { FlexLayoutModule } from "@angular/flex-layout";
-import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
-import { ClipboardModule } from "ngx-clipboard";
 import { Angulartics2Module } from "angulartics2";
 import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 import { NgProgressModule } from "@ngx-progressbar/core";
 import { NgProgressHttpModule } from "@ngx-progressbar/http";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
-import { IvyGalleryModule } from 'angular-gallery';
+import { IvyGalleryModule } from "angular-gallery";
 import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule } from "@angular-redux/store";
@@ -184,7 +183,6 @@ export function initializeApplication(injector: Injector) {
         imports: [
             CommonModule,
             BrowserModule,
-            WebStorageModule,
             HttpClientModule,
             BrowserAnimationsModule,
             MatDialogModule,
@@ -225,8 +223,6 @@ export function initializeApplication(injector: Injector) {
             HammerModule
         ],
         providers: [
-            SessionStorageService,
-            LocalStorageService,
             AuthorizationService,
             { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
             { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [Injector], multi: true },

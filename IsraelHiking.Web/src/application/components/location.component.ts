@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
 import { NgRedux, select } from "@angular-redux/store";
-import { LocalStorage } from "ngx-store";
 import { MapComponent } from "ngx-mapbox-gl";
 import { Observable } from "rxjs";
 
@@ -14,6 +13,7 @@ import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { ToggleDistanceAction, SetPannedAction } from "../reducres/in-memory.reducer";
+import { ConfigurationActions } from "../reducres/configuration.reducer";
 import { LatLngAlt, ApplicationState } from "../models/models";
 
 @Component({
@@ -22,9 +22,6 @@ import { LatLngAlt, ApplicationState } from "../models/models";
     styleUrls: ["./location.component.scss"]
 })
 export class LocationComponent extends BaseMapComponent {
-
-    @LocalStorage()
-    private showBatteryConfirmation = true;
 
     @select((state: ApplicationState) => state.inMemoryState.distance)
     public distance$: Observable<boolean>;
@@ -194,12 +191,12 @@ export class LocationComponent extends BaseMapComponent {
                 }
             });
         } else {
-            if (this.showBatteryConfirmation) {
+            if (this.ngRedux.getState().configuration.isShowBatteryConfirmation) {
                 this.toastService.confirm({
                     message: this.resources.makeSureBatteryOptimizationIsOff,
                     type: "Custom",
                     declineAction: () => {
-                        this.showBatteryConfirmation = false;
+                        this.ngRedux.dispatch(ConfigurationActions.isShowBatteryConfirmationAction);
                     },
                     customConfirmText: this.resources.ok,
                     customDeclineText: this.resources.dontShowThisMessageAgain

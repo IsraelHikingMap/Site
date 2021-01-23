@@ -10,7 +10,7 @@ import * as pako from "pako";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, ESRI, HIKING_TRAILS, BICYCLE_TRAILS } from "../reducres/initial-state";
+import { initialState } from "../reducres/initial-state";
 import { classToActionMiddleware } from "../reducres/reducer-action-decorator";
 import { rootReducer } from "../reducres/root.reducer";
 import { ApplicationState } from "../models/models";
@@ -268,26 +268,6 @@ export class DatabaseService {
         if (!this.runningContext.isCordova) {
             storedState.routes = initialState.routes;
             storedState.poiState = initialState.poiState;
-        }
-        if (storedState.configuration.version === "8.0") {
-            this.loggingService.info("[Database] Upgrading state from version 8.0 to 9.0");
-            storedState.configuration.version = "9.0";
-            for (let key of [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP]) {
-                let layer = storedState.layersState.baseLayers.find(l => l.key === key);
-                let layerToReplaceWith = initialState.layersState.baseLayers.find(l => l.key === key);
-                storedState.layersState.baseLayers.splice(storedState.layersState.baseLayers.indexOf(layer), 1, layerToReplaceWith);
-            }
-            let esriLayer = storedState.layersState.baseLayers.find(l => l.key === ESRI);
-            storedState.layersState.baseLayers.splice(storedState.layersState.baseLayers.indexOf(esriLayer), 1);
-            if (storedState.layersState.baseLayers.find(l => l.key === SATELLITE) == null) {
-                storedState.layersState.baseLayers.splice(2, 0, initialState.layersState.baseLayers.find(l => l.key === SATELLITE));
-            }
-            for (let key of [HIKING_TRAILS, BICYCLE_TRAILS]) {
-                let layer = storedState.layersState.overlays.find(l => l.key === key);
-                let layerToReplaceWith = initialState.layersState.overlays.find(l => l.key === key);
-                layerToReplaceWith.visible = layer.visible;
-                storedState.layersState.overlays.splice(storedState.layersState.overlays.indexOf(layer), 1, layerToReplaceWith);
-            }
         }
         return storedState;
     }
