@@ -11,7 +11,7 @@ import { Router } from "@angular/router";
 import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
-import { remove } from "lodash";
+import { remove } from "lodash-es";
 import { PointLike } from "mapbox-gl";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";

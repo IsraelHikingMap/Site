@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { minBy, maxBy, flatten, last } from "lodash";
+import { minBy, maxBy, flatten, last } from "lodash-es";
 import { parseString, Builder } from "isomorphic-xml2js";
 import { encode } from "base64-arraybuffer";
 import XmlBeautify from "xml-beautify";

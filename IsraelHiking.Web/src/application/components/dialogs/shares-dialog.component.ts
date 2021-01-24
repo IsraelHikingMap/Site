@@ -3,7 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
 import { select, NgRedux } from "@angular-redux/store";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
-import { take, orderBy } from "lodash";
+import { take, orderBy } from "lodash-es";
 import { Observable, Subscription } from "rxjs";
 
 import { BaseMapComponent } from "../base-map.component";

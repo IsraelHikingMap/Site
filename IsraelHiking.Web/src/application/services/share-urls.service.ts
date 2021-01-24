@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { NgRedux } from "@angular-redux/store";
-import { remove } from "lodash";
 import { timeout } from "rxjs/operators";
 
 import { HashService } from "./hash.service";

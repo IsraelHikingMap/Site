@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter } from "@angular/core";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
-import { some } from "lodash";
+import { some } from "lodash-es";
 
 import { SetSelectedRouteAction } from "../../../reducres/route-editing-state.reducer";
 import {

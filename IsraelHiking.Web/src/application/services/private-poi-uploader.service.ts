@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgRedux } from "@angular-redux/store";
-import { chain, flatten, map } from "lodash";
+import { chain } from "lodash-es";
 
 import { ResourcesService } from "./resources.service";
 import { PoiService } from "./poi.service";

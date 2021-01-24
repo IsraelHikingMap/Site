@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { NgRedux } from "@angular-redux/store";
-import { every } from "lodash";
+import { every } from "lodash-es";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";

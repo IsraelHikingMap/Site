@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
-import { orderBy, take } from "lodash";
+import { orderBy, take } from "lodash-es";
 import { NgRedux, select } from "@angular-redux/store";
 
 import { ResourcesService } from "../../services/resources.service";

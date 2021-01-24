@@ -1,4 +1,4 @@
-import { orderBy, remove, some } from "lodash";
+import { orderBy, remove, some } from "lodash-es";
 
 import { createReducerFromClass, ReduxAction, BaseAction } from "./reducer-action-decorator";
 import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS } from "./initial-state";

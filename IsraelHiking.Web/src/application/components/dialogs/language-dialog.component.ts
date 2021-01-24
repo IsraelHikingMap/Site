@@ -1,9 +1,9 @@
 import { Component } from "@angular/core";
+import { NgRedux } from "@angular-redux/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ApplicationState, Language, LanguageCode } from "../../models/models";
-import { NgRedux } from "@angular-redux/store";
 
 @Component({
     selector: "language-dialog",
@@ -34,7 +34,7 @@ export class LanguageDialogComponent extends BaseMapComponent {
         this.resources.setLanguage(language);
     }
 
-    public getLabel(code: LanguageCode) {
-        code === "he" ? "עברית" : "English"
+    public getLabel(code: LanguageCode): string {
+        return code === "he" ? "עברית" : "English";
     }
 }

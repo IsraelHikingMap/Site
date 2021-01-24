@@ -5,7 +5,7 @@ import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
 import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
-import { last } from "lodash";
+import { last } from "lodash-es";
 import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -141,13 +141,11 @@ export class FileService {
             : await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
 
         if (!this.runningContextService.isCordova) {
-            let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
+            let blobToSave = await fetch(`data:application/octet-stream;base64,${responseData}`).then(r => r.blob());
             this.nonAngularObjectsFactory.saveAsWrapper(blobToSave, fileName, { autoBom: false });
             return;
         }
-        let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
-            .replace("Z", "_") +
-            fileName.replace(/[/\\?%*:|"<>]/g, "-").split(" ").join("_");
+        fileName = fileName.replace(/[/\\?%*:|"<>]/g, "-");
         let contentType = format === "gpx" ? "application/gpx+xml" : "application/octet-stream";
         this.socialSharing.shareWithOptions({
             files: [`df:${fileName};data:${contentType};base64,${responseData}`]

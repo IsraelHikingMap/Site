@@ -3,7 +3,6 @@ import { Camera } from "@ionic-native/camera/ngx";
 import { StatusBar } from "@ionic-native/status-bar/ngx";
 
 import { environment } from "../../environments/environment";
-import { NonAngularObjectsFactory } from "../services/non-angular-objects.factory";
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
 
@@ -22,7 +21,6 @@ export class ImageCaptureDirective implements OnDestroy {
                 private readonly statusBar: StatusBar,
                 private readonly renderer: Renderer2,
                 private readonly ngZone: NgZone,
-                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
                 private readonly resources: ResourcesService,
                 private readonly toastService: ToastService) {
 
@@ -55,7 +53,7 @@ export class ImageCaptureDirective implements OnDestroy {
         });
         this.statusBar.overlaysWebView(true);
         this.statusBar.overlaysWebView(false);
-        let blob = this.nonAngularObjectsFactory.b64ToBlob("data:image/jpeg;base64," + base64ImageData);
+        let blob = await fetch(`data:image/jpeg;base64,${base64ImageData}`).then(r => r.blob());
         let changeEvent = {
             dataTransfer: {
                 files: [blob]

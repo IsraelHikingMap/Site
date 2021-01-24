@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
-import { first } from "rxjs/operators";
-import { last } from "lodash";
+import { last } from "lodash-es";
 
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { LoggingService } from "./logging.service";

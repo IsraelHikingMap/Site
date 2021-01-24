@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { NgRedux, select } from "@angular-redux/store";
-import { uniq } from "lodash";
+import { uniq } from "lodash-es";
 import { Observable, fromEvent } from "rxjs";
 import { timeout, throttleTime } from "rxjs/operators";
 import JSZip from "jszip";

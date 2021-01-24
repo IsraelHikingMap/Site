@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { last } from "lodash";
+import { last } from "lodash-es";
 
 import { SpatialService } from "./spatial.service";
 import { LatLngAlt, RouteData, ILatLngTime } from "../models/models";

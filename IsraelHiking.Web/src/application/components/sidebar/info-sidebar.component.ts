@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { select } from "@angular-redux/store";
-import { remove } from "lodash";
+import { remove } from "lodash-es";
 import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 import { Observable } from "rxjs";
 
