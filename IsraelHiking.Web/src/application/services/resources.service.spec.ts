@@ -39,7 +39,7 @@ describe("ResourcesService", () => {
         });
         let spy = spyOn(MockNgRedux.getInstance(), "dispatch");
 
-        let promise = service.setLanguage({ code: "he", label: "label", rtl: true}).then(() => {
+        let promise = service.setLanguage({ code: "he", rtl: true}).then(() => {
             expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
             expect(spy).toHaveBeenCalled();
         });

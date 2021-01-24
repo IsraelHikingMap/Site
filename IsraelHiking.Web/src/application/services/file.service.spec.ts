@@ -72,7 +72,6 @@ describe("FileService", () => {
 
             let promise = fileService.saveToFile("file.name", "format", {} as DataContainer).then(() => {
                 expect(nonAngularObjectsFactory.saveAsWrapper).toHaveBeenCalled();
-                expect(nonAngularObjectsFactory.b64ToBlob).toHaveBeenCalled();
             });
 
             mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));

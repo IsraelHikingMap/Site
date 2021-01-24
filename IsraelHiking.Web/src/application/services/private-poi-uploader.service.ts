@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { NgRedux } from "@angular-redux/store";
-import { chain } from "lodash-es";
+import { flatten } from "lodash-es";
 
 import { ResourcesService } from "./resources.service";
 import { PoiService } from "./poi.service";
@@ -51,11 +51,8 @@ export class PrivatePoiUploaderService {
         let message = `${this.resources.wouldYouLikeToUpdate} ${results.title || this.resources.translate(results.type)}?`;
         if (!results.title) {
             let categories = await this.poiService.getSelectableCategories();
-            let iconWithLabel = chain(categories)
-                .map(c => c.icons)
-                .flatten()
-                .find(i => i.icon === `icon-${results.type}`)
-                .value();
+            let iconWithLabel = flatten(categories.map(c => c.icons))
+                .find(i => i.icon === `icon-${results.type}`);
             if (iconWithLabel) {
                 let type = this.resources.translate(iconWithLabel.label);
                 message = `${this.resources.wouldYouLikeToUpdate} ${type}?`;
