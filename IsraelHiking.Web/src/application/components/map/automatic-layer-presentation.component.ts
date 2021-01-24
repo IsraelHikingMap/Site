@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
 import { NgRedux, select } from "@angular-redux/store";
 import { MapComponent } from "ngx-mapbox-gl";
-import { RasterSource, RasterLayout, Layer, Style, Sources } from "mapbox-gl";
+import { RasterSource, RasterLayout, Layer, Style, Sources, RasterLayer, AnyLayer } from "mapbox-gl";
 import { Observable, Subscription } from "rxjs";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -141,7 +141,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             paint: {
                 "raster-opacity": this.layerData.opacity || 1.0
             }
-        } as Layer;
+        } as RasterLayer;
         this.mapComponent.mapInstance.addLayer(layer, this.before);
     }
 
@@ -181,7 +181,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                     layer.source = this.layerData.key + "_" + layer.source;
                 }
                 this.jsonLayersIds.push(layer.id);
-                this.mapComponent.mapInstance.addLayer(layer, this.before);
+                this.mapComponent.mapInstance.addLayer(layer as AnyLayer, this.before);
             }
         }
     }

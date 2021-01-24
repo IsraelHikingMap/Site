@@ -88,7 +88,7 @@
     "@types/jasmine": "~3.6.0",
     "@types/jszip": "^3.4.1",
     "@types/lodash": "^4.14.167",
-    "@types/mapbox-gl": "^1.8.3",
+    "@types/mapbox-gl": "^1.13.0",
     "@types/node": "^12.11.1",
     "@types/pako": "^1.0.1",
     "codelyzer": "^6.0.0",
