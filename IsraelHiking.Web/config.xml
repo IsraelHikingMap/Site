@@ -34,6 +34,7 @@
     <icon density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
     <config-file target="AndroidManifest.xml" parent="/manifest">
       <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+      <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     </config-file>
     <config-file parent="/manifest/application/activity" target="AndroidManifest.xml">
       <intent-filter>
