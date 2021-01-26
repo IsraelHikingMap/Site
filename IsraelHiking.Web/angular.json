@@ -38,6 +38,13 @@
             ],
             "scripts": [
               "src/google-analytics.js"
+            ],
+            "allowedCommonJsDependencies": [
+              "geojson-rbush",
+              "@mapbox/mapbox-gl-geocoder",
+              "ohauth",
+              "redux-undo",
+              "file-saver"
             ]
           },
           "configurations": {
