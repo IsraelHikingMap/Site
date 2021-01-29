@@ -38,7 +38,7 @@
     <Content Remove="plugins\**" />
     <Content Remove="wwwroot\Bin\**" />
     <Content Remove="wwwroot\lib\**" />
-    <Content Remove="sources\**" />
+    <Content Remove="src\**" />
     <EmbeddedResource Remove="coverage\**" />
     <EmbeddedResource Remove="Logs\**" />
     <EmbeddedResource Remove="platforms\**" />
@@ -67,7 +67,7 @@
     <Content Include="IsraelHiking.Web.nlog">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="sources\content\legend\legend.json" />
+    <None Include="src\content\legend\legend.json" />
     <None Include="angular.json" />
     <None Include="package-lock.json" />
     <None Include="package.json" />

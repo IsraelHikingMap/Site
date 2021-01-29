@@ -5,27 +5,28 @@
   "projects": {
     "israel-hiking": {
       "root": "",
-      "sourceRoot": "sources",
+      "sourceRoot": "src",
       "projectType": "application",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "aot": true,
             "outputPath": "wwwroot",
-            "index": "sources/index.html",
-            "main": "sources/main.ts",
+            "index": "src/index.html",
+            "main": "src/main.ts",
             "tsConfig": "./tsconfig.app.json",
-            "polyfills": "sources/polyfills.ts",
+            "polyfills": "src/polyfills.ts",
             "assets": [
-              "sources/content",
-              "sources/translations",
-              "sources/resource-not-found.html",
-              "sources/empty-for-oauth.html",
-              "sources/googlef59316cdb0845a8c.html",
-              "sources/robots.txt",
-              "sources/cordova.js",
-              "sources/fonts/glyphs",
-              "sources/fonts/glyphs.json",
+              "src/content",
+              "src/translations",
+              "src/resource-not-found.html",
+              "src/empty-for-oauth.html",
+              "src/googlef59316cdb0845a8c.html",
+              "src/robots.txt",
+              "src/cordova.js",
+              "src/fonts/glyphs",
+              "src/fonts/glyphs.json",
               {
                 "glob": "**/mapbox-gl-rtl-text.js",
                 "input": "./node_modules/@mapbox/mapbox-gl-rtl-text",
@@ -33,18 +34,30 @@
               }
             ],
             "styles": [
-              "sources/scss/common.scss"
+              "src/scss/common.scss"
             ],
             "scripts": [
-              "sources/google-analytics.js"
+              "src/google-analytics.js"
+            ],
+            "allowedCommonJsDependencies": [
+              "geojson-rbush",
+              "@mapbox/mapbox-gl-geocoder",
+              "ohauth",
+              "redux-undo",
+              "file-saver"
             ]
           },
           "configurations": {
             "production": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
@@ -52,16 +65,21 @@
               "buildOptimizer": true,
               "fileReplacements": [
                 {
-                  "replace": "sources/environments/environment.ts",
-                  "with": "sources/environments/environment.prod.ts"
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
                 }
               ]
             },
             "cordova": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
@@ -71,15 +89,20 @@
               "baseHref": "./",
               "fileReplacements": [
                 {
-                  "replace": "sources/environments/environment.ts",
-                  "with": "sources/environments/environment.cordova.ts"
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.cordova.ts"
                 }
               ]
             },
             "cordova-debug": {
+              "budgets": [
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
+                }
+              ],
               "optimization": false,
               "sourceMap": true,
-              "extractCss": true,
               "namedChunks": false,
               "aot": false,
               "extractLicenses": true,
@@ -89,8 +112,8 @@
               "baseHref": "./",
               "fileReplacements": [
                 {
-                  "replace": "sources/environments/environment.ts",
-                  "with": "sources/environments/environment.cordova-debug.ts"
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.cordova-debug.ts"
                 }
               ]
             }
@@ -116,18 +139,18 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "main": "sources/test.ts",
+            "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
-            "polyfills": "sources/polyfills.ts",
+            "polyfills": "src/polyfills.ts",
             "tsConfig": "./tsconfig.spec.json",
             "scripts": [
-              "sources/google-analytics.js"
+              "src/google-analytics.js"
             ],
             "assets": [
-              "sources/content",
-              "sources/translations",
-              "sources/resource-not-found.html",
-              "sources/empty-for-oauth.html"
+              "src/content",
+              "src/translations",
+              "src/resource-not-found.html",
+              "src/empty-for-oauth.html"
             ]
           }
         },
@@ -152,10 +175,13 @@
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",
-      "styleext": "scss"
+      "style": "scss"
     },
     "@schematics/angular:directive": {
       "prefix": "app"
     }
+  },
+  "cli": {
+    "analytics": "e3974bec-e594-4e85-be50-efbf3d593d0a"
   }
 }

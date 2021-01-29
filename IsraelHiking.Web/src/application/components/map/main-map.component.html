@@ -1,0 +1,25 @@
+﻿<ng-progress [ngStyle]="{'z-index':1500}"></ng-progress>
+<sidebar></sidebar>
+<div fxLayout="row" style="height: 100%">
+    <div fxFlex>
+        <mgl-map [zoom]="[location.zoom]"
+                 [center]="[location.longitude, location.latitude]"
+                 [style]="initialStyle"
+                 (moveEnd)="moveEnd($event)"
+                 (mapLoad)="mapLoaded()"
+                 [doubleClickZoom]="false"
+                 [attributionControl]="false">
+            <layers-view></layers-view>
+            <routes></routes>
+            <traces></traces>
+            <zoom *ngIf="!isMobile() && !isApp()" #topLeftControl></zoom>
+            <location #topLeftControl *ngIf="isMobile() || !isIFrame()"></location>
+            <main-menu #topRightControl></main-menu>
+            <search #topRightControl *ngIf="!isIFrame()"></search>
+            <drawing #topRightControl *ngIf="!isIFrame()"></drawing>
+            <route-statistics #bottomRightControl></route-statistics>
+            <center-me #bottomRightControl></center-me>
+            <ihm-link *ngIf="!isApp()" #bottomLeftControl></ihm-link>
+        </mgl-map>
+    </div>
+</div>
