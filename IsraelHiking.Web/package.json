@@ -86,7 +86,7 @@
     "@angular/cli": "^8.3.22",
     "@angular/compiler-cli": "8.2.14",
     "@angular/language-service": "8.2.14",
-    "@mauron85/cordova-plugin-background-geolocation": "git+https://github.com/HarelM/cordova-plugin-background-geolocation.git",
+    "@mauron85/cordova-plugin-background-geolocation": "git+https://github.com/zstadler/cordova-plugin-background-geolocation.git",
     "@types/angular-gettext": "^2.1.33",
     "@types/file-saver": "2.0.1",
     "@types/jasmine": "^3.3.13",
