@@ -150,7 +150,7 @@ export class SelectedRouteService {
             ? this.getSelectedRoute().segments[0].latlngs[0]
             : this.getLastLatLng(this.getSelectedRoute());
         for (let routeData of this.routes) {
-            if (routeData.id === this.selectedRouteId || routeData.segments.length <= 0) {
+            if (routeData.id === this.selectedRouteId || routeData.segments.length <= 0 || routeData.state === "Hidden") {
                 continue;
             }
             if (SpatialService.getDistanceInMeters(this.getLastLatLng(routeData), latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
@@ -171,7 +171,7 @@ export class SelectedRouteService {
         let routeToReturn = null;
         let minimalDistance = SelectedRouteService.MERGE_THRESHOLD;
         for (let routeData of this.routes) {
-            if (routeData.id === this.recordingRouteId || routeData.segments.length <= 0) {
+            if (routeData.id === this.recordingRouteId || routeData.segments.length <= 0 || routeData.state === "Hidden") {
                 continue;
             }
             let previousLatLng = routeData.segments[0].latlngs[0];
