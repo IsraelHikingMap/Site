@@ -246,7 +246,7 @@ export class FileService {
         }
     }
 
-    public async zipAndStoreFile(content: string): Promise<string> {
+    public async compressTextToBase64Zip(content: string): Promise<string> {
         let zip = new JSZip();
         zip.file("log.txt", content);
         let data = await zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });

@@ -270,6 +270,7 @@ export class ResourcesService {
     public useTheCloudIconToGoOffline: string;
     public largeFilesUseWifi: string;
     public thisWillDeteleAllCurrentRoutesAreYouSure: string;
+    public pleaseFillReport: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -433,7 +434,7 @@ export class ResourcesService {
     }
 
     public setLanguage = async (language: Language): Promise<void> => {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1610713268062");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1612214835998");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -631,8 +632,6 @@ export class ResourcesService {
         this.statisticsAndHeightChart = this.gettextCatalog.getString("Statistics and Height Chart");
         this.shareMapOverlays = this.gettextCatalog.getString("Share maps overlays");
         this.measureDistanceFromCurrentLocation = this.gettextCatalog.getString("Measure distance from current location");
-        this.thisWillDeteleAllCurrentRoutesAreYouSure = this.gettextCatalog
-            .getString("This will delete all current routes. Are you sure?");
         this.files = this.gettextCatalog.getString("Files");
         this.shareLocation = this.gettextCatalog.getString("Share Location");
         this.facebookWarning = this.gettextCatalog.getString("Explanation on how to open Facebook link out side facebook");
@@ -702,6 +701,10 @@ export class ResourcesService {
         this.useTheCloudIconToGoOffline = this.gettextCatalog.getString("Use the cloud icon to go offline");
         this.largeFilesUseWifi = this.gettextCatalog
             .getString("You are about to download large files, you can change to wifi before clicking continue...");
+        this.thisWillDeteleAllCurrentRoutesAreYouSure = this.gettextCatalog
+            .getString("This will delete all current routes. Are you sure?");
+        this.pleaseFillReport = this.gettextCatalog
+            .getString("Please fill in the details of the issue in the e-mail message that will be shown soon and send it");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

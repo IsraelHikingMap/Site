@@ -166,10 +166,11 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         }
         this.toastService.info(this.resources.preparingDataForIssueReport);
         try {
+            this.loggingService.info("--- Reporting an issue ---");
             let logs = await this.loggingService.getLog();
-            let logBase64zipped = await this.fileService.zipAndStoreFile(logs);
+            let logBase64zipped = await this.fileService.compressTextToBase64Zip(logs);
             logs = await this.geoLocationService.getLog();
-            let logBase64zippedGeoLocation = await this.fileService.zipAndStoreFile(logs);
+            let logBase64zippedGeoLocation = await this.fileService.compressTextToBase64Zip(logs);
             let userInfo = this.userInfo || {
                 displayName: "non-registered user",
                 id: "----"
@@ -183,6 +184,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 `OS version: ${this.device.version}`,
                 `App version: ${await this.appVersion.getVersionNumber()}`
             ].join("\n");
+            this.toastService.info(this.resources.pleaseFillReport);
             this.emailComposer.open({
                 to: ["israelhikingmap@gmail.com"],
                 subject: "Issue reported by " + userInfo.displayName,
