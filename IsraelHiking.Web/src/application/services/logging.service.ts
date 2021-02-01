@@ -14,6 +14,7 @@ interface LogLine {
 @Injectable()
 export class LoggingService {
     private static readonly LOGGING_TABLE_NAME = "logging";
+    private static readonly MAX_LOG_LINES = 50000;
 
     private queue: LogLine[];
     private loggingDatabase: Dexie;
@@ -31,10 +32,13 @@ export class LoggingService {
         this.loggingDatabase.version(1).stores({
             logging: "date"
         });
-        let threeDaysAgo = new Date((new Date()).getTime() - (3 * 24 * 60 * 60 * 1000));
-        // remove older than 3 days
-        await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
-            .where("date").between(new Date(0), threeDaysAgo).delete();
+        let lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).count();
+        if (lines > LoggingService.MAX_LOG_LINES) {
+            let threeDaysAgo = new Date((new Date()).getTime() - (3 * 24 * 60 * 60 * 1000));
+            // remove older than 3 days
+            await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
+                .where("date").between(new Date(0), threeDaysAgo).delete();
+        }
 
         while (this.queue.length > 0) {
             this.writeToStorage(this.queue[0]);
@@ -120,7 +124,15 @@ export class LoggingService {
 
     public async getLog(): Promise<string> {
         let logLines = [] as string[];
-        await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).each((l) => { logLines.push(this.logLineToString(l)); });
+        let lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).count();
+        let skip = lines > LoggingService.MAX_LOG_LINES ? lines - LoggingService.MAX_LOG_LINES : 0;
+        await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).each((l) => {
+            if (skip > 0) {
+                skip--;
+                return;
+            }
+            logLines.push(this.logLineToString(l)); 
+        });
         return logLines.join("\n");
     }
 
