@@ -40,7 +40,7 @@ export interface IRouteStatistics {
 
 @Injectable()
 export class RouteStatisticsService {
-    public getStatisticsByRange(route: RouteData, start: IRouteStatisticsPoint, end: IRouteStatisticsPoint) {
+    public getStatisticsByRange(route: RouteData, start: IRouteStatisticsPoint, end: IRouteStatisticsPoint): IRouteStatistics {
         let routeStatistics = {
             points: [] as IRouteStatisticsPoint[],
             length: 0,
