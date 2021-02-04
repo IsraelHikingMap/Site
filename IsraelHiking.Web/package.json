@@ -64,7 +64,7 @@
     "mapbox-gl": "1.10.0-beta.1",
     "minisearch": "^3.0.2",
     "ngx-infinite-scroll": "^10.0.1",
-    "ngx-mapbox-gl": "^5.0.0",
+    "ngx-mapbox-gl": "^6.0.1",
     "ohauth": "1.0.0",
     "pako": "^2.0.3",
     "piexifjs": "1.0.6",
