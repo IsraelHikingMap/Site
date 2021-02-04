@@ -10,7 +10,6 @@ import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
-import { Urls } from "../urls";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
@@ -18,6 +17,7 @@ import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { DataContainer } from "../models/models";
+import { Urls } from "../urls";
 
 export interface IFormatViewModel {
     label: string;
@@ -242,7 +242,7 @@ export class FileService {
             let styleText = (await zip.file(styleFileName).async("text")).trim();
             await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName.replace("styles/", ""), styleText,
                 { append: false, replace: true, truncate: 0 });
-            this.loggingService.debug(`Write style finished succefully: ${styleFileName}`);
+            this.loggingService.info(`[Files] Write style finished succefully: ${styleFileName}`);
         }
     }
 
@@ -278,7 +278,7 @@ export class FileService {
         try {
             return await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.cacheDirectory, fileName);
         } catch (ex) {
-            this.loggingService.warning("Unable to get file from cache: " + ex.message);
+            this.loggingService.warning("[Files] Unable to get file from cache: " + ex.message);
             return null;
         }
     }
