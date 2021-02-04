@@ -10,12 +10,12 @@ import * as pako from "pako";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import { initialState } from "../reducres/initial-state";
-import { classToActionMiddleware } from "../reducres/reducer-action-decorator";
-import { rootReducer } from "../reducres/root.reducer";
-import { ApplicationState } from "../models/models";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
+import { classToActionMiddleware } from "../reducres/reducer-action-decorator";
+import { initialState } from "../reducres/initial-state";
+import { rootReducer } from "../reducres/root.reducer";
+import { ApplicationState, ShareUrl } from "../models/models";
 
 export interface ImageUrlAndData {
     imageUrl: string;
@@ -33,11 +33,14 @@ export class DatabaseService {
     private static readonly POIS_LOCATION_COLUMN = "[properties.poiGeolocation.lat+properties.poiGeolocation.lon]";
     private static readonly IMAGES_DB_NAME = "Images";
     private static readonly IMAGES_TABLE_NAME = "images";
+    private static readonly SHARE_URLS_DB_NAME = "ShareUrls";
+    private static readonly SHARE_URLS_TABLE_NAME = "shareUrls";
 
     private stateDatabase: Dexie;
     // HM TODO: only for cordova?
     private poisDatabase: Dexie;
     private imagesDatabase: Dexie;
+    private shareUrlsDatabase: Dexie;
     private sourceDatabases: Map<string, SQLiteObject>;
     private updating: boolean;
 
@@ -63,6 +66,10 @@ export class DatabaseService {
         this.imagesDatabase = new Dexie(DatabaseService.IMAGES_DB_NAME);
         this.imagesDatabase.version(1).stores({
             images: "imageUrl"
+        });
+        this.shareUrlsDatabase = new Dexie(DatabaseService.SHARE_URLS_DB_NAME);
+        this.shareUrlsDatabase.version(1).stores({
+            shareUrls: "id"
         });
         this.initCustomTileLoadFunction();
         if (this.runningContext.isIFrame) {
@@ -219,7 +226,7 @@ export class DatabaseService {
     }
 
     public async getPoisForClustering(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
-        this.loggingService.debug("[Database] Getting POIs for clutering from DB");
+        this.loggingService.debug("[Database] Getting POIs for clustering from DB");
         let features = await this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).toArray();
         let slimPois = features.map((feature: GeoJSON.Feature) => {
             let geoLocation = feature.properties.poiGeolocation;
@@ -256,6 +263,18 @@ export class DatabaseService {
             return imageAndData.data;
         }
         return null;
+    }
+
+    public storeShareUrl(shareUrl: ShareUrl): Promise<any> {
+        return this.shareUrlsDatabase.table(DatabaseService.SHARE_URLS_TABLE_NAME).put(shareUrl);
+    }
+
+    public getShareUrlById(id: string): Promise<ShareUrl> {
+        return this.shareUrlsDatabase.table(DatabaseService.SHARE_URLS_TABLE_NAME).get(id);
+    }
+
+    public deleteShareUrlById(id: string): Promise<void> {
+        return this.shareUrlsDatabase.table(DatabaseService.SHARE_URLS_TABLE_NAME).delete(id);
     }
 
     private initialStateUpgrade(dbState: ApplicationState): ApplicationState {

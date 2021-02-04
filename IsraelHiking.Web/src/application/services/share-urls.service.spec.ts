@@ -11,11 +11,17 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { Urls } from "../urls";
 import { ShareUrl, DataContainer } from "../models/models";
+import { DatabaseService } from "./database.service";
 
 describe("Share Urls Service", () => {
     beforeEach(() => {
         let hashService = {
             getFullUrlFromShareId: jasmine.createSpy("getFullUrlFromShareId")
+        };
+        let databaseService = {
+            getShareUrlById: () => {},
+            storeShareUrl: () => {},
+            deleteShareUrlById: jasmine.createSpy()
         };
         TestBed.configureTestingModule({
             imports: [
@@ -26,6 +32,7 @@ describe("Share Urls Service", () => {
             providers: [
                 { provide: HashService, useValue: hashService },
                 { provide: LoggingService, useValue: {} },
+                { provide: DatabaseService, useValue: databaseService },
                 RunningContextService,
                 Device,
                 WhatsAppService,
@@ -47,14 +54,15 @@ describe("Share Urls Service", () => {
             return promise;
         }));
 
-    it("Should delete share url", inject([ShareUrlsService, HttpTestingController],
-        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
+    it("Should delete share url", inject([ShareUrlsService, HttpTestingController, DatabaseService],
+        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
 
             let shareUrl = { id: "42" } as ShareUrl;
             let spy = spyOn(MockNgRedux.getInstance(), "dispatch");
 
             let promise = shareUrlsService.deleteShareUrl(shareUrl).then(() => {
                 expect(spy).toHaveBeenCalled();
+                expect(databaseService.deleteShareUrlById).toHaveBeenCalled();
             });
 
             mockBackend.expectOne(Urls.urls + shareUrl.id).flush({});

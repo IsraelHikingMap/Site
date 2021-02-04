@@ -5,12 +5,17 @@ import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-actio
 const SET_OFFLINE_AVAILABLE = "SET_OFFLINE_AVAILABLE";
 const SET_OFFLINE_LAST_MODIFIED_DATE = "SET_OFFLINE_LAST_MODIFIED_DATE";
 const SET_OFFLINE_POIS_LAST_MODIFIED_DATE = "SET_OFFLINE_POIS_LAST_MODIFIED_DATE";
+const SET_SHARE_URLS_LAST_MODIFIED_DATE = "SET_SHARE_URLS_LAST_MODIFIED_DATE";
 
 export interface SetOfflineAvailablePayload {
     isAvailble: boolean;
 }
 
 export interface SetOfflineLastModifiedPayload {
+    lastModifiedDate: Date;
+}
+
+export interface SetShareUrlsLastModifiedPayload {
     lastModifiedDate: Date;
 }
 
@@ -29,6 +34,12 @@ export class SetOfflineLastModifiedAction extends BaseAction<SetOfflineLastModif
 export class SetOfflinePoisLastModifiedDateAction extends BaseAction<SetOfflineLastModifiedPayload> {
     constructor(payload: SetOfflineLastModifiedPayload) {
         super(SET_OFFLINE_POIS_LAST_MODIFIED_DATE, payload);
+    }
+}
+
+export class SetShareUrlsLastModifiedDateAction extends BaseAction<SetShareUrlsLastModifiedPayload> {
+    constructor(payload: SetShareUrlsLastModifiedPayload) {
+        super(SET_SHARE_URLS_LAST_MODIFIED_DATE, payload);
     }
 }
 
@@ -54,6 +65,14 @@ export class OfflineReducer {
         return {
             ...lastState,
             poisLastModifiedDate: action.payload.lastModifiedDate
+        };
+    }
+
+    @ReduxAction(SET_SHARE_URLS_LAST_MODIFIED_DATE)
+    public setShareUrlsLastModified(lastState: OfflineState, action: SetShareUrlsLastModifiedDateAction): OfflineState {
+        return {
+            ...lastState,
+            shareUrlsLastModifiedDate: action.payload.lastModifiedDate
         };
     }
 }

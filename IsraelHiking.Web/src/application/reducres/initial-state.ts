@@ -138,7 +138,9 @@ export const initialState =
         },
         offlineState: {
             isOfflineAvailable: false,
-            lastModifiedDate: null
+            lastModifiedDate: null,
+            poisLastModifiedDate: null,
+            shareUrlsLastModifiedDate: null
         },
         uiComponentsState: {
             drawingVisible: false,
