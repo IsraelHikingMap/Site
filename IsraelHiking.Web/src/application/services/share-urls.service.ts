@@ -7,10 +7,10 @@ import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
-import { SetShareUrlAction } from "../reducres/in-memory.reducer";
-import { UpdateShareUrlAction, AddShareUrlAction, RemoveShareUrlAction } from "../reducres/share-urls.reducer";
+import { SetShareUrlAction } from "../reducers/in-memory.reducer";
+import { UpdateShareUrlAction, AddShareUrlAction, RemoveShareUrlAction } from "../reducers/share-urls.reducer";
 import { ShareUrl, DataContainer, ApplicationState } from "../models/models";
-import { SetShareUrlsLastModifiedDateAction } from "application/reducres/offline.reducer";
+import { SetShareUrlsLastModifiedDateAction } from "application/reducers/offline.reducer";
 import { Urls } from "../urls";
 
 interface IShareUrlSocialLinks {

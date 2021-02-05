@@ -10,7 +10,7 @@ import { RoutesFactory } from "../../../services/layers/routelayers/routes.facto
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
-import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducres/routes.reducer";
+import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducers/routes.reducer";
 import { DataContainer, RouteData, ApplicationState, LatLngAlt } from "../../../models/models";
 
 @Component({

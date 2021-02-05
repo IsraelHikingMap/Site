@@ -12,9 +12,9 @@ import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { classToActionMiddleware } from "../reducres/reducer-action-decorator";
-import { initialState } from "../reducres/initial-state";
-import { rootReducer } from "../reducres/root.reducer";
+import { classToActionMiddleware } from "../reducers/reducer-action-decorator";
+import { initialState } from "../reducers/initial-state";
+import { rootReducer } from "../reducers/root.reducer";
 import { ApplicationState, ShareUrl } from "../models/models";
 
 export interface ImageUrlAndData {

@@ -15,9 +15,9 @@ import { OverlayEditDialogComponent } from "../dialogs/layers/overlay-edit-dialo
 import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
-import { SetSelectedRouteAction } from "../../reducres/route-editing-state.reducer";
-import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction } from "../../reducres/routes.reducer";
-import { ExpandGroupAction, CollapseGroupAction } from "../../reducres/layers.reducer";
+import { SetSelectedRouteAction } from "../../reducers/route-editing-state.reducer";
+import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction } from "../../reducers/routes.reducer";
+import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";

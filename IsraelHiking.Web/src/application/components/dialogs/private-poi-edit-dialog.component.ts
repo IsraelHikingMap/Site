@@ -11,7 +11,7 @@ import { NavigateHereService } from "../../services/navigate-here.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
-import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducres/routes.reducer";
+import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
 import { LinkData, MarkerData, ApplicationState } from "../../models/models";
 
 interface IIconsGroup {

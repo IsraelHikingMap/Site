@@ -13,8 +13,8 @@ import {
     ClearPoisAction,
     ClearPoisAndRouteAction,
     DeleteAllRoutesAction
-} from "../reducres/routes.reducer";
-import { SetRouteEditingStateAction } from "../reducres/route-editing-state.reducer";
+} from "../reducers/routes.reducer";
+import { SetRouteEditingStateAction } from "../reducers/route-editing-state.reducer";
 import { RoutingType, ApplicationState } from "../models/models";
 
 @Component({

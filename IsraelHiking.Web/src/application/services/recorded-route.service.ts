@@ -8,11 +8,11 @@ import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoLocationService } from "./geo-location.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
-import { StopRecordingAction, StartRecordingAction } from "../reducres/route-editing-state.reducer";
+import { StopRecordingAction, StartRecordingAction } from "../reducers/route-editing-state.reducer";
 import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
-import { AddTraceAction } from "../reducres/traces.reducer";
-import { AddRouteAction, AddRecordingPointsAction } from "../reducres/routes.reducer";
+import { AddTraceAction } from "../reducers/traces.reducer";
+import { AddRouteAction, AddRecordingPointsAction } from "../reducers/routes.reducer";
 import { TraceVisibility, DataContainer, ApplicationState, RouteData, ILatLngTime } from "../models/models";
 
 @Injectable()

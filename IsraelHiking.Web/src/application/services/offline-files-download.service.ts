@@ -11,8 +11,8 @@ import { LoggingService } from "./logging.service";
 import { ApplicationState } from "../models/models";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { ToggleOfflineAction } from "../reducres/layers.reducer";
-import { SetOfflineLastModifiedAction } from "../reducres/offline.reducer";
+import { ToggleOfflineAction } from "../reducers/layers.reducer";
+import { SetOfflineLastModifiedAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 
 @Injectable()

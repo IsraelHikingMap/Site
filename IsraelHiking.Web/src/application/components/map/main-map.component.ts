@@ -7,7 +7,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { ApplicationState, Location } from "../../models/models";
-import { SetLocationAction } from "../../reducres/location.reducer";
+import { SetLocationAction } from "../../reducers/location.reducer";
 import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";

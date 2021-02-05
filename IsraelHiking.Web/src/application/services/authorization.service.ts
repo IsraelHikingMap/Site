@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 import { NonAngularObjectsFactory, IOhAuth, IOAuthResponse, IOAuthParams } from "./non-angular-objects.factory";
 import { ApplicationState, OsmUserDetails, UserState, UserInfo } from "../models/models";
 import { Urls } from "../urls";
-import { SetTokenAction, SetUserInfoAction } from "../reducres/user.reducer";
+import { SetTokenAction, SetUserInfoAction } from "../reducers/user.reducer";
 import { RunningContextService } from "./running-context.service";
 
 export interface IAuthorizationServiceOptions {

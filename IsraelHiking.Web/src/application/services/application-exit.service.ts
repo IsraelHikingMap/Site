@@ -8,7 +8,7 @@ import { DatabaseService } from "./database.service";
 import { ToastService } from "./toast.service";
 import { MatDialog } from "@angular/material/dialog";
 import { SidebarService } from "./sidebar.service";
-import { SetSidebarAction } from "../reducres/poi.reducer";
+import { SetSidebarAction } from "../reducers/poi.reducer";
 import { GeoLocationService } from "./geo-location.service";
 import { RecordedRouteService } from "./recorded-route.service";
 import { ApplicationState } from "../models/models";

@@ -7,7 +7,7 @@ import { RoutesFactory } from "../../../services/layers/routelayers/routes.facto
 import { BaseMapComponent } from "../../base-map.component";
 import { ApplicationState, RouteData } from "../../../models/models";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
-import { SetOpacityAndWeightAction } from "../../../reducres/route-editing-state.reducer";
+import { SetOpacityAndWeightAction } from "../../../reducers/route-editing-state.reducer";
 
 export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     public colors: string[];

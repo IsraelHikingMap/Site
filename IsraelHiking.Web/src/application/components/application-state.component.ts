@@ -7,7 +7,7 @@ import { RouteStrings } from "../services/hash.service";
 import { SidebarService } from "../services/sidebar.service";
 import { DataContainerService } from "../services/data-container.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
-import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducres/in-memory.reducer";
+import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { ApplicationState } from "../models/models";
 
 @Component({

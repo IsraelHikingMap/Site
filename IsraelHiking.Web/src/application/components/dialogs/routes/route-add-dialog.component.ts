@@ -7,7 +7,7 @@ import { RoutesFactory } from "../../../services/layers/routelayers/routes.facto
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 import { ApplicationState } from "../../../models/models";
-import { AddRouteAction } from "../../../reducres/routes.reducer";
+import { AddRouteAction } from "../../../reducers/routes.reducer";
 
 @Component({
     selector: "route-add-dialog",

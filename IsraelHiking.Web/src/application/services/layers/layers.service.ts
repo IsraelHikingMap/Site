@@ -25,7 +25,7 @@ import {
     RemoveBaseLayerAction,
     AddOverlayAction,
     ToggleOfflineAction,
-} from "../../reducres/layers.reducer";
+} from "../../reducers/layers.reducer";
 import {
     ISRAEL_HIKING_MAP,
     ISRAEL_MTB_MAP,
@@ -33,7 +33,7 @@ import {
     ESRI,
     HIKING_TRAILS,
     BICYCLE_TRAILS
-} from "../../reducres/initial-state";
+} from "../../reducers/initial-state";
 import { LoggingService } from "../logging.service";
 
 interface IUserLayer extends LayerData {

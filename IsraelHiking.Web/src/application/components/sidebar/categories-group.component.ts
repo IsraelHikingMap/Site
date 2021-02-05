@@ -8,7 +8,7 @@ import {
     CollapseGroupAction,
     SetCategoryVisibilityAction,
     SetCategoriesGroupVisibilityAction
-} from "../../reducres/layers.reducer";
+} from "../../reducers/layers.reducer";
 import { ApplicationState, CategoriesGroup, Category } from "../../models/models";
 
 @Component({

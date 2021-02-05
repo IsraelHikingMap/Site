@@ -9,7 +9,7 @@ import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
-import { SetSelectedPoiAction } from "../../reducres/poi.reducer";
+import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { ApplicationState, Overlay, PointOfInterest, PointOfInterestExtended } from "../../models/models";
 
 @Component({

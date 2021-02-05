@@ -12,7 +12,7 @@ import { RunningContextService } from "../../services/running-context.service";
 import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
 import { ILegendItem } from "./legend-item.component";
-import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducres/initial-state";
+import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducers/initial-state";
 import { ApplicationState, Language } from "../../models/models";
 import legendSectionsJson from "../../../content/legend/legend.json";
 

@@ -26,9 +26,9 @@ import { SearchResultsProvider, ISearchResultsPointOfInterest } from "../service
 import { BaseMapComponent } from "./base-map.component";
 import { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt } from "../models/models";
 import { RoutesFactory } from "../services/layers/routelayers/routes.factory";
-import { AddRouteAction } from "../reducres/routes.reducer";
+import { AddRouteAction } from "../reducers/routes.reducer";
 import { SpatialService } from "../services/spatial.service";
-import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
+import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
 
 export interface ISearchContext {
     searchTerm: string;

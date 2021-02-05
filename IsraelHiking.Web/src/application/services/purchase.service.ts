@@ -5,7 +5,7 @@ import { Observable } from "rxjs";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { SetOfflineAvailableAction } from "../reducres/offline.reducer";
+import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
 import { ApplicationState, UserInfo } from "../models/models";
 
 @Injectable()

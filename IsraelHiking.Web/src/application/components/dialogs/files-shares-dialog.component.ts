@@ -11,7 +11,7 @@ import { FileService, IFormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
-import { SetOfflineLastModifiedAction } from "../../reducres/offline.reducer";
+import { SetOfflineLastModifiedAction } from "../../reducers/offline.reducer";
 import { ApplicationState, DataContainer } from "../../models/models";
 
 @Component({

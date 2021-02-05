@@ -2,7 +2,7 @@ import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 import { MapMouseEvent, Map, GeoJSONSource, Point } from "mapbox-gl";
 
-import { AddSegmentAction, UpdateSegmentsAction } from "../../reducres/routes.reducer";
+import { AddSegmentAction, UpdateSegmentsAction } from "../../reducers/routes.reducer";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RouterService } from "../../services/router.service";

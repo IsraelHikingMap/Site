@@ -12,8 +12,8 @@ import { SelectedRouteService } from "../services/layers/routelayers/selected-ro
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
-import { ToggleDistanceAction, SetPannedAction } from "../reducres/in-memory.reducer";
-import { ConfigurationActions } from "../reducres/configuration.reducer";
+import { ToggleDistanceAction, SetPannedAction } from "../reducers/in-memory.reducer";
+import { ConfigurationActions } from "../reducers/configuration.reducer";
 import { LatLngAlt, ApplicationState } from "../models/models";
 
 @Component({

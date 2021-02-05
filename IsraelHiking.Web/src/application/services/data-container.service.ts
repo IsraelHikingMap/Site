@@ -8,13 +8,13 @@ import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { SpatialService } from "./spatial.service";
 import { FitBoundsService } from "./fit-bounds.service";
-import { BulkReplaceRoutesAction } from "../reducres/routes.reducer";
+import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { MapService } from "./map.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
 import { RunningContextService } from "./running-context.service";
-import { SetFileUrlAndBaseLayerAction } from "../reducres/in-memory.reducer";
-import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
+import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
+import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
 import { DataContainer, ApplicationState, LayerData } from "../models/models";
 
 @Injectable()

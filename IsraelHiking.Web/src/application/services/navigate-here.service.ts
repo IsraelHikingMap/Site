@@ -8,7 +8,7 @@ import { ToastService } from "./toast.service";
 import { ApplicationState, LatLngAlt } from "../models/models";
 import { RouterService } from "./router.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
-import { AddSegmentAction, AddRouteAction, ChangeRoutePropertiesAction } from "../reducres/routes.reducer";
+import { AddSegmentAction, AddRouteAction, ChangeRoutePropertiesAction } from "../reducers/routes.reducer";
 
 @Injectable()
 export class NavigateHereService {

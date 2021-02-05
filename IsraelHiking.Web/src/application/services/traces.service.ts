@@ -7,7 +7,7 @@ import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { Urls } from "../urls";
-import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducres/traces.reducer";
+import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducers/traces.reducer";
 import { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
 
 @Injectable()

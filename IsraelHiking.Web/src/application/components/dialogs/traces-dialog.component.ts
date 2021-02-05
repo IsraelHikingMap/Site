@@ -16,7 +16,7 @@ import { TracesService } from "../../services/traces.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DataContainer, ApplicationState, Trace, TraceVisibility } from "../../models/models";
 import { SpatialService } from "../../services/spatial.service";
-import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducres/traces.reducer";
+import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
 
 @Component({
     selector: "traces-dialog",

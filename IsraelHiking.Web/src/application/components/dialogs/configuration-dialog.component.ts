@@ -5,7 +5,7 @@ import { select, NgRedux } from "@angular-redux/store";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { ConfigurationActions } from "../../reducres/configuration.reducer";
+import { ConfigurationActions } from "../../reducers/configuration.reducer";
 import { ApplicationState } from "../../models/models";
 
 @Component({

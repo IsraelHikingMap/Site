@@ -15,11 +15,11 @@ import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { GeoJsonParser } from "./geojson.parser";
-import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducres/layers.reducer";
+import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducers/layers.reducer";
 import { MapService } from "./map.service";
 import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
-import { SetOfflinePoisLastModifiedDateAction } from "../reducres/offline.reducer";
+import { SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import {
     MarkerData,

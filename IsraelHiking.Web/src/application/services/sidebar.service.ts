@@ -3,7 +3,7 @@ import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 
 import { HashService } from "./hash.service";
-import { SetSidebarAction } from "../reducres/poi.reducer";
+import { SetSidebarAction } from "../reducers/poi.reducer";
 import { ApplicationState } from "../models/models";
 
 export type SidebarView = "info" | "layers" | "public-poi" | "";
