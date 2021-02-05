@@ -2,7 +2,7 @@ import undoable, { UndoableOptions, includeAction, groupByActionTypes } from "re
 
 import { RouteData, MarkerData, RouteSegmentData, RouteStateName, ILatLngTime } from "../models/models";
 import { initialState } from "./initial-state";
-import { ReduxAction, createReducerFromClass, BaseAction } from "./reducer-action-decorator";
+import { ReduxAction, createReducerFromClass, BaseAction } from "./infra/ng-redux.module";
 
 const ADD_ROUTE = "ADD_ROUTE";
 const DELETE_ROUTE = "DELETE_ROUTE";

@@ -1,20 +1,20 @@
-import { AnyAction, Dispatch, Reducer, Observable as ReduxObservale } from 'redux';
-import { Observable } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { AnyAction, Dispatch, Reducer, Observable as ReduxObservale } from "redux";
+import { Observable } from "rxjs";
+import { distinctUntilChanged, map } from "rxjs/operators";
 
-import { getIn } from '../utils/get-in';
+import { getIn } from "../utils/get-in";
 import {
   registerFractalReducer,
   replaceLocalReducer,
-} from './fractal-reducer-map';
-import { NgRedux } from './ng-redux';
-import { ObservableStore } from './observable-store';
+} from "./fractal-reducer-map";
+import { NgRedux } from "./ng-redux";
+import { ObservableStore } from "./observable-store";
 import {
   Comparator,
   PathSelector,
   resolveToFunctionSelector,
   Selector,
-} from './selectors';
+} from "./selectors";
 
 /** @hidden */
 export class SubStore<State> implements ObservableStore<State> {
@@ -29,8 +29,8 @@ export class SubStore<State> implements ObservableStore<State> {
   dispatch: Dispatch<AnyAction> = action =>
     this.rootStore.dispatch({
       ...(action as any),
-      '@angular-redux::fractalkey': JSON.stringify(this.basePath),
-    });
+      "@angular-redux::fractalkey": JSON.stringify(this.basePath),
+    })
 
   getState = (): State => getIn(this.rootStore.getState(), this.basePath);
 
@@ -42,7 +42,7 @@ export class SubStore<State> implements ObservableStore<State> {
       this.rootStore,
       [...this.basePath, ...basePath],
       localReducer,
-    );
+    )
 
   select = <SelectedState>(
     selector?: Selector<State, SelectedState>,
@@ -51,15 +51,15 @@ export class SubStore<State> implements ObservableStore<State> {
     this.rootStore.select<State>(this.basePath).pipe(
       map(resolveToFunctionSelector(selector)),
       distinctUntilChanged(comparator),
-    );
+    )
 
   subscribe = (listener: () => void): (() => void) => {
     const subscription = this.select().subscribe(listener);
     return () => subscription.unsubscribe();
-  };
+  }
 
   replaceReducer = (nextLocalReducer: Reducer<State, AnyAction>) =>
     replaceLocalReducer(this.basePath, nextLocalReducer);
 
-    [Symbol.observable](): ReduxObservale<State> { return null }
+    [Symbol.observable](): ReduxObservale<State> { return null; }
 }

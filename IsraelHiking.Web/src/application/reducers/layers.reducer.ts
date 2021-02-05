@@ -1,6 +1,6 @@
 import { orderBy, remove, some } from "lodash-es";
 
-import { createReducerFromClass, ReduxAction, BaseAction } from "./reducer-action-decorator";
+import { createReducerFromClass, ReduxAction, BaseAction } from "./infra/ng-redux.module";
 import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS } from "./initial-state";
 import { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models/models";
 

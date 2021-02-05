@@ -1,6 +1,6 @@
-import { NgModule, NgZone } from '@angular/core';
-import { NgRedux } from './components/ng-redux';
-import { RootStore } from './components/root-store';
+import { NgModule, NgZone } from "@angular/core";
+import { NgRedux } from "./components/ng-redux";
+import { RootStore } from "./components/root-store";
 
 /** @hidden */
 export function _ngReduxFactory(ngZone: NgZone) {
@@ -15,3 +15,4 @@ export function _ngReduxFactory(ngZone: NgZone) {
 export class NgReduxModule {}
 export { NgRedux } from "./components/ng-redux";
 export { select } from "./decorators/select";
+export { classToActionMiddleware, ReduxAction, createReducerFromClass, BaseAction } from "./decorators/reducer-action-decorator";

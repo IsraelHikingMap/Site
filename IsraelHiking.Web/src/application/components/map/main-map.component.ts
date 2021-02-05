@@ -1,17 +1,17 @@
 import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
 import { MapComponent, CustomControl } from "ngx-mapbox-gl";
 import { Style, setRTLTextPlugin, ScaleControl } from "mapbox-gl";
 
-import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
+import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
-import { ApplicationState, Location } from "../../models/models";
-import { SetLocationAction } from "../../reducers/location.reducer";
 import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
+import { NgRedux } from "../../reducers/infra/ng-redux.module";
+import { SetLocationAction } from "../../reducers/location.reducer";
+import { ApplicationState, Location } from "../../models/models";
 
 @Component({
     selector: "main-map",

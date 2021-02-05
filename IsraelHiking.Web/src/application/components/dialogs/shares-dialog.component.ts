@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
-import { select, NgRedux } from "@angular-redux/store";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
 import { Observable, Subscription } from "rxjs";
@@ -13,6 +12,7 @@ import { ToastService } from "../../services/toast.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RunningContextService } from "../../services/running-context.service";
+import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ApplicationState, ShareUrl } from "../../models/models";
 
 @Component({

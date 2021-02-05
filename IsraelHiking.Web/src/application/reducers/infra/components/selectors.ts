@@ -1,5 +1,5 @@
-import { Observable } from 'rxjs';
-import { getIn } from '../utils/get-in';
+import { Observable } from "rxjs";
+import { getIn } from "../utils/get-in";
 
 /**
  * Custom equality checker that can be used with `.select` and `@select`.
@@ -29,12 +29,12 @@ export const sniffSelectorType = <RootState, S>(
   selector?: Selector<RootState, S>,
 ) =>
   !selector
-    ? 'nil'
+    ? "nil"
     : Array.isArray(selector)
-    ? 'path'
-    : 'function' === typeof selector
-    ? 'function'
-    : 'property';
+    ? "path"
+    : "function" === typeof selector
+    ? "function"
+    : "property";
 
 /** @hidden */
 export const resolver = <RootState, S>(selector?: Selector<RootState, S>) => ({

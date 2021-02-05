@@ -10,21 +10,21 @@ import {
   StoreCreator,
   StoreEnhancer,
   Unsubscribe,
-} from 'redux';
+} from "redux";
 
-import { NgZone } from '@angular/core';
-import { BehaviorSubject, Observable, Observer } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
-import { enableFractalReducers } from './fractal-reducer-map';
-import { NgRedux } from './ng-redux';
-import { ObservableStore } from './observable-store';
+import { NgZone } from "@angular/core";
+import { BehaviorSubject, Observable, Observer } from "rxjs";
+import { distinctUntilChanged, filter, map, switchMap } from "rxjs/operators";
+import { enableFractalReducers } from "./fractal-reducer-map";
+import { NgRedux } from "./ng-redux";
+import { ObservableStore } from "./observable-store";
 import {
   Comparator,
   PathSelector,
   resolveToFunctionSelector,
   Selector,
-} from './selectors';
-import { SubStore } from './sub-store';
+} from "./selectors";
+import { SubStore } from "./sub-store";
 
 /** @hidden */
 export class RootStore<RootState> extends NgRedux<RootState> {
@@ -55,28 +55,28 @@ export class RootStore<RootState> extends NgRedux<RootState> {
         ...enhancers,
       )(createStore)(enableFractalReducers(rootReducer), initState),
     );
-  };
+  }
 
   provideStore = (store: Store<RootState>) => {
     this.setStore(store);
-  };
+  }
 
-  getState = (): RootState => this.store!.getState();
+  getState = (): RootState => this.store.getState();
 
   subscribe = (listener: () => void): Unsubscribe =>
-    this.store!.subscribe(listener);
+    this.store.subscribe(listener)
 
   replaceReducer = (nextReducer: Reducer<RootState, AnyAction>): void => {
-    this.store!.replaceReducer(nextReducer);
-  };
+    this.store.replaceReducer(nextReducer);
+  }
 
   dispatch: Dispatch<AnyAction> = <A extends AnyAction>(action: A): A => {
     if (!NgZone.isInAngularZone()) {
-      return this.ngZone.run(() => this.store!.dispatch(action));
+      return this.ngZone.run(() => this.store.dispatch(action));
     } else {
-      return this.store!.dispatch(action);
+      return this.store.dispatch(action);
     }
-  };
+  }
 
   select = <SelectedType>(
     selector?: Selector<RootState, SelectedType>,
@@ -86,13 +86,13 @@ export class RootStore<RootState> extends NgRedux<RootState> {
       distinctUntilChanged(),
       map(resolveToFunctionSelector(selector)),
       distinctUntilChanged(comparator),
-    );
+    )
 
   configureSubStore = <SubState>(
     basePath: PathSelector,
     localReducer: Reducer<SubState, AnyAction>,
   ): ObservableStore<SubState> =>
-    new SubStore<SubState>(this, basePath, localReducer);
+    new SubStore<SubState>(this, basePath, localReducer)
 
   private setStore(store: Store<RootState>) {
     this.store = store;
@@ -112,5 +112,5 @@ export class RootStore<RootState> extends NgRedux<RootState> {
         unsubscribeFromRedux();
         observer.complete();
       };
-    });
+    })
 }

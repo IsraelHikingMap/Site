@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import { debounceTime } from "rxjs/operators";
 import { decode } from "base64-arraybuffer";
-import { NgRedux } from "@angular-redux/store";
 import { SQLite, SQLiteDatabaseConfig, SQLiteObject } from "@ionic-native/sqlite/ngx";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
@@ -12,8 +11,8 @@ import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { classToActionMiddleware } from "../reducers/reducer-action-decorator";
 import { initialState } from "../reducers/initial-state";
+import { NgRedux, classToActionMiddleware } from "../reducers/infra/ng-redux.module";
 import { rootReducer } from "../reducers/root.reducer";
 import { ApplicationState, ShareUrl } from "../models/models";
 

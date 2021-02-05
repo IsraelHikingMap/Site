@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
 import { Idle, DEFAULT_INTERRUPTSOURCES } from "@ng-idle/core";
 import { Brightness } from "@ionic-native/brightness/ngx";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
@@ -8,6 +7,7 @@ import { StatusBar } from "@ionic-native/status-bar/ngx";
 import { RunningContextService } from "./running-context.service";
 import { ApplicationState } from "../models/models";
 import { LoggingService } from "./logging.service";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
 
 @Injectable()
 export class ScreenService {

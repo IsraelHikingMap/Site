@@ -1,14 +1,14 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
-import { NgRedux } from "@angular-redux/store";
 import { flatten } from "lodash-es";
 
 import { ResourcesService } from "./resources.service";
 import { PoiService } from "./poi.service";
 import { ToastService } from "./toast.service";
 import { RouteStrings } from "./hash.service";
-import { LinkData, LatLngAlt, MarkerData, ApplicationState } from "../models/models";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
+import { LinkData, LatLngAlt, MarkerData, ApplicationState } from "../models/models";
 
 @Injectable()
 export class PrivatePoiUploaderService {

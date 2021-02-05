@@ -1,4 +1,4 @@
-import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
+import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
 
 import { UICompoentsState } from "../models/models";
 import { initialState } from "./initial-state";

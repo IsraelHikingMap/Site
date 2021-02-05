@@ -1,5 +1,5 @@
 import { RoutingType, RouteEditingState } from "../models/models";
-import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
+import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
 import { initialState } from "./initial-state";
 
 const SET_ROUTING_TYPE = "SET_ROUTING_TYPE";

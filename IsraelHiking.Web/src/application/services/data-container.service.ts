@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
 
 import { LayersService } from "./layers/layers.service";
 import { ToastService } from "./toast.service";
@@ -8,11 +7,12 @@ import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { SpatialService } from "./spatial.service";
 import { FitBoundsService } from "./fit-bounds.service";
-import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { MapService } from "./map.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
 import { RunningContextService } from "./running-context.service";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
+import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
 import { DataContainer, ApplicationState, LayerData } from "../models/models";

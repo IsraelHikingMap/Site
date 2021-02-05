@@ -1,6 +1,5 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { NgRedux, select } from "@angular-redux/store";
 import { uniq } from "lodash-es";
 import { Observable, fromEvent } from "rxjs";
 import { timeout, throttleTime } from "rxjs/operators";
@@ -15,12 +14,12 @@ import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { GeoJsonParser } from "./geojson.parser";
-import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducers/layers.reducer";
 import { MapService } from "./map.service";
 import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
+import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
-import { Urls } from "../urls";
+import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducers/layers.reducer";
 import {
     MarkerData,
     LatLngAlt,
@@ -32,6 +31,7 @@ import {
     PointOfInterest,
     Language
 } from "../models/models";
+import { Urls } from "../urls";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite";
 

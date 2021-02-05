@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
-import { NgRedux } from "@angular-redux/store";
 
 import { RouteStrings } from "../services/hash.service";
 import { SidebarService } from "../services/sidebar.service";
 import { DataContainerService } from "../services/data-container.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { ApplicationState } from "../models/models";
 
 @Component({

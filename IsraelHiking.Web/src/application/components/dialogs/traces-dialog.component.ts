@@ -3,20 +3,20 @@ import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash-es";
-import { NgRedux, select } from "@angular-redux/store";
 
+import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { AuthorizationService } from "../../services/authorization.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
 import { ToastService } from "../../services/toast.service";
 import { LayersService } from "../../services/layers/layers.service";
-import { BaseMapComponent } from "../base-map.component";
 import { TracesService } from "../../services/traces.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { DataContainer, ApplicationState, Trace, TraceVisibility } from "../../models/models";
 import { SpatialService } from "../../services/spatial.service";
+import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
+import { DataContainer, ApplicationState, Trace, TraceVisibility } from "../../models/models";
 
 @Component({
     selector: "traces-dialog",

@@ -1,12 +1,12 @@
-import { NgZone } from '@angular/core';
-import { Action, AnyAction, createStore, Reducer, Store } from 'redux';
+import { NgZone } from "@angular/core";
+import { Action, AnyAction, createStore, Reducer, Store } from "redux";
 
-import { Observable } from 'rxjs';
-import { combineLatest, filter } from 'rxjs/operators';
+import { Observable, combineLatest } from "rxjs";
+import { filter } from "rxjs/operators";
 
-import { select } from '../decorators/select';
-import { NgRedux } from './ng-redux';
-import { RootStore } from './root-store';
+import { select } from "../decorators/select";
+import { NgRedux } from "./ng-redux";
+import { RootStore } from "./root-store";
 
 class MockNgZone extends NgZone {
   run<T>(fn: (...args: any[]) => T): T {
@@ -16,7 +16,7 @@ class MockNgZone extends NgZone {
 
 type PayloadAction = Action & { payload?: string | number };
 
-describe('NgRedux Observable Store', () => {
+describe("NgRedux Observable Store", () => {
   interface AppState {
     foo: string;
     bar: string;
@@ -31,18 +31,18 @@ describe('NgRedux Observable Store', () => {
 
   beforeEach(() => {
     defaultState = {
-      foo: 'bar',
-      bar: 'foo',
+      foo: "bar",
+      bar: "foo",
       baz: -1,
     };
 
     rootReducer = (state = defaultState, action: PayloadAction): any => {
       switch (action.type) {
-        case 'UPDATE_FOO':
+        case "UPDATE_FOO":
           return { ...state, foo: action.payload };
-        case 'UPDATE_BAZ':
+        case "UPDATE_BAZ":
           return { ...state, baz: action.payload };
-        case 'UPDATE_BAR':
+        case "UPDATE_BAR":
           return { ...state, bar: action.payload };
         default:
           return state;
@@ -54,89 +54,89 @@ describe('NgRedux Observable Store', () => {
     ngRedux.configureStore(rootReducer, defaultState);
   });
 
-  it('should get the initial state', done =>
+  it("should get the initial state", done =>
     ngRedux.select<any>().subscribe((state: AppState) => {
-      expect(state.foo).toEqual('bar');
+      expect(state.foo).toEqual("bar");
       expect(state.baz).toEqual(-1);
       done();
     }));
 
-  it('should accept a keyname for a selector', done =>
-    ngRedux.select<any>('foo').subscribe(stateSlice => {
-      expect(stateSlice).toEqual('bar');
+  it("should accept a keyname for a selector", done =>
+    ngRedux.select<any>("foo").subscribe(stateSlice => {
+      expect(stateSlice).toEqual("bar");
       done();
     }));
 
-  it('should not trigger selector if that slice of state wasnt changed', () => {
-    let fooData = '';
+  it("should not trigger selector if that slice of state wasnt changed", () => {
+    let fooData = "";
 
-    const spy = jasmine.createSpy('spy').and.callFake((foo: string) => {
+    const spy = jasmine.createSpy("spy").and.callFake((foo: string) => {
       fooData = foo;
     });
 
-    const foo$ = ngRedux.select<any>('foo').subscribe(spy);
+    const foo$ = ngRedux.select<any>("foo").subscribe(spy);
 
     expect(spy.calls.count()).toEqual(1);
-    ngRedux.dispatch({ type: 'UPDATE_BAR', payload: 0 });
+    ngRedux.dispatch({ type: "UPDATE_BAR", payload: 0 });
     expect(spy.calls.count()).toEqual(1);
 
-    expect(fooData).toEqual('bar');
-    ngRedux.dispatch({ type: 'UPDATE_FOO', payload: 'changeFoo' });
+    expect(fooData).toEqual("bar");
+    ngRedux.dispatch({ type: "UPDATE_FOO", payload: "changeFoo" });
     expect(spy.calls.count()).toEqual(2);
-    expect(fooData).toEqual('changeFoo');
+    expect(fooData).toEqual("changeFoo");
     foo$.unsubscribe();
   });
 
-  it('should not trigger a selector if the action payload is the same', () => {
-    let fooData = '';
-    const spy = jasmine.createSpy('spy').and.callFake((foo: string) => {
+  it("should not trigger a selector if the action payload is the same", () => {
+    let fooData = "";
+    const spy = jasmine.createSpy("spy").and.callFake((foo: string) => {
       fooData = foo;
     });
-    const foo$ = ngRedux.select('foo').subscribe(spy);
+    const foo$ = ngRedux.select("foo").subscribe(spy);
 
     expect(spy.calls.count()).toEqual(1);
-    expect(fooData).toEqual('bar');
+    expect(fooData).toEqual("bar");
 
-    ngRedux.dispatch({ type: 'UPDATE_FOO', payload: 'bar' });
+    ngRedux.dispatch({ type: "UPDATE_FOO", payload: "bar" });
     expect(spy.calls.count()).toEqual(1);
-    expect(fooData).toEqual('bar');
+    expect(fooData).toEqual("bar");
     foo$.unsubscribe();
   });
 
-  it('should not call sub if the result of the function is the same', () => {
-    let fooData = '';
-    const spy = jasmine.createSpy('spy').and.callFake((foo: string) => {
+  it("should not call sub if the result of the function is the same", () => {
+    let fooData = "";
+    const spy = jasmine.createSpy("spy").and.callFake((foo: string) => {
       fooData = foo;
     });
     ngRedux.select(state => `${state.foo}-${state.baz}`).subscribe(spy);
 
     expect(spy.calls.count()).toEqual(1);
-    expect(fooData).toEqual('bar--1');
+    expect(fooData).toEqual("bar--1");
 
     expect(spy.calls.count()).toEqual(1);
-    expect(fooData).toEqual('bar--1');
+    expect(fooData).toEqual("bar--1");
 
-    ngRedux.dispatch({ type: 'UPDATE_BAR', payload: 'bar' });
+    ngRedux.dispatch({ type: "UPDATE_BAR", payload: "bar" });
     expect(spy.calls.count()).toEqual(1);
-    expect(fooData).toEqual('bar--1');
+    expect(fooData).toEqual("bar--1");
 
-    ngRedux.dispatch({ type: 'UPDATE_FOO', payload: 'update' });
-    expect(fooData).toEqual('update--1');
+    ngRedux.dispatch({ type: "UPDATE_FOO", payload: "update" });
+    expect(fooData).toEqual("update--1");
     expect(spy.calls.count()).toEqual(2);
 
-    ngRedux.dispatch({ type: 'UPDATE_BAZ', payload: 2 });
-    expect(fooData).toEqual('update-2');
+    ngRedux.dispatch({ type: "UPDATE_BAZ", payload: 2 });
+    expect(fooData).toEqual("update-2");
     expect(spy.calls.count()).toEqual(3);
   });
 
-  it('should accept a custom compare function', () => {
+  it("should accept a custom compare function", () => {
     interface Record {
       data?: string;
     }
     let fooData: Record = {};
 
     const spy = jasmine
-      .createSpy('spy')
+      .createSpy("spy")
       .and.callFake((data: Record) => (fooData = data));
     const cmp = (a: Record, b: Record) => a.data === b.data;
 
@@ -145,24 +145,24 @@ describe('NgRedux Observable Store', () => {
       .subscribe(spy);
 
     expect(spy.calls.count()).toEqual(1);
-    expect(fooData.data).toEqual('bar--1');
+    expect(fooData.data).toEqual("bar--1");
 
-    ngRedux.dispatch({ type: 'UPDATE_BAR', payload: 'bar' });
+    ngRedux.dispatch({ type: "UPDATE_BAR", payload: "bar" });
     expect(spy.calls.count()).toEqual(1);
-    expect(fooData.data).toEqual('bar--1');
+    expect(fooData.data).toEqual("bar--1");
 
-    ngRedux.dispatch({ type: 'UPDATE_FOO', payload: 'update' });
-    expect(fooData.data).toEqual('update--1');
+    ngRedux.dispatch({ type: "UPDATE_FOO", payload: "update" });
+    expect(fooData.data).toEqual("update--1");
     expect(spy.calls.count()).toEqual(2);
 
-    ngRedux.dispatch({ type: 'UPDATE_BAZ', payload: 2 });
-    expect(fooData.data).toEqual('update-2');
+    ngRedux.dispatch({ type: "UPDATE_BAZ", payload: 2 });
+    expect(fooData.data).toEqual("update-2");
     expect(spy.calls.count()).toEqual(3);
   });
 
-  it('should only call provided select function if state changed', () => {
+  it("should only call provided select function if state changed", () => {
     const selectSpy = jasmine
-      .createSpy('selectSpy')
+      .createSpy("selectSpy")
       .and.callFake((state: AppState) => state.foo);
 
     ngRedux.select().subscribe(selectSpy);
@@ -170,15 +170,15 @@ describe('NgRedux Observable Store', () => {
     // called once to get the initial value
     expect(selectSpy.calls.count()).toEqual(1);
     // not called since no state was updated
-    ngRedux.dispatch({ type: 'NOT_A_STATE_CHANGE' });
+    ngRedux.dispatch({ type: "NOT_A_STATE_CHANGE" });
     expect(selectSpy.calls.count()).toEqual(1);
-    ngRedux.dispatch({ type: 'UPDATE_FOO', payload: 'update' });
+    ngRedux.dispatch({ type: "UPDATE_FOO", payload: "update" });
     expect(selectSpy.calls.count()).toEqual(2);
-    ngRedux.dispatch({ type: 'NOT_A_STATE_CHANGE' });
+    ngRedux.dispatch({ type: "NOT_A_STATE_CHANGE" });
     expect(selectSpy.calls.count()).toEqual(2);
   });
 
-  it('should wait until store is configured before emitting values', () => {
+  it("should wait until store is configured before emitting values", () => {
     // tslint:disable-next-line:max-classes-per-file
     class SomeService {
       foo!: string;
@@ -195,12 +195,12 @@ describe('NgRedux Observable Store', () => {
 
     const someService = new SomeService(ngRedux);
     ngRedux.configureStore(rootReducer, defaultState);
-    expect(someService.foo).toEqual('bar');
-    expect(someService.bar).toEqual('foo');
+    expect(someService.foo).toEqual("bar");
+    expect(someService.bar).toEqual("foo");
     expect(someService.baz).toEqual(-1);
   });
 
-  it('should have select decorators work before store is configured', done => {
+  it("should have select decorators work before store is configured", done => {
     // tslint:disable-next-line:max-classes-per-file
     class SomeService {
       @select() foo$!: Observable<string>;
@@ -214,8 +214,8 @@ describe('NgRedux Observable Store', () => {
     someService.foo$
       .pipe(combineLatest(someService.bar$, someService.baz$))
       .subscribe(([foo, bar, baz]) => {
-        expect(foo).toEqual('bar');
-        expect(bar).toEqual('foo');
+        expect(foo).toEqual("bar");
+        expect(bar).toEqual("foo");
         expect(baz).toEqual(-1);
         done();
       });
@@ -224,7 +224,7 @@ describe('NgRedux Observable Store', () => {
   });
 });
 
-describe('Chained actions in subscriptions', () => {
+describe("Chained actions in subscriptions", () => {
   interface AppState {
     keyword: string;
     keywordLength: number;
@@ -236,21 +236,21 @@ describe('Chained actions in subscriptions', () => {
   const mockNgZone = new MockNgZone({ enableLongStackTrace: false }) as NgZone;
 
   const doSearch = (word: string) =>
-    ngRedux.dispatch({ type: 'SEARCH', payload: word });
+    ngRedux.dispatch({ type: "SEARCH", payload: word });
   const doFetch = (word: string) =>
-    ngRedux.dispatch({ type: 'SEARCH_RESULT', payload: word.length });
+    ngRedux.dispatch({ type: "SEARCH_RESULT", payload: word.length });
 
   beforeEach(() => {
     defaultState = {
-      keyword: '',
+      keyword: "",
       keywordLength: -1,
     };
 
     rootReducer = (state = defaultState, action: PayloadAction): any => {
       switch (action.type) {
-        case 'SEARCH':
+        case "SEARCH":
           return { ...state, keyword: action.payload };
-        case 'SEARCH_RESULT':
+        case "SEARCH_RESULT":
           return { ...state, keywordLength: action.payload };
         default:
           return state;
@@ -261,123 +261,123 @@ describe('Chained actions in subscriptions', () => {
     ngRedux.configureStore(rootReducer, defaultState);
   });
 
-  describe('dispatching an action in a keyword$ before length$ happens', () => {
-    it('length sub should be called twice', () => {
+  describe("dispatching an action in a keyword$ before length$ happens", () => {
+    it("length sub should be called twice", () => {
       const keyword$ = ngRedux.select(n => n.keyword);
-      let keyword = '';
+      let keyword = "";
       let length = 0;
       const length$ = ngRedux.select(n => n.keywordLength);
       const lengthSpy = jasmine
-        .createSpy('lengthSpy')
+        .createSpy("lengthSpy")
         .and.callFake((n: number) => (length = n));
       let lenSub;
       let keywordSub;
 
-      keywordSub = keyword$.pipe(filter(n => n !== '')).subscribe(n => {
+      keywordSub = keyword$.pipe(filter(n => n !== "")).subscribe(n => {
         keyword = n;
         doFetch(n);
       });
 
       lenSub = length$.subscribe(lengthSpy);
 
-      expect(keyword).toEqual('');
+      expect(keyword).toEqual("");
       expect(length).toEqual(-1);
       expect(lengthSpy.calls.count()).toEqual(1);
 
-      doSearch('test');
+      doSearch("test");
 
       expect(lengthSpy.calls.count()).toEqual(2);
-      expect(keyword).toEqual('test');
+      expect(keyword).toEqual("test");
       expect(length).toEqual(4);
       keywordSub.unsubscribe();
       lenSub.unsubscribe();
     });
 
-    it('second sub should get most current state value', () => {
+    it("second sub should get most current state value", () => {
       const keyword$ = ngRedux.select(n => n.keyword);
-      let keyword = '';
+      let keyword = "";
       let length = 0;
       const length$ = ngRedux.select(n => n.keywordLength);
       const lengthSpy = jasmine
-        .createSpy('lengthSpy')
+        .createSpy("lengthSpy")
         .and.callFake((n: number) => (length = n));
       let lenSub;
       let keywordSub;
 
-      keywordSub = keyword$.pipe(filter(n => n !== '')).subscribe(n => {
+      keywordSub = keyword$.pipe(filter(n => n !== "")).subscribe(n => {
         keyword = n;
         doFetch(n);
       });
 
       lenSub = length$.subscribe(lengthSpy);
 
-      expect(keyword).toEqual('');
+      expect(keyword).toEqual("");
       expect(length).toEqual(-1);
       expect(lengthSpy.calls.count()).toEqual(1);
 
-      doSearch('test');
+      doSearch("test");
 
-      expect(keyword).toEqual('test');
+      expect(keyword).toEqual("test");
       expect(length).toEqual(4);
       keywordSub.unsubscribe();
       lenSub.unsubscribe();
     });
   });
 
-  describe('dispatching an action in a keyword$ after length$ happens', () => {
-    it('length sub should be called twice', () => {
+  describe("dispatching an action in a keyword$ after length$ happens", () => {
+    it("length sub should be called twice", () => {
       const keyword$ = ngRedux.select(n => n.keyword);
-      let keyword = '';
+      let keyword = "";
       let length = 0;
       const length$ = ngRedux.select(n => n.keywordLength);
       const lengthSpy = jasmine
-        .createSpy('lengthSpy')
+        .createSpy("lengthSpy")
         .and.callFake((n: number) => (length = n));
       let lenSub;
       let keywordSub;
 
       lenSub = length$.subscribe(lengthSpy);
-      keywordSub = keyword$.pipe(filter(n => n !== '')).subscribe(n => {
+      keywordSub = keyword$.pipe(filter(n => n !== "")).subscribe(n => {
         keyword = n;
         doFetch(n);
       });
 
-      expect(keyword).toEqual('');
+      expect(keyword).toEqual("");
       expect(length).toEqual(-1);
       expect(lengthSpy.calls.count()).toEqual(1);
 
-      doSearch('test');
+      doSearch("test");
 
       expect(lengthSpy.calls.count()).toEqual(2);
-      expect(keyword).toEqual('test');
+      expect(keyword).toEqual("test");
       expect(length).toEqual(4);
       keywordSub.unsubscribe();
       lenSub.unsubscribe();
     });
 
-    it('first sub should get most current state value', () => {
+    it("first sub should get most current state value", () => {
       const keyword$ = ngRedux.select(n => n.keyword);
-      let keyword = '';
+      let keyword = "";
       let length = 0;
       const length$ = ngRedux.select(n => n.keywordLength);
       const lengthSpy = jasmine
-        .createSpy('lengthSpy')
+        .createSpy("lengthSpy")
         .and.callFake((n: number) => (length = n));
       let lenSub;
       let keywordSub;
 
       lenSub = length$.subscribe(lengthSpy);
-      keywordSub = keyword$.pipe(filter(n => n !== '')).subscribe(n => {
+      keywordSub = keyword$.pipe(filter(n => n !== "")).subscribe(n => {
         keyword = n;
         doFetch(n);
       });
 
-      expect(keyword).toEqual('');
+      expect(keyword).toEqual("");
       expect(length).toEqual(-1);
       expect(lengthSpy.calls.count()).toEqual(1);
 
-      doSearch('test');
-      expect(keyword).toEqual('test');
+      doSearch("test");
+      expect(keyword).toEqual("test");
       expect(length).toEqual(4);
       keywordSub.unsubscribe();
       lenSub.unsubscribe();

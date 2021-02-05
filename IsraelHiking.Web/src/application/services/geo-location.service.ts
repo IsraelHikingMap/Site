@@ -1,5 +1,4 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
 import {
     BackgroundGeolocation,
     BackgroundGeolocationEvents,
@@ -13,6 +12,7 @@ import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetGeoLocationStateAction } from "../reducers/in-memory.reducer";
 import { ApplicationState, ILatLngTime } from "../models/models";
 

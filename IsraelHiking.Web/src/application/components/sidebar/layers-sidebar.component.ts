@@ -1,12 +1,8 @@
 import { Component, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
-import { select, NgRedux } from "@angular-redux/store";
 import { Observable } from "rxjs";
 
-import { SidebarService } from "../../services/sidebar.service";
-import { LayersService } from "../../services/layers/layers.service";
-import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
 import { BaseLayerEditDialogComponent } from "../dialogs/layers/base-layer-edit-dialog.component";
@@ -14,14 +10,18 @@ import { OverlayAddDialogComponent } from "../dialogs/layers/overlay-add-dialog.
 import { OverlayEditDialogComponent } from "../dialogs/layers/overlay-edit-dialog-component";
 import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
+import { ResourcesService } from "../../services/resources.service";
+import { LayersService } from "../../services/layers/layers.service";
+import { SidebarService } from "../../services/sidebar.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
-import { SetSelectedRouteAction } from "../../reducers/route-editing-state.reducer";
-import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction } from "../../reducers/routes.reducer";
-import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
+import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
+import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
+import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction } from "../../reducers/routes.reducer";
+import { SetSelectedRouteAction } from "../../reducers/route-editing-state.reducer";
 import { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
 
 @Component({

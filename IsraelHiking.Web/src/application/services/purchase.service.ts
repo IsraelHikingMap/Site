@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
-import { NgRedux, select } from "@angular-redux/store";
 import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 import { Observable } from "rxjs";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
+import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
 import { ApplicationState, UserInfo } from "../models/models";
 

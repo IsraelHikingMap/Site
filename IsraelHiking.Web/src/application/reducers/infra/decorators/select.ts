@@ -1,5 +1,5 @@
-import { Comparator, Selector, Transformer } from '../components/selectors';
-import { getInstanceSelection } from './helpers';
+import { Comparator, Selector, Transformer } from "../components/selectors";
+import { getInstanceSelection } from "./helpers";
 
 /**
  * Selects an observable from the store, and attaches it to the decorated
@@ -27,7 +27,7 @@ export function select<T>(
   return (target: any, key: string | symbol): void => {
     const adjustedSelector = selector
       ? selector
-      : String(key).lastIndexOf('$') === String(key).length - 1
+      : String(key).lastIndexOf("$") === String(key).length - 1
       ? String(key).substring(0, String(key).length - 1)
       : key;
     decorate(adjustedSelector, undefined, comparator)(target, key);

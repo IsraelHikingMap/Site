@@ -1,14 +1,14 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { NgRedux } from "@angular-redux/store";
 import { timeout } from "rxjs/operators";
 
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
-import { Urls } from "../urls";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducers/traces.reducer";
 import { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
+import { Urls } from "../urls";
 
 @Injectable()
 export class TracesService {

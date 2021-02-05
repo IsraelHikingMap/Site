@@ -1,6 +1,5 @@
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
-import { NgRedux, select } from "@angular-redux/store";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { Subscription, Observable } from "rxjs";
 
@@ -11,15 +10,16 @@ import { AuthorizationService } from "../../../services/authorization.service";
 import { ToastService } from "../../../services/toast.service";
 import { HashService, RouteStrings, IPoiRouterData } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
-import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
 import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
-import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducers/poi.reducer";
 import { SpatialService } from "../../../services/spatial.service";
 import { RunningContextService } from "../../../services/running-context.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { NavigateHereService } from "../../../services/navigate-here.service";
 import { sidebarAnimate } from "../sidebar.component";
+import { NgRedux, select } from "../../../reducers/infra/ng-redux.module";
+import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
+import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducers/poi.reducer";
 import {
     RouteData,
     LinkData,

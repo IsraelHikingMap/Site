@@ -1,17 +1,17 @@
 import { Component, AfterViewInit, ViewEncapsulation } from "@angular/core";
-import { select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { MapComponent } from "ngx-mapbox-gl";
 import invert from "invert-color";
 
+import { BaseMapComponent } from "../base-map.component";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
+import { ResourcesService } from "../../services/resources.service";
+import { FileService } from "../../services/file.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
-import { BaseMapComponent } from "../base-map.component";
-import { ResourcesService } from "../../services/resources.service";
+import { select } from "../../reducers/infra/ng-redux.module";
 import { LatLngAlt, ApplicationState, RouteData } from "../../models/models";
-import { FileService } from "../../services/file.service";
 
 interface RoutePointViewData {
     latlng: LatLngAlt;

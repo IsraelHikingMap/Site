@@ -2,18 +2,18 @@ import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef,
 import { trigger, style, transition, animate } from "@angular/animations";
 import { Subscription, Observable, interval } from "rxjs";
 import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "@katze/ngx-d3";
-import { select, NgRedux } from "@angular-redux/store";
 import { regressionLoess } from "d3-regression";
 
+import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "../services/route-statistics.service";
-import { BaseMapComponent } from "./base-map.component";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
+import { select, NgRedux } from "../reducers/infra/ng-redux.module";
 import { LatLngAlt, RouteData, ApplicationState, Language } from "../models/models";
 
 declare type DragState = "start" | "drag" | "none";

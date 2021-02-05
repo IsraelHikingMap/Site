@@ -1,11 +1,10 @@
 import { Injectable, Inject } from "@angular/core";
-import { HttpParams } from "@angular/common/http";
 import { Router } from "@angular/router";
-import { NgRedux } from "@angular-redux/store";
 
 import { MapService } from "./map.service";
-import { Urls } from "../urls";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { ApplicationState, LatLngAlt } from "../models/models";
+import { Urls } from "../urls";
 
 export interface IPoiRouterData {
     source: string;

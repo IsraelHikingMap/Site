@@ -1,7 +1,7 @@
-import { AnyAction, Reducer } from 'redux';
-import { getIn } from '../utils/get-in';
-import { setIn } from '../utils/set-in';
-import { PathSelector } from './selectors';
+import { AnyAction, Reducer } from "redux";
+import { getIn } from "../utils/get-in";
+import { setIn } from "../utils/set-in";
+import { PathSelector } from "./selectors";
 
 let reducerMap: { [id: string]: Reducer<any, AnyAction> } = {};
 
@@ -46,11 +46,11 @@ export function replaceLocalReducer(
 
 function rootFractalReducer(
   state: {} = {},
-  action: AnyAction & { '@angular-redux::fractalkey'?: string },
+  action: AnyAction & { "@angular-redux::fractalkey"?: string },
 ) {
-  const fractalKey = action['@angular-redux::fractalkey'];
+  const fractalKey = action["@angular-redux::fractalkey"];
   const fractalPath = fractalKey ? JSON.parse(fractalKey) : [];
-  const localReducer = reducerMap[fractalKey || ''];
+  const localReducer = reducerMap[fractalKey || ""];
   return fractalKey && localReducer
     ? setIn(state, fractalPath, localReducer(getIn(state, fractalPath), action))
     : state;

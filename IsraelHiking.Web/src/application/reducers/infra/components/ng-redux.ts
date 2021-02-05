@@ -7,10 +7,10 @@ import {
   StoreEnhancer,
   Unsubscribe,
   Observable as ReduxObservale
-} from 'redux';
-import { Observable } from 'rxjs';
-import { ObservableStore } from './observable-store';
-import { Comparator, PathSelector, Selector } from './selectors';
+} from "redux";
+import { Observable } from "rxjs";
+import { ObservableStore } from "./observable-store";
+import { Comparator, PathSelector, Selector } from "./selectors";
 
 /**
  * This is the public interface of @angular-redux/store. It wraps the global
@@ -68,5 +68,5 @@ export abstract class NgRedux<RootState> implements ObservableStore<RootState> {
     localReducer: Reducer<SubState, AnyAction>,
   ) => ObservableStore<SubState>;
 
-  [Symbol.observable](): ReduxObservale<RootState> { return null }
+  [Symbol.observable](): ReduxObservale<RootState> { return null; }
 }

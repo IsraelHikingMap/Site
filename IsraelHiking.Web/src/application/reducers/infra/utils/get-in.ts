@@ -13,7 +13,7 @@ export function getIn(
   }
 
   // If this is an ImmutableJS structure, use existing getIn function
-  if ('function' === typeof v.getIn) {
+  if ("function" === typeof v.getIn) {
     return v.getIn(pathElems);
   }
 

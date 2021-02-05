@@ -1,16 +1,16 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, Inject } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
 import { MatDialogRef, MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 
 import { BaseMapComponent } from "../base-map.component";
+import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ImageResizeService } from "../../services/image-resize.service";
 import { NavigateHereService } from "../../services/navigate-here.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
-import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
+import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
 import { LinkData, MarkerData, ApplicationState } from "../../models/models";
 

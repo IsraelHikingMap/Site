@@ -1,6 +1,6 @@
 import { Location } from "../models/models";
 import { initialState } from "./initial-state";
-import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
+import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
 
 const SET_LOCATION = "SET_LOCATION";
 

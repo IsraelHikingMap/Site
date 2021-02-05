@@ -1,13 +1,13 @@
-import { AnyAction, Reducer } from 'redux';
-import { distinctUntilChanged } from 'rxjs/operators';
-import { NgRedux } from '../components/ng-redux';
-import { ObservableStore } from '../components/observable-store';
+import { AnyAction, Reducer } from "redux";
+import { distinctUntilChanged } from "rxjs/operators";
+import { NgRedux } from "../components/ng-redux";
+import { ObservableStore } from "../components/observable-store";
 import {
   Comparator,
   PathSelector,
   Selector,
   Transformer,
-} from '../components/selectors';
+} from "../components/selectors";
 
 /**
  * Used with the `@WithSubStore` class decorator to define a SubStore (AKA a
@@ -34,7 +34,7 @@ export interface FractalStoreOptions {
  * OPTIONS_KEY: this is per-class (static) and holds the config from the
  * @SubStore decorator.
  */
-const OPTIONS_KEY = '@angular-redux::substore::class::options';
+const OPTIONS_KEY = "@angular-redux::substore::class::options";
 
 /**
  * INSTANCE_SUBSTORE_KEY, INSTANCE_SELECTIONS_KEY: these are per-instance
@@ -49,15 +49,15 @@ const OPTIONS_KEY = '@angular-redux::substore::class::options';
  * This is therefore an own-property on the actual instance of the decorated
  * class.
  */
-const INSTANCE_SUBSTORE_KEY = '@angular-redux::substore::instance::store';
+const INSTANCE_SUBSTORE_KEY = "@angular-redux::substore::instance::store";
 const INSTANCE_SELECTIONS_KEY =
-  '@angular-redux::substore::instance::selections';
+  "@angular-redux::substore::instance::selections";
 
 /**
  * Used to detect when the base path changes - this allows components to
  * dynamically adjust their selections if necessary.
  */
-const INSTANCE_BASE_PATH_KEY = '@angular-redux::substore::instance::basepath';
+const INSTANCE_BASE_PATH_KEY = "@angular-redux::substore::instance::basepath";
 
 const getClassOptions = (decoratedInstance: any): FractalStoreOptions =>
   decoratedInstance.constructor[OPTIONS_KEY];
