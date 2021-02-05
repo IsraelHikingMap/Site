@@ -34,37 +34,6 @@ export function select<T>(
   };
 }
 
-/**
- * Selects an observable using the given path selector, and runs it through the
- * given transformer function. A transformer function takes the store
- * observable as an input and returns a derived observable from it. That derived
- *  observable is run through distinctUntilChanges with the given optional
- * comparator and attached to the store property.
- *
- * Think of a Transformer as a FunctionSelector that operates on observables
- * instead of values.
- *
- * ```ts
- * import { select$ } from 'angular-redux/store';
- *
- * export const debounceAndTriple = obs$ => obs$
- *  .debounce(300)
- *  .map(x => 3 * x);
- *
- * class Foo {
- *  @select$(['foo', 'bar'], debounceAndTriple)
- *  readonly debouncedFooBar$: Observable<number>;
- * }
- * ```
- */
-export function select$<T>(
-  selector: Selector<any, T>,
-  transformer: Transformer<any, T>,
-  comparator?: Comparator,
-): PropertyDecorator {
-  return decorate(selector, transformer, comparator);
-}
-
 function decorate(
   selector: Selector<any, any>,
   transformer?: Transformer<any, any>,

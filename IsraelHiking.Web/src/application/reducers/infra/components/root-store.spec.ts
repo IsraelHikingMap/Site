@@ -211,8 +211,7 @@ describe("NgRedux Observable Store", () => {
     ngRedux = new RootStore<AppState>(mockNgZone);
 
     const someService = new SomeService();
-    someService.foo$
-      .pipe(combineLatest(someService.bar$, someService.baz$))
+    combineLatest([someService.foo$, someService.bar$, someService.baz$])
       .subscribe(([foo, bar, baz]) => {
         expect(foo).toEqual("bar");
         expect(bar).toEqual("foo");

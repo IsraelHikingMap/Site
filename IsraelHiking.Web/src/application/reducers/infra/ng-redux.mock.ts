@@ -112,9 +112,8 @@ export class MockNgRedux<T = {}> extends NgRedux<T> {
       // This hooks the mock up to @select.
       NgRedux.instance = this as any;
     }
-    /** @deprecated Use MockNgRedux.getInstance() instead. */
-    static mockInstance?: MockNgRedux<any> = undefined;
-    //
+    private static mockInstance?: MockNgRedux<any> = undefined;
+
     private mockRootStore = new MockObservableStore<any>();
 
     configureSubStore = this.mockRootStore.configureSubStore as any;
