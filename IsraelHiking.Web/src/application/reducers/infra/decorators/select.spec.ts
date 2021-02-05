@@ -4,11 +4,11 @@ import { NgZone } from "@angular/core";
 import { Action } from "redux";
 
 import { Observable } from "rxjs";
-import { map, take, toArray } from "rxjs/operators";
+import { take, toArray } from "rxjs/operators";
 
 import { NgRedux } from "../components/ng-redux";
 import { RootStore } from "../components/root-store";
-import { select, select$ } from "./select";
+import { select } from "./select";
 
 interface AppState {
   foo: string;
@@ -162,75 +162,6 @@ describe("Select decorators", () => {
 
         expect(spy).toHaveBeenCalledWith(-1, 1);
         expect(spy).toHaveBeenCalledWith(1, 2);
-      });
-    });
-  });
-
-  describe("@select$", () => {
-    const transformer = (baz$: Observable<number>) =>
-      baz$.pipe(map(baz => 2 * baz));
-
-    it("applies a transformer to the observable", done => {
-      class MockClass {
-        @select$("baz", transformer)
-        baz$!: Observable<number>;
-      }
-      const mockInstance = new MockClass();
-
-      mockInstance.baz$
-        .pipe(
-          take(2),
-          toArray(),
-        )
-        .subscribe({
-          next: values => expect(values).toEqual([-2, 10]),
-          error: undefined,
-          complete: done
-        });
-      ngRedux.dispatch({ type: "nvm", payload: 5 });
-    });
-
-    describe("when passed a comparator", () => {
-      const comparator = (_: any, y: any): boolean => y === 1;
-      class MockClass {
-        @select$("baz", transformer, comparator)
-        baz$!: Observable<number>;
-      }
-
-      it("should only trigger next when the comparator returns true", done => {
-        const mockInstance = new MockClass();
-        mockInstance.baz$
-          .pipe(
-            take(2),
-            toArray(),
-          )
-          .subscribe({
-            next: values => expect(values).toEqual([-2, 2]),
-            error: undefined,
-            complete: done
-          });
-        ngRedux.dispatch({ type: "nvm", payload: 1 });
-        ngRedux.dispatch({ type: "nvm", payload: 2 });
-      });
-
-      it("should receive previous and next value for comparison", done => {
-        const spy = jasmine.createSpy("spy");
-        class SpyClass {
-          @select$("baz", transformer, spy)
-          baz$!: Observable<number>;
-        }
-
-        const mockInstance = new SpyClass();
-        mockInstance.baz$.pipe(take(3)).subscribe({
-          next: undefined,
-          error: undefined, complete: done
-        });
-
-        ngRedux.dispatch({ type: "nvm", payload: 1 });
-        ngRedux.dispatch({ type: "nvm", payload: 2 });
-
-        expect(spy).toHaveBeenCalledWith(-2, 2);
-        expect(spy).toHaveBeenCalledWith(2, 4);
       });
     });
   });
