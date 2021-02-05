@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { NgRedux } from "@angular-redux/store";
 import { timeout } from "rxjs/operators";
 
 import { LayersService } from "./layers/layers.service";
@@ -11,8 +10,9 @@ import { LoggingService } from "./logging.service";
 import { ApplicationState } from "../models/models";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { ToggleOfflineAction } from "../reducres/layers.reducer";
-import { SetOfflineLastModifiedAction } from "../reducres/offline.reducer";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
+import { ToggleOfflineAction } from "../reducers/layers.reducer";
+import { SetOfflineLastModifiedAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 
 @Injectable()

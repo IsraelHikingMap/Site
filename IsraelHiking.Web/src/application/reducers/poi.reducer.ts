@@ -1,4 +1,4 @@
-import { createReducerFromClass, ReduxAction, BaseAction } from "./reducer-action-decorator";
+import { createReducerFromClass, ReduxAction, BaseAction } from "./infra/ng-redux.module";
 import { initialState } from "./initial-state";
 import { PointsOfInterestState, PointOfInterestExtended, MarkerData } from "../models/models";
 

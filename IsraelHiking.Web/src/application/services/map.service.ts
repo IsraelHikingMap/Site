@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
 import { Map } from "mapbox-gl";
-import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
+import { NgRedux, select } from "../reducers/infra/ng-redux.module";
+import { SetPannedAction } from "../reducers/in-memory.reducer";
 import { ApplicationState } from "../models/models";
-import { SetPannedAction, SetPannedPayload } from "../reducres/in-memory.reducer";
 
 @Injectable()
 export class MapService {

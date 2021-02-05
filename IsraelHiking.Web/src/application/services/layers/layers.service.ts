@@ -1,21 +1,20 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { timeout } from "rxjs/operators";
 
 import { ResourcesService } from "../resources.service";
 import { AuthorizationService } from "../authorization.service";
 import { ToastService } from "../toast.service";
-import { Urls } from "../../urls";
+import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import {
-    DataContainer,
-    LayerData,
-    EditableLayer,
-    Overlay,
-    ApplicationState,
-    UserInfo
-} from "../../models/models";
+    ISRAEL_HIKING_MAP,
+    ISRAEL_MTB_MAP,
+    SATELLITE,
+    ESRI,
+    HIKING_TRAILS,
+    BICYCLE_TRAILS
+} from "../../reducers/initial-state";
 import {
     AddBaseLayerAction,
     UpdateBaseLayerAction,
@@ -25,15 +24,17 @@ import {
     RemoveBaseLayerAction,
     AddOverlayAction,
     ToggleOfflineAction,
-} from "../../reducres/layers.reducer";
+} from "../../reducers/layers.reducer";
 import {
-    ISRAEL_HIKING_MAP,
-    ISRAEL_MTB_MAP,
-    SATELLITE,
-    ESRI,
-    HIKING_TRAILS,
-    BICYCLE_TRAILS
-} from "../../reducres/initial-state";
+    DataContainer,
+    LayerData,
+    EditableLayer,
+    Overlay,
+    ApplicationState,
+    UserInfo
+} from "../../models/models";
+import { Urls } from "../../urls";
+
 import { LoggingService } from "../logging.service";
 
 interface IUserLayer extends LayerData {

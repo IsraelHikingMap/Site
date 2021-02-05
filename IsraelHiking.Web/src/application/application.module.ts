@@ -37,7 +37,6 @@ import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { IvyGalleryModule } from "angular-gallery";
 import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
-import { NgReduxModule } from "@angular-redux/store";
 import { NgxMapboxGLModule } from "ngx-mapbox-gl";
 import { NgIdleModule } from "@ng-idle/core";
 // Cordova plugins
@@ -61,6 +60,7 @@ import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { WebIntent } from "@ionic-native/web-intent/ngx";
 import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
 // services
+import { NgReduxModule } from "./reducers/infra/ng-redux.module";
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
 import { OsmTokenInterceptor } from "./services/osm-token.interceptor";

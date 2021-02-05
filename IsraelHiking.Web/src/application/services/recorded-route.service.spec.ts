@@ -1,6 +1,7 @@
-import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { TestBed, inject } from "@angular/core/testing";
-import { NgReduxTestingModule } from "@angular-redux/store/testing";
+import { NgReduxTestingModule } from "../reducers/infra/ng-redux-testing.module";
+import { Device } from "@ionic-native/device/ngx";
 
 import { RecordedRouteService } from "./recorded-route.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
@@ -10,13 +11,11 @@ import { TracesService } from "./traces.service";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
 import { LoggingService } from "./logging.service";
-import { NgRedux } from "@angular-redux/store";
-import { ApplicationState, RouteData } from "../models/models";
 import { ToastService } from "./toast.service";
 import { BackgroundGeolocation } from "@ionic-native/background-geolocation/ngx";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
-import { Device } from "@ionic-native/device/ngx";
+import { RouteData } from "../models/models";
 
 describe("RecordedRouteService", () => {
     beforeEach(() => {

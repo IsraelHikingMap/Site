@@ -1,6 +1,6 @@
 import { Action } from "redux";
 
-import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
+import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
 import { ShareUrl, InMemoryState, GeoLocationStateType } from "../models/models";
 import { initialState } from "./initial-state";
 

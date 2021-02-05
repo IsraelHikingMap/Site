@@ -1,14 +1,14 @@
 import { Injectable } from "@angular/core";
-import { NgRedux, select } from "@angular-redux/store";
 
 import { ResourcesService } from "./resources.service";
 import { GeoLocationService } from "./geo-location.service";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { ToastService } from "./toast.service";
-import { ApplicationState, LatLngAlt } from "../models/models";
 import { RouterService } from "./router.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
-import { AddSegmentAction, AddRouteAction, ChangeRoutePropertiesAction } from "../reducres/routes.reducer";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
+import { AddSegmentAction, AddRouteAction, ChangeRoutePropertiesAction } from "../reducers/routes.reducer";
+import { ApplicationState, LatLngAlt } from "../models/models";
 
 @Injectable()
 export class NavigateHereService {

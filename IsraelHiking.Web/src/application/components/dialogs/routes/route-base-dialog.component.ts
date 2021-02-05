@@ -1,13 +1,13 @@
-import { NgRedux } from "@angular-redux/store";
 import invert from "invert-color";
 
+import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
-import { BaseMapComponent } from "../../base-map.component";
-import { ApplicationState, RouteData } from "../../../models/models";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
-import { SetOpacityAndWeightAction } from "../../../reducres/route-editing-state.reducer";
+import { NgRedux } from "../../../reducers/infra/ng-redux.module";
+import { SetOpacityAndWeightAction } from "../../../reducers/route-editing-state.reducer";
+import { ApplicationState, RouteData } from "../../../models/models";
 
 export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     public colors: string[];

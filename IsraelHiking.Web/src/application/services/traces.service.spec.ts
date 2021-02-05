@@ -1,7 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { NgRedux } from "@angular-redux/store";
+import { NgReduxTestingModule } from "../reducers/infra/ng-redux-testing.module";
 
 import { TracesService } from "./traces.service";
 import { LoggingService } from "./logging.service";
@@ -20,10 +20,10 @@ describe("Traces Service", () => {
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
-                HttpClientTestingModule
+                HttpClientTestingModule,
+                NgReduxTestingModule
             ],
             providers: [
-                NgRedux,
                 TracesService,
                 { provide: ResourcesService, useValue: mock.resourcesService },
                 { provide: LoggingService, useValue: loggignMock },

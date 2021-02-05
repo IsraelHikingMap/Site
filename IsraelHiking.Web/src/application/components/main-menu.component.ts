@@ -1,6 +1,5 @@
 import { Component, OnDestroy } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
-import { NgRedux, select } from "@angular-redux/store";
 import { Subscription, Observable } from "rxjs";
 import { Device } from "@ionic-native/device/ngx";
 import { AppVersion } from "@ionic-native/app-version/ngx";
@@ -22,8 +21,9 @@ import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
-import { SetUIComponentVisibilityAction } from "../reducres/ui-components.reducer";
-import { SetAgreeToTermsAction } from "../reducres/user.reducer";
+import { NgRedux, select } from "../reducers/infra/ng-redux.module";
+import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
+import { SetAgreeToTermsAction } from "../reducers/user.reducer";
 import { UserInfo, ApplicationState } from "../models/models";
 
 @Component({

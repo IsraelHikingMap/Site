@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
 import { HttpInterceptor, HttpHandler, HttpRequest, HttpEvent } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { NgRedux } from "@angular-redux/store";
 
-import { Urls } from "../urls";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { ApplicationState } from "../models/models";
+import { Urls } from "../urls";
 
 @Injectable()
 export class OsmTokenInterceptor implements HttpInterceptor {

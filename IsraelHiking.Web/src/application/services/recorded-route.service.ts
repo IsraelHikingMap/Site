@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
 import { last } from "lodash-es";
 
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
@@ -8,11 +7,12 @@ import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoLocationService } from "./geo-location.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
-import { StopRecordingAction, StartRecordingAction } from "../reducres/route-editing-state.reducer";
 import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
-import { AddTraceAction } from "../reducres/traces.reducer";
-import { AddRouteAction, AddRecordingPointsAction } from "../reducres/routes.reducer";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
+import { StopRecordingAction, StartRecordingAction } from "../reducers/route-editing-state.reducer";
+import { AddTraceAction } from "../reducers/traces.reducer";
+import { AddRouteAction, AddRecordingPointsAction } from "../reducers/routes.reducer";
 import { TraceVisibility, DataContainer, ApplicationState, RouteData, ILatLngTime } from "../models/models";
 
 @Injectable()

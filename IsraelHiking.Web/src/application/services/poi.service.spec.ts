@@ -17,7 +17,7 @@ import { GeoJsonParser } from "./geojson.parser";
 import { SQLite } from "@ionic-native/sqlite/ngx";
 import { Urls } from "../urls";
 import { PointOfInterestExtended } from "../models/models";
-import { NgReduxTestingModule, MockNgRedux } from "@angular-redux/store/testing";
+import { NgReduxTestingModule, MockNgRedux } from "../reducers/infra/ng-redux-testing.module";
 import { MapService } from "./map.service";
 
 describe("Poi Service", () => {

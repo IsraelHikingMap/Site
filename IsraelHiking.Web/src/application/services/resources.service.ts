@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
-import { NgRedux } from "@angular-redux/store";
 
 import { GetTextCatalogService } from "./gettext-catalog.service";
-import { SetLanguageAction } from "../reducres/configuration.reducer";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
+import { SetLanguageAction } from "../reducers/configuration.reducer";
 import { ApplicationState, Language } from "../models/models";
 import { Urls } from "../urls";
 

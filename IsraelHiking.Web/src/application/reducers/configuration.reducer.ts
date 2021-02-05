@@ -2,7 +2,7 @@ import { Action } from "redux";
 
 import { Configuration, Language } from "../models/models";
 import { initialState } from "./initial-state";
-import { ReduxAction, createReducerFromClass, BaseAction } from "./reducer-action-decorator";
+import { ReduxAction, createReducerFromClass, BaseAction } from "./infra/ng-redux.module";
 
 const IS_BATTERY_OPTIMIZATION_TOGGLE = "IS_BATTERY_OPTIMIZATION_TOGGLE";
 const IS_AUTOMATIC_RECORDING_UPLOAD_TOGGLE = "IS_AUTOMATIC_RECORDING_UPLOAD_TOGGLE";

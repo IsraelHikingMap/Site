@@ -1,13 +1,13 @@
 import { Component } from "@angular/core";
-import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
-import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducres/traces.reducer";
-import { AddRouteAction } from "../../reducres/routes.reducer";
 import { RoutesFactory } from "../../services/layers/routelayers/routes.factory";
+import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
+import { AddRouteAction } from "../../reducers/routes.reducer";
+import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
 import { Trace, ApplicationState, LatLngAlt } from "../../models/models";
 
 @Component({

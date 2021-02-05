@@ -1,14 +1,14 @@
 import { Component, Input } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
+import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import {
     ExpandGroupAction,
     CollapseGroupAction,
     SetCategoryVisibilityAction,
     SetCategoriesGroupVisibilityAction
-} from "../../reducres/layers.reducer";
+} from "../../reducers/layers.reducer";
 import { ApplicationState, CategoriesGroup, Category } from "../../models/models";
 
 @Component({

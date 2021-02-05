@@ -1,6 +1,5 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 
@@ -11,8 +10,9 @@ import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
-import { AddPrivatePoiAction } from "../../reducres/routes.reducer";
-import { ToggleDistanceAction } from "../../reducres/in-memory.reducer";
+import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
+import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
+import { ToggleDistanceAction } from "../../reducers/in-memory.reducer";
 import { ApplicationState, LatLngAlt } from "../../models/models";
 
 @Component({

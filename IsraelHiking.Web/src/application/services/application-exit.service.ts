@@ -1,5 +1,4 @@
 import { Injectable, NgZone } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
 
 import { RunningContextService } from "./running-context.service";
 import { ResourcesService } from "./resources.service";
@@ -8,9 +7,10 @@ import { DatabaseService } from "./database.service";
 import { ToastService } from "./toast.service";
 import { MatDialog } from "@angular/material/dialog";
 import { SidebarService } from "./sidebar.service";
-import { SetSidebarAction } from "../reducres/poi.reducer";
+import { SetSidebarAction } from "../reducers/poi.reducer";
 import { GeoLocationService } from "./geo-location.service";
 import { RecordedRouteService } from "./recorded-route.service";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { ApplicationState } from "../models/models";
 
 declare var navigator: Navigator;

@@ -1,16 +1,16 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { NgRedux } from "@angular-redux/store";
 import { timeout } from "rxjs/operators";
 
 import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
-import { SetShareUrlAction } from "../reducres/in-memory.reducer";
-import { UpdateShareUrlAction, AddShareUrlAction, RemoveShareUrlAction } from "../reducres/share-urls.reducer";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
+import { SetShareUrlAction } from "../reducers/in-memory.reducer";
+import { UpdateShareUrlAction, AddShareUrlAction, RemoveShareUrlAction } from "../reducers/share-urls.reducer";
+import { SetShareUrlsLastModifiedDateAction } from "application/reducers/offline.reducer";
 import { ShareUrl, DataContainer, ApplicationState } from "../models/models";
-import { SetShareUrlsLastModifiedDateAction } from "application/reducres/offline.reducer";
 import { Urls } from "../urls";
 
 interface IShareUrlSocialLinks {

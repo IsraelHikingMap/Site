@@ -1,6 +1,6 @@
 import { OfflineState } from "../models/models";
 import { initialState } from "./initial-state";
-import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
+import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
 
 const SET_OFFLINE_AVAILABLE = "SET_OFFLINE_AVAILABLE";
 const SET_OFFLINE_LAST_MODIFIED_DATE = "SET_OFFLINE_LAST_MODIFIED_DATE";

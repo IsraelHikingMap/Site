@@ -1,5 +1,4 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
-import { NgRedux, select } from "@angular-redux/store";
 import { MapComponent } from "ngx-mapbox-gl";
 import { RasterSource, RasterLayout, Layer, Style, Sources, RasterLayer, AnyLayer } from "mapbox-gl";
 import { Observable, Subscription } from "rxjs";
@@ -8,6 +7,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
+import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import { ApplicationState, EditableLayer, Language } from "../../models/models";
 
 @Component({

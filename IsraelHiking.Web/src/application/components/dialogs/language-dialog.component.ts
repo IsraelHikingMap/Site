@@ -1,8 +1,8 @@
 import { Component } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
+import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ApplicationState, Language, LanguageCode } from "../../models/models";
 
 @Component({

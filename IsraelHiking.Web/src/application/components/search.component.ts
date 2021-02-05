@@ -13,22 +13,22 @@ import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
 import { remove } from "lodash-es";
 import { PointLike } from "mapbox-gl";
-import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { skip } from "rxjs/operators";
 
+import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
 import { RouterService } from "../services/router.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider, ISearchResultsPointOfInterest } from "../services/search-results.provider";
-import { BaseMapComponent } from "./base-map.component";
-import { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt } from "../models/models";
 import { RoutesFactory } from "../services/layers/routelayers/routes.factory";
-import { AddRouteAction } from "../reducres/routes.reducer";
 import { SpatialService } from "../services/spatial.service";
-import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
+import { NgRedux, select } from "../reducers/infra/ng-redux.module";
+import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
+import { AddRouteAction } from "../reducers/routes.reducer";
+import { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt } from "../models/models";
 
 export interface ISearchContext {
     searchTerm: string;

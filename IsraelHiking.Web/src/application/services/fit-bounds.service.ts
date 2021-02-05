@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
-import { NgRedux } from "@angular-redux/store";
 
 import { SidebarService } from "./sidebar.service";
-import { Bounds, LatLngAlt, ApplicationState } from "../models/models";
 import { MapService } from "./map.service";
 import { SpatialService } from "./spatial.service";
-import { SetPannedAction } from "../reducres/in-memory.reducer";
+import { NgRedux } from "../reducers/infra/ng-redux.module";
+import { SetPannedAction } from "../reducers/in-memory.reducer";
+import { Bounds, LatLngAlt, ApplicationState } from "../models/models";
 
 @Injectable()
 export class FitBoundsService {

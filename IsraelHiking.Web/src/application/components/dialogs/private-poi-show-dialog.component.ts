@@ -1,14 +1,14 @@
 import { Component, Inject } from "@angular/core";
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { NgRedux } from "@angular-redux/store";
 
 import { BaseMapComponent } from "../base-map.component";
+import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
+import { PrivatePoiEditDialogComponent } from "./private-poi-edit-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
-import { PrivatePoiEditDialogComponent } from "./private-poi-edit-dialog.component";
-import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
-import { AddPrivatePoiAction } from "../../reducres/routes.reducer";
+import { NgRedux } from "../../reducers/infra/ng-redux.module";
+import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { ApplicationState, MarkerData, LinkData } from "../../models/models";
 
 interface IPrivatePoiShowDialogData {

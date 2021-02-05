@@ -1,9 +1,9 @@
 import { Injectable, EventEmitter } from "@angular/core";
-import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 
 import { HashService } from "./hash.service";
-import { SetSidebarAction } from "../reducres/poi.reducer";
+import { NgRedux, select } from "../reducers/infra/ng-redux.module";
+import { SetSidebarAction } from "../reducers/poi.reducer";
 import { ApplicationState } from "../models/models";
 
 export type SidebarView = "info" | "layers" | "public-poi" | "";
@@ -31,7 +31,7 @@ export class SidebarService {
         });
     }
 
-    public toggle = (viewName: SidebarView) => {
+    public toggle(viewName: SidebarView) {
         if (this.viewName === viewName) {
             this.hide();
         } else {
@@ -49,7 +49,7 @@ export class SidebarService {
         this.sideBarStateChanged.next();
     }
 
-    public hide = () => {
+    public hide() {
         this.hideWithoutChangingAddressbar();
         this.hashService.resetAddressbar();
     }

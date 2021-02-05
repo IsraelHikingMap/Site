@@ -1,9 +1,13 @@
 import { Injectable, EventEmitter } from "@angular/core";
-import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { some } from "lodash-es";
 
-import { SetSelectedRouteAction } from "../../../reducres/route-editing-state.reducer";
+import { RoutesFactory } from "./routes.factory";
+import { ResourcesService } from "../../resources.service";
+import { SpatialService } from "../../spatial.service";
+import { RouterService } from "../../router.service";
+import { NgRedux, select } from "../../../reducers/infra/ng-redux.module";
+import { SetSelectedRouteAction } from "../../../reducers/route-editing-state.reducer";
 import {
     AddRouteAction,
     SplitRouteAction,
@@ -14,11 +18,7 @@ import {
     ReplaceSegmentsAction,
     AddPrivatePoiAction,
     ChangeEditStateAction
-} from "../../../reducres/routes.reducer";
-import { RoutesFactory } from "./routes.factory";
-import { ResourcesService } from "../../resources.service";
-import { SpatialService } from "../../spatial.service";
-import { RouterService } from "../../router.service";
+} from "../../../reducers/routes.reducer";
 import {
     RouteData,
     ApplicationState,
