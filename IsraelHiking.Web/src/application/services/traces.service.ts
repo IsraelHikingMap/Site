@@ -76,9 +76,24 @@ export class TracesService {
         }
     }
 
-    public getTraceById(trace: Trace): Promise<DataContainer> {
-        this.loggingService.info(`[Traces] Getting trace by id ${trace.id}`);
-        return this.httpClient.get(Urls.osmTrace + trace.id).toPromise() as Promise<DataContainer>;
+    public async getTraceById(traceId: string): Promise<Trace> {
+        this.loggingService.info(`[Traces] Getting trace by id: ${traceId}`);
+        let trace = this.ngRedux.getState().tracesState.traces.find(t => t.id === traceId);
+        if (trace == null) {
+            return null
+        }
+        if (trace != null && trace.dataContainer != null) {
+            this.loggingService.info(`[Traces] Got trace from cache: ${traceId}`);
+            return trace;
+        }
+        let dataContainer = await this.httpClient.get(Urls.osmTrace + traceId).toPromise() as DataContainer;
+        trace = { 
+            ...trace, 
+            dataContainer 
+        };
+        this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace: trace }));
+        this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
+        return trace;
     }
 
     public uploadTrace(file: File): Promise<any> {

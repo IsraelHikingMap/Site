@@ -77,12 +77,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.tracesChangedSubscription.unsubscribe();
     }
 
-    public async showTrace(): Promise<DataContainer> {
-        let trace = this.getSelectedTrace();
-        if (trace.dataContainer == null) {
-            trace.dataContainer = await this.tracesService.getTraceById(trace);
-        }
-
+    public async showTrace(): Promise<void> {
+        let trace = await this.tracesService.getTraceById(this.selectedTraceId);
         this.ngRedux.dispatch(new SetVisibleTraceAction({ traceId: trace.id }));
         let latlngs = [];
         for (let route of trace.dataContainer.routes) {
@@ -95,7 +91,6 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         }
         let bounds = SpatialService.getBounds(latlngs);
         this.fitBoundsService.fitBounds(bounds);
-        return trace.dataContainer;
     }
 
     private getSelectedTrace(): Trace {

@@ -5,6 +5,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RoutesFactory } from "../../services/layers/routelayers/routes.factory";
+import { TracesService } from "application/services/traces.service";
 import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import { AddRouteAction } from "../../reducers/routes.reducer";
 import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
@@ -16,7 +17,7 @@ import { Trace, ApplicationState, LatLngAlt } from "../../models/models";
 })
 export class TracesComponent extends BaseMapComponent {
 
-    public visibleTrace: Trace;
+    public visibleTraceName: string;
     public selectedTrace: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public selectedTraceStart: LatLngAlt;
     public selectedFeature: GeoJSON.Feature<GeoJSON.LineString>;
@@ -33,25 +34,29 @@ export class TracesComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
                 private readonly routesFactory: RoutesFactory,
+                private readonly tracesService: TracesService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.isConfigOpen = false;
         this.selectedTrace = null;
         this.selectedTraceStart = null;
+        this.visibleTraceName = "";
         this.clearSelection();
         this.missingParts = {
             type: "FeatureCollection",
             features: []
         };
-        this.visibleTraceId$.subscribe((id) => {
-            this.visibleTrace = this.ngRedux.getState().tracesState.traces.find(t => t.id === id);
-            let traceCoordinates = [];
-            let points: GeoJSON.Feature<GeoJSON.Point>[] = [];
-            if (this.visibleTrace == null) {
+        this.visibleTraceId$.subscribe(async (id) => {
+            if (id == null)
+            {
                 this.clearTraceSource();
                 return;
             }
-            for (let route of this.visibleTrace.dataContainer.routes) {
+            let visibleTrace = await this.tracesService.getTraceById(id);
+            let traceCoordinates = [];
+            let points: GeoJSON.Feature<GeoJSON.Point>[] = [];
+            this.visibleTraceName = visibleTrace.name;
+            for (let route of visibleTrace.dataContainer.routes) {
                 for (let segment of route.segments) {
                     traceCoordinates = traceCoordinates.concat(segment.latlngs.map(l => SpatialService.toCoordinate(l)));
                 }
@@ -132,8 +137,10 @@ export class TracesComponent extends BaseMapComponent {
         }));
     }
 
-    public convertToRoute() {
-        for (let route of this.visibleTrace.dataContainer.routes) {
+    public async convertToRoute() {
+        let traceId = this.ngRedux.getState().tracesState.visibleTraceId;
+        let trace = await this.tracesService.getTraceById(traceId);
+        for (let route of trace.dataContainer.routes) {
             let routeToAdd = this.routesFactory.createRouteData(route.name);
             routeToAdd.segments = route.segments;
             routeToAdd.markers = route.markers;

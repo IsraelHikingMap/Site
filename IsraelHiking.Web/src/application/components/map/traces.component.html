@@ -43,7 +43,7 @@
     </mgl-marker>
     <mgl-popup [marker]="tracesConfigMarker" (popupClose)="isConfigOpen = false">
         <clearable-overlay [latlng]="selectedTraceStart"
-                           [title]="visibleTrace.name"
+                           [title]="visibleTraceName"
                            (cleared)="clearTrace()"
                            (convertToRoute)="convertToRoute()"></clearable-overlay>
     </mgl-popup>
