@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { saveAs, FileSaverOptions } from "file-saver";
+import { saveAs, FileSaverOptions } from "file-saver-es";
 import * as ohauth from "ohauth";
 
 export interface IOAuthResponse {

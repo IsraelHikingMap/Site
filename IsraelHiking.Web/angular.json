@@ -43,8 +43,7 @@
               "geojson-rbush",
               "@mapbox/mapbox-gl-geocoder",
               "ohauth",
-              "redux-undo",
-              "file-saver"
+              "redux-undo"
             ]
           },
           "configurations": {

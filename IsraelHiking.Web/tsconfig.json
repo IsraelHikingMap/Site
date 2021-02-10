@@ -21,7 +21,12 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "file-saver-es": [
+        "@types/file-saver"
+      ]
+    }
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": false,
