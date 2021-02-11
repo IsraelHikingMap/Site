@@ -80,18 +80,18 @@ export class TracesService {
         this.loggingService.info(`[Traces] Getting trace by id: ${traceId}`);
         let trace = this.ngRedux.getState().tracesState.traces.find(t => t.id === traceId);
         if (trace == null) {
-            return null
+            return null;
         }
         if (trace != null && trace.dataContainer != null) {
             this.loggingService.info(`[Traces] Got trace from cache: ${traceId}`);
             return trace;
         }
         let dataContainer = await this.httpClient.get(Urls.osmTrace + traceId).toPromise() as DataContainer;
-        trace = { 
-            ...trace, 
-            dataContainer 
+        trace = {
+            ...trace,
+            dataContainer
         };
-        this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace: trace }));
+        this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace }));
         this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
         return trace;
     }
