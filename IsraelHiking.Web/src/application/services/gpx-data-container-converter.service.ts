@@ -186,7 +186,7 @@ export class GpxDataContainerConverterService {
         }
         this.updateBoundingBox(gpx);
         let gpxString = builder.buildObject(gpx);
-        gpxString = new XmlBeautify().beautify(gpxString);
+        gpxString = "\uFEFF" + new XmlBeautify().beautify(gpxString);
         return encode(await new Response(gpxString).arrayBuffer());
     }
 
