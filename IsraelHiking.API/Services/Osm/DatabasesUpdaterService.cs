@@ -3,6 +3,7 @@ using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Extensions;
+using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
@@ -31,7 +32,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly IFeaturesMergeExecutor _featuresMergeExecutor;
-        private readonly IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
+        private readonly IOsmLatestFileGateway _osmLatestFileGateway;
         private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
@@ -48,7 +49,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="osmRepository"></param>
         /// <param name="pointsOfInterestAdapterFactory"></param>
         /// <param name="featuresMergeExecutor"></param>
-        /// <param name="latestFileFetcherExecutor"></param>
+        /// <param name="latestFileGateway"></param>
         /// <param name="pointsOfInterestFilesCreatorExecutor"></param>
         /// <param name="imagesUrlsStorageExecutor"></param>
         /// <param name="pointsOfInterestProvider"></param>
@@ -62,7 +63,7 @@ namespace IsraelHiking.API.Services.Osm
             ITagsHelper tagsHelper, IOsmRepository osmRepository,
             IPointsOfInterestAdapterFactory pointsOfInterestAdapterFactory,
             IFeaturesMergeExecutor featuresMergeExecutor,
-            IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
+            IOsmLatestFileGateway latestFileGateway,
             IPointsOfInterestFilesCreatorExecutor pointsOfInterestFilesCreatorExecutor,
             IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
             IPointsOfInterestProvider pointsOfInterestProvider,
@@ -78,7 +79,7 @@ namespace IsraelHiking.API.Services.Osm
             _pointsOfInterestAdapterFactory = pointsOfInterestAdapterFactory;
             _pointsOfInterestFilesCreatorExecutor = pointsOfInterestFilesCreatorExecutor;
             _featuresMergeExecutor = featuresMergeExecutor;
-            _osmLatestFileFetcherExecutor = latestFileFetcherExecutor;
+            _osmLatestFileGateway = latestFileGateway;
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _osmGateway = clinetsFactory.CreateNonAuthClient();
             _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
@@ -90,7 +91,7 @@ namespace IsraelHiking.API.Services.Osm
         public async Task Update()
         {
             _logger.LogInformation("Staring updating from OSM change file");
-            using var updatesStream = await _osmLatestFileFetcherExecutor.GetUpdates();
+            using var updatesStream = await _osmLatestFileGateway.GetUpdates();
             XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
             var changes = (OsmChange)serializer.Deserialize(updatesStream);
             await Updatehighways(changes);
@@ -187,7 +188,7 @@ namespace IsraelHiking.API.Services.Osm
                 }
                 if (request.UpdateOsmFile || request.DownloadOsmFile)
                 {
-                    await _osmLatestFileFetcherExecutor.Update(request.DownloadOsmFile, request.UpdateOsmFile);
+                    await _osmLatestFileGateway.Update(request.DownloadOsmFile, request.UpdateOsmFile);
                 }
                 if (request.Highways)
                 {
@@ -257,7 +258,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildHighways()
         {
             _logger.LogInformation("Starting rebuilding highways database.");
-            using var stream = _osmLatestFileFetcherExecutor.Get();
+            using var stream = await _osmLatestFileGateway.Get();
             var osmHighways = await _osmRepository.GetAllHighways(stream);
             var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
             await _highwaysRepository.UpdateHighwaysZeroDownTime(geoJsonHighways);
@@ -268,7 +269,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildImages()
         {
             _logger.LogInformation("Starting rebuilding images database.");
-            using var stream = _osmLatestFileFetcherExecutor.Get();
+            using var stream = await _osmLatestFileGateway.Get();
             var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
             var featuresUrls = features.SelectMany(f =>
                 f.Attributes.GetNames()

@@ -2,7 +2,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "outDir": "./wwwroot/out-tsc",
-    "baseUrl": "sources",
+    "baseUrl": "src",
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,
@@ -11,7 +11,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "module": "esnext",
+    "module": "es2020",
     "importHelpers": true,
     "skipLibCheck": true,
     "target": "es5",
@@ -21,7 +21,12 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "file-saver-es": [
+        "@types/file-saver"
+      ]
+    }
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": false,

@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IOsmRepository _osmRepository;
         private readonly IWikipediaGateway _wikipediaGateway;
         private readonly ITagsHelper _tagsHelper;
-        private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
+        private readonly IOsmLatestFileGateway _latestFileGateway;
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
         private readonly IDataContainerConverterService _dataContainerConverterService;
@@ -57,7 +57,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="dataContainerConverterService"></param>
         /// <param name="wikipediaGateway"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
-        /// <param name="latestFileFetcherExecutor"></param>
+        /// <param name="latestFileGateway"></param>
         /// <param name="tagsHelper"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
@@ -68,7 +68,7 @@ namespace IsraelHiking.API.Services.Poi
             IDataContainerConverterService dataContainerConverterService,
             IWikipediaGateway wikipediaGateway,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
-            IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
+            IOsmLatestFileGateway latestFileGateway,
             ITagsHelper tagsHelper,
             IOptions<ConfigurationData> options,
             ILogger logger)
@@ -77,7 +77,7 @@ namespace IsraelHiking.API.Services.Poi
             _osmRepository = osmRepository;
             _wikipediaGateway = wikipediaGateway;
             _tagsHelper = tagsHelper;
-            _latestFileFetcherExecutor = latestFileFetcherExecutor;
+            _latestFileGateway = latestFileGateway;
             _elevationDataStorage = elevationDataStorage;
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
             _options = options.Value;
@@ -292,7 +292,7 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<List<Feature>> GetAll()
         {
             _logger.LogInformation("Starting getting OSM points of interest");
-            using var stream = _latestFileFetcherExecutor.Get();
+            using var stream = await _latestFileGateway.Get();
             var osmEntities = await _osmRepository.GetElementsWithName(stream);
             var relevantTagsDictionary = _tagsHelper.GetAllTags();
             var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(stream, relevantTagsDictionary);

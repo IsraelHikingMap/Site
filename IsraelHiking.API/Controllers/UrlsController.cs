@@ -69,12 +69,26 @@ namespace IsraelHiking.API.Controllers
             }
             shareUrl.LastViewed = DateTime.Now;
             shareUrl.ViewsCount++;
+            shareUrl.FixModifiedDate();
             await _repository.Update(shareUrl);
             if (string.IsNullOrWhiteSpace(format))
             {
                 return Ok(shareUrl);
             }
             return await GetUrlAsFile(id, format, shareUrl);
+        }
+
+        /// <summary>
+        /// Returns the last modifed timestamp relevant to a given shared route
+        /// </summary>
+        /// <param name="id">The shared route ID</param>
+        /// <returns>The shared last modified timestamp</returns>
+        // GET api/Urls/abc/timestamp
+        [HttpGet]
+        [Route("{id}/timestamp")]
+        public async Task<DateTime> GetShareUrlLastModifiedTimeStamp(string id)
+        {
+            return await _repository.GetUrlTimestampById(id);
         }
 
         private async Task<IActionResult> GetUrlAsFile(string id, string format, ShareUrl shareUrl)
@@ -98,7 +112,11 @@ namespace IsraelHiking.API.Controllers
         public async Task<IActionResult> GetShareUrlForUser()
         {
             var shareUrls = await _repository.GetUrlsByUser(User.Identity.Name);
-            return Ok(shareUrls.OrderByDescending(d => d.CreationDate));
+            foreach (var shareUrl in shareUrls)
+            {
+                shareUrl.FixModifiedDate();
+            }
+            return Ok(shareUrls.OrderByDescending(d => d.LastModifiedDate));
         }
 
         /// <summary>
@@ -116,8 +134,10 @@ namespace IsraelHiking.API.Controllers
                 return BadRequest("You can't create a share as someone else!");
             }
             var random = new Random(Guid.NewGuid().GetHashCode());
-            shareUrl.CreationDate = DateTime.Now;
-            shareUrl.LastViewed = DateTime.Now;
+            var now = DateTime.Now;
+            shareUrl.CreationDate = now;
+            shareUrl.LastModifiedDate = now;
+            shareUrl.LastViewed = now;
             shareUrl.ViewsCount = 0;
             var id = GetRandomString(10, random);
             while (await _repository.GetUrlById(id) != null)
@@ -192,6 +212,7 @@ namespace IsraelHiking.API.Controllers
             }
             shareUrlFromDatabase.Title = shareUrl.Title;
             shareUrlFromDatabase.Description = shareUrl.Description;
+            shareUrlFromDatabase.LastModifiedDate = DateTime.Now;
             if (shareUrl.DataContainer != null)
             {
                 // update can be made without the datacontainer data

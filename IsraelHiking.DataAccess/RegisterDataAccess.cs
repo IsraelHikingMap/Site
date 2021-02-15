@@ -1,5 +1,4 @@
-﻿using IsraelHiking.DataAccess.OpenStreetMap;
-using IsraelHiking.DataAccessInterfaces;
+﻿using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,7 +8,6 @@ namespace IsraelHiking.DataAccess
     {
         public static IServiceCollection AddIHMDataAccess(this IServiceCollection services)
         {
-            services.AddTransient<IProcessHelper, ProcessHelper>();
             services.AddTransient<IFileSystemHelper, FileSystemHelper>();
             services.AddTransient<IRemoteFileSizeFetcherGateway, RemoteFileFetcherGateway>();
             services.AddTransient<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
@@ -32,6 +30,7 @@ namespace IsraelHiking.DataAccess
             services.AddSingleton<IINatureGateway, INatureGateway>();
             services.AddTransient<IReceiptValidationGateway, ReceiptValidationGateway>();
             services.AddTransient<IOverpassTurboGateway, OverpassTurboGateway>();
+            services.AddTransient<IOsmLatestFileGateway, OsmLatestFileGateway>();
             // Initializables
             services.AddSingleton<IInitializable>(x => x.GetService<ElasticSearchGateway>());
             services.AddSingleton<IInitializable>(x => x.GetService<IElevationDataStorage>());

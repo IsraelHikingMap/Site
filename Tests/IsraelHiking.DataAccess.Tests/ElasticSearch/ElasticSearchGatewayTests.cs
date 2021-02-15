@@ -197,6 +197,15 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
             Assert.IsTrue(results > DateTime.MinValue);
         }
+
+        [TestMethod]
+        [Ignore]
+        public void GetUrlTimestampById_ShouldSGetIt()
+        {
+            var results = _gateway.GetUrlTimestampById("mXgPc5nohX").Result;
+
+            Assert.IsTrue(results > DateTime.MinValue);
+        }
     }
 }
 

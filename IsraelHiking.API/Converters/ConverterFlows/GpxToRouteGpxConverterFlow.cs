@@ -23,7 +23,7 @@ namespace IsraelHiking.API.Converters.ConverterFlows
                 name: t.Name,
                 description: t.Description,
                 comment: t.Comment,
-                waypoints: new ImmutableGpxWaypointTable(t.Segments.SelectMany(s => s.Waypoints)),
+                waypoints: GpxToSingleTrackGpxConverterFlow.RemoveDuplicatePoints(t.Segments.SelectMany(s => s.Waypoints)),
                 source: null, links: ImmutableArray<GpxWebLink>.Empty, number: null, classification: null, extensions: null
             )));
             var routeGpx = new GpxFile

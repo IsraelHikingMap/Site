@@ -181,7 +181,11 @@ namespace IsraelHiking.API.Services
                 Icon = "icon-tree"
             };
             var caveIcon = new IconColorCategory("icon-cave", Categories.NATURAL, "black", "Cave");
-            naturalCategory.Items.Add(new IconAndTags(caveIcon, "natural", "cave_entrance"));
+            naturalCategory.Items.Add(new IconAndTags(caveIcon, new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("natural", "cave_entrance"),
+                new KeyValuePair<string, string>("historic", "tomb")
+            }));
 
             var treeIcon = new IconColorCategory("icon-tree", Categories.NATURAL, "#008000", "Tree");
             naturalCategory.Items.Add(new IconAndTags(treeIcon, "natural", "tree"));

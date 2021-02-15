@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head prefix="og: http://ogp.me/ns#">
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible" />
+    <meta property="og:site_name" content="IsraelHiking.OSM.org.il" />
+    <meta property="og:url" content="http://israelhiking.osm.org.il/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Israel Hiking Map" />
+    <meta property="og:image" content="http://israelhiking.osm.org.il/content/favicons/android-chrome-192x192.png" />
+    <meta property="og:image:url" content="http://israelhiking.osm.org.il/content/favicons/android-chrome-192x192.png" />
+    <meta property="og:image:secure_url" content="https://israelhiking.osm.org.il/content/favicons/android-chrome-192x192.png" />
+    <meta property="og:image:width" content="192" />
+    <meta property="og:image:height" content="192" />
+    <meta property="og:description" content="בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע." />
+    <meta name="title" content="Israel Hiking Map" />
+    <meta name="description" content="בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע." />
+    <meta name="keyword" content="hike,bike,outdoor,israel hiking,map,navigation,route planning,nominatim,סימון שבילים,אופניים,מפה,ניווט,שטח,טיול,מטיבי לכת,ג'יפים,רכיבה,הליכה,טבע" />
+    <meta name="robot" content="index,follow" />
+    <meta name="msapplication-TileColor" content="#2b5797">
+    <meta name="msapplication-TileImage" content="content/favicons/mstile-144x144.png">
+    <meta name="msapplication-config" content="content/favicons/browserconfig.xml">
+    <meta name="theme-color" content="#0a42bb">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Israel Hiking Map</title>
+    <base href="/">
+    <!-- Favicons courtesy of http://realfavicongenerator.net/ -->
+    <link rel="apple-touch-icon" sizes="57x57" href="content/favicons/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="content/favicons/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="content/favicons/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="content/favicons/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="content/favicons/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="content/favicons/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="content/favicons/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="content/favicons/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="content/favicons/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="content/favicons/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="content/favicons/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="content/favicons/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="content/favicons/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="content/favicons/manifest.json">
+    <link rel="mask-icon" href="content/favicons/safari-pinned-tab.svg" color="#0a42bb">
+    <link rel="shortcut icon" href="content/favicons/favicon.ico" type="image/x-icon">
+    <link rel="text/html" href="fonts/IsraelHikingMap.ttf">
+    <style>
+        .preloader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: -1;
+        }
+
+        .lds-ellipsis {
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            position: relative;
+            width: 64px;
+            height: 32px;
+        }
+
+            .lds-ellipsis div {
+                position: absolute;
+                top: 14px;
+                width: 11px;
+                height: 11px;
+                border-radius: 50%;
+                background: #43a047;
+                animation-timing-function: cubic-bezier(0, 1, 1, 0);
+            }
+
+                .lds-ellipsis div:nth-child(1) {
+                    left: 6px;
+                    animation: lds-ellipsis1 0.6s infinite;
+                }
+
+                .lds-ellipsis div:nth-child(2) {
+                    left: 6px;
+                    animation: lds-ellipsis2 0.6s infinite;
+                }
+
+                .lds-ellipsis div:nth-child(3) {
+                    left: 26px;
+                    animation: lds-ellipsis2 0.6s infinite;
+                }
+
+                .lds-ellipsis div:nth-child(4) {
+                    left: 45px;
+                    animation: lds-ellipsis3 0.6s infinite;
+                }
+
+        @keyframes lds-ellipsis1 {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes lds-ellipsis3 {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(0);
+            }
+        }
+
+        @keyframes lds-ellipsis2 {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(19px, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="preloader">
+        <img src="content/logo.png" />
+        <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+        <br/>
+        <div id="delayed" style="display:none">
+            <p dir="rtl">אם אתם מספיקים לקרוא את כל מה שבפסקה הזו יש שתי אפשרויות:
+                <ol dir="rtl">
+                    <li>שאתם מנסים להשתמש במפות ללא חיבור לרשת, ואת זה ניתן לפתור ע״י רכישת מנוי למפות לא מקוונות בתפריט של מפות ושכבות</li>
+                    <li>שיש בעיה עם אחת השכבות שלכם - במקרה כזה אנחנו ממליצים לכבות את כל השכבות השקופות ולמחוק את זו שעושה בעיות</li>
+                </ol>
+            </p>
+            <p>If you manage to read this paragraph there are two options:
+                <ol>
+                    <li>That you are trying to use the map without a network connection, this can be solved by purchasing a subscription to offline maps in the layer menu</li>
+                    <li>That there's a problem with one of your layers - in such case we reccomend turning off all the overlay layers and delete the one that's causing the issue</li>
+                </ol>
+            </p>
+        </div>
+    </div>
+    <main-map></main-map>
+    <script>
+        window.handleOpenURL = (url) => {
+            if (typeof(window.handleExternalUrl) === "function") {
+                window.handleExternalUrl(url);
+            } else {
+                window.externalUrl = url;
+            }
+        }
+        setTimeout(() => {
+            document.getElementById("delayed").style.display = null;
+        }, 7000);
+    </script>
+    <script type="text/javascript" src="cordova.js"></script>
+</body>
+</html>

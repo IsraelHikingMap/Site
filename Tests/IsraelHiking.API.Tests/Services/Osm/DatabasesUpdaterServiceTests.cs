@@ -6,6 +6,7 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
+using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -38,7 +39,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         private IHighwaysRepository _highwaysRepository;
         private IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
         private IFeaturesMergeExecutor _featuresMergeExecutor;
-        private IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
+        private IOsmLatestFileGateway _osmLatestFileGateway;
         private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
@@ -58,7 +59,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _osmRepository = Substitute.For<IOsmRepository>();
             _geoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
             _featuresMergeExecutor = Substitute.For<IFeaturesMergeExecutor>();
-            _osmLatestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
+            _osmLatestFileGateway = Substitute.For<IOsmLatestFileGateway>();
             _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
             _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
@@ -71,7 +72,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 _osmRepository,
                 _pointsOfInterestAdapterFactory,
                 _featuresMergeExecutor,
-                _osmLatestFileFetcherExecutor,
+                _osmLatestFileGateway,
                 _pointsOfInterestFilesCreatorExecutor,
                 null,
                 _pointsOfInterestProvider,
@@ -109,7 +110,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 0))
                 .Returns(new List<Feature>());
-            _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes));
+            _osmLatestFileGateway.GetUpdates().Returns(CreateStream(changes));
 
             _service.Update().Wait();
 
@@ -133,7 +134,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 0))
                 .Returns(new List<Feature>());
-            _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes));
+            _osmLatestFileGateway.GetUpdates().Returns(CreateStream(changes));
 
             _service.Update().Wait();
 
@@ -164,7 +165,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 1))
                 .Returns(list);
             _osmGateway.GetCompleteWay(1).Returns(way);
-            _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes));
+            _osmLatestFileGateway.GetUpdates().Returns(CreateStream(changes));
 
             _service.Update().Wait();
 
@@ -207,7 +208,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 .Returns(list);
             _osmGateway.GetCompleteWay(1).Returns(way);
             _pointsOfInterestRepository.GetPointOfInterestById("way_1", Sources.OSM).Returns(wayFeatureInDatabase);
-            _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes));
+            _osmLatestFileGateway.GetUpdates().Returns(CreateStream(changes));
 
             _service.Update().Wait();
 

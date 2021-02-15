@@ -76,7 +76,8 @@ namespace IsraelHiking.API.Executors
                         { "barrier", "gate" },
                         { "access", "yes" }
                     },
-                _ => throw new Exception("Invalid point type " + pointType),
+                SimplePointType.PicnicSite => new TagsCollection { { "tourism", "picnic_site" } },
+                _ => throw new Exception("Invalid point type for finding relevant tags" + pointType),
             };
         }
 
@@ -90,7 +91,8 @@ namespace IsraelHiking.API.Executors
                 SimplePointType.CattleGrid => true,
                 SimplePointType.ClosedGate => true,
                 SimplePointType.OpenGate => true,
-                _ => throw new Exception("Invalid point type " + pointType),
+                SimplePointType.PicnicSite => false,
+                _ => throw new Exception("Invalid point type for closest line check" + pointType),
             };
         }
 

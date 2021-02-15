@@ -18,10 +18,23 @@ namespace IsraelHiking.Common
         public int ViewsCount { get; set; }
         [JsonProperty("creationDate")]
         public DateTime CreationDate { get; set; }
+        [JsonProperty("lastModifiedDate")]
+        public DateTime LastModifiedDate { get; set; }
         [JsonProperty("lastViewed")]
         public DateTime LastViewed { get; set; }
 
         [JsonProperty("dataContainer")]
         public DataContainerPoco DataContainer { get; set; }
+    }
+
+    public static class ShareUrlExtensions
+    {
+        public static void FixModifiedDate(this ShareUrl shareUrl)
+        {
+            if (shareUrl.LastModifiedDate < shareUrl.CreationDate)
+            {
+                shareUrl.LastModifiedDate = shareUrl.CreationDate;
+            }
+        }
     }
 }

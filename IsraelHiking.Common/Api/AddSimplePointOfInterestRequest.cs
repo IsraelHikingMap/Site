@@ -8,7 +8,8 @@
         Parking,
         OpenGate,
         ClosedGate,
-        Block
+        Block,
+        PicnicSite
     }
 
     public class AddSimplePointOfInterestRequest

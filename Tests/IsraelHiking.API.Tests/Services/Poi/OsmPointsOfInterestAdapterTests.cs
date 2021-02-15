@@ -32,7 +32,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IOsmRepository _osmRepository;
         private IPointsOfInterestRepository _pointsOfInterestRepository;
         private IWikipediaGateway _wikipediaGateway;
-        private IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
+        private IOsmLatestFileGateway _latestFileGateway;
         private ITagsHelper _tagsHelper;
 
         [TestInitialize]
@@ -47,9 +47,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
             _osmRepository = Substitute.For<IOsmRepository>();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
-            _latestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
+            _latestFileGateway = Substitute.For<IOsmLatestFileGateway>();
             _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
-            _adapter = new OsmPointsOfInterestAdapter(_pointsOfInterestRepository, _elevationDataStorage, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileFetcherExecutor, _tagsHelper, _options, Substitute.For<ILogger>());
+            _adapter = new OsmPointsOfInterestAdapter(_pointsOfInterestRepository, _elevationDataStorage, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileGateway, _tagsHelper, _options, Substitute.For<ILogger>());
         }
 
         private IAuthClient SetupHttpFactory()
@@ -416,7 +416,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void GetPointsForIndexing_ShouldGetThem()
         {
             var features = new List<Feature>();
-            _latestFileFetcherExecutor.Get().Returns(new MemoryStream());
+            _latestFileGateway.Get().Returns(new MemoryStream());
             _osmRepository.GetElementsWithName(Arg.Any<Stream>()).Returns(new List<ICompleteOsmGeo>());
             _osmRepository.GetPointsWithNoNameByTags(Arg.Any<Stream>(), Arg.Any<List<KeyValuePair<string, string>>>())
                 .Returns(new List<Node>());

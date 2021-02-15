@@ -4,9 +4,9 @@ var https = require("https");
 var fs = require("fs");
 var po2json = require("po2json");
 
-var englishFilePath = "./sources/translations/en-Us.po";
-var hebrewFilePath = "./sources/translations/he.po";
-var resourcesFilePath = "./sources/application/services/resources.service.ts";
+var englishFilePath = "./src/translations/en-Us.po";
+var hebrewFilePath = "./src/translations/he.po";
+var resourcesFilePath = "./src/application/services/resources.service.ts";
 
 console.log("Downloading English translation");
 https.get("https://translate.zanata.org/rest/file/translation/IsraelHiking/Main/en-US/po?docId=IsraelHiking",
