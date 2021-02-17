@@ -100,8 +100,8 @@ describe("Poi Service", () => {
         inject([PoiService, HttpTestingController],
             async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-                let poiExtended = {} as GeoJSON.Feature;
-                let promise = poiService.uploadPoint(poiExtended).then((res) => {
+                let fullFeature = {} as GeoJSON.Feature;
+                let promise = poiService.uploadPoint(fullFeature).then((res) => {
                     expect(res).not.toBeNull();
                 });
 
