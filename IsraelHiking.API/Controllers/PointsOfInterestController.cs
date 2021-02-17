@@ -132,16 +132,11 @@ namespace IsraelHiking.API.Controllers
                     { FeatureAttributes.NAME, id },
                     { FeatureAttributes.POI_ICON, OsmPointsOfInterestAdapter.SEARCH_ICON },
                     { FeatureAttributes.POI_ICON_COLOR, "black" },
-                    { FeatureAttributes.POI_GEOLOCATION, new AttributesTable
-                        {
-                            {FeatureAttributes.LAT, latLng.Lat },
-                            {FeatureAttributes.LON, latLng.Lng }
-                        }
-                    },
                     { FeatureAttributes.POI_CATEGORY, Categories.NONE },
                     { FeatureAttributes.POI_SOURCE, Sources.COORDINATES },
                 });
                 feautre.SetTitles();
+                feautre.SetLocation(latLng.ToCoordinate());
                 return Ok(feautre);
             }
             var poiItem = await _pointsOfInterestProvider.GetFeatureById(source, id);
@@ -178,10 +173,11 @@ namespace IsraelHiking.API.Controllers
             }
             var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
             var location = feature.GetLocation();
-            _logger.LogInformation($"Adding a POI of type {icon} with id {feature.GetId()}" +
-                $" at {location.Y}, {location.X}");
+            var idString = feature.Attributes.Exists(FeatureAttributes.POI_ID) ? feature.GetId() : "";
+            _logger.LogInformation($"Adding a POI of type {icon} with id: {idString}, at {location.Y}, {location.X}");
             var osmGateway = CreateOsmGateway();
             var user = await osmGateway.GetUserDetails();
+            feature.SetTitles();
             var imageUrls = feature.Attributes.GetNames()
                     .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
                     .Select(p => feature.Attributes[p].ToString())
@@ -210,7 +206,7 @@ namespace IsraelHiking.API.Controllers
                 await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrls[urlIndex]);
             }
 
-            if (string.IsNullOrWhiteSpace(feature.GetId()))
+            if (string.IsNullOrWhiteSpace(idString))
             {
                 return Ok(await _pointsOfInterestProvider.AddFeature(feature, osmGateway, language));
             }

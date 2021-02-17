@@ -147,6 +147,10 @@ namespace IsraelHiking.Common.Extensions
 
         public static string GetTitle(this IFeature feature, string language)
         {
+            if (!feature.Attributes.Exists(FeatureAttributes.POI_NAMES))
+            {
+                return string.Empty;
+            }
             if (!(feature.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable titleByLanguage))
             {
                 return string.Empty;
@@ -281,6 +285,21 @@ namespace IsraelHiking.Common.Extensions
                 location.X = double.Parse(locationTable[FeatureAttributes.LON].ToString());
             }
             return location;
+        }
+
+        public static void SetLocation(this IFeature feature, Coordinate geoLocation)
+        {
+            feature.Attributes.SetLocation(geoLocation);
+        }
+
+        public static void SetLocation(this IAttributesTable table, Coordinate geoLocation)
+        {
+            var geoLocationTable = new AttributesTable
+                {
+                    {FeatureAttributes.LAT, geoLocation.Y},
+                    {FeatureAttributes.LON, geoLocation.X}
+                };
+            table.AddOrUpdate(FeatureAttributes.POI_GEOLOCATION, geoLocationTable);
         }
     }
 }

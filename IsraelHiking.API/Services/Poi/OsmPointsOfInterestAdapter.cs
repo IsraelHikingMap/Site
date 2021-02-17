@@ -194,11 +194,10 @@ namespace IsraelHiking.API.Services.Poi
         private TPoiItem ConvertToPoiItem<TPoiItem>(IFeature feature, string language) where TPoiItem : PointOfInterest, new()
         {
             var poiItem = new TPoiItem();
-            if (feature.Attributes[FeatureAttributes.POI_GEOLOCATION] is AttributesTable geoLocation)
+            if (feature.Attributes[FeatureAttributes.POI_GEOLOCATION] is IAttributesTable)
             {
-                poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], 
-                    (double)geoLocation[FeatureAttributes.LON],
-                    (double)feature.Attributes[FeatureAttributes.POI_ALT]);
+                Coordinate location = feature.GetLocation();
+                poiItem.Location = new LatLng(location.Y, location.X, (double)feature.Attributes[FeatureAttributes.POI_ALT]);
             }
             poiItem.Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString();
             poiItem.Title = feature.Attributes.GetByLanguage(FeatureAttributes.NAME, language);

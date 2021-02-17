@@ -137,17 +137,11 @@ namespace IsraelHiking.API.Services.Poi
 
         private Feature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest)
         {
-            var geoLocation = new AttributesTable
-            {
-                {FeatureAttributes.LAT, pointOfInterest.Latitude},
-                {FeatureAttributes.LON, pointOfInterest.Longitude},
-            };
             var table = new AttributesTable
             {
                 {FeatureAttributes.NAME, pointOfInterest.Title},
                 {FeatureAttributes.NAME + ":" + Languages.HEBREW, pointOfInterest.Title},
                 {FeatureAttributes.DESCRIPTION + ":" + Languages.HEBREW, pointOfInterest.Description},
-                {FeatureAttributes.POI_GEOLOCATION, geoLocation},
                 {FeatureAttributes.POI_ICON, pointOfInterest.Icon},
                 {FeatureAttributes.POI_ICON_COLOR, pointOfInterest.IconColor},
                 {FeatureAttributes.POI_SOURCE, Source},
@@ -161,6 +155,7 @@ namespace IsraelHiking.API.Services.Poi
                 {FeatureAttributes.WEBSITE, pointOfInterest.Website}
             };
             var feature = new Feature(new Point(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude)), table);
+            feature.SetLocation(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude));
             feature.SetLastModified(pointOfInterest.LastModified > DateTime.Now ? DateTime.Now : pointOfInterest.LastModified);
             feature.SetTitles();
             feature.SetId();

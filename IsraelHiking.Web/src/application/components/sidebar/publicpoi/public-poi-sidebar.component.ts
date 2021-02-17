@@ -17,7 +17,7 @@ import { SpatialService } from "../../../services/spatial.service";
 import { RunningContextService } from "../../../services/running-context.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { NavigateHereService } from "../../../services/navigate-here.service";
-import { GeoJsonParser } from '../../../services/geojson.parser';
+import { GeoJsonParser } from "../../../services/geojson.parser";
 import { sidebarAnimate } from "../sidebar.component";
 import { NgRedux, select } from "../../../reducers/infra/ng-redux.module";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
@@ -193,7 +193,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.latlng = this.poiService.getLocation(feature);
         this.sourceImageUrls = Object.keys(feature.properties).filter(k => k.startsWith("poiSourceImageUrl")).map(k => {
             let imageUrl = feature.properties[k];
-            let url = feature.properties[k.replace("poiSourceImageUrl", "website")]
+            let url = feature.properties[k.replace("poiSourceImageUrl", "website")];
             return {
                 imageUrl,
                 url
@@ -202,7 +202,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.contribution = this.poiService.getContribution(feature);
         this.itmCoordinates = this.poiService.getItmCoordinates(feature);
-        
+
         let language = this.resources.getCurrentLanguageCodeSimplified();
         this.info = {
             id: feature.properties.poiId,
@@ -214,7 +214,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             imagesUrls: Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => feature.properties[k]),
             urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
             isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint"
-        }
+        };
     }
 
     public isHideEditMode(): boolean {
@@ -265,7 +265,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public isRoute() {
-        return this.poiExtended && (this.poiExtended.geometry.type === "LineString" || this.poiExtended.geometry.type === "MultiLineString");
+        return this.poiExtended && (this.poiExtended.geometry.type === "LineString" ||
+            this.poiExtended.geometry.type === "MultiLineString");
     }
 
     public getIcon() {
@@ -375,7 +376,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (!this.poiExtended) {
             return urls;
         }
-        let imageUrls = Object.keys(this.poiExtended.properties).filter(k => k.startsWith("image")).map(k => this.poiExtended.properties[k]);
+        let imageUrls = Object.keys(this.poiExtended.properties)
+            .filter(k => k.startsWith("image"))
+            .map(k => this.poiExtended.properties[k]);
         for (let imageUrl of imageUrls) {
             urls.push({
                 mimeType: `image/${imageUrl.split(".").pop().replace("jpg", "jpeg")}`,

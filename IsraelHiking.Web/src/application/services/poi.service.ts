@@ -160,7 +160,9 @@ export class PoiService {
             .set("southWest", bounds.southWest.lat + "," + bounds.southWest.lng)
             .set("categories", visibleCategories.join(","))
             .set("language", language);
-        this.poisGeojson.features = await this.httpClient.get(Urls.poi, { params }).pipe(timeout(10000)).toPromise() as GeoJSON.Feature<GeoJSON.Point>[];
+        this.poisGeojson.features = await this.httpClient.get(Urls.poi, { params })
+            .pipe(timeout(10000))
+            .toPromise() as GeoJSON.Feature<GeoJSON.Point>[];
         return this.poisGeojson.features;
     }
 
@@ -446,7 +448,7 @@ export class PoiService {
     }
 
     public getPoiSocialLinks(feature: GeoJSON.Feature): IPoiSocialLinks {
-        let language = this.resources.getCurrentLanguageCodeSimplified(); 
+        let language = this.resources.getCurrentLanguageCodeSimplified();
         let poiLink = this.hashService.getFullUrlFromPoiId({
             source: feature.properties.poiSource,
             id: feature.properties.identifier,
@@ -468,7 +470,9 @@ export class PoiService {
         this.setDescription(feature, feature.properties["description:" + language] || markerData.description, language);
         this.setLocation(feature, markerData.latlng);
         feature.properties.poiIcon = feature.properties.poiIcon || `icon-${markerData.type || "star"}`;
-        let lastIndex = Math.max(-1, ...Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => +k.replace("image", "")));
+        let lastIndex = Math.max(-1, ...Object.keys(feature.properties)
+            .filter(k => k.startsWith("image"))
+            .map(k => +k.replace("image", "")));
         markerData.urls.filter(u => u.mimeType.startsWith("image")).map(u => u.url).forEach(url => {
             let name = "image" + ++lastIndex;
             if (name === "image0") {
@@ -503,7 +507,7 @@ export class PoiService {
     }
 
     public getDescription(feature: GeoJSON.Feature, language: string) {
-        return feature.properties["description:" + language] || feature.properties.description
+        return feature.properties["description:" + language] || feature.properties.description;
     }
 
     public getExternalDescription(feature: GeoJSON.Feature, language: string) {

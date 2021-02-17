@@ -5,7 +5,7 @@ using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.Common.Poi;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -80,8 +80,8 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetPointsOfIntereset_OneAdapter_ShouldReturnPoi()
         {
-            _pointsOfInterestProvider.GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(),
-                Arg.Any<string>()).Returns(new[] {new PointOfInterest()});
+            _pointsOfInterestProvider.GetFeatures(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(),
+                Arg.Any<string>()).Returns(new[] { new Feature() });
 
             var result = _controller.GetPointsOfInterest(string.Empty, string.Empty, "category", "language").Result;
 
@@ -106,9 +106,9 @@ namespace IsraelHiking.API.Tests.Controllers
             var result = _controller.GetPointOfInterest(source, id, language).Result as OkObjectResult;
 
             Assert.IsNotNull(result);
-            var poi = result.Value as SearchResultsPointOfInterest;
+            var poi = result.Value as Feature;
             Assert.IsNotNull(poi);
-            Assert.AreEqual(32, poi.Location.Lat);
+            Assert.AreEqual(32, poi.GetLocation().Y);
         }
 
         [TestMethod]
@@ -116,10 +116,9 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var id = "way_1";
             var source = "source";
-            var language = "language";
-            _pointsOfInterestProvider.GetPointOfInterestById(source, id, language).Returns(new PointOfInterestExtended());
+            _pointsOfInterestProvider.GetFeatureById(source, id).Returns(new Feature());
 
-            var result = _controller.GetPointOfInterest(source, id, language).Result as OkObjectResult;
+            var result = _controller.GetPointOfInterest(source, id).Result as OkObjectResult;
 
             Assert.IsNotNull(result);
         }
@@ -127,9 +126,9 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void UploadPointOfInterest_WrongSource_ShouldReturnBadRequest()
         {
-            var poi = new PointOfInterestExtended {Source = "wrong source"};
-
-            var result = _controller.UploadPointOfInterest(poi, "he").Result as BadRequestObjectResult;
+            var poi = new Feature(new Point(0, 0), new AttributesTable { { FeatureAttributes.POI_SOURCE, "wrong source" } });
+            
+            var result = _controller.UploadPointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(result);
         }
@@ -138,24 +137,33 @@ namespace IsraelHiking.API.Tests.Controllers
         public void UploadPointOfInterest_IdDoesNotExists_ShouldAdd()
         {
             _controller.SetupIdentity(_cache);
-            var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "", Location = new LatLng() };
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.POI_ICON, "icon" },
+            });
+            poi.SetLocation(new Coordinate());
 
-            var result = _controller.UploadPointOfInterest(poi, "he").Result as OkObjectResult;
+            var result = _controller.UploadPointOfInterest(poi, Languages.HEBREW).Result as OkObjectResult;
 
             Assert.IsNotNull(result);
-            _pointsOfInterestProvider.Received(1).AddPointOfInterest(Arg.Any<PointOfInterestExtended>(), _osmGateway, Arg.Any<string>());
+            _pointsOfInterestProvider.Received(1).AddFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
         }
 
         [TestMethod]
         public void UploadPointOfInterest_IdExists_ShouldUpdate()
         {
             _controller.SetupIdentity(_cache);
-            var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "1", Location = new LatLng() };
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.POI_ID, "1" },
+                { FeatureAttributes.POI_ICON, "icon" },
+            });
+            poi.SetLocation(new Coordinate());
 
-            var result = _controller.UploadPointOfInterest(poi, "he").Result as OkObjectResult;
+            var result = _controller.UploadPointOfInterest(poi, Languages.HEBREW).Result as OkObjectResult;
 
             Assert.IsNotNull(result);
-            _pointsOfInterestProvider.Received(1).UpdatePointOfInterest(Arg.Any<PointOfInterestExtended>(), _osmGateway, Arg.Any<string>());
+            _pointsOfInterestProvider.Received(1).UpdateFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
         }
 
         [TestMethod]
@@ -164,20 +172,22 @@ namespace IsraelHiking.API.Tests.Controllers
             var user = new User {DisplayName = "DisplayName"};
             _controller.SetupIdentity(_cache);
             _osmGateway.GetUserDetails().Returns(user);
-            var poi = new PointOfInterestExtended
-            {
-                Title = "title",
-                Source = Sources.OSM,
-                Id = "1",
-                Location = new LatLng(5, 6),
-                ImagesUrls = new [] { "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
-                                      "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==", "http://link.com"}
-            };
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.NAME, "title" },
+                { "name:he", "title" },
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.POI_ID, "1" },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.IMAGE_URL, "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                                      "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="},
+                { "image2", "http://link.com" }
+            });
+            poi.SetLocation(new Coordinate(6, 5));
             _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
 
-            _controller.UploadPointOfInterest(poi, "he").Wait();
+            _controller.UploadPointOfInterest(poi, Languages.HEBREW).Wait();
 
-            _wikimediaCommonGateway.Received(1).UploadImage(poi.Title, poi.Description, user.DisplayName, "title.png", Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.Received(1).UploadImage(poi.GetTitle(Languages.HEBREW), poi.GetDescription(Languages.HEBREW), user.DisplayName, "title.png", Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
             _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
         }
@@ -188,18 +198,19 @@ namespace IsraelHiking.API.Tests.Controllers
             var user = new User { DisplayName = "DisplayName" };
             _controller.SetupIdentity(_cache);
             _osmGateway.GetUserDetails().Returns(user);
-            var poi = new PointOfInterestExtended
-            {
-                Title = "title",
-                Source = Sources.OSM,
-                Id = "1",
-                Location = new LatLng(5, 6),
-                ImagesUrls = new[] { "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
-                                      "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==", "http://link.com"}
-            };
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.NAME, "title" },
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, "1" },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.IMAGE_URL, "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                                      "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="},
+                { "image2", "http://link.com" }
+            });
+            poi.SetLocation(new Coordinate(6, 5));
             _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns("some-url");
 
-            _controller.UploadPointOfInterest(poi, "he").Wait();
+            _controller.UploadPointOfInterest(poi, Languages.HEBREW).Wait();
 
             _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());

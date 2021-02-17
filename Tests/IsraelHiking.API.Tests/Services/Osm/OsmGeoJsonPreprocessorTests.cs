@@ -3,6 +3,7 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -88,10 +89,10 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var results = _preprocessorExecutor.Preprocess(osmElements);
 
             Assert.AreEqual(1, results.Count);
-            var geoLocation = results.First().Attributes[FeatureAttributes.POI_GEOLOCATION] as IAttributesTable;
+            var geoLocation = results.First().GetLocation();
             Assert.IsNotNull(geoLocation);
-            Assert.AreEqual(0.5, geoLocation[FeatureAttributes.LAT]);
-            Assert.AreEqual(0.5, geoLocation[FeatureAttributes.LAT]);
+            Assert.AreEqual(0.5, geoLocation.X);
+            Assert.AreEqual(0.5, geoLocation.Y);
         }
 
         [TestMethod]
@@ -112,9 +113,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var results = _preprocessorExecutor.Preprocess(osmElements);
 
             Assert.AreEqual(1, results.Count);
-            var geoLocation = results.First().Attributes[FeatureAttributes.POI_GEOLOCATION] as IAttributesTable;
+            var geoLocation = results.First().GetLocation();
             Assert.IsNotNull(geoLocation);
-            Assert.AreEqual(node1.Latitude, geoLocation[FeatureAttributes.LAT]);
+            Assert.AreEqual(node1.Latitude, geoLocation.Y);
         }
 
         [TestMethod]
@@ -148,9 +149,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var results = _preprocessorExecutor.Preprocess(osmElements);
 
             Assert.AreEqual(1, results.Count);
-            var geoLocation = results.First().Attributes[FeatureAttributes.POI_GEOLOCATION] as IAttributesTable;
+            var geoLocation = results.First().GetLocation();
             Assert.IsNotNull(geoLocation);
-            Assert.AreEqual(node1.Latitude, geoLocation[FeatureAttributes.LAT]);
+            Assert.AreEqual(node1.Latitude, geoLocation.Y);
         }
 
         [TestMethod]

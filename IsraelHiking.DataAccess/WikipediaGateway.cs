@@ -167,11 +167,6 @@ namespace IsraelHiking.DataAccess
 
         private AttributesTable GetAttributes(Coordinate location, WikiPageStub page, string language)
         {
-            var geoLocation = new AttributesTable
-            {
-                {FeatureAttributes.LAT, location.Y},
-                {FeatureAttributes.LON, location.X}
-            };
             var attributes = new AttributesTable
             {
                 {FeatureAttributes.ID, ToId(language, page.Id.ToString()) },
@@ -185,10 +180,10 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.POI_ICON, "icon-wikipedia-w"},
                 {FeatureAttributes.POI_ICON_COLOR, "black"},
                 {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
-                {FeatureAttributes.POI_GEOLOCATION, geoLocation},
                 {FeatureAttributes.WEBSITE, _wikiSites[language].SiteInfo.MakeArticleUrl(page.Title)},
                 {FeatureAttributes.POI_SOURCE_IMAGE_URL, WIKI_LOGO}
             };
+            attributes.SetLocation(location);
             return attributes;
         }
 

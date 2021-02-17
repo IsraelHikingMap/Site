@@ -154,14 +154,8 @@ namespace IsraelHiking.DataAccess
                 return null;
             }
             var geoLocation = new LatLng(double.Parse(match.Groups[1].Value), double.Parse(match.Groups[2].Value));
-            var geoLocationTable = new AttributesTable
-                {
-                    {FeatureAttributes.LAT, geoLocation.Lat},
-                    {FeatureAttributes.LON, geoLocation.Lng}
-                };
             var feature = new Feature(new Point(geoLocation.ToCoordinate()), new AttributesTable
                 {
-                    {FeatureAttributes.POI_GEOLOCATION, geoLocationTable},
                     {FeatureAttributes.DESCRIPTION + ":" + Languages.HEBREW, description},
                     {FeatureAttributes.NAME, page.Title},
                     {FeatureAttributes.NAME + ":" + Languages.HEBREW, page.Title},
@@ -173,6 +167,7 @@ namespace IsraelHiking.DataAccess
                     {FeatureAttributes.POI_SOURCE_IMAGE_URL, "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" }
                 });
             feature.SetLastModified(page.LastRevision.TimeStamp);
+            feature.SetLocation(geoLocation.ToCoordinate());
             var image = await GetPageImageUrl(page).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(image))
             {

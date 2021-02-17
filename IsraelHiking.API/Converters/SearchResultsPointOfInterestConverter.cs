@@ -79,8 +79,8 @@ namespace IsraelHiking.API.Converters
         public static SearchResultsPointOfInterest FromFeature(IFeature feature, string language)
         {
             var title = feature.GetTitle(language);
-            var geoLocation = (AttributesTable)feature.Attributes[FeatureAttributes.POI_GEOLOCATION];
-            var latLng = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
+            var geoLocation = feature.GetLocation();
+            var latLng = new LatLng(geoLocation.Y,geoLocation.X);
             var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
             if (string.IsNullOrWhiteSpace(icon))
             {
