@@ -144,7 +144,7 @@ namespace IsraelHiking.API.Controllers
                 feautre.SetTitles();
                 return Ok(feautre);
             }
-            var poiItem = await _pointsOfInterestProvider.GetFeatureById(source, id, language);
+            var poiItem = await _pointsOfInterestProvider.GetFeatureById(source, id);
             if (poiItem == null)
             {
                 return NotFound();

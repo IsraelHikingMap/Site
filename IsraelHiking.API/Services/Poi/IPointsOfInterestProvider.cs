@@ -29,9 +29,8 @@ namespace IsraelHiking.API.Services.Poi
         /// </summary>
         /// <param name="id"></param>
         /// <param name="source"></param>
-        /// <param name="language"></param>
         /// <returns></returns>
-        Task<Feature> GetFeatureById(string source, string id, string language = "");
+        Task<Feature> GetFeatureById(string source, string id);
 
         /// <summary>
         /// Gets all the POIs within the bounding box that matches the given categories in the given language
@@ -73,7 +72,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <summary>
         /// Adds a POI
         /// </summary>
-        /// <param name="pointOfInterest">The POI's data to add</param>
+        /// <param name="feature">The POI's data to add</param>
         /// <param name="osmGateway"></param>
         /// <param name="language"></param>
         /// <returns></returns>
@@ -82,7 +81,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <summary>
         /// Updates a POI
         /// </summary>
-        /// <param name="pointOfInterest">The POI's new data</param>
+        /// <param name="feature">The POI's new data</param>
         /// <param name="osmGateway"></param>
         /// <param name="language">The relevant language</param>
         /// <returns></returns>

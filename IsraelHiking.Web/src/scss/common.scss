@@ -175,6 +175,28 @@ overlay.overlay-shown {
     white-space: pre-line;
 }
 
+.has-extra-data {
+    width: 4px;
+    height: 4px;
+    display: block;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+[dir=rtl] .has-extra-data {
+    width: 4px;
+    height: 4px;
+    display: block;
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    border-radius: 50%;
+    z-index: 1;
+}
+
 /* Progressbar override */
 .ng-bar {
     background-color: mat-color($app-primary) !important;

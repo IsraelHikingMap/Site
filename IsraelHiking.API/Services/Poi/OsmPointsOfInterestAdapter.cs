@@ -269,8 +269,8 @@ namespace IsraelHiking.API.Services.Poi
         /// <summary>
         /// Updates the location in case the OSM element is of type node and the location change is not too little
         /// </summary>
-        /// <param name="completeOsmGeo"></param>
-        /// <param name="pointOfInterestExtended"></param>
+        /// <param name="completeOsmGeo">The element to update</param>
+        /// <param name="location">The new location</param>
         /// <returns>True if the location was updated, false otherwise</returns>
         private bool UpdateLocationIfNeeded(ICompleteOsmGeo completeOsmGeo, LatLng location)
         {
@@ -523,11 +523,13 @@ namespace IsraelHiking.API.Services.Poi
             
         }
 
-        public Task<Feature> GetFeatureById(string source, string id, string language = "")
+        /// <inheritdoc/>
+        public Task<Feature> GetFeatureById(string source, string id)
         {
             return _pointsOfInterestRepository.GetPointOfInterestById(id, source);
         }
 
+        /// <inheritdoc/>
         public async Task<Feature[]> GetFeatures(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
             var features = await _pointsOfInterestRepository.GetPointsOfInterest(northEast, southWest, categories, language);
@@ -536,9 +538,15 @@ namespace IsraelHiking.API.Services.Poi
             {
                 pointOfInterest.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, SEARCH_ICON);
             }
+            foreach (var feature in features)
+            {
+                var location = feature.GetLocation();
+                feature.Geometry = new Point(location);
+            }
             return points;
         }
 
+        /// <inheritdoc/>
         public async Task<Feature> AddFeature(Feature feature, IAuthClient osmGateway, string language)
         {
             var location = feature.GetLocation();
@@ -567,6 +575,7 @@ namespace IsraelHiking.API.Services.Poi
             return await UpdateElasticSearch(node);
         }
 
+        /// <inheritdoc/>
         public async Task<Feature> UpdateFeature(Feature feature, IAuthClient osmGateway, string language)
         {
             // HM TODO: 3-way diff update?

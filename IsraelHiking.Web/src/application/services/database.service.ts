@@ -227,9 +227,9 @@ export class DatabaseService {
     public async getPoisForClustering(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
         this.loggingService.debug("[Database] Getting POIs for clustering from DB");
         let features = await this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).toArray();
-        let slimPois = features.map((feature: GeoJSON.Feature) => {
+        let pointFeatures = features.map((feature: GeoJSON.Feature) => {
             let geoLocation = feature.properties.poiGeolocation;
-            let slimFeature = {
+            let pointFeature = {
                 type: "Feature",
                 geometry: {
                     type: "Point",
@@ -237,15 +237,9 @@ export class DatabaseService {
                 },
                 properties: feature.properties
             } as GeoJSON.Feature<GeoJSON.Point>;
-            slimFeature.properties.poiHasExtraData = {};
-
-            for (let language of Object.keys(slimFeature.properties.poiNames)) {
-                slimFeature.properties.poiHasExtraData[language] = (slimFeature.properties["description:" + language] != null)
-                    || Object.keys(slimFeature.properties).find(k => k.startsWith("image")) != null;
-            }
-            return slimFeature;
+            return pointFeature;
         });
-        return slimPois;
+        return pointFeatures;
     }
 
     public getPoiById(id: string): Promise<GeoJSON.Feature> {

@@ -66,7 +66,6 @@
         public const string POI_ALT = POI_PREFIX + "Alt";
         public const string POI_ITM_NORTH = POI_PREFIX + "ItmNorth";
         public const string POI_ITM_EAST = POI_PREFIX + "ItmEast";
-        public const string POI_HAS_EXTRA_DATA = POI_PREFIX + "HasExtraData";
         public const string POI_DELETED = POI_PREFIX + "Deleted";
         public const string POI_EXTERNAL_DESCRIPTION = POI_PREFIX + "ExternalDescription";
         public const string POI_VERSION = POI_PREFIX + "Version";

@@ -23,10 +23,10 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
-    [Obsolete("Should be removed by May 2021")]
     /// <summary>
     /// This controller allows viewing, editing and filtering of points of interest (POI)
     /// </summary>
+    [Obsolete("Should be removed by July 2021")]
     [Route("api/poi")]
     public class ObsoletePointsOfInterestController : ControllerBase
     {

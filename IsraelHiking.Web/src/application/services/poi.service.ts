@@ -175,10 +175,7 @@ export class PoiService {
             if (visibleCategories.indexOf(feature.properties.poiCategory) === -1) {
                 continue;
             }
-            let titles = feature.properties.poiNames[language] || feature.properties.poiNames.all;
-            feature.properties.title = (titles && titles.length > 0) ? titles[0] : "";
-            feature.properties.hasExtraData = feature.properties.poiHasExtraData[language] || false;
-            if (feature.properties.title || feature.properties.hasExtraData) {
+            if (this.getTitle(feature, language) || this.hasExtraData(feature, language)) {
                 visibleFeatures.push(feature);
             }
         }
@@ -496,11 +493,13 @@ export class PoiService {
     }
 
     public getTitle(feature: GeoJSON.Feature, language: string) {
-        return Array.isArray(feature.properties.poiNames[language]) && feature.properties.poiNames[language].length !== 0
-            ? feature.properties.poiNames[language][0]
-            : Array.isArray(feature.properties.poiNames.all) && feature.properties.poiNames.all.length !== 0
-                ? feature.properties.poiNames.all[0]
-                : ""
+        if (feature.properties["name:" + language]) {
+            return feature.properties["name:" + language];
+        }
+        if (feature.properties.name) {
+            return feature.properties.name;
+        }
+        return "";
     }
 
     public getDescription(feature: GeoJSON.Feature, language: string) {
@@ -527,11 +526,15 @@ export class PoiService {
         } as Contribution;
     }
 
-    public getItmCoordinates(f: GeoJSON.Feature): NorthEast {
+    public getItmCoordinates(feature: GeoJSON.Feature): NorthEast {
         return {
-            east: f.properties.poiItmEast,
-            north: f.properties.poiItmNorth,
+            east: feature.properties.poiItmEast,
+            north: feature.properties.poiItmNorth,
         } as NorthEast;
+    }
+
+    public hasExtraData(feature: GeoJSON.Feature, language: string): boolean {
+        return feature.properties["description:" + language] || Object.keys(feature.properties).find(k => k.startsWith("image")) != null;
     }
 
     public async getClosestPoint(location: LatLngAlt, source?: string, language?: string): Promise<MarkerData> {

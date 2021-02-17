@@ -31,6 +31,11 @@ import {
     NorthEast
 } from "../../../models/models";
 
+export interface SourceImageUrlPair {
+    imageUrl: string;
+    url: string;
+}
+
 @Component({
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
@@ -45,7 +50,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public isLoading: boolean;
     public showLocationUpdate: boolean;
     public updateLocation: boolean;
-    public sourceImageUrls: string[];
+    public sourceImageUrls: SourceImageUrlPair[];
     public latlng: LatLngAlt;
     public itmCoordinates: NorthEast;
     public shareLinks: IPoiSocialLinks;
@@ -186,7 +191,14 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     private initFromFeature(feature: GeoJSON.Feature) {
         this.poiExtended = feature;
         this.latlng = this.poiService.getLocation(feature);
-        this.sourceImageUrls = Object.keys(feature.properties).filter(k => k.startsWith("poiSourceImageUrl")).map(k => feature.properties[k]);
+        this.sourceImageUrls = Object.keys(feature.properties).filter(k => k.startsWith("poiSourceImageUrl")).map(k => {
+            let imageUrl = feature.properties[k];
+            let url = feature.properties[k.replace("poiSourceImageUrl", "website")]
+            return {
+                imageUrl,
+                url
+            } as SourceImageUrlPair;
+        }).filter(iup => iup.url != null);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.contribution = this.poiService.getContribution(feature);
         this.itmCoordinates = this.poiService.getItmCoordinates(feature);
