@@ -102,7 +102,6 @@ namespace IsraelHiking.API.Controllers
         public async Task<Feature[]> GetPointsOfInterest(string northEast, string southWest, string categories,
             string language = "")
         {
-            // HM TODO: return only point geometry!
             if (string.IsNullOrWhiteSpace(categories))
             {
                 return new Feature[0];
