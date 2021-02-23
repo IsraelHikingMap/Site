@@ -7,7 +7,6 @@ namespace IsraelHiking.DataAccessInterfaces.Repositories
 {
     public interface IShareUrlsRepository
     {
-        Task<List<ShareUrl>> GetUrls();
         Task AddUrl(ShareUrl shareUrl);
         Task<DateTime> GetUrlTimestampById(string id);
         Task<ShareUrl> GetUrlById(string id);
