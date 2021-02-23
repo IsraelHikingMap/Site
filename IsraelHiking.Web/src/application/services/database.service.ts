@@ -28,6 +28,7 @@ export class DatabaseService {
     private static readonly STATE_DOC_ID = "state";
     private static readonly POIS_DB_NAME = "PointsOfInterest";
     private static readonly POIS_TABLE_NAME = "pois";
+    private static readonly POIS_UPLOAD_QUEUE_TABLE_NAME = "uploadQueue";
     private static readonly POIS_ID_COLUMN = "properties.poiId";
     private static readonly POIS_LOCATION_COLUMN = "[properties.poiGeolocation.lat+properties.poiGeolocation.lon]";
     private static readonly IMAGES_DB_NAME = "Images";
@@ -59,8 +60,9 @@ export class DatabaseService {
             state: "id"
         });
         this.poisDatabase = new Dexie(DatabaseService.POIS_DB_NAME);
-        this.poisDatabase.version(1).stores({
-            pois: DatabaseService.POIS_ID_COLUMN + "," + DatabaseService.POIS_LOCATION_COLUMN
+        this.poisDatabase.version(2).stores({
+            pois: DatabaseService.POIS_ID_COLUMN + "," + DatabaseService.POIS_LOCATION_COLUMN,
+            uploadQueue: DatabaseService.POIS_ID_COLUMN
         });
         this.imagesDatabase = new Dexie(DatabaseService.IMAGES_DB_NAME);
         this.imagesDatabase.version(1).stores({
@@ -244,6 +246,18 @@ export class DatabaseService {
 
     public getPoiById(id: string): Promise<GeoJSON.Feature> {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).get(id);
+    }
+
+    public addPoiToUploadQueue(feature: GeoJSON.Feature): Promise<void> {
+        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).put(feature);
+    }
+
+    public getPoiFromUploadQueue(featureId: string): Promise<GeoJSON.Feature> {
+        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).get(featureId);
+    }
+
+    public removePoiFromUploadQueue(featureId: string): Promise<void> {
+        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).delete(featureId);
     }
 
     public storeImages(images: ImageUrlAndData[]): Promise<void> {

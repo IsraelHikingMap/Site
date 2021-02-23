@@ -140,7 +140,8 @@ export const initialState =
             isOfflineAvailable: false,
             lastModifiedDate: null,
             poisLastModifiedDate: null,
-            shareUrlsLastModifiedDate: null
+            shareUrlsLastModifiedDate: null,
+            uploadPoiQueue: []
         },
         uiComponentsState: {
             drawingVisible: false,

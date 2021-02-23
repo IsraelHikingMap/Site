@@ -6,6 +6,8 @@ const SET_OFFLINE_AVAILABLE = "SET_OFFLINE_AVAILABLE";
 const SET_OFFLINE_LAST_MODIFIED_DATE = "SET_OFFLINE_LAST_MODIFIED_DATE";
 const SET_OFFLINE_POIS_LAST_MODIFIED_DATE = "SET_OFFLINE_POIS_LAST_MODIFIED_DATE";
 const SET_SHARE_URLS_LAST_MODIFIED_DATE = "SET_SHARE_URLS_LAST_MODIFIED_DATE";
+const ADD_TO_POI_QUEUE = "ADD_TO_POI_QUEUE";
+const REMOVE_FROM_POI_QUEUE = "REMOVE_FROM_POI_QUEUE";
 
 export interface SetOfflineAvailablePayload {
     isAvailble: boolean;
@@ -17,6 +19,14 @@ export interface SetOfflineLastModifiedPayload {
 
 export interface SetShareUrlsLastModifiedPayload {
     lastModifiedDate: Date;
+}
+
+export interface AddToPoiQueuePayload {
+    featureId: string;
+}
+
+export interface RemoveFromPoiQueuePayload {
+    featureId: string;
 }
 
 export class SetOfflineAvailableAction extends BaseAction<SetOfflineAvailablePayload> {
@@ -40,6 +50,18 @@ export class SetOfflinePoisLastModifiedDateAction extends BaseAction<SetOfflineL
 export class SetShareUrlsLastModifiedDateAction extends BaseAction<SetShareUrlsLastModifiedPayload> {
     constructor(payload: SetShareUrlsLastModifiedPayload) {
         super(SET_SHARE_URLS_LAST_MODIFIED_DATE, payload);
+    }
+}
+
+export class AddToPoiQueueAction extends BaseAction<AddToPoiQueuePayload> {
+    constructor(payload: AddToPoiQueuePayload) {
+        super(ADD_TO_POI_QUEUE, payload);
+    }
+}
+
+export class RemoveFromPoiQueueAction extends BaseAction<RemoveFromPoiQueuePayload> {
+    constructor(payload: RemoveFromPoiQueuePayload) {
+        super(REMOVE_FROM_POI_QUEUE, payload);
     }
 }
 
@@ -73,6 +95,22 @@ export class OfflineReducer {
         return {
             ...lastState,
             shareUrlsLastModifiedDate: action.payload.lastModifiedDate
+        };
+    }
+
+    @ReduxAction(ADD_TO_POI_QUEUE)
+    public addToPoiQueue(lastState: OfflineState, action: AddToPoiQueueAction): OfflineState {
+        return {
+            ...lastState,
+            uploadPoiQueue: [...lastState.uploadPoiQueue, action.payload.featureId]
+        };
+    }
+
+    @ReduxAction(REMOVE_FROM_POI_QUEUE)
+    public removeFromPoiQueue(lastState: OfflineState, action: RemoveFromPoiQueueAction): OfflineState {
+        return {
+            ...lastState,
+            uploadPoiQueue: lastState.uploadPoiQueue.filter(f => f !== action.payload.featureId)
         };
     }
 }

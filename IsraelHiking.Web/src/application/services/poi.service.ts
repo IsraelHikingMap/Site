@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { uniq } from "lodash-es";
 import { Observable, fromEvent } from "rxjs";
 import { timeout, throttleTime } from "rxjs/operators";
+import { v4 as uuidv4 } from "uuid";
 import JSZip from "jszip";
 import MiniSearch from "minisearch";
 
@@ -18,7 +19,7 @@ import { MapService } from "./map.service";
 import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
-import { SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
+import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
 import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducers/layers.reducer";
 import {
     MarkerData,
@@ -75,6 +76,9 @@ export class PoiService {
 
     @select((state: ApplicationState) => state.configuration.language)
     private language$: Observable<Language>;
+
+    @select((state: ApplicationState) => state.offlineState.uploadPoiQueue)
+    private uploadPoiQueue$: Observable<string[]>;
 
     constructor(private readonly resources: ResourcesService,
                 private readonly httpClient: HttpClient,
@@ -140,6 +144,28 @@ export class PoiService {
                     });
                 });
         }
+        this.uploadPoiQueue$.subscribe(async (items: string[]) => {
+            if (items.length === 0) {
+                this.loggingService.info(`[POIs] Upload queue change and now it is empty`);
+                return;
+            }
+            let firstItemId = items[0];
+            this.loggingService.info(`[POIs] Upload queue change, items in queue: ${items.length}, first item id: ${firstItemId}`);
+
+            let feature = await this.databaseService.getPoiFromUploadQueue(firstItemId);
+            let postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+            let putAddress = Urls.poi + feature.properties.poiId + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+            let poi = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(feature.properties.poiId)
+                ? await this.httpClient.post(postAddress, feature).toPromise() as GeoJSON.Feature
+                : await this.httpClient.put(putAddress, feature).toPromise() as GeoJSON.Feature;
+
+            this.loggingService.info(`[POIs] Uploaded feature with id: ${firstItemId}, removing from upload queue`);
+            if (this.runningContextService.isCordova) {
+                this.databaseService.storePois([poi]);
+            }
+            this.databaseService.removePoiFromUploadQueue(firstItemId);
+            this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
+        });
     }
 
     private async getPoisFromServer(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
@@ -437,14 +463,14 @@ export class PoiService {
         return JSON.parse(JSON.stringify(poi));
     }
 
-    public async uploadPoint(feature: GeoJSON.Feature): Promise<GeoJSON.Feature> {
-        let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+    public async uploadPoint(feature: GeoJSON.Feature): Promise<void> {
         this.poisCache = [];
-        let poi = await this.httpClient.post(uploadAddress, feature).toPromise() as GeoJSON.Feature;
-        if (this.runningContextService.isCordova) {
-            this.databaseService.storePois([poi]);
+        if (!feature.properties.poiId) {
+            feature.properties.poiId = uuidv4();
         }
-        return poi;
+        this.loggingService.info(`[POIs] adding POI with id ${feature.properties.poiId} to queue`);
+        await this.databaseService.addPoiToUploadQueue(feature);
+        this.ngRedux.dispatch(new AddToPoiQueueAction({featureId: feature.properties.poiId}));
     }
 
     public getPoiSocialLinks(feature: GeoJSON.Feature): IPoiSocialLinks {

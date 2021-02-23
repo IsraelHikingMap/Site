@@ -39,6 +39,7 @@ describe("Share Urls Service", () => {
                 ShareUrlsService
             ]
         });
+        MockNgRedux.reset();
     });
 
     it("Should update share url", inject([ShareUrlsService, HttpTestingController],
@@ -58,10 +59,10 @@ describe("Share Urls Service", () => {
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
 
             let shareUrl = { id: "42" } as ShareUrl;
-            let spy = spyOn(MockNgRedux.getInstance(), "dispatch");
+            MockNgRedux.getInstance().dispatch = jasmine.createSpy();
 
             let promise = shareUrlsService.deleteShareUrl(shareUrl).then(() => {
-                expect(spy).toHaveBeenCalled();
+                expect(MockNgRedux.getInstance().dispatch).toHaveBeenCalled();
                 expect(databaseService.deleteShareUrlById).toHaveBeenCalled();
             });
 

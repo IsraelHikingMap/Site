@@ -26,7 +26,8 @@ describe("Poi Service", () => {
         let hashService = {};
         let fileServiceMock = {};
         let databaseServiceMock = {
-            getPoisForClustering: () => Promise.resolve([])
+            getPoisForClustering: () => Promise.resolve([]),
+            addPoiToUploadQueue: () => Promise.resolve()
         };
         let mapServiceMosk = {
             map: {
@@ -72,7 +73,6 @@ describe("Poi Service", () => {
             let promise = poiService.initialize();
             mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            // mockBackend.match(r => r.url === Urls.slimGeoJSON)[0].flush({ type: "FeatureCollection", features: [] });
 
             await promise;
 
@@ -100,12 +100,15 @@ describe("Poi Service", () => {
         inject([PoiService, HttpTestingController],
             async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-                let fullFeature = {} as GeoJSON.Feature;
-                let promise = poiService.uploadPoint(fullFeature).then((res) => {
-                    expect(res).not.toBeNull();
+                MockNgRedux.getInstance().dispatch = jasmine.createSpy();
+                let fullFeature = {
+                    properties: {}
+                } as GeoJSON.Feature;
+
+                let promise = poiService.uploadPoint(fullFeature).then(() => {
+                    expect(MockNgRedux.getInstance().dispatch).toHaveBeenCalled();
                 });
 
-                mockBackend.expectOne((request) => request.url.includes(Urls.poi)).flush({});
                 return promise;
             }));
 });
