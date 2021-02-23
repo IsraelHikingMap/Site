@@ -229,7 +229,7 @@ export class PoiService {
                     showContinueButton: true,
                     continueText: this.resources.largeFilesUseWifi
                 });
-                lastModified = new Date(this.ngRedux.getState().offlineState.poisLastModifiedDate);
+                lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
             }
             if (lastModified == null) {
                 // don't send a request that is too big to the server by mistake
