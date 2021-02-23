@@ -296,21 +296,26 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             for (let imageUrl of this.info.imagesUrls) {
                 let key = index === 0 ? "image" : `image${index}`;
                 featureToUpload.properties[key] = imageUrl;
-                index++;    
+                index++;
             }
             index = 0;
             for (let url of this.info.urls) {
                 let key = index === 0 ? "website" : `website${index}`;
                 featureToUpload.properties[key] = url;
-                index++;    
+                index++;
             }
             // HM TODO: check ids throught the app with this change
+            // HM TODO: check this behavior - close after save
+            // HM TODO: change toast text
+            // HM TODO: update server side
+            // HM TODO: clean this
             this.originalLocation = null;
             let feature = await this.poiService.uploadPoint(featureToUpload);
-            this.initFromFeature(feature);
+            // this.initFromFeature(feature);
             this.toastService.info(this.resources.dataUpdatedSuccessfully);
-            this.router.navigate([RouteStrings.ROUTE_POI, this.fullFeature.properties.poiSource, this.fullFeature.properties.identifier],
-                { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+            // this.router.navigate([RouteStrings.ROUTE_POI, this.fullFeature.properties.poiSource, this.fullFeature.properties.identifier],
+            //    { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+            this.close();
         } catch (ex) {
             this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });
         } finally {
