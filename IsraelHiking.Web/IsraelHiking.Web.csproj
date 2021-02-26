@@ -69,7 +69,6 @@
     </Content>
     <None Include="src\content\legend\legend.json" />
     <None Include="angular.json" />
-    <None Include="package-lock.json" />
     <None Include="package.json" />
     <None Include="tsconfig.json" />
     <None Include="tslint.json" />
@@ -101,6 +100,7 @@
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
     <PackageReference Include="Wangkanai.Detection" Version="3.0.0-alpha05" />
+    <PackageReference Include="NeoSmart.Caching.Sqlite" Version="3.1.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IsraelHiking.API\IsraelHiking.API.csproj" />

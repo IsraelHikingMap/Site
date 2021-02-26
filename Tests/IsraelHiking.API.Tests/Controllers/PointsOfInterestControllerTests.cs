@@ -8,6 +8,7 @@ using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -17,8 +18,10 @@ using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp.API;
 using OsmSharp.IO.API;
+using System;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -32,6 +35,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IPointsOfInterestProvider _pointsOfInterestProvider;
         private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private UsersIdAndTokensCache _cache;
+        private IDistributedCache _persistantCache;
 
         [TestInitialize]
         public void TestInitialize()
@@ -41,6 +45,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
             _osmGateway = Substitute.For<IAuthClient>();
             _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
+            _persistantCache = Substitute.For<IDistributedCache>();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
             _cache = new UsersIdAndTokensCache(optionsProvider, Substitute.For<ILogger>(), new MemoryCache(new MemoryCacheOptions()));
@@ -53,6 +58,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 new Base64ImageStringToFileConverter(), 
                 _imagesUrlsStorageExecutor,
                 Substitute.For<ISimplePointAdderExecutor>(),
+                _persistantCache,
                 Substitute.For<ILogger>(),
                 optionsProvider, 
                 _cache);
@@ -124,33 +130,77 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void UploadPointOfInterest_WrongSource_ShouldReturnBadRequest()
+        public void CreatePointOfInterest_WrongSource_ShouldReturnBadRequest()
         {
             var poi = new Feature(new Point(0, 0), new AttributesTable { { FeatureAttributes.POI_SOURCE, "wrong source" } });
             
-            var result = _controller.UploadPointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
+            var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(result);
         }
 
         [TestMethod]
-        public void UploadPointOfInterest_IdDoesNotExists_ShouldAdd()
+        public void CreatePointOfInterest_ExistsInCacheAndInTheDatabase_ShouldAdd()
         {
             _controller.SetupIdentity(_cache);
             var poi = new Feature(new Point(0, 0), new AttributesTable {
                 { FeatureAttributes.POI_SOURCE, Sources.OSM },
                 { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.POI_ID, Guid.NewGuid().ToString() },
             });
             poi.SetLocation(new Coordinate());
+            _persistantCache.Get(Arg.Any<string>()).Returns(Encoding.UTF8.GetBytes("the id in the cache"));
+            _pointsOfInterestProvider.GetFeatureById(Sources.OSM, "the id in the cache").Returns(poi);
 
-            var result = _controller.UploadPointOfInterest(poi, Languages.HEBREW).Result as OkObjectResult;
+            var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as OkObjectResult;
 
             Assert.IsNotNull(result);
-            _pointsOfInterestProvider.Received(1).AddFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
+            _pointsOfInterestProvider.DidNotReceive().AddFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
         }
 
         [TestMethod]
-        public void UploadPointOfInterest_IdExists_ShouldUpdate()
+        public void CreatePointOfInterest_ExistsInCacheButNotInTheDatabase_ShouldAdd()
+        {
+            _controller.SetupIdentity(_cache);
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.POI_ID, Guid.NewGuid().ToString() },
+            });
+            poi.SetLocation(new Coordinate());
+            _persistantCache.Get(Arg.Any<string>()).Returns(Encoding.UTF8.GetBytes("the id in the cache"));
+            _pointsOfInterestProvider.GetFeatureById(Sources.OSM, "the id in the cache").Returns((Feature)null);
+
+            var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(result);
+            _pointsOfInterestProvider.DidNotReceive().AddFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
+        }
+
+        [TestMethod]
+        public void CreatePointOfInterest_DoesNotExistInCache_ShouldNotAdd()
+        {
+            _controller.SetupIdentity(_cache);
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.POI_ID, Guid.NewGuid().ToString() },
+            });
+            poi.SetLocation(new Coordinate(0, 0));
+            _persistantCache.Get(Arg.Any<string>()).Returns((byte[])null);
+            _pointsOfInterestProvider.AddFeature(poi, _osmGateway, Languages.HEBREW).Returns(new Feature(new Point(0,0), new AttributesTable
+            {
+                { FeatureAttributes.ID, "new id" }
+            }));
+
+            var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as OkObjectResult;
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue((result.Value as Feature).Attributes.Exists(FeatureAttributes.ID));
+        }
+
+        [TestMethod]
+        public void UploadPointOfInterest_IncorrectId_ShouldNotUpdate()
         {
             _controller.SetupIdentity(_cache);
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -160,14 +210,31 @@ namespace IsraelHiking.API.Tests.Controllers
             });
             poi.SetLocation(new Coordinate());
 
-            var result = _controller.UploadPointOfInterest(poi, Languages.HEBREW).Result as OkObjectResult;
+            var result = _controller.UpdatePointOfInterest("42", poi, Languages.HEBREW).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(result);
+            _pointsOfInterestProvider.DidNotReceive().UpdateFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
+        }
+
+        [TestMethod]
+        public void UpdatePointOfInterest_ValidFeature_ShouldUpdate()
+        {
+            _controller.SetupIdentity(_cache);
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.POI_ID, "1" },
+                { FeatureAttributes.POI_ICON, "icon" },
+            });
+            poi.SetLocation(new Coordinate());
+
+            var result = _controller.UpdatePointOfInterest(poi.GetId(), poi, Languages.HEBREW).Result as OkObjectResult;
 
             Assert.IsNotNull(result);
             _pointsOfInterestProvider.Received(1).UpdateFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
         }
 
         [TestMethod]
-        public void UploadPointOfInterest_WithImageIdExists_ShouldUpdate()
+        public void UpdatePointOfInterest_WithImageIdExists_ShouldUpdate()
         {
             var user = new User {DisplayName = "DisplayName"};
             _controller.SetupIdentity(_cache);
@@ -185,7 +252,7 @@ namespace IsraelHiking.API.Tests.Controllers
             poi.SetLocation(new Coordinate(6, 5));
             _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
 
-            _controller.UploadPointOfInterest(poi, Languages.HEBREW).Wait();
+            _controller.UpdatePointOfInterest(poi.GetId(), poi, Languages.HEBREW).Wait();
 
             _wikimediaCommonGateway.Received(1).UploadImage(poi.GetTitle(Languages.HEBREW), poi.GetDescription(Languages.HEBREW), user.DisplayName, "title.png", Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
@@ -193,7 +260,7 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void UploadPointOfInterest_WithImageInRepository_ShouldNotUploadImage()
+        public void UpdatePointOfInterest_WithImageInRepository_ShouldNotUploadImage()
         {
             var user = new User { DisplayName = "DisplayName" };
             _controller.SetupIdentity(_cache);
@@ -201,7 +268,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var poi = new Feature(new Point(0, 0), new AttributesTable {
                 { FeatureAttributes.NAME, "title" },
                 { FeatureAttributes.POI_SOURCE, Sources.OSM },
-                { FeatureAttributes.ID, "1" },
+                { FeatureAttributes.POI_ID, "1" },
                 { FeatureAttributes.POI_ICON, "icon" },
                 { FeatureAttributes.IMAGE_URL, "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
                                       "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="},
@@ -210,7 +277,7 @@ namespace IsraelHiking.API.Tests.Controllers
             poi.SetLocation(new Coordinate(6, 5));
             _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns("some-url");
 
-            _controller.UploadPointOfInterest(poi, Languages.HEBREW).Wait();
+            _controller.UpdatePointOfInterest(poi.GetId(), poi, Languages.HEBREW).Wait();
 
             _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());

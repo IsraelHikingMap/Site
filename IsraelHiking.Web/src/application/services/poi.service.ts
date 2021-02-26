@@ -146,25 +146,29 @@ export class PoiService {
         }
         this.uploadPoiQueue$.subscribe(async (items: string[]) => {
             if (items.length === 0) {
-                this.loggingService.info(`[POIs] Upload queue change and now it is empty`);
+                this.loggingService.info(`[POIs] Upload queue changed and now it is empty`);
                 return;
             }
             let firstItemId = items[0];
-            this.loggingService.info(`[POIs] Upload queue change, items in queue: ${items.length}, first item id: ${firstItemId}`);
+            this.loggingService.info(`[POIs] Upload queue changed, items in queue: ${items.length}, first item id: ${firstItemId}`);
 
             let feature = await this.databaseService.getPoiFromUploadQueue(firstItemId);
-            let postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-            let putAddress = Urls.poi + feature.properties.poiId + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-            let poi = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(feature.properties.poiId)
-                ? await this.httpClient.post(postAddress, feature).toPromise() as GeoJSON.Feature
-                : await this.httpClient.put(putAddress, feature).toPromise() as GeoJSON.Feature;
-
-            this.loggingService.info(`[POIs] Uploaded feature with id: ${firstItemId}, removing from upload queue`);
-            if (this.runningContextService.isCordova) {
-                this.databaseService.storePois([poi]);
+            try {
+                let postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+                let putAddress = Urls.poi + feature.properties.poiId + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+                let poi = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(feature.properties.poiId)
+                    ? await this.httpClient.post(postAddress, feature).pipe(timeout(60000)).toPromise() as GeoJSON.Feature
+                    : await this.httpClient.put(putAddress, feature).pipe(timeout(60000)).toPromise() as GeoJSON.Feature;
+    
+                this.loggingService.info(`[POIs] Uploaded feature with id: ${firstItemId}, removing from upload queue`);
+                if (this.runningContextService.isCordova) {
+                    this.databaseService.storePois([poi]);
+                }
+                this.databaseService.removePoiFromUploadQueue(firstItemId);
+                this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
+            } catch (ex) {
+                this.loggingService.error(`[POI] Failed to upload feature with id: ${firstItemId}, ${ex.message}`);
             }
-            this.databaseService.removePoiFromUploadQueue(firstItemId);
-            this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
         });
     }
 

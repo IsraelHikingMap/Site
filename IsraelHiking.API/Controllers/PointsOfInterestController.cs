@@ -6,10 +6,10 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
@@ -37,6 +37,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
         private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
         private readonly ISimplePointAdderExecutor _simplePointAdderExecutor;
+        private readonly IDistributedCache _persistantCache;
         private readonly ILogger _logger;
         private readonly ConfigurationData _options;
         private readonly UsersIdAndTokensCache _cache;
@@ -51,6 +52,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="base64ImageConverter"></param>
         /// <param name="imageUrlStoreExecutor"></param>
         /// <param name="simplePointAdderExecutor"></param>
+        /// <param name="persistantCache"></param>
         /// <param name="logger"></param>
         /// <param name="options"></param>
         /// <param name="cache"></param>
@@ -61,6 +63,7 @@ namespace IsraelHiking.API.Controllers
             IBase64ImageStringToFileConverter base64ImageConverter,
             IImagesUrlsStorageExecutor imageUrlStoreExecutor,
             ISimplePointAdderExecutor simplePointAdderExecutor,
+            IDistributedCache persistantCache,
             ILogger logger,
             IOptions<ConfigurationData> options,
             UsersIdAndTokensCache cache)
@@ -73,6 +76,7 @@ namespace IsraelHiking.API.Controllers
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _wikimediaCommonGateway = wikimediaCommonGateway;
             _simplePointAdderExecutor = simplePointAdderExecutor;
+            _persistantCache = persistantCache;
             _logger = logger;
             _options = options.Value;
         }
@@ -147,7 +151,7 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Update a POI by id and source, upload the image to wikimedia commons if needed.
+        /// Creates a POI by id and source, upload the image to wikimedia commons if needed.
         /// </summary>
         /// <param name="feature"></param>
         /// <param name="language">The language code</param>
@@ -155,26 +159,87 @@ namespace IsraelHiking.API.Controllers
         [Route("")]
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> UploadPointOfInterest([FromBody]Feature feature,
+        public async Task<IActionResult> CreatePointOfInterest([FromBody]Feature feature,
             [FromQuery] string language)
+        {
+            _logger.LogInformation("Processing create point of interest request");
+            var validationResults = ValidateFeature(feature, language);
+            if (!string.IsNullOrEmpty(validationResults))
+            {
+                _logger.LogWarning("Create request validation failed: " + validationResults);
+                return BadRequest(validationResults);
+            }
+            var mappedId = _persistantCache.GetString(feature.GetId());
+            if (!string.IsNullOrEmpty(mappedId))
+            {
+                var featureFromDatabase = await _pointsOfInterestProvider.GetFeatureById(feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(), mappedId);
+                if (featureFromDatabase == null)
+                {
+                    return BadRequest("Feature is still in process please try again later...");
+                }
+                return Ok(featureFromDatabase);
+            }
+            _persistantCache.SetString(feature.GetId(), "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
+            
+            var osmGateway = CreateOsmGateway();
+            await UploadImageAndUpdateFeature(feature, language, osmGateway);
+            var newFeature = await _pointsOfInterestProvider.AddFeature(feature, osmGateway, language);
+            _persistantCache.SetString(feature.GetId(), newFeature.Attributes[FeatureAttributes.ID].ToString(), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
+            return Ok(newFeature);
+        }
+
+        /// <summary>
+        /// Creates a POI by id and source, upload the image to wikimedia commons if needed.
+        /// </summary>
+        /// <param name="id">The feature ID</param>
+        /// <param name="feature"></param>
+        /// <param name="language">The language code</param>
+        /// <returns></returns>
+        [Route("{id}")]
+        [HttpPut]
+        [Authorize]
+        public async Task<IActionResult> UpdatePointOfInterest(string id, [FromBody]Feature feature,
+            [FromQuery] string language)
+        {
+            _logger.LogInformation("Processing update point of interest request");
+            var validationResults = ValidateFeature(feature, language);
+            if (!string.IsNullOrEmpty(validationResults))
+            {
+                _logger.LogWarning("Update request validation failed: " + validationResults);
+                return BadRequest(validationResults);
+            }
+            if (feature.GetId() != id) {
+                return BadRequest("Feature ID and supplied id do not match...");
+            }
+            
+            var osmGateway = CreateOsmGateway();
+            await UploadImageAndUpdateFeature(feature, language, osmGateway);
+            return Ok(await _pointsOfInterestProvider.UpdateFeature(feature, osmGateway, language));
+        }
+
+        private string ValidateFeature(Feature feature, string language) 
         {
             if (!feature.Attributes[FeatureAttributes.POI_SOURCE].ToString().Equals(Sources.OSM, StringComparison.InvariantCultureIgnoreCase))
             {
-                return BadRequest("OSM is the only supported source for this action...");
+                return "OSM is the only supported source for this action...";
             }
             if (feature.GetDescription(language).Length > 255)
             {
-                return BadRequest("Description must not be more than 255 characters...");
+                return "Description must not be more than 255 characters...";
             }
             if (feature.GetTitle(language).Length > 255)
             {
-                return BadRequest("Title must not be more than 255 characters...");
+                return "Title must not be more than 255 characters...";
             }
+            return string.Empty;
+        }
+
+        private async Task UploadImageAndUpdateFeature(Feature feature, string language, IAuthClient osmGateway) 
+        {
             var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
             var location = feature.GetLocation();
             var idString = feature.Attributes.Exists(FeatureAttributes.POI_ID) ? feature.GetId() : "";
-            _logger.LogInformation($"Adding a POI of type {icon} with id: {idString}, at {location.Y}, {location.X}");
-            var osmGateway = CreateOsmGateway();
+            _logger.LogInformation($"Uploaded a POI of type {icon} with id: {idString}, at {location.Y}, {location.X}");
             var user = await osmGateway.GetUserDetails();
             feature.SetTitles();
             var imageUrls = feature.Attributes.GetNames()
@@ -204,12 +269,6 @@ namespace IsraelHiking.API.Controllers
                 imageUrls[urlIndex] = await _wikimediaCommonGateway.GetImageUrl(imageName);
                 await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrls[urlIndex]);
             }
-
-            if (string.IsNullOrWhiteSpace(idString))
-            {
-                return Ok(await _pointsOfInterestProvider.AddFeature(feature, osmGateway, language));
-            }
-            return Ok(await _pointsOfInterestProvider.UpdateFeature(feature, osmGateway, language));
         }
 
         /// <summary>

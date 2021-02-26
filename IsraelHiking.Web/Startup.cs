@@ -25,6 +25,7 @@ using Microsoft.OpenApi.Models;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
+using NeoSmart.Caching.Sqlite;
 using OsmSharp.IO.API;
 using System;
 using System.IO;
@@ -64,6 +65,7 @@ namespace IsraelHiking.Web
             services.AddHttpClient();
             services.AddIHMDataAccess();
             services.AddIHMApi();
+            services.AddSqliteCache(@"./cache.sqlite");
             services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
             services.AddSingleton<IClientsFactory>(serviceProvider =>
                 new ClientsFactory(serviceProvider.GetRequiredService<ILogger>(),
