@@ -57,7 +57,6 @@ export const ConnectionServiceOptionsToken: InjectionToken<ConnectionServiceOpti
 })
 export class ConnectionService implements OnDestroy {
     private static DEFAULT_OPTIONS: ConnectionServiceOptions = {
-        enableHeartbeat: true,
         heartbeatUrl: "https://israelhiking.osm.org.il/favicon.ico",
         heartbeatInterval: 15000,
         heartbeatRetryInterval: 1000,
@@ -91,38 +90,31 @@ export class ConnectionService implements OnDestroy {
     }
 
     private checkInternetState() {
-
         if (!isNil(this.httpSubscription)) {
             this.httpSubscription.unsubscribe();
         }
 
-        if (this.serviceOptions.enableHeartbeat) {
-            this.httpSubscription = timer(0, this.serviceOptions.heartbeatInterval)
-                .pipe(
-                    switchMap(() => this.http[this.serviceOptions.requestMethod](this.serviceOptions.heartbeatUrl, {
-                        responseType: "text",
-                        headers: {
-                            ignoreProgressBar: ""
-                        }
-                    })),
-                    retryWhen(errors =>
-                        errors.pipe(
-                            // log error message
-                            tap(val => {
-                                this.currentState.hasInternetAccess = false;
-                                this.emitEvent();
-                            }),
-                            // restart after 5 seconds
-                            delay(this.serviceOptions.heartbeatRetryInterval)
-                        )
-                    )
+        this.httpSubscription = timer(0, this.serviceOptions.heartbeatInterval).pipe(
+            switchMap(() => this.http[this.serviceOptions.requestMethod](this.serviceOptions.heartbeatUrl, {
+                responseType: "text",
+                headers: {
+                    ignoreProgressBar: ""
+                }
+            })),
+            retryWhen(errors =>
+                errors.pipe(
+                    tap(_ => this.setInternetAccessAndEmitIfNeeded(false)),
+                    // restart after x seconds
+                    delay(this.serviceOptions.heartbeatRetryInterval)
                 )
-                .subscribe(result => {
-                    this.currentState.hasInternetAccess = true;
-                    this.emitEvent();
-                });
-        } else {
-            this.currentState.hasInternetAccess = false;
+            )
+        ).subscribe(_ => this.setInternetAccessAndEmitIfNeeded(true));
+    }
+
+    private setInternetAccessAndEmitIfNeeded(hasInternetAccess: boolean) {
+        let previousState = this.currentState.hasInternetAccess;
+        this.currentState.hasInternetAccess = hasInternetAccess;
+        if (previousState !== this.currentState.hasInternetAccess) {
             this.emitEvent();
         }
     }

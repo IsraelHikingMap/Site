@@ -104,6 +104,11 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         $event.stopPropagation();
     }
 
+    public getQueueText(): string {
+        let queueLength = this.ngRedux.getState().offlineState.uploadPoiQueue.length;
+        return queueLength > 0 ? queueLength.toString() : "";
+    }
+
     public login() {
         if (!this.runningContextService.isOnline) {
             this.toastService.warning(this.resources.unableToLogin);
