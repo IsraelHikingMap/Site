@@ -173,16 +173,26 @@ export class PoiService {
 
         let feature = await this.databaseService.getPoiFromUploadQueue(firstItemId);
         try {
-            let postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-            let putAddress = Urls.poi + feature.properties.poiId + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-            let poi = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(feature.properties.poiId)
-                ? await this.httpClient.post(postAddress, feature).pipe(timeout(60000)).toPromise() as GeoJSON.Feature
-                : await this.httpClient.put(putAddress, feature).pipe(timeout(60000)).toPromise() as GeoJSON.Feature;
+            if (feature.properties.isSimple) {
+                await this.httpClient.post(Urls.poiSimple, { 
+                    latLng: SpatialService.toLatLng((feature.geometry as GeoJSON.Point).coordinates as [number, number]), 
+                    pointType: feature.properties.poiType,
+                    guid: feature.properties.poiId 
+                }).pipe(timeout(10000)).toPromise();
+                this.loggingService.info(`[POIs] Uploaded simple feature with id: ${firstItemId}, removing from upload queue`);
+            } else {
+                let postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+                let putAddress = Urls.poi + feature.properties.poiId + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+                let poi = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(feature.properties.poiId)
+                    ? await this.httpClient.post(postAddress, feature).pipe(timeout(60000)).toPromise() as GeoJSON.Feature
+                    : await this.httpClient.put(putAddress, feature).pipe(timeout(60000)).toPromise() as GeoJSON.Feature;
 
-            this.loggingService.info(`[POIs] Uploaded feature with id: ${firstItemId}, removing from upload queue`);
-            if (this.runningContextService.isCordova) {
-                this.databaseService.storePois([poi]);
+                this.loggingService.info(`[POIs] Uploaded full feature with id: ${firstItemId}, removing from upload queue`);
+                if (this.runningContextService.isCordova) {
+                    this.databaseService.storePois([poi]);
+                }
             }
+            
             this.databaseService.removePoiFromUploadQueue(firstItemId);
             this.queueIsProcessing = false;
             this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
@@ -618,6 +628,18 @@ export class PoiService {
     }
 
     public addSimplePoint(latlng: LatLngAlt, pointType: SimplePointType): Promise<any> {
-        return this.httpClient.post(Urls.poiSimple, { latLng: latlng, pointType }).toPromise();
+        return this.uploadPoint({
+            type: "Feature",
+            properties: {
+                isSimple: true,
+                poiType: pointType,
+                poiId: uuidv4(),
+                poiSrouce: "osm"
+            },
+            geometry: {
+                type: "Point",
+                coordinates: SpatialService.toCoordinate(latlng)
+            },
+        });
     }
 }

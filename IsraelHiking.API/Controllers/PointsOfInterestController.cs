@@ -310,18 +310,23 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Get a POI by id and source
+        /// Creates a simple POI
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
         [Route("simple")]
         [HttpPost]
         [Authorize]
-        public Task AddSimplePoint([FromBody]AddSimplePointOfInterestRequest request)
+        public async Task AddSimplePoint([FromBody]AddSimplePointOfInterestRequest request)
         {
+            // HM TODO: unite this with the regular post request??
+            if (!string.IsNullOrEmpty(_persistantCache.GetString(request.Guid))) {
+                return;
+            }
+            _persistantCache.SetString(request.Guid, "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             _logger.LogInformation($"Adding a simple POI of type {request.PointType} at {request.LatLng.Lat}, {request.LatLng.Lng}");
             var osmGateway = CreateOsmGateway();
-            return _simplePointAdderExecutor.Add(osmGateway, request);
+            await _simplePointAdderExecutor.Add(osmGateway, request);
         }
 
         

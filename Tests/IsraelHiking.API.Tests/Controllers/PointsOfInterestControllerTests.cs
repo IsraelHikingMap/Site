@@ -4,6 +4,7 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
@@ -36,6 +37,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private UsersIdAndTokensCache _cache;
         private IDistributedCache _persistantCache;
+        private ISimplePointAdderExecutor _simplePointAdderExecutor;
 
         [TestInitialize]
         public void TestInitialize()
@@ -46,6 +48,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _osmGateway = Substitute.For<IAuthClient>();
             _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
             _persistantCache = Substitute.For<IDistributedCache>();
+            _simplePointAdderExecutor = Substitute.For<ISimplePointAdderExecutor>();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
             _cache = new UsersIdAndTokensCache(optionsProvider, Substitute.For<ILogger>(), new MemoryCache(new MemoryCacheOptions()));
@@ -57,7 +60,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 _pointsOfInterestProvider, 
                 new Base64ImageStringToFileConverter(), 
                 _imagesUrlsStorageExecutor,
-                Substitute.For<ISimplePointAdderExecutor>(),
+                _simplePointAdderExecutor,
                 _persistantCache,
                 Substitute.For<ILogger>(),
                 optionsProvider, 
@@ -291,6 +294,36 @@ namespace IsraelHiking.API.Tests.Controllers
             var results = _controller.GetClosestPoint("0,0", Sources.OSM, "he").Result;
 
             Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void CreateSimplePoint_DoesNotExistInCache_ShouldAddIt()
+        {
+            _controller.SetupIdentity(_cache);
+
+            _controller.AddSimplePoint(new AddSimplePointOfInterestRequest {
+                    LatLng = new LatLng(),
+                    Guid = Guid.NewGuid().ToString(),
+                    PointType = SimplePointType.Parking
+            }).Wait();
+
+            _simplePointAdderExecutor.Received(1).Add(Arg.Any<IAuthClient>(), Arg.Any<AddSimplePointOfInterestRequest>());
+        }
+
+        [TestMethod]
+        public void CreateSimplePoint_ExistsInCache_ShouldNotAddIt()
+        {
+            var guidString = Guid.NewGuid().ToString();
+            _persistantCache.Get(guidString).Returns(new byte[] { 1 });
+
+            _controller.AddSimplePoint(new AddSimplePointOfInterestRequest
+            {
+                LatLng = new LatLng(),
+                Guid = guidString,
+                PointType = SimplePointType.Parking
+            }).Wait();
+
+            _simplePointAdderExecutor.DidNotReceive().Add(Arg.Any<IAuthClient>(), Arg.Any<AddSimplePointOfInterestRequest>());
         }
     }
 }
