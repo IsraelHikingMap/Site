@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
+import { orderBy } from "lodash-es";
 
 import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -22,12 +23,15 @@ interface IShareUrlSocialLinks {
 
 @Injectable()
 export class ShareUrlsService {
+    private syncying: boolean;
+
     constructor(private readonly httpClient: HttpClient,
                 private readonly whatsAppService: WhatsAppService,
                 private readonly hashService: HashService,
                 private readonly loggingService: LoggingService,
                 private readonly databaseService: DatabaseService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
+            this.syncying = false;
     }
 
     public async initialize() {
@@ -62,7 +66,7 @@ export class ShareUrlsService {
 
     private async getShareFromServerAndCacheIt(shareUrlId: string): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Getting share by id ${shareUrlId}`);
-        let shareUrl = await this.httpClient.get(Urls.urls + shareUrlId).pipe(timeout(20000)).toPromise() as ShareUrl;
+        let shareUrl = await this.httpClient.get(Urls.urls + shareUrlId).pipe(timeout(60000)).toPromise() as ShareUrl;
         this.databaseService.storeShareUrl(shareUrl);
         return shareUrl;
     }
@@ -83,20 +87,27 @@ export class ShareUrlsService {
     }
 
     public async syncShareUrls(): Promise<any> {
+        if (this.syncying) {
+            this.loggingService.info(`[Shares] Already syncing...`);
+            return;
+        }
+        this.syncying = true;
         try {
             let sharesLastSuccessfullSync = this.ngRedux.getState().offlineState.shareUrlsLastModifiedDate;
             let operationStartTimeStamp = new Date();
-            this.loggingService.info(`[Shares] Starting shares sync, last modified: ${(sharesLastSuccessfullSync || new Date()).toUTCString()}`);
+            let sharesToGetFromServer = [] as ShareUrl[];
+            this.loggingService.info(`[Shares] Starting shares sync, last modified: ${(sharesLastSuccessfullSync || new Date(0)).toUTCString()}`);
             let shareUrls = await this.httpClient.get(Urls.urls).pipe(timeout(10000)).toPromise() as ShareUrl[];
             let exitingShareUrls = this.ngRedux.getState().shareUrlsState.shareUrls;
             for (let shareUrl of shareUrls) {
+                shareUrl.lastModifiedDate = new Date(shareUrl.lastModifiedDate);
                 if (exitingShareUrls.find(s => s.id === shareUrl.id) != null) {
                     this.ngRedux.dispatch(new UpdateShareUrlAction({ shareUrl }));
                 } else {
                     this.ngRedux.dispatch(new AddShareUrlAction({ shareUrl }));
                 }
-                if (sharesLastSuccessfullSync == null || new Date(shareUrl.lastModifiedDate) > sharesLastSuccessfullSync) {
-                        await this.getShareFromServerAndCacheIt(shareUrl.id);
+                if (sharesLastSuccessfullSync == null || shareUrl.lastModifiedDate > sharesLastSuccessfullSync) {
+                    sharesToGetFromServer.push(shareUrl);
                 }
             }
             for (let shareUrl of exitingShareUrls) {
@@ -105,10 +116,17 @@ export class ShareUrlsService {
                     await this.databaseService.deleteShareUrlById(shareUrl.id);
                 }
             }
+            sharesToGetFromServer = orderBy(sharesToGetFromServer, s => s.lastModifiedDate, "asc");
+            for (let shareToGet of sharesToGetFromServer) {
+                await this.getShareFromServerAndCacheIt(shareToGet.id);
+                this.ngRedux.dispatch(new SetShareUrlsLastModifiedDateAction({lastModifiedDate: shareToGet.lastModifiedDate}));
+            }
             this.ngRedux.dispatch(new SetShareUrlsLastModifiedDateAction({lastModifiedDate: operationStartTimeStamp}));
             this.loggingService.info(`[Shares] Finished shares sync, last modified: ${operationStartTimeStamp.toUTCString()}`);
-        } catch {
-            this.loggingService.error("[Shares] Unable to sync shares");
+        } catch (ex) {
+            this.loggingService.error("[Shares] Unable to sync shares: " + ex.message);
+        } finally {
+            this.syncying = false;
         }
     }
 
