@@ -14,7 +14,7 @@ import { ResourcesService } from "./resources.service";
 import { initialState } from "../reducers/initial-state";
 import { NgRedux, classToActionMiddleware } from "../reducers/infra/ng-redux.module";
 import { rootReducer } from "../reducers/root.reducer";
-import { ApplicationState, ShareUrl } from "../models/models";
+import { ApplicationState, ShareUrl, Trace } from "../models/models";
 
 export interface ImageUrlAndData {
     imageUrl: string;
@@ -34,12 +34,15 @@ export class DatabaseService {
     private static readonly IMAGES_TABLE_NAME = "images";
     private static readonly SHARE_URLS_DB_NAME = "ShareUrls";
     private static readonly SHARE_URLS_TABLE_NAME = "shareUrls";
+    private static readonly TRACES_DB_NAME = "Traces";
+    private static readonly TRACES_TABLE_NAME = "traces";
 
     private stateDatabase: Dexie;
     // HM TODO: only for cordova?
     private poisDatabase: Dexie;
     private imagesDatabase: Dexie;
     private shareUrlsDatabase: Dexie;
+    private tracesDatabase: Dexie;
     private sourceDatabases: Map<string, SQLiteObject>;
     private updating: boolean;
 
@@ -69,6 +72,10 @@ export class DatabaseService {
         this.shareUrlsDatabase = new Dexie(DatabaseService.SHARE_URLS_DB_NAME);
         this.shareUrlsDatabase.version(1).stores({
             shareUrls: "id"
+        });
+        this.tracesDatabase = new Dexie(DatabaseService.TRACES_DB_NAME);
+        this.tracesDatabase.version(1).stores({
+            traces: "id",
         });
         this.initCustomTileLoadFunction();
         if (this.runningContext.isIFrame) {
@@ -274,6 +281,18 @@ export class DatabaseService {
 
     public deleteShareUrlById(id: string): Promise<void> {
         return this.shareUrlsDatabase.table(DatabaseService.SHARE_URLS_TABLE_NAME).delete(id);
+    }
+
+    public storeTrace(trace: Trace): Promise<any> {
+        return this.tracesDatabase.table(DatabaseService.TRACES_TABLE_NAME).put(trace);
+    }
+
+    public getTraceById(id: string): Promise<Trace> {
+        return this.tracesDatabase.table(DatabaseService.TRACES_TABLE_NAME).get(id);
+    }
+
+    public deleteTraceById(id: string): Promise<void> {
+        return this.tracesDatabase.table(DatabaseService.TRACES_TABLE_NAME).delete(id);
     }
 
     private initialStateUpgrade(dbState: ApplicationState): ApplicationState {

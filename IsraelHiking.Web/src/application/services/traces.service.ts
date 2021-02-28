@@ -5,6 +5,7 @@ import { timeout } from "rxjs/operators";
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
+import { DatabaseService } from "./database.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducers/traces.reducer";
 import { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
@@ -17,6 +18,7 @@ export class TracesService {
                 private readonly httpClient: HttpClient,
                 private readonly loggingService: LoggingService,
                 private readonly runningContextService: RunningContextService,
+                private readonly databaseService: DatabaseService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
@@ -49,6 +51,7 @@ export class TracesService {
 
     public async syncTraces(): Promise<void> {
         try {
+            this.loggingService.info(`[Traces] Starting syncing traces`);
             let response = await this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)).toPromise() as Trace[];
             let traces = ([] as Trace[]).concat(response || []);
             let existingTraces = this.ngRedux.getState().tracesState.traces;
@@ -60,7 +63,6 @@ export class TracesService {
                 traceJson.timeStamp = new Date(traceJson.timeStamp);
                 let existingTrace = existingTraces.find(t => t.id === traceJson.id);
                 if (existingTrace != null) {
-                    traceJson.dataContainer = existingTrace.dataContainer;
                     this.ngRedux.dispatch(new UpdateTraceAction({ traceId: traceJson.id, trace: traceJson }));
                 } else {
                     this.ngRedux.dispatch(new AddTraceAction({ trace: traceJson }));
@@ -69,8 +71,10 @@ export class TracesService {
             for (let trace of existingTraces.filter(t => t.visibility !== "local")) {
                 if (traces.find(t => t.id === trace.id) == null) {
                     this.ngRedux.dispatch(new RemoveTraceAction({ traceId: trace.id }));
+                    await this.databaseService.deleteTraceById(trace.id);
                 }
             }
+            this.loggingService.info(`[Traces] Finished syncing traces`);
         } catch (ex) {
             this.loggingService.error("[Traces] Unable to get user's traces.");
         }
@@ -82,17 +86,21 @@ export class TracesService {
         if (trace == null) {
             return null;
         }
-        if (trace != null && trace.dataContainer != null) {
-            this.loggingService.info(`[Traces] Got trace from cache: ${traceId}`);
-            return trace;
+        let storedTrace = await this.databaseService.getTraceById(traceId);
+        if (storedTrace != null) {
+            this.loggingService.info(`[Traces] Got trace from database: ${traceId}`);
+            return {
+                ...trace,
+                dataContainer: storedTrace.dataContainer
+            };
         }
         let dataContainer = await this.httpClient.get(Urls.osmTrace + traceId).toPromise() as DataContainer;
+        this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
         trace = {
             ...trace,
             dataContainer
         };
-        this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace }));
-        this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
+        await this.databaseService.storeTrace(trace);
         return trace;
     }
 
@@ -124,5 +132,6 @@ export class TracesService {
             await this.httpClient.delete(Urls.osmTrace + trace.id).toPromise();
         }
         this.ngRedux.dispatch(new RemoveTraceAction({ traceId: trace.id }));
+        await this.databaseService.deleteTraceById(trace.id);
     }
 }
