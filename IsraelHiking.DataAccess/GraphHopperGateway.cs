@@ -66,11 +66,11 @@ namespace IsraelHiking.DataAccess
         public async Task<Feature> GetRouting(RoutingGatewayRequest request)
         {
             var httpClient = _httpClientFactory.CreateClient();
-            string profile = "foot";
+            string profile = "hike";
             switch (request.Profile)
             {
                 case ProfileType.Foot:
-                    profile = "foot";
+                    profile = "hike";
                     break;
                 case ProfileType.Bike:
                     profile = "mtb";
