@@ -7,7 +7,6 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
@@ -17,11 +16,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
-using OsmSharp.API;
 using OsmSharp.IO.API;
 using System;
-using System.IO;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace IsraelHiking.API.Tests.Controllers
@@ -30,7 +26,6 @@ namespace IsraelHiking.API.Tests.Controllers
     public class PointsOfInterestControllerTests
     {
         private PointsOfInterestController _controller;
-        private IWikimediaCommonGateway _wikimediaCommonGateway;
         private IAuthClient _osmGateway;
         private ITagsHelper _tagHelper;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
@@ -44,7 +39,6 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
             _tagHelper = Substitute.For<ITagsHelper>();
-            _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
             _osmGateway = Substitute.For<IAuthClient>();
             _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
             _persistantCache = Substitute.For<IDistributedCache>();
@@ -56,9 +50,7 @@ namespace IsraelHiking.API.Tests.Controllers
             factory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(_osmGateway);
             _controller = new PointsOfInterestController(factory, 
                 _tagHelper, 
-                _wikimediaCommonGateway, 
                 _pointsOfInterestProvider, 
-                new Base64ImageStringToFileConverter(), 
                 _imagesUrlsStorageExecutor,
                 _simplePointAdderExecutor,
                 _persistantCache,
@@ -237,56 +229,6 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void UpdatePointOfInterest_WithImageIdExists_ShouldUpdate()
-        {
-            var user = new User {DisplayName = "DisplayName"};
-            _controller.SetupIdentity(_cache);
-            _osmGateway.GetUserDetails().Returns(user);
-            var poi = new Feature(new Point(0, 0), new AttributesTable {
-                { FeatureAttributes.NAME, "title" },
-                { "name:he", "title" },
-                { FeatureAttributes.POI_SOURCE, Sources.OSM },
-                { FeatureAttributes.POI_ID, "1" },
-                { FeatureAttributes.POI_ICON, "icon" },
-                { FeatureAttributes.IMAGE_URL, "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
-                                      "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="},
-                { "image2", "http://link.com" }
-            });
-            poi.SetLocation(new Coordinate(6, 5));
-            _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
-
-            _controller.UpdatePointOfInterest(poi.GetId(), poi, Languages.HEBREW).Wait();
-
-            _wikimediaCommonGateway.Received(1).UploadImage(poi.GetTitle(Languages.HEBREW), poi.GetDescription(Languages.HEBREW), user.DisplayName, "title.png", Arg.Any<Stream>(), Arg.Any<Coordinate>());
-            _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
-            _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
-        }
-
-        [TestMethod]
-        public void UpdatePointOfInterest_WithImageInRepository_ShouldNotUploadImage()
-        {
-            var user = new User { DisplayName = "DisplayName" };
-            _controller.SetupIdentity(_cache);
-            _osmGateway.GetUserDetails().Returns(user);
-            var poi = new Feature(new Point(0, 0), new AttributesTable {
-                { FeatureAttributes.NAME, "title" },
-                { FeatureAttributes.POI_SOURCE, Sources.OSM },
-                { FeatureAttributes.POI_ID, "1" },
-                { FeatureAttributes.POI_ICON, "icon" },
-                { FeatureAttributes.IMAGE_URL, "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
-                                      "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="},
-                { "image2", "http://link.com" }
-            });
-            poi.SetLocation(new Coordinate(6, 5));
-            _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns("some-url");
-
-            _controller.UpdatePointOfInterest(poi.GetId(), poi, Languages.HEBREW).Wait();
-
-            _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
-            _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());
-        }
-
-        [TestMethod]
         public void GetClosestPoint_ShouldGetTheClosesOsmPoint()
         {
             _pointsOfInterestProvider.GetClosestPoint(Arg.Any<Coordinate>(), Arg.Any<string>(), Arg.Any<string>()).Returns(new Feature(new Point(0,0), new AttributesTable()));
@@ -300,12 +242,19 @@ namespace IsraelHiking.API.Tests.Controllers
         public void CreateSimplePoint_DoesNotExistInCache_ShouldAddIt()
         {
             _controller.SetupIdentity(_cache);
+            var simpleFeature = new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ID, Guid.NewGuid().ToString() },
+                    { FeatureAttributes.POI_IS_SIMPLE, "true" },
+                    { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                    { FeatureAttributes.POI_TYPE, SimplePointType.Parking.ToString() }
+                }
+            };
+            simpleFeature.SetLocation(new Coordinate());
 
-            _controller.AddSimplePoint(new AddSimplePointOfInterestRequest {
-                    LatLng = new LatLng(),
-                    Guid = Guid.NewGuid().ToString(),
-                    PointType = SimplePointType.Parking
-            }).Wait();
+            _controller.CreatePointOfInterest(simpleFeature, Languages.HEBREW).Wait();
 
             _simplePointAdderExecutor.Received(1).Add(Arg.Any<IAuthClient>(), Arg.Any<AddSimplePointOfInterestRequest>());
         }
@@ -315,13 +264,19 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var guidString = Guid.NewGuid().ToString();
             _persistantCache.Get(guidString).Returns(new byte[] { 1 });
-
-            _controller.AddSimplePoint(new AddSimplePointOfInterestRequest
+            var simpleFeature = new Feature
             {
-                LatLng = new LatLng(),
-                Guid = guidString,
-                PointType = SimplePointType.Parking
-            }).Wait();
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ID, guidString },
+                    { FeatureAttributes.POI_IS_SIMPLE, "true" },
+                    { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                    { FeatureAttributes.POI_TYPE, SimplePointType.Parking.ToString() }
+                }
+            };
+            simpleFeature.SetLocation(new Coordinate());
+
+            _controller.CreatePointOfInterest(simpleFeature, Languages.HEBREW).Wait();
 
             _simplePointAdderExecutor.DidNotReceive().Add(Arg.Any<IAuthClient>(), Arg.Any<AddSimplePointOfInterestRequest>());
         }

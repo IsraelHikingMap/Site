@@ -81,11 +81,11 @@ namespace IsraelHiking.API.Services.Poi
         /// <summary>
         /// Updates a POI
         /// </summary>
-        /// <param name="feature">The POI's new data</param>
+        /// <param name="partialFeature">The POI's new data - only added or deleted data will be in this feature</param>
         /// <param name="osmGateway"></param>
         /// <param name="language">The relevant language</param>
         /// <returns></returns>
-        Task<Feature> UpdateFeature(Feature feature, IAuthClient osmGateway, string language);
+        Task<Feature> UpdateFeature(Feature partialFeature, IAuthClient osmGateway, string language);
 
         /// <summary>
         /// Get the closest point to the given location, only for the given source

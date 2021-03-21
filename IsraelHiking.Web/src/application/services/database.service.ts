@@ -63,8 +63,10 @@ export class DatabaseService {
             state: "id"
         });
         this.poisDatabase = new Dexie(DatabaseService.POIS_DB_NAME);
-        this.poisDatabase.version(2).stores({
+        this.poisDatabase.version(1).stores({
             pois: DatabaseService.POIS_ID_COLUMN + "," + DatabaseService.POIS_LOCATION_COLUMN,
+        });
+        this.poisDatabase.version(2).stores({
             uploadQueue: DatabaseService.POIS_ID_COLUMN
         });
         this.imagesDatabase = new Dexie(DatabaseService.IMAGES_DB_NAME);

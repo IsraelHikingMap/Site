@@ -61,7 +61,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     private editMode: boolean;
     private fullFeature: GeoJSON.Feature;
-    private originalLocation: LatLngAlt;
     private subscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
@@ -85,7 +84,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.isLoading = true;
         this.showLocationUpdate = false;
         this.updateLocation = false;
-        this.originalLocation = null;
         this.shareLinks = {} as IPoiSocialLinks;
         this.contribution = {} as Contribution;
         this.info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
@@ -97,7 +95,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             let snapshot = this.route.snapshot;
             let poiSourceAndId = this.getDataFromRoute(snapshot.paramMap, snapshot.queryParamMap);
             if (snapshot.queryParamMap.get(RouteStrings.EDIT) !== "true" || poiSourceAndId.source === "new") {
-                await this.getExtendedData(poiSourceAndId);
+                await this.fillUiWithData(poiSourceAndId);
             }
         }));
         this.subscriptions.push(this.route.queryParams.subscribe(async (params) => {
@@ -108,7 +106,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             let snapshot = this.route.snapshot;
             let poiSourceAndId = this.getDataFromRoute(snapshot.paramMap, snapshot.queryParamMap);
             if (editMode && poiSourceAndId.source !== "new") {
-                await this.getExtendedData(poiSourceAndId);
+                await this.fillUiWithData(poiSourceAndId);
             }
             // change this only after we get the full data
             // so that the edit dialog will have all the necessary data to decide
@@ -134,7 +132,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         return this.runningContextSerivce.isCordova;
     }
 
-    private async getExtendedData(data: IPoiRouterData) {
+    private async fillUiWithData(data: IPoiRouterData) {
         try {
             this.ngRedux.dispatch(new SetSidebarAction({
                 isOpen: true
@@ -155,12 +153,12 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 this.mergeDataIfNeededData(newFeature);
             } else {
                 let feature = await this.poiService.getPoint(data.id, data.source, data.language);
-                this.originalLocation = this.poiService.getLocation(feature);
+                let originalFeature = cloneDeep(feature);
                 this.mergeDataIfNeededData(feature);
                 let bounds = SpatialService.getBoundsForFeature(feature);
                 this.fitBoundsService.fitBounds(bounds);
                 this.ngRedux.dispatch(new SetSelectedPoiAction({
-                    poi: this.fullFeature
+                    poi: originalFeature
                 }));
                 if (this.runningContextSerivce.isMobile && data.source === "Coordinates") {
                     this.close();
@@ -202,19 +200,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.contribution = this.poiService.getContribution(feature);
         this.itmCoordinates = this.poiService.getItmCoordinates(feature);
-
-        let language = this.resources.getCurrentLanguageCodeSimplified();
-        this.info = {
-            id: feature.properties.poiId,
-            category: this.fullFeature.properties.poiCategory,
-            description: this.poiService.getDescription(feature, language),
-            title: this.poiService.getTitle(feature, language),
-            icon: feature.properties.poiIcon,
-            iconColor: feature.properties.poiIconColor,
-            imagesUrls: Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => feature.properties[k]),
-            urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
-            isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint"
-        };
+        this.info = this.poiService.getEditableDataFromFeature(feature);
     }
 
     public isHideEditMode(): boolean {
@@ -277,44 +263,17 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public async save() {
-        if (!this.runningContextSerivce.isOnline) {
-            this.toastService.warning(this.resources.cantEditWhileOffline);
-            return;
-        }
         this.isLoading = true;
         try {
-            let language = this.resources.getCurrentLanguageCodeSimplified();
-            let featureToUpload = cloneDeep(this.fullFeature);
-            if (!this.updateLocation && this.info.id) {
-                this.poiService.setLocation(featureToUpload, this.originalLocation);
-            }
-            this.poiService.setDescription(featureToUpload, this.info.description, language);
-            this.poiService.setTitle(featureToUpload, this.info.title, language);
-            featureToUpload.properties.poiIcon = this.info.icon;
-            featureToUpload.properties.poiIconColor = this.info.iconColor;
-            let index = 0;
-            for (let imageUrl of this.info.imagesUrls) {
-                let key = index === 0 ? "image" : `image${index}`;
-                featureToUpload.properties[key] = imageUrl;
-                index++;
-            }
-            index = 0;
-            for (let url of this.info.urls) {
-                let key = index === 0 ? "website" : `website${index}`;
-                featureToUpload.properties[key] = url;
-                index++;
+            if (!this.info.id) {
+                await this.poiService.addComplexPoi(this.info, this.latlng);
+            } else {
+                await this.poiService.updateComplexPoi(this.info, this.updateLocation ? this.latlng : null);
             }
             // HM TODO: check ids throught the app with this change
             // HM TODO: check this behavior - close after save
             // HM TODO: change toast text
-            // HM TODO: update server side
-            // HM TODO: clean this
-            this.originalLocation = null;
-            let feature = await this.poiService.uploadPoint(featureToUpload);
-            // this.initFromFeature(feature);
             this.toastService.info(this.resources.dataUpdatedSuccessfully);
-            // this.router.navigate([RouteStrings.ROUTE_POI, this.fullFeature.properties.poiSource, this.fullFeature.properties.identifier],
-            //    { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
             this.close();
         } catch (ex) {
             this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });

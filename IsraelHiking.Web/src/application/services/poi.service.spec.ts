@@ -20,7 +20,7 @@ import { NgReduxTestingModule, MockNgRedux } from "../reducers/infra/ng-redux-te
 import { MapService } from "./map.service";
 
 describe("Poi Service", () => {
-
+    // HM TODO: more tests are needed...
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
         let hashService = {};
@@ -96,16 +96,13 @@ describe("Poi Service", () => {
             return promise;
         })));
 
-    it("Should update point using the server and convert images to files",
+    it("Should create simple point",
         inject([PoiService, HttpTestingController],
             async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
                 MockNgRedux.getInstance().dispatch = jasmine.createSpy();
-                let fullFeature = {
-                    properties: {}
-                } as GeoJSON.Feature;
 
-                let promise = poiService.uploadPoint(fullFeature).then(() => {
+                let promise = poiService.addSimplePoint({ lat: 0, lng: 0}, "Tap").then(() => {
                     expect(MockNgRedux.getInstance().dispatch).toHaveBeenCalled();
                 });
 

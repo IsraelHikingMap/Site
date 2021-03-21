@@ -8,6 +8,7 @@ import { LoggingService } from "./logging.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
+import { DatabaseService } from "./database.service";
 import { Urls } from "../urls";
 import { Trace } from "../models/models";
 
@@ -28,6 +29,7 @@ describe("Traces Service", () => {
                 { provide: ResourcesService, useValue: mock.resourcesService },
                 { provide: LoggingService, useValue: loggignMock },
                 { provide: RunningContextService, useValue: null },
+                { provide: DatabaseService, useValue: null }
             ]
         });
     });

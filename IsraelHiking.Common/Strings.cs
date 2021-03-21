@@ -69,10 +69,16 @@
         public const string POI_DELETED = POI_PREFIX + "Deleted";
         public const string POI_EXTERNAL_DESCRIPTION = POI_PREFIX + "ExternalDescription";
         public const string POI_VERSION = POI_PREFIX + "Version";
+        public const string POI_IS_SIMPLE = POI_PREFIX + "IsSimple";
+        public const string POI_TYPE = POI_PREFIX + "Type";
+        public const string POI_ADDED_URLS = POI_PREFIX + "AddedUrls";
+        public const string POI_REMOVED_URLS = POI_PREFIX + "RemovedUrls";
+        public const string POI_ADDED_IMAGES = POI_PREFIX + "AddedImages";
+        public const string POI_REMOVED_IMAGES = POI_PREFIX + "RemovedImages";
+
         public const string LAT = "lat";
         public const string LON = "lon";
         public const double INVALID_LOCATION = -9999;
-
     }
 
     public static class Sources
