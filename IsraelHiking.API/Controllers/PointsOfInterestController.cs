@@ -199,7 +199,6 @@ namespace IsraelHiking.API.Controllers
         public async Task<IActionResult> UpdatePointOfInterest(string id, [FromBody]Feature feature,
             [FromQuery] string language)
         {
-            // HM TODO: change update request
             _logger.LogInformation("Processing update point of interest request");
             var validationResults = ValidateFeature(feature, language);
             if (!string.IsNullOrEmpty(validationResults))

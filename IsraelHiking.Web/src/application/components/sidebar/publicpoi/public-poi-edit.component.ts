@@ -12,7 +12,7 @@ import { EditablePublicPointData, IconColorLabel } from "../../../models/models"
     styleUrls: ["./public-poi-edit.component.scss"]
 })
 export class PublicPointOfInterestEditComponent extends BaseMapComponent implements OnInit {
-    // HN TODO: Fix UI
+
     @Input()
     public info: EditablePublicPointData;
 

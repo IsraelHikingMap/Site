@@ -216,7 +216,9 @@ describe("Poi Service", () => {
                     }
                 } as GeoJSON.Feature;
 
-                poiService.mergeWithPoi(feature, { description: "description", title: "title", type: "some-type", urls: [], latlng: { lng: 1, lat: 2}});
+                poiService.mergeWithPoi(feature,
+                    { description: "description", title: "title", type: "some-type", urls: [], latlng: { lng: 1, lat: 2}}
+                );
                 let info = poiService.getEditableDataFromFeature(feature);
                 let featureAfterConverstion = poiService.getFeatureFromEditableData(info);
                 poiService.setLocation(featureAfterConverstion, { lat: 2, lng: 1});
