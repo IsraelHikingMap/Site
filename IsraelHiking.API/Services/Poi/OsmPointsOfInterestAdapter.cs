@@ -661,16 +661,16 @@ namespace IsraelHiking.API.Services.Poi
             if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ADDED_URLS))
             {    
                 var user = await osmGateway.GetUserDetails();
-                foreach (var url in partialFeature.Attributes[FeatureAttributes.POI_ADDED_URLS] as IEnumerable<string>)
+                foreach (var url in partialFeature.Attributes[FeatureAttributes.POI_ADDED_URLS] as IEnumerable<object>)
                 {
-                    existingUrls.Add(url);
+                    existingUrls.Add(url.ToString());
                 }
             }
             if (partialFeature.Attributes.Exists(FeatureAttributes.POI_REMOVED_URLS))
             {
-                foreach(var urlToRemove in partialFeature.Attributes[FeatureAttributes.POI_REMOVED_URLS] as IEnumerable<string>)
+                foreach(var urlToRemove in partialFeature.Attributes[FeatureAttributes.POI_REMOVED_URLS] as IEnumerable<object>)
                 {
-                    existingUrls.Remove(urlToRemove);
+                    existingUrls.Remove(urlToRemove.ToString());
                 }
             }
             SetWebsiteUrl(completeOsmGeo.Tags, existingUrls);
@@ -682,16 +682,16 @@ namespace IsraelHiking.API.Services.Poi
             if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ADDED_IMAGES))
             {
                 var user = await osmGateway.GetUserDetails();
-                foreach (var imageUrl in partialFeature.Attributes[FeatureAttributes.POI_ADDED_IMAGES] as IEnumerable<string>)
+                foreach (var imageUrl in partialFeature.Attributes[FeatureAttributes.POI_ADDED_IMAGES] as IEnumerable<object>)
                 {
-                    existingImages.Add(await UploadImageIfNeeded(imageUrl, featureAfterTagsUpdates, language, user.DisplayName));
+                    existingImages.Add(await UploadImageIfNeeded(imageUrl.ToString(), featureAfterTagsUpdates, language, user.DisplayName));
                 }
             }
             if (partialFeature.Attributes.Exists(FeatureAttributes.POI_REMOVED_IMAGES))
             {
-                foreach (var imageUrlToRemove in partialFeature.Attributes[FeatureAttributes.POI_REMOVED_IMAGES] as IEnumerable<string>)
+                foreach (var imageUrlToRemove in partialFeature.Attributes[FeatureAttributes.POI_REMOVED_IMAGES] as IEnumerable<object>)
                 {
-                    existingImages.Remove(imageUrlToRemove);
+                    existingImages.Remove(imageUrlToRemove.ToString());
                 }
             }
             SetMultipleValuesForTag(completeOsmGeo.Tags, FeatureAttributes.IMAGE_URL, existingImages.ToArray());

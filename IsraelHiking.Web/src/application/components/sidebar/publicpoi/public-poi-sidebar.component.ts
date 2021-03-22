@@ -271,10 +271,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 await this.poiService.updateComplexPoi(this.info, this.updateLocation ? this.latlng : null);
             }
             // HM TODO: check ids throught the app with this change
-            // HM TODO: check this behavior - close after save
             // HM TODO: change toast text
-            this.toastService.info(this.resources.dataUpdatedSuccessfully);
-            this.close();
+            this.toastService.success(this.resources.dataUpdatedSuccessfully);
+            this.clear();
         } catch (ex) {
             this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });
         } finally {

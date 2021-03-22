@@ -180,7 +180,7 @@ export class PoiService {
                 ? await this.httpClient.post(postAddress, feature).pipe(timeout(60000)).toPromise() as GeoJSON.Feature
                 : await this.httpClient.put(putAddress, feature).pipe(timeout(60000)).toPromise() as GeoJSON.Feature;
 
-            this.loggingService.info(`[POIs] Uploaded full feature with id: ${firstItemId}, removing from upload queue`);
+            this.loggingService.info(`[POIs] Uploaded successfully a${feature.properties.poiIsSimple ? " simple" : ""} feature with id: ${firstItemId}, removing from upload queue`);
             if (this.runningContextService.isCordova && !feature.properties.poiIsSimple) {
                 this.databaseService.storePois([poi]);
             }
@@ -541,7 +541,7 @@ export class PoiService {
     }
 
     public setLocation(feature: GeoJSON.Feature, value: LatLngAlt) {
-        feature.properties.poiGeoLocation = {
+        feature.properties.poiGeolocation = {
             lat: value.lat,
             lon: value.lng
         };
@@ -624,7 +624,7 @@ export class PoiService {
                 poiIsSimple: true,
                 poiType: pointType,
                 poiId: uuidv4(),
-                poiSrouce: "OSM"
+                poiSource: "OSM"
             },
             geometry: {
                 type: "Point",
@@ -639,7 +639,7 @@ export class PoiService {
         let feature = this.getFeatureFromEditableData(info);
         this.setLocation(feature, location);
         feature.properties.poiId = uuidv4();
-        feature.properties.poiSrouce = "OSM";
+        feature.properties.poiSource = "OSM";
         feature.geometry = {
             type: "Point",
             coordinates: SpatialService.toCoordinate(location)
@@ -679,22 +679,22 @@ export class PoiService {
             featureContainingOnlyChanges.properties.poiCategory = info.category;
             hasChages = true;
         }
-        let addedImages = info.imagesUrls.filter(u => !editableDataBeforeChanges.imagesUrls.includes(u));
+        let addedImages = info.imagesUrls.filter(u => u && !editableDataBeforeChanges.imagesUrls.includes(u));
         if (addedImages.length > 0) {
             featureContainingOnlyChanges.properties.poiAddedImages = addedImages;
             hasChages = true;
         }
-        let removedImages = editableDataBeforeChanges.imagesUrls.filter(u => !info.imagesUrls.includes(u));
+        let removedImages = editableDataBeforeChanges.imagesUrls.filter(u => u && !info.imagesUrls.includes(u));
         if (removedImages.length > 0) {
             featureContainingOnlyChanges.properties.poiRemovedImages = removedImages;
             hasChages = true;
         }
-        let addedUrls = info.urls.filter(u => !editableDataBeforeChanges.urls.includes(u));
+        let addedUrls = info.urls.filter(u => u && !editableDataBeforeChanges.urls.includes(u));
         if (addedUrls.length > 0) {
             featureContainingOnlyChanges.properties.poiAddedUrls = addedUrls;
             hasChages = true;
         }
-        let removedUrls = editableDataBeforeChanges.urls.filter(u => !info.urls.includes(u));
+        let removedUrls = editableDataBeforeChanges.urls.filter(u => u && !info.urls.includes(u));
         if (removedUrls.length > 0) {
             featureContainingOnlyChanges.properties.poiRemovedUrls = removedUrls;
             hasChages = true;
