@@ -23,7 +23,7 @@ export const initialState =
             // isFindMissingRoutesAfterUpload: false,
             isGotLostWarnings: false,
             isShowBatteryConfirmation: true,
-            version: "9.6",
+            version: "9.8",
             language: {
                 code: "he",
                 rtl: true
