@@ -12,6 +12,7 @@ import { ToastService } from "../../services/toast.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RunningContextService } from "../../services/running-context.service";
+import { RecordedRouteService } from "application/services/recorded-route.service";
 import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ApplicationState, ShareUrl } from "../../models/models";
 
@@ -43,6 +44,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
                 private readonly dataContainerService: DataContainerService,
                 private readonly socialSharing: SocialSharing,
                 private readonly runningContextService: RunningContextService,
+                private readonly recordedRouteService: RecordedRouteService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
@@ -149,6 +151,21 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public async showShareUrl() {
+        if (!this.recordedRouteService.isRecording()) {
+            this.showDeleteAllRoutesConfirmation();
+            return;
+        } 
+        this.toastService.confirm({
+            message: this.resources.areYouSureYouWantToStopRecording,
+            confirmAction: () => {
+                this.recordedRouteService.stopRecording();
+                this.showDeleteAllRoutesConfirmation();
+            },
+            type: "YesNo"
+        });
+    }
+
+    private showDeleteAllRoutesConfirmation() {
         this.toastService.confirm({
             message: this.resources.thisWillDeteleAllCurrentRoutesAreYouSure,
             confirmAction: async () => {
