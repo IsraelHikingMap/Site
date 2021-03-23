@@ -15,6 +15,7 @@ import {
     DeleteAllRoutesAction
 } from "../reducers/routes.reducer";
 import { SetRouteEditingStateAction } from "../reducers/route-editing-state.reducer";
+import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { RoutingType, ApplicationState } from "../models/models";
 
 @Component({
@@ -134,21 +135,21 @@ export class DrawingComponent extends BaseMapComponent {
         this.ngRedux.dispatch(new SetRouteEditingStateAction({ routingType }));
     }
 
-    public undo = () => {
+    public undo() {
         this.ngRedux.dispatch(ActionCreators.undo());
         // Undo can change the route editing state but doesn't affect the selected route...
         // HM TODO: should selected route be part of the routes undo object?
         this.selectedRouteService.syncSelectedRouteWithEditingRoute();
     }
 
-    public getRoutingType = (): RoutingType => {
+    public getRoutingType(): RoutingType {
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return "None";
         }
         return this.ngRedux.getState().routeEditingState.routingType;
     }
 
-    public getRouteColor = (): string => {
+    public getRouteColor(): string {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
             return "black";
@@ -161,6 +162,7 @@ export class DrawingComponent extends BaseMapComponent {
             message: this.resources.areYouSureYouWantToDeleteAllRoutes,
             type: "YesNo",
             confirmAction: () => {
+                this.ngRedux.dispatch(new SetShareUrlAction({ shareUrl: null }));
                 this.ngRedux.dispatch(new DeleteAllRoutesAction({}));
             }
         });
