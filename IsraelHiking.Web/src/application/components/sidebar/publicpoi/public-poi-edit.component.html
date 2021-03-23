@@ -15,10 +15,10 @@
             <textarea rows="4" maxlength="255" matInput [dir]="resources.getDirection(info.description)" [(ngModel)]="info.description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
         </mat-form-field>
     </div>
-    <div *ngFor="let url of info.references; let i = index; trackBy:trackByIndex" fxLayout="row">
+    <div *ngFor="let url of info.urls; let i = index; trackBy:trackByIndex" fxLayout="row">
         <div fxFlex="90">
             <mat-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
-                <input matInput type="text" [dir]="'ltr'" [(ngModel)]="info.references[i].url" placeholder="{{resources.website}}" fxFill />
+                <input matInput type="text" [dir]="'ltr'" [(ngModel)]="info.urls[i]" placeholder="{{resources.website}}" fxFill />
             </mat-form-field>
         </div>
         <div fxFlex="10">

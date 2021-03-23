@@ -14,12 +14,14 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp;
+using OsmSharp.API;
 using OsmSharp.Complete;
 using OsmSharp.IO.API;
 using OsmSharp.Tags;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace IsraelHiking.API.Tests.Services.Poi
 {
@@ -32,7 +34,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IOsmRepository _osmRepository;
         private IPointsOfInterestRepository _pointsOfInterestRepository;
         private IWikipediaGateway _wikipediaGateway;
+        private IWikimediaCommonGateway _wikimediaCommonGateway;
         private IOsmLatestFileGateway _latestFileGateway;
+        private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private ITagsHelper _tagsHelper;
 
         [TestInitialize]
@@ -49,7 +53,22 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
             _latestFileGateway = Substitute.For<IOsmLatestFileGateway>();
             _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
-            _adapter = new OsmPointsOfInterestAdapter(_pointsOfInterestRepository, _elevationDataStorage, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileGateway, _tagsHelper, _options, Substitute.For<ILogger>());
+            _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
+            _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
+            _adapter = new OsmPointsOfInterestAdapter(_pointsOfInterestRepository,
+                _elevationDataStorage,
+                _osmGeoJsonPreprocessorExecutor,
+                _osmRepository,
+                _dataContainerConverterService,
+                _wikipediaGateway,
+                _itmWgs84MathTransfromFactory,
+                _latestFileGateway,
+                _wikimediaCommonGateway,
+                new Base64ImageStringToFileConverter(),
+                _imagesUrlsStorageExecutor,
+                _tagsHelper,
+                _options,
+                Substitute.For<ILogger>());
         }
 
         private IAuthClient SetupHttpFactory()
@@ -449,6 +468,202 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var results = _adapter.GetClosestPoint(new Coordinate(0,0), Sources.OSM, "").Result;
 
             Assert.AreEqual(list.Last(), results);
+        }
+
+        [TestMethod]
+        public void UpdateFeature_WithImageIdExists_ShouldUpdate()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            var id = "Node_42";
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                                      "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
+            });
+            _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
+            var featureFromDatabase = new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ICON, "icon" }
+                }
+            };
+            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(featureFromDatabase);
+            gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
+                { "description:he", "description" },
+                { "name:he", "name" },
+            }, Latitude = 0, Longitude = 0, Id = 42 });
+
+            _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+            _wikimediaCommonGateway.Received(1).UploadImage("name", "description", user.DisplayName, "name.png", Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
+            _imagesUrlsStorageExecutor.Received(1).StoreImage(Arg.Any<MD5>(), Arg.Any<byte[]>(), Arg.Any<string>());
+        }
+
+        [TestMethod]
+        public void UpdateFeature_WithImageInRepository_ShouldNotUploadImage()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            var id = "Node_42";
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.POI_ADDED_IMAGES, new [] {"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                                      "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="} }
+            });
+            _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns("some-url");
+            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ICON, "icon" }
+                }
+            });
+            gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection { { "osmish", "something" } }, Latitude = 0, Longitude = 0, Id = 42 });
+
+            _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+            _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());
+            gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Tags.Any(t => t.Key == "image")));
+        }
+
+        [TestMethod]
+        public void UpdateFeature_NewTitleDescriptionUrlsLocation_ShouldUpdateInOSM()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            var id = "Node_42";
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.POI_ADDED_URLS, new [] { "some-url" } }
+            });
+            poi.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + Languages.HEBREW, "new name");
+            poi.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION + ":" + Languages.HEBREW, "new description");
+            poi.SetLocation(new Coordinate(6, 5));
+            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ICON, "icon" }
+                }
+            });
+            gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection { { "osmish", "something" } }, Latitude = 0, Longitude = 0, Id = 42 });
+
+            _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+            _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());
+            gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o => o.Tags.Any(t =>
+                t.Key == "description:he" && t.Value == "new description") &&
+                o.Tags.Any(t => t.Key == "name:he" && t.Value == "new name") &&
+                o.Tags.Any(t => t.Key == "website" && t.Value == "some-url") &&
+                (o as Node).Latitude.Value == 5 && (o as Node).Longitude.Value == 6
+             ));
+        }
+
+        [TestMethod]
+        public void UpdateFeature_IconChange_ShouldUpdateInOSM()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            var id = "Node_42";
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+                { FeatureAttributes.POI_ICON, "icon-ruins" },
+            });
+            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ICON, "icon-tint" }
+                }
+            });
+            gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection { { "natural", "spring" } }, Latitude = 0, Longitude = 0, Id = 42 });
+
+            _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+            gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+                o.Tags.Any(t => t.Key == "historic" && t.Value == "ruins") &&
+                o.Tags.All(t => t.Key != "natural"))
+            );
+        }
+
+        [TestMethod]
+        public void UpdateFeature_RemoveUrl_ShouldUpdateInOSM()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            var id = "Node_42";
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+                { FeatureAttributes.POI_ICON, "icon-ruins" },
+                { FeatureAttributes.POI_REMOVED_URLS, new [] { "url-to-remove" } }
+            });
+            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ICON, "icon-ruins" }
+                }
+            });
+            gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
+                { "website", "url-to-remove" },
+                { "website1", "url-to-keep" }
+            }, Latitude = 0, Longitude = 0, Id = 42 });
+
+            _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+            gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+                o.Tags.All(t => t.Key != "website1") && o.Tags.Any(t => t.Value == "url-to-keep")
+            ));
+        }
+
+        [TestMethod]
+        public void UpdateFeature_RemoveImage_ShouldUpdateInOSM()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            var id = "Node_42";
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+                { FeatureAttributes.POI_ICON, "icon-ruins" },
+                { FeatureAttributes.POI_REMOVED_IMAGES, new [] { "image-to-remove" } }
+            });
+            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ICON, "icon-ruins" }
+                }
+            });
+            gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
+                { "image", "image-to-remove" },
+                { "image1", "some-image" }
+            }, Latitude = 0, Longitude = 0, Id = 42 });
+
+            _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+            gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+                o.Tags.All(t => t.Key != "image1") && o.Tags.All(t => t.Value != "iamge-to-remove")
+            ));
         }
     }
 }

@@ -10,7 +10,7 @@ import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
 import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
-import { ApplicationState, Overlay, PointOfInterest, PointOfInterestExtended } from "../../models/models";
+import { ApplicationState, Overlay } from "../../models/models";
 
 @Component({
     selector: "layers-view",
@@ -24,14 +24,14 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     public selectedPoiFeature: GeoJSON.Feature<GeoJSON.Point>;
     public selectedPoiGeoJson: GeoJSON.FeatureCollection;
     public selectedCluster: GeoJSON.Feature<GeoJSON.Point>;
-    public clusterPoints: PointOfInterest[];
+    public clusterFeatures: GeoJSON.Feature<GeoJSON.Point>[];
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point>;
 
     @select((state: ApplicationState) => state.layersState.overlays)
     public overlays: Observable<Overlay[]>;
 
     @select((state: ApplicationState) => state.poiState.selectedPointOfInterest)
-    public selectedPoi$: Observable<PointOfInterestExtended>;
+    public selectedPoi$: Observable<GeoJSON.Feature>;
 
     constructor(resources: ResourcesService,
                 private readonly router: Router,
@@ -61,17 +61,19 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         this.selectedPoi$.subscribe((poi) => this.onSelectedPoiChanged(poi));
     }
 
-    private onSelectedPoiChanged = (poi: PointOfInterestExtended) => {
-        if (poi == null) {
-            this.selectedPoiFeature = null;
-            this.selectedPoiGeoJson = {
-                type: "FeatureCollection",
-                features: []
-            };
-            return;
-        }
-        this.selectedPoiFeature = this.poiService.pointToFeature(poi);
-        this.selectedPoiGeoJson = poi.featureCollection;
+    private onSelectedPoiChanged = (poi: GeoJSON.Feature) => {
+        this.selectedPoiFeature = !poi ? null : {
+            type: "Feature",
+            properties: poi.properties,
+            geometry: {
+                type: "Point",
+                coordinates: [poi.properties.poiGeolocation.lon, poi.properties.poiGeolocation.lat]
+            }
+        };
+        this.selectedPoiGeoJson = {
+            type: "FeatureCollection",
+            features: poi == null ? [] : [poi]
+        };
     }
 
     public openPoi(id, e: Event) {
@@ -92,23 +94,12 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         event.stopPropagation();
         if (this.selectedCluster != null && feature.properties.id === this.selectedCluster.properties.id) {
             this.selectedCluster = null;
-            this.clusterPoints = [];
+            this.clusterFeatures = [];
             return;
         }
-        let features = await sourceComponent.getClusterLeaves(feature.properties.cluster_id,
-            LayersViewComponent.MAX_MENU_POINTS_IN_CLUSTER, 0);
+        this.clusterFeatures = await sourceComponent.getClusterLeaves(feature.properties.cluster_id,
+            LayersViewComponent.MAX_MENU_POINTS_IN_CLUSTER, 0) as GeoJSON.Feature<GeoJSON.Point>[];
         this.selectedCluster = feature;
-        this.clusterPoints = features.map(f => {
-            let properties = f.properties;
-            let sourceAndId = this.getSourceAndId(f.properties.poiId);
-            return {
-                icon: properties.poiIcon,
-                iconColor: properties.poiIconColor,
-                title: properties.title,
-                id: sourceAndId.id,
-                source: sourceAndId.source
-            } as PointOfInterest;
-        });
     }
 
     private getSourceAndId(sourceAndId: string): { source: string, id: string } {
@@ -125,8 +116,16 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     }
 
     public setHoverFeature(selectedPoi: GeoJSON.Feature<GeoJSON.Point>) {
-        if (selectedPoi.properties.title) {
+        if (this.getTitle(selectedPoi)) {
             this.hoverFeature = selectedPoi;
         }
+    }
+
+    public getTitle(feature: GeoJSON.Feature<GeoJSON.Point>): string {
+        return this.poiService.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
+    }
+
+    public hasExtraData(feature: GeoJSON.Feature<GeoJSON.Point>): boolean {
+        return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 }

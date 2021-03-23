@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Converters;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
@@ -19,7 +20,9 @@ using OsmSharp.Tags;
 using ProjNet.CoordinateSystems.Transformations;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -43,6 +46,9 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
         private readonly IDataContainerConverterService _dataContainerConverterService;
+        private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
+        private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
+        private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
         private readonly ILogger _logger;
         private readonly MathTransform _wgs84ItmMathTransform;
         private readonly ConfigurationData _options;
@@ -58,6 +64,9 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="wikipediaGateway"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="latestFileGateway"></param>
+        /// <param name="base64ImageConverter"></param>
+        /// <param name="wikimediaCommonGateway"></param>
+        /// <param name="imageUrlStoreExecutor"></param>
         /// <param name="tagsHelper"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
@@ -69,6 +78,9 @@ namespace IsraelHiking.API.Services.Poi
             IWikipediaGateway wikipediaGateway,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IOsmLatestFileGateway latestFileGateway,
+            IWikimediaCommonGateway wikimediaCommonGateway,
+            IBase64ImageStringToFileConverter base64ImageConverter,
+            IImagesUrlsStorageExecutor imageUrlStoreExecutor,
             ITagsHelper tagsHelper,
             IOptions<ConfigurationData> options,
             ILogger logger)
@@ -83,6 +95,9 @@ namespace IsraelHiking.API.Services.Poi
             _options = options.Value;
             _pointsOfInterestRepository = pointsOfInterestRepository;
             _dataContainerConverterService = dataContainerConverterService;
+            _wikimediaCommonGateway = wikimediaCommonGateway;
+            _base64ImageConverter = base64ImageConverter;
+            _imageUrlStoreExecutor = imageUrlStoreExecutor;
             _logger = logger;
         }
 
@@ -194,11 +209,10 @@ namespace IsraelHiking.API.Services.Poi
         private TPoiItem ConvertToPoiItem<TPoiItem>(IFeature feature, string language) where TPoiItem : PointOfInterest, new()
         {
             var poiItem = new TPoiItem();
-            if (feature.Attributes[FeatureAttributes.POI_GEOLOCATION] is AttributesTable geoLocation)
+            if (feature.Attributes[FeatureAttributes.POI_GEOLOCATION] is IAttributesTable)
             {
-                poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], 
-                    (double)geoLocation[FeatureAttributes.LON],
-                    (double)feature.Attributes[FeatureAttributes.POI_ALT]);
+                Coordinate location = feature.GetLocation();
+                poiItem.Location = new LatLng(location.Y, location.X, (double)feature.Attributes[FeatureAttributes.POI_ALT]);
             }
             poiItem.Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString();
             poiItem.Title = feature.Attributes.GetByLanguage(FeatureAttributes.NAME, language);
@@ -219,7 +233,7 @@ namespace IsraelHiking.API.Services.Poi
                 Longitude = pointOfInterest.Location.Lng,
                 Tags = new TagsCollection()
             };
-            SetWebsiteUrl(node.Tags, pointOfInterest);
+            SetWebsiteUrl(node.Tags, pointOfInterest.References.Select(r => r.Url).ToList());
             SetMultipleValuesForTag(node.Tags, FeatureAttributes.IMAGE_URL, pointOfInterest.ImagesUrls);
             SetTagByLanguage(node.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
@@ -242,7 +256,7 @@ namespace IsraelHiking.API.Services.Poi
             var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.POI_ICON].ToString();
             var oldTags = completeOsmGeo.Tags.ToArray();
 
-            SetWebsiteUrl(completeOsmGeo.Tags, pointOfInterest);
+            SetWebsiteUrl(completeOsmGeo.Tags, pointOfInterest.References.Select(r => r.Url).ToList());
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             SyncImages(completeOsmGeo.Tags, pointOfInterest.ImagesUrls);
@@ -252,7 +266,7 @@ namespace IsraelHiking.API.Services.Poi
                 AddTagsByIcon(completeOsmGeo.Tags, pointOfInterest.Icon);
             }
             RemoveEmptyTags(completeOsmGeo.Tags);
-            var locationWasUpdated = UpdateLocationIfNeeded(completeOsmGeo, pointOfInterest);
+            var locationWasUpdated = UpdateLocationIfNeeded(completeOsmGeo, pointOfInterest.Location);
             if (Enumerable.SequenceEqual(oldTags, completeOsmGeo.Tags.ToArray()) && 
                 !locationWasUpdated)
             {
@@ -269,22 +283,22 @@ namespace IsraelHiking.API.Services.Poi
         /// <summary>
         /// Updates the location in case the OSM element is of type node and the location change is not too little
         /// </summary>
-        /// <param name="completeOsmGeo"></param>
-        /// <param name="pointOfInterestExtended"></param>
+        /// <param name="completeOsmGeo">The element to update</param>
+        /// <param name="location">The new location</param>
         /// <returns>True if the location was updated, false otherwise</returns>
-        private bool UpdateLocationIfNeeded(ICompleteOsmGeo completeOsmGeo, PointOfInterestExtended pointOfInterestExtended)
+        private bool UpdateLocationIfNeeded(ICompleteOsmGeo completeOsmGeo, LatLng location)
         {
             var node = completeOsmGeo as Node;
             if (node == null)
             {
                 return false;
             }
-            if (new Coordinate(node.Longitude.Value, node.Latitude.Value).Equals2D(pointOfInterestExtended.Location.ToCoordinate(), 0.00001))
+            if (new Coordinate(node.Longitude.Value, node.Latitude.Value).Equals2D(location.ToCoordinate(), 0.00001))
             {
                 return false;
             }
-            node.Latitude = pointOfInterestExtended.Location.Lat;
-            node.Longitude = pointOfInterestExtended.Location.Lng;
+            node.Latitude = location.Lat;
+            node.Longitude = location.Lng;
             return true;
         }
 
@@ -458,11 +472,11 @@ namespace IsraelHiking.API.Services.Poi
                         .ToArray();
         }
 
-        private void SetWebsiteUrl(TagsCollectionBase tags, PointOfInterestExtended pointOfInterest)
+        private void SetWebsiteUrl(TagsCollectionBase tags, List<string> urls)
         {
             var regexp = new Regex(@"((https?://)|^)([a-z]+)(\.m)?\.wikipedia.org/wiki/(.*)");
             var nonWikipediaUrls = new List<string>();
-            foreach (var url in pointOfInterest.References.Select(r => r.Url))
+            foreach (var url in urls)
             {
                 var match = regexp.Match(url ?? string.Empty);
                 if (!match.Success)
@@ -486,6 +500,10 @@ namespace IsraelHiking.API.Services.Poi
 
         private void SetMultipleValuesForTag(TagsCollectionBase tags, string tagKey, string[] values)
         {
+            foreach (var tag in tags.Where(t => t.Key.StartsWith(tagKey)))
+            {
+                tags.RemoveKey(tag.Key);
+            }
             for (var index = 0; index < values.Length; index++)
             {
                 var value = values[index];
@@ -521,6 +539,204 @@ namespace IsraelHiking.API.Services.Poi
                 LastModified = lastModified
             };
             
+        }
+
+        /// <inheritdoc/>
+        public Task<Feature> GetFeatureById(string source, string id)
+        {
+            return _pointsOfInterestRepository.GetPointOfInterestById(id, source);
+        }
+
+        /// <inheritdoc/>
+        public async Task<Feature[]> GetFeatures(Coordinate northEast, Coordinate southWest, string[] categories, string language)
+        {
+            var features = await _pointsOfInterestRepository.GetPointsOfInterest(northEast, southWest, categories, language);
+            var points = features.Where(f => f.IsProperPoi(language)).ToArray();
+            foreach (var pointOfInterest in points.Where(p => string.IsNullOrWhiteSpace(p.Attributes[FeatureAttributes.POI_ICON]?.ToString())))
+            {
+                pointOfInterest.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, SEARCH_ICON);
+            }
+            foreach (var feature in features)
+            {
+                var location = feature.GetLocation();
+                feature.Geometry = new Point(location);
+            }
+            return points;
+        }
+
+        /// <inheritdoc/>
+        public async Task<Feature> AddFeature(Feature feature, IAuthClient osmGateway, string language)
+        {
+            var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
+            var location = feature.GetLocation();
+            var idString = feature.Attributes.Exists(FeatureAttributes.POI_ID) ? feature.GetId() : "";
+            _logger.LogInformation($"Uploaded a POI of type {icon} with id: {idString}, at {location.Y}, {location.X}");
+            var imagesList = await UploadImages(feature, language, osmGateway);
+            var node = new Node
+            {
+                Latitude = location.Y,
+                Longitude = location.X,
+                Tags = new TagsCollection()
+            };
+            SetWebsiteUrl(node.Tags, feature.Attributes.GetNames()
+                    .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
+                    .Select(p => feature.Attributes[p].ToString())
+                    .ToList());
+            SetMultipleValuesForTag(node.Tags, FeatureAttributes.IMAGE_URL, imagesList);
+            SetTagByLanguage(node.Tags, FeatureAttributes.NAME, feature.GetTitle(language), language);
+            SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, feature.GetDescription(language), language);
+            AddTagsByIcon(node.Tags, feature.Attributes[FeatureAttributes.POI_ICON].ToString());
+            RemoveEmptyTags(node.Tags);
+            var changesetId = await osmGateway.CreateChangeset($"Added {feature.GetTitle(language)} using IsraelHiking.osm.org.il");
+            node.Id = await osmGateway.CreateElement(changesetId, node);
+            await osmGateway.CloseChangeset(changesetId);
+
+            return await UpdateElasticSearch(node);
+        }
+
+        /// <inheritdoc/>
+        public async Task<Feature> UpdateFeature(Feature partialFeature, IAuthClient osmGateway, string language)
+        {
+            ICompleteOsmGeo completeOsmGeo = await osmGateway.GetCompleteElement(partialFeature.GetOsmId(), partialFeature.GetOsmType());
+            var featureBeforeUpdate = await _pointsOfInterestRepository.GetPointOfInterestById(partialFeature.Attributes[FeatureAttributes.ID].ToString(), Sources.OSM);
+            var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.POI_ICON].ToString();
+            var oldTags = completeOsmGeo.Tags.ToArray();
+            var locationWasUpdated = false;
+            partialFeature.SetTitles();
+            if (!string.IsNullOrWhiteSpace(partialFeature.GetTitle(language)))
+            {
+                SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, partialFeature.GetTitle(language), language);
+            }
+            if (!string.IsNullOrWhiteSpace(partialFeature.GetDescription(language)))
+            {
+                SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, partialFeature.GetDescription(language), language);
+            }
+            if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ICON))
+            {
+                var icon = partialFeature.Attributes[FeatureAttributes.POI_ICON].ToString();
+                if (icon != oldIcon && icon != SEARCH_ICON)
+                {
+                    RemoveTagsByIcon(completeOsmGeo.Tags, oldIcon);
+                    AddTagsByIcon(completeOsmGeo.Tags, icon);
+                }
+            }
+            if (partialFeature.Attributes.Exists(FeatureAttributes.POI_GEOLOCATION))
+            {
+                var coordinate = partialFeature.GetLocation();
+                var location = new LatLng(coordinate.Y, coordinate.X);
+                locationWasUpdated = UpdateLocationIfNeeded(completeOsmGeo, location);
+            }
+
+            await UpdateLists(partialFeature, completeOsmGeo, osmGateway, language);
+
+            RemoveEmptyTags(completeOsmGeo.Tags);
+            if (Enumerable.SequenceEqual(oldTags, completeOsmGeo.Tags.ToArray()) &&
+                !locationWasUpdated)
+            {
+                return featureBeforeUpdate;
+            }
+            var changesetId = await osmGateway.CreateChangeset($"Updated {featureBeforeUpdate.GetTitle(language)} using IsraelHiking.osm.org.il");
+            await osmGateway.UpdateElement(changesetId, completeOsmGeo);
+            await osmGateway.CloseChangeset(changesetId);
+
+            return await UpdateElasticSearch(completeOsmGeo);
+        }
+
+        /// <summary>
+        /// This function updates the lists of items in the OSM entity, i.e. websites and images.
+        /// In case there are "holes" the function reorders the list to remove holes such as image=..., image2=...
+        /// </summary>
+        /// <param name="partialFeature">A feature containing only deltas</param>
+        /// <param name="completeOsmGeo">The OSM entity to update</param>
+        /// <param name="osmGateway">The gateway to get the user details from</param>
+        /// <param name="language">The language to use for the tags</param>
+        /// <returns></returns>
+        private async Task UpdateLists(Feature partialFeature, ICompleteOsmGeo completeOsmGeo, IAuthClient osmGateway, string language)
+        {
+            var featureAfterTagsUpdates = ConvertOsmToFeature(completeOsmGeo);
+            var existingUrls = featureAfterTagsUpdates.Attributes.GetNames()
+                     .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
+                     .Select(p => featureAfterTagsUpdates.Attributes[p].ToString())
+                     .ToList();
+            if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ADDED_URLS))
+            {    
+                var user = await osmGateway.GetUserDetails();
+                foreach (var url in partialFeature.Attributes[FeatureAttributes.POI_ADDED_URLS] as IEnumerable<object>)
+                {
+                    existingUrls.Add(url.ToString());
+                }
+            }
+            if (partialFeature.Attributes.Exists(FeatureAttributes.POI_REMOVED_URLS))
+            {
+                foreach(var urlToRemove in partialFeature.Attributes[FeatureAttributes.POI_REMOVED_URLS] as IEnumerable<object>)
+                {
+                    existingUrls.Remove(urlToRemove.ToString());
+                }
+            }
+            SetWebsiteUrl(completeOsmGeo.Tags, existingUrls);
+
+            var existingImages = featureAfterTagsUpdates.Attributes.GetNames()
+                    .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                    .Select(p => featureAfterTagsUpdates.Attributes[p].ToString())
+                    .ToList();
+            if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ADDED_IMAGES))
+            {
+                var user = await osmGateway.GetUserDetails();
+                foreach (var imageUrl in partialFeature.Attributes[FeatureAttributes.POI_ADDED_IMAGES] as IEnumerable<object>)
+                {
+                    existingImages.Add(await UploadImageIfNeeded(imageUrl.ToString(), featureAfterTagsUpdates, language, user.DisplayName));
+                }
+            }
+            if (partialFeature.Attributes.Exists(FeatureAttributes.POI_REMOVED_IMAGES))
+            {
+                foreach (var imageUrlToRemove in partialFeature.Attributes[FeatureAttributes.POI_REMOVED_IMAGES] as IEnumerable<object>)
+                {
+                    existingImages.Remove(imageUrlToRemove.ToString());
+                }
+            }
+            SetMultipleValuesForTag(completeOsmGeo.Tags, FeatureAttributes.IMAGE_URL, existingImages.ToArray());
+        }
+
+        private async Task<string[]> UploadImages(Feature feature, string language, IAuthClient osmGateway)
+        {
+            var user = await osmGateway.GetUserDetails();
+            feature.SetTitles();
+            var imageUrls = feature.Attributes.GetNames()
+                    .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                    .Select(p => feature.Attributes[p].ToString())
+                    .ToArray();
+            var updatedImageUrls = new List<string>();
+            foreach (var imageUrl in imageUrls)
+            {
+                updatedImageUrls.Add(await UploadImageIfNeeded(imageUrl, feature, language, user.DisplayName));
+            }
+            return updatedImageUrls.ToArray();
+        }
+
+        private async Task<string> UploadImageIfNeeded(string imageUrl,
+            Feature feature, string language, string userDisplayName)
+        {
+            var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
+            var fileName = string.IsNullOrWhiteSpace(feature.GetTitle(language))
+                    ? icon.Replace("icon-", "")
+                    : feature.GetTitle(language);
+            var file = _base64ImageConverter.ConvertToFile(imageUrl, fileName);
+            if (file == null)
+            {
+                return imageUrl;
+            }
+            using var md5 = MD5.Create();
+            var imageUrlFromDatabase = await _imageUrlStoreExecutor.GetImageUrlIfExists(md5, file.Content);
+            if (imageUrlFromDatabase != null)
+            {
+                return imageUrlFromDatabase;
+            }
+            using var memoryStream = new MemoryStream(file.Content);
+            var imageName = await _wikimediaCommonGateway.UploadImage(feature.GetTitle(language),
+                    feature.GetDescription(language), userDisplayName, file.FileName, memoryStream, feature.GetLocation());
+            imageUrl = await _wikimediaCommonGateway.GetImageUrl(imageName);
+            await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrl);
+            return imageUrl;
         }
     }
 }

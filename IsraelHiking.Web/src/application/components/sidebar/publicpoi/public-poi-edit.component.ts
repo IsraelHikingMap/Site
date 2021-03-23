@@ -4,7 +4,7 @@ import { MatSelectChange } from "@angular/material/select";
 import { PoiService, ISelectableCategory } from "../../../services/poi.service";
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
-import { PointOfInterestExtended, IconColorLabel } from "../../../models/models";
+import { EditablePublicPointData, IconColorLabel } from "../../../models/models";
 
 @Component({
     selector: "public-poi-edit",
@@ -12,8 +12,9 @@ import { PointOfInterestExtended, IconColorLabel } from "../../../models/models"
     styleUrls: ["./public-poi-edit.component.scss"]
 })
 export class PublicPointOfInterestEditComponent extends BaseMapComponent implements OnInit {
+
     @Input()
-    public info: PointOfInterestExtended;
+    public info: EditablePublicPointData;
 
     public categories: ISelectableCategory[];
     public selectedCategory: ISelectableCategory;
@@ -34,7 +35,7 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
 
     public async ngOnInit(): Promise<void> {
         await this.initializeCategories();
-        if (this.info.references.length === 0) {
+        if (this.info.urls.length === 0) {
             this.addEmptyUrl();
         }
         let selectedIcon = null;
@@ -77,11 +78,11 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
     }
 
     public addEmptyUrl() {
-        this.info.references.push({url: "", sourceImageUrl: ""});
+        this.info.urls.push("");
     }
 
     public removeUrl(i: number) {
-        this.info.references.splice(i, 1);
+        this.info.urls.splice(i, 1);
     }
 
     public trackByIndex(index) {
@@ -89,6 +90,6 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
     }
 
     public isPoint(): boolean {
-        return this.info != null && !this.info.isArea && !this.info.isRoute;
+        return this.info != null && this.info.isPoint;
     }
 }

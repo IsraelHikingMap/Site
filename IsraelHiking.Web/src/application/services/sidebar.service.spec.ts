@@ -1,5 +1,5 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { NgReduxTestingModule } from "../reducers/infra/ng-redux-testing.module";
+import { MockNgRedux, NgReduxTestingModule } from "../reducers/infra/ng-redux-testing.module";
 
 import { SidebarService } from "./sidebar.service";
 import { HashService } from "./hash.service";
@@ -20,6 +20,7 @@ describe("SidebarService", () => {
                 SidebarService
             ]
         });
+        MockNgRedux.reset();
     });
 
     it("Should initialize hidden", inject([SidebarService], (service: SidebarService) => {

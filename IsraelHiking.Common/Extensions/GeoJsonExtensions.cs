@@ -147,6 +147,10 @@ namespace IsraelHiking.Common.Extensions
 
         public static string GetTitle(this IFeature feature, string language)
         {
+            if (!feature.Attributes.Exists(FeatureAttributes.POI_NAMES))
+            {
+                return string.Empty;
+            }
             if (!(feature.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable titleByLanguage))
             {
                 return string.Empty;
@@ -161,6 +165,20 @@ namespace IsraelHiking.Common.Extensions
                 title = GetStringListFromAttributeValue(titleByLanguage[Languages.ALL]).FirstOrDefault();
             }
             return title ?? string.Empty;
+
+        }
+
+        public static string GetDescription(this IFeature feature, string language)
+        {
+            if (feature.Attributes.Exists(FeatureAttributes.DESCRIPTION + ":" + language))
+            {
+                return feature.Attributes[FeatureAttributes.DESCRIPTION + ":" + language].ToString();
+            }
+            if (feature.Attributes.Exists(FeatureAttributes.DESCRIPTION))
+            {
+                return feature.Attributes[FeatureAttributes.DESCRIPTION].ToString();
+            }
+            return string.Empty;
 
         }
 
@@ -251,6 +269,37 @@ namespace IsraelHiking.Common.Extensions
         public static void SetLastModified(this IAttributesTable table, DateTime dateTime)
         {
             table.AddOrUpdate(FeatureAttributes.POI_LAST_MODIFIED, dateTime.ToString("o"));
+        }
+
+        public static Coordinate GetLocation(this IFeature feature)
+        {
+            var locationTable = feature.Attributes[FeatureAttributes.POI_GEOLOCATION] as AttributesTable;
+            if (locationTable == null)
+            {
+                throw new InvalidOperationException($"Missing location for feature with id {feature.GetId()}");
+            }
+            var location = new Coordinate();
+            if (locationTable != null)
+            {
+                location.Y = double.Parse(locationTable[FeatureAttributes.LAT].ToString());
+                location.X = double.Parse(locationTable[FeatureAttributes.LON].ToString());
+            }
+            return location;
+        }
+
+        public static void SetLocation(this IFeature feature, Coordinate geoLocation)
+        {
+            feature.Attributes.SetLocation(geoLocation);
+        }
+
+        public static void SetLocation(this IAttributesTable table, Coordinate geoLocation)
+        {
+            var geoLocationTable = new AttributesTable
+                {
+                    {FeatureAttributes.LAT, geoLocation.Y},
+                    {FeatureAttributes.LON, geoLocation.X}
+                };
+            table.AddOrUpdate(FeatureAttributes.POI_GEOLOCATION, geoLocationTable);
         }
     }
 }

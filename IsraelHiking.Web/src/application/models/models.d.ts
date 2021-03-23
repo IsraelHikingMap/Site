@@ -12,7 +12,7 @@ export { RouteEditingState } from "./route-editing-state";
 export { Trace, TraceVisibility } from "./trace";
 export { OsmUserDetails } from "./osm-user-details";
 export { UserInfo } from "./user-info";
-export { PointOfInterestExtended, PointOfInterest, Contribution } from "./point-of-interest";
+export { Contribution, SearchResultsPointOfInterest, EditablePublicPointData } from "./point-of-interest";
 export { NorthEast } from "./north-east";
 export { CategoriesGroup, Category, IconColorLabel, CategoriesGroupType } from "./categories-group";
 export { Language, LanguageCode } from "./language";

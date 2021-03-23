@@ -96,11 +96,6 @@ namespace IsraelHiking.DataAccess
 
         private AttributesTable GetAttributes(JsonNakebItem nakebItem)
         {
-            var geoLocation = new AttributesTable
-            {
-                {FeatureAttributes.LAT, nakebItem.Start.Lat},
-                {FeatureAttributes.LON, nakebItem.Start.Lng}
-            };
             var attributes = new AttributesTable
             {
                 {FeatureAttributes.ID, nakebItem.Id.ToString()},
@@ -111,10 +106,10 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
                 {FeatureAttributes.POI_ICON, "icon-hike"},
                 {FeatureAttributes.POI_ICON_COLOR, "black"},
-                {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
-                {FeatureAttributes.POI_GEOLOCATION, geoLocation}
+                {FeatureAttributes.POI_SEARCH_FACTOR, 1.0}
             };
             attributes.SetLastModified(nakebItem.LastModified);
+            attributes.SetLocation(new Coordinate(nakebItem.Start.Lng, nakebItem.Start.Lat));
             return attributes;
         }
     }

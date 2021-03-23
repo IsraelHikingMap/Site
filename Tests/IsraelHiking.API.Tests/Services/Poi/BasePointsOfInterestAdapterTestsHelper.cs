@@ -2,6 +2,7 @@
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
@@ -28,7 +29,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
 
         protected Feature GetValidFeature(string poiId, string source)
         {
-            return new Feature
+            var feature = new Feature
             {
                 Geometry = new LineString(new[]
                 {
@@ -44,15 +45,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     {FeatureAttributes.POI_ICON, FeatureAttributes.POI_ICON},
                     {FeatureAttributes.POI_ICON_COLOR, FeatureAttributes.POI_ICON_COLOR},
                     {FeatureAttributes.POI_ALT, 11.1},
-                    {
-                        FeatureAttributes.POI_GEOLOCATION, new AttributesTable
-                        {
-                            {FeatureAttributes.LAT, 1.1},
-                            {FeatureAttributes.LON, 2.2}
-                        }
-                    }
                 }
             };
+            feature.SetLocation(new Coordinate(2.2, 1.1));
+            return feature;
         }
     }
 }

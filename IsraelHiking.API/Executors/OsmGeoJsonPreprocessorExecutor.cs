@@ -178,11 +178,7 @@ namespace IsraelHiking.API.Executors
             {
                 geoLocation = feature.Geometry.Centroid.Coordinate;
             }
-            feature.Attributes.Add(FeatureAttributes.POI_GEOLOCATION, new AttributesTable
-            {
-                { FeatureAttributes.LAT, geoLocation.Y },
-                { FeatureAttributes.LON, geoLocation.X }
-            });
+            feature.Attributes.SetLocation(geoLocation);
             feature.Attributes.Add(FeatureAttributes.POI_ALT, _elevationDataStorage.GetElevation(geoLocation).Result);
             var (x, y) = _wgs84ItmConverter.Transform(geoLocation.X, geoLocation.Y);
             feature.Attributes.Add(FeatureAttributes.POI_ITM_EAST, x);

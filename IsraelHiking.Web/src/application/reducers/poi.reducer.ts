@@ -1,13 +1,13 @@
 import { createReducerFromClass, ReduxAction, BaseAction } from "./infra/ng-redux.module";
 import { initialState } from "./initial-state";
-import { PointsOfInterestState, PointOfInterestExtended, MarkerData } from "../models/models";
+import { PointsOfInterestState, MarkerData } from "../models/models";
 
 const SET_SELECTED_POI = "SET_SELECTED_POI";
 const SET_UPLOAD_MARKER_DATA = "SET_UPLOAD_MARKER_DATA";
 const SET_SIDEBAR = "SET_SIDEBAR";
 
 export interface SetSelectedPoiPayload {
-    poi: PointOfInterestExtended;
+    poi: GeoJSON.Feature;
 }
 
 export interface SetUploadMarkerDataPayload {

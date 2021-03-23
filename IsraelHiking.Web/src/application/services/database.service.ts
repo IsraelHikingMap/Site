@@ -28,6 +28,7 @@ export class DatabaseService {
     private static readonly STATE_DOC_ID = "state";
     private static readonly POIS_DB_NAME = "PointsOfInterest";
     private static readonly POIS_TABLE_NAME = "pois";
+    private static readonly POIS_UPLOAD_QUEUE_TABLE_NAME = "uploadQueue";
     private static readonly POIS_ID_COLUMN = "properties.poiId";
     private static readonly POIS_LOCATION_COLUMN = "[properties.poiGeolocation.lat+properties.poiGeolocation.lon]";
     private static readonly IMAGES_DB_NAME = "Images";
@@ -63,7 +64,10 @@ export class DatabaseService {
         });
         this.poisDatabase = new Dexie(DatabaseService.POIS_DB_NAME);
         this.poisDatabase.version(1).stores({
-            pois: DatabaseService.POIS_ID_COLUMN + "," + DatabaseService.POIS_LOCATION_COLUMN
+            pois: DatabaseService.POIS_ID_COLUMN + "," + DatabaseService.POIS_LOCATION_COLUMN,
+        });
+        this.poisDatabase.version(2).stores({
+            uploadQueue: DatabaseService.POIS_ID_COLUMN
         });
         this.imagesDatabase = new Dexie(DatabaseService.IMAGES_DB_NAME);
         this.imagesDatabase.version(1).stores({
@@ -234,9 +238,9 @@ export class DatabaseService {
     public async getPoisForClustering(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
         this.loggingService.debug("[Database] Getting POIs for clustering from DB");
         let features = await this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).toArray();
-        let slimPois = features.map((feature: GeoJSON.Feature) => {
+        let pointFeatures = features.map((feature: GeoJSON.Feature) => {
             let geoLocation = feature.properties.poiGeolocation;
-            let slimFeature = {
+            let pointFeature = {
                 type: "Feature",
                 geometry: {
                     type: "Point",
@@ -244,19 +248,25 @@ export class DatabaseService {
                 },
                 properties: feature.properties
             } as GeoJSON.Feature<GeoJSON.Point>;
-            slimFeature.properties.poiHasExtraData = {};
-
-            for (let language of Object.keys(slimFeature.properties.poiNames)) {
-                slimFeature.properties.poiHasExtraData[language] = (slimFeature.properties["description:" + language] != null)
-                    || Object.keys(slimFeature.properties).find(k => k.startsWith("image")) != null;
-            }
-            return slimFeature;
+            return pointFeature;
         });
-        return slimPois;
+        return pointFeatures;
     }
 
     public getPoiById(id: string): Promise<GeoJSON.Feature> {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).get(id);
+    }
+
+    public addPoiToUploadQueue(feature: GeoJSON.Feature): Promise<void> {
+        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).put(feature);
+    }
+
+    public getPoiFromUploadQueue(featureId: string): Promise<GeoJSON.Feature> {
+        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).get(featureId);
+    }
+
+    public removePoiFromUploadQueue(featureId: string): Promise<void> {
+        return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).delete(featureId);
     }
 
     public storeImages(images: ImageUrlAndData[]): Promise<void> {

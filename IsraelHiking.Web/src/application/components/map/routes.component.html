@@ -85,7 +85,7 @@
             <mgl-marker anchor="bottom"
                         [draggable]="isRouteInEditPoiMode(route)"
                         [lngLat]="[marker.latlng.lng, marker.latlng.lat]"
-                        (dragEnd)="markerDragEnd(idx, $event)">
+                        (markerDragEnd)="markerDragEnd(idx, $event)">
                 <private-poi-overlay [marker]="marker" [routeId]="route.id" [index]="idx" [color]="route.color"></private-poi-overlay>
             </mgl-marker>
         </div>

@@ -239,6 +239,7 @@ export class ResourcesService {
     public unableToUploadFile: string;
     public unableToSaveAnEmptyRoute: string;
     public dataUpdatedSuccessfully: string;
+    public dataUpdatedSuccessfullyItWillTakeTimeToSeeIt: string;
     public loginRequired: string;
     public noDescriptionLoginRequired: string;
     public nameInLanguage: string;
@@ -434,7 +435,7 @@ export class ResourcesService {
     }
 
     public setLanguage = async (language: Language): Promise<void> => {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1612214835998");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1616457406224");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -661,6 +662,8 @@ export class ResourcesService {
         this.unableToSaveAnEmptyRoute = this.gettextCatalog
             .getString("Unable to save an empty route, Please try and select a different one from the layers control on your left.");
         this.dataUpdatedSuccessfully = this.gettextCatalog.getString("The data was updated successfully!");
+        this.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt = this.gettextCatalog
+            .getString("The data was updated successfully! It will take time to see it on the map...");
         this.loginRequired = this.gettextCatalog
             .getString("You need to login to OSM first, please use the button in the upper right corner to login.");
         this.noDescriptionLoginRequired = this.gettextCatalog

@@ -25,6 +25,7 @@ describe("ResourcesService", () => {
                 ResourcesService
             ]
         });
+        MockNgRedux.reset();
     });
 
     it("Should faciliate language change to english and raise event", inject([ResourcesService], (service: ResourcesService) => {
@@ -37,11 +38,11 @@ describe("ResourcesService", () => {
                 }
             }
         });
-        let spy = spyOn(MockNgRedux.getInstance(), "dispatch");
+        MockNgRedux.getInstance().dispatch = jasmine.createSpy();
 
         let promise = service.setLanguage({ code: "he", rtl: true}).then(() => {
             expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
-            expect(spy).toHaveBeenCalled();
+            expect(MockNgRedux.getInstance().dispatch).toHaveBeenCalled();
         });
         return promise;
     }));

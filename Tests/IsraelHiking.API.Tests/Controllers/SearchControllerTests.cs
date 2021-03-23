@@ -47,10 +47,6 @@ namespace IsraelHiking.API.Tests.Controllers
             var featureInPlace = new Feature(new Point(featureLocation), new AttributesTable
             {
                 {FeatureAttributes.NAME, "name"},
-                {
-                    FeatureAttributes.POI_GEOLOCATION,
-                    new AttributesTable {{FeatureAttributes.LAT, featureLocation.Y}, {FeatureAttributes.LON, featureLocation.X} }
-                },
                 {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
                 {FeatureAttributes.POI_SOURCE, Sources.OSM},
                 {FeatureAttributes.POI_ICON, string.Empty},
@@ -58,6 +54,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 {FeatureAttributes.ID, "id"}
             });
             featureInPlace.SetTitles();
+            featureInPlace.SetLocation(featureLocation);
             var featuresInsidePlace = new List<Feature> { featureInPlace };
             _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<Feature>());
             _searchRepository.Search("searchTerm", Languages.ENGLISH).Returns(new List<Feature> { featureInPlace });
@@ -91,10 +88,6 @@ namespace IsraelHiking.API.Tests.Controllers
             var featureInPlace = new Feature(new Point(featureLocation), new AttributesTable
             {
                 {FeatureAttributes.NAME, "name"},
-                {
-                    FeatureAttributes.POI_GEOLOCATION,
-                    new AttributesTable {{FeatureAttributes.LAT, featureLocation.Y}, {FeatureAttributes.LON, featureLocation.X} }
-                },
                 {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
                 {FeatureAttributes.POI_SOURCE, Sources.OSM},
                 {FeatureAttributes.POI_ICON, string.Empty},
@@ -102,6 +95,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 {FeatureAttributes.ID, "id"}
             });
             featureInPlace.SetTitles();
+            featureInPlace.SetLocation(featureLocation);
             var featuresInsidePlace = new List<Feature> { featureInPlace };
             _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<Feature> {placeFeature});
             _searchRepository
@@ -140,11 +134,6 @@ namespace IsraelHiking.API.Tests.Controllers
                 }), new AttributesTable
                 {
                     {FeatureAttributes.NAME, "name"},
-                    {
-                        FeatureAttributes.POI_GEOLOCATION,
-                        new AttributesTable
-                            {{FeatureAttributes.LAT, featureLocation.Y}, {FeatureAttributes.LON, featureLocation.X}}
-                    },
                     {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
                     {FeatureAttributes.POI_SOURCE, Sources.OSM},
                     {FeatureAttributes.POI_ICON, string.Empty},
@@ -153,6 +142,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 }
             );
             featureInPlace.SetTitles();
+            featureInPlace.SetLocation(featureLocation);
             var featuresInsidePlace = new List<Feature> { featureInPlace };
             _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<Feature> { placeFeature });
             _searchRepository
@@ -192,11 +182,6 @@ namespace IsraelHiking.API.Tests.Controllers
                 }), new AttributesTable
                 {
                     {FeatureAttributes.NAME, "name"},
-                    {
-                        FeatureAttributes.POI_GEOLOCATION,
-                        new AttributesTable
-                            {{FeatureAttributes.LAT, featureLocation.Y}, {FeatureAttributes.LON, featureLocation.X}}
-                    },
                     {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
                     {FeatureAttributes.POI_SOURCE, Sources.OSM},
                     {FeatureAttributes.POI_ICON, string.Empty},
@@ -205,6 +190,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 }
             );
             featureInPlace.SetTitles();
+            featureInPlace.SetLocation(featureLocation);
             var featuresInsidePlace = new List<Feature> { featureInPlace };
             _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<Feature> { placeFeature });
             _searchRepository
@@ -240,10 +226,6 @@ namespace IsraelHiking.API.Tests.Controllers
             var featureInPlace = new Feature(new Point(featureLocation), new AttributesTable
             {
                 {FeatureAttributes.NAME, "name"},
-                {
-                    FeatureAttributes.POI_GEOLOCATION,
-                    new AttributesTable {{FeatureAttributes.LAT, featureLocation.Y}, {FeatureAttributes.LON, featureLocation.X} }
-                },
                 {FeatureAttributes.POI_CATEGORY, Categories.HISTORIC},
                 {FeatureAttributes.POI_SOURCE, Sources.OSM},
                 {FeatureAttributes.POI_ICON, string.Empty},
@@ -251,6 +233,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 {FeatureAttributes.ID, "id"}
             });
             featureInPlace.SetTitles();
+            featureInPlace.SetLocation(featureLocation);
             _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns(new List<Feature> { featureInPlace });
             _searchRepository.GetContainers(featureLocation).Returns(new List<Feature> { placeFeature });
 

@@ -1,7 +1,8 @@
 ﻿<div [dir]="resources.direction">
-    <div *ngFor="let point of points" fxLayout="row" [dir]="resources.getDirection(point.title)">
-        <a fxFill mat-button (click)="clickOnItem(point)" [ngClass]="resources.getTextAlignment(point.title)" class="break-button-text">
-            <i class="fa {{point.icon}}" [style.color]="point.iconColor"></i> {{point.title}}
-        </a><br/>
+    <div *ngFor="let feature of features" fxLayout="row" [dir]="resources.getDirection(getTitle(feature))">
+        <button fxFill mat-button (click)="clickOnItem(feature)" [ngClass]="resources.getTextAlignment(getTitle(feature))" class="break-button-text">
+            <span *ngIf="hasExtraData(feature)" class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
+            <i class="fa {{feature.properties.poiIcon}}" [style.color]="feature.properties.poiIconColor"></i> {{getTitle(feature)}}
+        </button><br/>
     </div>
 </div>
