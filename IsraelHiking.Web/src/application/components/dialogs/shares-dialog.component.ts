@@ -154,7 +154,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         if (!this.recordedRouteService.isRecording()) {
             this.showDeleteAllRoutesConfirmation();
             return;
-        } 
+        }
         this.toastService.confirm({
             message: this.resources.areYouSureYouWantToStopRecording,
             confirmAction: () => {

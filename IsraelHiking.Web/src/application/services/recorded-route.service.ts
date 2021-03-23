@@ -139,7 +139,7 @@ export class RecordedRouteService {
         this.ngRedux.dispatch(new AddTraceAction({ trace }));
         await this.tracesService.uploadLocalTracesIfNeeded();
         this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
-        
+
         if (this.ngRedux.getState().userState.userInfo == null) {
             this.toastService.warning(this.resources.youNeedToLoginToSeeYourTraces);
         }
