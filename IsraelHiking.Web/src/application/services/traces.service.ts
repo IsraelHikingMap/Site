@@ -29,11 +29,21 @@ export class TracesService {
     }
 
     public async initialize(): Promise<void> {
+        await this.uploadLocalTracesIfNeeded();
+    }
+
+    public async uploadLocalTracesIfNeeded(): Promise<void> {
         let state = this.ngRedux.getState();
         if (!state.configuration.isAutomaticRecordingUpload) {
             return;
         }
         if (!this.runningContextService.isOnline) {
+            return;
+        }
+        if (!this.runningContextService.isOnline) {
+            return;
+        }
+        if (state.userState.userInfo == null) {
             return;
         }
         let localTraces = state.tracesState.traces.filter(t => t.visibility === "local");
@@ -45,8 +55,8 @@ export class TracesService {
             await this.uploadRouteAsTrace(localTrace.dataContainer.routes[0]);
             await this.deleteTrace(localTrace);
         }
-        await this.syncTraces();
         this.loggingService.info(`[Traces] Finished uploading ${localTraces.length} local traces to server`);
+        await this.syncTraces();
     }
 
     public async syncTraces(): Promise<void> {
@@ -127,7 +137,7 @@ export class TracesService {
     }
 
     public async deleteTrace(trace: Trace): Promise<void> {
-        this.loggingService.info(`[Traces] Deleting a trace with id ${trace.id}, visibility: ${trace.visibility}`);
+        this.loggingService.info(`[Traces] Deleting a trace with name ${trace.name} and id ${trace.id}, visibility: ${trace.visibility}`);
         if (trace.visibility !== "local") {
             await this.httpClient.delete(Urls.osmTrace + trace.id).toPromise();
         }

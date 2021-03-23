@@ -135,19 +135,12 @@ export class RecordedRouteService {
             dataUrl: "",
             user: ""
         };
-        let state = this.ngRedux.getState();
-        if (state.configuration.isAutomaticRecordingUpload &&
-            state.userState.userInfo != null) {
-            try {
-                await this.tracesService.uploadRouteAsTrace(routeData);
-                this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
-            } catch {
-                this.ngRedux.dispatch(new AddTraceAction({ trace }));
-            }
-        } else {
-            this.ngRedux.dispatch(new AddTraceAction({ trace }));
-        }
-        if (state.userState.userInfo == null) {
+
+        this.ngRedux.dispatch(new AddTraceAction({ trace }));
+        await this.tracesService.uploadLocalTracesIfNeeded();
+        this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
+        
+        if (this.ngRedux.getState().userState.userInfo == null) {
             this.toastService.warning(this.resources.youNeedToLoginToSeeYourTraces);
         }
     }
