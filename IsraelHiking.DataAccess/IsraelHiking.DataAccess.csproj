@@ -31,7 +31,6 @@
 
   <ItemGroup>
     <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.7.1" />
-    <PackageReference Include="IsraelHiking.OsmCTools" Version="0.8.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="3.1.4" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.4" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.4" />
