@@ -12,7 +12,7 @@ import { ToastService } from "../../services/toast.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { RecordedRouteService } from "application/services/recorded-route.service";
+import { RecordedRouteService } from "../../services/recorded-route.service";
 import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ApplicationState, ShareUrl } from "../../models/models";
 
