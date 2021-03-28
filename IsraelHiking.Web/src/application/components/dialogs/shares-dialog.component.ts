@@ -93,7 +93,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         searchTerm = searchTerm.trim();
         this.sessionSearchTerm = searchTerm;
         let shareUrls = this.ngRedux.getState().shareUrlsState.shareUrls;
-        shareUrls = orderBy(shareUrls.filter((s) => this.findInShareUrl(s, searchTerm)), ["creationDate"], ["desc"]);
+        shareUrls = orderBy(shareUrls.filter((s) => this.findInShareUrl(s, searchTerm)), ["lastModifiedDate"], ["desc"]);
         this.filteredShareUrls = take(shareUrls, this.page * 10);
     }
 
@@ -144,7 +144,8 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         return this.shareUrlIdInEditMode === shareUrlId && this.filteredShareUrls.find(s => s.id === shareUrlId);
     }
 
-    public async updateShareUrl(shareUrl: ShareUrl) {
+    public async updateShareUrl() {
+        let shareUrl = this.filteredShareUrls.find(s => s.id === this.shareUrlIdInEditMode);
         this.shareUrlIdInEditMode = null;
         await this.shareUrlsService.updateShareUrl(shareUrl);
         this.toastService.success(this.resources.dataUpdatedSuccessfully);
