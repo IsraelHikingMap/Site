@@ -10,7 +10,7 @@ graphhopper:
 
   # More options: foot,hike,bike,bike2,mtb,racingbike,motorcycle,car4wd,wheelchair (comma separated)
   # bike2 takes elevation data into account (like up-hill is slower than down-hill) and requires enabling graph.elevation.provider below.
-  graph.flag_encoders: car4wd|block_fords=false|block_barriers=false,foot|block_fords=false,mtb|block_fords=false,car
+  graph.flag_encoders: car4wd|block_fords=false|block_barriers=false,hike|block_fords=false,mtb|block_fords=false|block_barriers=false
 
   # Add additional information to every edge. Used for path details (#1548), better instructions (#1844) and tunnel/bridge interpolation (#798).
   # Default values are: road_class,road_class_link,road_environment,max_speed,road_access (since #1805)
@@ -39,14 +39,11 @@ graphhopper:
     - name: car4wd
       vehicle: car4wd
       weighting: short_fastest
-    - name: foot
-      vehicle: foot
+    - name: hike
+      vehicle: hike
       weighting: short_fastest
     - name: mtb
       vehicle: mtb
-      weighting: short_fastest
-    - name: car
-      vehicle: car
       weighting: short_fastest
 
   #  - name: car_with_turn_costs
@@ -64,9 +61,8 @@ graphhopper:
   # usage) and the routing will also be slower than with `turn_costs: false`.
   profiles_ch:
     - profile: car4wd
-    - profile: foot
+    - profile: hike
     - profile: mtb
-    - profile: car
 
   # Hybrid mode:
   # Similar to speed mode, the hybrid mode (Landmarks, LM) also speeds up routing by doing calculating auxiliary data
@@ -87,7 +83,7 @@ graphhopper:
 
 
   # default location for cache is /tmp/srtm
-  graph.elevation.cache_dir: /data/elevation-cache/
+  graph.elevation.cache_dir: /usr/src/app/elevation/
 
 
   # If you have a slow disk or plenty of RAM change the default MMAP to:
