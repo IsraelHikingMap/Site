@@ -23,6 +23,9 @@ describe("Share Urls Service", () => {
             storeShareUrl: () => {},
             deleteShareUrlById: jasmine.createSpy()
         };
+        let loggingService = {
+            info: () => {}
+        };
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -31,7 +34,7 @@ describe("Share Urls Service", () => {
             ],
             providers: [
                 { provide: HashService, useValue: hashService },
-                { provide: LoggingService, useValue: {} },
+                { provide: LoggingService, useValue: loggingService },
                 { provide: DatabaseService, useValue: databaseService },
                 RunningContextService,
                 Device,

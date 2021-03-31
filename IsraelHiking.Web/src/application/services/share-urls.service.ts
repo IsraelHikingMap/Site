@@ -142,7 +142,7 @@ export class ShareUrlsService {
     }
 
     public async deleteShareUrl(shareUrl: ShareUrl): Promise<void> {
-        this.loggingService.error(`[Shares] Deleting share with id: ${shareUrl.id}`);
+        this.loggingService.info(`[Shares] Deleting share with id: ${shareUrl.id}`);
         await this.httpClient.delete(Urls.urls + shareUrl.id).toPromise();
         this.ngRedux.dispatch(new RemoveShareUrlAction({ shareUrl }));
         await this.databaseService.deleteShareUrlById(shareUrl.id);
