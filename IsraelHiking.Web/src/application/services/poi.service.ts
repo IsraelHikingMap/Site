@@ -1,8 +1,9 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
+import { NgProgress } from "@ngx-progressbar/core";
 import { uniq } from "lodash-es";
-import { Observable, fromEvent } from "rxjs";
-import { timeout, throttleTime } from "rxjs/operators";
+import { Observable, fromEvent, Subscription } from "rxjs";
+import { timeout, throttleTime, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import JSZip from "jszip";
 import MiniSearch from "minisearch";
@@ -16,7 +17,6 @@ import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
-import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
 import { ConnectionService } from "./connection.service";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
@@ -70,6 +70,7 @@ export class PoiService {
     private poisGeojson: GeoJSON.FeatureCollection<GeoJSON.Point>;
     private miniSearch: MiniSearch;
     private queueIsProcessing: boolean;
+    private moveEndSubsription: Subscription;
 
     public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public poisChanged: EventEmitter<void>;
@@ -92,15 +93,16 @@ export class PoiService {
                 private readonly runningContextService: RunningContextService,
                 private readonly geoJsonParser: GeoJsonParser,
                 private readonly loggingService: LoggingService,
-                private readonly toastService: ToastService,
                 private readonly mapService: MapService,
                 private readonly fileService: FileService,
                 private readonly connectionService: ConnectionService,
+                private readonly ngPregress: NgProgress,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         this.poisCache = [];
         this.poisChanged = new EventEmitter();
         this.queueIsProcessing = false;
+        this.moveEndSubsription = null;
 
         this.poiGeojsonFiltered = {
             type: "FeatureCollection",
@@ -130,24 +132,28 @@ export class PoiService {
     }
 
     public async initialize() {
-        this.language$.subscribe(() => {
+        this.language$.pipe(skip(1)).subscribe(() => {
             this.poisCache = [];
-            this.updatePois();
+            this.loggingService.info(`[POIs] Language changed, updating pois`);
+            this.updatePois(this.ngRedux.getState().offlineState.poisLastModifiedDate == null);
         });
-        this.categoriesGroups.subscribe(() => this.updatePois());
+        this.categoriesGroups.pipe(skip(1)).subscribe(() => {
+            this.loggingService.info(`[POIs] Categoris changed, updating pois`);
+            this.updatePois(this.ngRedux.getState().offlineState.poisLastModifiedDate == null);
+        });
         await this.syncCategories();
-        if (this.runningContextService.isCordova) {
-            await this.rebuildPois();
-            await this.updateOfflinePois();
-        } else {
-            await this.updatePois();
-            fromEvent(this.mapService.map, "moveend")
-                .pipe(throttleTime(500, undefined, { trailing: true }))
-                .subscribe(() => {
-                    this.ngZone.run(() => {
-                        this.updatePois();
-                    });
+        this.updatePois(true); // don't wait
+        await this.mapService.initializationPromise;
+        this.moveEndSubsription = fromEvent(this.mapService.map, "moveend")
+            .pipe(throttleTime(500, undefined, { trailing: true }))
+            .subscribe(() => {
+                this.ngZone.run(() => {
+                    this.updatePois(true);
                 });
+            });
+
+        if (this.runningContextService.isCordova) {
+            await this.updateOfflinePois();
         }
         this.uploadPoiQueue$.subscribe((items: string[]) => this.handleUploadQueueChanges(items));
         this.connectionService.monitor(false).subscribe(state => {
@@ -212,10 +218,14 @@ export class PoiService {
             .set("southWest", bounds.southWest.lat + "," + bounds.southWest.lng)
             .set("categories", visibleCategories.join(","))
             .set("language", language);
-        this.poisGeojson.features = await this.httpClient.get(Urls.poi, { params })
+        try {
+            this.poisGeojson.features = await this.httpClient.get(Urls.poi, { params })
             .pipe(timeout(10000))
             .toPromise() as GeoJSON.Feature<GeoJSON.Point>[];
-        return this.poisGeojson.features;
+            return this.poisGeojson.features;
+        } catch {
+            return this.poisGeojson.features;
+        }
     }
 
     private getPoisFromMemory(): GeoJSON.Feature<GeoJSON.Point>[] {
@@ -238,8 +248,13 @@ export class PoiService {
 
     private async rebuildPois() {
         this.poisGeojson.features = await this.databaseService.getPoisForClustering();
+        if (this.poisGeojson.features.length > 0 && this.moveEndSubsription != null) {
+            this.loggingService.info("[POIs] Unsubscribing from move end, pois are from database now");
+            this.moveEndSubsription.unsubscribe();
+        }
         this.miniSearch.addAllAsync(this.poisGeojson.features);
-        this.updatePois();
+        this.loggingService.info(`[POIs] Finished getting pois from database and adding to memory: ${this.poisGeojson.features.length}`);
+        this.updatePois(false);
     }
 
     private async updateOfflinePois() {
@@ -250,23 +265,18 @@ export class PoiService {
             }
             this.loggingService.info(`[POIs] Getting POIs for: ${lastModified ? lastModified.toUTCString() : null} from server`);
             if (lastModified == null || Date.now() - lastModified.getTime() > 1000 * 60 * 60 * 24 * 180) {
-                await this.toastService.progress({
-                    action: (progressCallback) => this.downlodOfflineFileAndUpdateDatabase(progressCallback),
-                    showContinueButton: true,
-                    continueText: this.resources.largeFilesUseWifi
-                });
+                await this.downlodOfflineFileAndUpdateDatabase((value) => this.ngPregress.ref().set(value));
                 lastModified = this.ngRedux.getState().offlineState.poisLastModifiedDate;
             }
             if (lastModified == null) {
-                // don't send a request that is too big to the server by mistake
                 return;
             }
             await this.updateOfflinePoisByPaging(lastModified);
-            this.loggingService.info(`[POIs] Getting POIs for clustering from database`);
-            await this.rebuildPois();
         } catch (ex) {
             this.loggingService.warning("[POIs] Unable to sync public pois and categories - using local data: " + ex.message);
         }
+        this.loggingService.info(`[POIs] Getting POIs for clustering from database`);
+        await this.rebuildPois();
     }
 
     private async downlodOfflineFileAndUpdateDatabase(progressCallback: (value: number, text?: string) => void): Promise<void> {
@@ -274,14 +284,21 @@ export class PoiService {
         let poiIdsToDelete = this.poisGeojson.features.map(f => f.properties.poiId);
         this.loggingService.info(`[POIs] Deleting exiting pois: ${poiIdsToDelete.length}`);
         await this.databaseService.deletePois(poiIdsToDelete);
-        this.loggingService.info(`[POIs] Starting downloading pois file`);
-        let poisFile = await this.fileService.getFileContentWithProgress(Urls.poisOfflineFile,
-            (value) => progressCallback(1 + value * 49, this.resources.downloadingPoisForOfflineUsage));
-        this.loggingService.info(`[POIs] Finished downloading pois file, opening it`);
+        this.loggingService.info(`[POIs] Getting cached offline pois file`);
+        let poisFile = await this.fileService.getFileFromCache(Urls.poisOfflineFile);
+        if (poisFile == null) {
+            this.loggingService.info(`[POIs] No file in cache, downloading pois file`);
+            await this.fileService.downloadFileToCache(Urls.poisOfflineFile, (value) => progressCallback(value * 50));
+            this.loggingService.info(`[POIs] Finished downloading pois file, reading file`);
+            poisFile = await this.fileService.getFileFromCache(Urls.poisOfflineFile);
+        }
+        this.loggingService.info(`[POIs] Opening pois file`);
         let lastModified = await this.openPoisFile(poisFile, progressCallback);
         this.loggingService.info(`[POIs] Updating last modified to: ${lastModified}`);
         this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: lastModified }));
         this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
+        await this.fileService.deleteFileFromCache(Urls.poisOfflineFile);
+        this.loggingService.info(`[POIs] Finished deleting offline pois cached file`);
     }
 
     private async updateOfflinePoisByPaging(lastModified: Date) {
@@ -398,8 +415,8 @@ export class PoiService {
         return visibleCategories;
     }
 
-    public async updatePois() {
-        await await this.mapService.initializationPromise;
+    public async updatePois(fromServer: boolean) {
+        await this.mapService.initializationPromise;
         let visibleCategories = this.getVisibleCategories();
         if (visibleCategories.length === 0) {
             this.poiGeojsonFiltered = {
@@ -409,10 +426,7 @@ export class PoiService {
             this.poisChanged.next();
             return;
         }
-        let visibleFeatures = !this.runningContextService.isCordova || this.ngRedux.getState().offlineState.poisLastModifiedDate == null
-            ? await this.getPoisFromServer()
-            : this.getPoisFromMemory();
-
+        let visibleFeatures = fromServer ? await this.getPoisFromServer() : this.getPoisFromMemory();
         this.poiGeojsonFiltered = {
             type: "FeatureCollection",
             features: visibleFeatures

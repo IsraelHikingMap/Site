@@ -236,8 +236,17 @@ export class DatabaseService {
     }
 
     public async getPoisForClustering(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
-        this.loggingService.debug("[Database] Getting POIs for clustering from DB");
-        let features = await this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).toArray();
+        this.loggingService.debug("[Database] Startting getting pois for clustering in chunks");
+        let features = [];
+        let index = 0;
+        let size = 2000;
+        let currentFeatures = [];
+        do {
+            currentFeatures = await this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).offset(index * size).limit(size).toArray();
+            features = features.concat(currentFeatures);
+            index++;
+        } while (currentFeatures.length !== 0);
+        this.loggingService.debug("[Database] Finished getting pois for clustering in chunks: " + features.length);
         let pointFeatures = features.map((feature: GeoJSON.Feature) => {
             let geoLocation = feature.properties.poiGeolocation;
             let pointFeature = {

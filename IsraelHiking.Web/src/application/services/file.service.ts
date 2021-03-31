@@ -324,6 +324,29 @@ export class FileService {
         });
     }
 
+    public async downloadFileToCache(url: string, progressCallback: (value: number) => void) {
+        let fileTransferObject = this.fileTransfer.create();
+        let path = this.fileSystemWrapper.cacheDirectory + "/" + url.split("/").pop();
+        fileTransferObject.onProgress((event) => {
+            progressCallback(event.loaded / event.total);
+        });
+        await fileTransferObject.download(url, path, true);
+        return path;
+    }
+
+    public async getFileFromCache(url: string): Promise<Blob> {
+        try {
+            let fileBuffer = await this.fileSystemWrapper.readAsArrayBuffer(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
+            return new Blob([fileBuffer]);
+        } catch {
+            return null;
+        }
+    }
+
+    public async deleteFileFromCache(url: string): Promise<void> {
+        this.fileSystemWrapper.removeFile(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
+    }
+
     public async downloadDatabaseFile(url: string, fileName: string, token: string, progressCallback: (value: number) => void) {
         let fileTransferObject = this.fileTransfer.create();
         let path = this.getDatabaseFolder();

@@ -35,6 +35,9 @@ describe("Poi Service", () => {
                 off: () => { },
             }
         };
+        let loggingService = {
+            info: () => {}
+        };
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -48,11 +51,11 @@ describe("Poi Service", () => {
                 { provide: FileService, useValue: fileServiceMock },
                 { provide: DatabaseService, useValue: databaseServiceMock },
                 { provide: MapService, useValue: mapServiceMosk },
+                { provide: LoggingService, useValue: loggingService },
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,
                 PoiService,
-                LoggingService,
                 Device,
                 SQLite
             ]
