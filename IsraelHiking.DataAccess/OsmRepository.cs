@@ -68,8 +68,7 @@ namespace IsraelHiking.DataAccess
                     .OfType<Node>()
                     .Where(node =>
                         node.Tags.GetName() == string.Empty &&
-                        node.Tags.HasAny(tags) &&
-                        (node.Tags.Any(t => t.Key.StartsWith(FeatureAttributes.DESCRIPTION)) || node.Tags.Any(t => t.Key.StartsWith(FeatureAttributes.IMAGE_URL)))
+                        node.Tags.HasAny(tags)
                     )
                     .ToList();
                 _logger.LogInformation("Finished getting nodes by tags. " + nodes.Count);

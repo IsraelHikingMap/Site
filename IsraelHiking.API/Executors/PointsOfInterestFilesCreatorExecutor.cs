@@ -57,7 +57,7 @@ namespace IsraelHiking.API.Executors
         public void CreateSiteMapXmlFile(List<Feature> features)
         {
             using var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "sitemap.xml"));
-            var list = features.Select(feature =>
+            var list = features.Where(f => Languages.Array.Any(l => f.IsProperPoi(l))).Select(feature =>
             {
                 return new tUrl
                 {
