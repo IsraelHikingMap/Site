@@ -673,7 +673,7 @@ namespace IsraelHiking.API.Services.Poi
                     existingUrls.Remove(urlToRemove.ToString());
                 }
             }
-            SetWebsiteUrl(completeOsmGeo.Tags, existingUrls);
+            SetWebsiteUrl(completeOsmGeo.Tags, existingUrls.Distinct().ToList());
 
             var existingImages = featureAfterTagsUpdates.Attributes.GetNames()
                     .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
@@ -694,7 +694,7 @@ namespace IsraelHiking.API.Services.Poi
                     existingImages.Remove(imageUrlToRemove.ToString());
                 }
             }
-            SetMultipleValuesForTag(completeOsmGeo.Tags, FeatureAttributes.IMAGE_URL, existingImages.ToArray());
+            SetMultipleValuesForTag(completeOsmGeo.Tags, FeatureAttributes.IMAGE_URL, existingImages.Distinct().ToArray());
         }
 
         private async Task<string[]> UploadImages(Feature feature, string language, IAuthClient osmGateway)

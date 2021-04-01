@@ -574,6 +574,35 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
+        public void UpdateFeature_UpdateSameUrlsSecondTime_ShouldNotUpdate()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            var id = "Node_42";
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.POI_ADDED_URLS, new [] { "some-url" } }
+            });
+            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ICON, "icon" }
+                }
+            });
+            gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection { { "website", "some-url" } }, Latitude = 0, Longitude = 0, Id = 42 });
+
+            _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+            _wikimediaCommonGateway.DidNotReceive().UploadImage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.DidNotReceive().GetImageUrl(Arg.Any<string>());
+            gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
+        }
+
+        [TestMethod]
         public void UpdateFeature_IconChange_ShouldUpdateInOSM()
         {
             var user = new User { DisplayName = "DisplayName" };
