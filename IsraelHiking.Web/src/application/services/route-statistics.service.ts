@@ -5,6 +5,9 @@ import { SpatialService } from "./spatial.service";
 import { LatLngAlt, RouteData, ILatLngTime } from "../models/models";
 
 export interface IRouteStatisticsPoint {
+    /**
+     * x - distance in KM, y - altitude in meters
+     */
     coordinate: [number, number];
     latlng: LatLngAlt;
     slope: number;

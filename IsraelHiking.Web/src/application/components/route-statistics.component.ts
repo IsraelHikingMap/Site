@@ -3,6 +3,7 @@ import { trigger, style, transition, animate } from "@angular/animations";
 import { Subscription, Observable, interval } from "rxjs";
 import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "@katze/ngx-d3";
 import { regressionLoess } from "d3-regression";
+import { LinePaint } from "mapbox-gl";
 
 import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
@@ -88,7 +89,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public isFollowing: boolean;
     public kmMarkersSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public chartHoverSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
+    public slopeRouteSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public subRouteRange: IChartSubRouteRange;
+    public slopeRoutePaint: LinePaint;
 
     @ViewChild("lineChartContainer")
     public lineChartContainer: ElementRef;
@@ -145,6 +148,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             type: "FeatureCollection",
             features: []
         };
+        this.slopeRouteSource = {
+            type: "FeatureCollection",
+            features: []
+        };
+        this.slopeRoutePaint = {};
         this.chartElements = {
             margin: { top: 10, right: 10, bottom: 40, left: 40 },
         } as IChartElements;
@@ -299,29 +307,25 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private routeChanged() {
-        this.updateKmMarkers();
         this.setDataToChart([]);
         this.hideLocationGroup();
         this.onRouteDataChanged();
     }
 
     private onRouteDataChanged = () => {
-
         this.updateStatistics();
-
-        if (!this.getRouteForChart()) {
+        this.updateKmMarkers();
+        this.updateSlopeRoute();
+        if (!this.getRouteForChart() || !this.isOpen) {    
             return;
         }
-        if (this.isOpen) {
-            this.clearSubRouteSelection();
-            this.setRouteColorToChart();
-            this.setDataToChart(this.getDataFromStatistics());
-            this.refreshLocationGroup();
-        }
-        this.updateKmMarkers();
+        this.clearSubRouteSelection();
+        this.setRouteColorToChart();
+        this.setDataToChart(this.getDataFromStatistics());
+        this.refreshLocationGroup();
     }
 
-    public redrawChart = () => {
+    public redrawChart() {
         this.changeDetectorRef.detectChanges();
         if (!this.isOpen) {
             return;
@@ -720,6 +724,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public toggleSlope() {
         this.isSlopeOn = !this.isSlopeOn;
         this.redrawChart();
+        this.updateSlopeRoute();
     }
 
     private updateKmMarkers() {
@@ -936,5 +941,63 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             }
             this.audioPlayer.play();
         }
+    }
+
+    private updateSlopeRoute() {
+        let route = this.getRouteForChart();
+        this.slopeRouteSource = {
+            type: "FeatureCollection",
+            features: []       
+        };
+        this.slopeRoutePaint = {};
+        if (!this.isSlopeOn ||
+            route == null || 
+            route.segments.length === 0 || 
+            this.statistics == null || 
+            this.statistics.points.length < 2) {
+            return;
+        }
+        
+        this.slopeRouteSource.features.push({
+            type: "Feature",
+            properties: {},
+            geometry: {
+                type: "LineString",
+                coordinates: this.statistics.points.map(p => SpatialService.toCoordinate(p.latlng))
+            }
+        });
+
+        let maxSlope = Math.max(...this.statistics.points.map(p => p.slope));
+        let minSlope = Math.min(...this.statistics.points.map(p => p.slope));
+        let stops = [0, this.routeSlopeToColor(this.statistics.points[0].slope, minSlope, maxSlope)];
+        for (let pointIndex = 1; pointIndex < this.statistics.points.length; pointIndex++) {
+            stops.push(this.statistics.points[pointIndex].coordinate[0] * 1000 / this.statistics.length);
+            stops.push(this.routeSlopeToColor(this.statistics.points[pointIndex].slope, minSlope, maxSlope));
+        }
+        this.slopeRoutePaint = {
+            "line-width": route.weight,
+            "line-gradient": [
+                "interpolate",
+                ["linear"],
+                ["line-progress"],
+                ...stops
+            ]
+        }
+    }
+
+    private routeSlopeToColor(slope: number, minSlope: number, maxSlope: number): string {
+        let r: number, g: number, b: number;
+        if (slope > 0) {
+            let ratio = slope / maxSlope;
+            r = Math.floor(255 * ratio);
+            g = Math.floor(255 * (1 - ratio));
+            b = 0;
+        } else {
+            let ratio = slope / minSlope;
+            r = 0
+            g = Math.floor(255 * (1 - ratio));
+            b = Math.floor(255 * ratio);
+        }
+        return  "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
 }

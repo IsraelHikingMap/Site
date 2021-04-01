@@ -101,6 +101,17 @@
     </div>
 </div>
 
+<mgl-geojson-source id="slope-route" [data]="slopeRouteSource" [lineMetrics]="true"></mgl-geojson-source>
+<mgl-layer id="slope-route-layer"
+            type="line"
+            source="slope-route"
+            [layout]="{
+                'line-cap': 'round',
+                'line-join': 'bevel'
+            }"
+            [paint]="slopeRoutePaint">
+</mgl-layer>
+
 <mgl-geojson-source id="km-markers-source" [data]="kmMarkersSource"></mgl-geojson-source>
 <mgl-layer id="km-markers-cricles"
            type="circle"
@@ -132,4 +143,5 @@
             'circle-radius': 7,
             'circle-stroke-color': 'white',
             'circle-stroke-width': 3
-           }"></mgl-layer>
+           }">
+</mgl-layer>
