@@ -39,7 +39,7 @@ export class AddSimplePoiDialogComponent extends BaseMapComponent {
     public async addSimplePoint(pointType: SimplePointType) {
         try {
             await this.poiService.addSimplePoint(this.data.latlng, pointType);
-            this.toastService.success(this.resources.dataUpdatedSuccessfully);
+            this.toastService.success(this.resources.dataUpdatedSuccessfullyItWillTakeTimeToSeeIt);
         } catch (ex) {
             this.toastService.error(ex, this.resources.unableToSaveData);
         }
