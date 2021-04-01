@@ -183,8 +183,8 @@ export class PoiService {
             let postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
             let putAddress = Urls.poi + feature.properties.poiId + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
             let poi = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(feature.properties.poiId)
-                ? await this.httpClient.post(postAddress, feature).pipe(timeout(60000)).toPromise() as GeoJSON.Feature
-                : await this.httpClient.put(putAddress, feature).pipe(timeout(60000)).toPromise() as GeoJSON.Feature;
+                ? await this.httpClient.post(postAddress, feature).pipe(timeout(180000)).toPromise() as GeoJSON.Feature
+                : await this.httpClient.put(putAddress, feature).pipe(timeout(180000)).toPromise() as GeoJSON.Feature;
 
             this.loggingService.info(`[POIs] Uploaded successfully a${feature.properties.poiIsSimple ? " simple" : ""} feature with id: ${firstItemId}, removing from upload queue`);
             if (this.runningContextService.isCordova && !feature.properties.poiIsSimple) {
