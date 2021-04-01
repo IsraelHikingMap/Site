@@ -194,7 +194,7 @@ export class PoiService {
             this.queueIsProcessing = false;
             this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
         } catch (ex) {
-            this.loggingService.error(`[POI] Failed to upload feature with id: ${firstItemId}, ${ex.message}`);
+            this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, ${ex.message}`);
         } finally {
             this.queueIsProcessing = false;
         }
