@@ -63,6 +63,10 @@ namespace IsraelHiking.API.Services
             if (isCrawler && context.Request.Path.StartsWithSegments("/share"))
             {
                 var url = await _shareUrlsRepository.GetUrlById(context.Request.Path.Value.Split("/").Last());
+                if (url == null) {
+                    await SendDefaultFile(context);
+                    return;
+                }
                 var title = string.IsNullOrWhiteSpace(url.Title) ? "Israel Hiking Map Route Share" : url.Title;
                 var thumbnailUrl = context.Request.GetDisplayUrl().Replace("/share/", "/api/images/");
                 if (isWhatsApp)
@@ -79,8 +83,7 @@ namespace IsraelHiking.API.Services
                 var point = await _pointsOfInterestProvider.GetPointOfInterestById(split[split.Length - 2], split.Last(), language.FirstOrDefault());
                 if (point == null)
                 {
-                    var invalidPoi = _environment.WebRootFileProvider.GetFileInfo("/index.html");
-                    await SendFile(context, invalidPoi);
+                    await SendDefaultFile(context);
                     return;
                 }
                 var thumbnailUrl = point.ImagesUrls.FirstOrDefault() ?? string.Empty;
@@ -92,6 +95,10 @@ namespace IsraelHiking.API.Services
                 return;
             }
 
+            await SendDefaultFile(context);
+        }
+
+        private async Task SendDefaultFile(HttpContext context) {
             var defaultFile = _environment.WebRootFileProvider.GetFileInfo("/index.html");
             await SendFile(context, defaultFile);
         }

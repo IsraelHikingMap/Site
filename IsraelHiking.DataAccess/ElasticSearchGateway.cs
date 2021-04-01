@@ -513,6 +513,9 @@ namespace IsraelHiking.DataAccess
         public async Task<DateTime> GetUrlTimestampById(string id)
         {
             var response = await _elasticClient.GetAsync<ShareUrl>(id, r => r.Index(SHARES).SourceIncludes(e => e.LastModifiedDate, e=> e.CreationDate));
+            if (response.Source == null) {
+                return DateTime.MinValue;
+            }
             response.Source.FixModifiedDate();
             return response.Source.LastModifiedDate;
         }
