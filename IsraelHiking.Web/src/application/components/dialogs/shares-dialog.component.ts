@@ -33,6 +33,9 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     @select((state: ApplicationState) => state.shareUrlsState.shareUrls)
     public shareUrls$: Observable<ShareUrl[]>;
 
+    @select((state: ApplicationState) => state.inMemoryState.shareUrl)
+    public shownShareUrl$: Observable<ShareUrl>;
+
     private sessionSearchTerm = "";
     private page: number;
     private subscriptions: Subscription[];
