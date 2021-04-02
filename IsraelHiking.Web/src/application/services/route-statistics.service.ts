@@ -43,9 +43,9 @@ export interface IRouteStatistics {
 
 @Injectable()
 export class RouteStatisticsService {
-    public static readonly MAX_SLOPE = 25;
-    public static readonly MODERATE_SLOPE = 10;
-    public static readonly MIN_SLOPE = -40;
+    public static readonly MAX_SLOPE = 15;
+    public static readonly MODERATE_SLOPE = 5;
+    public static readonly MIN_SLOPE = -15;
 
     public getStatisticsByRange(route: RouteData, start: IRouteStatisticsPoint, end: IRouteStatisticsPoint): IRouteStatistics {
         let routeStatistics = {
