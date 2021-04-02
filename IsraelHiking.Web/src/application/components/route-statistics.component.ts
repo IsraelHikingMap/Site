@@ -703,7 +703,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         let maxAbsSlope = Math.max(RouteStatisticsService.MAX_SLOPE, Math.abs(RouteStatisticsService.MIN_SLOPE));
         // making the doing be symetric around zero
-        this.chartElements.yScaleSlope.domain([maxAbsSlope, -maxAbsSlope]);
+        this.chartElements.yScaleSlope.domain([-maxAbsSlope, maxAbsSlope]);
         let slopeLine = d3.line()
             .curve(d3.curveCatmullRom)
             .x(d => this.chartElements.xScale(d[0]))
