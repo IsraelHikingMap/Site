@@ -701,9 +701,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 .y(d => d.slope)
                 .bandwidth(0.03)(this.statistics.points);
         }
+        let maxAbsSlope = Math.max(RouteStatisticsService.MAX_SLOPE, Math.abs(RouteStatisticsService.MIN_SLOPE));
         // making the doing be symetric around zero
-        this.chartElements.yScaleSlope.domain([Math.min(d3.min(slopeData, d => d[1]), -d3.max(slopeData, d => d[1])),
-        Math.max(d3.max(slopeData, d => d[1]), -d3.min(slopeData, d => d[1]))]);
+        this.chartElements.yScaleSlope.domain([maxAbsSlope, -maxAbsSlope]);
         let slopeLine = d3.line()
             .curve(d3.curveCatmullRom)
             .x(d => this.chartElements.xScale(d[0]))
@@ -967,12 +967,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             }
         });
 
-        let maxSlope = Math.max(...this.statistics.points.map(p => p.slope));
-        let minSlope = Math.min(...this.statistics.points.map(p => p.slope));
-        let stops = [0, this.routeSlopeToColor(this.statistics.points[0].slope, minSlope, maxSlope)];
+        let stops = [0, this.routeSlopeToColor(this.statistics.points[0].slope)];
         for (let pointIndex = 1; pointIndex < this.statistics.points.length; pointIndex++) {
             stops.push(this.statistics.points[pointIndex].coordinate[0] * 1000 / this.statistics.length);
-            stops.push(this.routeSlopeToColor(this.statistics.points[pointIndex].slope, minSlope, maxSlope));
+            stops.push(this.routeSlopeToColor(this.statistics.points[pointIndex].slope));
         }
         this.slopeRoutePaint = {
             "line-width": route.weight,
@@ -985,15 +983,25 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
     }
 
-    private routeSlopeToColor(slope: number, minSlope: number, maxSlope: number): string {
+    private routeSlopeToColor(slope: number): string {
         let r: number, g: number, b: number;
-        if (slope > 0) {
-            let ratio = slope / maxSlope;
-            r = Math.floor(255 * ratio);
+        if (slope > RouteStatisticsService.MODERATE_SLOPE) {
+            // red to yellow
+            let ratio = (slope - RouteStatisticsService.MODERATE_SLOPE) / 
+                (RouteStatisticsService.MAX_SLOPE - RouteStatisticsService.MODERATE_SLOPE);
+            r = 255;
             g = Math.floor(255 * (1 - ratio));
             b = 0;
+        }
+        else if (slope > 0) {
+            // yellow to green
+            let ratio = slope / RouteStatisticsService.MODERATE_SLOPE;
+            r = Math.floor(255 * ratio);
+            g = 255;
+            b = 0;
         } else {
-            let ratio = slope / minSlope;
+            // green to blue
+            let ratio = slope / RouteStatisticsService.MIN_SLOPE;
             r = 0
             g = Math.floor(255 * (1 - ratio));
             b = Math.floor(255 * ratio);
