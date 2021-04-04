@@ -16,10 +16,10 @@
       {
         "key": "legendBlueMarkedTrail",
         "latlng": {
-          "lat": 32.827,
-          "lng": 35.313
+          "lat": 32.56633,
+          "lng": 35.11137
         },
-        "zoom": 15,
+        "zoom": 17,
         "type": "Way",
         "osmTags": [ "colour=blue" ],
         "link": "osm-key-link"
