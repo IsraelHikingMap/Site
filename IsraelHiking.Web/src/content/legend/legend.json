@@ -60,10 +60,10 @@
       {
         "key": "legendIsraelTrail",
         "latlng": {
-          "lat": 31.5386,
-          "lng": 34.8068
+          "lat": 31.5401,
+          "lng": 34.8176
         },
-        "zoom": 15,
+        "zoom": 16,
         "type": "Way",
         "osmTags": [ "Relation \"שביל ישראל\"" ],
         "link": "https://www.openstreetmap.org/relation/282071"
