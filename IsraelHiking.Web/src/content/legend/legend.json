@@ -16,10 +16,10 @@
       {
         "key": "legendBlueMarkedTrail",
         "latlng": {
-          "lat": 32.827,
-          "lng": 35.313
+          "lat": 32.56633,
+          "lng": 35.11137
         },
-        "zoom": 15,
+        "zoom": 17,
         "type": "Way",
         "osmTags": [ "colour=blue" ],
         "link": "osm-key-link"
@@ -60,10 +60,10 @@
       {
         "key": "legendIsraelTrail",
         "latlng": {
-          "lat": 31.5386,
-          "lng": 34.8068
+          "lat": 31.5401,
+          "lng": 34.8176
         },
-        "zoom": 15,
+        "zoom": 16,
         "type": "Way",
         "osmTags": [ "Relation \"שביל ישראל\"" ],
         "link": "https://www.openstreetmap.org/relation/282071"
@@ -946,10 +946,10 @@
       {
         "key": "legendMilitaryArea",
         "latlng": {
-          "lat": 31.214912,
-          "lng": 34.65281
+          "lat": 32.1405,
+          "lng": 35.4790
         },
-        "zoom": 16,
+        "zoom": 15,
         "type": "Way",
         "osmTags": [ "landuse=military" ],
         "link": "osm-tag-link"
@@ -966,10 +966,21 @@
         "link": "osm-tag-link"
       },
       {
+        "key": "legendMinefield",
+        "latlng": {
+          "lat": 32.77060,
+          "lng": 35.6765
+        },
+        "zoom": 15,
+        "type": "Way",
+        "osmTags": [ ],
+        "link": ""
+      },
+      {
         "key": "legendAreaA",
         "latlng": {
-          "lat": 32.275980,
-          "lng": 35.3625011
+          "lat": 32.4360,
+          "lng": 35.3842
         },
         "zoom": 16,
         "type": "Way",
