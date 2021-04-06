@@ -71,7 +71,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     }
 
     public showImage() {
-        this.imageGalleryService.open([this.imageLink.url]);
+        this.imageGalleryService.open([this.imageLink.url], 0);
     }
 
     public edit() {

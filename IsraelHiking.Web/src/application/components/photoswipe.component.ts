@@ -1,0 +1,63 @@
+import { Component, ElementRef, ViewChild, AfterViewInit, InjectionToken, Inject, ViewEncapsulation } from "@angular/core";
+import { OverlayRef } from "@angular/cdk/overlay";
+import * as PhotoSwipe from "photoswipe";
+import * as PhotoSwipeUI_Default from "photoswipe/dist/photoswipe-ui-default";
+
+import { BaseMapComponent } from "./base-map.component";
+import { ResourcesService } from "application/services/resources.service";
+import { RunningContextService } from "application/services/running-context.service";
+
+export const PHOTO_SWIPE_DATA = new InjectionToken<PhotoSwipeData>("PHOTO_SWIPE_DATA");
+
+export interface PhotoSwipeData {
+    imageUrls: string[];
+    index: number;
+}
+
+@Component({
+    selector: "photoswipe",
+    templateUrl: "./photoswipe.component.html",
+    styleUrls: ["./photoswipe.component.scss"],
+    encapsulation: ViewEncapsulation.None
+})
+export class PhotoSwpieComponent extends BaseMapComponent implements AfterViewInit{
+    
+    @ViewChild("photoswipe")
+    public photoswipe: ElementRef;
+
+    private data: PhotoSwipeData;
+
+    constructor(resources: ResourcesService,
+        private readonly runningContext: RunningContextService,
+        private readonly overlayRef: OverlayRef,
+        @Inject(PHOTO_SWIPE_DATA) data) {
+        super(resources);
+        this.data = data;
+    }
+
+    public ngAfterViewInit(): void {
+        let pswpElement = this.photoswipe.nativeElement;
+
+        let items = this.data.imageUrls.map(i => ({
+            src: i,
+            w: window.innerWidth,
+            h: window.innerHeight
+        }));
+
+        var options = {
+            index: this.data.index,
+            closeOnScroll: false,
+            pinchToClose: false,
+            history: false,
+            captionEl: false,
+            fullscreenEl: false,
+            shareEl: false,
+            zoomEl: false
+        };
+
+        // Initializes and opens PhotoSwipe
+        let pswp = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
+        pswp.listen("destroy", () => this.overlayRef.dispose());
+        pswp.init();
+    }
+}
