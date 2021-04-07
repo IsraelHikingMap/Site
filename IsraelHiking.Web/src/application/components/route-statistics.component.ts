@@ -316,7 +316,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.updateStatistics();
         this.updateKmMarkers();
         this.updateSlopeRoute();
-        if (!this.getRouteForChart() || !this.isOpen) {    
+        if (!this.getRouteForChart() || !this.isOpen) {
             return;
         }
         this.clearSubRouteSelection();
@@ -947,17 +947,17 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let route = this.getRouteForChart();
         this.slopeRouteSource = {
             type: "FeatureCollection",
-            features: []       
+            features: []
         };
         this.slopeRoutePaint = {};
         if (!this.isSlopeOn ||
-            route == null || 
-            route.segments.length === 0 || 
-            this.statistics == null || 
+            route == null ||
+            route.segments.length === 0 ||
+            this.statistics == null ||
             this.statistics.points.length < 2) {
             return;
         }
-        
+
         this.slopeRouteSource.features.push({
             type: "Feature",
             properties: {},
@@ -980,14 +980,16 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 ["line-progress"],
                 ...stops
             ]
-        }
+        };
     }
 
     private routeSlopeToColor(slope: number): string {
-        let r: number, g: number, b: number;
+        let r: number;
+        let g: number;
+        let b: number;
         if (slope > RouteStatisticsService.MODERATE_SLOPE) {
             // red to yellow
-            let ratio = (slope - RouteStatisticsService.MODERATE_SLOPE) / 
+            let ratio = (slope - RouteStatisticsService.MODERATE_SLOPE) /
                 (RouteStatisticsService.MAX_SLOPE - RouteStatisticsService.MODERATE_SLOPE);
             r = 255;
             g = Math.floor(255 * (1 - ratio));
@@ -1002,10 +1004,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         } else {
             // green to blue
             let ratio = slope / RouteStatisticsService.MIN_SLOPE;
-            r = 0
+            r = 0;
             g = Math.floor(255 * (1 - ratio));
             b = Math.floor(255 * ratio);
         }
+        // tslint:disable-next-line
         return  "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
 }
