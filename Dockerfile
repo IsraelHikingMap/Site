@@ -5,7 +5,7 @@ COPY ./IsraelHiking.Web/ ./
 
 RUN npm i && npm run build -- --no-progress
 
-FROM mcr.microsoft.com/dotnet/core/sdk:5.0 as build-net
+FROM mcr.microsoft.com/dotnet/sdk:5.0 as build-net
 
 WORKDIR /net
 COPY . .
@@ -16,7 +16,7 @@ WORKDIR /net/IsraelHiking.Web
 
 RUN dotnet publish
 
-From mcr.microsoft.com/dotnet/core/aspnet:5.0 as release
+From mcr.microsoft.com/dotnet/aspnet:5.0 as release
 
 WORKDIR /israelhiking
 
