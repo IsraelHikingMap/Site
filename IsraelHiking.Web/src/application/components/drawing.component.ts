@@ -40,6 +40,10 @@ export class DrawingComponent extends BaseMapComponent {
             this.undo();
             return;
         }
+        if ($event.ctrlKey && $event.key.toLowerCase() === "y") {
+            this.redo();
+            return;
+        }
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return;
         }
@@ -137,6 +141,13 @@ export class DrawingComponent extends BaseMapComponent {
 
     public undo() {
         this.ngRedux.dispatch(ActionCreators.undo());
+        // Undo can change the route editing state but doesn't affect the selected route...
+        // HM TODO: should selected route be part of the routes undo object?
+        this.selectedRouteService.syncSelectedRouteWithEditingRoute();
+    }
+
+    private redo() {
+        this.ngRedux.dispatch(ActionCreators.redo());
         // Undo can change the route editing state but doesn't affect the selected route...
         // HM TODO: should selected route be part of the routes undo object?
         this.selectedRouteService.syncSelectedRouteWithEditingRoute();
