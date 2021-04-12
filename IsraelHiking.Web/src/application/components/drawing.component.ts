@@ -5,6 +5,7 @@ import { ActionCreators } from "redux-undo";
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
+import { RecordedRouteService } from "../services/recorded-route.service";
 import { ToastService } from "../services/toast.service";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import {
@@ -29,6 +30,7 @@ export class DrawingComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
                 private readonly selectedRouteService: SelectedRouteService,
+                private readonly recordedRouteService: RecordedRouteService,
                 private readonly toastService: ToastService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
@@ -37,14 +39,14 @@ export class DrawingComponent extends BaseMapComponent {
     @HostListener("window:keydown", ["$event"])
     public onDrawingShortcutKeys($event: KeyboardEvent) {
         if (($event.ctrlKey && $event.key.toLowerCase() === "y") ||
-            ($event.metaKey && $event.shiftKey && $event.key.toLowerCase() === "z")) {
-            this.redo();
-            return;
-        }
-        if (($event.ctrlKey || $event.metaKey) && $event.key.toLowerCase() === "z") {
-            this.undo();
-            return;
-        }
+        ($event.metaKey && $event.shiftKey && $event.key.toLowerCase() === "z")) {
+        this.redo();
+        return;
+    }
+    if (($event.ctrlKey || $event.metaKey) && $event.key.toLowerCase() === "z") {
+        this.undo();
+        return;
+    }
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return;
         }
@@ -106,7 +108,7 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public isRecording() {
-        return this.selectedRouteService.getRecordingRoute() != null;
+        return this.recordedRouteService.isRecording();
     }
 
     public toggleEditRoute() {
@@ -170,6 +172,22 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public deleteAllRoutes() {
+        if (!this.recordedRouteService.isRecording()) {
+            this.showDeleteAllRoutesConfirmation();
+            return;
+        }
+        this.toastService.confirm({
+            message: this.resources.areYouSureYouWantToStopRecording,
+            confirmAction: () => {
+                this.recordedRouteService.stopRecording();
+                this.showDeleteAllRoutesConfirmation();
+            },
+            type: "YesNo"
+        });
+        
+    }
+
+    private showDeleteAllRoutesConfirmation() {
         this.toastService.confirm({
             message: this.resources.areYouSureYouWantToDeleteAllRoutes,
             type: "YesNo",
