@@ -38,15 +38,15 @@ export class DrawingComponent extends BaseMapComponent {
 
     @HostListener("window:keydown", ["$event"])
     public onDrawingShortcutKeys($event: KeyboardEvent) {
-        if (($event.ctrlKey && $event.key.toLowerCase() === "y") ||
-        ($event.metaKey && $event.shiftKey && $event.key.toLowerCase() === "z")) {
-        this.redo();
-        return;
-    }
-    if (($event.ctrlKey || $event.metaKey) && $event.key.toLowerCase() === "z") {
-        this.undo();
-        return;
-    }
+        if (($event.ctrlKey && $event.code === "KeyY") ||
+            ($event.metaKey && $event.shiftKey && $event.code === "KeyZ")) {
+            this.redo();
+            return;
+        }
+        if (($event.ctrlKey || $event.metaKey) && $event.code === "KeyZ") {
+            this.undo();
+            return;
+        }
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return;
         }
