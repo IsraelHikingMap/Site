@@ -184,7 +184,6 @@ export class DrawingComponent extends BaseMapComponent {
             },
             type: "YesNo"
         });
-        
     }
 
     private showDeleteAllRoutesConfirmation() {
