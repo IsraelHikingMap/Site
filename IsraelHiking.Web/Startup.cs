@@ -130,24 +130,20 @@ namespace IsraelHiking.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var rewriteOptions = new RewriteOptions();
-            rewriteOptions.Rules.Add(new RewriteWithQueryRule(".*_escaped_fragment_=%2F%3Fs%3D(.*)", "api/opengraph/$1", false));
-
             if (_isDevelopment)
             {
                 app.UseDeveloperExceptionPage();
             }
             else
             {
-                rewriteOptions.AddRedirectToHttps();
+                app.UseHttpsRedirection();
             }
-            app.UseRewriter(rewriteOptions);
             app.UseResponseCompression();
+            app.UseRouting();
             app.UseCors(builder =>
             {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();//.AllowCredentials();
             });
-            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
