@@ -78,26 +78,14 @@ namespace IsraelHiking.API.Controllers
 
         private static ProfileType ConvertProfile(string type)
         {
-            var profile = ProfileType.Foot;
-            switch (type)
+            return type switch
             {
-                case RoutingType.HIKE:
-                    profile = ProfileType.Foot;
-                    break;
-                case RoutingType.BIKE:
-                    profile = ProfileType.Bike;
-                    break;
-                case RoutingType.FOUR_WHEEL_DRIVE:
-                    profile = ProfileType.Car4WheelDrive;
-                    break;
-                case RoutingType.CAR:
-                    profile = ProfileType.Car;
-                    break;
-                case RoutingType.NONE:
-                    profile = ProfileType.None;
-                    break;
-            }
-            return profile;
+                RoutingType.HIKE => ProfileType.Foot,
+                RoutingType.BIKE => ProfileType.Bike,
+                RoutingType.FOUR_WHEEL_DRIVE => ProfileType.Car4WheelDrive,
+                RoutingType.NONE => ProfileType.None,
+                _ => ProfileType.Foot
+            };
         }
 
         private async Task<Coordinate> GetGeographicPosition(string position)

@@ -66,22 +66,12 @@ namespace IsraelHiking.DataAccess
         public async Task<Feature> GetRouting(RoutingGatewayRequest request)
         {
             var httpClient = _httpClientFactory.CreateClient();
-            string profile = "hike";
-            switch (request.Profile)
-            {
-                case ProfileType.Foot:
-                    profile = "hike";
-                    break;
-                case ProfileType.Bike:
-                    profile = "mtb";
-                    break;
-                case ProfileType.Car4WheelDrive:
-                    profile = "car4wd";
-                    break;
-                case ProfileType.Car:
-                    profile = "car";
-                    break;
-            }
+            string profile = request.Profile switch {
+                ProfileType.Foot => "hike",
+                ProfileType.Bike => "mtb",
+                ProfileType.Car4WheelDrive => "car4wd",
+                _ => "hike"
+            };
             var fromStr = $"{request.From.Y},{request.From.X}";
             var toStr = $"{request.To.Y},{request.To.X}";
             var requestAddress = $"{$"{_options.GraphhopperServerAddress}route?instructions=false&points_encoded=false&elevation=true&details=track_type&details=road_class&point="}{fromStr}&point={toStr}&profile={profile}";
