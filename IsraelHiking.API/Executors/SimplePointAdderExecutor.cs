@@ -97,36 +97,54 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <summary>
-        /// This gets the closest highway from the database, checks that it's up to date and update from OSM if needed.
+        /// This gets the closest highways ordered by distance from the database, checks that it's up to date and update from OSM if needed.
         /// </summary>
         /// <param name="osmGateway"></param>
         /// <param name="latLng"></param>
-        /// <returns>The way from OSM and the equivalent feature</returns>
-        private async Task<(Way, Feature)> GetClosestHighway(IAuthClient osmGateway, LatLng latLng)
+        /// <returns>The way from OSM and the equivalent feature, and also all the other closest highways</returns>
+        private async Task<(Way, Feature[])> GetClosestHighways(IAuthClient osmGateway, LatLng latLng)
         {
             var diff = 0.003; // get hihgways around 300 m radius not to miss highways (elastic bug?)
             var highways = await _highwaysRepository.GetHighways(new Coordinate(latLng.Lng + diff, latLng.Lat + diff),
                 new Coordinate(latLng.Lng - diff, latLng.Lat - diff));
             var point = new Point(latLng.Lng, latLng.Lat);
-            var closestHighway = highways.Where(h => h.Geometry.Distance(point) < _options.ClosestHighwayForGates)
-                .OrderBy(h => h.Geometry.Distance(point)).FirstOrDefault();
+            var closestHighways = highways.Where(h => h.Geometry.Distance(point) < _options.ClosestHighwayForGates)
+                .OrderBy(h => h.Geometry.Distance(point)).ToArray();
 
-            if (closestHighway == null)
+            if (!closestHighways.Any())
             {
-                return (null, closestHighway);
+                return (null, Array.Empty<Feature>());
             }
 
             // check for version matching and get updates if needed.
+            var closestHighway = closestHighways.First();
             var simpleWay = await osmGateway.GetWay(closestHighway.GetOsmId());
             if (simpleWay.Version == long.Parse(closestHighway.Attributes[FeatureAttributes.POI_VERSION].ToString()))
             {
-                return (simpleWay, closestHighway);
+                return (simpleWay, closestHighways);
             }
             var completeWay = await osmGateway.GetCompleteWay(closestHighway.GetOsmId());
             highways = _osmGeoJsonPreprocessorExecutor.Preprocess(new List<CompleteWay> { completeWay });
-            closestHighway = highways.Where(h => h.Geometry.Distance(point) < _options.ClosestHighwayForGates)
+            closestHighways[0] = highways.Where(h => h.Geometry.Distance(point) < _options.ClosestHighwayForGates)
                 .OrderBy(h => h.Geometry.Distance(point)).FirstOrDefault();
-            return (simpleWay, closestHighway);
+            return (simpleWay, closestHighways);
+        }
+
+        /// <summary>
+        /// This method receives the closest highways and finds the closest node, and checks if it is a juction node
+        /// </summary>
+        /// <param name="latLng"></param>
+        /// <param name="closestHighways"></param>
+        /// <returns>The closest node, its index in the way and whether it is a junction node</returns>
+        private (Coordinate, int, long, bool) GetClosestNodeAndCheckIsJunction(LatLng latLng, Feature[] closestHighways)
+        {
+            var coordinate = latLng.ToCoordinate();
+            var closestHighway = closestHighways.First();
+            var closestNode = closestHighway.Geometry.Coordinates.OrderBy(n => n.Distance(coordinate)).FirstOrDefault();
+            var closetNodeIndex = Array.FindIndex(closestHighway.Geometry.Coordinates.ToArray(), n => n == closestNode);
+            var nodeId = long.Parse(((List<object>)closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[closetNodeIndex].ToString());
+            var isJunction = closestHighways.Skip(1).Any(f => ((List<object>)f.Attributes[FeatureAttributes.POI_OSM_NODES]).Any(nId => nId.ToString() == nodeId.ToString()));
+            return (closestNode, closetNodeIndex, nodeId, isJunction);
         }
 
         private async Task<OsmChange> GetOsmChange(IAuthClient osmGateway, AddSimplePointOfInterestRequest request)
@@ -146,23 +164,21 @@ namespace IsraelHiking.API.Executors
                 };
             }
 
-            (var way, var closestHighway) = await GetClosestHighway(osmGateway, request.LatLng);
-            if (closestHighway == null)
+            (var way, var closestHighways) = await GetClosestHighways(osmGateway, request.LatLng);
+            if (!closestHighways.Any())
             {
                 throw new Exception("There's no close enough highway to add a gate");
             }
+            (var closestNode, var closetNodeIndex, var nodeId, var isJunction) = GetClosestNodeAndCheckIsJunction(request.LatLng, closestHighways);
             var coordinate = request.LatLng.ToCoordinate();
-            var closestNode = closestHighway.Geometry.Coordinates.OrderBy(n => n.Distance(coordinate)).FirstOrDefault();
-            var closetNodeIndex = Array.FindIndex(closestHighway.Geometry.Coordinates.ToArray(), n => n == closestNode);
-            if (closestNode.Distance(coordinate) < _options.ClosestNodeForGates
-                || closetNodeIndex == 0 || closetNodeIndex == closestHighway.Geometry.Coordinates.Length - 1)
+            if (isJunction == false && closestNode.Distance(coordinate) < _options.ClosestNodeForGates)
             {
-                var nodeId = long.Parse(((List<object>)closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[closetNodeIndex].ToString());
+                // Close enough to a node and not a juction -> updating this node
                 var nodeToUpdate = await osmGateway.GetNode(nodeId);
                 if (nodeToUpdate.Tags == null)
                 {
                     nodeToUpdate.Tags = newNode.Tags;
-                } 
+                }
                 else
                 {
                     foreach (var tag in newNode.Tags)
@@ -170,20 +186,44 @@ namespace IsraelHiking.API.Executors
                         nodeToUpdate.Tags.AddOrReplace(tag);
                     }
                 }
-                
+
                 return new OsmChange
                 {
                     Modify = new[] { nodeToUpdate }
                 };
             }
-
-            // add in between two points:
-            var segmentBefore = new LineSegment(closestHighway.Geometry.Coordinates[closetNodeIndex - 1], closestNode);
-            var segmentAfter = new LineSegment(closestNode, closestHighway.Geometry.Coordinates[closetNodeIndex + 1]);
+            // Need to add a node, default location is just before the closest node
             var indexToInsert = closetNodeIndex;
-            if (segmentBefore.DistancePerpendicular(coordinate) < segmentAfter.DistancePerpendicular(coordinate))
+
+            if (closetNodeIndex == 0)
             {
-                indexToInsert += 1;
+                var firstSegment = new LineSegment(closestNode, closestHighways.First().Geometry.Coordinates[closetNodeIndex + 1]);
+                if (firstSegment.Distance(coordinate) < closestNode.Distance(coordinate)) {
+                    indexToInsert = 1;
+                }
+            }
+            else if (closetNodeIndex == closestHighways.First().Geometry.Coordinates.Length - 1)
+            {
+                var lastSegment = new LineSegment(closestHighways.First().Geometry.Coordinates[closetNodeIndex - 1], closestNode);
+                if (lastSegment.Distance(coordinate) >= closestNode.Distance(coordinate))
+                {
+                    indexToInsert += 1;
+                }
+            }
+            else
+            {
+                // add in between two points:
+                var segmentBefore = new LineSegment(closestHighways.First().Geometry.Coordinates[closetNodeIndex - 1], closestNode);
+                var segmentAfter = new LineSegment(closestNode, closestHighways.First().Geometry.Coordinates[closetNodeIndex + 1]);
+                var closestSegment = segmentBefore.Distance(coordinate) < segmentAfter.Distance(coordinate) ? segmentBefore : segmentAfter;
+                if (closestSegment.Distance(coordinate) >= closestNode.Distance(coordinate))
+                {
+                    throw new Exception("Closest segment is not in the right aligment to add a node to it");
+                }
+                if (closestSegment == segmentAfter)
+                {
+                    indexToInsert += 1;
+                }
             }
             var updatedList = way.Nodes.ToList();
             updatedList.Insert(indexToInsert, -1);
