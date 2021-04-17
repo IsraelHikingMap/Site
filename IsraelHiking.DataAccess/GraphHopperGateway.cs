@@ -1,6 +1,7 @@
 ﻿using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -56,11 +57,15 @@ namespace IsraelHiking.DataAccess
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ConfigurationData _options;
+        private readonly ILogger _logger;
 
-        public GraphHopperGateway(IHttpClientFactory httpClientFactory, IOptions<ConfigurationData> options)
+        public GraphHopperGateway(IHttpClientFactory httpClientFactory,
+            IOptions<ConfigurationData> options,
+            ILogger logger)
         {
             _httpClientFactory = httpClientFactory;
             _options = options.Value;
+            _logger = logger;
         }
 
         public async Task<Feature> GetRouting(RoutingGatewayRequest request)
@@ -80,6 +85,7 @@ namespace IsraelHiking.DataAccess
             var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
             if (jsonResponse?.Paths == null || !jsonResponse.Paths.Any())
             {
+                _logger.LogWarning($"Problem with routing response: {response.StatusCode} {content}");
                 return LineStringToFeature(new LineString(new[] { request.From, request.To }));
             }
             var path = jsonResponse.Paths.First();
@@ -87,6 +93,7 @@ namespace IsraelHiking.DataAccess
             {
                 var jsonCoordinates = path.Points.Coordinates.First();
                 var convertedCoordiates = new CoordinateZ(jsonCoordinates[0], jsonCoordinates[1], jsonCoordinates.Count > 2 ? jsonCoordinates[2] : 0.0);
+                _logger.LogWarning($"Problem with routing response: got only one point back from graphhopper...");
                 return LineStringToFeature(new LineString(new[] { convertedCoordiates, convertedCoordiates }));
             }
             var lineString = new LineString(path.Points.Coordinates.Select(c => new CoordinateZ(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());

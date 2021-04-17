@@ -1,5 +1,6 @@
 ﻿using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
@@ -19,7 +20,7 @@ namespace IsraelHiking.DataAccess.Tests
             factory.CreateClient().Returns(new HttpClient());
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
-            var gateway = new GraphHopperGateway(factory, options);
+            var gateway = new GraphHopperGateway(factory, options, Substitute.For<ILogger>());
             var results = gateway.GetRouting(new RoutingGatewayRequest
             {
                 From = new Coordinate(35.24470233230383, 31.971396577420734),
