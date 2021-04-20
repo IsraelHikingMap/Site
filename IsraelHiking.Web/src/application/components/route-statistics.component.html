@@ -111,7 +111,20 @@
             }"
             [paint]="slopeRoutePaint">
 </mgl-layer>
-
+<mgl-layer id="slope-route-layer-direction"
+           type="symbol"
+           source="slope-route"
+           [layout]="{
+                'symbol-placement': 'line',
+                'symbol-spacing': 150,
+                'icon-image': 'arrow',
+                'icon-size': 0.4,
+                'icon-allow-overlap': true,
+                'icon-ignore-placement': true
+           }"
+           [paint]="{
+                'icon-color': 'black'
+            }">
 <mgl-geojson-source id="km-markers-source" [data]="kmMarkersSource"></mgl-geojson-source>
 <mgl-layer id="km-markers-cricles"
            type="circle"

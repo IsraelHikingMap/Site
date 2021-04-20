@@ -43,10 +43,6 @@ export interface IRouteStatistics {
 
 @Injectable()
 export class RouteStatisticsService {
-    public static readonly MAX_SLOPE = 15;
-    public static readonly MODERATE_SLOPE = 5;
-    public static readonly MIN_SLOPE = -15;
-
     public getStatisticsByRange(route: RouteData, start: IRouteStatisticsPoint, end: IRouteStatisticsPoint): IRouteStatistics {
         let routeStatistics = {
             points: [] as IRouteStatisticsPoint[],
@@ -79,12 +75,6 @@ export class RouteStatisticsService {
                 } as IRouteStatisticsPoint;
                 point.latlng = latlng;
                 point.slope = distance === 0 ? 0 : (latlng.alt - previousPoint.alt) * 100 / distance;
-                if (point.slope > RouteStatisticsService.MAX_SLOPE) {
-                    point.slope = RouteStatisticsService.MAX_SLOPE;
-                }
-                if (point.slope < RouteStatisticsService.MIN_SLOPE) {
-                    point.slope = RouteStatisticsService.MIN_SLOPE;
-                }
                 if (start == null || (point.coordinate[0] > start.coordinate[0] && point.coordinate[0] < end.coordinate[0])) {
                     routeStatistics.points.push(point);
                 }
