@@ -249,6 +249,49 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
+        public void AddGate_InsidePolygonAndCloserWay_ShouldAddToCloserWay()
+        {
+            var feature = new Feature(new LineString(new[] {
+                    new Coordinate(0,0),
+                    new Coordinate(1,1)
+                }), new AttributesTable {
+                    {FeatureAttributes.POI_OSM_NODES, new List<object> { 0, 1 } },
+                    {FeatureAttributes.ID, "Way_1"},
+                    {FeatureAttributes.POI_VERSION, 1 }
+                });
+            var feature2 = new Feature(new Polygon(new LinearRing(new[] {
+                    new Coordinate(0,0),
+                    new Coordinate(1,0),
+                    new Coordinate(1,1),
+                    new Coordinate(0,1),
+                    new Coordinate(0,0)
+                })), new AttributesTable {
+                    {FeatureAttributes.POI_OSM_NODES, new List<object> { 2, 3, 4, 5, 2} },
+                    {FeatureAttributes.ID, "Way_2"},
+                    {FeatureAttributes.POI_VERSION, 1 }
+                });
+            foreach (var coordinate in feature.Geometry.Coordinates)
+            {
+                _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
+                    .Returns(new Node() { Longitude = coordinate.X, Latitude = coordinate.Y });
+            }
+            _authClient.GetWay(1).Returns(new Way { Id = 1, Version = 1, Nodes = new long[] { 0, 1 } });
+            _authClient.GetWay(2).Returns(new Way { Id = 2, Version = 1, Nodes = new long[] { 2, 3, 4, 5, 2 } });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature, feature2 });
+
+            _executor.Add(_authClient, new AddSimplePointOfInterestRequest
+            {
+                LatLng = new LatLng(0.50001, 0.5),
+                PointType = SimplePointType.ClosedGate
+            }).Wait();
+
+            _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c =>
+                c.Create.Length == 1 && c.Modify.Length == 1 &&
+                c.Modify.OfType<Way>().First().Nodes.Length == 3 &&
+                c.Modify.OfType<Way>().First().Nodes[1] == -1));
+        }
+
+        [TestMethod]
         public void AddGate_NearAnOutdatedWay_ShouldAddItInTheRightPlace()
         {
             var feature = new Feature(new LineString(new[] {

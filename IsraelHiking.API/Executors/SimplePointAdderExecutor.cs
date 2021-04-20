@@ -97,7 +97,8 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <summary>
-        /// This gets the closest highways ordered by distance from the database, checks that it's up to date and update from OSM if needed.
+        /// This gets the closest highways ordered by distance from the database, 
+        /// checks the closest is up-to-date and updates from OSM if needed.
         /// </summary>
         /// <param name="osmGateway"></param>
         /// <param name="latLng"></param>
@@ -108,8 +109,8 @@ namespace IsraelHiking.API.Executors
             var highways = await _highwaysRepository.GetHighways(new Coordinate(latLng.Lng + diff, latLng.Lat + diff),
                 new Coordinate(latLng.Lng - diff, latLng.Lat - diff));
             var point = new Point(latLng.Lng, latLng.Lat);
-            var closestHighways = highways.Where(h => h.Geometry.Distance(point) < _options.ClosestHighwayForGates)
-                .OrderBy(h => h.Geometry.Distance(point)).ToArray();
+            var closestHighways = highways.Where(h => DistanceWithPolygonFix(h.Geometry, point) < _options.ClosestHighwayForGates)
+                .OrderBy(h => DistanceWithPolygonFix(h.Geometry, point)).ToArray();
 
             if (!closestHighways.Any())
             {
@@ -121,13 +122,43 @@ namespace IsraelHiking.API.Executors
             var simpleWay = await osmGateway.GetWay(closestHighway.GetOsmId());
             if (simpleWay.Version == long.Parse(closestHighway.Attributes[FeatureAttributes.POI_VERSION].ToString()))
             {
-                return (simpleWay, closestHighways);
+                return (simpleWay, closestHighways.ToArray());
             }
+            // The highway in the database is not up-to-date, need to fetch it from OSM.
             var completeWay = await osmGateway.GetCompleteWay(closestHighway.GetOsmId());
-            highways = _osmGeoJsonPreprocessorExecutor.Preprocess(new List<CompleteWay> { completeWay });
-            closestHighways[0] = highways.Where(h => h.Geometry.Distance(point) < _options.ClosestHighwayForGates)
-                .OrderBy(h => h.Geometry.Distance(point)).FirstOrDefault();
+            var firstHighway = _osmGeoJsonPreprocessorExecutor.Preprocess(new List<CompleteWay> { completeWay }).FirstOrDefault();
+            if (firstHighway == null) {
+                // This is a rate case where the next version of the highway doesn't contain any tags 
+                // and it was a highway when the highways database wes built
+                return (null, Array.Empty<Feature>());
+            }
+            // The following assumes that after the highway version upgrade this is still the closest highway 
+            // Ignoring this assumption will require to redo the entire process to another highway 
+            // which seems too complicated and has very low probability...
+            closestHighways[0] = firstHighway;
             return (simpleWay, closestHighways);
+        }
+
+        private double DistanceWithPolygonFix(Geometry geometry, Point point)
+        {
+            if (geometry is Polygon polygon)
+            {
+                return DistanceToPolygon(polygon, point);
+            }
+            if (geometry is MultiPolygon multiPolygon)
+            {
+                return multiPolygon.OfType<Polygon>().Min(p => DistanceToPolygon(p, point));
+            }
+            return geometry.Distance(point);
+        }
+
+        private double DistanceToPolygon(Polygon polygon, Point point)
+        {
+            if (!polygon.Contains(point))
+            {
+                return polygon.Distance(point);
+            }
+            return polygon.InteriorRings.Concat(new[] { polygon.ExteriorRing }).Min(l => l.Distance(point));
         }
 
         /// <summary>

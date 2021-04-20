@@ -33,7 +33,7 @@ namespace IsraelHiking.API.Converters
         /// <inheritdoc />
         public Feature ToGeoJson(ICompleteOsmGeo completeOsmGeo)
         {
-            if (completeOsmGeo.Tags.Count == 0)
+            if (completeOsmGeo?.Tags == null || completeOsmGeo.Tags.Count == 0)
             {
                 return null;
             }
