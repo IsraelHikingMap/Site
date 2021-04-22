@@ -4,7 +4,7 @@ import * as PhotoSwipe from "photoswipe";
 import * as PhotoSwipeUI_Default from "photoswipe/dist/photoswipe-ui-default";
 
 import { BaseMapComponent } from "./base-map.component";
-import { ResourcesService } from "application/services/resources.service";
+import { ResourcesService } from "../services/resources.service";
 
 export const PHOTO_SWIPE_DATA = new InjectionToken<PhotoSwipeData>("PHOTO_SWIPE_DATA");
 

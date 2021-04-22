@@ -3,7 +3,7 @@ import { Router } from "@angular/router";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { PoiService } from "application/services/poi.service";
+import { PoiService } from "../../services/poi.service";
 import { RouteStrings } from "../../services/hash.service";
 
 @Component({
