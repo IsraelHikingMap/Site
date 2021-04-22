@@ -1,10 +1,9 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { fromEvent, Subscription } from "rxjs";
+import { Subscription } from "rxjs";
 import { throttleTime } from "rxjs/operators";
-import { DeviceOrientation, DeviceOrientationCompassHeading } from "@ionic-native/device-orientation/ngx";
+import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
 
 import { LoggingService } from "./logging.service";
-import { RunningContextService } from "./running-context.service";
 
 @Injectable()
 export class DeviceOrientationService {
@@ -16,7 +15,6 @@ export class DeviceOrientationService {
     private isBackground: boolean;
 
     constructor(private readonly ngZone: NgZone,
-                private readonly runningContextService: RunningContextService,
                 private readonly loggingService: LoggingService,
                 private readonly deviceOrientation: DeviceOrientation) {
         this.orientationChanged = new EventEmitter();
