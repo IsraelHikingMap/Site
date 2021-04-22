@@ -4,6 +4,9 @@ import { last } from "lodash-es";
 import { SpatialService } from "./spatial.service";
 import { LatLngAlt, RouteData, ILatLngTime } from "../models/models";
 
+export const MINIMAL_DISTANCE = 50;
+export const MINIMAL_ANGLE = 30;
+
 export interface IRouteStatisticsPoint {
     /**
      * x - distance in KM, y - altitude in meters
@@ -108,6 +111,7 @@ export class RouteStatisticsService {
     public getStatistics(route: RouteData,
                          closestRouteToRecording: RouteData,
                          latLng: ILatLngTime,
+                         heading: number,
                          routeIsRecording: boolean): IRouteStatistics {
         let routeStatistics = this.getStatisticsByRange(route, null, null);
         let closestRouteStatistics = closestRouteToRecording ? this.getStatisticsByRange(closestRouteToRecording, null, null) : null;
@@ -116,7 +120,7 @@ export class RouteStatisticsService {
             return routeStatistics;
         }
         closestRouteStatistics.remainingDistance =
-            closestRouteStatistics.length - (this.findDistanceForLatLngInKM(closestRouteStatistics, latLng) * 1000);
+            closestRouteStatistics.length - (this.findDistanceForLatLngInKM(closestRouteStatistics, latLng, heading) * 1000);
         if (routeIsRecording) {
             this.addDurationAndAverageSpeed(route, routeStatistics.length, closestRouteStatistics);
             closestRouteStatistics.length = routeStatistics.length;
@@ -170,61 +174,32 @@ export class RouteStatisticsService {
         return (value2 - value1) * ratio + value1;
     }
 
-    private isOnSegment(latlng1: LatLngAlt, latlng2: LatLngAlt, latlng: LatLngAlt): boolean {
-        if (latlng2.lat > latlng1.lat) {
-            if (latlng.lat < latlng1.lat) {
-                return false;
-            }
-            if (latlng.lat > latlng2.lat) {
-                return false;
-            }
-        } else {
-            if (latlng.lat > latlng1.lat) {
-                return false;
-            }
-            if (latlng.lat < latlng2.lat) {
-                return false;
-            }
-        }
-        if (latlng2.lng > latlng1.lng) {
-            if (latlng.lng < latlng1.lng) {
-                return false;
-            }
-            if (latlng.lng > latlng2.lng) {
-                return false;
-            }
-        } else {
-            if (latlng.lng > latlng1.lng) {
-                return false;
-            }
-            if (latlng.lng < latlng2.lng) {
-                return false;
-            }
-        }
-        let distance = SpatialService.getDistanceFromPointToLine(latlng, [latlng1, latlng2]);
-        if (distance < 100) {
-            return true;
-        }
-        return false;
-    }
-
-    public findDistanceForLatLngInKM(statistics: IRouteStatistics, latLng: LatLngAlt): number {
+    public findDistanceForLatLngInKM(statistics: IRouteStatistics, latLng: LatLngAlt, heading: number): number {
         if (statistics.points.length < 2) {
             return 0;
         }
-        let distance = SpatialService.getDistanceFromPointToLine(latLng, statistics.points.map(p => p.latlng));
-        if (distance > 50) {
-            return 0;
+        let bestPoint = null;
+        let minimalWeight = MINIMAL_DISTANCE;
+        if (heading != null) {
+            minimalWeight += MINIMAL_ANGLE;
         }
-        let closestPoint = SpatialService.getClosestPoint(latLng, statistics.points.map(p => p.latlng));
         let previousPoint = statistics.points[0];
-        for (let currentPoint of statistics.points) {
-            if (this.isOnSegment(previousPoint.latlng, currentPoint.latlng, closestPoint) === false) {
-                previousPoint = currentPoint;
+        for (let point of statistics.points) {
+            if (point === statistics.points[0]) {
                 continue;
             }
-            return previousPoint.coordinate[0] + SpatialService.getDistanceInMeters(previousPoint.latlng, latLng) / 1000;
+            let currentWeight = SpatialService.getDistanceFromPointToLine(latLng, [previousPoint.latlng, point.latlng]);
+            if (heading != null) {
+                currentWeight += Math.abs(heading - SpatialService.getLineBearingInDegrees(previousPoint.latlng, point.latlng));
+            }
+            if (currentWeight < minimalWeight) {
+                minimalWeight = currentWeight;
+                bestPoint = previousPoint;
+            }
+            previousPoint = point;
         }
-        return 0;
+        return bestPoint
+            ? bestPoint.coordinate[0] + SpatialService.getDistanceInMeters(bestPoint.latlng, latLng) / 1000
+            : 0;
     }
 }

@@ -118,6 +118,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     private zoom: number;
     private routeColor: string;
     private audioPlayer: IAudioPlayer;
+    private heading: number;
 
     constructor(resources: ResourcesService,
                 private readonly changeDetectorRef: ChangeDetectorRef,
@@ -139,6 +140,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.isFollowing = false;
         this.statistics = null;
         this.subRouteRange = null;
+        this.heading = null;
         this.setViewStatisticsValues(null);
         this.componentSubscriptions = [];
         this.kmMarkersSource = {
@@ -845,23 +847,25 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (!this.isOpen) {
             return;
         }
-        let point = this.getPointFromLatLng(latlng);
+        let point = this.getPointFromLatLng(latlng, null);
         this.showChartHover(point);
     }
 
     private onGeolocationChanged(position: Position) {
         this.currentSpeed = (position == null) ? null : position.coords.speed * 3.6;
+        this.heading = (position == null) || position.coords.speed === 0 ? null : position.coords.heading;
         const currentSpeedTimeout = "currentSpeedTimeout";
         this.cancelableTimeoutService.clearTimeoutByGroup(currentSpeedTimeout);
         this.cancelableTimeoutService.setTimeoutByGroup(() => {
             // if there are no location updates reset speed.
             this.currentSpeed = null;
+            this.heading = null;
         }, 5000, currentSpeedTimeout);
         this.onRouteDataChanged();
     }
 
     private refreshLocationGroup() {
-        let point = this.getPointFromLatLng(this.geoLocationService.currentLocation);
+        let point = this.getPointFromLatLng(this.geoLocationService.currentLocation, this.heading);
         if (!point) {
             this.hideLocationGroup();
             return;
@@ -884,14 +888,14 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
     }
 
-    private getPointFromLatLng(latlng: LatLngAlt): IRouteStatisticsPoint {
+    private getPointFromLatLng(latlng: LatLngAlt, heading: number): IRouteStatisticsPoint {
         if (latlng == null) {
             return null;
         }
         if (this.statistics == null) {
             return null;
         }
-        let x = this.routeStatisticsService.findDistanceForLatLngInKM(this.statistics, latlng);
+        let x = this.routeStatisticsService.findDistanceForLatLngInKM(this.statistics, latlng, heading);
         if (x <= 0) {
             return null;
         }
@@ -905,13 +909,15 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.setViewStatisticsValues(null);
             return;
         }
-        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation);
+        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation,
+            this.heading);
         let routeIsRecording = this.selectedRouteService.getRecordingRoute() != null &&
             this.selectedRouteService.getRecordingRoute().id === route.id;
         this.statistics = this.routeStatisticsService.getStatistics(
             route,
             closestRouteToGps,
             this.geoLocationService.currentLocation,
+            this.heading,
             routeIsRecording);
         this.routeColor = closestRouteToGps ? closestRouteToGps.color : route.color;
         this.updateIsFollowing();
@@ -920,7 +926,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private getRouteForChart() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation);
+        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation,
+            this.heading);
         return selectedRoute || closestRouteToGps;
     }
 
