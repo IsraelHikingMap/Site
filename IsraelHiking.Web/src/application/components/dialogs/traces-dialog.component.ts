@@ -14,9 +14,11 @@ import { LayersService } from "../../services/layers/layers.service";
 import { TracesService } from "../../services/traces.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SpatialService } from "../../services/spatial.service";
+import { RecordedRouteService } from "../../services/recorded-route.service";
+import { DataContainerService } from "../../services/data-container.service";
 import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
-import { DataContainer, ApplicationState, Trace, TraceVisibility } from "../../models/models";
+import { ApplicationState, Trace, TraceVisibility } from "../../models/models";
 
 @Component({
     selector: "traces-dialog",
@@ -49,6 +51,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                 private readonly authorizationService: AuthorizationService,
                 private readonly tracesService: TracesService,
                 private readonly runningContextService: RunningContextService,
+                private readonly recordedRouteService: RecordedRouteService,
+                private readonly dataContainerService: DataContainerService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
@@ -77,20 +81,9 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.tracesChangedSubscription.unsubscribe();
     }
 
-    public async showTrace(): Promise<void> {
+    public async addTraceToRoutes() {
         let trace = await this.tracesService.getTraceById(this.selectedTraceId);
-        this.ngRedux.dispatch(new SetVisibleTraceAction({ traceId: trace.id }));
-        let latlngs = [];
-        for (let route of trace.dataContainer.routes) {
-            for (let segment of route.segments) {
-                latlngs = latlngs.concat(segment.latlngs);
-            }
-            for (let marker of route.markers) {
-                latlngs.push(marker.latlng);
-            }
-        }
-        let bounds = SpatialService.getBounds(latlngs);
-        this.fitBoundsService.fitBounds(bounds);
+        this.dataContainerService.setData(trace.dataContainer, true);
     }
 
     private getSelectedTrace(): Trace {
@@ -128,7 +121,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                 this.toastService.confirm({ message: this.resources.noUnmappedRoutes, type: "Ok" });
                 return;
             }
-            await this.showTrace();
+            let trace = await this.tracesService.getTraceById(this.selectedTraceId);
+            this.ngRedux.dispatch(new SetVisibleTraceAction({ traceId: trace.id }));
             this.ngRedux.dispatch(new SetMissingPartsAction({ missingParts: geoJson }));
             let bounds = SpatialService.getGeoJsonBounds(geoJson);
             this.fitBoundsService.fitBounds(bounds);
