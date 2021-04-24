@@ -1,6 +1,8 @@
 ﻿using IsraelHiking.DataAccessInterfaces;
+using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using System;
+using System.Collections.Generic;
 
 namespace IsraelHiking.API.Executors
 {
@@ -26,7 +28,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <summary>
-        /// Main helper function to set the elevation
+        /// Main helper function to set the elevation for a geometry
         /// </summary>
         /// <param name="geometry"></param>
         /// <param name="elevationDataStorage"></param>
@@ -34,6 +36,19 @@ namespace IsraelHiking.API.Executors
         {
             var setElevationValuesFilter = new SetElevationValuesFilter((x, y) => elevationDataStorage.GetElevation(new Coordinate(x,y)).Result);
             geometry.Apply(setElevationValuesFilter);
+        }
+
+        /// <summary>
+        /// Main helper function to set the elevation for a coleection of features
+        /// </summary>
+        /// <param name="features"></param>
+        /// <param name="elevationDataStorage"></param>
+        public static void SetElevation(IEnumerable<Feature> features, IElevationDataStorage elevationDataStorage)
+        {
+            foreach (var feature in features)
+            {
+                SetElevation(feature.Geometry, elevationDataStorage);
+            }
         }
     }
 

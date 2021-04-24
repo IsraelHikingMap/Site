@@ -750,7 +750,10 @@ export class PoiService {
             iconColor: feature.properties.poiIconColor,
             imagesUrls: Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => feature.properties[k]),
             urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
-            isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint"
+            isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint",
+            lengthInKm: (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString")
+                ? SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0 
+                : null
         };
     }
 
