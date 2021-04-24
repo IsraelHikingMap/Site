@@ -23,7 +23,7 @@
   <platform name="android">
     <hook type="after_prepare" src="remove-permissions.js" />
     <allow-intent href="market:*" />
-    <preference name="android-targetSdkVersion" value="30" />
+    <preference name="android-targetSdkVersion" value="29" />
     <preference name="android-minSdkVersion" value="22" />
     <preference name="AndroidLaunchMode" value="singleInstance" />
     <icon density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />
