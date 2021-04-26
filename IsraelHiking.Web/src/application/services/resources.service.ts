@@ -409,7 +409,6 @@ export class ResourcesService {
     public legendGrass: string;
     public legendScrub: string;
     public legendSand: string;
-    public legendWetland: string;
     public legendCemetery: string;
     public legendQuarry: string;
     public legendEmpty: string;

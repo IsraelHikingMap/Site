@@ -122,7 +122,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
         remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendSingles);
 
         this.removeItemInSection(this.resources.legendWater, this.resources.legendRiver);
-        this.removeItemInSection(this.resources.legendWater, this.resources.legendWetland);
         this.removeItemInSection(this.resources.legendWater, this.resources.legendWaterfall);
 
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendAttraction);
