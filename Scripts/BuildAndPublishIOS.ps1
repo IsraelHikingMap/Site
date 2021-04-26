@@ -7,7 +7,7 @@ $xml.Load($filePath)
 $xml.widget.version = $env:APPVEYOR_BUILD_VERSION
 $xml.Save($filePath)
 
-Write-Host "Decripting files"
+Write-Host "Decrypting files"
 Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/appveyor.mobileprovision.enc -d -a -out ./signing/appveyor.mobileprovision"
 Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/appveyorshareextention.mobileprovision.enc -d -a -out ./signing/appveyorshareextention.mobileprovision"
 Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer"
