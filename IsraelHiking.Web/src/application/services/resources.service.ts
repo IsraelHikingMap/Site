@@ -849,7 +849,6 @@ export class ResourcesService {
         this.legendGrass = this.gettextCatalog.getString("Grass");
         this.legendScrub = this.gettextCatalog.getString("Scrub");
         this.legendSand = this.gettextCatalog.getString("Sand");
-        this.legendWetland = this.gettextCatalog.getString("Wetland");
         this.legendCemetery = this.gettextCatalog.getString("Cemetery");
         this.legendQuarry = this.gettextCatalog.getString("Quarry");
         this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
