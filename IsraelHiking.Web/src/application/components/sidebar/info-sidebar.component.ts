@@ -116,19 +116,17 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendTheGreenLine);
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendThePurpleLine);
-
-        this.removeItemInSection(this.resources.legendAreas, this.resources.legendScrub);
     }
 
     private removeIhmUnwantedLegend() {
         remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendSingles);
-        remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendBicycleTrails);
 
         this.removeItemInSection(this.resources.legendWater, this.resources.legendRiver);
         this.removeItemInSection(this.resources.legendWater, this.resources.legendWetland);
         this.removeItemInSection(this.resources.legendWater, this.resources.legendWaterfall);
 
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendAttraction);
+        this.removeItemInSection(this.resources.legendPoi, this.resources.legendFlowers);
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendObservationTower);
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendAntenna);
 
@@ -146,7 +144,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendInformationCenter);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendPlayground);
 
-        this.removeItemInSection(this.resources.legendAreas, this.resources.legendWetland);
+        this.removeItemInSection(this.resources.legendAreas, this.resources.legendVineyard);
         this.removeItemInSection(this.resources.legendAreas, this.resources.legendCemetery);
         this.removeItemInSection(this.resources.legendAreas, this.resources.legendConstructionSite);
     }
