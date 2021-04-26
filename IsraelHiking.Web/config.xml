@@ -37,12 +37,6 @@
     </config-file>
     <config-file parent="/manifest/application/activity" target="AndroidManifest.xml">
       <intent-filter>
-        <action android:name="android.intent.action.SEND" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <data android:mimeType="image/jpeg" />
-        <data android:mimeType="image/jpg" />
-      </intent-filter>
-      <intent-filter>
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
@@ -70,8 +64,6 @@
         <data android:mimeType="application/kmz+xml" />
         <data android:mimeType="application/octet-stream" />
         <data android:mimeType="application/xml" />
-        <data android:mimeType="image/jpeg" />
-        <data android:mimeType="image/jpg" />
       </intent-filter>
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
@@ -130,14 +122,6 @@
         <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\.twl" />
         <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.twl" />
         <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.twl" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\.jpg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\.jpg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.jpg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.jpg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\.jpeg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\.jpeg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.jpeg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.jpeg" />
       </intent-filter>
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
@@ -198,19 +182,6 @@
     </config-file>
     <config-file target="*-Info.plist" parent="CFBundleDocumentTypes">
       <array>
-        <dict>
-          <key>CFBundleTypeName</key>
-          <string>JPEG image</string>
-          <key>CFBundleTypeRole</key>
-          <string>Editor</string>
-          <key>LSHandlerRank</key>
-          <string>Owner</string>
-          <key>LSItemContentTypes</key>
-          <array>
-              <string>public.jpeg</string>
-              <string>public.jpg</string>
-          </array>
-        </dict>
         <dict>
             <key>CFBundleTypeIconFiles</key>
             <array/>
