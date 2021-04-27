@@ -375,6 +375,7 @@ export class ResourcesService {
     public legendNatureReserveNationalPark: string;
     public legendMilitaryArea: string;
     public legendMilitaryTraining: string;
+    public legendMinefield: string;
     public legendAreaA: string;
     public legendAreaB: string;
     public legendInternationalBorder: string;
@@ -815,6 +816,7 @@ export class ResourcesService {
         this.legendNatureReserveNationalPark = this.gettextCatalog.getString("Nature Reserve, National Park");
         this.legendMilitaryArea = this.gettextCatalog.getString("Military Area");
         this.legendMilitaryTraining = this.gettextCatalog.getString("Military Training");
+        this.legendMinefield = this.gettextCatalog.getString("Minefield");
         this.legendAreaA = this.gettextCatalog.getString("Area A");
         this.legendAreaB = this.gettextCatalog.getString("Area B");
         this.legendInternationalBorder = this.gettextCatalog.getString("International Border");
