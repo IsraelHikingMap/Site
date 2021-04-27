@@ -399,6 +399,7 @@ export class ResourcesService {
     public legendModerate: string;
     public legendAdvanced: string;
     public legendChallengingWithDirection: string;
+    public legendBicycleTrails: string;
     public legendLocalTrail: string;
     public legendNationalTrail: string;
     public legendAreas: string;
@@ -435,7 +436,7 @@ export class ResourcesService {
     }
 
     public setLanguage = async (language: Language): Promise<void> => {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1619530770819");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1619543707958");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -840,6 +841,7 @@ export class ResourcesService {
         this.legendModerate = this.gettextCatalog.getString("Moderate");
         this.legendAdvanced = this.gettextCatalog.getString("Advanced");
         this.legendChallengingWithDirection = this.gettextCatalog.getString("Challenging with Direction");
+        this.legendBicycleTrails = this.gettextCatalog.getString("Bicycle Trails");
         this.legendLocalTrail = this.gettextCatalog.getString("Local Trail");
         this.legendNationalTrail = this.gettextCatalog.getString("National Trail");
         this.legendAreas = this.gettextCatalog.getString("Areas");
