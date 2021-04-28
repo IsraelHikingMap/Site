@@ -17,6 +17,7 @@ import { FileService } from "./file.service";
 import { ToastService } from "./toast.service";
 import { MapService } from "./map.service";
 import { GeoJsonParser } from "./geojson.parser";
+import { ApplicationState } from "../models/models";
 import { Urls } from "../urls";
 
 describe("Poi Service", () => {
@@ -165,6 +166,9 @@ describe("Poi Service", () => {
                                     coordinates: [0, 0]
                                 }
                             } as GeoJSON.Feature
+                        },
+                        offlineState: {
+                            uploadPoiQueue: []
                         }
                     };
                 };
@@ -191,6 +195,82 @@ describe("Poi Service", () => {
                     expect(feature.properties.poiAddedUrls).toEqual(["some-url"]);
                     expect(feature.properties.poiAddedImages).toEqual(["some-image-url"]);
                     expect(feature.properties.poiIcon).toBe("icon-spring");
+                    expect(feature.properties.poiGeolocation.lat).toBe(1);
+                    expect(feature.properties.poiGeolocation.lon).toBe(2);
+                    expect(poiService.getLocation(feature).lat).toBe(1);
+                    expect(poiService.getLocation(feature).lng).toBe(2);
+                    // expected to not change geometry
+                    expect(feature.geometry.type).toBe("Point");
+                    expect((feature.geometry as GeoJSON.Point).coordinates).toEqual([0, 0]);
+                });
+
+                return promise;
+            }
+        )
+    );
+
+    it("Should add properties when update point is in the queue already",
+        inject([PoiService, DatabaseService],
+            async (poiService: PoiService, dbMock: DatabaseService) => {
+                let featureInQueue = {
+                    properties: {
+                        poiSource: "OSM",
+                        poiId: "poiId",
+                        identifier: "id"
+                    } as any,
+                    geometry: {
+                        type: "Point",
+                        coordinates: [0, 0]
+                    }
+                } as GeoJSON.Feature;
+                poiService.setLocation(featureInQueue, { lat: 1, lng: 2 });
+                dbMock.getPoiFromUploadQueue = () => Promise.resolve(featureInQueue);
+                MockNgRedux.getInstance().dispatch = jasmine.createSpy();
+                MockNgRedux.getInstance().getState = () => {
+                    return {
+                        poiState: {
+                            selectedPointOfInterest: {
+                                properties: {
+                                    poiSource: "OSM",
+                                    poiId: "poiId",
+                                    identifier: "id",
+                                    poiIcon: "icon-spring",
+                                    poiIconColor: "blue",
+                                } as any,
+                                geometry: {
+                                    type: "Point",
+                                    coordinates: [0, 0]
+                                }
+                            } as GeoJSON.Feature
+                        },
+                        offlineState: {
+                            uploadPoiQueue: ["poiId"]
+                        }
+                    } as ApplicationState;
+                };
+                let spy = spyOn(dbMock, "addPoiToUploadQueue");
+                let promise = poiService.updateComplexPoi({
+                    id: "poiId",
+                    isPoint: true,
+                    category: "natural",
+                    icon: "icon-spring",
+                    iconColor: "blue",
+                    description: "description",
+                    imagesUrls: ["some-image-url"],
+                    title: "title",
+                    urls: ["some-url"]
+                }).then(() => {
+                    expect(MockNgRedux.getInstance().dispatch).toHaveBeenCalled();
+                    let feature = spy.calls.mostRecent().args[0];
+                    expect(feature.properties.poiId).not.toBeNull();
+                    expect(feature.properties.poiSource).toBe("OSM");
+                    expect(feature.properties["description:he"]).toBe("description");
+                    expect(poiService.getDescription(feature, "he")).toBe("description");
+                    expect(feature.properties["name:he"]).toBe("title");
+                    expect(poiService.getTitle(feature, "he")).toBe("title");
+                    expect(feature.properties.poiAddedUrls).toEqual(["some-url"]);
+                    expect(feature.properties.poiAddedImages).toEqual(["some-image-url"]);
+                    expect(feature.properties.poiIcon).toBeUndefined();
                     expect(feature.properties.poiGeolocation.lat).toBe(1);
                     expect(feature.properties.poiGeolocation.lon).toBe(2);
                     expect(poiService.getLocation(feature).lat).toBe(1);

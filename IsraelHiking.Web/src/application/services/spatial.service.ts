@@ -155,4 +155,15 @@ export class SpatialService {
         let options = { steps: 64, units: "meters" as Units, properties: { radius } };
         return circle(SpatialService.toCoordinate(centerPoint), radius, options);
     }
+
+    public static getLineBearingInDegrees(latlng1: LatLngAlt, latlng2: LatLngAlt): number {
+        let lat1Radians = latlng1.lat * Math.PI / 180;
+        let lat2Radians = latlng2.lat * Math.PI / 180;
+        let lngDiffRadians = (latlng2.lng - latlng1.lng) * Math.PI / 180;
+        let y = Math.sin(lngDiffRadians) * Math.cos(lat2Radians);
+        let x = Math.cos(lat1Radians) * Math.sin(lat2Radians) -
+                Math.sin(lat1Radians) * Math.cos(lat2Radians) * Math.cos(lngDiffRadians);
+        let bearingRadians = Math.atan2(y, x);
+        return (bearingRadians * 180 / Math.PI + 360) % 360; // in degrees
+    }
 }

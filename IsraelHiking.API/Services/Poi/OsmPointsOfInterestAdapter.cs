@@ -529,10 +529,11 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc/>
         public async Task<UpdatesResponse> GetUpdates(DateTime lastMoidifiedDate, DateTime modifiedUntil)
         {
-            var results = (lastMoidifiedDate == DateTime.MinValue)
-                ? await _pointsOfInterestRepository.GetAllPointsOfInterest(false)
+            var results = (lastMoidifiedDate.Year < 2010)
+                ? throw new ArgumentException("Last modified date must be higher than 2010", nameof(lastMoidifiedDate))
                 : await _pointsOfInterestRepository.GetPointsOfInterestUpdates(lastMoidifiedDate, modifiedUntil);
             var lastModified = await _pointsOfInterestRepository.GetLastSuccessfulRebuildTime();
+            ElevationSetterHelper.SetElevation(results, _elevationDataStorage);
             return new UpdatesResponse
             {
                 Features = results.ToArray(),
@@ -542,9 +543,11 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public Task<Feature> GetFeatureById(string source, string id)
+        public async Task<Feature> GetFeatureById(string source, string id)
         {
-            return _pointsOfInterestRepository.GetPointOfInterestById(id, source);
+            var feature = await _pointsOfInterestRepository.GetPointOfInterestById(id, source);
+            ElevationSetterHelper.SetElevation(feature.Geometry, _elevationDataStorage);
+            return feature;
         }
 
         /// <inheritdoc/>

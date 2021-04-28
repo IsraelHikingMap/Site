@@ -36,6 +36,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
+        private readonly IElevationDataStorage _elevationDataStorage;
         private readonly ILogger _logger;
         /// <summary>
         /// Service's constructor
@@ -54,6 +55,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="imagesUrlsStorageExecutor"></param>
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="externalSourceUpdaterExecutor"></param>
+        /// <param name="elevationDataStorage"></param>
         /// <param name="logger"></param>
         public DatabasesUpdaterService(IClientsFactory clinetsFactory,
             IExternalSourcesRepository externalSourcesRepository,
@@ -68,6 +70,7 @@ namespace IsraelHiking.API.Services.Osm
             IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
             IPointsOfInterestProvider pointsOfInterestProvider,
             IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor,
+            IElevationDataStorage elevationDataStorage,
             ILogger logger)
         {
             _externalSourcesRepository = externalSourcesRepository;
@@ -84,6 +87,7 @@ namespace IsraelHiking.API.Services.Osm
             _osmGateway = clinetsFactory.CreateNonAuthClient();
             _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
             _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
+            _elevationDataStorage = elevationDataStorage;
             _logger = logger;
         }
 
@@ -94,12 +98,12 @@ namespace IsraelHiking.API.Services.Osm
             using var updatesStream = await _osmLatestFileGateway.GetUpdates();
             XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
             var changes = (OsmChange)serializer.Deserialize(updatesStream);
-            await Updatehighways(changes);
+            await UpdateHighways(changes);
             await UpdatePointsOfInterest(changes);
             _logger.LogInformation("Finished updating from OSM change file");
         }
 
-        private async Task Updatehighways(OsmChange changes)
+        private async Task UpdateHighways(OsmChange changes)
         {
             var deleteTasks = new List<Task>();
             foreach (var highwaysToRemove in changes.Delete.OfType<Way>())
@@ -294,6 +298,7 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation($"Starting rebuilding offline pois file for date: {context.StartTime.ToInvariantString()}");
             var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
             features = features.Where(f => f.GetLastModified() <= context.StartTime).ToList();
+            ElevationSetterHelper.SetElevation(features, _elevationDataStorage);
             _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
             _logger.LogInformation("Finished rebuilding offline pois file.");
         }

@@ -5,11 +5,11 @@ import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RoutesFactory } from "../../services/layers/routelayers/routes.factory";
-import { TracesService } from "application/services/traces.service";
+import { TracesService } from "../../services/traces.service";
 import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import { AddRouteAction } from "../../reducers/routes.reducer";
 import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
-import { Trace, ApplicationState, LatLngAlt } from "../../models/models";
+import { ApplicationState, LatLngAlt } from "../../models/models";
 
 @Component({
     selector: "traces",

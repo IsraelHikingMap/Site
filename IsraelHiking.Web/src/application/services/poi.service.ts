@@ -179,6 +179,12 @@ export class PoiService {
         this.loggingService.info(`[POIs] Upload queue changed, items in queue: ${items.length}, first item id: ${firstItemId}`);
 
         let feature = await this.databaseService.getPoiFromUploadQueue(firstItemId);
+        if (feature == null) {
+            this.loggingService.info(`[POIs] Upload queue has element which is not in the database, removing item: ${firstItemId}`);
+            this.queueIsProcessing = false;
+            this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
+            return;
+        }
         try {
             let postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
             let putAddress = Urls.poi + feature.properties.poiId + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
@@ -195,6 +201,11 @@ export class PoiService {
             this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
         } catch (ex) {
             this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, ${ex.message}`);
+            if (ex.name !== "TimeoutError") {
+                // No timeout - i.e. error from server - need to remove this feature from queue
+                this.queueIsProcessing = false;
+                this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
+            }
         } finally {
             this.queueIsProcessing = false;
         }
@@ -674,6 +685,16 @@ export class PoiService {
                 poiSource: originalFeature.properties.poiSource
             } as any
         } as GeoJSON.Feature;
+
+        if (this.ngRedux.getState().offlineState.uploadPoiQueue.indexOf(originalFeature.properties.poiId) !== -1) {
+            // this is the case where there was a previous update request but this hs not been uploaded to the server yet...
+            let featureFromDatabase = await this.databaseService.getPoiFromUploadQueue(originalFeature.properties.poiId);
+            if (featureFromDatabase != null) {
+                featureContainingOnlyChanges = featureFromDatabase;
+                hasChages = true;
+            }
+        }
+
         if (newLocation) {
             this.setLocation(featureContainingOnlyChanges, newLocation);
             hasChages = true;
@@ -729,7 +750,10 @@ export class PoiService {
             iconColor: feature.properties.poiIconColor,
             imagesUrls: Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => feature.properties[k]),
             urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
-            isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint"
+            isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint",
+            lengthInKm: (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString")
+                ? SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0 
+                : null
         };
     }
 

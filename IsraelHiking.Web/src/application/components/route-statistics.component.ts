@@ -71,6 +71,7 @@ interface IChartElements {
 })
 export class RouteStatisticsComponent extends BaseMapComponent implements OnInit, OnDestroy {
     private static readonly HOVER_BOX_WIDTH = 160;
+    private static readonly MAX_SLOPE = 20;
 
     public length: number;
     public gain: number;
@@ -117,6 +118,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     private zoom: number;
     private routeColor: string;
     private audioPlayer: IAudioPlayer;
+    private heading: number;
 
     constructor(resources: ResourcesService,
                 private readonly changeDetectorRef: ChangeDetectorRef,
@@ -138,6 +140,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.isFollowing = false;
         this.statistics = null;
         this.subRouteRange = null;
+        this.heading = null;
         this.setViewStatisticsValues(null);
         this.componentSubscriptions = [];
         this.kmMarkersSource = {
@@ -316,7 +319,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.updateStatistics();
         this.updateKmMarkers();
         this.updateSlopeRoute();
-        if (!this.getRouteForChart() || !this.isOpen) {    
+        if (!this.getRouteForChart() || !this.isOpen) {
             return;
         }
         this.clearSubRouteSelection();
@@ -701,8 +704,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 .y(d => d.slope)
                 .bandwidth(0.03)(this.statistics.points);
         }
-        let maxAbsSlope = Math.max(RouteStatisticsService.MAX_SLOPE, Math.abs(RouteStatisticsService.MIN_SLOPE));
-        // making the doing be symetric around zero
+        let maxAbsSlope = RouteStatisticsComponent.MAX_SLOPE;
+        if (this.statistics && this.statistics.points) {
+            maxAbsSlope = Math.max(...this.statistics.points.map(p => Math.abs(p.slope)), RouteStatisticsComponent.MAX_SLOPE);
+        }
+        // making the slope chart be symetric around zero
         this.chartElements.yScaleSlope.domain([-maxAbsSlope, maxAbsSlope]);
         let slopeLine = d3.line()
             .curve(d3.curveCatmullRom)
@@ -841,23 +847,25 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (!this.isOpen) {
             return;
         }
-        let point = this.getPointFromLatLng(latlng);
+        let point = this.getPointFromLatLng(latlng, null);
         this.showChartHover(point);
     }
 
     private onGeolocationChanged(position: Position) {
         this.currentSpeed = (position == null) ? null : position.coords.speed * 3.6;
+        this.heading = (position == null) || position.coords.speed === 0 ? null : position.coords.heading;
         const currentSpeedTimeout = "currentSpeedTimeout";
         this.cancelableTimeoutService.clearTimeoutByGroup(currentSpeedTimeout);
         this.cancelableTimeoutService.setTimeoutByGroup(() => {
             // if there are no location updates reset speed.
             this.currentSpeed = null;
+            this.heading = null;
         }, 5000, currentSpeedTimeout);
         this.onRouteDataChanged();
     }
 
     private refreshLocationGroup() {
-        let point = this.getPointFromLatLng(this.geoLocationService.currentLocation);
+        let point = this.getPointFromLatLng(this.geoLocationService.currentLocation, this.heading);
         if (!point) {
             this.hideLocationGroup();
             return;
@@ -880,14 +888,14 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
     }
 
-    private getPointFromLatLng(latlng: LatLngAlt): IRouteStatisticsPoint {
+    private getPointFromLatLng(latlng: LatLngAlt, heading: number): IRouteStatisticsPoint {
         if (latlng == null) {
             return null;
         }
         if (this.statistics == null) {
             return null;
         }
-        let x = this.routeStatisticsService.findDistanceForLatLngInKM(this.statistics, latlng);
+        let x = this.routeStatisticsService.findDistanceForLatLngInKM(this.statistics, latlng, heading);
         if (x <= 0) {
             return null;
         }
@@ -901,13 +909,15 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.setViewStatisticsValues(null);
             return;
         }
-        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation);
+        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation,
+            this.heading);
         let routeIsRecording = this.selectedRouteService.getRecordingRoute() != null &&
             this.selectedRouteService.getRecordingRoute().id === route.id;
         this.statistics = this.routeStatisticsService.getStatistics(
             route,
             closestRouteToGps,
             this.geoLocationService.currentLocation,
+            this.heading,
             routeIsRecording);
         this.routeColor = closestRouteToGps ? closestRouteToGps.color : route.color;
         this.updateIsFollowing();
@@ -916,7 +926,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private getRouteForChart() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation);
+        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation,
+            this.heading);
         return selectedRoute || closestRouteToGps;
     }
 
@@ -947,17 +958,17 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let route = this.getRouteForChart();
         this.slopeRouteSource = {
             type: "FeatureCollection",
-            features: []       
+            features: []
         };
         this.slopeRoutePaint = {};
         if (!this.isSlopeOn ||
-            route == null || 
-            route.segments.length === 0 || 
-            this.statistics == null || 
+            route == null ||
+            route.segments.length === 0 ||
+            this.statistics == null ||
             this.statistics.points.length < 2) {
             return;
         }
-        
+
         this.slopeRouteSource.features.push({
             type: "Feature",
             properties: {},
@@ -980,32 +991,39 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 ["line-progress"],
                 ...stops
             ]
-        }
+        };
     }
 
     private routeSlopeToColor(slope: number): string {
-        let r: number, g: number, b: number;
-        if (slope > RouteStatisticsService.MODERATE_SLOPE) {
+        let r: number;
+        let g: number;
+        let b: number;
+        if (slope > RouteStatisticsComponent.MAX_SLOPE) {
+            slope = RouteStatisticsComponent.MAX_SLOPE;
+        } else if (slope < -RouteStatisticsComponent.MAX_SLOPE) {
+            slope = -RouteStatisticsComponent.MAX_SLOPE;
+        }
+        if (slope > 5) {
             // red to yellow
-            let ratio = (slope - RouteStatisticsService.MODERATE_SLOPE) / 
-                (RouteStatisticsService.MAX_SLOPE - RouteStatisticsService.MODERATE_SLOPE);
+            let ratio = (slope - 5) / (RouteStatisticsComponent.MAX_SLOPE - 5);
             r = 255;
             g = Math.floor(255 * (1 - ratio));
             b = 0;
         }
         else if (slope > 0) {
             // yellow to green
-            let ratio = slope / RouteStatisticsService.MODERATE_SLOPE;
+            let ratio = slope / 5;
             r = Math.floor(255 * ratio);
             g = 255;
             b = 0;
         } else {
             // green to blue
-            let ratio = slope / RouteStatisticsService.MIN_SLOPE;
-            r = 0
+            let ratio = slope / -RouteStatisticsComponent.MAX_SLOPE;
+            r = 0;
             g = Math.floor(255 * (1 - ratio));
             b = Math.floor(255 * ratio);
         }
+        // tslint:disable-next-line
         return  "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
 }

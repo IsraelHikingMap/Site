@@ -77,6 +77,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 null,
                 _pointsOfInterestProvider,
                 null,
+                null,
                 Substitute.For<ILogger>());
         }
 
