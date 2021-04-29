@@ -171,11 +171,11 @@ namespace IsraelHiking.API.Executors
         {
             var coordinate = latLng.ToCoordinate();
             var closestHighway = closestHighways.First();
-            var closestNode = closestHighway.Geometry.Coordinates.OrderBy(n => n.Distance(coordinate)).FirstOrDefault();
-            var closetNodeIndex = Array.FindIndex(closestHighway.Geometry.Coordinates.ToArray(), n => n == closestNode);
+            var closestNodeCoordinate = closestHighway.Geometry.Coordinates.OrderBy(n => n.Distance(coordinate)).FirstOrDefault();
+            var closetNodeIndex = Array.FindIndex(closestHighway.Geometry.Coordinates.ToArray(), n => n == closestNodeCoordinate);
             var nodeId = long.Parse(((List<object>)closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[closetNodeIndex].ToString());
             var isJunction = closestHighways.Skip(1).Any(f => ((List<object>)f.Attributes[FeatureAttributes.POI_OSM_NODES]).Any(nId => nId.ToString() == nodeId.ToString()));
-            return (closestNode, closetNodeIndex, nodeId, isJunction);
+            return (closestNodeCoordinate, closetNodeIndex, nodeId, isJunction);
         }
 
         private async Task<OsmChange> GetOsmChange(IAuthClient osmGateway, AddSimplePointOfInterestRequest request)
@@ -200,43 +200,51 @@ namespace IsraelHiking.API.Executors
             {
                 throw new Exception("There's no close enough highway to add a gate");
             }
-            (var closestNode, var closetNodeIndex, var nodeId, var isJunction) = GetClosestNodeAndCheckIsJunction(request.LatLng, closestHighways);
-            var coordinate = request.LatLng.ToCoordinate();
-            if (isJunction == false && closestNode.Distance(coordinate) < _options.ClosestNodeForGates)
+            (var closestNodeCoordinate, var closetNodeIndex, var nodeId, var isJunction) = GetClosestNodeAndCheckIsJunction(request.LatLng, closestHighways);
+            var newNodeCoordinate = request.LatLng.ToCoordinate();
+            if (isJunction || closestNodeCoordinate.Distance(newNodeCoordinate) >= _options.ClosestNodeForGates)
             {
-                // Close enough to a node and not a juction -> updating this node
-                var nodeToUpdate = await osmGateway.GetNode(nodeId);
-                if (nodeToUpdate.Tags == null)
-                {
-                    nodeToUpdate.Tags = newNode.Tags;
-                }
-                else
-                {
-                    foreach (var tag in newNode.Tags)
-                    {
-                        nodeToUpdate.Tags.AddOrReplace(tag);
-                    }
-                }
-
-                return new OsmChange
-                {
-                    Modify = new[] { nodeToUpdate }
-                };
+                // Need to add a node to the closest way
+                var indexToInsert = GetIndexToInsert(closetNodeIndex, closestNodeCoordinate, closestHighways, newNodeCoordinate);
+                return CreateUpdateWayChangeFromData(way, indexToInsert, newNode, closestHighways.First());
             }
-            // Need to add a node, default location is just before the closest node
+            // Close enough to a node and not a juction -> updating this node
+            var nodeToUpdate = await osmGateway.GetNode(nodeId);
+            if (nodeToUpdate.Tags == null)
+            {
+                nodeToUpdate.Tags = newNode.Tags;
+            }
+            else
+            {
+                foreach (var tag in newNode.Tags)
+                {
+                    nodeToUpdate.Tags.AddOrReplace(tag);
+                }
+            }
+
+            return new OsmChange
+            {
+                Modify = new[] { nodeToUpdate }
+            };
+        }
+
+        private int GetIndexToInsert(int closetNodeIndex, Coordinate closestNodeCoordinate, Feature[] closestHighways, Coordinate newNodeCoordinate)
+        {
+            // Default location is before the closest node
             var indexToInsert = closetNodeIndex;
 
             if (closetNodeIndex == 0)
             {
-                var firstSegment = new LineSegment(closestNode, closestHighways.First().Geometry.Coordinates[closetNodeIndex + 1]);
-                if (firstSegment.Distance(coordinate) < closestNode.Distance(coordinate)) {
+                var firstSegment = new LineSegment(closestNodeCoordinate, closestHighways.First().Geometry.Coordinates[closetNodeIndex + 1]);
+                if (firstSegment.Distance(newNodeCoordinate) < closestNodeCoordinate.Distance(newNodeCoordinate))
+                {
                     indexToInsert = 1;
                 }
             }
             else if (closetNodeIndex == closestHighways.First().Geometry.Coordinates.Length - 1)
             {
-                var lastSegment = new LineSegment(closestHighways.First().Geometry.Coordinates[closetNodeIndex - 1], closestNode);
-                if (lastSegment.Distance(coordinate) >= closestNode.Distance(coordinate))
+                var lastSegment = new LineSegment(closestHighways.First().Geometry.Coordinates[closetNodeIndex - 1], closestNodeCoordinate);
+                if (lastSegment.Distance(newNodeCoordinate) >= closestNodeCoordinate.Distance(newNodeCoordinate))
                 {
                     indexToInsert += 1;
                 }
@@ -244,10 +252,10 @@ namespace IsraelHiking.API.Executors
             else
             {
                 // add in between two points:
-                var segmentBefore = new LineSegment(closestHighways.First().Geometry.Coordinates[closetNodeIndex - 1], closestNode);
-                var segmentAfter = new LineSegment(closestNode, closestHighways.First().Geometry.Coordinates[closetNodeIndex + 1]);
-                var closestSegment = segmentBefore.Distance(coordinate) < segmentAfter.Distance(coordinate) ? segmentBefore : segmentAfter;
-                if (closestSegment.Distance(coordinate) >= closestNode.Distance(coordinate))
+                var segmentBefore = new LineSegment(closestHighways.First().Geometry.Coordinates[closetNodeIndex - 1], closestNodeCoordinate);
+                var segmentAfter = new LineSegment(closestNodeCoordinate, closestHighways.First().Geometry.Coordinates[closetNodeIndex + 1]);
+                var closestSegment = segmentBefore.Distance(newNodeCoordinate) < segmentAfter.Distance(newNodeCoordinate) ? segmentBefore : segmentAfter;
+                if (closestSegment.Distance(newNodeCoordinate) >= closestNodeCoordinate.Distance(newNodeCoordinate))
                 {
                     throw new Exception("Closest segment is not in the right aligment to add a node to it");
                 }
@@ -255,6 +263,19 @@ namespace IsraelHiking.API.Executors
                 {
                     indexToInsert += 1;
                 }
+            }
+            return indexToInsert;
+        }
+
+        private OsmChange CreateUpdateWayChangeFromData(Way way, int indexToInsert, Node newNode, Feature closestHighway)
+        {
+            if (indexToInsert != 0 && indexToInsert != way.Nodes.Length)
+            {
+                var segment = new LineSegment(closestHighway.Geometry.Coordinates[indexToInsert - 1], closestHighway.Geometry.Coordinates[indexToInsert]);
+                var projectionFactor = segment.ProjectionFactor(new Coordinate(newNode.Longitude.Value, newNode.Latitude.Value));
+                var coordinate = segment.PointAlong(projectionFactor);
+                newNode.Longitude = coordinate.X;
+                newNode.Latitude = coordinate.Y;
             }
             var updatedList = way.Nodes.ToList();
             updatedList.Insert(indexToInsert, -1);
