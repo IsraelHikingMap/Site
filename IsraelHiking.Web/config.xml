@@ -27,11 +27,18 @@
     <preference name="android-minSdkVersion" value="22" />
     <preference name="AndroidLaunchMode" value="singleInstance" />
     <icon density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />
+    <splash density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />
     <icon density="mdpi" src="www/content/favicons/android-chrome-48x48.png" />
+    <splash density="mdpi" src="www/content/favicons/android-chrome-48x48.png" />
     <icon density="hdpi" src="www/content/favicons/android-chrome-72x72.png" />
+    <splash density="hdpi" src="www/content/favicons/android-chrome-72x72.png" />
     <icon density="xhdpi" src="www/content/favicons/android-chrome-96x96.png" />
+    <splash density="xhdpi" src="www/content/favicons/android-chrome-96x96.png" />
     <icon density="xxhdpi" src="www/content/favicons/android-chrome-144x144.png" />
+    <splash density="xxhdpi" src="www/content/favicons/android-chrome-144x144.png" />
     <icon density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
+    <splash density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
+
     <config-file target="AndroidManifest.xml" parent="/manifest">
       <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     </config-file>
