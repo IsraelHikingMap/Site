@@ -115,7 +115,7 @@ namespace IsraelHiking.API.Converters
                 var group = nodesGroups.First(g => CanBeMerged(currentNodes, g));
                 if (CanBeReverseMerged(group, currentNodes))
                 {
-                    if (wayToGroup.Tags != null && wayToGroup.Tags.ContainsKey("oneway") && wayToGroup.Tags["oneway"] == "true")
+                    if (wayToGroup.Tags != null && wayToGroup.Tags.ContainsKey("oneway") && wayToGroup.Tags["oneway"] == "yes")
                     {
                         group.Reverse();
                     }
