@@ -294,6 +294,7 @@ export class ResourcesService {
     public legendIsraelTrail: string;
     public legendRegionalTrail: string;
     public legendTrails: string;
+    public legendPavedRoad: string;
     public legendAllVehicles: string;
     public legendLight4WDVehicles: string;
     public legendStrong4WDVehicles: string;
@@ -737,6 +738,7 @@ export class ResourcesService {
         this.legendIsraelTrail = this.gettextCatalog.getString("Israel Trail");
         this.legendRegionalTrail = this.gettextCatalog.getString("Regional Trail");
         this.legendTrails = this.gettextCatalog.getString("Trails");
+        this.legendPavedRoad = this.gettextCatalog.getString("Paved Road");
         this.legendAllVehicles = this.gettextCatalog.getString("All Vehicles");
         this.legendLight4WDVehicles = this.gettextCatalog.getString("Light 4WD Vehicles");
         this.legendStrong4WDVehicles = this.gettextCatalog.getString("Strong 4WD Vehicles");

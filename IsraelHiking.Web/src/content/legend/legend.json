@@ -435,6 +435,17 @@
     "key": "legendRoads",
     "items": [
       {
+        "key": "legendPavedRoad",
+        "latlng": {
+          "lat": 32.4088604,
+          "lng": 34.946265
+        },
+        "zoom": 13,
+        "type": "Way",
+        "osmTags": [ "highway=..." ],
+        "link": "https://wiki.openstreetmap.org/wiki/Key:highway#Roads"
+      },
+      {
         "key": "legendMotorway",
         "latlng": {
           "lat": 32.4088604,
@@ -498,17 +509,6 @@
         "zoom": 16,
         "type": "Way",
         "osmTags": [ "hihgway=unclassified" ],
-        "link": "osm-tag-link"
-      },
-      {
-        "key": "legendLowSpeedStreet",
-        "latlng": {
-          "lat": 32.126961,
-          "lng": 34.80634
-        },
-        "zoom": 16,
-        "type": "Way",
-        "osmTags": [ "highway=residential", "maxspeed=..." ],
         "link": "osm-tag-link"
       },
       {
@@ -585,10 +585,10 @@
       {
         "key": "legendRunwayTaxiway",
         "latlng": {
-          "lat": 32.5960,
-          "lng": 35.2300
+          "lat": 32.597,
+          "lng": 35.2370
         },
-        "zoom": 13,
+        "zoom": 15,
         "type": "Way",
         "osmTags": [ "aeroway=runway or aeroway=taxiway" ],
         "link": "osm-key-link"
@@ -1160,10 +1160,10 @@
       {
         "key": "legendCitySettlement",
         "latlng": {
-          "lat": 30.490800,
-          "lng": 35.1667000
+          "lat": 32.0485,
+          "lng": 34.7704
         },
-        "zoom": 13,
+        "zoom": 16,
         "type": "POI",
         "osmTags": [ "landuse=residential", "place=..." ],
         "link": "osm-tag-link"
@@ -1226,8 +1226,8 @@
       {
         "key": "legendScrub",
         "latlng": {
-          "lat": 32.485095,
-          "lng": 34.8953676
+          "lat": 31.688228,
+          "lng": 35.027876
         },
         "zoom": 16,
         "type": "POI",
