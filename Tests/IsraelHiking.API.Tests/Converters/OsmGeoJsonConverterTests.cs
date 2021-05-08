@@ -527,7 +527,7 @@ namespace IsraelHiking.API.Tests.Converters
             wayPartOfLineString1.Nodes = new[] { node1, node2 };
             wayPartOfLineString2.Nodes = new[] { node3, node4 };
             wayPartOfLineString3.Nodes = new[] { node3, node2 };
-            wayPartOfLineString3.Tags = new TagsCollection() { { "oneway", "true" } };
+            wayPartOfLineString3.Tags = new TagsCollection() { { "oneway", "yes" } };
             var relation = new CompleteRelation { Id = 11, Tags = new TagsCollection() };
             relation.Tags.Add(NAME, NAME);
             relation.Members = new[] {

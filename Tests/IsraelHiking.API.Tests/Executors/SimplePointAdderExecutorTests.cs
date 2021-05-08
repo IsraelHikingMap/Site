@@ -150,6 +150,38 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
+        public void AddGate_NearAWay_ShouldAddItOnTheWayItselfPerpendicularToItsLocation()
+        {
+            var feature = new Feature(new LineString(new[] {
+                    new Coordinate(0,0),
+                    new Coordinate(1,0),
+                    new Coordinate(2,0)
+                }), new AttributesTable {
+                    {FeatureAttributes.POI_OSM_NODES, new List<object> { 0, 1, 2} },
+                    {FeatureAttributes.ID, "Way_42"},
+                    {FeatureAttributes.POI_VERSION, 1 }
+                });
+            foreach (var coordinate in feature.Geometry.Coordinates)
+            {
+                _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
+                    .Returns(new Node() { Longitude = coordinate.X, Latitude = coordinate.Y });
+            }
+            _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 1, Nodes = new long[] { 0, 1, 2 } });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+            _executor.Add(_authClient, new AddSimplePointOfInterestRequest
+            {
+                LatLng = new LatLng(0.0001, 0.5),
+                PointType = SimplePointType.CattleGrid
+            }).Wait();
+
+            _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c =>
+                c.Create.Length == 1 && c.Modify.Length == 1 &&
+                c.Modify.OfType<Way>().First().Nodes[1] == -1 &&
+                c.Create.OfType<Node>().First().Latitude == 0 &&
+                c.Create.OfType<Node>().First().Longitude == 0.5));
+        }
+
+        [TestMethod]
         public void AddGate_NearAJunction_ShouldAddItNotOnTheJuctionsNode()
         {
             var feature = new Feature(new LineString(new[] {

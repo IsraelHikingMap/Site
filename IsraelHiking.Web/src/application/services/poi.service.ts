@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { NgProgress } from "@ngx-progressbar/core";
-import { uniq } from "lodash-es";
+import { uniq, cloneDeep } from "lodash-es";
 import { Observable, fromEvent, Subscription } from "rxjs";
 import { timeout, throttleTime, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
@@ -498,20 +498,24 @@ export class PoiService {
     public async getPoint(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
         let itemInCache = this.poisCache.find(f => f.properties.poiId === id && f.properties.source === source);
         if (itemInCache) {
-            return JSON.parse(JSON.stringify(itemInCache));
+            return cloneDeep(itemInCache);
         }
-        if (!this.runningContextService.isOnline) {
+        try {
+            let params = new HttpParams()
+            .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
+            let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params })
+                .pipe(timeout(6000))
+                .toPromise() as GeoJSON.Feature;
+            this.poisCache.splice(0, 0, poi);
+            return cloneDeep(poi);
+        } catch {
             let feature = await this.databaseService.getPoiById(`${source}_${id}`);
             if (feature == null) {
                 throw new Error("Failed to load POI from offline database.");
             }
+            this.poisCache.splice(0, 0, feature);
             return feature;
         }
-        let params = new HttpParams()
-            .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-        let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params }).toPromise() as GeoJSON.Feature;
-        this.poisCache.splice(0, 0, poi);
-        return JSON.parse(JSON.stringify(poi));
     }
 
     private async addPointToUploadQueue(feature: GeoJSON.Feature): Promise<void> {
@@ -752,7 +756,7 @@ export class PoiService {
             urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
             isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint",
             lengthInKm: (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString")
-                ? SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0 
+                ? SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0
                 : null
         };
     }
