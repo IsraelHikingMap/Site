@@ -26,9 +26,9 @@ using System.Security.Cryptography;
 namespace IsraelHiking.API.Tests.Services.Poi
 {
     [TestClass]
-    public class OsmPointsOfInterestAdapterTests : BasePointsOfInterestAdapterTestsHelper
+    public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHelper
     {
-        private OsmPointsOfInterestAdapter _adapter;
+        private PointsOfInterestProvider _adapter;
         private IClientsFactory _clientsFactory;
         private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private IOsmRepository _osmRepository;
@@ -55,7 +55,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
             _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
-            _adapter = new OsmPointsOfInterestAdapter(_pointsOfInterestRepository,
+            _adapter = new PointsOfInterestProvider(_pointsOfInterestRepository,
                 _elevationDataStorage,
                 _osmGeoJsonPreprocessorExecutor,
                 _osmRepository,
@@ -131,7 +131,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var result = _adapter.GetPointsOfInterest(null, null, null, "he").Result;
 
             Assert.AreEqual(1, result.Length);
-            Assert.AreEqual(OsmPointsOfInterestAdapter.SEARCH_ICON, result.First().Icon);
+            Assert.AreEqual(PointsOfInterestProvider.SEARCH_ICON, result.First().Icon);
         }
 
         [TestMethod]

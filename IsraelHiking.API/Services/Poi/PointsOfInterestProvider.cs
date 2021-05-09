@@ -31,7 +31,7 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Points of interest provider
     /// </summary>
-    public class OsmPointsOfInterestAdapter : IPointsOfInterestProvider
+    public class PointsOfInterestProvider : IPointsOfInterestProvider
     {
         /// <summary>
         /// This icon is the default icon when no icon was used
@@ -70,7 +70,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="tagsHelper"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public OsmPointsOfInterestAdapter(IPointsOfInterestRepository pointsOfInterestRepository,
+        public PointsOfInterestProvider(IPointsOfInterestRepository pointsOfInterestRepository,
             IElevationDataStorage elevationDataStorage,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
