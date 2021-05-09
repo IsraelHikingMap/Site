@@ -1226,8 +1226,8 @@
       {
         "key": "legendScrub",
         "latlng": {
-          "lat": 31.688228,
-          "lng": 35.027876
+          "lat": 32.46835,
+          "lng": 34.92850
         },
         "zoom": 16,
         "type": "POI",
@@ -1237,8 +1237,8 @@
       {
         "key": "legendSand",
         "latlng": {
-          "lat": 31.746489,
-          "lng": 34.602857
+          "lat": 31.7443,
+          "lng": 34.6051
         },
         "zoom": 16,
         "type": "POI",

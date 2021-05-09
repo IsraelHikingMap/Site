@@ -120,8 +120,11 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendPowerLine);
 
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendMilitaryTraining);
+        this.removeItemInSection(this.resources.legendBorders, this.resources.legendMinefield);
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendTheGreenLine);
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendThePurpleLine);
+
+        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendGuidepost);
 
         this.removeItemInSection(this.resources.legendAreas, this.resources.legendBeach);
         this.removeItemInSection(this.resources.legendAreas, this.resources.legendConstructionSite);
@@ -132,6 +135,8 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
         this.removeItemInSection(this.resources.legendWater, this.resources.legendRiver);
         this.removeItemInSection(this.resources.legendWater, this.resources.legendWaterfall);
+
+        this.removeItemInSection(this.resources.legendRoads, this.resources.legendPavedRoad);
 
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendAttraction);
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendFlowers);
