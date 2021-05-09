@@ -117,8 +117,14 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.removeItemInSection(this.resources.legendRoads, this.resources.legendUnclassified);
         this.removeItemInSection(this.resources.legendRoads, this.resources.legendResidential);
 
+        this.removeItemInSection(this.resources.legendPoi, this.resources.legendPowerLine);
+
+        this.removeItemInSection(this.resources.legendBorders, this.resources.legendMilitaryTraining);
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendTheGreenLine);
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendThePurpleLine);
+
+        this.removeItemInSection(this.resources.legendAreas, this.resources.legendBeach);
+        this.removeItemInSection(this.resources.legendAreas, this.resources.legendConstructionSite);
     }
 
     private removeIhmUnwantedLegend() {

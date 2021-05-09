@@ -412,6 +412,7 @@ export class ResourcesService {
     public legendGrass: string;
     public legendScrub: string;
     public legendSand: string;
+    public legendBeach: string;
     public legendCemetery: string;
     public legendQuarry: string;
     public legendEmpty: string;
@@ -855,6 +856,7 @@ export class ResourcesService {
         this.legendGrass = this.gettextCatalog.getString("Grass");
         this.legendScrub = this.gettextCatalog.getString("Scrub");
         this.legendSand = this.gettextCatalog.getString("Sand");
+        this.legendBeach = this.gettextCatalog.getString("Beach");
         this.legendCemetery = this.gettextCatalog.getString("Cemetery");
         this.legendQuarry = this.gettextCatalog.getString("Quarry");
         this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");

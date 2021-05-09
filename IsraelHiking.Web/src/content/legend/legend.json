@@ -1246,6 +1246,17 @@
         "link": "osm-tag-link"
       },
       {
+        "key": "legendBeach",
+              "latlng": {
+          "lat": 31.7600,
+          "lng": 34.6104
+        },
+        "zoom": 17,
+        "type": "POI",
+        "osmTags": [ "natural=beach" ],
+        "link": "osm-tag-link"
+      },
+      {
         "key": "legendCemetery",
         "latlng": {
           "lat": 32.831568,
