@@ -12,7 +12,6 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
@@ -114,22 +113,13 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [Route("{source}/{id}")]
         [HttpGet]
-        public async Task<IActionResult> GetPointOfInterest(string source, string id, string language = "")
+        public async Task<IActionResult> GetPointOfInterest(string source, string id)
         {
             if (source.Equals(Sources.COORDINATES, StringComparison.InvariantCultureIgnoreCase))
             {
                 var latLng = SearchResultsPointOfInterestConverter.GetLatLngFromId(id);
-                var feautre = new Feature(new Point(latLng.Lng, latLng.Lat), new AttributesTable
-                {
-                    { FeatureAttributes.NAME, id },
-                    { FeatureAttributes.POI_ICON, OsmPointsOfInterestAdapter.SEARCH_ICON },
-                    { FeatureAttributes.POI_ICON_COLOR, "black" },
-                    { FeatureAttributes.POI_CATEGORY, Categories.NONE },
-                    { FeatureAttributes.POI_SOURCE, Sources.COORDINATES },
-                });
-                feautre.SetTitles();
-                feautre.SetLocation(latLng.ToCoordinate());
-                return Ok(feautre);
+                var feature = _pointsOfInterestProvider.GetCoordinatesFeature(latLng, id);
+                return Ok(feature);
             }
             var poiItem = await _pointsOfInterestProvider.GetFeatureById(source, id);
             if (poiItem == null)

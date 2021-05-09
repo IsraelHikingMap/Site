@@ -741,5 +741,27 @@ namespace IsraelHiking.API.Services.Poi
             await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrl);
             return imageUrl;
         }
+
+        /// <inheritdoc/>
+        public Feature GetCoordinatesFeature(LatLng latLng, string id)
+        {
+            var coordinate = latLng.ToCoordinate();
+            var (east, north) = _wgs84ItmMathTransform.Transform(coordinate.X, coordinate.Y);
+            var alt = _elevationDataStorage.GetElevation(coordinate).Result;
+            var feautre = new Feature(new Point(coordinate), new AttributesTable
+                {
+                    { FeatureAttributes.NAME, id },
+                    { FeatureAttributes.POI_ICON, SEARCH_ICON },
+                    { FeatureAttributes.POI_ICON_COLOR, "black" },
+                    { FeatureAttributes.POI_CATEGORY, Categories.NONE },
+                    { FeatureAttributes.POI_SOURCE, Sources.COORDINATES },
+                    { FeatureAttributes.POI_ITM_EAST, east },
+                    { FeatureAttributes.POI_ITM_NORTH, north },
+                    { FeatureAttributes.POI_ALT, alt }
+                });
+            feautre.SetTitles();
+            feautre.SetLocation(coordinate);
+            return feautre;
+        }
     }
 }

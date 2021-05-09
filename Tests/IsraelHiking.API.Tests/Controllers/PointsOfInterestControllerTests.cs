@@ -92,7 +92,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetPointOfIntereset_WrongSource_ShouldReturnBadRequest()
         {
-            var result = _controller.GetPointOfInterest("wrong source", string.Empty, "language").Result as NotFoundResult;
+            var result = _controller.GetPointOfInterest("wrong source", string.Empty).Result as NotFoundResult;
 
             Assert.IsNotNull(result);
         }
@@ -102,14 +102,13 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var id = "32_35";
             var source = Sources.COORDINATES;
-            var language = "language";
+            _pointsOfInterestProvider.GetCoordinatesFeature(Arg.Any<LatLng>(), id).Returns(new Feature());
 
-            var result = _controller.GetPointOfInterest(source, id, language).Result as OkObjectResult;
+            var result = _controller.GetPointOfInterest(source, id).Result as OkObjectResult;
 
             Assert.IsNotNull(result);
             var poi = result.Value as Feature;
             Assert.IsNotNull(poi);
-            Assert.AreEqual(32, poi.GetLocation().Y);
         }
 
         [TestMethod]
