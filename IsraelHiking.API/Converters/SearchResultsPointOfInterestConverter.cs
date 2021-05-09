@@ -84,7 +84,7 @@ namespace IsraelHiking.API.Converters
             var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
             if (string.IsNullOrWhiteSpace(icon))
             {
-                icon = OsmPointsOfInterestAdapter.SEARCH_ICON;
+                icon = PointsOfInterestProvider.SEARCH_ICON;
             }
             return new SearchResultsPointOfInterest
             {

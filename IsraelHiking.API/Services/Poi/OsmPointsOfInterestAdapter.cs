@@ -29,7 +29,7 @@ using System.Threading.Tasks;
 namespace IsraelHiking.API.Services.Poi
 {
     /// <summary>
-    /// Points of interest adapter for OSM data
+    /// Points of interest provider
     /// </summary>
     public class OsmPointsOfInterestAdapter : IPointsOfInterestProvider
     {
