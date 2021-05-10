@@ -82,10 +82,10 @@
       {
         "key": "legendOrangeRegionalTrail",
         "latlng": {
-          "lat": 32.7992,
-          "lng": 35.451357
+          "lat": 32.7993,
+          "lng": 35.4523
         },
-        "zoom": 16,
+        "zoom": 17,
         "type": "Way",
         "osmTags": ["network=rwn", "osmc:symbol=orange:white:orange_stripe relation"],
         "link": "osm-tag-link"
@@ -169,10 +169,10 @@
       {
         "key": "legendEasyWithDirection",
         "latlng": {
-          "lat": 31.6208,
-          "lng": 34.7377
+          "lat": 32.591221,
+          "lng": 35.139636
         },
-        "zoom": 16,
+        "zoom": 17,
         "type": "Way",
         "osmTags": [ "mtb:scale=0" ],
         "link": "osm-key-link"
@@ -180,12 +180,12 @@
       {
         "key": "legendModerate",
         "latlng": {
-          "lat": 32.5911896,
-          "lng": 35.139556
+          "lat": 31.7121,
+          "lng": 34.9299
         },
-        "zoom": 16,
+        "zoom": 17,
         "type": "Way",
-        "osmTags": [ "mtb:scale=1" ],
+        "osmTags": [ "mtb:scale=1", "colour=green" ],
         "link": "osm-key-link"
       },
       {
@@ -209,44 +209,6 @@
         "type": "Way",
         "osmTags": [ "mtb:scale=4 or mtb:scale=5" ],
         "link": "osm-key-link"
-      }
-    ]
-  },
-  {
-    "key": "legendBicycleTrails",
-    "items": [
-      {
-        "key": "legendLocalTrail",
-        "latlng": {
-          "lat": 30.6234487,
-          "lng": 34.906955
-        },
-        "zoom": 16,
-        "type": "Way",
-        "osmTags": [ "network=lcn relation" ],
-        "link": "osm-tag-link"
-      },
-      {
-        "key": "legendRegionalTrail",
-        "latlng": {
-          "lat": 32.099950,
-          "lng": 34.8055512
-        },
-        "zoom": 16,
-        "type": "Way",
-        "osmTags": [ "network=rcn relation" ],
-        "link": "osm-tag-link"
-      },
-      {
-        "key": "legendNationalTrail",
-        "latlng": {
-          "lat": 29.982344,
-          "lng": 35.0060463
-        },
-        "zoom": 16,
-        "type": "Way",
-        "osmTags": [ "network=ncn relation" ],
-        "link": "osm-tag-link"
       }
     ]
   },
@@ -393,34 +355,12 @@
       {
         "key": "legendSeasonalLake",
         "latlng": {
-          "lat": 31.7849,
-          "lng": 34.8694
-        },
-        "zoom": 13,
-        "type": "POI",
-        "osmTags": [ "intermittent=yes", "water=reservoir", "natural=water" ],
-        "link": "osm-tag-link"
-      },
-      {
-        "key": "legendWetland",
-        "latlng": {
-          "lat": 32.24501,
-          "lng": 34.85836
-        },
-        "zoom": 13,
-        "type": "POI",
-        "osmTags": [ "natural=wetland" ],
-        "link": "osm-tag-link"
-      },
-      {
-        "key": "legendDryRiverbed",
-        "latlng": {
-          "lat": 31.24348,
-          "lng": 34.833312
+          "lat": 32.248,
+          "lng": 34.852
         },
         "zoom": 15,
         "type": "POI",
-        "osmTags": [ "intermittent=yes", "waterway=riverbank" ],
+        "osmTags": [ "natural=wetland or water area with intermittent=yes" ],
         "link": "osm-tag-link"
       },
       {
@@ -495,6 +435,17 @@
     "key": "legendRoads",
     "items": [
       {
+        "key": "legendPavedRoad",
+        "latlng": {
+          "lat": 32.4088604,
+          "lng": 34.946265
+        },
+        "zoom": 13,
+        "type": "Way",
+        "osmTags": [ "highway=..." ],
+        "link": "https://wiki.openstreetmap.org/wiki/Key:highway#Roads"
+      },
+      {
         "key": "legendMotorway",
         "latlng": {
           "lat": 32.4088604,
@@ -561,17 +512,6 @@
         "link": "osm-tag-link"
       },
       {
-        "key": "legendLowSpeedStreet",
-        "latlng": {
-          "lat": 32.126961,
-          "lng": 34.80634
-        },
-        "zoom": 16,
-        "type": "Way",
-        "osmTags": [ "highway=residential", "maxspeed=..." ],
-        "link": "osm-tag-link"
-      },
-      {
         "key": "legendResidential",
         "latlng": {
           "lat": 31.1980,
@@ -596,10 +536,10 @@
       {
         "key": "legendTunnel",
         "latlng": {
-          "lat": 31.800750,
-          "lng": 35.1934469
+          "lat": 31.78985,
+          "lng": 35.2486
         },
-        "zoom": 16,
+        "zoom": 17.7,
         "type": "Way",
         "osmTags": [ "tunnel=yes", "highway=..." ],
         "link": "osm-key-link"
@@ -645,10 +585,10 @@
       {
         "key": "legendRunwayTaxiway",
         "latlng": {
-          "lat": 32.5960,
-          "lng": 35.2300
+          "lat": 32.597,
+          "lng": 35.2370
         },
-        "zoom": 13,
+        "zoom": 15,
         "type": "Way",
         "osmTags": [ "aeroway=runway or aeroway=taxiway" ],
         "link": "osm-key-link"
@@ -672,10 +612,10 @@
       {
         "key": "legendViewpoint",
         "latlng": {
-          "lat": 30.5972172,
-          "lng": 34.772286
+          "lat": 31.336388,
+          "lng": 34.854169
         },
-        "zoom": 16,
+        "zoom": 20,
         "type": "POI",
         "osmTags": [ "tourism=viewpoint" ],
         "link": "osm-tag-link"
@@ -716,10 +656,10 @@
       {
         "key": "legendCave",
         "latlng": {
-          "lat": 31.386269,
-          "lng": 35.328282
+          "lat": 31.747561,
+          "lng": 34.951367
         },
-        "zoom": 16,
+        "zoom": 20,
         "type": "POI",
         "osmTags": [ "natural=cave" ],
         "link": "osm-tag-link"
@@ -744,6 +684,17 @@
         "zoom": 16,
         "type": "POI",
         "osmTags": [ "natural=tree" ],
+        "link": "osm-tag-link"
+      },
+      {
+        "key": "legendFlowers",
+        "latlng": {
+          "lat": 31.372208,
+          "lng": 34.831966
+        },
+        "zoom": 21,
+        "type": "POI",
+        "osmTags": [ "natural=flowers" ],
         "link": "osm-tag-link"
       },
       {
@@ -935,10 +886,10 @@
       {
         "key": "legendNatureReserveNationalPark",
         "latlng": {
-          "lat": 31.582219,
+          "lat": 31.5825,
           "lng": 34.590261
         },
-        "zoom": 15,
+        "zoom": 15.5,
         "type": "Way",
         "osmTags": [ "boundary=protected_area", "protection_title=..." ],
         "link": "osm-tag-link"
@@ -1023,10 +974,10 @@
       {
         "key": "legendThePurpleLine",
         "latlng": {
-          "lat": 33.104053,
-          "lng": 35.8432388
+          "lat": 33.20308,
+          "lng": 35.81725
         },
-        "zoom": 14,
+        "zoom": 19,
         "type": "Way",
         "osmTags": [ "boundary=administrative", "admin_level=2", "border_type=armistice line" ],
         "link": "osm-tag-link"
@@ -1209,10 +1160,10 @@
       {
         "key": "legendCitySettlement",
         "latlng": {
-          "lat": 30.490800,
-          "lng": 35.1667000
+          "lat": 32.0485,
+          "lng": 34.7704
         },
-        "zoom": 13,
+        "zoom": 16,
         "type": "POI",
         "osmTags": [ "landuse=residential", "place=..." ],
         "link": "osm-tag-link"
@@ -1229,6 +1180,17 @@
         "link": "osm-tag-link"
       },
       {
+        "key": "legendVineyard",
+        "latlng": {
+          "lat": 31.83516,
+          "lng": 34.887922
+        },
+        "zoom": 19,
+        "type": "POI",
+        "osmTags": [ "landuse=vineyard" ],
+        "link": "osm-tag-link"
+      },
+      {
         "key": "legendCrop",
         "latlng": {
           "lat": 31.289700,
@@ -1242,21 +1204,21 @@
       {
         "key": "legendWoods",
         "latlng": {
-          "lat": 31.111483,
-          "lng": 34.8333120
+          "lat": 32.5214,
+          "lng": 35.04847
         },
-        "zoom": 16,
+        "zoom": 17,
         "type": "POI",
-        "osmTags": [ "landuse=forst" ],
+        "osmTags": [ "landuse=forest" ],
         "link": "osm-tag-link"
       },
       {
         "key": "legendGrass",
         "latlng": {
-          "lat": 32.112186,
-          "lng": 34.916375
+          "lat": 32.102039,
+          "lng": 34.815222
         },
-        "zoom": 17,
+        "zoom": 20,
         "type": "POI",
         "osmTags": [ "leisure=park" ],
         "link": "osm-tag-link"
@@ -1264,8 +1226,8 @@
       {
         "key": "legendScrub",
         "latlng": {
-          "lat": 32.485095,
-          "lng": 34.8953676
+          "lat": 32.46835,
+          "lng": 34.92850
         },
         "zoom": 16,
         "type": "POI",
@@ -1275,12 +1237,23 @@
       {
         "key": "legendSand",
         "latlng": {
-          "lat": 31.746489,
-          "lng": 34.602857
+          "lat": 31.7443,
+          "lng": 34.6051
         },
         "zoom": 16,
         "type": "POI",
         "osmTags": [ "natural=sand" ],
+        "link": "osm-tag-link"
+      },
+      {
+        "key": "legendBeach",
+              "latlng": {
+          "lat": 31.7600,
+          "lng": 34.6104
+        },
+        "zoom": 17,
+        "type": "POI",
+        "osmTags": [ "natural=beach" ],
         "link": "osm-tag-link"
       },
       {
@@ -1297,10 +1270,10 @@
       {
         "key": "legendQuarry",
         "latlng": {
-          "lat": 31.232381,
-          "lng": 35.204895
+          "lat": 31.715015,
+          "lng": 35.022489
         },
-        "zoom": 16,
+        "zoom": 19,
         "type": "POI",
         "osmTags": [ "landuse=quarry" ],
         "link": "osm-tag-link"
@@ -1308,10 +1281,10 @@
       {
         "key": "legendConstructionSite",
         "latlng": {
-          "lat": 30.980369,
-          "lng": 34.922879
+          "lat": 31.7895042,
+          "lng": 35.1360069
         },
-        "zoom": 15,
+        "zoom": 17,
         "type": "POI",
         "osmTags": [ "landuse=construction" ],
         "link": "osm-tag-link"

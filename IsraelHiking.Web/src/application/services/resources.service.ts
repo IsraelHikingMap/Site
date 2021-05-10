@@ -294,6 +294,7 @@ export class ResourcesService {
     public legendIsraelTrail: string;
     public legendRegionalTrail: string;
     public legendTrails: string;
+    public legendPavedRoad: string;
     public legendAllVehicles: string;
     public legendLight4WDVehicles: string;
     public legendStrong4WDVehicles: string;
@@ -352,6 +353,7 @@ export class ResourcesService {
     public legendCave: string;
     public legendAttraction: string;
     public legendTree: string;
+    public legendFlowers: string;
     public legendSynagogue: string;
     public legendChurch: string;
     public legendMosque: string;
@@ -374,6 +376,7 @@ export class ResourcesService {
     public legendNatureReserveNationalPark: string;
     public legendMilitaryArea: string;
     public legendMilitaryTraining: string;
+    public legendMinefield: string;
     public legendAreaA: string;
     public legendAreaB: string;
     public legendInternationalBorder: string;
@@ -403,13 +406,13 @@ export class ResourcesService {
     public legendAreas: string;
     public legendCitySettlement: string;
     public legendOrchard: string;
+    public legendVineyard: string;
     public legendCrop: string;
     public legendWoods: string;
     public legendGrass: string;
     public legendScrub: string;
     public legendSand: string;
-    public legendWetland: string;
-    public legendDryRiverbed: string;
+    public legendBeach: string;
     public legendCemetery: string;
     public legendQuarry: string;
     public legendEmpty: string;
@@ -435,7 +438,7 @@ export class ResourcesService {
     }
 
     public setLanguage = async (language: Language): Promise<void> => {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1617312596017");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1620576083100");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -736,6 +739,7 @@ export class ResourcesService {
         this.legendIsraelTrail = this.gettextCatalog.getString("Israel Trail");
         this.legendRegionalTrail = this.gettextCatalog.getString("Regional Trail");
         this.legendTrails = this.gettextCatalog.getString("Trails");
+        this.legendPavedRoad = this.gettextCatalog.getString("Paved Road");
         this.legendAllVehicles = this.gettextCatalog.getString("All Vehicles");
         this.legendLight4WDVehicles = this.gettextCatalog.getString("Light 4WD Vehicles");
         this.legendStrong4WDVehicles = this.gettextCatalog.getString("Strong 4WD Vehicles");
@@ -793,6 +797,7 @@ export class ResourcesService {
         this.legendCave = this.gettextCatalog.getString("Cave");
         this.legendAttraction = this.gettextCatalog.getString("Attraction");
         this.legendTree = this.gettextCatalog.getString("Tree");
+        this.legendFlowers = this.gettextCatalog.getString("Flowers");
         this.legendSynagogue = this.gettextCatalog.getString("Synagogue");
         this.legendChurch = this.gettextCatalog.getString("Church");
         this.legendMosque = this.gettextCatalog.getString("Mosque");
@@ -815,6 +820,7 @@ export class ResourcesService {
         this.legendNatureReserveNationalPark = this.gettextCatalog.getString("Nature Reserve, National Park");
         this.legendMilitaryArea = this.gettextCatalog.getString("Military Area");
         this.legendMilitaryTraining = this.gettextCatalog.getString("Military Training");
+        this.legendMinefield = this.gettextCatalog.getString("Minefield");
         this.legendAreaA = this.gettextCatalog.getString("Area A");
         this.legendAreaB = this.gettextCatalog.getString("Area B");
         this.legendInternationalBorder = this.gettextCatalog.getString("International Border");
@@ -844,13 +850,13 @@ export class ResourcesService {
         this.legendAreas = this.gettextCatalog.getString("Areas");
         this.legendCitySettlement = this.gettextCatalog.getString("City, Settlement");
         this.legendOrchard = this.gettextCatalog.getString("Orchard");
+        this.legendVineyard = this.gettextCatalog.getString("Vineyard");
         this.legendCrop = this.gettextCatalog.getString("Crop");
         this.legendWoods = this.gettextCatalog.getString("Woods");
         this.legendGrass = this.gettextCatalog.getString("Grass");
         this.legendScrub = this.gettextCatalog.getString("Scrub");
         this.legendSand = this.gettextCatalog.getString("Sand");
-        this.legendWetland = this.gettextCatalog.getString("Wetland");
-        this.legendDryRiverbed = this.gettextCatalog.getString("Dry Riverbed");
+        this.legendBeach = this.gettextCatalog.getString("Beach");
         this.legendCemetery = this.gettextCatalog.getString("Cemetery");
         this.legendQuarry = this.gettextCatalog.getString("Quarry");
         this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
