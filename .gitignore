@@ -203,3 +203,4 @@ ModelManifest.xml
 /IsraelHiking.Web/platforms
 /IsraelHiking.Web/plugins
 /IsraelHiking.Web/ul_web_hooks/android
+*.swp
