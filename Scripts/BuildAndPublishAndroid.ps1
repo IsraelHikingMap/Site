@@ -55,14 +55,13 @@ Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign
 
 Push-AppveyorArtifact $apkVersioned
 
-#if ($env:APPVEYOR_REPO_TAG -eq "true")
-#{
+if ($env:APPVEYOR_REPO_TAG -eq "true")
+{
 	Write-Host "npm install -g apkup --loglevel=error"
 	npm install -g apkup --loglevel=error
 	Write-Host "Wrtiting json file"
 	$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json
-	Write-Host "Invoking apkup upload"
 	apkup upload -k ./playstore_service_account.json -a $apkVersioned -t 'internal'
-#}
+}
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
