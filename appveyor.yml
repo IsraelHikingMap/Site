@@ -45,7 +45,7 @@ for:
       verbosity: minimal
     test: off
     after_build:
-      - ps: >-
+      - pwsh: >-
             $TestAndPublishWeb = "$env:APPVEYOR_BUILD_FOLDER\Scripts\TestAndPublishWeb.ps1"
 
             Write-Host $TestAndPublishWeb
@@ -59,7 +59,7 @@ for:
     install:
       - ps: Install-Product node 12.18    
     build_script:
-    - ps: >-
+    - pwsh: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
 
         Write-Host $BuildAndPublishAndroid
@@ -74,7 +74,7 @@ for:
     install:
       - sh: nvm install 12.18
     build_script: 
-    - ps: >-
+    - pwsh: >-
         $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishIOS.ps1"
 
         Write-Host $BuildAndPublishIOS

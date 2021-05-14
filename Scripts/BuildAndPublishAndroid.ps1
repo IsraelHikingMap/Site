@@ -1,7 +1,3 @@
-iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
-[System.IO.File]::WriteAllText("playstore_service_account.json", $env:PLAYSTORE_JSON, (New-Object System.Text.UTF8Encoding $False))
-
 choco install gradle --version 4.10.3 --no-progress
 
 refreshenv
@@ -64,9 +60,9 @@ Push-AppveyorArtifact $apkVersioned
 	Write-Host "npm install -g apkup --loglevel=error"
 	npm install -g apkup --loglevel=error
 	Write-Host "Wrtiting json file"
-	[System.IO.File]::WriteAllText("playstore_service_account.json", $env:PLAYSTORE_JSON, (New-Object System.Text.UTF8Encoding $False))
+	$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json
 	Write-Host "Invoking apkup upload"
-	apkup upload -k playstore_service_account.json -a $apkVersioned -t 'internal'
+	apkup upload -k ./playstore_service_account.json -a $apkVersioned -t 'internal'
 #}
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
