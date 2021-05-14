@@ -16,6 +16,10 @@ Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;andro
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
 
+Write-Host "Wrtiting json file"
+$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json
+Write-Host((Get-Item playstore_service_account.json).length/1KB)
+
 # Building android:
 Write-Host "npm install --loglevel=error"
 npm install --loglevel=error
@@ -59,8 +63,7 @@ Push-AppveyorArtifact $apkVersioned
 #{
 	Write-Host "npm install -g google-playstore-publisher"
 	npm install -g google-playstore-publisher
-	Write-Host "Wrtiting json file"
-	$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json
+	
 	Write-Host "Invoking playstore publisher"
 	playstore -t=internal -p=il.org.osm.israelhiking -k=./playstore_service_account.json -a=$apkVersioned
 #}
