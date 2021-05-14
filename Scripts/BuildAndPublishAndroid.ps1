@@ -60,7 +60,8 @@ Push-AppveyorArtifact $apkVersioned
 	Write-Host "npm install -g apkup --loglevel=error"
 	npm install -g apkup --loglevel=error
 	Write-Host "Wrtiting json file"
-	$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json -Encoding "utf8NoBOM"
+	$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+	[System.IO.File]::WriteAllText("playstore_service_account.json", $env:PLAYSTORE_JSON, $Utf8NoBomEncoding)
 	Write-Host "Invoking apkup upload"
 	apkup upload -k ./playstore_service_account.json -a $apkVersioned -t 'internal'
 #}
