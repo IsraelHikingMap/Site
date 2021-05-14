@@ -1,5 +1,3 @@
-iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-$blockRdp = $true;
 choco install gradle --version 4.10.3 --no-progress
 
 refreshenv
@@ -17,10 +15,6 @@ Invoke-Expression """$response"" | sdkmanager.bat --update | out-null"
 Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
-
-Write-Host "Wrtiting json file"
-$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json
-Write-Host((Get-Item playstore_service_account.json).length/1KB)
 
 # Building android:
 Write-Host "npm install --loglevel=error"
@@ -63,11 +57,12 @@ Push-AppveyorArtifact $apkVersioned
 
 #if ($env:APPVEYOR_REPO_TAG -eq "true")
 #{
-	Write-Host "npm install -g google-playstore-publisher"
-	npm install -g google-playstore-publisher
-	
-	Write-Host "Invoking playstore publisher"
-	playstore -t=internal -p=il.org.osm.israelhiking -k=./playstore_service_account.json -a=$apkVersioned
+	Write-Host "npm install -g apkup"
+	npm install -g apkup
+	Write-Host "Wrtiting json file"
+	$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json
+	Write-Host "Invoking apkup upload"
+	apkup upload -t 'internal' -k ./playstore_service_account.json -a $apkVersioned
 #}
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
