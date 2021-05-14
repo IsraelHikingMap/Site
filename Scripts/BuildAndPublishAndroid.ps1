@@ -55,4 +55,14 @@ Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign
 
 Push-AppveyorArtifact $apkVersioned
 
+#if ($env:APPVEYOR_REPO_TAG -eq "true")
+#{
+	Write-Host "npm install -g google-playstore-publisher"
+	npm install -g google-playstore-publisher
+	Write-Host "Wrtiting json file"
+	$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json
+	Write-Host "Invoking playstore publisher"
+	playstore -t=internal -p=il.org.osm.israelhiking -k=./playstore_service_account.json -a=$apkVersioned
+#}
+
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
