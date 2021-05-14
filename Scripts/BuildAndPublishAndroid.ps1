@@ -57,12 +57,12 @@ Push-AppveyorArtifact $apkVersioned
 
 #if ($env:APPVEYOR_REPO_TAG -eq "true")
 #{
-	Write-Host "npm install -g apkup"
-	npm install -g apkup
+	Write-Host "npm install -g apkup --loglevel=error"
+	npm install -g apkup --loglevel=error
 	Write-Host "Wrtiting json file"
-	$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json
+	$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json -Encoding "utf8NoBOM"
 	Write-Host "Invoking apkup upload"
-	apkup upload -t 'internal' -k ./playstore_service_account.json -a $apkVersioned
+	apkup upload -k ./playstore_service_account.json -a $apkVersioned -t 'internal'
 #}
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
