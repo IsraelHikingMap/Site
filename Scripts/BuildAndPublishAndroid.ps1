@@ -57,13 +57,13 @@ $preVersionAabLocation = "./platforms/android/app/build/outputs/bundle/release/a
 Copy-Item -Path $preVersionAabLocation -Destination $aabVersioned
 Push-AppveyorArtifact $aabVersioned
 
-if ($env:APPVEYOR_REPO_TAG -eq "true")
-{
-	Write-Host "npm install -g apkup --loglevel=error"
-	npm install -g apkup --loglevel=error
+#HM TODO: revert
+#if ($env:APPVEYOR_REPO_TAG -eq "true")
+#{
 	Write-Host "Wrtiting json file"
 	$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json
-	apkup upload -k ./playstore_service_account.json -a $aabVersioned -t 'internal'
-}
+	Write-Host "Uploading file to play store"
+	npx apkup upload -k ./playstore_service_account.json -a $aabVersioned -t 'internal'
+#}
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
