@@ -62,7 +62,7 @@ npm run build-ipa
 $preVersionIpaLocation = "./platforms/ios/build/device/Israel Hiking Map.ipa";
 $ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
-Copy-Item -Path $preVersionIpaLocation -Destination "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
+Copy-Item -Path $preVersionIpaLocation -Destination $ipaVersioned
 
 if (-not (Test-Path -Path $ipaVersioned)) {
 	throw "Failed to create ios ipa file"
