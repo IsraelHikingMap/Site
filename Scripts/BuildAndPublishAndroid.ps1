@@ -40,8 +40,11 @@ $xml.widget.version = $env:APPVEYOR_BUILD_VERSION
 $xml.Save($filePath)
 
 
-Write-Host "npm run build-apk"
-npm run build-apk
+Write-Host "npx cordova build android --release --  --packageType=bundle"
+npx cordova build android --release -- --keystore=.\signing\IHM.jks --storePassword=$env:STORE_PASSWORD --password=$env:PASSWORD --packageType=bundle
+
+Write-Host "npx cordova build android --release --  --packageType=apk"
+npx cordova build android --release -- --keystore=.\signing\IHM.jks --storePassword=$env:STORE_PASSWORD --password=$env:PASSWORD --packageType=apk
 
 $apkVersioned = ".\IHM_signed_$env:APPVEYOR_BUILD_VERSION.apk"
 $preSignApkLocation = ".\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk";
@@ -50,9 +53,7 @@ if (-not (Test-Path -Path $preSignApkLocation)) {
 	throw "Failed to create android apk file"
 }
 
-Write-Host "Signing apk"
-Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\signing\IHM.jks --ks-pass pass:$env:STORE_PASSWORD --key-pass pass:$env:PASSWORD --out $apkVersioned $preSignApkLocation"
-
+#HM TODO: rename and copy
 Push-AppveyorArtifact $apkVersioned
 
 if ($env:APPVEYOR_REPO_TAG -eq "true")
