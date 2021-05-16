@@ -109,7 +109,6 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="source">The source</param>
         /// <param name="id">The ID</param>
-        /// <param name="language">The required language</param>
         /// <returns></returns>
         [Route("{source}/{id}")]
         [HttpGet]
