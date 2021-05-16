@@ -109,7 +109,7 @@ namespace IsraelHiking.API.Services.Osm
                     // a new node was added to this highway - no reason to add a new one to the same location
                     continue;
                 }
-                var simpleWay = await AddNewNodeToExistingWay(newNode.Id.ToString(), closestItmHighway.GetOsmId(), indexToInsert);
+                var simpleWay = await AddNewNodeToExistingWay(newNode, closestItmHighway, indexToInsert);
                 modifiedElement.Add(simpleWay);
                 waysToUpdateIds.Add(simpleWay.Id);
             }
@@ -196,11 +196,34 @@ namespace IsraelHiking.API.Services.Osm
             }
         }
 
-        private async Task<Way> AddNewNodeToExistingWay(string nodeId, long wayId, int indexToInsert)
+        /// <summary>
+        /// This will add the new node to an exiting way
+        /// It will also update the new node to be on the existing way instead of just altering the existing way by
+        /// pleacing the node in the projection location
+        /// </summary>
+        /// <param name="newNode"></param>
+        /// <param name="closestHighwayItm"></param>
+        /// <param name="indexToInsert"></param>
+        /// <returns></returns>
+        private async Task<Way> AddNewNodeToExistingWay(Node newNode, LineString closestHighwayItm, int indexToInsert)
         {
-            var simpleWay = await _osmGateway.GetWay(wayId);
+            var simpleWay = await _osmGateway.GetWay(closestHighwayItm.GetOsmId());
+            if (indexToInsert != 0 && indexToInsert != simpleWay.Nodes.Length)
+            {
+                var segment = new LineSegment(closestHighwayItm.Coordinates[indexToInsert - 1], closestHighwayItm.Coordinates[indexToInsert]);
+                var (newNodeX, newNodeY) = _wgs84ItmMathTransform.Transform(newNode.Longitude.Value, newNode.Latitude.Value);
+                var projectionFactor = segment.ProjectionFactor(new Coordinate(newNodeX, newNodeY));
+                var itmCoordinate = segment.PointAlong(projectionFactor);
+                if (projectionFactor >= 0 && projectionFactor <= 1)
+                {
+                    var (longitude, latitude) = _itmWgs84MathTransform.Transform(itmCoordinate.X, itmCoordinate.Y);
+                    newNode.Longitude = longitude;
+                    newNode.Latitude = latitude;
+                }
+            }
+            
             var updatedList = simpleWay.Nodes.ToList();
-            updatedList.Insert(indexToInsert, long.Parse(nodeId));
+            updatedList.Insert(indexToInsert, newNode.Id.Value);
             simpleWay.Nodes = updatedList.ToArray();
             return simpleWay;
         }
@@ -210,7 +233,6 @@ namespace IsraelHiking.API.Services.Osm
             var indexToInsert = indexOnWay;
             if (indexOnWay != closestItmHighway.Coordinates.Length - 1)
             {
-                // HM TODO: fix this using projection
                 var postItmLine = new LineString(new[] { closestItmHighway.Coordinates[indexOnWay], closestItmHighway.Coordinates[indexOnWay + 1] });
                 if (postItmLine.Distance(itmPoint) <= _options.MaxDistanceToExisitngLineForMerge)
                 {

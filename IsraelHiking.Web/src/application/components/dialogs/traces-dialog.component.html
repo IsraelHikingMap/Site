@@ -69,10 +69,10 @@
                 <button mat-button class="no-padding" fxFill [disabled]="!hasSelected()" (click)="deleteTrace()" matTooltip="{{resources.delete}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-trash"></i></button>
             </div>
             <div fxFlex>
-                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected()" matDialogClose (click)="showTrace()" matTooltip="{{resources.view}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View OSM trace"><i class="fa icon-eye"></i></button>
+                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected()" matDialogClose (click)="addTraceToRoutes()" matTooltip="{{resources.addToRoutes}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Add OSM trace to routes"><i class="fa icon-plus"></i></button>
             </div>
-            <div fxFlex>
-                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected() || !canUploadToOsm()" (click)="uploadRecordingToOsm()" matTooltip="{{resources.uploadFileToOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload locally recorded route"><i class="fa icon-cloud-upload"></i></button>
+            <div fxFlex *ngIf="hasSelected() && canUploadToOsm()">
+                <button mat-button class="no-padding" fxFill (click)="uploadRecordingToOsm()" matTooltip="{{resources.uploadFileToOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload locally recorded route"><i class="fa icon-cloud-upload"></i></button>
             </div>
             <div fxFlex *ngIf="!isMobile()">
                 <button mat-button class="no-padding" fxFill [disabled]="!hasSelected() || canUploadToOsm()" (click)="editInOsm()" matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace in OSM"><i class="fa icon-map-editing fa-lg"></i></button>

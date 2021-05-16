@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { NgProgress } from "@ngx-progressbar/core";
-import { uniq } from "lodash-es";
+import { uniq, cloneDeep } from "lodash-es";
 import { Observable, fromEvent, Subscription } from "rxjs";
 import { timeout, throttleTime, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
@@ -179,6 +179,12 @@ export class PoiService {
         this.loggingService.info(`[POIs] Upload queue changed, items in queue: ${items.length}, first item id: ${firstItemId}`);
 
         let feature = await this.databaseService.getPoiFromUploadQueue(firstItemId);
+        if (feature == null) {
+            this.loggingService.info(`[POIs] Upload queue has element which is not in the database, removing item: ${firstItemId}`);
+            this.queueIsProcessing = false;
+            this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
+            return;
+        }
         try {
             let postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
             let putAddress = Urls.poi + feature.properties.poiId + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
@@ -195,6 +201,11 @@ export class PoiService {
             this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
         } catch (ex) {
             this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, ${ex.message}`);
+            if (ex.name !== "TimeoutError") {
+                // No timeout - i.e. error from server - need to remove this feature from queue
+                this.queueIsProcessing = false;
+                this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
+            }
         } finally {
             this.queueIsProcessing = false;
         }
@@ -487,20 +498,24 @@ export class PoiService {
     public async getPoint(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
         let itemInCache = this.poisCache.find(f => f.properties.poiId === id && f.properties.source === source);
         if (itemInCache) {
-            return JSON.parse(JSON.stringify(itemInCache));
+            return cloneDeep(itemInCache);
         }
-        if (!this.runningContextService.isOnline) {
+        try {
+            let params = new HttpParams()
+            .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
+            let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params })
+                .pipe(timeout(6000))
+                .toPromise() as GeoJSON.Feature;
+            this.poisCache.splice(0, 0, poi);
+            return cloneDeep(poi);
+        } catch {
             let feature = await this.databaseService.getPoiById(`${source}_${id}`);
             if (feature == null) {
                 throw new Error("Failed to load POI from offline database.");
             }
+            this.poisCache.splice(0, 0, feature);
             return feature;
         }
-        let params = new HttpParams()
-            .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-        let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params }).toPromise() as GeoJSON.Feature;
-        this.poisCache.splice(0, 0, poi);
-        return JSON.parse(JSON.stringify(poi));
     }
 
     private async addPointToUploadQueue(feature: GeoJSON.Feature): Promise<void> {
@@ -674,6 +689,16 @@ export class PoiService {
                 poiSource: originalFeature.properties.poiSource
             } as any
         } as GeoJSON.Feature;
+
+        if (this.ngRedux.getState().offlineState.uploadPoiQueue.indexOf(originalFeature.properties.poiId) !== -1) {
+            // this is the case where there was a previous update request but this hs not been uploaded to the server yet...
+            let featureFromDatabase = await this.databaseService.getPoiFromUploadQueue(originalFeature.properties.poiId);
+            if (featureFromDatabase != null) {
+                featureContainingOnlyChanges = featureFromDatabase;
+                hasChages = true;
+            }
+        }
+
         if (newLocation) {
             this.setLocation(featureContainingOnlyChanges, newLocation);
             hasChages = true;
@@ -729,7 +754,10 @@ export class PoiService {
             iconColor: feature.properties.poiIconColor,
             imagesUrls: Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => feature.properties[k]),
             urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
-            isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint"
+            isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint",
+            lengthInKm: (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString")
+                ? SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0
+                : null
         };
     }
 

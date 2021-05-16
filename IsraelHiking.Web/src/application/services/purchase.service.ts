@@ -43,7 +43,7 @@ export class PurchaseService {
             type: this.store.PAID_SUBSCRIPTION
         });
         this.store.when("offline_map").owned(() => {
-            this.loggingService.debug("[Store] Product owned!");
+            this.loggingService.debug("[Store] Product owned! Last modified: " + this.ngRedux.getState().offlineState.lastModifiedDate);
             this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: true }));
             return;
         });

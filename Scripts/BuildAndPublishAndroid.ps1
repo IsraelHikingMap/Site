@@ -2,7 +2,7 @@ choco install gradle --version 4.10.3 --no-progress
 
 refreshenv
 
-$env:PATH += ";$env:ANDROID_HOME\tools\bin\"
+$env:PATH += ";$env:ANDROID_HOME/tools/bin/"
 
 gradle --version
 
@@ -14,7 +14,7 @@ Invoke-Expression """$response"" | sdkmanager.bat --update | out-null"
 
 Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
 
-Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 # Building android:
 Write-Host "npm install --loglevel=error"
@@ -31,28 +31,39 @@ if ($lastexitcode)
 Write-Host "npm run add-android"
 npm run add-android
 
-#Replace version in config.xml file
-
+Write-Host "Replacing version in config.xml file"
 $filePath = get-ChildItem config.xml | Select-Object -first 1 | select -expand FullName
 $xml = New-Object XML
 $xml.Load($filePath)
 $xml.widget.version = $env:APPVEYOR_BUILD_VERSION
 $xml.Save($filePath)
 
+Write-Host "cordova build android --release --  --packageType=apk"
+npx cordova build android --release -- --keystore=./signing/IHM.jks --storePassword=$env:STORE_PASSWORD --alias=ihmkey --password=$env:PASSWORD --packageType=apk
+$preVersionApkLocation = "./platforms/android/app/build/outputs/apk/release/app-release.apk";
 
-Write-Host "npm run build-apk"
-npm run build-apk
-
-$apkVersioned = ".\IHM_signed_$env:APPVEYOR_BUILD_VERSION.apk"
-$preSignApkLocation = ".\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk";
-
-if (-not (Test-Path -Path $preSignApkLocation)) {
+if (-not (Test-Path -Path $preVersionApkLocation)) {
 	throw "Failed to create android apk file"
 }
 
-Write-Host "Signing apk"
-Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\signing\IHM.jks --ks-pass pass:$env:STORE_PASSWORD --key-pass pass:$env:PASSWORD --out $apkVersioned $preSignApkLocation"
-
+$apkVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.apk"
+Copy-Item -Path $preVersionApkLocation -Destination $apkVersioned
 Push-AppveyorArtifact $apkVersioned
+
+Write-Host "cordova build android --release --  --packageType=bundle"
+npx cordova build android --release -- --keystore=./signing/IHM.jks --storePassword=$env:STORE_PASSWORD --alias=ihmkey --password=$env:PASSWORD --packageType=bundle
+$aabVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.aab"
+$preVersionAabLocation = "./platforms/android/app/build/outputs/bundle/release/app-release.aab";
+Copy-Item -Path $preVersionAabLocation -Destination $aabVersioned
+Push-AppveyorArtifact $aabVersioned
+
+
+if ($env:APPVEYOR_REPO_TAG -eq "true")
+{
+	Write-Host "Wrtiting json file"
+	$env:PLAYSTORE_JSON | Out-File -FilePath ./playstore_service_account.json
+	Write-Host "Uploading file to play store"
+	npx apkup upload -k ./playstore_service_account.json -a $aabVersioned -t 'internal'
+}
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER

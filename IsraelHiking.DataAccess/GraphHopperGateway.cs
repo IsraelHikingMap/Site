@@ -1,6 +1,7 @@
 ﻿using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -56,32 +57,26 @@ namespace IsraelHiking.DataAccess
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ConfigurationData _options;
+        private readonly ILogger _logger;
 
-        public GraphHopperGateway(IHttpClientFactory httpClientFactory, IOptions<ConfigurationData> options)
+        public GraphHopperGateway(IHttpClientFactory httpClientFactory,
+            IOptions<ConfigurationData> options,
+            ILogger logger)
         {
             _httpClientFactory = httpClientFactory;
             _options = options.Value;
+            _logger = logger;
         }
 
         public async Task<Feature> GetRouting(RoutingGatewayRequest request)
         {
             var httpClient = _httpClientFactory.CreateClient();
-            string profile = "hike";
-            switch (request.Profile)
-            {
-                case ProfileType.Foot:
-                    profile = "hike";
-                    break;
-                case ProfileType.Bike:
-                    profile = "mtb";
-                    break;
-                case ProfileType.Car4WheelDrive:
-                    profile = "car4wd";
-                    break;
-                case ProfileType.Car:
-                    profile = "car";
-                    break;
-            }
+            string profile = request.Profile switch {
+                ProfileType.Foot => "hike",
+                ProfileType.Bike => "mtb",
+                ProfileType.Car4WheelDrive => "car4wd",
+                _ => "hike"
+            };
             var fromStr = $"{request.From.Y},{request.From.X}";
             var toStr = $"{request.To.Y},{request.To.X}";
             var requestAddress = $"{$"{_options.GraphhopperServerAddress}route?instructions=false&points_encoded=false&elevation=true&details=track_type&details=road_class&point="}{fromStr}&point={toStr}&profile={profile}";
@@ -90,6 +85,7 @@ namespace IsraelHiking.DataAccess
             var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
             if (jsonResponse?.Paths == null || !jsonResponse.Paths.Any())
             {
+                _logger.LogWarning($"Problem with routing response: {response.StatusCode} {content}");
                 return LineStringToFeature(new LineString(new[] { request.From, request.To }));
             }
             var path = jsonResponse.Paths.First();
@@ -97,6 +93,7 @@ namespace IsraelHiking.DataAccess
             {
                 var jsonCoordinates = path.Points.Coordinates.First();
                 var convertedCoordiates = new CoordinateZ(jsonCoordinates[0], jsonCoordinates[1], jsonCoordinates.Count > 2 ? jsonCoordinates[2] : 0.0);
+                _logger.LogWarning($"Problem with routing response: got only one point back from graphhopper...");
                 return LineStringToFeature(new LineString(new[] { convertedCoordiates, convertedCoordiates }));
             }
             var lineString = new LineString(path.Points.Coordinates.Select(c => new CoordinateZ(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());

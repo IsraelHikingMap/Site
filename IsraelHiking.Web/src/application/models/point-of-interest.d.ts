@@ -26,4 +26,5 @@ export interface EditablePublicPointData {
     urls: string[];
     category: string;
     isPoint: boolean;
+    lengthInKm?: number;
 }

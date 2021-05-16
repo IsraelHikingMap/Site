@@ -34,7 +34,6 @@ import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 import { NgProgressModule } from "@ngx-progressbar/core";
 import { NgProgressHttpModule } from "@ngx-progressbar/http";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
-import { IvyGalleryModule } from "angular-gallery";
 import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgxMapboxGLModule } from "ngx-mapbox-gl";
@@ -169,6 +168,7 @@ import { MainMenuComponent } from "./components/main-menu.component";
 import { FilesSharesDialogComponent } from "./components/dialogs/files-shares-dialog.component";
 import { CenterMeComponent } from "./components/center-me.component";
 import { FacebookWarningDialogComponent } from "./components/dialogs/facebook-warning-dialog.component";
+import { PhotoSwpieComponent } from "./components/photoswipe.component";
 
 // variables and functions
 import { routes } from "./routes";
@@ -215,7 +215,6 @@ export function initializeApplication(injector: Injector) {
             NgProgressHttpModule,
             ScrollToModule.forRoot(),
             DragDropModule,
-            IvyGalleryModule,
             InfiniteScrollModule,
             NgReduxModule,
             NgxMapboxGLModule.withConfig({ accessToken: "no-token" }),
@@ -347,6 +346,7 @@ export function initializeApplication(injector: Injector) {
             FilesSharesDialogComponent,
             CenterMeComponent,
             FacebookWarningDialogComponent,
+            PhotoSwpieComponent,
             NameInUseValidatorDirective,
             ImageCaptureDirective,
             OfflineImagePipe

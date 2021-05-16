@@ -10,7 +10,7 @@ import { DatabaseService } from "./database.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { UpdateShareUrlAction, AddShareUrlAction, RemoveShareUrlAction } from "../reducers/share-urls.reducer";
-import { SetShareUrlsLastModifiedDateAction } from "application/reducers/offline.reducer";
+import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { ShareUrl, DataContainer, ApplicationState } from "../models/models";
 import { Urls } from "../urls";
 

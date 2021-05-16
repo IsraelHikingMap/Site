@@ -37,7 +37,7 @@ namespace IsraelHiking.API
             services.AddTransient<IImageCreationService, ImageCreationService>();
             services.AddTransient<IOsmLineAdderService, OsmLineAdderService>();
             services.AddTransient<ITagsHelper, TagsHelper>();
-            services.AddTransient<IPointsOfInterestProvider, OsmPointsOfInterestAdapter>();
+            services.AddTransient<IPointsOfInterestProvider, PointsOfInterestProvider>();
             services.AddTransient<IPointsOfInterestFilesCreatorExecutor, PointsOfInterestFilesCreatorExecutor>();
             services.AddTransient<IOfflineFilesService, OfflineFilesService>();
             services.AddTransient<IImagesUrlsStorageExecutor, ImagesUrlsStorageExecutor>();

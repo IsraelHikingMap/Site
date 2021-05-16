@@ -26,9 +26,9 @@ using System.Security.Cryptography;
 namespace IsraelHiking.API.Tests.Services.Poi
 {
     [TestClass]
-    public class OsmPointsOfInterestAdapterTests : BasePointsOfInterestAdapterTestsHelper
+    public class PointsOfInterestProviderTests : BasePointsOfInterestAdapterTestsHelper
     {
-        private OsmPointsOfInterestAdapter _adapter;
+        private PointsOfInterestProvider _adapter;
         private IClientsFactory _clientsFactory;
         private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private IOsmRepository _osmRepository;
@@ -55,7 +55,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _pointsOfInterestRepository = Substitute.For<IPointsOfInterestRepository>();
             _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
-            _adapter = new OsmPointsOfInterestAdapter(_pointsOfInterestRepository,
+            _adapter = new PointsOfInterestProvider(_pointsOfInterestRepository,
                 _elevationDataStorage,
                 _osmGeoJsonPreprocessorExecutor,
                 _osmRepository,
@@ -131,7 +131,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var result = _adapter.GetPointsOfInterest(null, null, null, "he").Result;
 
             Assert.AreEqual(1, result.Length);
-            Assert.AreEqual(OsmPointsOfInterestAdapter.SEARCH_ICON, result.First().Icon);
+            Assert.AreEqual(PointsOfInterestProvider.SEARCH_ICON, result.First().Icon);
         }
 
         [TestMethod]
@@ -693,6 +693,23 @@ namespace IsraelHiking.API.Tests.Services.Poi
             gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
                 o.Tags.All(t => t.Key != "image1") && o.Tags.All(t => t.Value != "iamge-to-remove")
             ));
+        }
+
+        [TestMethod]
+        public void CreateFeatureFromCoordinates_ShouldCreate()
+        {
+            var alt = 10;
+            _elevationDataStorage.GetElevation(Arg.Any<Coordinate>()).Returns(alt);
+            var feature = _adapter.GetCoordinatesFeature(new LatLng(35, 32), "32_35");
+
+            Assert.IsNotNull(feature);
+            Assert.AreEqual(feature.Geometry.Coordinate.X, 32);
+            Assert.AreEqual(feature.Geometry.Coordinate.Y, 35);
+            Assert.IsTrue(feature.Attributes.Exists(FeatureAttributes.POI_ITM_NORTH));
+            Assert.IsTrue(feature.Attributes.Exists(FeatureAttributes.POI_ITM_EAST));
+            Assert.IsTrue(feature.Attributes.Has(FeatureAttributes.POI_ALT, alt.ToString()));
+            Assert.IsTrue(feature.Attributes.Exists(FeatureAttributes.POI_ICON));
+            Assert.IsTrue(feature.Attributes.Exists(FeatureAttributes.POI_SOURCE));
         }
     }
 }

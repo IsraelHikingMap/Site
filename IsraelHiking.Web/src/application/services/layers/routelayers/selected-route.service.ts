@@ -6,6 +6,7 @@ import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "../../resources.service";
 import { SpatialService } from "../../spatial.service";
 import { RouterService } from "../../router.service";
+import { MINIMAL_ANGLE, MINIMAL_DISTANCE } from "../../route-statistics.service";
 import { NgRedux, select } from "../../../reducers/infra/ng-redux.module";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing-state.reducer";
 import {
@@ -164,12 +165,15 @@ export class SelectedRouteService {
         return null;
     }
 
-    public getClosestRouteToGPS(currentLocation: ILatLngTime): RouteData {
+    public getClosestRouteToGPS(currentLocation: ILatLngTime, heading: number): RouteData {
         if (currentLocation == null) {
             return null;
         }
         let routeToReturn = null;
-        let minimalDistance = SelectedRouteService.MERGE_THRESHOLD;
+        let minimalWeight = MINIMAL_DISTANCE;
+        if (heading !== null) {
+            minimalWeight += MINIMAL_ANGLE;
+        }
         for (let routeData of this.routes) {
             if (routeData.id === this.recordingRouteId || routeData.segments.length <= 0 || routeData.state === "Hidden") {
                 continue;
@@ -180,9 +184,12 @@ export class SelectedRouteService {
                     if (latLng === previousLatLng) {
                         continue;
                     }
-                    let currentDistance = SpatialService.getDistanceFromPointToLine(currentLocation, [previousLatLng, latLng]);
-                    if (currentDistance < minimalDistance) {
-                        minimalDistance = currentDistance;
+                    let currentWeight = SpatialService.getDistanceFromPointToLine(currentLocation, [previousLatLng, latLng]);
+                    if (heading != null) {
+                        currentWeight += Math.abs(heading - SpatialService.getLineBearingInDegrees(previousLatLng, latLng));
+                    }
+                    if (currentWeight < minimalWeight) {
+                        minimalWeight = currentWeight;
                         routeToReturn = routeData;
                     }
                     previousLatLng = latLng;

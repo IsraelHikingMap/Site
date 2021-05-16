@@ -29,9 +29,9 @@ using System.Threading.Tasks;
 namespace IsraelHiking.API.Services.Poi
 {
     /// <summary>
-    /// Points of interest adapter for OSM data
+    /// Points of interest provider
     /// </summary>
-    public class OsmPointsOfInterestAdapter : IPointsOfInterestProvider
+    public class PointsOfInterestProvider : IPointsOfInterestProvider
     {
         /// <summary>
         /// This icon is the default icon when no icon was used
@@ -70,7 +70,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="tagsHelper"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public OsmPointsOfInterestAdapter(IPointsOfInterestRepository pointsOfInterestRepository,
+        public PointsOfInterestProvider(IPointsOfInterestRepository pointsOfInterestRepository,
             IElevationDataStorage elevationDataStorage,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
@@ -529,10 +529,11 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc/>
         public async Task<UpdatesResponse> GetUpdates(DateTime lastMoidifiedDate, DateTime modifiedUntil)
         {
-            var results = (lastMoidifiedDate == DateTime.MinValue)
-                ? await _pointsOfInterestRepository.GetAllPointsOfInterest(false)
+            var results = (lastMoidifiedDate.Year < 2010)
+                ? throw new ArgumentException("Last modified date must be higher than 2010", nameof(lastMoidifiedDate))
                 : await _pointsOfInterestRepository.GetPointsOfInterestUpdates(lastMoidifiedDate, modifiedUntil);
             var lastModified = await _pointsOfInterestRepository.GetLastSuccessfulRebuildTime();
+            ElevationSetterHelper.SetElevation(results, _elevationDataStorage);
             return new UpdatesResponse
             {
                 Features = results.ToArray(),
@@ -542,9 +543,11 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public Task<Feature> GetFeatureById(string source, string id)
+        public async Task<Feature> GetFeatureById(string source, string id)
         {
-            return _pointsOfInterestRepository.GetPointOfInterestById(id, source);
+            var feature = await _pointsOfInterestRepository.GetPointOfInterestById(id, source);
+            ElevationSetterHelper.SetElevation(feature.Geometry, _elevationDataStorage);
+            return feature;
         }
 
         /// <inheritdoc/>
@@ -737,6 +740,28 @@ namespace IsraelHiking.API.Services.Poi
             imageUrl = await _wikimediaCommonGateway.GetImageUrl(imageName);
             await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrl);
             return imageUrl;
+        }
+
+        /// <inheritdoc/>
+        public Feature GetCoordinatesFeature(LatLng latLng, string id)
+        {
+            var coordinate = latLng.ToCoordinate();
+            var (east, north) = _wgs84ItmMathTransform.Transform(coordinate.X, coordinate.Y);
+            var alt = _elevationDataStorage.GetElevation(coordinate).Result;
+            var feautre = new Feature(new Point(coordinate), new AttributesTable
+                {
+                    { FeatureAttributes.NAME, id },
+                    { FeatureAttributes.POI_ICON, SEARCH_ICON },
+                    { FeatureAttributes.POI_ICON_COLOR, "black" },
+                    { FeatureAttributes.POI_CATEGORY, Categories.NONE },
+                    { FeatureAttributes.POI_SOURCE, Sources.COORDINATES },
+                    { FeatureAttributes.POI_ITM_EAST, east },
+                    { FeatureAttributes.POI_ITM_NORTH, north },
+                    { FeatureAttributes.POI_ALT, alt }
+                });
+            feautre.SetTitles();
+            feautre.SetLocation(coordinate);
+            return feautre;
         }
     }
 }

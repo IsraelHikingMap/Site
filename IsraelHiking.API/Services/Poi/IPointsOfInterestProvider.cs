@@ -1,4 +1,5 @@
-﻿using IsraelHiking.Common.Api;
+﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -109,5 +110,13 @@ namespace IsraelHiking.API.Services.Poi
         /// </summary>
         /// <returns></returns>
         public Task<List<Feature>> GetAll();
+
+        /// <summary>
+        /// Gets a feature related to a coordinate
+        /// </summary>
+        /// <param name="latLng"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Feature GetCoordinatesFeature(LatLng latLng, string id);
     }
 }

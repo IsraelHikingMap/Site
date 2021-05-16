@@ -1,4 +1,4 @@
-version: 9.8.{build}
+version: 9.9.{build}
 clone_depth: 3
 configuration: Release
 skip_branch_with_pr: true
@@ -15,6 +15,8 @@ environment:
       ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
       ANDROID_SDK_ROOT: C:\Program Files (x86)\Android\android-sdk
       GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+      PLAYSTORE_JSON:
+        secure: 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
     - PRODUCT: ios
       APPVEYOR_BUILD_WORKER_IMAGE: macOS
       TMS_USER: israelhikingmap@gmail.com
@@ -29,7 +31,7 @@ for:
     install:
       - sh: nvm install 12.18
     before_build:
-      - ps: dotnet restore
+      - pwsh: dotnet restore
     dotnet_csproj:
       patch: true
       file: '**\*.csproj'
@@ -44,7 +46,7 @@ for:
       verbosity: minimal
     test: off
     after_build:
-      - ps: >-
+      - pwsh: >-
             $TestAndPublishWeb = "$env:APPVEYOR_BUILD_FOLDER\Scripts\TestAndPublishWeb.ps1"
 
             Write-Host $TestAndPublishWeb
@@ -58,7 +60,7 @@ for:
     install:
       - ps: Install-Product node 12.18    
     build_script:
-    - ps: >-
+    - pwsh: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
 
         Write-Host $BuildAndPublishAndroid
@@ -73,7 +75,7 @@ for:
     install:
       - sh: nvm install 12.18
     build_script: 
-    - ps: >-
+    - pwsh: >-
         $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishIOS.ps1"
 
         Write-Host $BuildAndPublishIOS

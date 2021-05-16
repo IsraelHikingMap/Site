@@ -5,6 +5,7 @@ import { ActionCreators } from "redux-undo";
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
+import { RecordedRouteService } from "../services/recorded-route.service";
 import { ToastService } from "../services/toast.service";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import {
@@ -29,6 +30,7 @@ export class DrawingComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
                 private readonly selectedRouteService: SelectedRouteService,
+                private readonly recordedRouteService: RecordedRouteService,
                 private readonly toastService: ToastService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
@@ -36,7 +38,12 @@ export class DrawingComponent extends BaseMapComponent {
 
     @HostListener("window:keydown", ["$event"])
     public onDrawingShortcutKeys($event: KeyboardEvent) {
-        if ($event.ctrlKey && $event.key.toLowerCase() === "z") {
+        if (($event.ctrlKey && $event.code === "KeyY") ||
+            ($event.metaKey && $event.shiftKey && $event.code === "KeyZ")) {
+            this.redo();
+            return;
+        }
+        if (($event.ctrlKey || $event.metaKey) && $event.code === "KeyZ") {
             this.undo();
             return;
         }
@@ -101,7 +108,7 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public isRecording() {
-        return this.selectedRouteService.getRecordingRoute() != null;
+        return this.recordedRouteService.isRecording();
     }
 
     public toggleEditRoute() {
@@ -142,6 +149,13 @@ export class DrawingComponent extends BaseMapComponent {
         this.selectedRouteService.syncSelectedRouteWithEditingRoute();
     }
 
+    private redo() {
+        this.ngRedux.dispatch(ActionCreators.redo());
+        // Undo can change the route editing state but doesn't affect the selected route...
+        // HM TODO: should selected route be part of the routes undo object?
+        this.selectedRouteService.syncSelectedRouteWithEditingRoute();
+    }
+
     public getRoutingType(): RoutingType {
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return "None";
@@ -158,6 +172,21 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public deleteAllRoutes() {
+        if (!this.recordedRouteService.isRecording()) {
+            this.showDeleteAllRoutesConfirmation();
+            return;
+        }
+        this.toastService.confirm({
+            message: this.resources.areYouSureYouWantToStopRecording,
+            confirmAction: () => {
+                this.recordedRouteService.stopRecording();
+                this.showDeleteAllRoutesConfirmation();
+            },
+            type: "YesNo"
+        });
+    }
+
+    private showDeleteAllRoutesConfirmation() {
         this.toastService.confirm({
             message: this.resources.areYouSureYouWantToDeleteAllRoutes,
             type: "YesNo",

@@ -55,14 +55,14 @@ body {
 .active {
     outline: 2px solid mat-color($app-primary) !important;
 }
-
-// angular-gallery
+// photoswipe, used for placing overlay at the right z-index
 overlay.overlay-shown {
     z-index: 2000 !important;
 }
 .cdk-overlay-container {
     z-index: 1500 !important;
 }
+// end photoswipe
 
 .cursor-default {
     cursor: default !important;

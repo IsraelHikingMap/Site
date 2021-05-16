@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="il.org.osm.israelhiking" version="9.8.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="il.org.osm.israelhiking" version="9.9.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>Israel Hiking Map</name>
   <description>An application for outdoor navigation.</description>
   <author email="IsraelHikingMap@gmail.com" href="http://israelhiking.osm.org.il">Israel Hiking Map</author>
@@ -27,21 +27,22 @@
     <preference name="android-minSdkVersion" value="22" />
     <preference name="AndroidLaunchMode" value="singleInstance" />
     <icon density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />
+    <splash density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />
     <icon density="mdpi" src="www/content/favicons/android-chrome-48x48.png" />
+    <splash density="mdpi" src="www/content/favicons/android-chrome-48x48.png" />
     <icon density="hdpi" src="www/content/favicons/android-chrome-72x72.png" />
+    <splash density="hdpi" src="www/content/favicons/android-chrome-72x72.png" />
     <icon density="xhdpi" src="www/content/favicons/android-chrome-96x96.png" />
+    <splash density="xhdpi" src="www/content/favicons/android-chrome-96x96.png" />
     <icon density="xxhdpi" src="www/content/favicons/android-chrome-144x144.png" />
+    <splash density="xxhdpi" src="www/content/favicons/android-chrome-144x144.png" />
     <icon density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
+    <splash density="xxxhdpi" src="www/content/favicons/android-chrome-192x192.png" />
+
     <config-file target="AndroidManifest.xml" parent="/manifest">
       <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     </config-file>
     <config-file parent="/manifest/application/activity" target="AndroidManifest.xml">
-      <intent-filter>
-        <action android:name="android.intent.action.SEND" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <data android:mimeType="image/jpeg" />
-        <data android:mimeType="image/jpg" />
-      </intent-filter>
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
@@ -70,8 +71,6 @@
         <data android:mimeType="application/kmz+xml" />
         <data android:mimeType="application/octet-stream" />
         <data android:mimeType="application/xml" />
-        <data android:mimeType="image/jpeg" />
-        <data android:mimeType="image/jpg" />
       </intent-filter>
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
@@ -130,14 +129,6 @@
         <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\.twl" />
         <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.twl" />
         <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.twl" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\.jpg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\.jpg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.jpg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.jpg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\.jpeg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\.jpeg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.jpeg" />
-        <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.jpeg" />
       </intent-filter>
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
@@ -198,19 +189,6 @@
     </config-file>
     <config-file target="*-Info.plist" parent="CFBundleDocumentTypes">
       <array>
-        <dict>
-          <key>CFBundleTypeName</key>
-          <string>JPEG image</string>
-          <key>CFBundleTypeRole</key>
-          <string>Editor</string>
-          <key>LSHandlerRank</key>
-          <string>Owner</string>
-          <key>LSItemContentTypes</key>
-          <array>
-              <string>public.jpeg</string>
-              <string>public.jpg</string>
-          </array>
-        </dict>
         <dict>
             <key>CFBundleTypeIconFiles</key>
             <array/>

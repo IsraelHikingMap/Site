@@ -10,6 +10,7 @@ import { SidebarService } from "./sidebar.service";
 import { SetSidebarAction } from "../reducers/poi.reducer";
 import { GeoLocationService } from "./geo-location.service";
 import { RecordedRouteService } from "./recorded-route.service";
+import { ImageGalleryService } from "./image-gallery.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { ApplicationState } from "../models/models";
 
@@ -33,6 +34,7 @@ export class ApplicationExitService {
                 private readonly runningContext: RunningContextService,
                 private readonly recordingRouteService: RecordedRouteService,
                 private readonly geoLocationService: GeoLocationService,
+                private readonly imageGalleryService: ImageGalleryService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 private readonly loggingService: LoggingService,
                 private readonly toastService: ToastService) {
@@ -47,6 +49,10 @@ export class ApplicationExitService {
         document.addEventListener("backbutton", async (e) => {
             e.preventDefault();
             await this.ngZone.run(async () => {
+                if (this.imageGalleryService.isOpen()) {
+                    this.imageGalleryService.close();
+                    return;
+                }
                 if (this.matDialog.openDialogs.length > 0) {
                     this.matDialog.closeAll();
                     return;

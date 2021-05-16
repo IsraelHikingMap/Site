@@ -13,7 +13,7 @@ describe("RouteStatisticsService", () => {
             segments: []
         } as RouteData;
 
-        let statistics = service.getStatistics(routeData, null, null, false);
+        let statistics = service.getStatistics(routeData, null, null, null, false);
 
         expect(statistics.gain).toBe(0);
         expect(statistics.loss).toBe(0);
@@ -36,7 +36,7 @@ describe("RouteStatisticsService", () => {
             ]
         } as RouteData;
 
-        let statistics = service.getStatistics(routeData, null, null, false);
+        let statistics = service.getStatistics(routeData, null, null, null, false);
 
         expect(statistics.gain).toBe(20);
         expect(statistics.loss).toBe(-20);
@@ -69,8 +69,8 @@ describe("RouteStatisticsService", () => {
             ]
         } as RouteData;
 
-        let statistics = service.getStatistics(recordingRouteData, closestRouteData, lastLatLng, true);
-        let statisticsOfCloseRoute = service.getStatistics(closestRouteData, null, null, false);
+        let statistics = service.getStatistics(recordingRouteData, closestRouteData, lastLatLng, null, true);
+        let statisticsOfCloseRoute = service.getStatistics(closestRouteData, null, null, null, false);
 
         expect(statistics.gain).toBe(20);
         expect(statistics.loss).toBe(0);
@@ -95,8 +95,8 @@ describe("RouteStatisticsService", () => {
             ]
         } as RouteData;
 
-        let statistics = service.getStatistics(routeData, routeData, gpsLatLng, false);
-        let statisticsOfFullRoute = service.getStatistics(routeData, null, null, false);
+        let statistics = service.getStatistics(routeData, routeData, gpsLatLng, null, false);
+        let statisticsOfFullRoute = service.getStatistics(routeData, null, null, null, false);
 
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(3);
@@ -117,7 +117,7 @@ describe("RouteStatisticsService", () => {
             ]
         } as RouteData;
 
-        let statistics = service.getStatistics(routeData, null, null, false);
+        let statistics = service.getStatistics(routeData, null, null, null, false);
 
         expect(statistics.gain).toBe(0);
         expect(statistics.loss).toBe(0);
@@ -132,7 +132,7 @@ describe("RouteStatisticsService", () => {
                 }
             ]
         } as RouteData;
-        let statistics = service.getStatistics(routeData, null, null, false);
+        let statistics = service.getStatistics(routeData, null, null, null, false);
         let start = service.interpolateStatistics(statistics, 0.5);
         let end = service.interpolateStatistics(statistics, 1);
         statistics = service.getStatisticsByRange(routeData, start, end);
@@ -176,8 +176,8 @@ describe("RouteStatisticsService", () => {
         expect(interpolated.latlng.lng).toBe(2.5);
     });
 
-    it("Should return zero for statistics with less than 2 points", () => {
-        let distance = service.findDistanceForLatLngInKM({ points: [] } as IRouteStatistics, null);
+    it("Should return 0 for statistics with less than 2 points", () => {
+        let distance = service.findDistanceForLatLngInKM({ points: [] } as IRouteStatistics, null, null);
 
         expect(distance).toBe(0);
     });
@@ -202,7 +202,7 @@ describe("RouteStatisticsService", () => {
                     latlng: { lat: 3, lng: 3 }
                 }
             ]
-        } as IRouteStatistics, { lat: 0.6, lng: 0.6 });
+        } as IRouteStatistics, { lat: 0.6, lng: 0.6 }, null);
 
         expect(distance).not.toBe(0);
     });
@@ -227,7 +227,57 @@ describe("RouteStatisticsService", () => {
                     latlng: { lat: 0.0003, lng: 0.0003 }
                 }
             ]
-        } as IRouteStatistics, { lat: 0.005, lng: 0.005 });
+        } as IRouteStatistics, { lat: 0.005, lng: 0.005 }, null);
+
+        expect(distance).toBe(0);
+    });
+
+    it("Should not return 0 distance for good location and statistics", () => {
+        let distance = service.findDistanceForLatLngInKM({
+            points: [
+                {
+                    coordinate: [0, 0],
+                    latlng: { lat: 0, lng: 0 }
+                },
+                {
+                    coordinate: [1, 1],
+                    latlng: { lat: 0.0001, lng: 0.0001 }
+                },
+                {
+                    coordinate: [2, 2],
+                    latlng: { lat: 0.0002, lng: 0.0002 }
+                },
+                {
+                    coordinate: [3, 3],
+                    latlng: { lat: 0.0003, lng: 0.0003 }
+                }
+            ]
+        } as IRouteStatistics, { lat: 0.00015, lng: 0.00015 }, null);
+
+        expect(distance).not.toBe(0);
+    });
+
+    it("Should return 0 distance for wrong direction", () => {
+        let distance = service.findDistanceForLatLngInKM({
+            points: [
+                {
+                    coordinate: [0, 0],
+                    latlng: { lat: 0, lng: 0 }
+                },
+                {
+                    coordinate: [1, 1],
+                    latlng: { lat: 0, lng: 0.0001 }
+                },
+                {
+                    coordinate: [2, 2],
+                    latlng: { lat: 0, lng: 0.0002 }
+                },
+                {
+                    coordinate: [3, 3],
+                    latlng: { lat: 0, lng: 0.0003 }
+                }
+            ]
+        } as IRouteStatistics, { lat: 0, lng: 0.00015 }, 0);
 
         expect(distance).toBe(0);
     });
