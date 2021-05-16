@@ -127,7 +127,9 @@ export class GeoLocationService {
             interval: 1000,
             fastestInterval: 1000,
             activitiesInterval: 10000,
-            startForeground: true
+            startForeground: true,
+            notificationIconLarge: "ic_launcher",
+            notificationIconSmall: "ic_launcher",
         });
 
         this.backgroundGeolocation.on(BackgroundGeolocationEvents.location).subscribe(async (_: BackgroundGeolocationResponse) => {
