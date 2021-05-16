@@ -1,3 +1,4 @@
+ARG DOCKER_TAG=9.9.0
 FROM node:latest as build-node
 
 WORKDIR /angular
@@ -10,7 +11,11 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0 as build-net
 WORKDIR /net
 COPY . .
 
-RUN dotnet restore && dotnet build
+RUN if [[ "$DOCKER_TAG" == "latest" ]] ; then \
+    dotnet restore && dotnet build \
+    else \
+    dotnet restore && dotnet build -p:Version=${DOCKER_TAG:1} \
+    fi
 
 WORKDIR /net/IsraelHiking.Web
 
