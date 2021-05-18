@@ -419,7 +419,8 @@ namespace IsraelHiking.DataAccess
         {
             return _elasticClient.Indices.CreateAsync(highwaysIndexName,
                 c => c.Map<Feature>(m =>
-                    m.Properties(ps =>
+                    m.Dynamic(false)
+                    .Properties(ps =>
                         ps.GeoShape(g =>
                             g.Name(f => f.Geometry)
                         )
