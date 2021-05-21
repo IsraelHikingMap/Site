@@ -19,7 +19,6 @@ namespace IsraelHiking.Web
                 })
                 .UseStartup<Startup>()
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseUrls("http://+", "https://+")
                 .Build()
                 .Run();
         }
