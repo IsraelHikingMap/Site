@@ -5,8 +5,8 @@ using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using ProjNet.CoordinateSystems.Transformations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,14 +46,18 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc/>
         public async Task UpdateSource(string currentSource)
         {
-            _logger.LogInformation($"Starting updating {currentSource}, getting points...");
+            _logger.LogInformation($"Starting updating {currentSource}, getting new points...");
             var adapter = _adaptersFactory.GetBySource(currentSource);
             var exitingPois = await _externalSourcesRepository.GetExternalPoisBySource(currentSource);
-            var lastModified = exitingPois
-                .Select(f => f.GetLastModified())
-                .Max();
+            var lastModified = exitingPois.Any()
+                    ? exitingPois.Select(f => f.GetLastModified()).Max()
+                    : new DateTime();
+            if (!exitingPois.Any())
+            {
+                _logger.LogWarning($"Source {currentSource} is empty! Try running external source rebuild to make sure the data is correct");
+            }
             var features = await adapter.GetUpdates(lastModified);
-            _logger.LogInformation($"Got {features.Count} points for {currentSource}");
+            _logger.LogInformation($"Got {features.Count} points for {currentSource} that are new since last update");
             UpdateItmAndAltitude(features);
             await _externalSourcesRepository.AddExternalPois(features);
             _logger.LogInformation($"Finished updating {currentSource}, indexed {features.Count} points.");
