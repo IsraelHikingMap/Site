@@ -21,7 +21,7 @@ WORKDIR /net/IsraelHiking.Web
 
 RUN dotnet publish
 
-From mcr.microsoft.com/dotnet/aspnet:5.0 as release
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 as release
 
 WORKDIR /israelhiking
 

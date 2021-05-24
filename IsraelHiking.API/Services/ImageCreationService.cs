@@ -199,7 +199,7 @@ namespace IsraelHiking.API.Services
             }
             if (address.EndsWith(".json") && address.Contains("ilMTB"))
             {
-                return "https://israelhiking.osm.org.il/Hebrew/MtbTiles/{z}/{x}/{y}.png";
+                return "https://israelhiking.osm.org.il/Hebrew/mtbTiles/{z}/{x}/{y}.png";
             }
             return "https://israelhiking.osm.org.il/Hebrew/Tiles/{z}/{x}/{y}.png";
         }
