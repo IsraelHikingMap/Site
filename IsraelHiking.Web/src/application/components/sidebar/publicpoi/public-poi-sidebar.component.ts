@@ -238,10 +238,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             this.toastService.info(this.resources.loginRequired);
             return;
         }
-        if (!this.runningContextSerivce.isOnline) {
-            this.toastService.warning(this.resources.cantEditWhileOffline);
-            return;
-        }
         this.router.navigate([RouteStrings.ROUTE_POI, this.fullFeature.properties.poiSource, this.fullFeature.properties.identifier],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
     }

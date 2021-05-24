@@ -622,9 +622,6 @@ export class PoiService {
     }
 
     public async getClosestPoint(location: LatLngAlt, source?: string, language?: string): Promise<MarkerData> {
-        if (!this.runningContextService.isOnline) {
-            return null;
-        }
         let params = new HttpParams()
             .set("location", location.lat + "," + location.lng)
             .set("source", source)

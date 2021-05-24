@@ -40,9 +40,6 @@ export class TracesService {
         if (!this.runningContextService.isOnline) {
             return;
         }
-        if (!this.runningContextService.isOnline) {
-            return;
-        }
         if (state.userState.userInfo == null) {
             return;
         }
