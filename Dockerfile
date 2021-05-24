@@ -11,10 +11,10 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0 as build-net
 WORKDIR /net
 COPY . .
 
-RUN if [ "$DOCKER_TAG" = "latest" ] ; then \
-    dotnet restore && dotnet build; \
+RUN if [ "$DOCKER_TAG" = "latest" ] || [ "$DOCKER_TAG" = "" ] ; then \
+    echo "Building latest" && dotnet restore && dotnet build; \
     else \
-    dotnet restore && dotnet build -p:"Version=${DOCKER_TAG:1};AssemblyVersion=${DOCKER_TAG:1}"; \
+    echo "Building version: ${DOCKER_TAG}" && dotnet restore && dotnet build -p:"Version=${DOCKER_TAG:1};AssemblyVersion=${DOCKER_TAG:1}"; \
     fi
 
 WORKDIR /net/IsraelHiking.Web
