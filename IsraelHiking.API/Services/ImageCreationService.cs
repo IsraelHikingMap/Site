@@ -195,13 +195,13 @@ namespace IsraelHiking.API.Services
         {
             if (string.IsNullOrWhiteSpace(address))
             {
-                return "https://israelhiking.osm.org.il/Hebrew/tiles/{z}/{x}/{y}.png";
+                return "https://israelhiking.osm.org.il/Hebrew/Tiles/{z}/{x}/{y}.png";
             }
             if (address.EndsWith(".json") && address.Contains("ilMTB"))
             {
-                return "https://israelhiking.osm.org.il/Hebrew/mtbtiles/{z}/{x}/{y}.png";
+                return "https://israelhiking.osm.org.il/Hebrew/MtbTiles/{z}/{x}/{y}.png";
             }
-            return "https://israelhiking.osm.org.il/Hebrew/tiles/{z}/{x}/{y}.png";
+            return "https://israelhiking.osm.org.il/Hebrew/Tiles/{z}/{x}/{y}.png";
         }
 
         /// <summary>
