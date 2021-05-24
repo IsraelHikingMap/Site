@@ -11,7 +11,7 @@ FROM mcr.microsoft.com/dotnet/sdk:5.0 as build-net
 WORKDIR /net
 COPY . .
 
-RUN if [[ "$DOCKER_TAG" == "latest" ]] ; then \
+RUN if [ "$DOCKER_TAG" = "latest" ] ; then \
     dotnet restore && dotnet build; \
     else \
     dotnet restore && dotnet build -p:"Version=${DOCKER_TAG:1};AssemblyVersion=${DOCKER_TAG:1}"; \
