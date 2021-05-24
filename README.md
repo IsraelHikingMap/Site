@@ -66,7 +66,7 @@ In order to be able to build this site you'll need some tools:
 * Download and install [Visual Studio community 2019](https://www.visualstudio.com/downloads) or later. Select:
   * ASP.NET and web development
   * .NET cross-platform development
-* [.Net core SDK 3.1 ](https://www.microsoft.com/net/download/core)
+* [.Net core SDK 5.0 ](https://www.microsoft.com/net/download/core)
 * Install [node.js](https://nodejs.org/en/) for windows (10.1+). Use the recommended 64-bit installer on modern Windows versions.
 * Open Visual Studio
 * Follow [these steps](https://stackoverflow.com/a/43850262/368683) to update the version of node.js Visual Studio uses
