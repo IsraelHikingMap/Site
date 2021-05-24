@@ -12,9 +12,9 @@ WORKDIR /net
 COPY . .
 
 RUN if [[ "$DOCKER_TAG" == "latest" ]] ; then \
-    dotnet restore && dotnet build \
+    dotnet restore && dotnet build; \
     else \
-    dotnet restore && dotnet build -p:"Version=${DOCKER_TAG:1};AssemblyVersion=${DOCKER_TAG:1}" \
+    dotnet restore && dotnet build -p:"Version=${DOCKER_TAG:1};AssemblyVersion=${DOCKER_TAG:1}"; \
     fi
 
 WORKDIR /net/IsraelHiking.Web
