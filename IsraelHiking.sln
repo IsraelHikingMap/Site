@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.Web", "IsraelHiking.Web\IsraelHiking.Web.csproj", "{69BFA742-B354-4493-8C9B-794C8CD14214}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsraelHiking.Web", "IsraelHiking.Web\IsraelHiking.Web.csproj", "{69BFA742-B354-4493-8C9B-794C8CD14214}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.API", "IsraelHiking.API\IsraelHiking.API.csproj", "{F80CBD9D-D157-4901-A1EE-127F5A3E4CB8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsraelHiking.API", "IsraelHiking.API\IsraelHiking.API.csproj", "{F80CBD9D-D157-4901-A1EE-127F5A3E4CB8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.Common", "IsraelHiking.Common\IsraelHiking.Common.csproj", "{56FDAB86-D94D-4674-B666-B1674B29A2D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsraelHiking.Common", "IsraelHiking.Common\IsraelHiking.Common.csproj", "{56FDAB86-D94D-4674-B666-B1674B29A2D3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.DataAccess", "IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj", "{0C665CAB-994F-4C23-9D06-2F815AB39E5A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsraelHiking.DataAccess", "IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj", "{0C665CAB-994F-4C23-9D06-2F815AB39E5A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.DataAccessInterfaces", "IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj", "{48FA67B5-5788-436D-A910-7D82F85036AF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsraelHiking.DataAccessInterfaces", "IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj", "{48FA67B5-5788-436D-A910-7D82F85036AF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F82C943F-37C1-45DF-A2CF-7EFFB9C0B467}"
 	ProjectSection(SolutionItems) = preProject
@@ -25,17 +25,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F72D33D1-176B-4BC5-851A-F71C1ABA74D9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.API.Tests", "Tests\IsraelHiking.API.Tests\IsraelHiking.API.Tests.csproj", "{8CDCB151-DBAF-4E19-804E-C0FB26A2B12B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsraelHiking.API.Tests", "Tests\IsraelHiking.API.Tests\IsraelHiking.API.Tests.csproj", "{8CDCB151-DBAF-4E19-804E-C0FB26A2B12B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.DataAccess.Tests", "Tests\IsraelHiking.DataAccess.Tests\IsraelHiking.DataAccess.Tests.csproj", "{32A771F8-7A45-4359-9E22-B3CF5155C9A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsraelHiking.DataAccess.Tests", "Tests\IsraelHiking.DataAccess.Tests\IsraelHiking.DataAccess.Tests.csproj", "{32A771F8-7A45-4359-9E22-B3CF5155C9A8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{3585675D-C9A0-4E48-A11D-4B9E789A0B0A}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 		Scripts\BuildAndPublishAndroid.ps1 = Scripts\BuildAndPublishAndroid.ps1
 		Scripts\BuildAndPublishIOS.ps1 = Scripts\BuildAndPublishIOS.ps1
-		Scripts\CleanLogs.cmd = Scripts\CleanLogs.cmd
-		Scripts\Deploy.ps1 = Scripts\Deploy.ps1
 		Scripts\generate-legend.py = Scripts\generate-legend.py
 		gh-update.ps1 = gh-update.ps1
 		Scripts\TestAndPublishWeb.ps1 = Scripts\TestAndPublishWeb.ps1
