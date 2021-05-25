@@ -165,18 +165,18 @@ namespace IsraelHiking.API.Tests.Converters
         public void ToGeoJson_RelationWithTwoSubRelationsWithInnerRole_ShouldReturnMultiPolygon()
         {
             int id = 1;
-            var node1 = CreateNode(id++);
-            var node2 = CreateNode(id++);
-            var node3 = CreateNode(id++);
+            var node1 = CreateNode(id++, 1, 1);
+            var node2 = CreateNode(id++, 2, 2);
+            var node3 = CreateNode(id++, 1, 2);
            
             var way1 = new CompleteWay
             {
                 Id = 4,
                 Nodes = new[] {node1, node2, node3, node1}
             };
-            var node4 = CreateNode(id++);
-            var node5 = CreateNode(id++);
-            var node6 = CreateNode(id++);
+            var node4 = CreateNode(id++, 4, 4);
+            var node5 = CreateNode(id++, 5, 5);
+            var node6 = CreateNode(id++, 4, 5);
             var way2 = new CompleteWay
             {
                 Id = id++,

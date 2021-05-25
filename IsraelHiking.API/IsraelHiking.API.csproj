@@ -24,20 +24,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="15.0.5" />
-    <PackageReference Include="NetTopologySuite" Version="2.0.0" />
+    <PackageReference Include="CsvHelper" Version="27.0.4" />
+    <PackageReference Include="NetTopologySuite" Version="2.2.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
     <PackageReference Include="NetTopologySuite.IO.GPX" Version="1.1.1" />
-    <PackageReference Include="OsmApiClient" Version="0.0.5" />
+    <PackageReference Include="OsmApiClient" Version="0.0.7" />
     <PackageReference Include="ProjNet" Version="2.0.0" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.4.1" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0007" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta12" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
-    <PackageReference Include="Wangkanai.Detection" Version="3.0.0-alpha05" />
+    <PackageReference Include="Wangkanai.Detection" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

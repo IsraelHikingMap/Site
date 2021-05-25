@@ -4,10 +4,10 @@ using IsraelHiking.Common.DataContainer;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
-using SixLabors.Shapes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -284,7 +284,7 @@ namespace IsraelHiking.API.Services
 
                     if (points.Any())
                     {
-                        var path = new SixLabors.Shapes.Path(new LinearLineSegment(points));
+                        var path = new SixLabors.ImageSharp.Drawing.Path(new LinearLineSegment(points));
                         ctx.Draw(Color.White, PEN_WIDTH + PEN_WIDTH_OFFSET, path);
                         ctx.Draw(lineColor, PEN_WIDTH, path);
                         var startCircle = new EllipsePolygon(points.First(), CIRCLE_RADIUS);
@@ -407,7 +407,7 @@ namespace IsraelHiking.API.Services
             Color color = Color.Blue;
             if (colorString.StartsWith("#"))
             {
-                color = Color.FromHex(colorString);
+                color = Rgba32.ParseHex(colorString);
             } 
             else
             {

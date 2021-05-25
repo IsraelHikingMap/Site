@@ -59,7 +59,7 @@ namespace IsraelHiking.API.Services
                 return;
             }
             var isCrawler = detectionService.Crawler.IsCrawler;
-            var isWhatsApp = detectionService.Crawler.Type == Wangkanai.Detection.Models.Crawler.WhatsApp;
+            var isWhatsApp = detectionService.Crawler.Name == Wangkanai.Detection.Models.Crawler.WhatsApp;
             if (isCrawler && context.Request.Path.StartsWithSegments("/share"))
             {
                 var url = await _shareUrlsRepository.GetUrlById(context.Request.Path.Value.Split("/").Last());

@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using CsvHelper.Configuration;
 using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
@@ -48,18 +49,24 @@ namespace IsraelHiking.API.Controllers
         /// <param name="category">the relevant category <see cref="Categories"/></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> UploadCsv(IFormFile file, [FromQuery]string idRegExPattern, [FromQuery]string sourceImageUrl, [FromQuery]string icon = "icon-bike", [FromQuery]string iconColor = "black", [FromQuery]string category = Categories.ROUTE_BIKE)
+        public async Task<IActionResult> UploadCsv(IFormFile file, [FromQuery] string idRegExPattern, [FromQuery] string sourceImageUrl, [FromQuery] string icon = "icon-bike", [FromQuery] string iconColor = "black", [FromQuery] string category = Categories.ROUTE_BIKE)
         {
             var reader = new StreamReader(file.OpenReadStream());
-            var csvReader = new CsvReader(reader, CultureInfo.InvariantCulture);
-            csvReader.Configuration.HeaderValidated = null;
-            csvReader.Configuration.MissingFieldFound = null;
+            var readerConfiguration = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HeaderValidated = null,
+                MissingFieldFound = null
+            };
+            var csvReader = new CsvReader(reader, readerConfiguration);
             var pointsOfInterest = csvReader.GetRecords<CsvPointOfInterestRow>().ToList();
 
             var stream = new MemoryStream();
             using TextWriter writer = new StreamWriter(stream, Encoding.UTF8, 1024, true);
-            var csvWriter = new CsvWriter(writer, CultureInfo.InvariantCulture);
-            csvWriter.Configuration.HasHeaderRecord = true;
+            var writerConfiguration = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = true
+            };
+            var csvWriter = new CsvWriter(writer, writerConfiguration);
             csvWriter.WriteHeader<CsvPointOfInterestRow>();
             csvWriter.NextRecord();
             foreach (var csvRow in pointsOfInterest)

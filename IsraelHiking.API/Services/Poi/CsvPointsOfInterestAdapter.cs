@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using CsvHelper.Configuration;
 using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
@@ -165,8 +166,11 @@ namespace IsraelHiking.API.Services.Poi
         private IEnumerable<CsvPointOfInterestRow> GetRecords(Stream stream)
         {
             var reader = new StreamReader(stream);
-            var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-            csv.Configuration.MissingFieldFound = null;
+            var configuration = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                MissingFieldFound = null
+            };
+            var csv = new CsvReader(reader, configuration);
             return csv.GetRecords<CsvPointOfInterestRow>();
         }
 

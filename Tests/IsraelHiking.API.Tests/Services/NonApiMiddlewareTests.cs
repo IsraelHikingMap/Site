@@ -43,7 +43,7 @@ namespace IsraelHiking.API.Tests.Services
             var detectionService = Substitute.For<IDetectionService>();
             var crawlerService = Substitute.For<ICrawlerService>();
             crawlerService.IsCrawler.Returns(true);
-            crawlerService.Type.Returns(Wangkanai.Detection.Models.Crawler.WhatsApp);
+            crawlerService.Name.Returns(Wangkanai.Detection.Models.Crawler.WhatsApp);
             detectionService.Crawler.Returns(crawlerService);
             _serviceProvider.GetService(typeof(IDetectionService)).Returns(detectionService);
             return detectionService;
