@@ -1,20 +1,23 @@
-ARG DOCKER_TAG=9.9.0
+ARG DOCKER_TAG=v9.9.0
 FROM node:latest as build-node
 
 WORKDIR /angular
 COPY ./IsraelHiking.Web/ ./
 
-RUN npm i && npm run build -- --no-progress
+RUN npm install
+RUN npm run build -- --no-progress
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0 as build-net
+FROM mcr.microsoft.com/dotnet/sdk:5.0.300 as build-net
 
 WORKDIR /net
 COPY . .
 
+RUN dotnet restore
+
 RUN if [ "$DOCKER_TAG" = "latest" ] || [ "$DOCKER_TAG" = "" ] ; then \
-    echo "Building latest" && dotnet restore && dotnet build; \
+    echo "Building latest" && dotnet build; \
     else \
-    echo "Building version: ${DOCKER_TAG}" && dotnet restore && dotnet build -p:"Version=${DOCKER_TAG:1};AssemblyVersion=${DOCKER_TAG:1}"; \
+    echo "Building version: ${DOCKER_TAG}" && dotnet build -p:"Version=${DOCKER_TAG:1};AssemblyVersion=${DOCKER_TAG:1}"; \
     fi
 
 WORKDIR /net/IsraelHiking.Web
@@ -22,6 +25,8 @@ WORKDIR /net/IsraelHiking.Web
 RUN dotnet publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 as release
+
+RUN apt-get update -y --allow-unauthenticated --allow-insecure-repositories && apt-get install -y curl
 
 WORKDIR /israelhiking
 
