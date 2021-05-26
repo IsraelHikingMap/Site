@@ -141,11 +141,14 @@ namespace IsraelHiking.Common.Configuration
         /// A list of directories that are visible to the user for folder navigation
         /// </summary>
         public Dictionary<string, string> ListingDictionary { get; set; }
-
         /// <summary>
         /// A list of reverse-proxies that the site will redirect
         /// </summary>
         public Dictionary<string, string> ProxiesDictionary { get; set; }
+        /// <summary>
+        /// A list of reverse-proxies that the site will redirect
+        /// </summary>
+        public Dictionary<string, string> ProxiesDictionaryCleared { get; set; }
         /// <summary>
         /// A list of external sources - address and file name
         /// </summary>

@@ -30,6 +30,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.Web
 {
@@ -172,6 +173,25 @@ namespace IsraelHiking.Web
 
             app.UseProxies(proxies =>
             {
+                foreach (var proxyEntry in configurationData.ProxiesDictionaryCleared)
+                {
+                    proxies.Map(proxyEntry.Key,
+                        proxy => proxy.UseHttp((_, args) =>
+                        {
+                            var targetAddress = proxyEntry.Value;
+                            foreach (var argValuePair in args)
+                            {
+                                targetAddress = targetAddress.Replace("{" + argValuePair.Key + "}", argValuePair.Value.ToString());
+                            }
+                            return targetAddress;
+                        }, options => options.WithAfterReceive((context, response) =>
+                        {
+                            response.Headers.Clear();
+                            return Task.CompletedTask;
+                        })
+                    ));
+                }
+
                 foreach (var proxyEntry in configurationData.ProxiesDictionary)
                 {
                     proxies.Map(proxyEntry.Key,
