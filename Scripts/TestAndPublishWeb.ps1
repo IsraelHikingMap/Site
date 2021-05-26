@@ -85,20 +85,9 @@ if ($lastexitcode)
 	throw $lastexitcode
 }
 
-Write-Host "dotnet publish"
-dotnet publish
-
-$binFolder = get-ChildItem netcore* -recurse | Select-Object -first 1 | select -expand FullName
-
-$artifactsFileName = "IsraelHiking_$env:APPVEYOR_BUILD_VERSION.zip"
-
-7z a $artifactsFileName $binFolder/publish/IsraelHiking*.*
-7z a $artifactsFileName wwwroot
-Push-AppveyorArtifact $artifactsFileName
-
 if ($anyFailures -eq $TRUE){
     Write-Host "Failing build as there are broken tests"
-    $host.SetShouldExit(1)
+    throw $lastexitcode
 }
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER

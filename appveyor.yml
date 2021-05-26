@@ -8,8 +8,6 @@ environment:
   PASSWORD:
     secure: mqbXr4+cn3l9YNyKhOezbA==
   matrix:
-    - PRODUCT: web
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
     - PRODUCT: android
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
@@ -22,12 +20,14 @@ environment:
       TMS_USER: israelhikingmap@gmail.com
       TMS_APPLE_APPLICATION_SPECIFIC_PASSWORD:
         secure: oSccSp70X/744XBpfRV4UVJZKxN1jMYHxn3OHFsTSVE=
+    - PRODUCT: tests
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
     
 for:
   -
     matrix:
       only: 
-        - PRODUCT: web
+        - PRODUCT: tests
     install:
       - sh: nvm install 12.18
     before_build:
