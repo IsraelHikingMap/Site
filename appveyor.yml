@@ -29,17 +29,9 @@ for:
       only: 
         - PRODUCT: tests
     install:
-      - sh: nvm install 12.18
+      - sh: nvm install 14.17
     before_build:
       - pwsh: dotnet restore
-    dotnet_csproj:
-      patch: true
-      file: '**\*.csproj'
-      version: $(appveyor_build_version)
-      package_version: $(appveyor_build_version)
-      assembly_version: $(appveyor_build_version)
-      file_version: $(appveyor_build_version)
-      informational_version: $(appveyor_build_version)
     build:
       project: IsraelHiking.sln
       parallel: true
@@ -47,18 +39,18 @@ for:
     test: off
     after_build:
       - pwsh: >-
-            $TestAndPublishWeb = "$env:APPVEYOR_BUILD_FOLDER\Scripts\TestAndPublishWeb.ps1"
+            $RunTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\RunTests.ps1"
 
-            Write-Host $TestAndPublishWeb
+            Write-Host $RunTests
 
-            & "$TestAndPublishWeb"
+            & "$RunTests"
 
   -
     matrix:
       only:
         - PRODUCT: android
     install:
-      - ps: Install-Product node 12.18    
+      - ps: Install-Product node 14.17    
     build_script:
     - pwsh: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
@@ -73,7 +65,7 @@ for:
         - PRODUCT: ios
       fast_finish: true
     install:
-      - sh: nvm install 12.18
+      - sh: nvm install 14.17
     build_script: 
     - pwsh: >-
         $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishIOS.ps1"

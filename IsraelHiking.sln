@@ -36,7 +36,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{3585
 		Scripts\BuildAndPublishIOS.ps1 = Scripts\BuildAndPublishIOS.ps1
 		Scripts\generate-legend.py = Scripts\generate-legend.py
 		gh-update.ps1 = gh-update.ps1
-		Scripts\TestAndPublishWeb.ps1 = Scripts\TestAndPublishWeb.ps1
+		Scripts\RunTests.ps1 = Scripts\RunTests.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{3E9EFE32-6A08-4960-AD00-83AC5FEAB259}"

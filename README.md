@@ -59,34 +59,22 @@ The architecture is based on layers
 * DataAccess - database, file system and network request are processed in this layer
 * Common - Mainly for POCOs
 
-# Setting Up the Project for Development (Windows)
+# Setting Up the Project for site Development (To setup iOS and Android follow the cordova guide)
 In order to be able to build this site you'll need some tools:
-* Install [Java runtime](https://java.com/en/download/) - make sure to install 64bit version.
 * Install [Docker](https://www.docker.com/products/docker-desktop)
-* Download and install [Visual Studio community 2019](https://www.visualstudio.com/downloads) or later. Select:
-  * ASP.NET and web development
-  * .NET cross-platform development
-* [.Net core SDK 5.0 ](https://www.microsoft.com/net/download/core)
-* Install [node.js](https://nodejs.org/en/) for windows (10.1+). Use the recommended 64-bit installer on modern Windows versions.
-* Open Visual Studio
-* Follow [these steps](https://stackoverflow.com/a/43850262/368683) to update the version of node.js Visual Studio uses
-* If asked, and you don't have any other preference, choose "General" development settings
-* In Visual Studio, _File &rarr; Open &rarr; Project/Solution..._ and choose the `IsraelHiking.sln` solution from the Site reposotory location.
-* From Visual Studio's _Tools &rarr; Extensions and Updates..._ 
-  * Go to _Online_
-  * Search for the following and `Download` them: 
-    * Web Essentials 2019
-  * Exit Visual Studio to complete the installation
-  * Find the `VSIX Installer` window and click _Modify_, wait for the installation to complete, and close it
-  * Open Visual Studio, wait for the installations to complete, and restart when asked
-* Open `IsraelHiking.sln`. You may use _File &rarr; Recent Projects and Solutions_
-* Compile using `Ctrl-Shift-B` - Note: please be patient as it will take time to download all the packages.
+* Install [.Net core SDK 5.0 ](https://www.microsoft.com/net/download/core)
+* Install [node.js](https://nodejs.org/en/) (14.17+).
+* Run from command line `dotnet restore` and after that `dotnet build`
 * Go to `IsraelHiking.Web` and run from command line: 
   * `npm install` to install all npm packages for the client side code
   * `npm run build` to generate the Angular UI client. It should create `wwwroot` folder on a successful run
-* If you want to update the translations or upload images from your debug environment, right-click on `IsraelHiking.Web` and select `Manage User Secrets`. Otherwise, skip this step.    
+* Run `docker compose up graphhopper` - it should fail for the first time
+* Run `gh-update.ps1` (set chmod +x if needed) to generate the graphhopper routing data
+* Run `docker compose up` to load the rest of the sercives
+* Run `dotnet run --project IsraelHiking.Web --launch_profile IsraelHiking.Web`
+* If you want to update the translations or upload images from your debug environment, you'll need to add the following secrets to `IsraelHiking.Web`. Otherwise, skip this step.    
   <img width="397" alt="2017-10-22 10_47_32-" src="https://user-images.githubusercontent.com/1304610/31860867-3b283092-b72a-11e7-8119-fe04ecd13852.png">    
-  In the `secrets.json` file that opens add the applicable fields and save the file.
+  In the `secrets.json` at the end there should be these fields.
   ```
   {
     "wikiMediaUserName": "your wikimedia user",
@@ -100,16 +88,3 @@ In order to be able to build this site you'll need some tools:
 # Starting a debug session
 [See the relevant page in our wiki](https://github.com/IsraelHikingMap/Site/wiki/Debug-Environment-Setup)
 
-# Setup the server
-In order to be able to make the server work a few prerequisits are needed:
-* Windows machine with IIS enabled and a site (Although this site should be able to run on Linux it was never fully tested).
-* Install Java Runtime Environment.
-* Add `curl` to path.
-* For graphhoper routing see instructions here: https://github.com/IsraelHikingMap/graphhopper-docker
-* Create a task to rebuild Elastic Search:
-  * Open Windows' Task Scheduler
-  * Create task
-  * Add an action to run `curl -k -X POST https://israelhiking.osm.org.il/api/update -d ""`
-  * Add a "On a schedule" trigger to run once a day or at the frequency of the map updates.
-* Create a task to update elastic search using the above steps with the action `curl -k -X PUT https://israelhiking.osm.org.il/api/update -d ""`
-* Create a task to clean the IIS logs using `Scripts\CleanLogs.cmd`
