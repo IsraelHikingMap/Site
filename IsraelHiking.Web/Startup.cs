@@ -27,6 +27,7 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using OsmSharp.IO.API;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -94,7 +95,7 @@ namespace IsraelHiking.Web
             services.AddOptions();
 
             var config = new ConfigurationBuilder()
-                .AddJsonFile(_isDevelopment ? "appsettings.json" : "appsettings.Production.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
             services.Configure<ConfigurationData>(config);
             services.Configure<NonPublicConfigurationData>(_nonPublicConfiguration);
@@ -173,7 +174,8 @@ namespace IsraelHiking.Web
 
             app.UseProxies(proxies =>
             {
-                foreach (var proxyEntry in configurationData.ProxiesDictionaryCleared)
+                // HM TODO: remove this section after HTTP/2 issue is resolved
+                foreach (var proxyEntry in configurationData.ProxiesDictionaryCleared ?? new Dictionary<string, string>())
                 {
                     proxies.Map(proxyEntry.Key,
                         proxy => proxy.UseHttp((_, args) =>
@@ -192,7 +194,7 @@ namespace IsraelHiking.Web
                     ));
                 }
 
-                foreach (var proxyEntry in configurationData.ProxiesDictionary)
+                foreach (var proxyEntry in configurationData.ProxiesDictionary ?? new Dictionary<string, string>())
                 {
                     proxies.Map(proxyEntry.Key,
                         proxy => proxy.UseHttp((_, args) =>

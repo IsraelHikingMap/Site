@@ -134,6 +134,10 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public string OsmMinutsFileBaseAddress { get; set; }
         /// <summary>
+        /// A location where offline files are saved in order to allow them to be downloaded
+        /// </summary>
+        public string OfflineFilesFolder { get; set; }
+        /// <summary>
         /// An object that describe how to connect to OSM
         /// </summary>
         public OsmConfiguraionData OsmConfiguration { get; set; }

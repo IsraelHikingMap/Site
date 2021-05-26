@@ -77,9 +77,6 @@
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Update="appsettings.Production.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AspNetCore.Proxy" Version="4.2.0" />

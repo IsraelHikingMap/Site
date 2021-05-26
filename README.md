@@ -93,8 +93,7 @@ In order to be able to build this site you'll need some tools:
     "wikiMediaPassword": "your wikimedia password"
     "zanataUserName": "your zanata user",
     "zanataApiKey": "your zanata api key",
-    "imgurClientId": "your imgur clinet ID",
-    "offlineFilesFolder": "a folder path for offline files"
+    "imgurClientId": "your imgur clinet ID"
   }
   ```
 

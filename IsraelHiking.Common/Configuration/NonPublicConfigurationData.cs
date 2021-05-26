@@ -23,10 +23,6 @@
         /// </summary>
         public string ImgurClientId { get; set; }
         /// <summary>
-        /// A location where offline files are saved in order to allow them to be downloaded
-        /// </summary>
-        public string OfflineFilesFolder { get; set; }
-        /// <summary>
         /// Fovea API Key for server side receipt validation
         /// </summary>
         public string FoveaApiKey { get; set; }

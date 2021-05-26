@@ -27,7 +27,7 @@ namespace IsraelHiking.API.Services
         /// <param name="logger"></param>
         public OfflineFilesService(IFileSystemHelper fileSystemHelper,
             IReceiptValidationGateway receiptValidationGateway,
-            IOptions<NonPublicConfigurationData> options,
+            IOptions<ConfigurationData> options,
             ILogger logger)
         {
             _logger = logger;
