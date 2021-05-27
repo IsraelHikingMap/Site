@@ -15,7 +15,7 @@ COPY . .
 RUN dotnet restore
 
 RUN if [ "$DOCKER_TAG" = "latest" ] || [ "$DOCKER_TAG" = "" ] ; then \
-    echo "Building latest" && dotnet build; \
+    echo "Building latest: $DOCKER_TAG" && dotnet build; \
     else \
     echo "Building version: ${DOCKER_TAG}" && dotnet build -p:"Version=${DOCKER_TAG:1};AssemblyVersion=${DOCKER_TAG:1}"; \
     fi
