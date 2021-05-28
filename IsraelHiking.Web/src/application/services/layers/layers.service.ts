@@ -96,17 +96,17 @@ export class LayersService {
         if (baseLayerAddress.indexOf("{x}") !== -1) {
             return baseLayerAddress;
         }
-        let defaultAddress = Urls.baseTilesAddress + "/Hebrew/tiles/{z}/{x}/{y}.png";
+                    let defaultAddress = Urls.baseTilesAddress + "/Hebrew/Tiles/{z}/{x}/{y}.png";
         // using the same logic that the server is using in ImageCreationService + language
         if (!baseLayerAddress) {
             return defaultAddress;
         }
         let language = this.resources.getCurrentLanguageCodeSimplified() === "he" ? "Hebrew" : "English";
-        let tiles = "tiles";
+        let tiles = "Tiles";
         if (baseLayerAddress.endsWith(".json")) {
             let styleKey = baseLayerAddress.replace(".json", "").split("/").splice(-1)[0];
             if (styleKey === "ilMTB") {
-                tiles = "mtbtiles";
+                tiles = "mtbTiles";
             }
         }
         return `${Urls.baseTilesAddress}/${language}/${tiles}/{z}/{x}/{y}.png`;
