@@ -1,5 +1,4 @@
-ARG VERSION=9.9.0
-FROM node:latest as build-node
+FROM node:14.17 as build-node
 
 WORKDIR /angular
 COPY ./IsraelHiking.Web/ ./
@@ -8,17 +7,13 @@ RUN npm install
 RUN npm run build -- --no-progress
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0.300 as build-net
-
+ARG VERSION=9.9.0
 WORKDIR /net
 COPY . .
 
-RUN dotnet restore
-
-RUN echo "Building version: $Version" && dotnet build -p:"Version=$VERSION;AssemblyVersion=$VERSION"
-
 WORKDIR /net/IsraelHiking.Web
 
-RUN dotnet publish
+RUN dotnet publish -p:"Version=$VERSION;AssemblyVersion=$VERSION"
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 as release
 

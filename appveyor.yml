@@ -34,8 +34,6 @@ for:
     matrix:
       only:
         - PRODUCT: docker
-    install:
-      - sh: nvm install 14.17
     build_script:
     - pwsh: >-
         $BuildAndPublishDocker = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishDocker.ps1"
