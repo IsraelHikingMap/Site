@@ -606,11 +606,11 @@ namespace IsraelHiking.API.Services.Poi
             var oldTags = completeOsmGeo.Tags.ToArray();
             var locationWasUpdated = false;
             partialFeature.SetTitles();
-            if (!string.IsNullOrWhiteSpace(partialFeature.GetTitle(language)))
+            if (partialFeature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.NAME)))
             {
                 SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, partialFeature.GetTitle(language), language);
             }
-            if (!string.IsNullOrWhiteSpace(partialFeature.GetDescription(language)))
+            if (partialFeature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.DESCRIPTION)))
             {
                 SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, partialFeature.GetDescription(language), language);
             }
