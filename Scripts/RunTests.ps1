@@ -2,7 +2,7 @@ Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
 $anyFailures = $FLASE
 
-# Run dotnet tests with coverage
+Write-Host "Run dotnet tests with coverage"
 
 $DotnetTestsCmd = "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude=`"[IsraelHiking.Common]*`" --logger trx"
 Write-Host $DotnetTestsCmd
@@ -12,7 +12,9 @@ if ($LastExitCode) {
 	$anyFailures = $TRUE
 }
 
-# Run tests using Karma and export results as JUnit and Lcov format
+
+
+Write-Host "Run tests using Karma and export results as JUnit and Lcov format"
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 

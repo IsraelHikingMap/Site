@@ -1,4 +1,4 @@
-ARG DOCKER_TAG=v9.9.0
+ARG VERSION=9.9.0
 FROM node:latest as build-node
 
 WORKDIR /angular
@@ -14,11 +14,7 @@ COPY . .
 
 RUN dotnet restore
 
-RUN if [ "$DOCKER_TAG" = "latest" ] || [ "$DOCKER_TAG" = "" ] ; then \
-    echo "Building latest: $DOCKER_TAG" && dotnet build; \
-    else \
-    echo "Building version: ${DOCKER_TAG}" && dotnet build -p:"Version=${DOCKER_TAG:1};AssemblyVersion=${DOCKER_TAG:1}"; \
-    fi
+RUN echo "Building version: $Version" && dotnet build -p:"Version=$VERSION;AssemblyVersion=$VERSION"
 
 WORKDIR /net/IsraelHiking.Web
 

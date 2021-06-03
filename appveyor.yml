@@ -8,6 +8,12 @@ environment:
   PASSWORD:
     secure: mqbXr4+cn3l9YNyKhOezbA==
   matrix:
+    - PRODUCT: docker
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      DOCKERHUB_TOKEN:
+        secure: nMbMKtO7V4z3JZjzmZxaleXFP++3NP2DSotTilHMiNLJ2klymxBAFYst6YFmhvE8
+      DOCKERHUB_USER:
+        secure: lwvYYDM7byt4+oDjoxO4+A==
     - PRODUCT: android
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
@@ -26,6 +32,18 @@ environment:
 for:
   -
     matrix:
+      only:
+        - PRODUCT: docker
+    install:
+      - sh: nvm install 14.17
+    build_script:
+    - pwsh: >-
+        $BuildAndPublishDocker = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishDocker.ps1"
+
+        & "$BuildAndPublishDocker"
+
+  -
+    matrix:
       only: 
         - PRODUCT: tests
     install:
@@ -41,8 +59,6 @@ for:
       - pwsh: >-
             $RunTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\RunTests.ps1"
 
-            Write-Host $RunTests
-
             & "$RunTests"
 
   -
@@ -54,8 +70,6 @@ for:
     build_script:
     - pwsh: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
-
-        Write-Host $BuildAndPublishAndroid
 
         & "$BuildAndPublishAndroid"
 
@@ -69,8 +83,6 @@ for:
     build_script: 
     - pwsh: >-
         $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishIOS.ps1"
-
-        Write-Host $BuildAndPublishIOS
 
         & "$BuildAndPublishIOS"
         
