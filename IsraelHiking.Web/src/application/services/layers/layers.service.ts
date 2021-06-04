@@ -96,7 +96,7 @@ export class LayersService {
         if (baseLayerAddress.indexOf("{x}") !== -1) {
             return baseLayerAddress;
         }
-                    let defaultAddress = Urls.baseTilesAddress + "/Hebrew/Tiles/{z}/{x}/{y}.png";
+        let defaultAddress = Urls.baseTilesAddress + "/Hebrew/Tiles/{z}/{x}/{y}.png";
         // using the same logic that the server is using in ImageCreationService + language
         if (!baseLayerAddress) {
             return defaultAddress;
