@@ -357,18 +357,9 @@ export class RouteEditRouteInteraction {
         let index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         let routeData = this.selectedRouteService.getSelectedRoute();
         let segment = { ...routeData.segments[index] };
-        let closestPointOnSegment = segment.latlngs[0];
-        for (let currentLatLng of segment.latlngs) {
-            if (SpatialService.getDistance(currentLatLng, latlng) <
-                SpatialService.getDistance(closestPointOnSegment, latlng)) {
-                closestPointOnSegment = currentLatLng;
-            }
-        }
-        let indexOnSegment = segment.latlngs.indexOf(closestPointOnSegment);
-        let latlngStart = segment.latlngs.slice(0, indexOnSegment < segment.latlngs.length ? indexOnSegment + 1 : indexOnSegment);
-        let latlngEnd = segment.latlngs.slice(indexOnSegment);
-        segment.latlngs = latlngEnd;
-        let middleSegment = this.createRouteSegment(latlng, latlngStart);
+        let newLatlngs = SpatialService.splitLine(latlng, segment.latlngs);
+        segment.latlngs = newLatlngs.end as ILatLngTime[];
+        let middleSegment = this.createRouteSegment(latlng, newLatlngs.start);
         this.ngRedux.dispatch(new UpdateSegmentsAction({
             routeId: routeData.id,
             indices: [index],

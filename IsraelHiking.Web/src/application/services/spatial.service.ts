@@ -7,7 +7,6 @@ import distance from "@turf/distance";
 import center from "@turf/center";
 import bbox from "@turf/bbox";
 import circle from "@turf/circle";
-import nearestPointOnLine from "@turf/nearest-point-on-line";
 import pointToLineDistance from "@turf/point-to-line-distance";
 
 @Injectable()
@@ -61,10 +60,78 @@ export class SpatialService {
         return pointToLineDistance(SpatialService.toCoordinate(latlng), SpatialService.getLineString(line), { units: "meters" });
     }
 
-    public static getClosestPoint(latlng: LatLngAlt, line: LatLngAlt[]): LatLngAlt {
-        let lineForCheck = SpatialService.getLineString(line);
-        let closestPointFeature = nearestPointOnLine(lineForCheck, SpatialService.toCoordinate(latlng));
-        return SpatialService.toLatLng(closestPointFeature.geometry.coordinates as [number, number]);
+    public static splitLine(newLatlng: LatLngAlt, line: LatLngAlt[]): { start: LatLngAlt[], end: LatLngAlt[] } {
+        if (line.length < 2 ) {
+            throw new Error("Line length should be at least 2");
+        }
+        let closestPointOnSegment = line[0];
+        for (let currentLatLng of line) {
+            if (SpatialService.getDistance(currentLatLng, newLatlng) <
+                SpatialService.getDistance(closestPointOnSegment, newLatlng)) {
+                closestPointOnSegment = currentLatLng;
+            }
+        }
+        let indexOfClosestPoint = line.indexOf(closestPointOnSegment);
+        let indexToInsert = SpatialService.getIndexToInsertForSplit(indexOfClosestPoint, line, newLatlng);
+        if (indexToInsert >= line.length) {
+            return { start: [...line, newLatlng], end: [newLatlng, newLatlng] };
+        }
+        if (indexToInsert === 0) {
+            return { start: [newLatlng, newLatlng], end: [newLatlng, ...line] };
+        }
+        let start = line.slice(0, indexToInsert);
+        let end = line.slice(indexToInsert);
+        let projected = SpatialService.project(newLatlng, line[indexToInsert - 1], line[indexToInsert]);
+        if (projected.projectionFactor === 0.0) {
+            // no need to add a point that already exists, adding a point only to end segment
+            return { start, end: [projected.latlng, ...end] };
+        }
+        return { start: [...start, projected.latlng], end: [projected.latlng, ...end] };
+    }
+
+    private static getIndexToInsertForSplit(indexOfClosestPoint: number, line: LatLngAlt[], newLatlng: LatLngAlt): number {
+        // Default location is before the closest node
+        let indexToInsert = indexOfClosestPoint;
+
+        if (indexOfClosestPoint === 0) {
+            let firstSegment = [line[0], line[1]];
+            if (SpatialService.getDistanceFromPointToLine(newLatlng, firstSegment) <
+                SpatialService.getDistanceInMeters(newLatlng, line[0])) {
+                indexToInsert = 1;
+            }
+        } else if (indexOfClosestPoint === line.length - 1) {
+            let lastSegment = [line[indexOfClosestPoint - 1], line[indexOfClosestPoint]];
+            if (SpatialService.getDistanceFromPointToLine(newLatlng, lastSegment) >=
+                SpatialService.getDistanceInMeters(newLatlng, line[indexOfClosestPoint])) {
+                indexToInsert += 1;
+            }
+        } else {
+            // add in between two points:
+            let segmentBefore = [line[indexOfClosestPoint - 1], line[indexOfClosestPoint]];
+            let segmentAfter = [line[indexOfClosestPoint], line[indexOfClosestPoint + 1]];
+            if (SpatialService.getDistanceFromPointToLine(newLatlng, segmentBefore) >=
+                SpatialService.getDistanceFromPointToLine(newLatlng, segmentAfter)) {
+                indexToInsert += 1;
+            }
+        }
+        return indexToInsert;
+    }
+
+    private static project(p: LatLngAlt, a: LatLngAlt, b: LatLngAlt): { latlng: LatLngAlt, projectionFactor: number } {
+
+        let atob = { x: b.lng - a.lng, y: b.lat - a.lat };
+        let atop = { x: p.lng - a.lng, y: p.lat - a.lat };
+        let len = atob.x * atob.x + atob.y * atob.y;
+        let dot = atop.x * atob.x + atop.y * atob.y;
+        let projectionFactor = Math.min(1, Math.max(0, dot / len ));
+
+        return {
+            latlng: {
+                lng: a.lng + atob.x * projectionFactor,
+                lat: a.lat + atob.y * projectionFactor
+            },
+            projectionFactor
+        };
     }
 
     public static getLatlngInterpolatedValue(latlng1: LatLngAlt, latlng2: LatLngAlt, ratio: number, alt?: number): LatLngAlt {
