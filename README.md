@@ -14,7 +14,7 @@ This repository holds all the files that the site needs in order to run.
 * [Setup the server](#setup-the-server)
 
 # Technology stack
-The technology stack of this site is base on the following frameworks:
+The technology stack of this site is based on the following frameworks:
 * [Typescript](http://www.typescriptlang.org/)
 * [Angular](https://angular.io/)
 * [Angular-Material](https://material.angular.io/)
@@ -28,7 +28,7 @@ The technology stack of this site is base on the following frameworks:
 * [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite)
 * [OsmSharp](http://www.osmsharp.com/)
 * [Wikipedia using Wiki client library](https://github.com/CXuesong/WikiClientLibrary) Wikipedia and upload images to Wikimedia common
-* [Imgur](https://imgur.com/) - Used for uploadling anonymous images
+* [Imgur](https://imgur.com/) - Used for uploading anonymous images
 * [Cordova](https://cordova.apache.org/) - Used to wrap the site as a mobile application and add some native capabilities
 * [Redux using angular-redux](https://github.com/angular-redux/platform)
 * [Dexie](https://dexie.org/) - Used for client side storage
@@ -36,23 +36,23 @@ The technology stack of this site is base on the following frameworks:
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:
-* application - where all the is, topmost folder.
+* application - where all the application code is, topmost folder.
   * components - this layer handles the UI calls and bindings along with the relevant css and html files.
   * directives - folder for all the directives.
   * models - used to store data types that are common to the entire app.
   * reducers - used for redux reducers, actions and payloads.
-  * services - this layer hold the lower level data handling.
+  * services - this layer holds the lower level data handling.
     * layers - where the layers logic is - POI, route, wiki, nakeb, relevant services, etc...
 * content - used for images and static content.
 * environments - used for angular-cli to define production and dev variables.
 * fonts - [icomoon](https://icomoon.io/app/) generated font for icons instead of images.
 * scss - used for global style files
-* translations - all relevant data related to i18n
+* translations - all relevant data related to i18n.
  
 # Architecture of Server
-The architecture is based on layers
+The architecture is based on layers:
 * Contollers - the topmost layer to catch all the requests
-* Services - responsible for orchastrating executors
+* Services - responsible for orchestrating executors
 * Converters - converters logic between types of geo structures
 * Executers - basic logical building blocks
 * DataAccessInterfaces - a slim layer to decouple business logic from data access
