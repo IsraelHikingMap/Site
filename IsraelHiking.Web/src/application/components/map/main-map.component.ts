@@ -1,6 +1,6 @@
 import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
-import { MapComponent, CustomControl } from "ngx-mapbox-gl";
-import { Style, setRTLTextPlugin, ScaleControl } from "mapbox-gl";
+import { MapComponent, CustomControl } from "ngx-maplibre-gl";
+import { Style, setRTLTextPlugin, ScaleControl } from "maplibre-gl";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";

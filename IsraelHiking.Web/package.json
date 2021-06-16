@@ -59,10 +59,10 @@
     "isomorphic-xml2js": "^0.1.3",
     "jszip": "^3.5.0",
     "lodash-es": "^4.17.20",
-    "mapbox-gl": "1.10.0-beta.1",
+    "maplibre-gl": "^1.14.1-rc.1",
     "minisearch": "^3.0.2",
     "ngx-infinite-scroll": "^10.0.1",
-    "ngx-mapbox-gl": "^6.0.1",
+    "ngx-maplibre-gl": "^11.2.0",
     "ohauth": "1.0.0",
     "pako": "^2.0.3",
     "photoswipe": "^4.1.3",
@@ -86,7 +86,6 @@
     "@types/jasmine": "~3.6.0",
     "@types/jszip": "^3.4.1",
     "@types/lodash-es": "^4.17.4",
-    "@types/mapbox-gl": "^1.13.0",
     "@types/node": "^12.11.1",
     "@types/pako": "^1.0.1",
     "codelyzer": "^6.0.0",
@@ -129,7 +128,6 @@
     "karma-junit-reporter": "^2.0.1",
     "md5-file": "^5.0.0",
     "open": "^7.3.1",
-    "patch-package": "^6.2.2",
     "phonegap-plugin-mobile-accessibility": "^1.0.5",
     "po2json": "0.4.5",
     "redux-devtools-extension": "^2.13.8",
@@ -162,8 +160,7 @@
     "run-ios": "cordova run ios",
     "build-ipa": "cordova build ios --release --no-telemetry --device --buildConfig=./build-ios-parameters.json",
     "1-upload": "node extract-and-upload.js",
-    "2-download": "node download-and-compile.js",
-    "postinstall": "patch-package"
+    "2-download": "node download-and-compile.js"
   },
   "cordova": {
     "plugins": {

@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, ViewEncapsulation } from "@angular/core";
 import { Observable } from "rxjs";
-import { MapComponent } from "ngx-mapbox-gl";
+import { MapComponent } from "ngx-maplibre-gl";
 import invert from "invert-color";
 
 import { BaseMapComponent } from "../base-map.component";

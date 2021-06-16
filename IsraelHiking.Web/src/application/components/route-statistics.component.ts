@@ -3,7 +3,7 @@ import { trigger, style, transition, animate } from "@angular/animations";
 import { Subscription, Observable, interval } from "rxjs";
 import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "@katze/ngx-d3";
 import { regressionLoess } from "d3-regression";
-import { LinePaint } from "mapbox-gl";
+import { LinePaint } from "maplibre-gl";
 
 import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";

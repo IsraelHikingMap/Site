@@ -4,7 +4,7 @@ import { decode } from "base64-arraybuffer";
 import { SQLite, SQLiteDatabaseConfig, SQLiteObject } from "@ionic-native/sqlite/ngx";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
-import * as mapboxgl from "mapbox-gl";
+import * as maplibregl from "maplibre-gl";
 import * as pako from "pako";
 
 import { LoggingService } from "./logging.service";
@@ -113,7 +113,7 @@ export class DatabaseService {
     }
 
     private initCustomTileLoadFunction() {
-        (mapboxgl as any).loadTilesFunction = (params, callback) => {
+        (maplibregl as any).loadTilesFunction = (params, callback) => {
             this.getTile(params.url).then((tileBuffer) => {
                 if (tileBuffer) {
                     callback(null, tileBuffer, null, null);

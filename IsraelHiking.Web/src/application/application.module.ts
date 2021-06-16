@@ -36,7 +36,7 @@ import { NgProgressHttpModule } from "@ngx-progressbar/http";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
-import { NgxMapboxGLModule } from "ngx-mapbox-gl";
+import { NgxMapLibreGLModule } from "ngx-maplibre-gl";
 import { NgIdleModule } from "@ng-idle/core";
 // Cordova plugins
 import { BackgroundGeolocation } from "@ionic-native/background-geolocation/ngx";
@@ -217,7 +217,7 @@ export function initializeApplication(injector: Injector) {
             DragDropModule,
             InfiniteScrollModule,
             NgReduxModule,
-            NgxMapboxGLModule.withConfig({ accessToken: "no-token" }),
+            NgxMapLibreGLModule,
             NgIdleModule.forRoot(),
             HammerModule
         ],

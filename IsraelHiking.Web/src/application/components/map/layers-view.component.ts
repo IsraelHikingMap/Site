@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
-import { GeoJSONSourceComponent } from "ngx-mapbox-gl";
+import { GeoJSONSourceComponent } from "ngx-maplibre-gl";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PoiService } from "../../services/poi.service";

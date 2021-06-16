@@ -12,7 +12,7 @@ import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
 import { remove } from "lodash-es";
-import { PointLike } from "mapbox-gl";
+import { PointLike } from "maplibre-gl";
 import { Observable } from "rxjs";
 import { skip } from "rxjs/operators";
 
