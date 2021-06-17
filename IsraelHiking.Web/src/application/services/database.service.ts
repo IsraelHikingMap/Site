@@ -113,7 +113,7 @@ export class DatabaseService {
     }
 
     private initCustomTileLoadFunction() {
-        (maplibregl as any).loadTilesFunction = (params, callback) => {
+        maplibregl.addProtocol("custom", (params, callback) => {
             this.getTile(params.url).then((tileBuffer) => {
                 if (tileBuffer) {
                     callback(null, tileBuffer, null, null);
@@ -124,7 +124,7 @@ export class DatabaseService {
                 }
             });
             return { cancel: () => { } };
-        };
+        });
     }
 
     public async close() {
