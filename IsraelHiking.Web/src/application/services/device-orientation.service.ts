@@ -58,7 +58,7 @@ export class DeviceOrientationService {
     }
 
     public enable() {
-        this.loggingService.info("Enabling device orientation service");
+        this.loggingService.info("[Orientation] Enabling device orientation service");
         this.subscription = this.deviceOrientation.watchHeading().pipe(
             throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })).subscribe(d => {
             this.fireOrientationChange(d.magneticHeading);
@@ -67,7 +67,7 @@ export class DeviceOrientationService {
 
     public disable() {
         if (this.subscription != null) {
-            this.loggingService.info("Disabling device orientation service");
+            this.loggingService.info("[Orientation] Disabling device orientation service");
             this.subscription.unsubscribe();
         }
     }
