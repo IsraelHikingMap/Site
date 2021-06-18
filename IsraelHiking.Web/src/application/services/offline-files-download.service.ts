@@ -96,10 +96,11 @@ export class OfflineFilesDownloadService {
 
     private async getFilesToDownloadDictionary(): Promise<{}> {
         let lastModified = this.ngRedux.getState().offlineState.lastModifiedDate;
+        let lastModifiedString = lastModified ? lastModified.toUTCString() : null;
         let fileNames = await this.httpClient.get(Urls.offlineFiles, {
-            params: { lastModified: lastModified ? lastModified.toUTCString() : null }
+            params: { lastModified: lastModifiedString }
         }).pipe(timeout(5000)).toPromise() as {};
-        this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded`);
+        this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded for date: ${lastModifiedString}, received: ${JSON.stringify(fileNames)}`);
         return fileNames;
     }
 }
