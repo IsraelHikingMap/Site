@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { MapMouseEvent, Map, GeoJSONSource, Point } from "mapbox-gl";
+import { MapMouseEvent, Map, GeoJSONSource, Point } from "maplibre-gl";
 
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";

@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Map } from "mapbox-gl";
+import { Map } from "maplibre-gl";
 import { Observable } from "rxjs";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";

@@ -18,8 +18,8 @@ The technology stack of this site is based on the following frameworks:
 * [Typescript](http://www.typescriptlang.org/)
 * [Angular](https://angular.io/)
 * [Angular-Material](https://material.angular.io/)
-* [Mapbox-gl-js](https://docs.mapbox.com/mapbox-gl-js/api/)
-* [ngx-mapbox-gl](https://wykks.github.io/ngx-mapbox-gl/)
+* [MapLibre](https://docs.maplibre.org/)
+* [ngx-maplibre-gl](https://github.com/maplibre/ngx-maplibre-gl/)
 * [Jasmine](http://jasmine.github.io/) + [Karma](https://karma-runner.github.io/) - for unit testing.
 * [Asp.Net core](https://docs.microsoft.com/en-us/aspnet/core/)
 * [NSubstitute](http://nsubstitute.github.io/)

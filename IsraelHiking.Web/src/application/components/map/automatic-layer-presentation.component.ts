@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
-import { MapComponent } from "ngx-mapbox-gl";
-import { RasterSource, RasterLayout, Layer, Style, Sources, RasterLayer, AnyLayer } from "mapbox-gl";
+import { MapComponent } from "ngx-maplibre-gl";
+import { RasterSource, RasterLayout, Layer, Style, Sources, RasterLayer, AnyLayer } from "maplibre-gl";
 import { Observable, Subscription } from "rxjs";
 
 import { BaseMapComponent } from "../base-map.component";

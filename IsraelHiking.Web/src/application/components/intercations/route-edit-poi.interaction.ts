@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from "@angular/core";
-import { MapMouseEvent, Map } from "mapbox-gl";
+import { MapMouseEvent, Map } from "maplibre-gl";
 import { MatDialog } from "@angular/material/dialog";
 
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";

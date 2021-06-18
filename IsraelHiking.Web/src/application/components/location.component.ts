@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { MapComponent } from "ngx-mapbox-gl";
+import { MapComponent } from "ngx-maplibre-gl";
 import { Observable } from "rxjs";
 
 import { BaseMapComponent } from "./base-map.component";

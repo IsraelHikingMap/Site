@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { LatLngAlt, Bounds } from "../models/models";
-import { Map, LngLatBoundsLike, LngLatBounds } from "mapbox-gl";
+import { Map, LngLatBoundsLike, LngLatBounds } from "maplibre-gl";
 import { lineString, featureCollection, Units } from "@turf/helpers";
 import simplify from "@turf/simplify";
 import distance from "@turf/distance";
