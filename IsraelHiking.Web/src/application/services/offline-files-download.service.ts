@@ -68,7 +68,7 @@ export class OfflineFilesDownloadService {
             let length = Object.keys(fileNames).length;
             for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
                 let fileName = Object.keys(fileNames)[fileNameIndex];
-                let fileDate = new Date(fileNames[fileName]);
+                let fileDate = new Date((fileNames[fileName].toString() + "Z").replace("ZZ", "Z"));
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
                 let token = this.ngRedux.getState().userState.token;
                 if (fileName.endsWith(".mbtiles")) {
@@ -96,7 +96,7 @@ export class OfflineFilesDownloadService {
 
     private async getFilesToDownloadDictionary(): Promise<{}> {
         let lastModified = this.ngRedux.getState().offlineState.lastModifiedDate;
-        let lastModifiedString = lastModified ? lastModified.toUTCString() : null;
+        let lastModifiedString = lastModified ? lastModified.toISOString() : null;
         let fileNames = await this.httpClient.get(Urls.offlineFiles, {
             params: { lastModified: lastModifiedString }
         }).pipe(timeout(5000)).toPromise() as {};
