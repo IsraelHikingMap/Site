@@ -44,6 +44,29 @@ describe("RouteStatisticsService", () => {
         expect(statistics.points.length).toBe(5);
     });
 
+    it("Should get statistics on route when first point alt is NaN", () => {
+        let routeData = {
+            segments: [
+                {
+                    latlngs: [{ lat: 10, lng: 10, alt: NaN }, { lat: 20, lng: 20, alt: NaN }]
+                },
+                {
+                    latlngs: [{ lat: 20, lng: 20, alt: 20 }, { lat: 30, lng: 30, alt: 30 }]
+                },
+                {
+                    latlngs: [{ lat: 30, lng: 30, alt: 30 }, { lat: 10, lng: 10, alt: 10 }]
+                }
+            ]
+        } as RouteData;
+
+        let statistics = service.getStatistics(routeData, null, null, null, false);
+
+        expect(statistics.gain).toBe(10);
+        expect(statistics.loss).toBe(-20);
+        expect(statistics.length).not.toBe(0);
+        expect(statistics.points.length).toBe(3);
+    });
+
     it("Should get statistics on route when recording and there's a route close by", () => {
         let now = new Date();
         let lastLatLng = { lat: 2, lng: 2, alt: 20, timestamp: new Date(now.getTime() + 1000) };

@@ -60,20 +60,28 @@ export class RouteStatisticsService {
             return routeStatistics;
         }
 
-        let previousPoint = route.segments[0].latlngs[0];
-        let point = { coordinate: [0, previousPoint.alt] } as IRouteStatisticsPoint;
-        point.latlng = previousPoint;
-        point.slope = 0;
-        routeStatistics.points.push(start || point);
+        let previousPoint = null;
 
         for (let segment of route.segments) {
             for (let latlng of segment.latlngs) {
+                if (isNaN(latlng.alt)) {
+                    continue;
+                }
+                if (previousPoint == null) {
+                    previousPoint = latlng;
+                    let firstPoint = { coordinate: [0, previousPoint.alt] } as IRouteStatisticsPoint;
+                    firstPoint.latlng = previousPoint;
+                    firstPoint.slope = 0;
+                    routeStatistics.points.push(start || firstPoint);
+                    continue;
+                }
+
                 let distance = SpatialService.getDistanceInMeters(previousPoint, latlng);
-                if (distance < 1 || isNaN(latlng.alt)) {
+                if (distance < 1) {
                     continue;
                 }
                 routeStatistics.length += distance;
-                point = {
+                let point = {
                     coordinate: [(routeStatistics.length / 1000), latlng.alt]
                 } as IRouteStatisticsPoint;
                 point.latlng = latlng;
