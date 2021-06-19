@@ -25,9 +25,11 @@ using NeoSmart.Caching.Sqlite;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
+using Newtonsoft.Json.Converters;
 using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -85,6 +87,10 @@ namespace IsraelHiking.Web
                 {
                     options.SerializerSettings.Converters.Add(converter);
                 }
+                options.SerializerSettings.Converters.Add(new IsoDateTimeConverter
+                {
+                    DateTimeStyles = DateTimeStyles.AdjustToUniversal
+                });
             });
             services.AddAuthentication(options =>
             {

@@ -68,7 +68,7 @@ export class OfflineFilesDownloadService {
             let length = Object.keys(fileNames).length;
             for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
                 let fileName = Object.keys(fileNames)[fileNameIndex];
-                let fileDate = new Date((fileNames[fileName].toString() + "Z").replace("ZZ", "Z"));
+                let fileDate = new Date(fileNames[fileName]);
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
                 let token = this.ngRedux.getState().userState.token;
                 if (fileName.endsWith(".mbtiles")) {
