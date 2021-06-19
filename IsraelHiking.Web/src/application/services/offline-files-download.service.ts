@@ -100,7 +100,8 @@ export class OfflineFilesDownloadService {
         let fileNames = await this.httpClient.get(Urls.offlineFiles, {
             params: { lastModified: lastModifiedString }
         }).pipe(timeout(5000)).toPromise() as {};
-        this.loggingService.info(`[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded for date: ${lastModifiedString}, received: ${JSON.stringify(fileNames)}`);
+        this.loggingService.info(
+            `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
         return fileNames;
     }
 }
