@@ -60,7 +60,7 @@ namespace IsraelHiking.API.Services
                 {
                     continue;
                 }
-                if (lastModifiedDate != DateTime.MinValue && content.LastModified.DateTime - lastModifiedDate <= new TimeSpan(0, 0, 1))
+                if (lastModifiedDate != DateTime.MinValue && content.LastModified.DateTime.ToUniversalTime() - lastModifiedDate.ToUniversalTime() <= new TimeSpan(0, 0, 1))
                 {
                     continue;
                 }
