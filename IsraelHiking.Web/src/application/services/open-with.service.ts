@@ -41,10 +41,7 @@ export class OpenWithService {
             });
         });
         universalLinks.subscribe("poi", (event) => {
-            this.loggingService.info("[OpenWith] Opening a poi: " + event.path);
-            if (this.matDialog.openDialogs.length > 0) {
-                this.matDialog.closeAll();
-            }
+            this.logAndCloseDialogs(event);
             let sourceAndId = event.path.replace("/poi/", "");
             let source = sourceAndId.split("/")[0];
             let id = sourceAndId.split("/")[1];
@@ -55,10 +52,7 @@ export class OpenWithService {
             });
         });
         universalLinks.subscribe("url", (event) => {
-            this.loggingService.info("[OpenWith] Opening a file url: " + event.path);
-            if (this.matDialog.openDialogs.length > 0) {
-                this.matDialog.closeAll();
-            }
+            this.logAndCloseDialogs(event);
             let url = event.path.replace("/url/", "");
             let baseLayer = event.params.baselayer;
             this.ngZone.run(() => {
@@ -66,11 +60,18 @@ export class OpenWithService {
                     { queryParams: { baseLayer } });
             });
         });
+        universalLinks.subscribe("map", (event) => {
+            this.logAndCloseDialogs(event);
+            let mapLocation = event.path.replace("/map/", "");
+            let zoom = mapLocation.split("/")[0];
+            let lat = mapLocation.split("/")[1];
+            let lng = mapLocation.split("/")[2];
+            this.ngZone.run(() => {
+                this.router.navigate([RouteStrings.ROUTE_MAP, zoom, lat, lng]);
+            });
+        });
         universalLinks.subscribe(null, (event) => {
-            this.loggingService.info("[OpenWith] Opening the null: " + event.path);
-            if (this.matDialog.openDialogs.length > 0) {
-                this.matDialog.closeAll();
-            }
+            this.logAndCloseDialogs(event);
             this.ngZone.run(() => {
                 this.router.navigate(["/"]);
             });
@@ -87,6 +88,13 @@ export class OpenWithService {
         this.webIntent.onIntent().subscribe((intent) => {
             this.handleIntent(intent);
         });
+    }
+
+    private logAndCloseDialogs(event) {
+        this.loggingService.info("[OpenWith] Opening: " + event.path);
+        if (this.matDialog.openDialogs.length > 0) {
+            this.matDialog.closeAll();
+        }
     }
 
     private handleUrl(url: string) {
