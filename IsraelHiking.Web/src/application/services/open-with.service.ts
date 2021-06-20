@@ -11,7 +11,7 @@ import { LoggingService } from "./logging.service";
 import { ImageResizeService } from "./image-resize.service";
 import { RouteStrings } from "./hash.service";
 
-declare var universalLinks: any;
+declare let universalLinks: any;
 
 @Injectable()
 export class OpenWithService {

@@ -61,7 +61,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         this.selectedPoi$.subscribe((poi) => this.onSelectedPoiChanged(poi));
     }
 
-    private onSelectedPoiChanged = (poi: GeoJSON.Feature) => {
+    private onSelectedPoiChanged(poi: GeoJSON.Feature) {
         this.selectedPoiFeature = !poi ? null : {
             type: "Feature",
             properties: poi.properties,
@@ -102,7 +102,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         this.selectedCluster = feature;
     }
 
-    private getSourceAndId(sourceAndId: string): { source: string, id: string } {
+    private getSourceAndId(sourceAndId: string): { source: string; id: string } {
         let poiSource = sourceAndId.split("_")[0];
         let id = sourceAndId.replace(poiSource + "_", "");
         return {

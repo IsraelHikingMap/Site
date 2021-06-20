@@ -1,3 +1,4 @@
+import { Action } from "redux";
 import undoable, { UndoableOptions, includeAction, groupByActionTypes } from "redux-undo";
 
 import { RouteData, MarkerData, RouteSegmentData, RouteStateName, ILatLngTime } from "../models/models";
@@ -205,10 +206,8 @@ export class ClearPoisAndRouteAction extends BaseAction<RoutePayload> {
     }
 }
 
-export class DeleteAllRoutesAction extends BaseAction<{}> {
-    constructor(payload: {}) {
-        super(DELETE_ALL_ROUTES, payload);
-    }
+export class DeleteAllRoutesAction implements Action {
+    constructor(public type = DELETE_ALL_ROUTES) {}
 }
 
 export class BulkReplaceRoutesAction extends BaseAction<BulkReplaceRoutesPayload> {
@@ -218,7 +217,7 @@ export class BulkReplaceRoutesAction extends BaseAction<BulkReplaceRoutesPayload
 }
 
 class RoutesReducer {
-    private doForRoute(lastState: RouteData[], routeId: string, updateAction: (route: RouteData) => RouteData): RouteData[] {
+    private doForRoute(lastState: RouteData[], routeId: string, updateAction: (routeToUpdate: RouteData) => RouteData): RouteData[] {
         let route = lastState.find(r => r.id === routeId);
         let routes = [...lastState];
         let updatedRoute = updateAction(route);

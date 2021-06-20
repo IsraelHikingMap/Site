@@ -14,7 +14,7 @@ import { ImageGalleryService } from "./image-gallery.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { ApplicationState } from "../models/models";
 
-declare var navigator: Navigator;
+declare let navigator: Navigator;
 
 declare type ExitState = "None" | "FirstClick" | "SecondClick";
 

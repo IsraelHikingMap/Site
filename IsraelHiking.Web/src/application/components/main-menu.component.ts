@@ -200,7 +200,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 ]
             });
         } catch (ex) {
-            alert(`Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?` +
+            alert("Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?" +
                 `\nSend issue failed: ${ex.toString()}`);
         }
     }

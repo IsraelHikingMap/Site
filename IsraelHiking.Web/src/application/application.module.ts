@@ -173,11 +173,9 @@ import { PhotoSwpieComponent } from "./components/photoswipe.component";
 // variables and functions
 import { routes } from "./routes";
 
-export function initializeApplication(injector: Injector) {
-    return async () => {
+const initializeApplication = (injector: Injector) => async () => {
         await injector.get<ApplicationInitializeService>(ApplicationInitializeService).initialize();
     };
-}
 
 @NgModule({
         imports: [
@@ -287,7 +285,7 @@ export function initializeApplication(injector: Injector) {
             SQLite,
             AppVersion,
             Media,
-            // tslint:disable-next-line
+            // eslint-disable-next-line
             FileTransfer,
             SocialSharing,
             WebIntent,

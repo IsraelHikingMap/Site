@@ -55,20 +55,20 @@ export class RootStore<RootState> extends NgRedux<RootState> {
         ...enhancers,
       )(createStore)(enableFractalReducers(rootReducer), initState),
     );
-  }
+  };
 
   provideStore = (store: Store<RootState>) => {
     this.setStore(store);
-  }
+  };
 
   getState = (): RootState => this.store.getState();
 
   subscribe = (listener: () => void): Unsubscribe =>
-    this.store.subscribe(listener)
+    this.store.subscribe(listener);
 
   replaceReducer = (nextReducer: Reducer<RootState, AnyAction>): void => {
     this.store.replaceReducer(nextReducer);
-  }
+  };
 
   dispatch: Dispatch<AnyAction> = <A extends AnyAction>(action: A): A => {
     if (!NgZone.isInAngularZone()) {
@@ -76,7 +76,7 @@ export class RootStore<RootState> extends NgRedux<RootState> {
     } else {
       return this.store.dispatch(action);
     }
-  }
+  };
 
   select = <SelectedType>(
     selector?: Selector<RootState, SelectedType>,
@@ -86,13 +86,13 @@ export class RootStore<RootState> extends NgRedux<RootState> {
       distinctUntilChanged(),
       map(resolveToFunctionSelector(selector)),
       distinctUntilChanged(comparator),
-    )
+    );
 
   configureSubStore = <SubState>(
     basePath: PathSelector,
     localReducer: Reducer<SubState, AnyAction>,
   ): ObservableStore<SubState> =>
-    new SubStore<SubState>(this, basePath, localReducer)
+    new SubStore<SubState>(this, basePath, localReducer);
 
   private setStore(store: Store<RootState>) {
     this.store = store;
@@ -112,5 +112,5 @@ export class RootStore<RootState> extends NgRedux<RootState> {
         unsubscribeFromRedux();
         observer.complete();
       };
-    })
+    });
 }

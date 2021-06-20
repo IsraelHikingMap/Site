@@ -104,9 +104,7 @@ export class RecordedRouteService {
     public stopRecording() {
         this.loggingService.info("[Record] Stop recording");
         let recordingRoute = this.selectedRouteService.getRecordingRoute();
-        this.ngRedux.dispatch(new StopRecordingAction({
-            routeId: recordingRoute.id
-        }));
+        this.ngRedux.dispatch(new StopRecordingAction());
         this.addRecordingToTraces(recordingRoute);
     }
 

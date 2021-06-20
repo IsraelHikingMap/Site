@@ -79,7 +79,7 @@ export class ShareUrlsService {
         // Refresh it in the background if needed...
         this.httpClient.get(Urls.urls + shareUrlId + "/timestamp").pipe(timeout(2000)).toPromise().then((timestamp: string) => {
             if (new Date(timestamp) > new Date(shareUrl.lastModifiedDate)) {
-                this.loggingService.warning(`[Shares] Cached share is outdated, fetching it again...`);
+                this.loggingService.warning("[Shares] Cached share is outdated, fetching it again...");
                 this.getShareFromServerAndCacheIt(shareUrlId);
             }
         });
@@ -88,7 +88,7 @@ export class ShareUrlsService {
 
     public async syncShareUrls(): Promise<any> {
         if (this.syncying) {
-            this.loggingService.info(`[Shares] Already syncing...`);
+            this.loggingService.info("[Shares] Already syncing...");
             return;
         }
         this.syncying = true;
@@ -96,7 +96,8 @@ export class ShareUrlsService {
             let sharesLastSuccessfullSync = this.ngRedux.getState().offlineState.shareUrlsLastModifiedDate;
             let operationStartTimeStamp = new Date();
             let sharesToGetFromServer = [] as ShareUrl[];
-            this.loggingService.info(`[Shares] Starting shares sync, last modified: ${(sharesLastSuccessfullSync || new Date(0)).toUTCString()}`);
+            this.loggingService.info("[Shares] Starting shares sync, last modified:" +
+                (sharesLastSuccessfullSync || new Date(0)).toUTCString());
             let shareUrls = await this.httpClient.get(Urls.urls).pipe(timeout(10000)).toPromise() as ShareUrl[];
             let exitingShareUrls = this.ngRedux.getState().shareUrlsState.shareUrls;
             for (let shareUrl of shareUrls) {
@@ -148,7 +149,7 @@ export class ShareUrlsService {
         await this.databaseService.deleteShareUrlById(shareUrl.id);
     }
 
-    public getImageFromShareId = (shareUrl: ShareUrl, width?: number, height?: number) => {
+    public getImageFromShareId(shareUrl: ShareUrl, width?: number, height?: number) {
         let address = Urls.images + shareUrl.id;
         if (width && height) {
             address += `?width=${width}&height=${height}`;

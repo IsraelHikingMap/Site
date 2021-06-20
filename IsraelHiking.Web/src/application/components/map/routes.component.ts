@@ -72,7 +72,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routes = routes;
         this.setInteractionAccordingToState();
         this.buildFeatureCollections();
-    }
+    };
 
     private buildFeatureCollections = () => {
         let features = [];
@@ -96,7 +96,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             features: editingFeatures
         };
         this.routeEditRouteInteraction.setData(this.editingRoute);
-    }
+    };
 
     private handleRoutePointClick = (pointIndex: number) => {
         if (pointIndex == null || (this.routePointPopupData != null && this.routePointPopupData.segmentIndex === pointIndex)) {
@@ -112,7 +112,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 segmentIndex: pointIndex,
             };
         }, 0);
-    }
+    };
 
     public closeRoutePointPopup() {
         this.routePointPopupData = null;

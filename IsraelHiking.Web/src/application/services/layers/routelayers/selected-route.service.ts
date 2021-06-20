@@ -144,6 +144,7 @@ export class SelectedRouteService {
 
     /**
      * This method is used to find the closest route in order to merge between routes.
+     *
      * @param isFirst use to signal the method if to check against the beginning or the end of the selected route.
      */
     public getClosestRoute(isFirst: boolean) {
@@ -333,7 +334,7 @@ export class SelectedRouteService {
         }
     }
 
-    public makeAllPointsEditable = (routeId: string) => {
+    public makeAllPointsEditable(routeId: string) {
         let route = this.getRouteById(routeId);
         if (!route || route.segments.length === 0) {
             return;

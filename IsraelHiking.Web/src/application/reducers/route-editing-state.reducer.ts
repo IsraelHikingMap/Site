@@ -1,3 +1,5 @@
+import { Action } from "redux";
+
 import { RoutingType, RouteEditingState } from "../models/models";
 import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
 import { initialState } from "./initial-state";
@@ -39,10 +41,8 @@ export class StartRecordingAction extends BaseAction<RoutePayload> {
     }
 }
 
-export class StopRecordingAction extends BaseAction<{}> {
-    constructor(payload: {}) {
-        super(STOP_RECORDING, payload);
-    }
+export class StopRecordingAction implements Action {
+    constructor(public type = STOP_RECORDING) {}
 }
 
 export class SetOpacityAndWeightAction extends BaseAction<SetOpacityAndWeightPayload> {
@@ -77,7 +77,7 @@ class RouteEditingStateReducer {
     }
 
     @ReduxAction(STOP_RECORDING)
-    public stopRecording(lastState: RouteEditingState, action: StopRecordingAction): RouteEditingState {
+    public stopRecording(lastState: RouteEditingState, _: StopRecordingAction): RouteEditingState {
         return {
             ...lastState,
             recordingRouteId: null

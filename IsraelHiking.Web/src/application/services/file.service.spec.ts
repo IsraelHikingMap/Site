@@ -54,7 +54,7 @@ describe("FileService", () => {
                 FileSystemWrapper,
                 WebView,
                 LoggingService,
-                // tslint:disable-next-line
+                // eslint-disable-next-line
                 FileTransfer,
                 SocialSharing,
                 GpxDataContainerConverterService,

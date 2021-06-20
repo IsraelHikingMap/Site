@@ -3,13 +3,11 @@ import { NgRedux } from "./components/ng-redux";
 import { RootStore } from "./components/root-store";
 
 /** @hidden */
-export function _ngReduxFactory(ngZone: NgZone) {
-  return new RootStore(ngZone);
-}
+export const ngReduxFactory = (ngZone: NgZone) => new RootStore(ngZone);
 
 @NgModule({
   providers: [
-    { provide: NgRedux, useFactory: _ngReduxFactory, deps: [NgZone] },
+    { provide: NgRedux, useFactory: ngReduxFactory, deps: [NgZone] },
   ],
 })
 export class NgReduxModule {}

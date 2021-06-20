@@ -32,6 +32,7 @@ export interface FractalStoreOptions {
 
 /**
  * OPTIONS_KEY: this is per-class (static) and holds the config from the
+ *
  * @SubStore decorator.
  */
 const OPTIONS_KEY = "@angular-redux::substore::class::options";
@@ -110,6 +111,7 @@ const clearInstanceState = (decoratedInstance: any) => {
 /**
  * Gets the store associated with a decorated instance (e.g. a
  * component or service)
+ *
  * @hidden
  */
 export const getBaseStore = (
@@ -153,6 +155,7 @@ export const getBaseStore = (
  * Creates an Observable from the given selection parameters,
  * rooted at decoratedInstance's store, and caches it on the
  * instance for future use.
+ *
  * @hidden
  */
 export const getInstanceSelection = <T>(

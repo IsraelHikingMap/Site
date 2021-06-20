@@ -80,7 +80,7 @@ export class LoggingService {
             message
         } as LogLine;
         if (!this.runningContextService.isProduction) {
-            // tslint:disable-next-line
+            // eslint-disable-next-line
             console.debug(this.logLineToString(logLine));
         }
         this.writeToStorage(logLine);

@@ -8,7 +8,6 @@ export interface Trace {
     description: string;
     url: string;
     imageUrl: string;
-    
     timeStamp: Date;
     tagsString: string;
     visibility: TraceVisibility;

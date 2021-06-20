@@ -13,6 +13,7 @@ import {
 } from "@angular/platform-browser-dynamic/testing";
 
 // Unfortunately there"s no typing for the `__karma__` variable. Just declare it as any.
+// eslint-disable-next-line
 declare const __karma__: any;
 declare const require: any;
 

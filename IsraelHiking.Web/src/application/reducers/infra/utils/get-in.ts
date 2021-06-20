@@ -4,10 +4,10 @@
  *
  * @hidden
  */
-export function getIn(
+export const getIn = (
   v: any | undefined,
   pathElems: (string | number)[],
-): any | undefined {
+): any | undefined => {
   if (!v) {
     return v;
   }
@@ -28,4 +28,4 @@ export function getIn(
   }
 
   return getIn(v[firstElem], restElems);
-}
+};

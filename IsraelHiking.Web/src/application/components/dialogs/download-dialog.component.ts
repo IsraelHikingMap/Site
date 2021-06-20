@@ -26,7 +26,7 @@ export class DownloadDialogComponent extends BaseMapComponent {
         this.zoom = 15;
     }
 
-    public getDownloadUrl = () => {
+    public getDownloadUrl() {
         let protocol = "https://";
         let extension = ".zip";
         let filesFolder = "OruxMaps";
@@ -58,14 +58,14 @@ export class DownloadDialogComponent extends BaseMapComponent {
         return this.sanitizer.bypassSecurityTrustUrl(href);
     }
 
-    public getDesktopInstallationInstructions = (app: ApplicationType) => {
+    public getDesktopInstallationInstructions(app: ApplicationType) {
         if (app === "Locus") {
             return this.resources.installationInstructionsDesktopLocus;
         }
         return this.resources.installationInstructionsDesktopOruxMaps;
     }
 
-    public getGooglePlayStoreAddress = (app: ApplicationType): string => {
+    public getGooglePlayStoreAddress(app: ApplicationType): string {
         if (app === "Locus") {
             return "https://play.google.com/store/apps/details?id=menion.android.locus";
         }

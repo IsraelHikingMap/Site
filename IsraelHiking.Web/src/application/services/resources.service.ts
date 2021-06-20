@@ -425,7 +425,7 @@ export class ResourcesService {
         await this.setLanguage(this.ngRedux.getState().configuration.language);
     }
 
-    private setRtl = (rtl: boolean) => {
+    private setRtl(rtl: boolean) {
         if (rtl) {
             this.direction = "rtl";
             this.start = "right";
@@ -437,7 +437,7 @@ export class ResourcesService {
         }
     }
 
-    public setLanguage = async (language: Language): Promise<void> => {
+    public async setLanguage(language: Language): Promise<void> {
         await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1620576083100");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
@@ -875,22 +875,22 @@ export class ResourcesService {
         return words.match(/^[^a-zA-Z]*[\u0591-\u05F4\u0600-\u06FF]/) != null;
     }
 
-    public getDirection = (text?: string): Direction => {
+    public getDirection(text?: string): Direction {
         if (!text) {
             return this.direction;
         }
         return this.hasRtlCharacters(text) ? "rtl" : "ltr";
     }
 
-    public getTextAlignment = (text?: string) => {
+    public getTextAlignment(text?: string) {
         return `text-${this.getDirection(text) === "rtl" ? "right" : "left"}`;
     }
 
-    public getImageFloat = (text?: string) => {
+    public getImageFloat(text?: string) {
         return this.getDirection(text) === "rtl" ? "left" : "right";
     }
 
-    public getCurrentLanguageCodeSimplified = (): string => {
+    public getCurrentLanguageCodeSimplified(): string {
         return this.ngRedux.getState().configuration.language.code.split("-")[0];
     }
 

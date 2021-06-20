@@ -18,7 +18,7 @@ export class SnappingService {
     /**
      * This method will snap to the nearest point. markerData will be null in case there were no points near by.
      */
-    public snapToPoint = (latlng: LatLngAlt, points: MarkerData[]): ISnappingPointResponse => {
+    public snapToPoint(latlng: LatLngAlt, points: MarkerData[]): ISnappingPointResponse {
         let response = {
             latlng,
             markerData: null,

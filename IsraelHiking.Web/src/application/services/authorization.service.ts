@@ -99,7 +99,7 @@ export class AuthorizationService {
         this.ngRedux.dispatch(new SetUserInfoAction({
             userInfo
         }));
-    }
+    };
 
     private async getAccessToken(oauthToken: string, oauthRequestTokenSecret: string): Promise<IOAuthResponse> {
         let accessTokenUrl = this.options.url + "/oauth/access_token";
@@ -165,9 +165,7 @@ export class AuthorizationService {
             ["width", w], ["height", h],
             ["left", screen.width / 2 - w / 2],
             ["top", screen.height / 2 - h / 2]
-        ].map((x) => {
-            return x.join("=");
-        }).join(",");
+        ].map((x) => x.join("=")).join(",");
 
         return window.open("about:blank", "Authorization", settings);
     }
@@ -208,7 +206,7 @@ export class AuthorizationService {
     private async watchPopup(popup, resolve: (value?: any) => void, reject: (value?: any) => void) {
         try {
             if (popup.closed) {
-                reject(new Error(`The OSM sign in flow was canceled`));
+                reject(new Error("The OSM sign in flow was canceled"));
                 return;
             }
             if (popup.location.href.indexOf(this.options.landing) !== -1) {

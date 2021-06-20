@@ -30,7 +30,7 @@ export class SubStore<State> implements ObservableStore<State> {
     this.rootStore.dispatch({
       ...(action as any),
       "@angular-redux::fractalkey": JSON.stringify(this.basePath),
-    })
+    });
 
   getState = (): State => getIn(this.rootStore.getState(), this.basePath);
 
@@ -42,7 +42,7 @@ export class SubStore<State> implements ObservableStore<State> {
       this.rootStore,
       [...this.basePath, ...basePath],
       localReducer,
-    )
+    );
 
   select = <SelectedState>(
     selector?: Selector<State, SelectedState>,
@@ -51,12 +51,12 @@ export class SubStore<State> implements ObservableStore<State> {
     this.rootStore.select<State>(this.basePath).pipe(
       map(resolveToFunctionSelector(selector)),
       distinctUntilChanged(comparator),
-    )
+    );
 
   subscribe = (listener: () => void): (() => void) => {
     const subscription = this.select().subscribe(listener);
     return () => subscription.unsubscribe();
-  }
+  };
 
   replaceReducer = (nextLocalReducer: Reducer<State, AnyAction>) =>
     replaceLocalReducer(this.basePath, nextLocalReducer);

@@ -177,7 +177,7 @@ export class LayersService {
         }
     }
 
-    public addBaseLayer = (layerData: LayerData) => {
+    public addBaseLayer(layerData: LayerData) {
         let layer = this.baseLayers.find((layerToFind) => this.compareKeys(layerToFind.key, layerData.key));
         if (layer != null) {
             return;
@@ -239,7 +239,7 @@ export class LayersService {
         }
     }
 
-    public addOverlay = (layerData: LayerData): Overlay => {
+    public addOverlay(layerData: LayerData): Overlay {
         let overlay = this.overlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
         if (overlay != null) {
             return overlay; // overlay exists
@@ -249,7 +249,7 @@ export class LayersService {
         return overlay;
     }
 
-    private addOverlayFromData = (layerData: LayerData, visible: boolean): Overlay => {
+    private addOverlayFromData(layerData: LayerData, visible: boolean): Overlay {
         let overlay = {
             ...layerData,
             visible,
@@ -295,7 +295,7 @@ export class LayersService {
         return layers.find(l => this.compareKeys(l.key, newName)) == null;
     }
 
-    public updateBaseLayer = (oldLayer: EditableLayer, newLayer: EditableLayer): void => {
+    public updateBaseLayer(oldLayer: EditableLayer, newLayer: EditableLayer): void {
         this.ngRedux.dispatch(new UpdateBaseLayerAction({
             key: oldLayer.key,
             layerData: newLayer
@@ -304,7 +304,7 @@ export class LayersService {
         this.updateUserLayerInDatabase(false, newLayer);
     }
 
-    public updateOverlay = (oldLayer: Overlay, newLayer: Overlay): void => {
+    public updateOverlay(oldLayer: Overlay, newLayer: Overlay): void {
         this.ngRedux.dispatch(new UpdateOverlayAction({
             key: oldLayer.key,
             layerData: newLayer
@@ -312,7 +312,7 @@ export class LayersService {
         this.updateUserLayerInDatabase(true, newLayer);
     }
 
-    public removeBaseLayer = (baseLayer: EditableLayer) => {
+    public removeBaseLayer(baseLayer: EditableLayer) {
         if (this.compareKeys(baseLayer.key, this.selectedBaseLayerKey)) {
             this.ngRedux.dispatch(new SelectBaseLayerAction({
                 key: this.baseLayers[0].key
@@ -324,20 +324,20 @@ export class LayersService {
         this.deleteUserLayerFromDatabase(baseLayer.id);
     }
 
-    public removeOverlay = (overlay: Overlay) => {
+    public removeOverlay(overlay: Overlay) {
         this.ngRedux.dispatch(new RemoveOverlayAction({
             key: overlay.key
         }));
         this.deleteUserLayerFromDatabase(overlay.id);
     }
 
-    public selectBaseLayer = (key: string) => {
+    public selectBaseLayer(key: string) {
         this.ngRedux.dispatch(new SelectBaseLayerAction({
             key
         }));
     }
 
-    public toggleOverlay = (overlay: Overlay) => {
+    public toggleOverlay(overlay: Overlay) {
         let newVisibility = !overlay.visible;
         this.ngRedux.dispatch(new UpdateOverlayAction({
             key: overlay.key,
@@ -367,7 +367,7 @@ export class LayersService {
         }
     }
 
-    public addExternalBaseLayer = (layerData: LayerData) => {
+    public addExternalBaseLayer(layerData: LayerData) {
         if (layerData == null || (layerData.address === "" && layerData.key === "")) {
             return;
         }
@@ -405,7 +405,7 @@ export class LayersService {
         } as EditableLayer);
     }
 
-    public addExternalOverlays = (overlays: LayerData[]) => {
+    public addExternalOverlays(overlays: LayerData[]) {
         if (!overlays || overlays.length === 0) {
             return;
         }
@@ -424,7 +424,7 @@ export class LayersService {
         }
     }
 
-    public getData = (): DataContainer => {
+    public getData(): DataContainer {
         let container = {
             baseLayer: null,
             overlays: []

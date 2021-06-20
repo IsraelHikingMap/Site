@@ -1,4 +1,4 @@
-// tslint:disable:max-classes-per-file
+/* eslint-disable max-classes-per-file */
 
 import { NgZone } from "@angular/core";
 import { Action } from "redux";

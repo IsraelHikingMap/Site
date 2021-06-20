@@ -20,11 +20,10 @@ import { getInstanceSelection } from "./helpers";
  *
  * @param comparator Function used to determine if this selector has changed.
  */
-export function select<T>(
+export const select = <T>(
   selector?: Selector<any, T>,
   comparator?: Comparator,
-): PropertyDecorator {
-  return (target: any, key: string | symbol): void => {
+): PropertyDecorator => (target: any, key: string | symbol): void => {
     const adjustedSelector = selector
       ? selector
       : String(key).lastIndexOf("$") === String(key).length - 1
@@ -32,7 +31,6 @@ export function select<T>(
       : key;
     decorate(adjustedSelector, undefined, comparator)(target, key);
   };
-}
 
 function decorate(
   selector: Selector<any, any>,

@@ -58,7 +58,7 @@ export class TracesService {
 
     public async syncTraces(): Promise<void> {
         try {
-            this.loggingService.info(`[Traces] Starting syncing traces`);
+            this.loggingService.info("[Traces] Starting syncing traces");
             let response = await this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)).toPromise() as Trace[];
             let traces = ([] as Trace[]).concat(response || []);
             let existingTraces = this.ngRedux.getState().tracesState.traces;
@@ -81,7 +81,7 @@ export class TracesService {
                     await this.databaseService.deleteTraceById(trace.id);
                 }
             }
-            this.loggingService.info(`[Traces] Finished syncing traces`);
+            this.loggingService.info("[Traces] Finished syncing traces");
         } catch (ex) {
             this.loggingService.error("[Traces] Unable to get user's traces.");
         }

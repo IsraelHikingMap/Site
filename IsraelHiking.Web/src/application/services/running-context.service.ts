@@ -22,7 +22,7 @@ export class RunningContextService {
         this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform) || (this.isCordova && this.device.platform === "iOS");
         this.isOnline = true;
         let agent: string = navigator.userAgent || navigator.vendor || (window as any).opera || "";
-        /* tslint:disable */
+        /* eslint-disable */
         if (
             /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i
                 .test(agent)
@@ -31,7 +31,7 @@ export class RunningContextService {
             || this.isCordova) {
             this.isMobile = true;
         }
-        /* tslint:enable */
+        /* eslint-enable */
         this.isFacebook = agent.indexOf("FBAN") !== -1 || agent.indexOf("FBAV") !== -1;
         this.connectionService.monitor(true).subscribe(state => this.isOnline = state.hasInternetAccess);
     }

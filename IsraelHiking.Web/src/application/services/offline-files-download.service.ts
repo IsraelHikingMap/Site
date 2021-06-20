@@ -40,7 +40,7 @@ export class OfflineFilesDownloadService {
     }
 
     public async downloadOfflineMaps(): Promise<void> {
-        this.loggingService.info(`[Offline Download] Starting downloading offline files`);
+        this.loggingService.info("[Offline Download] Starting downloading offline files");
         let fileNames = await this.getFilesToDownloadDictionary();
         if (Object.keys(fileNames).length === 0) {
             this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
@@ -54,7 +54,8 @@ export class OfflineFilesDownloadService {
         });
     }
 
-    private async downloadOfflineFilesProgressAction(reportProgress: (progressValue: number) => void, fileNames: {}): Promise<void> {
+    private async downloadOfflineFilesProgressAction(reportProgress: (progressValue: number) => void, fileNames: Record<string, string>):
+        Promise<void> {
         this.loggingService.info("[Offline Download] Starting downloading offline files, last update: " +
             this.ngRedux.getState().offlineState.lastModifiedDate);
         this.sidebarService.hide();
@@ -94,12 +95,12 @@ export class OfflineFilesDownloadService {
         }
     }
 
-    private async getFilesToDownloadDictionary(): Promise<{}> {
+    private async getFilesToDownloadDictionary(): Promise<Record<string, string>> {
         let lastModified = this.ngRedux.getState().offlineState.lastModifiedDate;
         let lastModifiedString = lastModified ? lastModified.toISOString() : null;
         let fileNames = await this.httpClient.get(Urls.offlineFiles, {
             params: { lastModified: lastModifiedString }
-        }).pipe(timeout(5000)).toPromise() as {};
+        }).pipe(timeout(5000)).toPromise() as Record<string, string>;
         this.loggingService.info(
             `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
         return fileNames;

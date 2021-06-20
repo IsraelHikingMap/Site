@@ -93,10 +93,8 @@ describe("Poi Service", () => {
                 expect(res).not.toBeNull();
             });
 
-            mockBackend.expectOne((request: HttpRequest<any>) => {
-                return request.url.includes(id) &&
-                    request.url.includes(source);
-            }).flush({});
+            mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(id) &&
+                    request.url.includes(source)).flush({});
             return promise;
         })));
 
@@ -152,8 +150,7 @@ describe("Poi Service", () => {
             async (poiService: PoiService, dbMock: DatabaseService) => {
 
                 MockNgRedux.getInstance().dispatch = jasmine.createSpy();
-                MockNgRedux.getInstance().getState = () => {
-                    return {
+                MockNgRedux.getInstance().getState = () => ({
                         poiState: {
                             selectedPointOfInterest: {
                                 properties: {
@@ -170,8 +167,7 @@ describe("Poi Service", () => {
                         offlineState: {
                             uploadPoiQueue: []
                         }
-                    };
-                };
+                    });
                 let spy = spyOn(dbMock, "addPoiToUploadQueue");
                 let promise = poiService.updateComplexPoi({
                     id: "poiId",
@@ -226,8 +222,7 @@ describe("Poi Service", () => {
                 poiService.setLocation(featureInQueue, { lat: 1, lng: 2 });
                 dbMock.getPoiFromUploadQueue = () => Promise.resolve(featureInQueue);
                 MockNgRedux.getInstance().dispatch = jasmine.createSpy();
-                MockNgRedux.getInstance().getState = () => {
-                    return {
+                MockNgRedux.getInstance().getState = () => ({
                         poiState: {
                             selectedPointOfInterest: {
                                 properties: {
@@ -246,8 +241,7 @@ describe("Poi Service", () => {
                         offlineState: {
                             uploadPoiQueue: ["poiId"]
                         }
-                    } as ApplicationState;
-                };
+                    } as ApplicationState);
                 let spy = spyOn(dbMock, "addPoiToUploadQueue");
                 let promise = poiService.updateComplexPoi({
                     id: "poiId",

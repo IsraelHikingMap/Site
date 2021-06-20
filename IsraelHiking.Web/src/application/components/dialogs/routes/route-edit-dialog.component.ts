@@ -73,6 +73,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         }
     }
 
+    // override base
     public moveToRoute = () => {
         let latLngs = this.getLatlngs();
         if (latLngs.length === 0) {
@@ -84,7 +85,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
             this.toastService.warning(this.resources.routeIsHidden);
         }
         this.fitBoundsService.fitBounds(bounds);
-    }
+    };
 
     private getLatlngs(): LatLngAlt[] {
         let latLngs = [];
@@ -97,13 +98,15 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         return latLngs;
     }
 
+    // override base
     public makeAllPointsEditable = () => {
         this.selectedRouteService.makeAllPointsEditable(this.routeData.id);
         this.toastService.info(this.resources.dataUpdatedSuccessfully);
-    }
+    };
 
+    // override base
     public reverseRoute = () => {
         this.selectedRouteService.reverseRoute(this.routeData.id);
         this.toastService.info(this.resources.dataUpdatedSuccessfully);
-    }
+    };
 }

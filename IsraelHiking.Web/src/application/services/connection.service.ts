@@ -149,6 +149,7 @@ export class ConnectionService implements OnDestroy {
     /**
      * Monitor Network & Internet connection status by subscribing to this observer. If you set "reportCurrentState" to "false" then
      * function will not report current status of the connections when initially subscribed.
+     *
      * @param reportCurrentState Report current state when initial subscription. Default is "true"
      */
     monitor(reportCurrentState = true): Observable<ConnectionState> {
@@ -166,6 +167,7 @@ export class ConnectionService implements OnDestroy {
     /**
      * Update options of the service. You could specify partial options object. Values that are not specified will use default / previous
      * option values.
+     *
      * @param options Partial option values.
      */
     updateOptions(options: Partial<ConnectionServiceOptions>) {

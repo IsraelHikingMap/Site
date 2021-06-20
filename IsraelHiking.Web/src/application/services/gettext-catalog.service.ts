@@ -4,7 +4,7 @@ import { HttpClient } from "@angular/common/http";
 @Injectable()
 export class GetTextCatalogService {
 
-    private strings: {};
+    private strings: Record<string, string>;
     private baseLanguage: string;
 
     constructor(private readonly httpClient: HttpClient) {
@@ -24,7 +24,7 @@ export class GetTextCatalogService {
     }
 
     public async loadRemote(url: string): Promise<void> {
-        let response = await this.httpClient.get(url).toPromise();
+        let response = await this.httpClient.get(url).toPromise() as Record<string, string>;
         this.strings = response;
     }
 }

@@ -60,7 +60,7 @@ export class SpatialService {
         return pointToLineDistance(SpatialService.toCoordinate(latlng), SpatialService.getLineString(line), { units: "meters" });
     }
 
-    public static splitLine(newLatlng: LatLngAlt, line: LatLngAlt[]): { start: LatLngAlt[], end: LatLngAlt[] } {
+    public static splitLine(newLatlng: LatLngAlt, line: LatLngAlt[]): { start: LatLngAlt[]; end: LatLngAlt[] } {
         if (line.length < 2 ) {
             throw new Error("Line length should be at least 2");
         }
@@ -117,7 +117,7 @@ export class SpatialService {
         return indexToInsert;
     }
 
-    private static project(p: LatLngAlt, a: LatLngAlt, b: LatLngAlt): { latlng: LatLngAlt, projectionFactor: number } {
+    private static project(p: LatLngAlt, a: LatLngAlt, b: LatLngAlt): { latlng: LatLngAlt; projectionFactor: number } {
 
         let atob = { x: b.lng - a.lng, y: b.lat - a.lat };
         let atop = { x: p.lng - a.lng, y: p.lat - a.lat };

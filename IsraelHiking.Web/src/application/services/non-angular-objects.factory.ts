@@ -22,14 +22,14 @@ export interface IOhAuth {
     /**
      * generates a querystring from an object
      */
-    qsString: (obj: {}) => string;
+    qsString: (obj: {oauth_token: string; oauth_callback: string}) => string;
     /**
      * generate an object from a querystring
      */
     stringQs: (str: string) => IOAuthResponse;
     timestamp: () => number;
     nonce: () => string;
-    xhr: (method: string, url: string, params: {}, data: {}, options: {}, callback: (err, xhr) => void) => void;
+    xhr: (method: string, url: string, params: any, data: any, options: any, callback: (err, xhr) => void) => void;
 }
 
 @Injectable()

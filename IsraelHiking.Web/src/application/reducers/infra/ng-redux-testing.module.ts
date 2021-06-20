@@ -1,5 +1,3 @@
-// TODO: See if this linting rule can be enabled with new build process (ng-packagr)
-// tslint:disable:no-implicit-dependencies
 import { NgModule } from "@angular/core";
 import { NgRedux } from "./ng-redux.module";
 import { MockNgRedux } from "./ng-redux.mock";
@@ -8,14 +6,12 @@ import { MockNgRedux } from "./ng-redux.mock";
 const mockNgRedux = MockNgRedux.getInstance();
 
 /** @hidden */
-export function _mockNgReduxFactory() {
-  return mockNgRedux;
-}
+export const mockNgReduxFactory = () => mockNgRedux;
 
 @NgModule({
   imports: [],
   providers: [
-    { provide: NgRedux, useFactory: _mockNgReduxFactory },
+    { provide: NgRedux, useFactory: mockNgReduxFactory },
   ],
 })
 export class NgReduxTestingModule {}

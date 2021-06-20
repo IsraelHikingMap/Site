@@ -56,7 +56,7 @@ export class RoutePointOverlayComponent extends BaseMapComponent implements OnCh
         this.closed.next();
     }
 
-    public remove = () => {
+    public remove() {
         this.selectedRouteService.removeSegment(this.segmentIndex);
         this.closed.next();
     }

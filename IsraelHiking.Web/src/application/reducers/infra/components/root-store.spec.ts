@@ -179,7 +179,7 @@ describe("NgRedux Observable Store", () => {
   });
 
   it("should wait until store is configured before emitting values", () => {
-    // tslint:disable-next-line:max-classes-per-file
+    // eslint-disable-next-line max-classes-per-file
     class SomeService {
       foo!: string;
       bar!: string;
@@ -201,7 +201,7 @@ describe("NgRedux Observable Store", () => {
   });
 
   it("should have select decorators work before store is configured", done => {
-    // tslint:disable-next-line:max-classes-per-file
+    // eslint-disable-next-line max-classes-per-file
     class SomeService {
       @select() foo$!: Observable<string>;
       @select() bar$!: Observable<string>;

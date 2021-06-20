@@ -1,19 +1,18 @@
 import { Action } from "redux";
 
+type ReduxActionDescriptor = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
+
 export abstract class BaseAction<TPayload> implements Action {
     constructor(public type: string, public payload: TPayload) { }
 }
 
 export const classToActionMiddleware = (state) => (next) => (action) => next({ ...action });
 
-export function ReduxAction(type: string):
-    (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void {
-    return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-        descriptor.value.type = type;
-    };
-}
+export const ReduxAction = (type: string): ReduxActionDescriptor => (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+            descriptor.value.type = type;
+        };
 
-export function createReducerFromClass<State>(reducer: new () => any, initialState: State) {
+export const createReducerFromClass = <State>(reducer: new () => any, initialState: State) => {
     const instance = Object.create(reducer.prototype);
     return (lastState: State = initialState, action: Action): State => {
         for (let fn in instance) {
@@ -24,4 +23,4 @@ export function createReducerFromClass<State>(reducer: new () => any, initialSta
         return lastState;
 
     };
-}
+};

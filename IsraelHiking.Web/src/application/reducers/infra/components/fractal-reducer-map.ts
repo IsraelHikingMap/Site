@@ -16,16 +16,16 @@ const composeReducers = (
  * NgRedux.configureStore
  * does it for you under the hood.
  */
-export function enableFractalReducers(rootReducer: Reducer<any, AnyAction>) {
+export const enableFractalReducers = (rootReducer: Reducer<any, AnyAction>) => {
   reducerMap = {};
   return composeReducers(rootFractalReducer, rootReducer);
-}
+};
 
 /** @hidden */
-export function registerFractalReducer(
+export const registerFractalReducer = (
   basePath: PathSelector,
   localReducer: Reducer<any, AnyAction>,
-): void {
+): void => {
   const existingFractalReducer = reducerMap[JSON.stringify(basePath)];
   if (existingFractalReducer && existingFractalReducer !== localReducer) {
     throw new Error(
@@ -34,24 +34,24 @@ export function registerFractalReducer(
   }
 
   reducerMap[JSON.stringify(basePath)] = localReducer;
-}
+};
 
 /** @hidden */
-export function replaceLocalReducer(
+export const replaceLocalReducer = (
   basePath: PathSelector,
   nextLocalReducer: Reducer<any, AnyAction>,
-): void {
+): void => {
   reducerMap[JSON.stringify(basePath)] = nextLocalReducer;
-}
+};
 
-function rootFractalReducer(
-  state: {} = {},
+const rootFractalReducer = (
+  state: any = {},
   action: AnyAction & { "@angular-redux::fractalkey"?: string },
-) {
+) => {
   const fractalKey = action["@angular-redux::fractalkey"];
   const fractalPath = fractalKey ? JSON.parse(fractalKey) : [];
   const localReducer = reducerMap[fractalKey || ""];
   return fractalKey && localReducer
     ? setIn(state, fractalPath, localReducer(getIn(state, fractalPath), action))
     : state;
-}
+};

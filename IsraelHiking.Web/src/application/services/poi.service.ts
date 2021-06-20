@@ -134,11 +134,11 @@ export class PoiService {
     public async initialize() {
         this.language$.pipe(skip(1)).subscribe(() => {
             this.poisCache = [];
-            this.loggingService.info(`[POIs] Language changed, updating pois`);
+            this.loggingService.info("[POIs] Language changed, updating pois");
             this.updatePois(this.ngRedux.getState().offlineState.poisLastModifiedDate == null);
         });
         this.categoriesGroups.pipe(skip(1)).subscribe(() => {
-            this.loggingService.info(`[POIs] Categoris changed, updating pois`);
+            this.loggingService.info("[POIs] Categoris changed, updating pois");
             this.updatePois(this.ngRedux.getState().offlineState.poisLastModifiedDate == null);
         });
         await this.syncCategories();
@@ -167,11 +167,11 @@ export class PoiService {
 
     private async handleUploadQueueChanges(items: string[]) {
         if (items.length === 0) {
-            this.loggingService.info(`[POIs] Upload queue changed and now it is empty`);
+            this.loggingService.info("[POIs] Upload queue changed and now it is empty");
             return;
         }
         if (this.queueIsProcessing) {
-            this.loggingService.info(`[POIs] Upload queue is currently processing, ignoring changes`);
+            this.loggingService.info("[POIs] Upload queue is currently processing, ignoring changes");
             return;
         }
         this.queueIsProcessing = true;
@@ -192,7 +192,8 @@ export class PoiService {
                 ? await this.httpClient.post(postAddress, feature).pipe(timeout(180000)).toPromise() as GeoJSON.Feature
                 : await this.httpClient.put(putAddress, feature).pipe(timeout(180000)).toPromise() as GeoJSON.Feature;
 
-            this.loggingService.info(`[POIs] Uploaded successfully a${feature.properties.poiIsSimple ? " simple" : ""} feature with id: ${firstItemId}, removing from upload queue`);
+            this.loggingService.info(`[POIs] Uploaded successfully a${feature.properties.poiIsSimple ? " simple" : ""} ` +
+                `feature with id: ${firstItemId}, ` + "removing from upload queue");
             if (this.runningContextService.isCordova && !feature.properties.poiIsSimple) {
                 this.databaseService.storePois([poi]);
             }
@@ -286,7 +287,7 @@ export class PoiService {
         } catch (ex) {
             this.loggingService.warning("[POIs] Unable to sync public pois and categories - using local data: " + ex.message);
         }
-        this.loggingService.info(`[POIs] Getting POIs for clustering from database`);
+        this.loggingService.info("[POIs] Getting POIs for clustering from database");
         await this.rebuildPois();
     }
 
@@ -295,21 +296,21 @@ export class PoiService {
         let poiIdsToDelete = this.poisGeojson.features.map(f => f.properties.poiId);
         this.loggingService.info(`[POIs] Deleting exiting pois: ${poiIdsToDelete.length}`);
         await this.databaseService.deletePois(poiIdsToDelete);
-        this.loggingService.info(`[POIs] Getting cached offline pois file`);
+        this.loggingService.info("[POIs] Getting cached offline pois file");
         let poisFile = await this.fileService.getFileFromCache(Urls.poisOfflineFile);
         if (poisFile == null) {
-            this.loggingService.info(`[POIs] No file in cache, downloading pois file`);
+            this.loggingService.info("[POIs] No file in cache, downloading pois file");
             await this.fileService.downloadFileToCache(Urls.poisOfflineFile, (value) => progressCallback(value * 50));
-            this.loggingService.info(`[POIs] Finished downloading pois file, reading file`);
+            this.loggingService.info("[POIs] Finished downloading pois file, reading file");
             poisFile = await this.fileService.getFileFromCache(Urls.poisOfflineFile);
         }
-        this.loggingService.info(`[POIs] Opening pois file`);
+        this.loggingService.info("[POIs] Opening pois file");
         let lastModified = await this.openPoisFile(poisFile, progressCallback);
         this.loggingService.info(`[POIs] Updating last modified to: ${lastModified}`);
         this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: lastModified }));
         this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
         await this.fileService.deleteFileFromCache(Urls.poisOfflineFile);
-        this.loggingService.info(`[POIs] Finished deleting offline pois cached file`);
+        this.loggingService.info("[POIs] Finished deleting offline pois cached file");
     }
 
     private async updateOfflinePoisByPaging(lastModified: Date) {
@@ -340,7 +341,7 @@ export class PoiService {
         let zip = new JSZip();
         await zip.loadAsync(blob);
         await this.writeImages(zip, progressCallback);
-        this.loggingService.info(`[POIs] Finished saving images to database`);
+        this.loggingService.info("[POIs] Finished saving images to database");
         return await this.writePois(zip, progressCallback);
     }
 
@@ -474,7 +475,7 @@ export class PoiService {
 
     }
 
-    public getSelectableCategories = async (): Promise<ISelectableCategory[]> => {
+    public async getSelectableCategories(): Promise<ISelectableCategory[]> {
         let categoriesGroup = this.ngRedux.getState().layersState.categoriesGroups.find(g => g.type === "Points of Interest");
         let selectableCategories = [] as ISelectableCategory[];
         for (let category of categoriesGroup.categories) {

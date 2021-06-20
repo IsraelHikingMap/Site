@@ -32,26 +32,26 @@ export class MissingPartOverlayComponent extends ClosableOverlayComponent {
         this.hideCoordinates = true;
     }
 
-    public getHighwayType = (): string => {
+    public getHighwayType(): string {
         return this.feature.properties.highway || "track";
     }
 
-    public setHighwayType = (highwayType: string) => {
+    public setHighwayType(highwayType: string) {
         this.feature.properties.highway = highwayType;
     }
 
-    public getColor = (): string => {
+    public getColor(): string {
         return this.feature.properties.colour || "none";
     }
 
-    public setColor = (color: string) => {
+    public setColor(color: string) {
         this.feature.properties.colour = color;
         if (color === "none") {
             delete this.feature.properties.colour;
         }
     }
 
-    public addMissingPartToOsm = async () => {
+    public async addMissingPartToOsm() {
         try {
             await this.httpClient.put(Urls.osm, this.feature).toPromise();
             this.toastService.success(this.resources.routeAddedSuccessfullyItWillTakeTime);

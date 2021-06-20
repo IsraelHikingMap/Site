@@ -103,7 +103,7 @@ export class RouteEditRouteInteraction {
         this.selectedRoutePoint = null;
         this.selectedRouteSegments = [];
         this.state = "canceled";
-    }
+    };
 
     private handleDown = (event: MapMouseEvent) => {
         this.mouseDownPoint = event.point;
@@ -150,7 +150,7 @@ export class RouteEditRouteInteraction {
             this.map.off("mousemove", this.handleMove);
             this.map.on("drag", this.handleMove);
         }
-    }
+    };
 
     private handleMove = (event: MapMouseEvent) => {
         if (this.mouseDownPoint != null && event.point &&
@@ -171,7 +171,7 @@ export class RouteEditRouteInteraction {
                 this.handleRouteMiddleSegmentDrag(event);
             }
         }
-    }
+    };
 
     private handleRoutePointDrag(event: MapMouseEvent) {
         let coordinate = SpatialService.toCoordinate(event.lngLat);
@@ -258,7 +258,7 @@ export class RouteEditRouteInteraction {
         }
 
         return;
-    }
+    };
 
     private addPointToEndOfRoute = async (latlng: LatLngAlt) => {
         let newSegment = this.createRouteSegment(latlng, [latlng, latlng]);
@@ -274,7 +274,7 @@ export class RouteEditRouteInteraction {
             routeId: selectedRoute.id,
             segmentData: newSegment
         }));
-    }
+    };
 
     private createRouteSegment = (latlng: LatLngAlt, latlngs: LatLngAlt[]): RouteSegmentData => {
         let routeSegment = {
@@ -283,7 +283,7 @@ export class RouteEditRouteInteraction {
             routingType: this.ngRedux.getState().routeEditingState.routingType
         };
         return routeSegment;
-    }
+    };
 
     private runRouting = async (startLatLng: LatLngAlt, segment: RouteSegmentData): Promise<void> => {
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, []);
@@ -293,7 +293,7 @@ export class RouteEditRouteInteraction {
         segment.latlngs = latLngs;
         let last = latLngs[latLngs.length - 1];
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, [last]);
-    }
+    };
 
     private async updateRoutePoint(latlng: LatLngAlt) {
         let index = this.getPointIndex();

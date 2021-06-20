@@ -32,7 +32,7 @@ export class FileService {
     constructor(private readonly httpClient: HttpClient,
                 private readonly fileSystemWrapper: FileSystemWrapper,
                 private readonly webView: WebView,
-                // tslint:disable-next-line
+                // eslint-disable-next-line
                 private readonly fileTransfer: FileTransfer,
                 private readonly runningContextService: RunningContextService,
                 private readonly imageResizeService: ImageResizeService,
@@ -97,7 +97,7 @@ export class FileService {
             return [];
         }
         let filesToReturn = [];
-        // tslint:disable-next-line:prefer-for-of
+        // eslint-disable-next-line @typescript-eslint/prefer-for-of
         for (let i = 0; i < files.length; i++) {
             filesToReturn.push(files[i]);
         }
@@ -220,7 +220,7 @@ export class FileService {
         this.addRoutesFromContainer(dataContainer);
     }
 
-    public openFromUrl = (url: string): Promise<DataContainer> => {
+    public openFromUrl(url: string): Promise<DataContainer> {
         return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<DataContainer>;
     }
 
@@ -300,6 +300,7 @@ export class FileService {
 
     /**
      * Downloads a file while reporting progress
+     *
      * @param url The url of the file
      * @param progressCallback reports progress between 0 and 1
      */

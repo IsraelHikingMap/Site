@@ -56,7 +56,7 @@ export class RouteEditPoiInteraction {
             }
             this.addPrivatePoi(event.lngLat);
         });
-    }
+    };
 
     public handleDragEnd(latlng: LatLngAlt, index: number) {
         let routeData = this.selectedRouteService.getSelectedRoute();

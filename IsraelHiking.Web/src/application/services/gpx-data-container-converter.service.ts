@@ -7,13 +7,13 @@ import XmlBeautify from "xml-beautify";
 import { DataContainer, RouteData, RouteSegmentData, ILatLngTime, MarkerData, LinkData, LatLngAlt } from "../models/models";
 
 interface Link {
-    $: { href: string; };
+    $: { href: string };
     text: string;
     type: string;
 }
 
 interface Wpt {
-    $: { lat: string; lon: string; };
+    $: { lat: string; lon: string };
     name?: string;
     ele: string;
     time?: string;
@@ -51,7 +51,7 @@ interface Trk {
 }
 
 interface Bounds {
-    $: { minlat: string; minlon: string; maxlat: string; maxlon: string; };
+    $: { minlat: string; minlon: string; maxlat: string; maxlon: string };
 }
 
 interface Metadata {
@@ -63,7 +63,7 @@ interface Gpx {
    rte: Rte[];
    wpt: Wpt[];
     metadata: Metadata;
-    $: { version: string, creator: string; xmlns: string; };
+    $: { version: string; creator: string; xmlns: string };
 }
 
 @Injectable()
@@ -102,15 +102,13 @@ export class GpxDataContainerConverterService {
                     name: m.title,
                     desc: m.description,
                     type: m.type,
-                    link: m.urls.map(u => {
-                        return {
+                    link: m.urls.map(u => ({
                             $: {
                                 href: u.url
                             },
                             text: u.text,
                             type: u.mimeType
-                        } as Link;
-                    })
+                        } as Link))
                 } as Wpt;
                 if (m.latlng.alt && !isNaN(m.latlng.alt)) {
                     wpt.ele = m.latlng.alt.toString();
@@ -142,8 +140,7 @@ export class GpxDataContainerConverterService {
                         _: route.weight.toString()
                     }
                 },
-                trkseg: route.segments.map(s => {
-                    return {
+                trkseg: route.segments.map(s => ({
                         trkpt: s.latlngs.map(l => {
                             let wpt = {
                                 $: {
@@ -168,8 +165,7 @@ export class GpxDataContainerConverterService {
                                 _: s.routingType
                             }
                         }
-                    } as TrkSeg;
-                })
+                    } as TrkSeg))
             } as Trk);
         }
         if (dataContainer.northEast && dataContainer.southWest) {

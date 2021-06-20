@@ -15,7 +15,7 @@ export class SearchResultsProvider {
                 private readonly poiService: PoiService) {
     }
 
-    public getResults = async (searchTerm: string, isHebrew: boolean): Promise<SearchResultsPointOfInterest[]> => {
+    public async getResults(searchTerm: string, isHebrew: boolean): Promise<SearchResultsPointOfInterest[]> {
         let params = new HttpParams();
         let language = isHebrew ? "he" : "en";
         params = params.set("language", language);

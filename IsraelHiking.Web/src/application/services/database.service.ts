@@ -316,9 +316,7 @@ export class DatabaseService {
 
     private initialStateUpgrade(dbState: ApplicationState): ApplicationState {
         let storedState = deepmerge(initialState, dbState, {
-            arrayMerge: (destinationArray, sourceArray) => {
-                return sourceArray == null ? destinationArray : sourceArray;
-            }
+            arrayMerge: (destinationArray, sourceArray) => sourceArray == null ? destinationArray : sourceArray
         });
         storedState.inMemoryState = initialState.inMemoryState;
         if (!this.runningContext.isCordova) {

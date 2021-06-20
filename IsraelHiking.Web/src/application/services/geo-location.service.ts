@@ -140,9 +140,9 @@ export class GeoLocationService {
             this.backgroundGeolocation.deleteAllLocations();
             let positions = locations.map(l => this.locationToPosition(l));
             if (positions.length === 0) {
-                this.loggingService.debug(`[GeoLocation] There's nothing to send - valid locations array is empty`);
+                this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
             } else if (positions.length === 1) {
-                this.loggingService.debug(`[GeoLocation] Sending a location update`);
+                this.loggingService.debug("[GeoLocation] Sending a location update");
                 this.handlePoistionChange(positions[positions.length - 1]);
             } else {
                 this.loggingService.debug(`[GeoLocation] Sending bulk location update on each location update: ${positions.length}`);

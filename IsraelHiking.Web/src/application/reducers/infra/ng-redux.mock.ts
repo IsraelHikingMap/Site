@@ -40,13 +40,13 @@ export class MockObservableStore<State> {
       selector?: Selector<State, SelectedState>,
       comparator?: Comparator,
     ): Subject<SelectedState> =>
-      this.initSelectorStub<SelectedState>(selector, comparator).subject
+      this.initSelectorStub<SelectedState>(selector, comparator).subject;
 
     reset = () => {
       Object.keys(this.subStores).forEach(k => this.subStores[k].reset());
       this.selections = {};
       this.subStores = {};
-    }
+    };
 
     dispatch: Dispatch<AnyAction> = action => action;
     replaceReducer = () => null;
@@ -61,12 +61,12 @@ export class MockObservableStore<State> {
       return stub.comparator
         ? stub.subject.pipe(distinctUntilChanged(stub.comparator))
         : stub.subject;
-    }
+    };
 
     configureSubStore = <SubState>(
       basePath: PathSelector,
       _: Reducer<SubState, AnyAction>,
-    ): MockObservableStore<SubState> => this.initSubStore<SubState>(basePath)
+    ): MockObservableStore<SubState> => this.initSubStore<SubState>(basePath);
 
     getSubStore = <SubState>(
       ...pathSelectors: PathSelector[]
@@ -75,7 +75,7 @@ export class MockObservableStore<State> {
       return (first
         ? this.initSubStore(first).getSubStore(...rest)
         : this) as MockObservableStore<SubState>;
-    }
+    };
 
     private initSubStore<SubState>(basePath: PathSelector) {
       const result =
@@ -104,7 +104,7 @@ export class MockObservableStore<State> {
    * Convenience mock to make it easier to control selector
    * behaviour in unit tests.
    */
-export class MockNgRedux<T = {}> extends NgRedux<T> {
+export class MockNgRedux<T = any> extends NgRedux<T> {
 
     /** @hidden */
     constructor() {
@@ -150,6 +150,7 @@ export class MockNgRedux<T = {}> extends NgRedux<T> {
      * If your app creates deeply nested substores from other substores,
      * pass the chain of pathSelectors in as ordered arguments to mock
      * the nested substores out.
+     *
      * @param pathSelectors - the selectors
      */
     static getSubStore<S>(
@@ -183,5 +184,5 @@ export class MockNgRedux<T = {}> extends NgRedux<T> {
       __: any,
       ___?: Middleware[],
       ____?: StoreEnhancer<any>[],
-    ): void => undefined
+    ): void => undefined;
   }

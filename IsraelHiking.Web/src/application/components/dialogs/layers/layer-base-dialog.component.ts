@@ -50,7 +50,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
         this.layerData.opacity = opacity;
     }
 
-    public saveLayer = () => {
+    public saveLayer() {
         let layerData = {
             ...this.layerData,
             minZoom: +this.layerData.minZoom, // fix issue with variable saved as string...

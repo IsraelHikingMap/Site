@@ -4,7 +4,7 @@
      */
     lastModifiedDate: Date;
     /**
-     * Points of interest last modified date 
+     * Points of interest last modified date
      */
     poisLastModifiedDate: Date;
     /**

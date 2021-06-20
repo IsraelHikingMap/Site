@@ -7,7 +7,7 @@ import { SpatialService } from "./spatial.service";
 export class GeoJsonParser {
     private static MARKERS = "markers";
 
-    public static getPropertyValue(properties: {}, key: string, language?: string): string {
+    public static getPropertyValue(properties: Record<string, string>, key: string, language?: string): string {
         let value = "";
         if (language) {
             value = properties[key + ":" + language];

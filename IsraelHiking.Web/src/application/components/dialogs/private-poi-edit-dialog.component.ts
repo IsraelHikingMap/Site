@@ -119,11 +119,11 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         this.showUrl = this.url != null;
     }
 
-    public setMarkerType = (markerType: string): void => {
+    public setMarkerType(markerType: string): void {
         this.markerType = markerType;
     }
 
-    public save = () => {
+    public save() {
         let urls = [];
         if (this.imageLink) {
             urls.push(this.imageLink);
@@ -170,7 +170,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         this.dialogRef.close();
     }
 
-    public remove: () => void = () => {
+    public remove() {
         this.ngRedux.dispatch(new DeletePrivatePoiAction({
             routeId: this.routeId,
             index: this.markerIndex

@@ -10,7 +10,7 @@ export interface SearchResultsPointOfInterest {
     iconColor: string;
     title: string;
     description: string;
-    location: LatLngAlt,
+    location: LatLngAlt;
     displayName: string;
     source: string;
     id: string;

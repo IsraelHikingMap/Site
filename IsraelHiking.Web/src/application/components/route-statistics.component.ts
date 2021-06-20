@@ -32,12 +32,12 @@ interface IChartSubRouteRange {
 }
 
 interface IChartElements {
-    svg: Selection<any, {}, null, undefined>;
-    chartArea: Selection<SVGGElement, {}, null, undefined>;
-    path: Selection<SVGPathElement, {}, null, undefined>;
-    hoverGroup: Selection<BaseType, {}, null, undefined>;
-    dragRect: Selection<SVGRectElement, {}, null, undefined>;
-    locationGroup: Selection<BaseType, {}, null, undefined>;
+    svg: Selection<any, any, null, undefined>;
+    chartArea: Selection<SVGGElement, any, null, undefined>;
+    path: Selection<SVGPathElement, any, null, undefined>;
+    hoverGroup: Selection<BaseType, any, null, undefined>;
+    dragRect: Selection<SVGRectElement, any, null, undefined>;
+    locationGroup: Selection<BaseType, any, null, undefined>;
     xScale: ScaleContinuousNumeric<number, number>;
     yScale: ScaleContinuousNumeric<number, number>;
     yScaleSlope: ScaleContinuousNumeric<number, number>;
@@ -289,16 +289,14 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         return this.sidebarService.isSidebarOpen();
     }
 
-    public getUnits = (value: number): string => {
-        return Math.abs(value) > 1000 ? this.resources.kmUnit : this.resources.meterUnit;
-    }
+    public getUnits = (value: number): string => Math.abs(value) > 1000 ? this.resources.kmUnit : this.resources.meterUnit;
 
     public toShortNumber = (value: number): string => {
         if (value == null) {
             return "0";
         }
         return Math.abs(value) > 1000 ? (value / 1000.0).toFixed(2) : value.toFixed(0);
-    }
+    };
 
     public toggle(): void {
         this.isOpen = !this.isOpen;
@@ -326,7 +324,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.setRouteColorToChart();
         this.setDataToChart(this.getDataFromStatistics());
         this.refreshLocationGroup();
-    }
+    };
 
     public redrawChart() {
         this.changeDetectorRef.detectChanges();
@@ -402,7 +400,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             xStart: this.chartElements.xScale.invert(d3.mouse(this.chartElements.chartArea.node())[0]),
             xEnd: null
         };
-    }
+    };
 
     private onMouseMove = () => {
         let d3 = this.d3Service.getD3();
@@ -425,7 +423,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.updatePointOnMap(point);
         }
 
-    }
+    };
 
     private onMouseUp() {
         if (this.chartElements.dragState === "drag") {
@@ -849,7 +847,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         let point = this.getPointFromLatLng(latlng, null);
         this.showChartHover(point);
-    }
+    };
 
     private onGeolocationChanged(position: Position) {
         this.currentSpeed = (position == null) ? null : position.coords.speed * 3.6;
@@ -1023,7 +1021,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             g = Math.floor(255 * (1 - ratio));
             b = Math.floor(255 * ratio);
         }
-        // tslint:disable-next-line
+        // eslint-disable-next-line
         return  "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
 }

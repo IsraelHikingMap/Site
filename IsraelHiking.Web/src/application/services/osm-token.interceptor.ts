@@ -26,5 +26,5 @@ export class OsmTokenInterceptor implements HttpInterceptor {
             });
         }
         return next.handle(request);
-    }
+    };
 }

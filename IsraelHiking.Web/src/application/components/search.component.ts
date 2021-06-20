@@ -275,6 +275,7 @@ export class SearchComponent extends BaseMapComponent {
      * This function should make sure the ENTER key is behaving as it should:
      * In case there are search results open and non is selected - select the first result.
      * In case a search is being made - when the search is finshed select the first result.
+     *
      * @returns true - if no operations was made, false otherwise
      */
     private handleEnterKeydown(): boolean {
