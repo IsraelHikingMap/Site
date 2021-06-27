@@ -363,22 +363,9 @@ export class FileService {
     }
 
     public async replaceTempDatabaseFile(fileName: string, tempFileName: string) {
-        let path = this.getDatabaseFolder();
-        try {
-            if (await this.fileSystemWrapper.checkFile(path, fileName)) {
-                this.loggingService.info(`[Files] Deleting existing database file ${fileName}`);
-                try {
-                    this.fileSystemWrapper.removeFile(path, fileName);
-                }
-                catch (ex) {
-                    this.loggingService.error("Unable to remove file " + ex.message);
-                }
-            }
-        } catch (ex) {
-            this.loggingService.error("Unable to check file " + ex.message);
-        }
         this.loggingService.info(`[Files] Starting moving file ${tempFileName} to ${fileName}`);
-        await this.fileSystemWrapper.moveFile(this.fileSystemWrapper.cacheDirectory, tempFileName, path, fileName);
+        let dbFolder = this.getDatabaseFolder();
+        await this.fileSystemWrapper.moveFile(this.fileSystemWrapper.cacheDirectory, tempFileName, dbFolder, fileName);
         this.loggingService.info(`[Files] Finished moving file ${tempFileName} to ${fileName}`);
     }
 }
