@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { BackgroundGeolocationPlugin, Location } from "cordova-background-geolocation-plugin"
+import { BackgroundGeolocationPlugin, Location } from "cordova-background-geolocation-plugin";
 
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
