@@ -348,16 +348,29 @@ export class FileService {
         this.fileSystemWrapper.removeFile(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
     }
 
-    public async downloadDatabaseFile(url: string, fileName: string, token: string, progressCallback: (value: number) => void) {
+    public async downloadDatabaseFile(url: string, tempFileName: string, token: string, progressCallback: (value: number) => void) {
         let fileTransferObject = this.fileTransfer.create();
         let path = this.getDatabaseFolder();
         fileTransferObject.onProgress((event) => {
             progressCallback(event.loaded / event.total);
         });
-        await fileTransferObject.download(url, path + "/" + fileName, true, {
+        this.loggingService.info(`[Files] Starting downloading and writing database file to temporary file name ${tempFileName}`);
+        await fileTransferObject.download(url, path + "/" + tempFileName, true, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
+        this.loggingService.info(`[Files] Finished downloading and writing database file to temporary file name ${tempFileName}`);
+    }
+
+    public async replaceTempDatabaseFile(fileName: string, tempFileName: string) {
+        let path = this.getDatabaseFolder();
+        if (await this.fileSystemWrapper.checkFile(path, fileName)) {
+            this.loggingService.info(`[Files] Deleting existing database file ${fileName}`);
+            this.fileSystemWrapper.removeFile(path, fileName);
+        }
+        this.loggingService.info(`[Files] Starting moving file ${tempFileName} to ${fileName}`);
+        await this.fileSystemWrapper.moveFile(path, tempFileName, path, fileName);
+        this.loggingService.info(`[Files] Finished moving file ${tempFileName} to ${fileName}`);
     }
 }
