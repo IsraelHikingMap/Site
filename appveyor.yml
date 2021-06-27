@@ -8,12 +8,6 @@ environment:
   PASSWORD:
     secure: mqbXr4+cn3l9YNyKhOezbA==
   matrix:
-    - PRODUCT: docker
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      DOCKERHUB_TOKEN:
-        secure: nMbMKtO7V4z3JZjzmZxaleXFP++3NP2DSotTilHMiNLJ2klymxBAFYst6YFmhvE8
-      DOCKERHUB_USER:
-        secure: lwvYYDM7byt4+oDjoxO4+A==
     - PRODUCT: android
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
@@ -26,6 +20,12 @@ environment:
       TMS_USER: israelhikingmap@gmail.com
       TMS_APPLE_APPLICATION_SPECIFIC_PASSWORD:
         secure: oSccSp70X/744XBpfRV4UVJZKxN1jMYHxn3OHFsTSVE=
+    - PRODUCT: docker
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      DOCKERHUB_TOKEN:
+        secure: nMbMKtO7V4z3JZjzmZxaleXFP++3NP2DSotTilHMiNLJ2klymxBAFYst6YFmhvE8
+      DOCKERHUB_USER:
+        secure: lwvYYDM7byt4+oDjoxO4+A==
     - PRODUCT: tests
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
     
