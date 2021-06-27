@@ -350,12 +350,11 @@ export class FileService {
 
     public async downloadDatabaseFile(url: string, tempFileName: string, token: string, progressCallback: (value: number) => void) {
         let fileTransferObject = this.fileTransfer.create();
-        let path = this.getDatabaseFolder();
         fileTransferObject.onProgress((event) => {
             progressCallback(event.loaded / event.total);
         });
         this.loggingService.info(`[Files] Starting downloading and writing database file to temporary file name ${tempFileName}`);
-        await fileTransferObject.download(url, path + "/" + tempFileName, true, {
+        await fileTransferObject.download(url, this.fileSystemWrapper.cacheDirectory + "/" + tempFileName, true, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -365,12 +364,21 @@ export class FileService {
 
     public async replaceTempDatabaseFile(fileName: string, tempFileName: string) {
         let path = this.getDatabaseFolder();
-        if (await this.fileSystemWrapper.checkFile(path, fileName)) {
-            this.loggingService.info(`[Files] Deleting existing database file ${fileName}`);
-            this.fileSystemWrapper.removeFile(path, fileName);
+        try {
+            if (await this.fileSystemWrapper.checkFile(path, fileName)) {
+                this.loggingService.info(`[Files] Deleting existing database file ${fileName}`);
+                try {
+                    this.fileSystemWrapper.removeFile(path, fileName);
+                }
+                catch (ex) {
+                    this.loggingService.error("Unable to remove file " + ex.message);
+                }
+            }
+        } catch (ex) {
+            this.loggingService.error("Unable to check file " + ex.message);
         }
         this.loggingService.info(`[Files] Starting moving file ${tempFileName} to ${fileName}`);
-        await this.fileSystemWrapper.moveFile(path, tempFileName, path, fileName);
+        await this.fileSystemWrapper.moveFile(this.fileSystemWrapper.cacheDirectory, tempFileName, path, fileName);
         this.loggingService.info(`[Files] Finished moving file ${tempFileName} to ${fileName}`);
     }
 }
