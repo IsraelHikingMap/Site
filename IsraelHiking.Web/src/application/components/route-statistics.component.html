@@ -1,4 +1,4 @@
-﻿<div class="control-container side-control mapboxgl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()" *ngIf="(statisticsVisible$ | async)">
+﻿<div class="control-container side-control maplibregl-ctrl" [dir]="resources.direction" (window:resize)="redrawChart()" *ngIf="(statisticsVisible$ | async)">
     <div *ngIf="isOpen" [@animateChart] class="chart-control-container" [ngClass]="{'expanded' : isExpanded, 'sidebar': isSidebarVisible() }">
         <div *ngIf="isTable" class="chart-container">
             <mat-grid-list cols="3" rowHeight="fit" class="chart-table">

@@ -41,7 +41,6 @@
             ],
             "allowedCommonJsDependencies": [
               "geojson-rbush",
-              "@mapbox/mapbox-gl-geocoder",
               "ohauth",
               "redux-undo",
               "photoswipe",

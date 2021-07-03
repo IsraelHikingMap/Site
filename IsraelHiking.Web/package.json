@@ -59,7 +59,7 @@
     "isomorphic-xml2js": "^0.1.3",
     "jszip": "^3.5.0",
     "lodash-es": "^4.17.20",
-    "maplibre-gl": "^1.14.1-rc.2",
+    "maplibre-gl": "^1.15.0",
     "minisearch": "^3.0.2",
     "ngx-infinite-scroll": "^10.0.1",
     "ngx-maplibre-gl": "^11.2.0",

@@ -8,12 +8,12 @@
     }
 }
 
-.popup-like-marker .mapboxgl-popup-content {
+.popup-like-marker .maplibregl-popup-content {
     margin-bottom: 10px;
     background: #fffb !important;
 }
 
-.popup-like-marker .mapboxgl-popup-tip {
+.popup-like-marker .maplibregl-popup-tip {
     position: absolute;
     transform: translate(-50%, -100%);
     left: 50%;

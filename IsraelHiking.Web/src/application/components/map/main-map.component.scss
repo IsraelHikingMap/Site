@@ -1,18 +1,18 @@
 ﻿@import "~scss/_variables.scss";
 
-.mapboxgl-ctrl-top-left {
+.maplibregl-ctrl-top-left {
     z-index: $app-left-z-index !important;
 }
 
-.mapboxgl-ctrl-top-right {
+.maplibregl-ctrl-top-right {
     z-index: $app-left-z-index - 10 !important;
 }
 
-.mapboxgl-ctrl-bottom-right {
+.maplibregl-ctrl-bottom-right {
     z-index: $app-left-z-index - 20 !important;
 }
 
-.mapboxgl-ctrl-bottom-left {
+.maplibregl-ctrl-bottom-left {
     z-index: $app-left-z-index - 30 !important;
 }
 
