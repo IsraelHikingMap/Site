@@ -20,10 +20,6 @@ import { RouteData } from "../models/models";
 describe("RecordedRouteService", () => {
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
-        // let geoLocationMock = {
-        //    positionChanged: new EventEmitter(),
-        //    bulkPositionChanged: new EventEmitter(),
-        // }
         let loggingServiceMock = {
             debug: () => { }
         };
@@ -38,7 +34,6 @@ describe("RecordedRouteService", () => {
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: ToastService, useValue: toastMock.toastService },
-                // { provide: GeoLocationService, useValue: geoLocationMock },
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: SelectedRouteService, useValue: selectedRouteServiceMock },
                 { provide: TracesService, useValue: null },
