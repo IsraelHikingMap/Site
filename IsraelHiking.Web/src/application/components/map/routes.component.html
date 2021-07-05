@@ -72,7 +72,7 @@
                }">
 </mgl-layer>
 
-<mgl-popup *ngIf="routePointPopupData != null"
+<mgl-popup *ngIf="routePointPopupData"
            [lngLat]="[routePointPopupData.latlng.lng, routePointPopupData.latlng.lat]"
            (popupClose)="closeRoutePointPopup()">
     <route-point-overlay [latlng]="routePointPopupData.latlng" [segmentIndex]="routePointPopupData.segmentIndex" (closed)="closeRoutePointPopup()"></route-point-overlay>
@@ -80,7 +80,7 @@
 
 
 <div *ngFor="let route of (routes$ | async)">
-    <div *ngIf="route.state != 'Hidden'">
+    <div *ngIf="route.state !== 'Hidden'">
         <div *ngFor="let marker of route.markers; let idx = index">
             <mgl-marker anchor="bottom"
                         [draggable]="isRouteInEditPoiMode(route)"

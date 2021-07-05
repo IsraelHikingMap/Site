@@ -1,9 +1,9 @@
 ﻿<div [dir]="resources.direction">
     <div matDialogTitle>
-        <div *ngIf="url == null">
+        <div *ngIf="!url">
             {{title}}
         </div>
-        <a *ngIf="url != null" href="{{url.url}}" target="_blank">
+        <a *ngIf="url" href="{{url.url}}" target="_blank">
             {{title}}
         </a>
         <div>
