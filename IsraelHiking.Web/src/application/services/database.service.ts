@@ -227,7 +227,7 @@ export class DatabaseService {
         return this.sourceDatabases.get(dbName);
     }
 
-    public storePois(pois: GeoJSON.Feature[]): Promise<void> {
+    public storePois(pois: GeoJSON.Feature[]): Promise<any> {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkPut(pois);
     }
 
@@ -266,7 +266,7 @@ export class DatabaseService {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).get(id);
     }
 
-    public addPoiToUploadQueue(feature: GeoJSON.Feature): Promise<void> {
+    public addPoiToUploadQueue(feature: GeoJSON.Feature): Promise<any> {
         return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).put(feature);
     }
 
@@ -278,7 +278,7 @@ export class DatabaseService {
         return this.poisDatabase.table(DatabaseService.POIS_UPLOAD_QUEUE_TABLE_NAME).delete(featureId);
     }
 
-    public storeImages(images: ImageUrlAndData[]): Promise<void> {
+    public storeImages(images: ImageUrlAndData[]): Promise<any> {
         return this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).bulkPut(images);
     }
 

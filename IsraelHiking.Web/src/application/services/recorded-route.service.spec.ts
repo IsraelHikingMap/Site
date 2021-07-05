@@ -12,7 +12,6 @@ import { SelectedRouteService } from "./layers/routelayers/selected-route.servic
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
-import { BackgroundGeolocation } from "@ionic-native/background-geolocation/ngx";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
 import { RouteData } from "../models/models";
@@ -38,7 +37,6 @@ describe("RecordedRouteService", () => {
                 { provide: SelectedRouteService, useValue: selectedRouteServiceMock },
                 { provide: TracesService, useValue: null },
                 GeoLocationService,
-                BackgroundGeolocation,
                 RunningContextService,
                 ConnectionService,
                 Device,
