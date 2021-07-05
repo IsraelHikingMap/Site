@@ -1,5 +1,5 @@
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
-import { Router, ActivatedRoute } from "@angular/router";
+import { Router, ActivatedRoute, ParamMap } from "@angular/router";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { Subscription, Observable } from "rxjs";
 import { cloneDeep } from "lodash-es";
@@ -114,7 +114,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         }));
     }
 
-    private getDataFromRoute(params, queryParams) {
+    private getDataFromRoute(params: ParamMap, queryParams: ParamMap) {
         return {
             id: params.get(RouteStrings.ID),
             source: params.get(RouteStrings.SOURCE),

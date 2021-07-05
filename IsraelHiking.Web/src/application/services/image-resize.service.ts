@@ -49,7 +49,7 @@ export class ImageResizeService {
         return new Promise<TReturn>((resolve, reject) => {
             let reader = new FileReader();
             reader.onload = (event: any) => {
-                let exifData = null;
+                let exifData = null as any;
                 if (file.type === ImageResizeService.JPEG) {
                     exifData = piexif.load(event.target.result);
                 }
@@ -86,7 +86,7 @@ export class ImageResizeService {
         return { lat, lng };
     }
 
-    private resizeImageWithExif(image: HTMLImageElement, exifData): string {
+    private resizeImageWithExif(image: HTMLImageElement, exifData: any): string {
         let canvas = document.createElement("canvas") as HTMLCanvasElement;
 
         let maxSize = 1600; // in px for both height and width maximal size

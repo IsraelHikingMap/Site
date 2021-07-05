@@ -77,8 +77,8 @@ export class ShareUrlsService {
             return await this.getShareFromServerAndCacheIt(shareUrlId);
         }
         // Refresh it in the background if needed...
-        this.httpClient.get(Urls.urls + shareUrlId + "/timestamp").pipe(timeout(2000)).toPromise().then((timestamp: string) => {
-            if (new Date(timestamp) > new Date(shareUrl.lastModifiedDate)) {
+        this.httpClient.get(Urls.urls + shareUrlId + "/timestamp").pipe(timeout(2000)).toPromise().then((timestamp: Object) => {
+            if (new Date(timestamp as string) > new Date(shareUrl.lastModifiedDate)) {
                 this.loggingService.warning("[Shares] Cached share is outdated, fetching it again...");
                 this.getShareFromServerAndCacheIt(shareUrlId);
             }

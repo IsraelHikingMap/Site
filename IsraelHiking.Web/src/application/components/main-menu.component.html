@@ -12,7 +12,7 @@
             </div>
         </div>
         <button mat-button *ngIf="isLoggedIn()" class="pull-right cursor-pointer" [matMenuTriggerFor]="userMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle user menu">
-            <img *ngIf="userInfo?.imageUrl" class="pull-right space-after profile-image" [src]="userInfo.imageUrl | offlineImage:'true' | async" alt=""/>
+            <img *ngIf="userInfo?.imageUrl" class="pull-right space-after profile-image" [src]="userInfo.imageUrl | offlineImage:true | async" alt=""/>
             <i *ngIf="!userInfo.imageUrl" class="fa icon-user fa-lg"></i>
             <span class="circle" [ngClass]="{'offline': isOffline(), 'online': !isOffline()}">{{getQueueText()}}</span>
         </button>

@@ -85,7 +85,7 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
         this.info.urls.splice(i, 1);
     }
 
-    public trackByIndex(index) {
+    public trackByIndex(index: number) {
         return index;
     }
 

@@ -144,7 +144,7 @@ export class SearchComponent extends BaseMapComponent {
             });
     }
 
-    public openDirectionalSearchPopup(event) {
+    public openDirectionalSearchPopup(event: any) {
         if (this.directional.overlayLocation == null ||
             SpatialService.getDistanceInMeters(this.directional.overlayLocation, event.lngLat) > 10) {
             this.directional.overlayLocation = event.lngLat;

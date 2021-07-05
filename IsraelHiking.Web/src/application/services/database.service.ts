@@ -107,7 +107,7 @@ export class DatabaseService {
         }
 
         this.ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
-        this.ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state: ApplicationState) => {
+        this.ngRedux.select().pipe(debounceTime(2000)).subscribe((state: any) => {
             this.updateState(state);
         });
     }
@@ -189,7 +189,7 @@ export class DatabaseService {
                 tx.executeSql("SELECT BASE64(tile_data) AS base64_tile_data FROM tiles " +
                     "WHERE zoom_level = ? AND tile_column = ? AND tile_row = ? limit 1",
                     params,
-                    (_, res) => {
+                    (_: any, res: any) => {
                         if (res.rows.length !== 1) {
                             reject(new Error("No tile..."));
                             return;
@@ -202,7 +202,7 @@ export class DatabaseService {
                         }
                         resolve(binData.buffer);
                     },
-                    (error) => {
+                    (error: Error) => {
                         reject(error);
                     }
                 );
@@ -237,7 +237,7 @@ export class DatabaseService {
 
     public async getPoisForClustering(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
         this.loggingService.debug("[Database] Startting getting pois for clustering in chunks");
-        let features = [];
+        let features = [] as GeoJSON.Feature<GeoJSON.Point>[];
         let index = 0;
         let size = 2000;
         let currentFeatures = [];

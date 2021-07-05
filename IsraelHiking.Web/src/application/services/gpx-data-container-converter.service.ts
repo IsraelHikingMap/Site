@@ -280,7 +280,7 @@ export class GpxDataContainerConverterService {
         }
     }
 
-    private updateBoundingBox(gpx: Gpx) {
+    private updateBoundingBox(gpx: Gpx): void {
         if (gpx.metadata != null && gpx.metadata.bounds != null &&
             +gpx.metadata.bounds.$.minlat !== 0.0 &&
             +gpx.metadata.bounds.$.maxlat !== 0.0 &&
@@ -294,7 +294,7 @@ export class GpxDataContainerConverterService {
             flatten(flatten((gpx.trk || []).filter(t => t != null && t.trkseg != null).map(t => t.trkseg)).map(s => s.trkpt))
         );
         if (points.length === 0) {
-            return gpx;
+            return;
         }
         if (gpx.metadata == null || gpx.metadata.bounds == null) {
             gpx.metadata = {

@@ -46,7 +46,7 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
         return this.selectedRouteService.isNameAvailable(this.routeData.name) === false;
     }
 
-    protected abstract saveImplementation();
+    protected abstract saveImplementation(): void;
     public saveRouteToFile() { }
     public moveToRoute = () => { };
     public deleteRoute() { }

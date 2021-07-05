@@ -144,7 +144,7 @@ export class PoiService {
         await this.syncCategories();
         this.updatePois(true); // don't wait
         await this.mapService.initializationPromise;
-        this.moveEndSubsription = fromEvent(this.mapService.map, "moveend")
+        this.moveEndSubsription = fromEvent(this.mapService.map as any, "moveend")
             .pipe(throttleTime(500, undefined, { trailing: true }))
             .subscribe(() => {
                 this.ngZone.run(() => {

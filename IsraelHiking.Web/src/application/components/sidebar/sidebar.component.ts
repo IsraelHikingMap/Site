@@ -54,6 +54,7 @@ export class SidebarComponent extends BaseMapComponent {
             case "info":
                 return this.resources.about + " - " + this.resources.legend;
         }
+        return "";
     }
 
     public close() {

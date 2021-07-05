@@ -698,8 +698,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (this.isSlopeOn && data.length > 0) {
             // smoothing the slope data for the chart
             slopeData = regressionLoess()
-                .x(d => d.coordinate[0])
-                .y(d => d.slope)
+                .x((d: IRouteStatisticsPoint) => d.coordinate[0])
+                .y((d: IRouteStatisticsPoint) => d.slope)
                 .bandwidth(0.03)(this.statistics.points);
         }
         let maxAbsSlope = RouteStatisticsComponent.MAX_SLOPE;
@@ -748,7 +748,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
 
         let points = this.getKmPoints(route);
-        let features = [];
+        let features = [] as GeoJSON.Feature<GeoJSON.Point>[];
         for (let i = 0; i < points.length; i++) {
             features.push({
                 type: "Feature",
@@ -930,7 +930,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private getDataFromStatistics(): [number, number][] {
-        let data = [];
+        let data = [] as [number, number][];
         if (this.statistics) {
             data = this.statistics.points.map(p => p.coordinate);
         }

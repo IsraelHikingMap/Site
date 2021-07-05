@@ -53,7 +53,7 @@ export class TracesComponent extends BaseMapComponent {
                 return;
             }
             let visibleTrace = await this.tracesService.getTraceById(id);
-            let traceCoordinates = [];
+            let traceCoordinates = [] as [number, number][];
             let points: GeoJSON.Feature<GeoJSON.Point>[] = [];
             this.visibleTraceName = visibleTrace.name;
             for (let route of visibleTrace.dataContainer.routes) {

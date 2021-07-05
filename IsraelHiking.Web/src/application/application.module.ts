@@ -39,7 +39,6 @@ import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgxMapLibreGLModule } from "ngx-maplibre-gl";
 import { NgIdleModule } from "@ng-idle/core";
 // Cordova plugins
-import { BackgroundGeolocation } from "@ionic-native/background-geolocation/ngx";
 import { Brightness } from "@ionic-native/brightness/ngx";
 import { Camera } from "@ionic-native/camera/ngx";
 import { EmailComposer } from "@ionic-native/email-composer/ngx";
@@ -270,7 +269,6 @@ const initializeApplication = (injector: Injector) => async () => {
             GpxDataContainerConverterService,
             OfflineFilesDownloadService,
             AudioPlayerFactory,
-            BackgroundGeolocation,
             Brightness,
             Camera,
             EmailComposer,

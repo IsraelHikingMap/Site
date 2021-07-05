@@ -17,7 +17,7 @@ export class RoutePointOverlayComponent extends BaseMapComponent implements OnCh
     public latlng: LatLngAlt;
 
     @Input()
-    private segmentIndex: number;
+    public segmentIndex: number;
 
     @Output()
     public closed = new EventEmitter();

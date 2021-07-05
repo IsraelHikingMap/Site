@@ -6,7 +6,8 @@ import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers/layers.service";
 import { select } from "../../../reducers/infra/ng-redux.module";
-import { LayerData, ApplicationState, EditableLayer } from "../../../models/models";
+import { LayerData, ApplicationState, EditableLayer, Location } from "../../../models/models";
+import { Observable } from "rxjs";
 
 export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     public title: string;
@@ -16,7 +17,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     public layerData: EditableLayer;
 
     @select((state: ApplicationState) => state.location)
-    public location;
+    public location: Observable<Location>;
 
     protected constructor(resources: ResourcesService,
                           protected readonly mapService: MapService,

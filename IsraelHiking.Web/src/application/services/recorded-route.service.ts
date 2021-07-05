@@ -124,7 +124,7 @@ export class RecordedRouteService {
             id: routeData.id,
             timeStamp: routeData.segments[0].latlngs[0].timestamp,
             dataContainer: container,
-            tags: [],
+            tags: [] as string[],
             tagsString: "",
             visibility: "local" as TraceVisibility,
             isInEditMode: false,

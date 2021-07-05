@@ -18,6 +18,12 @@ interface IIconsGroup {
     icons: string[];
 }
 
+interface PrivatePoiEditDialogData {
+    marker: MarkerData;
+    routeId: string; 
+    index: number;
+}
+
 @Component({
     selector: "private-poi-edit-dialog",
     templateUrl: "private-poi-edit-dialog.component.html"
@@ -52,7 +58,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                             marker,
                             routeId,
                             index
-                        }
+                        } as PrivatePoiEditDialogData
                     });
             },
             100);
@@ -68,7 +74,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                 private readonly socialSharing: SocialSharing,
                 private readonly hashService: HashService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
-                @Inject(MAT_DIALOG_DATA) data) {
+                @Inject(MAT_DIALOG_DATA) data: PrivatePoiEditDialogData) {
         super(resources);
         this.showIcons = false;
         this.showCoordinates = false;
