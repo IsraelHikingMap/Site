@@ -20,8 +20,8 @@ export class GeoLocationService {
     private isBackground: boolean;
     private wasInitialized: boolean;
 
-    public positionChanged: EventEmitter<Position>;
-    public bulkPositionChanged: EventEmitter<Position[]>;
+    public positionChanged: EventEmitter<GeolocationPosition>;
+    public bulkPositionChanged: EventEmitter<GeolocationPosition[]>;
     public currentLocation: ILatLngTime;
 
     constructor(private readonly resources: ResourcesService,
@@ -31,8 +31,8 @@ export class GeoLocationService {
                 private readonly ngZone: NgZone,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.watchNumber = -1;
-        this.positionChanged = new EventEmitter<Position>();
-        this.bulkPositionChanged = new EventEmitter<Position[]>();
+        this.positionChanged = new EventEmitter<GeolocationPosition>();
+        this.bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
         this.isBackground = false;
         this.currentLocation = null;
         this.wasInitialized = false;
@@ -70,7 +70,7 @@ export class GeoLocationService {
         this.ngRedux.dispatch(new SetGeoLocationStateAction({ state: "searching"}));
         if (window.navigator && window.navigator.geolocation) {
             // Upon starting location watching get the current position as fast as we can, even if not accurate.
-            window.navigator.geolocation.getCurrentPosition((position: Position) => {
+            window.navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
                 this.handlePoistionChange(position);
             }, () => {}, { timeout: GeoLocationService.SHORT_TIME_OUT });
         }
@@ -91,7 +91,7 @@ export class GeoLocationService {
             return;
         }
         this.watchNumber = window.navigator.geolocation.watchPosition(
-            (position: Position): void => this.handlePoistionChange(position),
+            (position: GeolocationPosition): void => this.handlePoistionChange(position),
             (err) => {
                 this.ngZone.run(() => {
                     this.loggingService.error("[GeoLocation] Failed to start tracking " + JSON.stringify(err));
@@ -195,7 +195,7 @@ export class GeoLocationService {
         }
     }
 
-    private handlePoistionChange(position: Position): void {
+    private handlePoistionChange(position: GeolocationPosition): void {
         this.ngZone.run(() => {
             this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
             if (this.ngRedux.getState().inMemoryState.geoLocation === "searching") {
@@ -209,7 +209,7 @@ export class GeoLocationService {
         });
     }
 
-    public positionToLatLngTime(position: Position): ILatLngTime {
+    public positionToLatLngTime(position: GeolocationPosition): ILatLngTime {
         return {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
@@ -218,7 +218,7 @@ export class GeoLocationService {
         };
     }
 
-    private locationToPosition(location: Location): Position {
+    private locationToPosition(location: Location): GeolocationPosition {
         return {
             coords: {
                 accuracy: location.accuracy,
@@ -229,7 +229,7 @@ export class GeoLocationService {
                 heading: location.bearing
             },
             timestamp: location.time
-        } as Position;
+        } as GeolocationPosition;
     }
 
     public async getLog(): Promise<string> {

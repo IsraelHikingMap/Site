@@ -110,7 +110,7 @@ export class LoggingService {
         if (this.runningContextService.isProduction) {
             return;
         }
-        let checkQueuePromise = new Promise((resolve, _) => {
+        let checkQueuePromise = new Promise<void>((resolve, _) => {
             let checkQueue = () => {
                 if (this.queue.length === 0) {
                     resolve();

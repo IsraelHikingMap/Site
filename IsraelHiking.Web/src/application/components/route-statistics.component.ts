@@ -849,7 +849,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.showChartHover(point);
     };
 
-    private onGeolocationChanged(position: Position) {
+    private onGeolocationChanged(position: GeolocationPosition) {
         this.currentSpeed = (position == null) ? null : position.coords.speed * 3.6;
         this.heading = (position == null) || position.coords.speed === 0 ? null : position.coords.heading;
         const currentSpeedTimeout = "currentSpeedTimeout";

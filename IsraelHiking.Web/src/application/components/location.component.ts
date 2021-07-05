@@ -86,13 +86,13 @@ export class LocationComponent extends BaseMapComponent {
         });
 
         this.geoLocationService.positionChanged.subscribe(
-            (position: Position) => {
+            (position: GeolocationPosition) => {
                 if (position != null) {
                     this.handlePositionChange(position);
                 }
             });
         this.geoLocationService.bulkPositionChanged.subscribe(
-            (positions: Position[]) => {
+            (positions: GeolocationPosition[]) => {
                 this.handlePositionChange(positions[positions.length - 1]);
             });
 
@@ -218,7 +218,7 @@ export class LocationComponent extends BaseMapComponent {
         return this.ngRedux.getState().inMemoryState.geoLocation === "searching";
     }
 
-    private handlePositionChange(position: Position) {
+    private handlePositionChange(position: GeolocationPosition) {
         if (this.locationFeatures.features.length === 0) {
             this.isFollowing = true;
         }
