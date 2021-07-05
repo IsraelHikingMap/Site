@@ -82,20 +82,20 @@ describe("RecordedRouteService", () => {
             let spy = spyOn(logginService, "debug");
             geoService.positionChanged.next(
                 {
-                    coords: { latitude: 1, longitude: 2 } as Coordinates,
+                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(1).getTime()
                 });
             geoService.bulkPositionChanged.next([
                 {
-                    coords: { longitude: 1, latitude: 2 } as Coordinates,
+                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(150000).getTime()
                 },
                 {
-                    coords: { longitude: 1, latitude: 2 } as Coordinates,
+                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(151000).getTime()
                 },
                 {
-                    coords: { longitude: 1, latitude: 2 } as Coordinates,
+                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(152000).getTime()
                 }
             ]);
