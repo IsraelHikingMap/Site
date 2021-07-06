@@ -76,7 +76,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         };
     }
 
-    public openPoi(id, e: Event) {
+    public openPoi(id: string, e: Event) {
         e.stopPropagation();
         this.selectedCluster = null;
         let sourceAndId = this.getSourceAndId(id);
@@ -90,7 +90,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
 
     }
 
-    public async toggleClusterPopup(event: MouseEvent, feature, sourceComponent: GeoJSONSourceComponent) {
+    public async toggleClusterPopup(event: MouseEvent, feature: GeoJSON.Feature<GeoJSON.Point>, sourceComponent: GeoJSONSourceComponent) {
         event.stopPropagation();
         if (this.selectedCluster != null && feature.properties.id === this.selectedCluster.properties.id) {
             this.selectedCluster = null;

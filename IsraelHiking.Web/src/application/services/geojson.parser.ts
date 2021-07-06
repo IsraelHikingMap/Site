@@ -109,7 +109,7 @@ export class GeoJsonParser {
             }
             data.routes[0].markers = markers;
         }
-        let latLngs = [];
+        let latLngs = [] as LatLngAlt[];
         for (let route of data.routes) {
             for (let segment of route.segments) {
                 latLngs = latLngs.concat(segment.latlngs);

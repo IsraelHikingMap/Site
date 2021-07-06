@@ -28,8 +28,7 @@ export class PhotoSwpieComponent extends BaseMapComponent implements AfterViewIn
     private data: PhotoSwipeData;
 
     constructor(resources: ResourcesService,
-                private readonly overlayRef: OverlayRef,
-                @Inject(PHOTO_SWIPE_DATA) data) {
+                @Inject(PHOTO_SWIPE_DATA) data: PhotoSwipeData) {
         super(resources);
         this.data = data;
         this.closed = new EventEmitter();

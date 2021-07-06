@@ -12,7 +12,6 @@ import { SelectedRouteService } from "./layers/routelayers/selected-route.servic
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
-import { BackgroundGeolocation } from "@ionic-native/background-geolocation/ngx";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
 import { RouteData } from "../models/models";
@@ -20,10 +19,6 @@ import { RouteData } from "../models/models";
 describe("RecordedRouteService", () => {
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
-        // let geoLocationMock = {
-        //    positionChanged: new EventEmitter(),
-        //    bulkPositionChanged: new EventEmitter(),
-        // }
         let loggingServiceMock = {
             debug: () => { }
         };
@@ -38,12 +33,10 @@ describe("RecordedRouteService", () => {
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: ToastService, useValue: toastMock.toastService },
-                // { provide: GeoLocationService, useValue: geoLocationMock },
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: SelectedRouteService, useValue: selectedRouteServiceMock },
                 { provide: TracesService, useValue: null },
                 GeoLocationService,
-                BackgroundGeolocation,
                 RunningContextService,
                 ConnectionService,
                 Device,
@@ -82,20 +75,20 @@ describe("RecordedRouteService", () => {
             let spy = spyOn(logginService, "debug");
             geoService.positionChanged.next(
                 {
-                    coords: { latitude: 1, longitude: 2 } as Coordinates,
+                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(1).getTime()
                 });
             geoService.bulkPositionChanged.next([
                 {
-                    coords: { longitude: 1, latitude: 2 } as Coordinates,
+                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(150000).getTime()
                 },
                 {
-                    coords: { longitude: 1, latitude: 2 } as Coordinates,
+                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(151000).getTime()
                 },
                 {
-                    coords: { longitude: 1, latitude: 2 } as Coordinates,
+                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(152000).getTime()
                 }
             ]);

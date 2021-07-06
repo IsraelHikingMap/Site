@@ -38,7 +38,7 @@ export class AuthorizationService {
                 private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.ohauth = this.nonAngularObjectsFactory.createOhAuth();
-        this.setOptions({});
+        this.setOptions({} as IAuthorizationServiceOptions);
         this.userState$.subscribe(us => this.userState = us);
     }
 
@@ -114,7 +114,7 @@ export class AuthorizationService {
         return this.ohauth.stringQs(response);
     }
 
-    private setOptions(options) {
+    private setOptions(options: IAuthorizationServiceOptions) {
         this.options = options;
         this.options.url = this.options.url || "https://www.openstreetmap.org";
         this.options.landing = this.options.landing || "land.html";
@@ -142,7 +142,7 @@ export class AuthorizationService {
         } as IOAuthParams;
     }
 
-    private xhrPromise(url, params): Promise<any> {
+    private xhrPromise(url: string, params: any): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             this.ohauth.xhr("POST", url, params, null, {},
                 (err, xhr) => {
@@ -203,7 +203,7 @@ export class AuthorizationService {
         });
     }
 
-    private async watchPopup(popup, resolve: (value?: any) => void, reject: (value?: any) => void) {
+    private async watchPopup(popup: any, resolve: (value?: any) => void, reject: (value?: any) => void) {
         try {
             if (popup.closed) {
                 reject(new Error("The OSM sign in flow was canceled"));

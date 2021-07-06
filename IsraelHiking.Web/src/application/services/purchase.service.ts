@@ -52,11 +52,11 @@ export class PurchaseService {
             this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: false }));
             return;
         });
-        this.store.when("product").approved(product => {
+        this.store.when("product").approved((product: any) => {
             this.loggingService.debug(`[Store] Approved, verifing: ${product.id}`);
             return product.verify();
         });
-        this.store.when("product").verified(product => {
+        this.store.when("product").verified((product: any) => {
             this.loggingService.debug(`[Store] Verified, Finishing: ${product.id}`);
             product.finish();
         });

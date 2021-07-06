@@ -13,6 +13,11 @@ import { RouteStrings } from "./hash.service";
 
 declare let universalLinks: any;
 
+interface UniversalLinkEvent {
+    path: string;
+    params: any;
+}
+
 @Injectable()
 export class OpenWithService {
     constructor(private readonly resources: ResourcesService,
@@ -30,7 +35,7 @@ export class OpenWithService {
             return;
         }
         this.loggingService.info("[OpenWith] subscribing to universal link events");
-        universalLinks.subscribe("share", (event) => {
+        universalLinks.subscribe("share", (event: UniversalLinkEvent) => {
             this.loggingService.info("[OpenWith] Opening a share: " + event.path);
             if (this.matDialog.openDialogs.length > 0) {
                 this.matDialog.closeAll();
@@ -40,7 +45,7 @@ export class OpenWithService {
                 this.router.navigate([RouteStrings.ROUTE_SHARE, shareId]);
             });
         });
-        universalLinks.subscribe("poi", (event) => {
+        universalLinks.subscribe("poi", (event: UniversalLinkEvent) => {
             this.logAndCloseDialogs(event);
             let sourceAndId = event.path.replace("/poi/", "");
             let source = sourceAndId.split("/")[0];
@@ -51,7 +56,7 @@ export class OpenWithService {
                     { queryParams: { language } });
             });
         });
-        universalLinks.subscribe("url", (event) => {
+        universalLinks.subscribe("url", (event: UniversalLinkEvent) => {
             this.logAndCloseDialogs(event);
             let url = event.path.replace("/url/", "");
             let baseLayer = event.params.baselayer;
@@ -60,7 +65,7 @@ export class OpenWithService {
                     { queryParams: { baseLayer } });
             });
         });
-        universalLinks.subscribe("map", (event) => {
+        universalLinks.subscribe("map", (event: UniversalLinkEvent) => {
             this.logAndCloseDialogs(event);
             let mapLocation = event.path.replace("/map/", "");
             let zoom = mapLocation.split("/")[0];
@@ -70,7 +75,7 @@ export class OpenWithService {
                 this.router.navigate([RouteStrings.ROUTE_MAP, zoom, lat, lng]);
             });
         });
-        universalLinks.subscribe(null, (event) => {
+        universalLinks.subscribe(null, (event: UniversalLinkEvent) => {
             this.logAndCloseDialogs(event);
             this.ngZone.run(() => {
                 this.router.navigate(["/"]);
@@ -90,7 +95,7 @@ export class OpenWithService {
         });
     }
 
-    private logAndCloseDialogs(event) {
+    private logAndCloseDialogs(event: UniversalLinkEvent) {
         this.loggingService.info("[OpenWith] Opening: " + event.path);
         if (this.matDialog.openDialogs.length > 0) {
             this.matDialog.closeAll();

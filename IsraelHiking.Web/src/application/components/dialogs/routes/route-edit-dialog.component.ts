@@ -88,7 +88,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     };
 
     private getLatlngs(): LatLngAlt[] {
-        let latLngs = [];
+        let latLngs: LatLngAlt[] = [];
         for (let segment of this.routeData.segments) {
             latLngs = latLngs.concat(segment.latlngs);
         }

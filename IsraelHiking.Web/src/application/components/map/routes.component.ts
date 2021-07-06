@@ -75,8 +75,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     };
 
     private buildFeatureCollections = () => {
-        let features = [];
-        let editingFeatures = [];
+        let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
+        let editingFeatures = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
         for (let route of this.routes) {
             if (route.state === "Hidden") {
                 continue;
@@ -119,7 +119,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     private createFeaturesForEditingRoute(route: RouteData): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
-        let features = [];
+        let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
         for (let segmentIndex = 0; segmentIndex < route.segments.length; segmentIndex++) {
             let segmentFeature = {
                 type: "Feature",
@@ -129,7 +129,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                     type: "LineString",
                     coordinates: route.segments[segmentIndex].latlngs.map(l => SpatialService.toCoordinate(l))
                 }
-            };
+            } as GeoJSON.Feature<GeoJSON.LineString>;
             segmentFeature.properties.id = RouteEditRouteInteraction.createSegmentId(route, segmentIndex);
             features.push(segmentFeature);
             let segmentPointFeature = {
@@ -140,7 +140,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                     type: "Point",
                     coordinates: SpatialService.toCoordinate(route.segments[segmentIndex].routePoint)
                 }
-            };
+            } as GeoJSON.Feature<GeoJSON.Point>;
             segmentPointFeature.properties.id = RouteEditRouteInteraction.createSegmentPointId(route, segmentIndex);
             if (segmentIndex === 0) {
                 segmentPointFeature.properties.color = RoutesComponent.START_COLOR;
@@ -153,9 +153,9 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     private createFeaturesForRoute(route: RouteData): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
-        let features = [];
+        let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];;
         let coordinatesArray = route.segments.map(s => s.latlngs.map(l => SpatialService.toCoordinate(l)));
-        let routeCoordinates = [].concat.apply([], coordinatesArray); // flatten
+        let routeCoordinates = [].concat.apply([], coordinatesArray as any); // flatten
         if (routeCoordinates.length < 2) {
             return features;
         }
@@ -244,7 +244,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         }
     }
 
-    public markerDragEnd(index: number, event) {
+    public markerDragEnd(index: number, event: any) {
         this.routeEditPoiInteraction.handleDragEnd(event.getLngLat(), index);
     }
 
@@ -252,7 +252,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.mapComponent.mapLoad.subscribe(() => {
             this.setInteractionAccordingToState();
             let fullFilePath = this.fileService.getFullFilePath("content/arrow.png");
-            this.mapComponent.mapInstance.loadImage(fullFilePath, (_, image) => {
+            this.mapComponent.mapInstance.loadImage(fullFilePath, (_: Error, image: HTMLImageElement) => {
                 this.mapComponent.mapInstance.addImage("arrow", image, { sdf: true });
             });
         });
@@ -277,12 +277,12 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         return selectedRoute != null && selectedRoute.id === route.id && selectedRoute.state === "Poi";
     }
 
-    public routeLineMouseEnter(event) {
+    public routeLineMouseEnter(event: any) {
         this.mapComponent.mapInstance.getCanvas().style.cursor = "pointer";
         this.routeLineMouseOver(event);
     }
 
-    public routeLineMouseOver(event) {
+    public routeLineMouseOver(event: any) {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
             return;
@@ -303,7 +303,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         }
     }
 
-    public routeLineClick(event) {
+    public routeLineClick(event: any) {
         if (event.features == null || event.features.length === 0) {
             return;
         }

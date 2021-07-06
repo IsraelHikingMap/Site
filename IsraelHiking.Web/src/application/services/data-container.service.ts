@@ -97,7 +97,7 @@ export class DataContainerService {
         }
     }
 
-    public async setShareUrlAfterNavigation(shareId) {
+    public async setShareUrlAfterNavigation(shareId: string) {
         let shareUrl = this.shareUrlsService.getSelectedShareUrl();
         if (shareUrl && shareUrl.id === shareId) {
             return;

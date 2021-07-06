@@ -206,7 +206,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         this.updateFilteredLists(this.searchTerm.value);
     }
 
-    public getImageFromShareId(shareUrl, width, height) {
+    public getImageFromShareId(shareUrl: ShareUrl, width: number, height: number) {
         return this.shareUrlsService.getImageFromShareId(shareUrl, width, height);
     }
 

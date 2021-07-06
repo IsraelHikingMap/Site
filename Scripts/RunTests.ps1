@@ -78,8 +78,8 @@ if ($LastExitCode) {
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
-Write-Host "npm run build -- --prod --no-progress"
-npm run build -- --prod --no-progress
+Write-Host "npm run build:prod -- --no-progress"
+npm run build:prod -- --no-progress
 
 if ($lastexitcode)
 {

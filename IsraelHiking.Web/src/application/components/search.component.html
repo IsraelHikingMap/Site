@@ -18,10 +18,10 @@
         <button mat-button class="pull-right" (click)="toggleOpen()" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search close"><i class="fa icon-search fa-lg"></i></button>
     </div>
     <div class="side-control maplibregl-ctrl pull-left-important" fxLayout="row" *ngIf="directional.isOn" [style.float]="'left'">
-        <button mat-button class="pull-right" (click)="setRouting('Hike')" [ngClass]="{active : routingType == 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></button>
-        <button mat-button class="pull-right" (click)="setRouting('Bike')" [ngClass]="{active : routingType == 'Bike' }" matTooltip="{{resources.bikeRouting}}" matTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></button>
-        <button mat-button class="pull-right" (click)="setRouting('4WD')" [ngClass]="{active : routingType == '4WD' }" matTooltip="{{resources.fourWheelDriveRouting}}" matTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></button>
-        <button mat-button class="pull-right" (click)="setRouting('None')" [ngClass]="{active : routingType == 'None' }" matTooltip="{{resources.straightLines}}" matTooltipPosition="below"><i class="fa icon-none fa-lg"></i></button>
+        <button mat-button class="pull-right" (click)="setRouting('Hike')" [ngClass]="{active : routingType === 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></button>
+        <button mat-button class="pull-right" (click)="setRouting('Bike')" [ngClass]="{active : routingType === 'Bike' }" matTooltip="{{resources.bikeRouting}}" matTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></button>
+        <button mat-button class="pull-right" (click)="setRouting('4WD')" [ngClass]="{active : routingType === '4WD' }" matTooltip="{{resources.fourWheelDriveRouting}}" matTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></button>
+        <button mat-button class="pull-right" (click)="setRouting('None')" [ngClass]="{active : routingType === 'None' }" matTooltip="{{resources.straightLines}}" matTooltipPosition="below"><i class="fa icon-none fa-lg"></i></button>
     </div>
     <br *ngIf="directional.isOn" />
     <div class="side-control maplibregl-ctrl" *ngIf="directional.isOn" fxLayout="row">

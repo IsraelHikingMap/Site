@@ -1,5 +1,5 @@
-﻿@import "~scss/_variables.scss";
-$background: map-get($app-theme, background);
+﻿@use "~@angular/material" as mat;
+@import "~scss/_variables.scss";
 
 .row-hover {
     padding: 0 10px;
@@ -9,7 +9,7 @@ $background: map-get($app-theme, background);
 .row-hover:hover {
     text-decoration: none;
     color: black;
-    background: mat-color($app-background, hover, 0.12);
+    background: mat.get-color-from-palette($app-background, hover, 0.12);
 }
 
 .short-button {

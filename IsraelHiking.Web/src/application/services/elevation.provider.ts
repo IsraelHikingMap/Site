@@ -32,7 +32,7 @@ export class ElevationProvider {
         }
         try {
             let params = new HttpParams().set("points", points.join("|"));
-            let response = await this.httpClient.get(Urls.elevation, { params }).pipe(timeout(1000)).toPromise();
+            let response = await this.httpClient.get(Urls.elevation, { params }).pipe(timeout(1000)).toPromise() as number[];
             for (let index = 0; index < relevantIndexes.length; index++) {
                 latlngs[relevantIndexes[index]].alt = response[index];
             }

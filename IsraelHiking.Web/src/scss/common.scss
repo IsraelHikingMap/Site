@@ -1,12 +1,13 @@
-﻿@import "../fonts/icons.css";
+﻿@use "~@angular/material" as mat;
+@import "../fonts/icons.css";
 @import "font-awesome/css/font-awesome.css";
 @import "~maplibre-gl/dist/maplibre-gl.css";
 @import "./dialogs.scss";
 @import "./sidebar.scss";
 @import "./_variables.scss";
 
-@include mat-core();
-@include angular-material-theme($app-theme);
+@include mat.core();
+@include mat.all-component-themes($app-theme);
 
 html {
     height: 100%;
@@ -53,7 +54,7 @@ body {
 }
 
 .active {
-    outline: 2px solid mat-color($app-primary) !important;
+    outline: 2px solid mat.get-color-from-palette($app-primary) !important;
 }
 // photoswipe, used for placing overlay at the right z-index
 overlay.overlay-shown {
@@ -199,16 +200,16 @@ overlay.overlay-shown {
 
 /* Progressbar override */
 .ng-bar {
-    background-color: mat-color($app-primary) !important;
+    background-color: mat.get-color-from-palette($app-primary) !important;
 }
 
 .ng-spinner-icon {
-    border-top-color: mat-color($app-primary) !important;
-    border-left-color: mat-color($app-primary) !important;
+    border-top-color: mat.get-color-from-palette($app-primary) !important;
+    border-left-color: mat.get-color-from-palette($app-primary) !important;
 }
 
 .ng-meteor {
-    box-shadow: 0 0 10px mat-color($app-primary), 0 0 5px mat-color($app-primary) !important
+    box-shadow: 0 0 10px mat.get-color-from-palette($app-primary), 0 0 5px mat.get-color-from-palette($app-primary) !important
 }
 /* Progressbar override */
 

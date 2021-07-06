@@ -13,7 +13,7 @@ import { HashService } from "../../services/hash.service";
 import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { ToggleDistanceAction } from "../../reducers/in-memory.reducer";
-import { ApplicationState, LatLngAlt } from "../../models/models";
+import { ApplicationState, LatLngAlt, LinkData } from "../../models/models";
 
 @Component({
     selector: "gps-location-overlay",
@@ -51,7 +51,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
             title: "",
             description: "",
             type: "star",
-            urls: []
+            urls: [] as LinkData[]
         };
         this.ngRedux.dispatch(new AddPrivatePoiAction({
             routeId: selectedRoute.id,

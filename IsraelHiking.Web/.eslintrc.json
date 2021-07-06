@@ -10,7 +10,8 @@
       ],
       "parserOptions": {
         "project": [
-          "tsconfig.json"        ],
+          "tsconfig.json"
+        ],
         "createDefaultProgram": true
       },
       "extends": [
@@ -47,8 +48,10 @@
         "no-multiple-empty-lines": "error",
         "prefer-const": "off",
         "quotes": "off",
-        "@typescript-eslint/quotes": ["error", "double"],
-        // HM TODO: bring this back
+        "@typescript-eslint/quotes": [
+          "error",
+          "double"
+        ],
         "@typescript-eslint/member-ordering": "off",
         "@typescript-eslint/naming-convention": "off"
       }

@@ -1,4 +1,5 @@
-﻿@import "~scss/_variables.scss";
+﻿@use "~@angular/material" as mat;
+@import "~scss/_variables.scss";
 
 .spinner-container {
     padding: 3px;
@@ -9,5 +10,5 @@
 }
 
 .following {
-    color: mat-color($app-primary)
+    color: mat.get-color-from-palette($app-primary)
 }

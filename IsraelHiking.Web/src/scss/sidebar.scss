@@ -1,4 +1,5 @@
-﻿@import "~scss/_variables.scss";
+﻿@use "~@angular/material" as mat;
+@import "~scss/_variables.scss";
 
 /* added direction to fix issue with scroll bar and legend maps */
 .sidebar-wrapper {
@@ -12,7 +13,7 @@
     overflow-y: auto;
     color: black;
     direction: ltr;
-    background: mat-color($app-background, card);
+    background: mat.get-color-from-palette($app-background, card);
     z-index: $app-left-z-index + 5;
 }
 

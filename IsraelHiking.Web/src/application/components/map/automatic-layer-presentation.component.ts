@@ -208,7 +208,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         }
     }
 
-    private removeLayer(address) {
+    private removeLayer(address: string) {
         if (this.isRaster(address)) {
             this.removeRasterLayer();
         } else {

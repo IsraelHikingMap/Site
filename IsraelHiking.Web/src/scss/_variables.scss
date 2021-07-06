@@ -1,9 +1,9 @@
-﻿@import "~@angular/material/theming";
+﻿@use "~@angular/material" as mat;
 
-$app-primary: mat-palette($mat-green, 600);
-$app-accent: mat-palette($mat-yellow);
-$app-warm: mat-palette($mat-red);
-$app-theme: mat-light-theme($app-primary, $app-accent, $app-warm);
+$app-primary: mat.define-palette(mat.$green-palette, 600);
+$app-accent: mat.define-palette(mat.$yellow-palette);
+$app-warm: mat.define-palette(mat.$red-palette);
+$app-theme: mat.define-light-theme($app-primary, $app-accent, $app-warm);
 $app-background: map-get($app-theme, background);
 
 $app-sidebar-width: 400px;

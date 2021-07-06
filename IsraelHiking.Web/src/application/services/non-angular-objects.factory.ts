@@ -29,7 +29,7 @@ export interface IOhAuth {
     stringQs: (str: string) => IOAuthResponse;
     timestamp: () => number;
     nonce: () => string;
-    xhr: (method: string, url: string, params: any, data: any, options: any, callback: (err, xhr) => void) => void;
+    xhr: (method: string, url: string, params: any, data: any, options: any, callback: (err: Error, xhr: XMLHttpRequest) => void) => void;
 }
 
 @Injectable()

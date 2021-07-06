@@ -442,7 +442,7 @@ export class LayersService {
         return key1.trim().toLowerCase() === key2.trim().toLowerCase();
     }
 
-    public toggleOffline(layer: EditableLayer, isOverlay) {
+    public toggleOffline(layer: EditableLayer, isOverlay: boolean) {
         this.ngRedux.dispatch(new ToggleOfflineAction({
             key: layer.key,
             isOverlay

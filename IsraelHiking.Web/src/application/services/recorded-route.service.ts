@@ -54,13 +54,13 @@ export class RecordedRouteService {
         }
 
         this.geoLocationService.positionChanged.subscribe(
-            (position: Position) => {
+            (position: GeolocationPosition) => {
                 if (position != null) {
                     this.updateRecordingRoute([position]);
                 }
             });
         this.geoLocationService.bulkPositionChanged.subscribe(
-            (positions: Position[]) => {
+            (positions: GeolocationPosition[]) => {
                 this.updateRecordingRoute(positions);
             });
     }
@@ -124,7 +124,7 @@ export class RecordedRouteService {
             id: routeData.id,
             timeStamp: routeData.segments[0].latlngs[0].timestamp,
             dataContainer: container,
-            tags: [],
+            tags: [] as string[],
             tagsString: "",
             visibility: "local" as TraceVisibility,
             isInEditMode: false,
@@ -143,7 +143,7 @@ export class RecordedRouteService {
         }
     }
 
-    private updateRecordingRoute(positions: Position[]) {
+    private updateRecordingRoute(positions: GeolocationPosition[]) {
         let recordingRoute = this.selectedRouteService.getRecordingRoute();
         if (recordingRoute == null) {
             return;
@@ -167,7 +167,7 @@ export class RecordedRouteService {
         }));
     }
 
-    private validateRecordingAndUpdateState(position: Position, lastValidLocation: ILatLngTime): boolean {
+    private validateRecordingAndUpdateState(position: GeolocationPosition, lastValidLocation: ILatLngTime): boolean {
         let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
             this.loggingService.debug(`[Record] Valid position, updating: (${position.coords.latitude}, ${position.coords.longitude})`);
@@ -192,7 +192,7 @@ export class RecordedRouteService {
         return false;
     }
 
-    private isValid(test: ILatLngTime, position: Position): string {
+    private isValid(test: ILatLngTime, position: GeolocationPosition): string {
         let distance = SpatialService.getDistanceInMeters(test, this.geoLocationService.positionToLatLngTime(position));
         let timeDifference = Math.abs(position.timestamp - test.timestamp.getTime()) / 1000;
         if (timeDifference === 0) {
