@@ -77,7 +77,7 @@
         <button mat-button class="chart-button chart-expand-button hidden-xs" *ngIf="!isTable" (click)="toggleExpand()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle expand view"><i class="fa fa-lg" [ngClass]="{ 'icon-chevron-right' : isExpanded, 'icon-chevron-left' : !isExpanded }"></i></button>
         <mat-menu #appMenu="matMenu" overlapTrigger="false" xPosition="before">
             <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="toggleKmMarker()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle KM markers"><i [class.active]="isKmMarkersOn" class="fa icon-map-marker"></i> {{resources.kmPoi}}</button>
-            <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="toggleSlope()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle Slope"><i [class.active]="isSlopeOn" class="fa icon-line-chart"></i> גרף שיפועים</button>
+            <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="toggleSlope()" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle Slope"><i [class.active]="isSlopeOn" class="fa icon-line-chart"></i> {{resources.showSlopes}}</button>
         </mat-menu>
         <button mat-button class="chart-button chart-more-button" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="More"><i class="fa icon-ellipsis-v fa-lg"></i></button>        
     </div>
