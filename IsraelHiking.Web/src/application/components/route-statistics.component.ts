@@ -35,9 +35,9 @@ interface IChartElements {
     svg: Selection<any, any, null, undefined>;
     chartArea: Selection<SVGGElement, any, null, undefined>;
     path: Selection<SVGPathElement, any, null, undefined>;
-    hoverGroup: Selection<BaseType, any, null, undefined>;
+    hoverGroup: Selection<SVGGElement, any, null, undefined>;
     dragRect: Selection<SVGRectElement, any, null, undefined>;
-    locationGroup: Selection<BaseType, any, null, undefined>;
+    locationGroup: Selection<SVGGElement, any, null, undefined>;
     xScale: ScaleContinuousNumeric<number, number>;
     yScale: ScaleContinuousNumeric<number, number>;
     yScaleSlope: ScaleContinuousNumeric<number, number>;

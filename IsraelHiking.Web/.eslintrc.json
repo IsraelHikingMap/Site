@@ -52,7 +52,7 @@
           "error",
           "double"
         ],
-        "@typescript-eslint/member-ordering": "off",
+        "@typescript-eslint/member-ordering": ["error", { "default": ["signature", "field", "constructor", "static-method", "method"] }],
         "@typescript-eslint/naming-convention": "off"
       }
     },

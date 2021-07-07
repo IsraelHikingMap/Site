@@ -20,7 +20,7 @@ interface IIconsGroup {
 
 interface PrivatePoiEditDialogData {
     marker: MarkerData;
-    routeId: string; 
+    routeId: string;
     index: number;
 }
 
@@ -47,22 +47,6 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
 
     @ViewChild("titleInput")
     public titleInput: ElementRef;
-
-    public static openDialog(matDialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
-        setTimeout(() => {
-                // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
-                matDialog.open(PrivatePoiEditDialogComponent,
-                    {
-                        maxWidth: "378px",
-                        data: {
-                            marker,
-                            routeId,
-                            index
-                        } as PrivatePoiEditDialogData
-                    });
-            },
-            100);
-    }
 
     constructor(resources: ResourcesService,
                 private readonly fileService: FileService,
@@ -94,6 +78,22 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
             });
         }
         this.setMarkerAndRoute(data.marker, data.routeId, data.index);
+    }
+
+    public static openDialog(matDialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
+        setTimeout(() => {
+                // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
+                matDialog.open(PrivatePoiEditDialogComponent,
+                    {
+                        maxWidth: "378px",
+                        data: {
+                            marker,
+                            routeId,
+                            index
+                        } as PrivatePoiEditDialogData
+                    });
+            },
+            100);
     }
 
     public ngAfterViewInit(): void {

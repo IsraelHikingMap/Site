@@ -6,7 +6,7 @@ export abstract class BaseAction<TPayload> implements Action {
     constructor(public type: string, public payload: TPayload) { }
 }
 
-export const classToActionMiddleware = (state: any) => (next:any) => (action:any) => next({ ...action });
+export const classToActionMiddleware = (state: any) => (next: any) => (action: any) => next({ ...action });
 
 export const ReduxAction = (type: string): ReduxActionDescriptor => (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
             descriptor.value.type = type;

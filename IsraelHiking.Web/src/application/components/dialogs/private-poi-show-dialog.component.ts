@@ -33,21 +33,6 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     public description: string;
     public showCoordinates: boolean;
 
-    public static openDialog(matDialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
-        setTimeout(() => {
-            // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
-            matDialog.open(PrivatePoiShowDialogComponent,
-                {
-                    maxWidth: "378px",
-                    data: {
-                        marker,
-                        routeId,
-                        index
-                    } as IPrivatePoiShowDialogData
-                });
-        }, 100);
-    }
-
     constructor(resources: ResourcesService,
                 private readonly matDialog: MatDialog,
                 private readonly imageGalleryService: ImageGalleryService,
@@ -64,6 +49,21 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
         this.description = this.marker.description;
         this.imageLink = this.marker.urls.find(u => u.mimeType.startsWith("image"));
         this.url = this.marker.urls.find(u => !u.mimeType.startsWith("image"));
+    }
+
+    public static openDialog(matDialog: MatDialog, marker: MarkerData, routeId: string, index: number) {
+        setTimeout(() => {
+            // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
+            matDialog.open(PrivatePoiShowDialogComponent,
+                {
+                    maxWidth: "378px",
+                    data: {
+                        marker,
+                        routeId,
+                        index
+                    } as IPrivatePoiShowDialogData
+                });
+        }, 100);
     }
 
     public toggleCoordinates() {

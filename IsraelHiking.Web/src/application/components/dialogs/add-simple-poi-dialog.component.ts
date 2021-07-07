@@ -23,10 +23,6 @@ export interface IAddSimplePoiDialogData {
 export class AddSimplePoiDialogComponent extends BaseMapComponent {
     private data: IAddSimplePoiDialogData;
 
-    public static openDialog(matDialog: MatDialog, data: IAddSimplePoiDialogData) {
-        matDialog.open(AddSimplePoiDialogComponent, { data });
-    }
-
     constructor(resources: ResourcesService,
                 private readonly poiService: PoiService,
                 private readonly privatePoiUploaderService: PrivatePoiUploaderService,
@@ -34,6 +30,10 @@ export class AddSimplePoiDialogComponent extends BaseMapComponent {
                 @Inject(MAT_DIALOG_DATA) data: IAddSimplePoiDialogData) {
         super(resources);
         this.data = data;
+    }
+
+    public static openDialog(matDialog: MatDialog, data: IAddSimplePoiDialogData) {
+        matDialog.open(AddSimplePoiDialogComponent, { data });
     }
 
     public async addSimplePoint(pointType: SimplePointType) {

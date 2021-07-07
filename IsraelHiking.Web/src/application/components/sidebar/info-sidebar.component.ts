@@ -17,7 +17,7 @@ import { ApplicationState, Language } from "../../models/models";
 import legendSectionsJson from "../../../content/legend/legend.json";
 
 export interface ILegendSection {
-    key: string;
+    key: keyof ResourcesService;
     items: ILegendItem[];
     title: string;
 }
@@ -87,9 +87,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
     private initalizeLegendSections() {
         this.legendSections = JSON.parse(JSON.stringify(legendSectionsJson));
         for (let section of this.legendSections) {
-            section.title = this.resources[section.key];
+            section.title = this.resources[section.key] as string;
             for (let item of section.items) {
-                item.title = this.resources[item.key];
+                item.title = this.resources[item.key] as string;
             }
         }
 

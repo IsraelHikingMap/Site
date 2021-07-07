@@ -7,6 +7,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "strictNullChecks": false,
+    "strict": true,
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,
@@ -21,17 +22,12 @@
     "lib": [
       "es2018",
       "dom"
-    ],
-    "paths": {
-      "file-saver-es": [
-        "@types/file-saver"
-      ]
-    }
+    ]
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": false,
     "strictInjectionParameters": true,
-    //"enableI18nLegacyMessageIdFormat": false,
+    "enableI18nLegacyMessageIdFormat": false,
     "strictInputAccessModifiers": true,
     //"strictTemplates": false
   }

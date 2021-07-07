@@ -15,7 +15,7 @@ export interface ILegendItem {
     type: LegendItemType;
     osmTags: string[];
     link: string;
-    key: string;
+    key: keyof ResourcesService;
 }
 
 @Component({

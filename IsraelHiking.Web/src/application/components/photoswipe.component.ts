@@ -1,5 +1,4 @@
 import { Component, ElementRef, ViewChild, AfterViewInit, InjectionToken, Inject, ViewEncapsulation, EventEmitter } from "@angular/core";
-import { OverlayRef } from "@angular/cdk/overlay";
 import * as PhotoSwipe from "photoswipe";
 import * as PhotoSwipeUI_Default from "photoswipe/dist/photoswipe-ui-default";
 
