@@ -134,7 +134,7 @@ describe("FileService", () => {
 
     it("Should not get a files from event", inject([FileService], (fileService: FileService) => {
         let event = {
-            target: { dataTransfer: [] },
+            target: { dataTransfer: [] as any[] },
         };
         let files = fileService.getFilesFromEvent(event);
 

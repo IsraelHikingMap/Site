@@ -9,7 +9,7 @@ describe("SnappingService", () => {
     beforeEach(() => {
         let mapServiceMock = {
             map: {
-                project: (lngLat) => ({ x: lngLat.lng, y: lngLat.lat })
+                project: (lngLat: LatLngAlt) => ({ x: lngLat.lng, y: lngLat.lat })
             }
         };
         TestBed.configureTestingModule({

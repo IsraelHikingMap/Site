@@ -69,7 +69,7 @@ describe("Poi Service", () => {
 
             MockNgRedux.getInstance().getState = () => ({
                 layersState: {
-                    categoriesGroups: [{ type: "type", categories: [], visible: true }]
+                    categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
                 }
             });
             let changed = false;
@@ -165,7 +165,7 @@ describe("Poi Service", () => {
                             } as GeoJSON.Feature
                         },
                         offlineState: {
-                            uploadPoiQueue: []
+                            uploadPoiQueue: [] as any[]
                         }
                     });
                 let spy = spyOn(dbMock, "addPoiToUploadQueue");

@@ -9,8 +9,8 @@ export class ToastServiceMockCreator {
     public toastService: ToastService;
     public resourcesService: ResourcesService;
     constructor() {
-        let snackBar = { open: () => null } as any as MatSnackBar;
-        let matDialog = { open: () => null } as any as MatDialog;
+        let snackBar = { open: () => null as any } as any as MatSnackBar;
+        let matDialog = { open: () => null as any } as any as MatDialog;
         let loggingService = { error: () => { }, info: () => { } } as any as LoggingService;
         this.resourcesService = new ResourcesService(new GetTextCatalogMockCreator().getTextCatalogService,
             { getState: () => ({ configuration: { language: {code: "he" } as any}} as any)} as any);

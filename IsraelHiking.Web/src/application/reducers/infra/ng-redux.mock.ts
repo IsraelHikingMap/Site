@@ -49,9 +49,9 @@ export class MockObservableStore<State> {
   };
 
   dispatch: Dispatch<AnyAction> = action => action;
-  replaceReducer = () => null;
+  replaceReducer = () => null as any;
   getState = () => ({});
-  subscribe = () => () => null;
+  subscribe = () => () => null as any;
 
   select = <SelectedState>(
     selector?: Selector<any, SelectedState>,
@@ -77,8 +77,8 @@ export class MockObservableStore<State> {
       : this) as MockObservableStore<SubState>;
   };
 
-  private initSubStore<SubState>(basePath: PathSelector) {
-    const result =
+  private initSubStore<SubState>(basePath: PathSelector): MockObservableStore<SubState> {
+    const result: MockObservableStore<SubState> =
       this.subStores[JSON.stringify(basePath)] ||
       new MockObservableStore<SubState>();
     this.subStores[JSON.stringify(basePath)] = result;

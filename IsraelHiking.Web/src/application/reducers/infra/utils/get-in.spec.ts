@@ -21,7 +21,7 @@ describe("getIn", () => {
       a: false,
       b: 0,
       c: "",
-      d: undefined,
+      d: undefined as any,
     };
     expect(getIn(test, ["a"])).toEqual(false);
     expect(getIn(test, ["b"])).toEqual(0);
@@ -35,7 +35,7 @@ describe("getIn", () => {
         a: false,
         b: 0,
         c: "",
-        d: undefined,
+        d: undefined as any,
       },
     };
     expect(getIn(test, ["foo", "a"])).toEqual(false);
