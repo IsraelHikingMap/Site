@@ -24,7 +24,7 @@ services:
       - 9300:9300
     restart: always
   graphhopper:
-    image: israelhikingmap/graphhopper:3.0
+    image: israelhikingmap/graphhopper:latest
     container_name: graphhopper
     volumes:
       - ghdata:/data:rw
@@ -33,7 +33,7 @@ services:
         target: /data/gh-config.yml
     ports:
       - 8989:8989
-    command: -i - -c /data/gh-config.yml -o /data/default-gh/
+    entrypoint: /bin/bash -c "java -Ddw.server.application_connectors[0].bind_host=0.0.0.0 -Ddw.graphhopper.graph.location=/data/default-gh/ -jar *.jar server /data/gh-config.yml"
     restart: always
   gpsbabel:
     image: israelhikingmap/gpsbabelwebapi
