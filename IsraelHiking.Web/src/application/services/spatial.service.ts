@@ -119,7 +119,7 @@ export class SpatialService {
 
     private static project(p: LatLngAlt, a: LatLngAlt, b: LatLngAlt): { latlng: LatLngAlt; projectionFactor: number } {
 
-        let atob = { x: b.lng - a.lng, y: b.lat - a.lat };
+        let atob = { x: b.lng - a.lng, y: b.lat - a.lat, z: (a.alt != null && b.alt != null) ? b.alt - a.alt : null };
         let atop = { x: p.lng - a.lng, y: p.lat - a.lat };
         let len = atob.x * atob.x + atob.y * atob.y;
         let dot = atop.x * atob.x + atop.y * atob.y;
@@ -128,7 +128,8 @@ export class SpatialService {
         return {
             latlng: {
                 lng: a.lng + atob.x * projectionFactor,
-                lat: a.lat + atob.y * projectionFactor
+                lat: a.lat + atob.y * projectionFactor,
+                alt: a.alt != null ? a.alt + atob.z * projectionFactor : null
             },
             projectionFactor
         };

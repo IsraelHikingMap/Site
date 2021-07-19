@@ -60,32 +60,18 @@ export class RouteStatisticsService {
             return routeStatistics;
         }
 
-        let previousPoint = null;
-
+        // convert to route statistic points
+        let previousPoint = route.segments[0].latlngs[0];
+        routeStatistics.points.push(start || { coordinate: [0, previousPoint.alt], latlng: previousPoint, slope: 0 });
         for (let segment of route.segments) {
             for (let latlng of segment.latlngs) {
-                if (isNaN(latlng.alt)) {
-                    continue;
-                }
-                if (previousPoint == null) {
-                    previousPoint = latlng;
-                    let firstPoint = { coordinate: [0, previousPoint.alt] } as IRouteStatisticsPoint;
-                    firstPoint.latlng = previousPoint;
-                    firstPoint.slope = 0;
-                    routeStatistics.points.push(start || firstPoint);
-                    continue;
-                }
-
                 let distance = SpatialService.getDistanceInMeters(previousPoint, latlng);
-                if (distance < 1) {
-                    continue;
-                }
                 routeStatistics.length += distance;
                 let point = {
-                    coordinate: [(routeStatistics.length / 1000), latlng.alt]
+                    coordinate: [(routeStatistics.length / 1000), latlng.alt],
+                    latlng,
+                    slope: 0
                 } as IRouteStatisticsPoint;
-                point.latlng = latlng;
-                point.slope = distance === 0 ? 0 : (latlng.alt - previousPoint.alt) * 100 / distance;
                 if (start == null || (point.coordinate[0] > start.coordinate[0] && point.coordinate[0] < end.coordinate[0])) {
                     routeStatistics.points.push(point);
                 }
@@ -96,6 +82,29 @@ export class RouteStatisticsService {
             routeStatistics.points.push(end);
             routeStatistics.length = (end.coordinate[0] - start.coordinate[0]) * 1000;
         }
+
+        // filter invalid points for the rest of the calculations
+        routeStatistics.points = routeStatistics.points.filter(p => !isNaN(p.latlng.alt) && p.latlng.alt != null);
+        for (let pointIndex = routeStatistics.points.length - 1; pointIndex > 0; pointIndex--) {
+            let prevPoint = routeStatistics.points[pointIndex - 1];
+            let currentPoint = routeStatistics.points[pointIndex];
+            if (currentPoint.coordinate[0] - prevPoint.coordinate[0] < 0.001) {
+                routeStatistics.points.splice(pointIndex, 1);
+            }
+        }
+
+        if (routeStatistics.points.length < 1) {
+            return routeStatistics;
+        }
+
+        // calculate slope
+        for (let pointIndex = 1; pointIndex < routeStatistics.points.length; pointIndex++) {
+            let prevPoint = routeStatistics.points[pointIndex - 1];
+            let currentPoint = routeStatistics.points[pointIndex];
+            currentPoint.slope = (currentPoint.coordinate[1] - prevPoint.coordinate[1]) * 0.1 /
+                (currentPoint.coordinate[0] - prevPoint.coordinate[0]);
+        }
+
         // smooth the line in order to better calculate gain and loss:
         // changing x from Km to Km * 100 to better align with required altitude sensitivity
         let simplifiedCoordinates = SpatialService.simplify(routeStatistics.points.map(p => [p.coordinate[0] * 100, p.coordinate[1]]), 5);

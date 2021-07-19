@@ -67,6 +67,32 @@ describe("RouteStatisticsService", () => {
         expect(statistics.points.length).toBe(3);
     });
 
+    it("Should get correct statistics on route when there are null altitudes", () => {
+        let routeData = {
+            segments: [
+                {
+                    latlngs: [{ lat: 10, lng: 10, alt: 10 }, { lat: 20, lng: 20, alt: 20 }]
+                },
+                {
+                    latlngs: [{ lat: 20, lng: 20, alt: 20 }, { lat: 30, lng: 30, alt: null }]
+                },
+                {
+                    latlngs: [{ lat: 30, lng: 30, alt: null }, { lat: 40, lng: 40, alt: 40 }]
+                },
+                {
+                    latlngs: [{ lat: 40, lng: 40, alt: 40 }, { lat: 10, lng: 10, alt: 10 }]
+                }
+            ]
+        } as RouteData;
+
+        let statistics = service.getStatistics(routeData, null, null, null, false);
+
+        expect(statistics.gain).toBe(30);
+        expect(statistics.loss).toBe(-30);
+        expect(statistics.length).not.toBe(0);
+        expect(statistics.points.length).toBe(4);
+    });
+
     it("Should get statistics on route when recording and there's a route close by", () => {
         let now = new Date();
         let lastLatLng = { lat: 2, lng: 2, alt: 20, timestamp: new Date(now.getTime() + 1000) };
