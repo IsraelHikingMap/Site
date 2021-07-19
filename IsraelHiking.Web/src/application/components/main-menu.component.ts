@@ -171,6 +171,10 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         }
         this.toastService.info(this.resources.preparingDataForIssueReport);
         try {
+            let state = this.ngRedux.getState();
+            let baseLayer = this.layersService.getSelectedBaseLayer()
+            this.loggingService.info(`Visible overlays: ${JSON.stringify(state.layersState.overlays.filter(o => o.visible))}`);
+            this.loggingService.info(`Baselayer: ${baseLayer.key}, ${baseLayer.address}`);
             this.loggingService.info("--- Reporting an issue ---");
             let logs = await this.loggingService.getLog();
             let logBase64zipped = await this.fileService.compressTextToBase64Zip(logs);
@@ -187,7 +191,9 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 `Model: ${this.device.model}`,
                 `Platform: ${this.device.platform}`,
                 `OS version: ${this.device.version}`,
-                `App version: ${await this.appVersion.getVersionNumber()}`
+                `App version: ${await this.appVersion.getVersionNumber()}`,
+                `Map Location: ${state.location.zoom + 1}/${state.location.latitude}/${state.location.longitude}/`,
+                ``
             ].join("\n");
             this.toastService.info(this.resources.pleaseFillReport);
             this.emailComposer.open({
