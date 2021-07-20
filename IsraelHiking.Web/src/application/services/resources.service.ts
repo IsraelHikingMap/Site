@@ -439,7 +439,7 @@ export class ResourcesService {
     }
 
     public async setLanguage(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1625606636983");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1626798555254");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");

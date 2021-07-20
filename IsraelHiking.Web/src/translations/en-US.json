@@ -261,7 +261,7 @@
     "Regional Trails": "Regional Trails",
     "Remaining distance": "Remaining distance",
     "Report an issue": "Report an issue",
-    "Report an issue instructions": "Please describe the problem as best as you can.\n\n1. What happened?\n\n2. When did it happen?\nIf the problem happened more than 72 hours ago, we would appreciate a report the next time it happens.\n\n3. What did you do right before it happened?\n\n4. Is this the first time it happened?\n\n5. How can we reproduce the problem?",
+    "Report an issue instructions": "Please describe the problem as best as you can. Unfortunately, we will not be able to help without the following information:\n1. What happened?\n2. At what date and time did it happen?\n3. What did you do right before it happened?\n4. Is this the first time it happened?\n5. Is there a way to reproduce the problem?\n",
     "Request features and report bugs on our Github project page": "Request features and report bugs on our Github project page",
     "Residential": "Residential",
     "Restaurant": "Restaurant",

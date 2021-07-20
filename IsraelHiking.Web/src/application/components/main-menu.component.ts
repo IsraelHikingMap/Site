@@ -4,6 +4,7 @@ import { Subscription, Observable } from "rxjs";
 import { Device } from "@ionic-native/device/ngx";
 import { AppVersion } from "@ionic-native/app-version/ngx";
 import { EmailComposer } from "@ionic-native/email-composer/ngx";
+import { encode } from "base64-arraybuffer";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -172,7 +173,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         this.toastService.info(this.resources.preparingDataForIssueReport);
         try {
             let state = this.ngRedux.getState();
-            let baseLayer = this.layersService.getSelectedBaseLayer()
+            let baseLayer = this.layersService.getSelectedBaseLayer();
             this.loggingService.info(`Visible overlays: ${JSON.stringify(state.layersState.overlays.filter(o => o.visible))}`);
             this.loggingService.info(`Baselayer: ${baseLayer.key}, ${baseLayer.address}`);
             this.loggingService.info("--- Reporting an issue ---");
@@ -184,7 +185,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 displayName: "non-registered user",
                 id: "----"
             } as UserInfo;
-            let infoString = ["----------------------------------------------------",
+            let infoString = [
                 `User ID: ${userInfo.id}`,
                 `Username: ${userInfo.displayName}`,
                 `Manufacture: ${this.device.manufacturer}`,
@@ -193,8 +194,8 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 `OS version: ${this.device.version}`,
                 `App version: ${await this.appVersion.getVersionNumber()}`,
                 `Map Location: ${state.location.zoom + 1}/${state.location.latitude}/${state.location.longitude}/`,
-                ``
             ].join("\n");
+            let infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
             this.emailComposer.open({
                 to: ["israelhikingmap@gmail.com"],
@@ -203,6 +204,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 attachments: [
                     "base64:log.zip//" + logBase64zipped,
                     "base64:geolocation-log.zip//" + logBase64zippedGeoLocation,
+                    `base64:info-${userInfo.id}.txt//${infoBase64}`
                 ]
             });
         } catch (ex) {
