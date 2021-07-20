@@ -200,7 +200,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             this.emailComposer.open({
                 to: ["israelhikingmap@gmail.com"],
                 subject: "Issue reported by " + userInfo.displayName,
-                body: this.resources.reportAnIssueInstructions + "\n\n" + infoString,
+                body: this.resources.reportAnIssueInstructions,
                 attachments: [
                     "base64:log.zip//" + logBase64zipped,
                     "base64:geolocation-log.zip//" + logBase64zippedGeoLocation,
