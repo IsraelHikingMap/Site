@@ -1,4 +1,4 @@
-import { Injectable, Inject } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { MapService } from "./map.service";
@@ -37,6 +37,8 @@ export class RouteStrings {
 export class HashService {
 
     private static readonly PERSICION = 4;
+    private static readonly HIGH_PERSICION = 6;
+    private static readonly ZOOM_PERSICION = 2;
 
     constructor(private readonly router: Router,
                 private readonly mapService: MapService,
@@ -68,7 +70,7 @@ export class HashService {
         let location = this.ngRedux.getState().location;
         this.router.navigate([
             RouteStrings.ROUTE_MAP,
-            (location.zoom + 1).toFixed(2),
+            (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
             location.latitude.toFixed(HashService.PERSICION),
             location.longitude.toFixed(HashService.PERSICION)
         ],
@@ -85,6 +87,15 @@ export class HashService {
             return this.getFullUrlFromShareId(inMemoryState.shareUrl.id);
         }
         return Urls.baseAddress;
+    }
+
+    public getMapAddress() {
+        let location = this.ngRedux.getState().location;
+        let urlTree = this.router.createUrlTree([RouteStrings.MAP, RouteStrings.ROUTE_MAP,
+            (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
+            location.latitude.toFixed(HashService.HIGH_PERSICION),
+            location.longitude.toFixed(HashService.HIGH_PERSICION)]);
+        return Urls.baseAddress + urlTree.toString();
     }
 
     public getFullUrlFromLatLng(latlng: LatLngAlt) {

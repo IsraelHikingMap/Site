@@ -16,6 +16,7 @@ import { ToastService } from "../services/toast.service";
 import { FileService } from "../services/file.service";
 import { LayersService } from "../services/layers/layers.service";
 import { SidebarService } from "../services/sidebar.service";
+import { HashService } from "../services/hash.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
@@ -67,6 +68,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 private readonly layersService: LayersService,
                 private readonly sidebarService: SidebarService,
                 private readonly loggingService: LoggingService,
+                private readonly hashService: HashService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.isShowMore = false;
@@ -174,8 +176,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         try {
             let state = this.ngRedux.getState();
             let baseLayer = this.layersService.getSelectedBaseLayer();
-            this.loggingService.info(`Visible overlays: ${JSON.stringify(state.layersState.overlays.filter(o => o.visible))}`);
-            this.loggingService.info(`Baselayer: ${baseLayer.key}, ${baseLayer.address}`);
             this.loggingService.info("--- Reporting an issue ---");
             let logs = await this.loggingService.getLog();
             let logBase64zipped = await this.fileService.compressTextToBase64Zip(logs);
@@ -193,7 +193,10 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 `Platform: ${this.device.platform}`,
                 `OS version: ${this.device.version}`,
                 `App version: ${await this.appVersion.getVersionNumber()}`,
-                `Map Location: ${state.location.zoom + 1}/${state.location.latitude}/${state.location.longitude}/`,
+                `Map Location: ${this.hashService.getMapAddress()}`,
+                `Baselayer: ${baseLayer.key}, ${baseLayer.address}`,
+                `Visible overlays: ${JSON.stringify(state.layersState.overlays.filter(o => o.visible))}`,
+
             ].join("\n");
             let infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
