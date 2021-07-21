@@ -91,7 +91,7 @@ export class HashService {
 
     public getMapAddress() {
         let location = this.ngRedux.getState().location;
-        let urlTree = this.router.createUrlTree([RouteStrings.MAP, RouteStrings.ROUTE_MAP,
+        let urlTree = this.router.createUrlTree([RouteStrings.MAP,
             (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
             location.latitude.toFixed(HashService.HIGH_PERSICION),
             location.longitude.toFixed(HashService.HIGH_PERSICION)]);
