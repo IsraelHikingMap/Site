@@ -16,12 +16,15 @@ export class MapService {
 
     private resolve: (value?: void | PromiseLike<void>) => void;
 
+    private missingImagesArray: string[];
+
     @select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
     public pannedTimestamp$: Observable<Date>;
 
     constructor(private readonly cancelableTimeoutService: CancelableTimeoutService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         this.initializationPromise = new Promise((resolve) => { this.resolve = resolve; });
+        this.missingImagesArray = [];
     }
 
     public setMap(map: Map) {
@@ -38,6 +41,19 @@ export class MapService {
 
         this.map.on("dragstart", () => {
             this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: new Date() }));
+        });
+
+        this.map.on("styleimagemissing", (e: {id: string}) => {
+            if (!/^http/.test(e.id)) {
+                return;
+            }
+            if (this.missingImagesArray.includes(e.id)) {
+                return;
+            }
+            this.missingImagesArray.push(e.id);
+            this.map.loadImage(e.id, (_: Error, image: HTMLImageElement) => {
+                this.map.addImage(e.id, image);
+            });
         });
     }
 }
