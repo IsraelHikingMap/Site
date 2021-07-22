@@ -60,10 +60,10 @@
             <mat-card class="mat-elevation-z0">
                 <mat-card-header>
                     <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
-                        <a *ngIf="info.urls.length > 0 && info.urls[0]" [href]="info.urls[0]" [target]="'_blank'" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site from title">
+                        <a *ngIf="hasUrl()" [href]="getUrl()" [target]="'_blank'" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site from title">
                             <span class="text-large">{{info.title}}</span>
                         </a>
-                        <span *ngIf="info.urls.length === 0 || !info.urls[0]" class="text-large">{{info.title}}</span>
+                        <span *ngIf="!hasUrl()" class="text-large">{{info.title}}</span>
                     </mat-card-title>
                 </mat-card-header>
                 <mat-card-content>

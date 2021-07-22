@@ -191,7 +191,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.latlng = this.poiService.getLocation(feature);
         this.sourceImageUrls = Object.keys(feature.properties).filter(k => k.startsWith("poiSourceImageUrl")).map(k => {
             let imageUrl = feature.properties[k];
-            let url = feature.properties[k.replace("poiSourceImageUrl", "website")];
+            let url = feature.properties[k.replace("poiSourceImageUrl", "website")] as string;
+            if (this.isBadWikipediaUrl(url)) {
+                url = null;
+            }
             return {
                 imageUrl,
                 url
@@ -379,5 +382,21 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.socialSharing.shareWithOptions({
             url: this.shareLinks.poiLink
         });
+    }
+
+    public hasUrl(): boolean {
+        return this.getUrl() != null;
+    }
+
+    public getUrl(): string {
+        if (this.info.urls == null) {
+            return null;
+        }
+        return this.info.urls.find(u => !this.isBadWikipediaUrl(u));
+    }
+
+    private isBadWikipediaUrl(url: string) {
+        let language = this.resources.getCurrentLanguageCodeSimplified();
+        return url == null || (url.includes("wikipedia") && !url.includes(language + ".wikipedia"));
     }
 }
