@@ -19,6 +19,7 @@
       <path event="poi" url="/poi/*" />
       <path event="url" url="/url/*" />
       <path event="map" url="/map/*" />
+      <path url="/" />
     </host>
   </universal-links>
   <platform name="android">
