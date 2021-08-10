@@ -137,6 +137,18 @@ namespace IsraelHiking.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // serve https certificate folder
+            var wellKnownFolder = Path.Combine(Directory.GetCurrentDirectory(), ".well-known");
+            if (Directory.Exists(wellKnownFolder))
+            {
+                app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new PhysicalFileProvider(wellKnownFolder),
+                    RequestPath = new PathString("/.well-known"),
+                    ServeUnknownFileTypes = true, // serve extensionless file
+                    DefaultContentType = "application/json"
+                });
+            }
             if (_isDevelopment)
             {
                 app.UseDeveloperExceptionPage();
@@ -238,18 +250,7 @@ namespace IsraelHiking.Web
                 };
                 app.UseFileServer(fileServerOptions);
             }
-            // serve https certificate folder
-            var wellKnownFolder = Path.Combine(Directory.GetCurrentDirectory(), ".well-known");
-            if (Directory.Exists(wellKnownFolder))
-            {
-                app.UseStaticFiles(new StaticFileOptions
-                {
-                    FileProvider = new PhysicalFileProvider(wellKnownFolder),
-                    RequestPath = new PathString("/.well-known"),
-                    ServeUnknownFileTypes = true, // serve extensionless file
-                    DefaultContentType = "application/json"
-                });
-            }
+
             // wwwroot
             app.UseStaticFiles(new StaticFileOptions
             {
