@@ -20,7 +20,7 @@ import { PurchaseService } from "../../services/purchase.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
 import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
-import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction } from "../../reducers/routes.reducer";
+import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing-state.reducer";
 import { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
 
@@ -185,7 +185,6 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public toggleRoute(routeData: RouteData) {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null && routeData.id === selectedRoute.id && routeData.state !== "Hidden") {
-            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: null }));
             routeData.state = "Hidden";
             this.ngRedux.dispatch(new ChangeRoutePropertiesAction(
                 {
@@ -205,13 +204,30 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.selectedRouteService.setSelectedRoute(routeData.id);
     }
 
-    public isRouteVisible(routeData: RouteData) {
+    public toggleAllRoutes(event: Event) {
+        event.stopPropagation();
+        this.ngRedux.dispatch(new ToggleAllRoutesAction());
+    }
+
+    public isAllRoutesHidden(): boolean {
+        return this.ngRedux.getState().routes.present.find(r => r.state !== "Hidden") == null;
+    }
+
+    public isRouteVisible(routeData: RouteData): boolean {
         return routeData.state !== "Hidden";
     }
 
-    public isRouteSelected(routeData: RouteData) {
+    public isRouteSelected(routeData: RouteData): boolean {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && selectedRoute.id === routeData.id;
+    }
+
+    public isRouteInEditMode(routeData: RouteData): boolean {
+        return routeData.state === 'Route';
+    }
+
+    public isShowActive(routeData: RouteData): boolean {
+        return this.isRouteSelected(routeData) && this.ngRedux.getState().routes.present.length > 1;
     }
 
     public dropRoute(event: CdkDragDrop<RouteData[]>) {
