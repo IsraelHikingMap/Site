@@ -141,13 +141,14 @@ namespace IsraelHiking.Web
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseWhen(context => !context.Request.Path.StartsWithSegments("/.well-known/acme-challenge"), httpApp =>
-                {
-                    httpApp.UseHttpsRedirection();
-                });
-            }
+            //else
+            //{
+                //app.UseWhen(context => !context.Request.Path.StartsWithSegments("/.well-known/acme-challenge"), httpApp =>
+                //{
+                    // this doesn't seems to be working... removing for now...
+                    //httpApp.UseHttpsRedirection();
+                //});
+            //}
             app.UseResponseCompression();
             app.UseRouting();
             app.UseCors(builder =>
