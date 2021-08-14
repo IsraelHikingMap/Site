@@ -2,7 +2,7 @@
 <widget id="il.org.osm.israelhiking" version="9.9.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>Israel Hiking Map</name>
   <description>An application for outdoor navigation.</description>
-  <author email="IsraelHikingMap@gmail.com" href="http://israelhiking.osm.org.il">Israel Hiking Map</author>
+  <author email="IsraelHikingMap@gmail.com" href="https://israelhiking.osm.org.il">Israel Hiking Map</author>
   <content src="index.html" />
   <access origin="*" />
   <allow-intent href="http://*/*" />
