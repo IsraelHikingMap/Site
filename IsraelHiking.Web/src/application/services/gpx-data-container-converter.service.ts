@@ -206,7 +206,7 @@ export class GpxDataContainerConverterService {
         } as DataContainer;
         dataContainer.routes = dataContainer.routes.concat(this.convertTracksToRouteData(gpxJsonObject.trk));
         let markers = gpxJsonObject.wpt.map(p => ({
-            description: typeof p.desc === 'string' ? p.desc : JSON.stringify(p.desc),
+            description: typeof p.desc === "string" ? p.desc : JSON.stringify(p.desc),
             latlng: { lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele },
             title: p.name,
             type: p.type || "",
@@ -332,7 +332,7 @@ export class GpxDataContainerConverterService {
             });
             return {
                 name: t.name,
-                description: typeof t.desc === 'string' ? t.desc : JSON.stringify(t.desc),
+                description: typeof t.desc === "string" ? t.desc : JSON.stringify(t.desc),
                 color: extensions.Color._,
                 opacity: +extensions.Opacity._,
                 weight: +extensions.Weight._,

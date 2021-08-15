@@ -89,13 +89,13 @@ export class GeoJsonParser {
                     break;
                 case "MultiPolygon":
                     let multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
-                    let i = 0;
+                    let routeIndex = 0;
                     for (let polygoneCoordinates of multiPolygone.coordinates) {
                         for (let ringCoordinates of polygoneCoordinates) {
-                            let prefix = i > 0 ? " " + i : "";
+                            let prefix = routeIndex > 0 ? " " + routeIndex : "";
                             routeData = this.positionsToData(ringCoordinates, `${name}${prefix}` , description);
                             this.addRouteDataToDataContainer(routeData, data);
-                            i++;
+                            routeIndex++;
                         }
                     }
                     break;

@@ -106,13 +106,13 @@ export class SelectedRouteService {
             this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId }));
         } else {
             let selectedRoute = this.getSelectedRoute();
-            if (selectedRoute != null && selectedRoute.state !== 'Hidden') {
+            if (selectedRoute != null && selectedRoute.state !== "Hidden") {
                 this.ngRedux.dispatch(new ChangeEditStateAction({
                     routeId: this.selectedRouteId,
                     state: "ReadOnly"
                 }));
             }
-            
+
             this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId }));
         }
     }

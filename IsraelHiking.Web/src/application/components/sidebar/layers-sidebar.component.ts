@@ -223,7 +223,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public isRouteInEditMode(routeData: RouteData): boolean {
-        return routeData.state === 'Route';
+        return routeData.state === "Route";
     }
 
     public isShowActive(routeData: RouteData): boolean {
