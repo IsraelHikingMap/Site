@@ -1,5 +1,7 @@
 ﻿using IsraelHiking.API.Services.Poi;
+using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -80,18 +82,21 @@ namespace IsraelHiking.API.Services
             {
                 var split = context.Request.Path.Value.Split("/");
                 context.Request.Query.TryGetValue("language", out var language);
-                var point = await _pointsOfInterestProvider.GetPointOfInterestById(split[split.Length - 2], split.Last(), language.FirstOrDefault());
-                if (point == null)
+                var feature = await _pointsOfInterestProvider.GetFeatureById(split[split.Length - 2], split.Last());
+                if (feature == null)
                 {
                     await SendDefaultFile(context);
                     return;
                 }
-                var thumbnailUrl = point.ImagesUrls.FirstOrDefault() ?? string.Empty;
+                var thumbnailUrl = feature.Attributes.GetNames()
+                    .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
+                    .Select(p => feature.Attributes[p].ToString())
+                    .FirstOrDefault() ?? string.Empty;
                 if (isWhatsApp)
                 {
                     thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/200px-$3");
                 }
-                await Write(context, GetPage(point.Title, thumbnailUrl, point.Description));
+                await Write(context, GetPage(feature.GetTitle(language), thumbnailUrl, feature.GetDescription(language)));
                 return;
             }
 

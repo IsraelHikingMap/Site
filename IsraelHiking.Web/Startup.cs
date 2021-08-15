@@ -80,7 +80,6 @@ namespace IsraelHiking.Web
             services.AddControllers(options =>
             {
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
-                options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(PointOfInterestExtended)));
             }).AddNewtonsoftJson(options =>
             {
                 foreach (var converter in GeoJsonSerializer.Create(geometryFactory, 3).Converters)

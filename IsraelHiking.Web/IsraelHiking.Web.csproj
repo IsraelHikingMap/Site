@@ -61,6 +61,7 @@
     <Content Remove="tsconfig.json" />
     <Content Remove="tsconfig.spec.json" />
     <Content Remove="tslint.json" />
+    <Content Remove="build-ios-parameters.json" />
   </ItemGroup>
 
   <ItemGroup>

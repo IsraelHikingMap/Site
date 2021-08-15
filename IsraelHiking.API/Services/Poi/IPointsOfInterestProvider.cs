@@ -16,16 +16,6 @@ namespace IsraelHiking.API.Services.Poi
     public interface IPointsOfInterestProvider
     {
         /// <summary>
-        /// Gets all the POIs within the bounding box that matches the given categories in the given language
-        /// </summary>
-        /// <param name="northEast">North east corner</param>
-        /// <param name="southWest">South west corner</param>
-        /// <param name="categories">The categories</param>
-        /// <param name="language">The language</param>
-        /// <returns>An array of POIs</returns>
-        Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language);
-
-        /// <summary>
         /// This get a specific point of interest by the Id and source
         /// </summary>
         /// <param name="id"></param>
@@ -42,33 +32,6 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="language">The language</param>
         /// <returns>An array of POIs</returns>
         Task<Feature[]> GetFeatures(Coordinate northEast, Coordinate southWest, string[] categories, string language);
-
-        /// <summary>
-        /// This get a specific point of interest by the Id and source
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="source"></param>
-        /// <param name="language"></param>
-        /// <returns></returns>
-        Task<PointOfInterestExtended> GetPointOfInterestById(string source, string id, string language = "");
-
-        /// <summary>
-        /// Adds a POI
-        /// </summary>
-        /// <param name="pointOfInterest">The POI's data to add</param>
-        /// <param name="osmGateway"></param>
-        /// <param name="language"></param>
-        /// <returns></returns>
-        Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, IAuthClient osmGateway, string language);
-
-        /// <summary>
-        /// Updates a POI
-        /// </summary>
-        /// <param name="pointOfInterest">The POI's new data</param>
-        /// <param name="osmGateway"></param>
-        /// <param name="language">The relevant language</param>
-        /// <returns></returns>
-        Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, IAuthClient osmGateway, string language);
 
         /// <summary>
         /// Adds a POI

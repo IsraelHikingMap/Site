@@ -1,4 +1,4 @@
-﻿import { DataContainer, LatLngAlt, NorthEast } from "./models";
+﻿import { LatLngAlt } from "./models";
 export interface Contribution {
     userName: string;
     userAddress: string;
