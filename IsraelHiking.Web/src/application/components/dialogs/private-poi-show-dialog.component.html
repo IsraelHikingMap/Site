@@ -18,7 +18,7 @@
                  (click)="showImage()" />
         </div>
         <div flexLayout="row">
-            <p [dir]="resources.getDirection(description)" class="{{resources.getTextAlignment(description)}}">{{description}}</p>
+            <p [dir]="resources.getDirection(description)" class="break-lines {{resources.getTextAlignment(description)}}">{{description}}</p>
         </div>
         <div flexLayout="row" *ngIf="showCoordinates">
             <coordinates [latlng]="marker.latlng"></coordinates>
