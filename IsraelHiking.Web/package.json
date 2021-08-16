@@ -36,7 +36,6 @@
     "@ng-idle/core": "^11.0.3",
     "@ngx-progressbar/core": "5.3.2",
     "@ngx-progressbar/http": "5.3.2",
-    "@nicky-lenaers/ngx-scroll-to": "^9.0.0",
     "@turf/bbox": "6.4.0",
     "@turf/center": "6.4.0",
     "@turf/circle": "6.4.0",

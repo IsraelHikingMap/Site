@@ -33,7 +33,6 @@ import { Angulartics2Module } from "angulartics2";
 import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 import { NgProgressModule } from "@ngx-progressbar/core";
 import { NgProgressHttpModule } from "@ngx-progressbar/http";
-import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgxMapLibreGLModule } from "ngx-maplibre-gl";
@@ -59,6 +58,7 @@ import { WebIntent } from "@ionic-native/web-intent/ngx";
 import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
 // services
 import { NgReduxModule } from "./reducers/infra/ng-redux.module";
+import { ScrollToModule } from "./infra/scroll-to/scroll-to.module";
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
 import { OsmTokenInterceptor } from "./services/osm-token.interceptor";
