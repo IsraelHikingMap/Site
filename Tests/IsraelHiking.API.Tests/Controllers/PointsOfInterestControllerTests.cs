@@ -75,7 +75,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var result = _controller.GetPointsOfInterest(string.Empty, string.Empty, string.Empty).Result;
 
             Assert.AreEqual(0, result.Length);
-            _pointsOfInterestProvider.DidNotReceive().GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(), Arg.Any<string>());
+            _pointsOfInterestProvider.DidNotReceive().GetFeatures(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(), Arg.Any<string>());
         }
 
         [TestMethod]

@@ -24,6 +24,7 @@ const ADD_RECORDING_POINTS = "ADD_RECORDING_POINTS";
 const CLEAR_POIS = "CLEAR_POIS";
 const CLEAR_POIS_AND_ROUTE = "CLEAR_POIS_AND_ROUTE";
 const DELETE_ALL_ROUTES = "DELETE_ALL_ROUTES";
+const TOGGLE_ALL_ROUTES = "TOGGLE_ALL_ROUTES";
 const BULK_REPLACE_ROUTES = "BULK_REPLACE_ROUTES";
 
 export interface RoutePayload {
@@ -208,6 +209,10 @@ export class ClearPoisAndRouteAction extends BaseAction<RoutePayload> {
 
 export class DeleteAllRoutesAction implements Action {
     constructor(public type = DELETE_ALL_ROUTES) {}
+}
+
+export class ToggleAllRoutesAction implements Action {
+    constructor(public type = TOGGLE_ALL_ROUTES) {}
 }
 
 export class BulkReplaceRoutesAction extends BaseAction<BulkReplaceRoutesPayload> {
@@ -437,6 +442,16 @@ class RoutesReducer {
     @ReduxAction(DELETE_ALL_ROUTES)
     public deleteAllRoutes(lastState: RouteData[], action: DeleteAllRoutesAction): RouteData[] {
         return [];
+    }
+
+    @ReduxAction(TOGGLE_ALL_ROUTES)
+    public toggleAllRoutes(lastState: RouteData[], action: ToggleAllRoutesAction): RouteData[] {
+        let routes = [...lastState];
+        let isAllRoutesHidden = routes.find(r => r.state !== "Hidden") == null;
+        for (let route of routes) {
+            route.state = isAllRoutesHidden ? "ReadOnly" : "Hidden";
+        }
+        return routes;
     }
 
     @ReduxAction(BULK_REPLACE_ROUTES)

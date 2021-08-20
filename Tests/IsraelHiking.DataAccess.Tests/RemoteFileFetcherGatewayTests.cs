@@ -42,7 +42,7 @@ namespace IsraelHiking.DataAccess.Tests
         [Ignore]
         public void TestGateway_InvalidFile()
         {
-            var response = _gateway.GetFileContent("http://israelhiking.osm.org.il/Hebrew/Tiles/11/1228/826.png").Result;
+            var response = _gateway.GetFileContent("https://israelhiking.osm.org.il/Hebrew/Tiles/11/1228/826.png").Result;
 
             Assert.IsFalse(response.Content.Any());
         }

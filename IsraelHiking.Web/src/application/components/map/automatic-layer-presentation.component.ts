@@ -175,14 +175,15 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             }
         }
         for (let layer of layers) {
-            if (this.isBaselayer || (this.visible && layer.metadata && layer.metadata["IHM:overlay"])) {
-                if (!this.isBaselayer) {
-                    layer.id = this.layerData.key + "_" + layer.id;
-                    layer.source = this.layerData.key + "_" + layer.source;
-                }
-                this.jsonLayersIds.push(layer.id);
-                this.mapComponent.mapInstance.addLayer(layer as AnyLayer, this.before);
+            if (!this.visible || (!this.isBaselayer && layer.metadata && !layer.metadata["IHM:overlay"])) {
+                continue;
             }
+            if (!this.isBaselayer) {
+                layer.id = this.layerData.key + "_" + layer.id;
+                layer.source = this.layerData.key + "_" + layer.source;
+            }
+            this.jsonLayersIds.push(layer.id);
+            this.mapComponent.mapInstance.addLayer(layer as AnyLayer, this.before);
         }
     }
 

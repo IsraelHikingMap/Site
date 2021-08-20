@@ -2,7 +2,6 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 
-import { RunningContextService } from "./running-context.service";
 import { PoiService } from "./poi.service";
 import { Urls } from "../urls";
 import { SearchResultsPointOfInterest } from "../models/models";
@@ -11,7 +10,6 @@ import { SearchResultsPointOfInterest } from "../models/models";
 export class SearchResultsProvider {
 
     constructor(private readonly httpClient: HttpClient,
-                private readonly runningContextService: RunningContextService,
                 private readonly poiService: PoiService) {
     }
 

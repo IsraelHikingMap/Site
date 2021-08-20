@@ -9,7 +9,7 @@ describe("GeoJsonParser", () => {
         geoJsonParser = new GeoJsonParser();
     });
 
-    it("Should parse geoJson point", () => {
+    it("Should convert geoJson point", () => {
         let collection = {
             type: "FeatureCollection",
             features: [{
@@ -24,7 +24,7 @@ describe("GeoJsonParser", () => {
             } as GeoJSON.Feature<GeoJSON.Point>]
         } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
-        let data = geoJsonParser.parse(JSON.stringify(collection));
+        let data = geoJsonParser.toDataContainer(collection);
         expect(data.routes.length).toBe(1);
         expect(data.routes[0].markers.length).toBe(1);
     });
@@ -45,7 +45,7 @@ describe("GeoJsonParser", () => {
             ]
         } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
-        let data = geoJsonParser.parse(JSON.stringify(collection));
+        let data = geoJsonParser.toDataContainer(collection);
         expect(data.routes.length).toBe(1);
         expect(data.routes[0].markers.length).toBe(0);
     });
@@ -66,11 +66,11 @@ describe("GeoJsonParser", () => {
             ]
         } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
-        let data = geoJsonParser.parse(JSON.stringify(collection));
+        let data = geoJsonParser.toDataContainer(collection);
         expect(data.routes.length).toBe(0);
     });
 
-    it("Should parse complex geoJson string", () => {
+    it("Should parse complex geoJson", () => {
         let collection = {
             type: "FeatureCollection",
             features: [{
@@ -133,9 +133,30 @@ describe("GeoJsonParser", () => {
             ]
         } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
-        let data = geoJsonParser.parse(JSON.stringify(collection));
+        let data = geoJsonParser.toDataContainer(collection);
         expect(data.routes.length).toBe(4);
         expect(data.routes[0].markers.length).toBe(2);
+    });
+
+    it("Should convert geoJson MultilineString to different routes", () => {
+        let collection = {
+            type: "FeatureCollection",
+            features: [{
+                type: "Feature",
+                properties: {
+                    name: "multilinestring"
+                },
+                geometry: {
+                    type: "MultiLineString",
+                    coordinates: [[[1,1], [2,2]], [[3,3], [4,4]]]
+                } as GeoJSON.MultiLineString
+            } as GeoJSON.Feature<GeoJSON.MultiLineString>]
+        } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
+
+        let data = geoJsonParser.toDataContainer(collection);
+        expect(data.routes.length).toBe(2);
+        expect(data.routes[0].markers.length).toBe(0);
+        expect(data.routes[1].name.endsWith("1")).toBeTruthy();
     });
 
     it("Should convert data container to geojson", () => {
@@ -156,7 +177,7 @@ describe("GeoJsonParser", () => {
                 } as RouteData
             ]
         } as DataContainer;
-        let geoJson = JSON.parse(geoJsonParser.toString(data)) as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
+        let geoJson = geoJsonParser.toGeoJson(data);
         expect(geoJson.features.length).toBe(2);
         expect(geoJson.features[0].geometry.type).toBe("Point");
         expect(geoJson.features[1].geometry.type).toBe("MultiLineString");

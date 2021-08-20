@@ -2,12 +2,13 @@
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using NSubstitute;
 using System;
 using System.IO;
@@ -58,10 +59,10 @@ namespace IsraelHiking.API.Tests.Services
             var stream = new MemoryStream();
             context.Response.Body = stream;
             context.Request.Path = new PathString($"/poi/{source}/{id}");
-            _pointsOfInterestProvider.GetPointOfInterestById(source, id, null).Returns(new PointOfInterestExtended
+            _pointsOfInterestProvider.GetFeatureById(source, id).Returns(new Feature(new Point(0,0), new AttributesTable
             {
-                ImagesUrls = new [] { "https://upload.wikimedia.org/wikipedia/commons/archive/1/17/Israel_Hiking_Map.jpeg" }
-            });
+                { FeatureAttributes.IMAGE_URL, "https://upload.wikimedia.org/wikipedia/commons/archive/1/17/Israel_Hiking_Map.jpeg" }
+            }));
             var detectionService = SetupDetectionService();
 
             _middleware.InvokeAsync(context, detectionService).Wait();

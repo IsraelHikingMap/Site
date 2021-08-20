@@ -33,20 +33,8 @@ namespace IsraelHiking.API.Converters
                 Source = Sources.COORDINATES,
                 Icon = "icon-search",
                 IconColor = "black",
-                IsArea = false,
-                IsRoute = false,
-                IsEditable = false,
-                HasExtraData = false,
                 Location = latLng,
-                SouthWest = latLng,
-                NorthEast = latLng,
-                Category = Categories.NONE,
                 Description = string.Empty,
-                ImagesUrls = new string[0],
-                References = new Reference[0],
-                DataContainer = new DataContainerPoco(),
-                // HN TODO: add elevation?
-                FeatureCollection = new FeatureCollection { new Feature(new Point(latLng.ToCoordinate()), new AttributesTable()) }
             };
         }
         
@@ -90,14 +78,10 @@ namespace IsraelHiking.API.Converters
             {
                 Id = feature.Attributes[FeatureAttributes.ID].ToString(),
                 Title = title,
-                Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString(),
                 Icon = icon,
                 IconColor = feature.Attributes[FeatureAttributes.POI_ICON_COLOR].ToString(),
                 Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(),
                 Location = latLng,
-                HasExtraData = feature.HasExtraData(language),
-                NorthEast = new LatLng(feature.Geometry.EnvelopeInternal.MaxY, feature.Geometry.EnvelopeInternal.MaxX),
-                SouthWest = new LatLng(feature.Geometry.EnvelopeInternal.MinY, feature.Geometry.EnvelopeInternal.MinX)
             };
         }
     }

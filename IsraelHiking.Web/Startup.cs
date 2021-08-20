@@ -80,7 +80,6 @@ namespace IsraelHiking.Web
             services.AddControllers(options =>
             {
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
-                options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(PointOfInterestExtended)));
             }).AddNewtonsoftJson(options =>
             {
                 foreach (var converter in GeoJsonSerializer.Create(geometryFactory, 3).Converters)
@@ -143,7 +142,10 @@ namespace IsraelHiking.Web
             }
             else
             {
-                app.UseHttpsRedirection();
+                app.UseWhen(context => !context.Request.Path.StartsWithSegments("/.well-known/acme-challenge"), httpApp =>
+                {
+                    httpApp.UseHttpsRedirection();
+                });
             }
             app.UseResponseCompression();
             app.UseRouting();
@@ -238,6 +240,7 @@ namespace IsraelHiking.Web
                 };
                 app.UseFileServer(fileServerOptions);
             }
+
             // serve https certificate folder
             var wellKnownFolder = Path.Combine(Directory.GetCurrentDirectory(), ".well-known");
             if (Directory.Exists(wellKnownFolder))
@@ -250,6 +253,7 @@ namespace IsraelHiking.Web
                     DefaultContentType = "application/json"
                 });
             }
+
             // wwwroot
             app.UseStaticFiles(new StaticFileOptions
             {

@@ -74,15 +74,18 @@
                     <div fxFlex>
                         <p fxFill>{{resources.privateRoutes}}</p>
                     </div>
+                    <div fxFlex="20">
+                        <button fxFill mat-button (click)="toggleAllRoutes($event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle all routes"><i class="fa fa-lg" [ngClass]="isAllRoutesHidden() ? 'icon-eye-slash' : 'icon-eye'"></i></button>
+                    </div>
                 </div>
             </mat-expansion-panel-header>
             <div cdkDropList (cdkDropListDropped)="dropRoute($event)">
                 <div *ngFor="let route of (routes | async); let i = index" cdkDrag>
-                    <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleRoute(route)">
+                    <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleRoute(route)" [class.active]="isShowActive(route)">
                         <div fxFlex="10"></div>
                         <div fxFlex="15">
                             <span [ngStyle]="{'color': route.color}">
-                                <i class="fa" [ngClass]="{'icon-pencil': isRouteSelected(route), 'icon-eye': isRouteVisible(route) && !isRouteSelected(route), 'icon-eye-slash': !isRouteVisible(route) }"></i>
+                                <i class="fa" [ngClass]="{ 'icon-pencil': isRouteInEditMode(route), 'icon-eye': isRouteVisible(route) && !isRouteInEditMode(route), 'icon-eye-slash': !isRouteVisible(route) }"></i>
                             </span>
                         </div>
                         <div fxFlex matTooltip="{{route.description}}" matTooltipPosition="below" class="cursor-move">

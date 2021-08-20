@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { minBy, maxBy, flatten, last } from "lodash-es";
+import { minBy, maxBy, flatten, last, escape } from "lodash-es";
 import { parseString, Builder } from "isomorphic-xml2js";
 import { encode } from "base64-arraybuffer";
 import XmlBeautify from "xml-beautify";
@@ -99,14 +99,14 @@ export class GpxDataContainerConverterService {
                         lat: m.latlng.lat.toString(),
                         lon: m.latlng.lng.toString()
                     },
-                    name: m.title,
-                    desc: m.description,
+                    name: escape(m.title),
+                    desc: escape(m.description),
                     type: m.type,
                     link: m.urls.map(u => ({
                             $: {
                                 href: u.url
                             },
-                            text: u.text,
+                            text: escape(u.text),
                             type: u.mimeType
                         } as Link))
                 } as Wpt;
@@ -118,8 +118,8 @@ export class GpxDataContainerConverterService {
         }
         for (let route of nonEmptyRoutes) {
             gpx.trk.push({
-                name: route.name,
-                desc: route.description,
+                name: escape(route.name),
+                desc: escape(route.description),
                 extensions: {
                     Color: {
                         $: {
@@ -206,7 +206,7 @@ export class GpxDataContainerConverterService {
         } as DataContainer;
         dataContainer.routes = dataContainer.routes.concat(this.convertTracksToRouteData(gpxJsonObject.trk));
         let markers = gpxJsonObject.wpt.map(p => ({
-            description: p.desc,
+            description: typeof p.desc === "string" ? p.desc : JSON.stringify(p.desc),
             latlng: { lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele },
             title: p.name,
             type: p.type || "",
@@ -332,7 +332,7 @@ export class GpxDataContainerConverterService {
             });
             return {
                 name: t.name,
-                description: t.desc,
+                description: typeof t.desc === "string" ? t.desc : JSON.stringify(t.desc),
                 color: extensions.Color._,
                 opacity: +extensions.Opacity._,
                 weight: +extensions.Weight._,

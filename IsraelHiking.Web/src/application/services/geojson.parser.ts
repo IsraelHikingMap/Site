@@ -7,7 +7,7 @@ import { SpatialService } from "./spatial.service";
 export class GeoJsonParser {
     private static MARKERS = "markers";
 
-    public static getPropertyValue(properties: Record<string, string>, key: string, language?: string): string {
+    private getPropertyValue(properties: Record<string, string>, key: string, language?: string): string {
         let value = "";
         if (language) {
             value = properties[key + ":" + language];
@@ -15,7 +15,7 @@ export class GeoJsonParser {
         return value || properties[key];
     }
 
-    public static createLatlng(coordinates: GeoJSON.Position): LatLngAlt {
+    private createLatlng(coordinates: GeoJSON.Position): LatLngAlt {
         return {
             lat: coordinates[1],
             lng: coordinates[0],
@@ -23,14 +23,11 @@ export class GeoJsonParser {
         };
     }
 
-    public parse(content: string): DataContainer {
-        let geojson = JSON.parse(content);
-        return this.toDataContainer(geojson);
-    }
-
-    public toString(data: DataContainer): string {
-        let geoJson = this.toGeoJson(data);
-        return JSON.stringify(geoJson);
+    private addRouteDataToDataContainer(routeData: RouteData, data: DataContainer) {
+        if (routeData && routeData.segments.length > 0) {
+            routeData.markers = routeData.markers || [];
+            data.routes.push(routeData);
+        }
     }
 
     public toDataContainer(geoJson: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>, language?: string): DataContainer {
@@ -40,8 +37,8 @@ export class GeoJsonParser {
         } as DataContainer;
         for (let feature of geoJson.features) {
             let routeData = null;
-            let name = GeoJsonParser.getPropertyValue(feature.properties, "name", language);
-            let description = GeoJsonParser.getPropertyValue(feature.properties, "description", language);
+            let name = this.getPropertyValue(feature.properties, "name", language);
+            let description = this.getPropertyValue(feature.properties, "description", language);
             let icon = feature.properties.icon;
             let id = feature.properties.identifier;
             let website = feature.properties.website;
@@ -72,27 +69,36 @@ export class GeoJsonParser {
                 case "LineString":
                     let lineString = feature.geometry as GeoJSON.LineString;
                     routeData = this.positionsToData(lineString.coordinates, name, description);
+                    this.addRouteDataToDataContainer(routeData, data);
                     break;
                 case "MultiLineString":
                     let multiLineString = feature.geometry as GeoJSON.MultiLineString;
-                    routeData = this.coordinatesArrayToData(multiLineString.coordinates, name, description);
+                    for (let i = 0; i < multiLineString.coordinates.length; i++) {
+                        let prefix = i > 0 ? " " + i : "";
+                        routeData = this.positionsToData(multiLineString.coordinates[i], `${name}${prefix}` , description);
+                        this.addRouteDataToDataContainer(routeData, data);
+                    }
                     break;
                 case "Polygon":
                     let polygone = feature.geometry as GeoJSON.Polygon;
-                    routeData = this.coordinatesArrayToData(polygone.coordinates, name, description);
+                    for (let i = 0; i < polygone.coordinates.length; i++) {
+                        let prefix = i > 0 ? " " + i : "";
+                        routeData = this.positionsToData(polygone.coordinates[i], `${name}${prefix}` , description);
+                        this.addRouteDataToDataContainer(routeData, data);
+                    }
                     break;
                 case "MultiPolygon":
                     let multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
-                    routeData = ({ name: name || "", description: description || "", segments: [] } as RouteData);
+                    let routeIndex = 0;
                     for (let polygoneCoordinates of multiPolygone.coordinates) {
-                        let route = this.coordinatesArrayToData(polygoneCoordinates, name, description);
-                        routeData.segments = routeData.segments.concat(route.segments);
+                        for (let ringCoordinates of polygoneCoordinates) {
+                            let prefix = routeIndex > 0 ? " " + routeIndex : "";
+                            routeData = this.positionsToData(ringCoordinates, `${name}${prefix}` , description);
+                            this.addRouteDataToDataContainer(routeData, data);
+                            routeIndex++;
+                        }
                     }
                     break;
-            }
-            if (routeData && routeData.segments.length > 0) {
-                routeData.markers = routeData.markers || [];
-                data.routes.push(routeData);
             }
         }
         if (markers.length > 0) {
@@ -129,7 +135,7 @@ export class GeoJsonParser {
     private createMarker(coordinates: GeoJSON.Position, id: string, message: string, icon: string, description: string): MarkerData {
         return {
             id,
-            latlng: GeoJsonParser.createLatlng(coordinates),
+            latlng: this.createLatlng(coordinates),
             title: message,
             type: icon ? icon.replace("icon-", "") : "",
             description,
@@ -140,7 +146,7 @@ export class GeoJsonParser {
     private createLatlngArray(coordinates: GeoJSON.Position[]): LatLngAlt[] {
         let latlngs = [] as LatLngAlt[];
         for (let pointCoordinates of coordinates) {
-            latlngs.push(GeoJsonParser.createLatlng(pointCoordinates));
+            latlngs.push(this.createLatlng(pointCoordinates));
         }
         return latlngs;
     }
@@ -162,32 +168,6 @@ export class GeoJsonParser {
             latlngs,
             routingType: "Hike"
         } as RouteSegmentData);
-        return routeData;
-    }
-
-    private coordinatesArrayToData(coordinates: GeoJSON.Position[][], name: string, description: string): RouteData {
-        let routeData = { name: name || "", description: description || "", segments: [], markers: [] } as RouteData;
-        for (let lineCoordinates of coordinates) {
-            if (lineCoordinates.length <= 0) {
-                continue;
-            }
-            if (routeData.segments.length === 0) {
-                let latLng = GeoJsonParser.createLatlng(lineCoordinates[0]);
-                routeData.segments.push({
-                    latlngs: [latLng, latLng],
-                    routePoint: latLng,
-                    routingType: "Hike"
-                } as RouteSegmentData);
-            }
-            let latlngs = this.createLatlngArray(lineCoordinates);
-            if (latlngs.length >= 2) {
-                routeData.segments.push({
-                    latlngs,
-                    routePoint: latlngs[0],
-                    routingType: "Hike"
-                } as RouteSegmentData);
-            }
-        }
         return routeData;
     }
 
@@ -244,7 +224,7 @@ export class GeoJsonParser {
         switch (feature.geometry.type) {
             case "Point":
                 let point = feature.geometry as GeoJSON.Point;
-                latlngsArray.push([GeoJsonParser.createLatlng(point.coordinates)]);
+                latlngsArray.push([this.createLatlng(point.coordinates)]);
                 break;
             case "LineString":
                 let lineString = feature.geometry as GeoJSON.LineString;
