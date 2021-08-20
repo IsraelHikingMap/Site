@@ -106,8 +106,6 @@ export class RouteStatisticsService {
                 (currentPoint.coordinate[0] - prevPoint.coordinate[0]);
         }
 
-        // smooth the line in order to better calculate gain and loss:
-        // changing x from Km to Km * 100 to better align with required altitude sensitivity
         let pts = resample(routeStatistics.points.map(p=>p.coordinate), { dist: 0.025 }, false);
         let median = createMedianFilter(11);
         let simplifiedCoordinates = pts.map(p => [p[0], median(p[1])])
