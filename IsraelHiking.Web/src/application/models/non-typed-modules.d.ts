@@ -1,5 +1,6 @@
 /// <reference types="file-saver" />
 
+declare module "moving-median";
 declare module "piexifjs";
 declare module "ohauth";
 declare module "d3-regression";

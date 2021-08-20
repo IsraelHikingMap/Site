@@ -38,8 +38,8 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
-        expect(statistics.gain).toBe(20);
-        expect(statistics.loss).toBe(-20);
+        expect(statistics.gain).toBeCloseTo(20);
+        expect(statistics.loss).toBeCloseTo(-20);
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(5);
     });
@@ -61,8 +61,8 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
-        expect(statistics.gain).toBe(10);
-        expect(statistics.loss).toBe(-20);
+        expect(statistics.gain).toBeCloseTo(10);
+        expect(statistics.loss).toBeCloseTo(-20);
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(3);
     });
@@ -87,8 +87,8 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
-        expect(statistics.gain).toBe(30);
-        expect(statistics.loss).toBe(-30);
+        expect(statistics.gain).toBeCloseTo(30);
+        expect(statistics.loss).toBeCloseTo(-30);
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(4);
     });
@@ -121,7 +121,7 @@ describe("RouteStatisticsService", () => {
         let statistics = service.getStatistics(recordingRouteData, closestRouteData, lastLatLng, null, true);
         let statisticsOfCloseRoute = service.getStatistics(closestRouteData, null, null, null, false);
 
-        expect(statistics.gain).toBe(20);
+        expect(statistics.gain).toBeCloseTo(19.99,2);
         expect(statistics.loss).toBe(0);
         expect(statistics.length).not.toBe(statisticsOfCloseRoute.length);
         expect(statistics.points.length).toBe(3);
@@ -168,8 +168,35 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
-        expect(statistics.gain).toBe(0);
-        expect(statistics.loss).toBe(0);
+        expect(statistics.gain).toBeCloseTo(3);
+        expect(statistics.loss).toBeCloseTo(-3);
+        expect(statistics.length).not.toBe(0);
+    });
+
+    it("Should get simplified statistics on route with outliers", () => {
+        let routeData = {
+            segments: [
+                {
+                    latlngs: [
+                        { lat: 31.3401, lng: 35.1014, alt: 10 },
+                        { lat: 31.3403, lng: 35.1014, alt: 30 },
+                        { lat: 31.340305, lng: 35.1014, alt: 700 },
+                        { lat: 31.3404, lng: 35.1014, alt: 50 },
+                        { lat: 31.3407, lng: 35.1014, alt: 70 },
+                        { lat: 31.3408, lng: 35.1014, alt: 60 },
+                        { lat: 31.3410, lng: 35.1014, alt: 40 },
+                        { lat: 31.341005, lng: 35.1014, alt: -700 },
+                        { lat: 31.3411, lng: 35.1014, alt: 30 },
+                        { lat: 31.3413, lng: 35.1014, alt: 10 }
+                    ]
+                }
+            ]
+        } as RouteData;
+
+        let statistics = service.getStatistics(routeData, null, null, null, false);
+
+        expect(statistics.gain).toBeCloseTo(59.9,1);
+        expect(statistics.loss).toBeCloseTo(-59.8,1);
         expect(statistics.length).not.toBe(0);
     });
 
@@ -186,7 +213,7 @@ describe("RouteStatisticsService", () => {
         let end = service.interpolateStatistics(statistics, 1);
         statistics = service.getStatisticsByRange(routeData, start, end);
 
-        expect(statistics.gain).toBeCloseTo(0.9, 2);
+        expect(statistics.gain).toBeCloseTo(0.8, 1);
         expect(statistics.loss).toBe(0);
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(2);

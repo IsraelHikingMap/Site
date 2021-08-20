@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { last } from "lodash-es";
-
+import { resample } from "@thi.ng/geom-resample";
+import createMedianFilter from "moving-median";
 import { SpatialService } from "./spatial.service";
 import { LatLngAlt, RouteData, ILatLngTime } from "../models/models";
 
@@ -61,11 +62,11 @@ export class RouteStatisticsService {
         }
 
         // convert to route statistic points
-        let previousPoint = route.segments[0].latlngs[0];
-        routeStatistics.points.push(start || { coordinate: [0, previousPoint.alt], latlng: previousPoint, slope: 0 });
+        let previousLatlng = route.segments[0].latlngs[0];
+        routeStatistics.points.push(start || { coordinate: [0, previousLatlng.alt], latlng: previousLatlng, slope: 0 });
         for (let segment of route.segments) {
             for (let latlng of segment.latlngs) {
-                let distance = SpatialService.getDistanceInMeters(previousPoint, latlng);
+                let distance = SpatialService.getDistanceInMeters(previousLatlng, latlng);
                 routeStatistics.length += distance;
                 let point = {
                     coordinate: [(routeStatistics.length / 1000), latlng.alt],
@@ -75,7 +76,7 @@ export class RouteStatisticsService {
                 if (start == null || (point.coordinate[0] > start.coordinate[0] && point.coordinate[0] < end.coordinate[0])) {
                     routeStatistics.points.push(point);
                 }
-                previousPoint = latlng;
+                previousLatlng = latlng;
             }
         }
         if (start != null && end != null) {
@@ -105,9 +106,9 @@ export class RouteStatisticsService {
                 (currentPoint.coordinate[0] - prevPoint.coordinate[0]);
         }
 
-        // smooth the line in order to better calculate gain and loss:
-        // changing x from Km to Km * 100 to better align with required altitude sensitivity
-        let simplifiedCoordinates = SpatialService.simplify(routeStatistics.points.map(p => [p.coordinate[0] * 100, p.coordinate[1]]), 5);
+        let pts = resample(routeStatistics.points.map(p=>p.coordinate), { dist: 0.025 }, false);
+        let median = createMedianFilter(11);
+        let simplifiedCoordinates = pts.map(p => [p[0], median(p[1])])
         let previousSimplifiedPoint = simplifiedCoordinates[0];
         for (let simplifiedPoint of simplifiedCoordinates) {
             routeStatistics.gain += ((simplifiedPoint[1] - previousSimplifiedPoint[1]) > 0 &&
