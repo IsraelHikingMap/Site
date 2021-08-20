@@ -38,8 +38,8 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
-        expect(statistics.gain).toBe(20);
-        expect(statistics.loss).toBe(-20);
+        expect(statistics.gain).toBeCloseTo(20,1);
+        expect(statistics.loss).toBeCloseTo(-20,1);
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(5);
     });
@@ -62,7 +62,7 @@ describe("RouteStatisticsService", () => {
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
         expect(statistics.gain).toBe(10);
-        expect(statistics.loss).toBe(-20);
+        expect(statistics.loss).toBeCloseTo(-20,0);
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(3);
     });
@@ -87,8 +87,8 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
-        expect(statistics.gain).toBe(30);
-        expect(statistics.loss).toBe(-30);
+        expect(statistics.gain).toBeCloseTo(30,1);
+        expect(statistics.loss).toBeCloseTo(-30,1);
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(4);
     });
@@ -121,7 +121,7 @@ describe("RouteStatisticsService", () => {
         let statistics = service.getStatistics(recordingRouteData, closestRouteData, lastLatLng, null, true);
         let statisticsOfCloseRoute = service.getStatistics(closestRouteData, null, null, null, false);
 
-        expect(statistics.gain).toBe(20);
+        expect(statistics.gain).toBeCloseTo(20);
         expect(statistics.loss).toBe(0);
         expect(statistics.length).not.toBe(statisticsOfCloseRoute.length);
         expect(statistics.points.length).toBe(3);
@@ -168,8 +168,8 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
-        expect(statistics.gain).toBe(0);
-        expect(statistics.loss).toBe(0);
+        expect(statistics.gain).toBeCloseTo(3);
+        expect(statistics.loss).toBeCloseTo(-3);
         expect(statistics.length).not.toBe(0);
     });
 
