@@ -173,6 +173,33 @@ describe("RouteStatisticsService", () => {
         expect(statistics.length).not.toBe(0);
     });
 
+    it("Should get simplified statistics on route with outliers", () => {
+        let routeData = {
+            segments: [
+                {
+                    latlngs: [
+                        { lat: 31.3401, lng: 35.1014, alt: 10 },
+                        { lat: 31.3403, lng: 35.1014, alt: 30 },
+                        { lat: 31.340305, lng: 35.1014, alt: 700 },
+                        { lat: 31.3404, lng: 35.1014, alt: 50 },
+                        { lat: 31.3407, lng: 35.1014, alt: 70 },
+                        { lat: 31.3408, lng: 35.1014, alt: 60 },
+                        { lat: 31.3410, lng: 35.1014, alt: 40 },
+                        { lat: 31.341005, lng: 35.1014, alt: -700 },
+                        { lat: 31.3411, lng: 35.1014, alt: 30 },
+                        { lat: 31.3413, lng: 35.1014, alt: 10 }
+                    ]
+                }
+            ]
+        } as RouteData;
+
+        let statistics = service.getStatistics(routeData, null, null, null, false);
+
+        expect(statistics.gain).toBeCloseTo(59.9,1);
+        expect(statistics.loss).toBeCloseTo(-59.8,1);
+        expect(statistics.length).not.toBe(0);
+    });
+
     it("Should get statistics on part of route", () => {
         let routeData = {
             segments: [
