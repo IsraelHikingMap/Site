@@ -5,7 +5,6 @@
     "baseUrl": "src",
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
-    "noImplicitAny": false,
     "noFallthroughCasesInSwitch": true,
     "strictNullChecks": false,
     "strict": true,
