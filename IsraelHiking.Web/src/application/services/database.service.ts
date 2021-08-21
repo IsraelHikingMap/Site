@@ -91,6 +91,10 @@ export class DatabaseService {
         if (dbState != null) {
             storedState = this.initialStateUpgrade(dbState.state);
         } else {
+            // initial load ever:
+            if (this.runningContext.isCordova) {
+                initialState.gpsState.tracking = "tracking";
+            }
             this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).put({
                 id: DatabaseService.STATE_DOC_ID,
                 state: initialState
@@ -322,6 +326,7 @@ export class DatabaseService {
         if (!this.runningContext.isCordova) {
             storedState.routes = initialState.routes;
             storedState.poiState = initialState.poiState;
+            storedState.gpsState.tracking = initialState.gpsState.tracking;
         }
         return storedState;
     }

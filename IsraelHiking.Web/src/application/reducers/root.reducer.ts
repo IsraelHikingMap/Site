@@ -11,6 +11,7 @@ import { shareUrlsReducer } from "./share-urls.reducer";
 import { userReducer } from "./user.reducer";
 import { pointsOfInterestReducer } from "./poi.reducer";
 import { inMemoryReducer } from "./in-memory.reducer";
+import { gpsReducer } from "./gps.reducer";
 import { offlineReducer } from "./offline.reducer";
 import { uiComponentsReducer } from "./ui-components.reducer";
 
@@ -25,6 +26,7 @@ export const rootReducer = combineReducers<ApplicationState>({
     userState: userReducer,
     poiState: pointsOfInterestReducer,
     inMemoryState: inMemoryReducer,
+    gpsState: gpsReducer,
     offlineState: offlineReducer,
     uiComponentsState: uiComponentsReducer
 } as ReducersMapObject<ApplicationState>);

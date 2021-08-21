@@ -133,8 +133,11 @@ export const initialState =
             pannedTimestamp: null,
             shareUrl: null,
             fileUrl: null,
-            baseLayer: null,
-            geoLocation: "disabled"
+            baseLayer: null
+        },
+        gpsState: {
+            tracking: "disabled",
+            currentPoistion: null
         },
         offlineState: {
             isOfflineAvailable: false,

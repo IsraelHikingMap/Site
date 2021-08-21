@@ -6,7 +6,7 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
-import { SetGeoLocationStateAction } from "../reducers/in-memory.reducer";
+import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import { ApplicationState, ILatLngTime } from "../models/models";
 
 declare let BackgroundGeolocation: BackgroundGeolocationPlugin;
@@ -20,9 +20,7 @@ export class GeoLocationService {
     private isBackground: boolean;
     private wasInitialized: boolean;
 
-    public positionChanged: EventEmitter<GeolocationPosition>;
     public bulkPositionChanged: EventEmitter<GeolocationPosition[]>;
-    public currentLocation: ILatLngTime;
 
     constructor(private readonly resources: ResourcesService,
                 private readonly runningContextService: RunningContextService,
@@ -31,15 +29,20 @@ export class GeoLocationService {
                 private readonly ngZone: NgZone,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.watchNumber = -1;
-        this.positionChanged = new EventEmitter<GeolocationPosition>();
         this.bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
         this.isBackground = false;
-        this.currentLocation = null;
         this.wasInitialized = false;
     }
 
+    public initialize() {
+        if (this.ngRedux.getState().gpsState.tracking === "tracking") {
+            this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
+            this.enable();
+        }
+    }
+
     public enable() {
-        switch (this.ngRedux.getState().inMemoryState.geoLocation) {
+        switch (this.ngRedux.getState().gpsState.tracking) {
             case "disabled":
                 this.startWatching();
                 return;
@@ -51,7 +54,7 @@ export class GeoLocationService {
     }
 
     public async disable() {
-        switch (this.ngRedux.getState().inMemoryState.geoLocation) {
+        switch (this.ngRedux.getState().gpsState.tracking) {
             case "disabled":
                 return;
             case "searching":
@@ -62,12 +65,13 @@ export class GeoLocationService {
     }
 
     public canRecord(): boolean {
-        return this.ngRedux.getState().inMemoryState.geoLocation === "tracking"
-            && this.currentLocation != null && this.runningContextService.isCordova;
+        let gpsState = this.ngRedux.getState().gpsState;
+        return gpsState.tracking === "tracking"
+            && gpsState.currentPoistion != null && this.runningContextService.isCordova;
     }
 
     private startWatching() {
-        this.ngRedux.dispatch(new SetGeoLocationStateAction({ state: "searching"}));
+        this.ngRedux.dispatch(new SetTrackingStateAction({ state: "searching"}));
         if (window.navigator && window.navigator.geolocation) {
             // Upon starting location watching get the current position as fast as we can, even if not accurate.
             window.navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
@@ -76,7 +80,6 @@ export class GeoLocationService {
         }
         if (this.runningContextService.isCordova) {
             this.startBackgroundGeolocation();
-
         } else {
             this.startNavigator();
         }
@@ -130,18 +133,8 @@ export class GeoLocationService {
             if (this.isBackground) {
                 return;
             }
-            let locations = await BackgroundGeolocation.getValidLocationsAndDelete();
-            let positions = locations.map(l => this.locationToPosition(l));
-            if (positions.length === 0) {
-                this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
-            } else if (positions.length === 1) {
-                this.loggingService.debug("[GeoLocation] Sending a location update");
-                this.handlePoistionChange(positions[positions.length - 1]);
-            } else {
-                this.loggingService.debug(`[GeoLocation] Sending bulk location update on each location update: ${positions.length}`);
-                this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
-                this.handlePoistionChange(positions[0]);
-            }
+            this.loggingService.debug("[GeoLocation] Recieved location(s) while in foreground");
+            await this.onLocationUpdate();
         });
 
         BackgroundGeolocation.on("start").subscribe(
@@ -163,22 +156,30 @@ export class GeoLocationService {
         BackgroundGeolocation.on("foreground").subscribe(
             async () => {
                 this.loggingService.debug("[GeoLocation] Now in foreground");
-                let locations = await BackgroundGeolocation.getValidLocationsAndDelete();
                 this.isBackground = false;
-                let positions = locations.map(l => this.locationToPosition(l));
-                if (positions.length > 0) {
-                    this.loggingService.debug(`[GeoLocation] Sending bulk location update: ${positions.length}`);
-                    this.currentLocation = this.positionToLatLngTime(positions[positions.length - 1]);
-                    this.bulkPositionChanged.next(positions);
-                }
+                await this.onLocationUpdate();
             });
         BackgroundGeolocation.start();
     }
 
+    private async onLocationUpdate() {
+        let locations = await BackgroundGeolocation.getValidLocationsAndDelete();
+        let positions = locations.map(l => this.locationToPosition(l));
+        if (positions.length === 0) {
+            this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
+        } else if (positions.length === 1) {
+            this.loggingService.debug("[GeoLocation] Sending a location update");
+            this.handlePoistionChange(positions[positions.length - 1]);
+        } else {
+            this.loggingService.debug(`[GeoLocation] Sending bulk location update: ${positions.length}`);
+            this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
+            this.handlePoistionChange(positions[0]);
+        }
+    }
+
     private async stopWatching() {
-        this.ngRedux.dispatch(new SetGeoLocationStateAction({ state: "disabled"}));
-        this.currentLocation = null;
-        this.positionChanged.next(null);
+        this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
+        this.ngRedux.dispatch(new SetCurrentPositionAction({position: null}));
         if (this.runningContextService.isCordova) {
             this.loggingService.debug("[GeoLocation] Stopping background tracking");
             await BackgroundGeolocation.stop();
@@ -198,14 +199,13 @@ export class GeoLocationService {
     private handlePoistionChange(position: GeolocationPosition): void {
         this.ngZone.run(() => {
             this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
-            if (this.ngRedux.getState().inMemoryState.geoLocation === "searching") {
-                this.ngRedux.dispatch(new SetGeoLocationStateAction({ state: "tracking"}));
+            if (this.ngRedux.getState().gpsState.tracking === "searching") {
+                this.ngRedux.dispatch(new SetTrackingStateAction({ state: "tracking"}));
             }
-            if (this.ngRedux.getState().inMemoryState.geoLocation !== "tracking") {
+            if (this.ngRedux.getState().gpsState.tracking !== "tracking") {
                 return;
             }
-            this.currentLocation = this.positionToLatLngTime(position);
-            this.positionChanged.next(position);
+            this.ngRedux.dispatch(new SetCurrentPositionAction({position}));
         });
     }
 

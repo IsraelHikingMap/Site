@@ -1,7 +1,8 @@
 import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { TestBed, inject } from "@angular/core/testing";
-import { NgReduxTestingModule } from "../reducers/infra/ng-redux-testing.module";
+import { MockNgRedux, NgReduxTestingModule } from "../reducers/infra/ng-redux-testing.module";
 import { Device } from "@ionic-native/device/ngx";
+import { Subject } from "rxjs";
 
 import { RecordedRouteService } from "./recorded-route.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
@@ -14,7 +15,7 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
-import { RouteData } from "../models/models";
+import { ApplicationState, RouteData } from "../models/models";
 
 describe("RecordedRouteService", () => {
     beforeEach(() => {
@@ -44,6 +45,7 @@ describe("RecordedRouteService", () => {
                 RecordedRouteService
             ]
         });
+        MockNgRedux.reset();
     });
 
     it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService,
@@ -73,11 +75,11 @@ describe("RecordedRouteService", () => {
             } as RouteData;
             selectedRouteService.getRecordingRoute = () => recordingRoute;
             let spy = spyOn(logginService, "debug");
-            geoService.positionChanged.next(
-                {
-                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(1).getTime()
-                });
+            const positionStub: Subject<GeolocationPosition> = MockNgRedux.getSelectorStub<ApplicationState, GeolocationPosition>(
+                (state)=> state.gpsState.currentPoistion
+            );
+            positionStub.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
+                timestamp: new Date(1).getTime()});
             geoService.bulkPositionChanged.next([
                 {
                     coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,

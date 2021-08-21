@@ -18,6 +18,7 @@ import { TracesService } from "./traces.service";
 import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
+import { GeoLocationService } from "./geo-location.service";
 
 @Injectable()
 export class ApplicationInitializeService {
@@ -36,7 +37,8 @@ export class ApplicationInitializeService {
                 private readonly recordedRouteService: RecordedRouteService,
                 private readonly tracesService: TracesService,
                 private readonly shareUrlsService: ShareUrlsService,
-                private readonly offlineFilesDownloadService: OfflineFilesDownloadService
+                private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
+                private readonly geoLocationService: GeoLocationService
     ) {
     }
 
@@ -51,6 +53,7 @@ export class ApplicationInitializeService {
             this.applicationExitService.initialize();
             this.openWithService.initialize();
             this.purchaseService.initialize();
+            this.geoLocationService.initialize();
             this.dragAndDropService.initialize();
             if (this.runnincContextService.isMobile
                 && !this.runnincContextService.isCordova

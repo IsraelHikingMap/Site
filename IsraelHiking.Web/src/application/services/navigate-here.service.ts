@@ -21,12 +21,14 @@ export class NavigateHereService {
                 private readonly ngRedux: NgRedux<ApplicationState>) { }
 
     public async addNavigationSegment(latlng: LatLngAlt, title: string) {
-        if (this.geoLocationService.currentLocation == null) {
+        let currentPoistion = this.ngRedux.getState().gpsState.currentPoistion;
+        if (currentPoistion == null) {
             this.toastService.warning(this.resources.unableToFindYourLocation);
             return;
         }
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
-        let routeSegments = await this.routerService.getRoute(this.geoLocationService.currentLocation, latlng, routingType);
+        let currentLocation = this.geoLocationService.positionToLatLngTime(currentPoistion);
+        let routeSegments = await this.routerService.getRoute(currentLocation, latlng, routingType);
         if (routeSegments.length === 0 || routeSegments[0].latlngs.length < 2) {
             this.toastService.warning(this.resources.routingFailed);
             return;
