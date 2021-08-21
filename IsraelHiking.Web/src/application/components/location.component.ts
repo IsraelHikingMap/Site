@@ -86,29 +86,28 @@ export class LocationComponent extends BaseMapComponent {
             this.mapComponent.mapInstance.on("move", () => {
                 this.updateDistanceFeatureCollection();
             });
-        });
 
-        this.currentPoistion$.subscribe(
-            (position: GeolocationPosition) => {
+            this.currentPoistion$.subscribe((position: GeolocationPosition) => {
                 if (position != null) {
                     this.handlePositionChange(position);
                 }
             });
 
-        this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
-            if (!this.isActive() || this.locationFeatures.features.length === 0) {
-                return;
-            }
-            if (this.lastSpeed != null && new Date().getTime() - this.lastSpeedTime < 5000) {
-                return;
-            }
-            this.lastSpeed = null;
-            let center = this.getCenterFromLocationFeatureCollection();
-            let radius = this.getRadiusFromLocationFeatureCollection();
-            this.updateLocationFeatureCollection(center, radius, bearing);
-            if (!this.mapComponent.mapInstance.isMoving() && this.isFollowingLocation()) {
-                this.moveMapToGpsPosition();
-            }
+            this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
+                if (!this.isActive() || this.locationFeatures.features.length === 0) {
+                    return;
+                }
+                if (this.lastSpeed != null && new Date().getTime() - this.lastSpeedTime < 5000) {
+                    return;
+                }
+                this.lastSpeed = null;
+                let center = this.getCenterFromLocationFeatureCollection();
+                let radius = this.getRadiusFromLocationFeatureCollection();
+                this.updateLocationFeatureCollection(center, radius, bearing);
+                if (!this.mapComponent.mapInstance.isMoving() && this.isFollowingLocation()) {
+                    this.moveMapToGpsPosition();
+                }
+            });
         });
     }
 

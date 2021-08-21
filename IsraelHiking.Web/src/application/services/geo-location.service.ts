@@ -41,6 +41,12 @@ export class GeoLocationService {
         }
     }
 
+    public async uninitialize() {
+        let stateBefore = this.ngRedux.getState().gpsState.tracking;
+        await this.disable();
+        this.ngRedux.dispatch(new SetTrackingStateAction({ state: stateBefore}));
+    }
+
     public enable() {
         switch (this.ngRedux.getState().gpsState.tracking) {
             case "disabled":
@@ -210,6 +216,9 @@ export class GeoLocationService {
     }
 
     public positionToLatLngTime(position: GeolocationPosition): ILatLngTime {
+        if (position == null) {
+            return null;
+        }
         return {
             lat: position.coords.latitude,
             lng: position.coords.longitude,

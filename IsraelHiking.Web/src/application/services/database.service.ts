@@ -131,7 +131,7 @@ export class DatabaseService {
         });
     }
 
-    public async close() {
+    public async uninitialize() {
         let finalState = this.ngRedux.getState();
         // reduce database size and memory footprint
         finalState.routes.past = [];
