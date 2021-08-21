@@ -108,7 +108,7 @@ export class RouteStatisticsService {
 
         let pts = resample(routeStatistics.points.map(p=>p.coordinate), { dist: 0.025 }, false);
         let median = createMedianFilter(11);
-        let simplifiedCoordinates = pts.map(p => [p[0], median(p[1])])
+        let simplifiedCoordinates = pts.map(p => [p[0], median(p[1])]);
         let previousSimplifiedPoint = simplifiedCoordinates[0];
         for (let simplifiedPoint of simplifiedCoordinates) {
             routeStatistics.gain += ((simplifiedPoint[1] - previousSimplifiedPoint[1]) > 0 &&

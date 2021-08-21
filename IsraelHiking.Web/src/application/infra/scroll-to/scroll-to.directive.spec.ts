@@ -1,15 +1,15 @@
-import { Component, OnInit, Type } from '@angular/core';
+import { Component, OnInit, Type } from "@angular/core";
 import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { ScrollToConfigOptionsTarget } from './scroll-to-config.interface';
+import { ScrollToConfigOptionsTarget } from "./scroll-to-config.interface";
 import { ScrollToModule } from "./scroll-to.module";
 import { ScrollToDirective } from "./scroll-to.directive";
 import { ScrollToService } from "./scroll-to.service";
 import { DEFAULTS, EVENTS } from "./scroll-to-helpers";
 import { ScrollToEvent } from "./scroll-to-event.interface";
 
-const TARGET = 'destination';
-const BUTTON_ID = 'btn-1';
+const TARGET = "destination";
+const BUTTON_ID = "btn-1";
 
 interface CompileTemplateConfigOptions extends ScrollToConfigOptionsTarget {
   action?: string;
@@ -21,7 +21,7 @@ class ScrollToServiceMock {
 
 /** Dummy Component for testing the Angular Directive */
 @Component({
-  selector: 'ngx-scroll-to',
+  selector: "ngx-scroll-to",
   styles: [`
     #destination {
     margin-top: 100vh;
@@ -47,7 +47,7 @@ const createTestComponent = (
   const template = `
     <button id="${BUTTON_ID}" 
       [ngxScrollTo]="'${config.target}'"
-      ${event ? '[ngxScrollToEvent]="\'' + event + '\'"' : ''}
+      ${event ? "[ngxScrollToEvent]=\"'" + event + "'\"" : ""}
       >Go to destination</button>
     <div id="${config.target}">You've reached your destination</div>
 `;
@@ -59,7 +59,7 @@ const createTestComponent = (
   });
 
   return TestBed.createComponent(component);
-}
+};
 
 describe("ScrollToDirective", () => {
 
