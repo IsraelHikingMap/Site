@@ -48,7 +48,7 @@ describe("RecordedRouteService", () => {
         MockNgRedux.reset();
     });
 
-    it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService,
+    it("Should add a valid location", inject([RecordedRouteService, GeoLocationService,
         LoggingService, SelectedRouteService],
         (service: RecordedRouteService, geoService: GeoLocationService,
          logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
@@ -76,11 +76,49 @@ describe("RecordedRouteService", () => {
             selectedRouteService.getRecordingRoute = () => recordingRoute;
             let spy = spyOn(logginService, "debug");
             const positionStub: Subject<GeolocationPosition> = MockNgRedux.getSelectorStub<ApplicationState, GeolocationPosition>(
-                (state)=> state.gpsState.currentPoistion
+                state => state.gpsState.currentPoistion
             );
-            positionStub.next({ coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
-                timestamp: new Date(1).getTime()});
+            
+            positionStub.next(
+                { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime()}
+            );
+
+            expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy(spy.calls.all()[0].args[0]);
+        }));
+
+    it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService,
+        LoggingService, SelectedRouteService],
+        (service: RecordedRouteService, geoService: GeoLocationService,
+         logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
+            service.initialize();
+            let recordingRoute = {
+                id: "1",
+                name: "",
+                description: "",
+                markers: [],
+                segments: [{
+                    routePoint: {
+                        lat: 1,
+                        lng: 2,
+                        alt: 10
+                    },
+                    routingType: "Hike",
+                    latlngs: [{
+                        lat: 1,
+                        lng: 2,
+                        alt: 10,
+                        timestamp: new Date(0)
+                    }]
+                }]
+            } as RouteData;
+            selectedRouteService.getRecordingRoute = () => recordingRoute;
+            let spy = spyOn(logginService, "debug");
+
             geoService.bulkPositionChanged.next([
+                { 
+                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, 
+                    timestamp: new Date(1).getTime()
+                },
                 {
                     coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(150000).getTime()
