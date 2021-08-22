@@ -15,16 +15,21 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
+import { AddRecordingPointsAction } from "../reducers/routes.reducer";
 import { ApplicationState, RouteData } from "../models/models";
 
 describe("RecordedRouteService", () => {
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
         let loggingServiceMock = {
-            debug: () => { }
+            debug: () => { },
+            info: () => { }
         };
         let selectedRouteServiceMock = {
             getRecordingRoute: () => { }
+        };
+        let tracesServiceMock = {
+            uploadLocalTracesIfNeeded: () => Promise.resolve()
         };
         TestBed.configureTestingModule({
             imports: [
@@ -36,7 +41,7 @@ describe("RecordedRouteService", () => {
                 { provide: ToastService, useValue: toastMock.toastService },
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: SelectedRouteService, useValue: selectedRouteServiceMock },
-                { provide: TracesService, useValue: null },
+                { provide: TracesService, useValue: tracesServiceMock },
                 GeoLocationService,
                 RunningContextService,
                 ConnectionService,
@@ -48,10 +53,8 @@ describe("RecordedRouteService", () => {
         MockNgRedux.reset();
     });
 
-    it("Should add a valid location", inject([RecordedRouteService, GeoLocationService,
-        LoggingService, SelectedRouteService],
-        (service: RecordedRouteService, geoService: GeoLocationService,
-         logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
+    it("Should add a valid location", inject([RecordedRouteService, LoggingService, SelectedRouteService],
+        (service: RecordedRouteService, logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
             service.initialize();
             let recordingRoute = {
                 id: "1",
@@ -73,17 +76,22 @@ describe("RecordedRouteService", () => {
                     }]
                 }]
             } as RouteData;
+            MockNgRedux.getInstance().getState = () => ({
+                userState: {}
+            });
             selectedRouteService.getRecordingRoute = () => recordingRoute;
-            let spy = spyOn(logginService, "debug");
             const positionStub: Subject<GeolocationPosition> = MockNgRedux.getSelectorStub<ApplicationState, GeolocationPosition>(
                 state => state.gpsState.currentPoistion
             );
-            
+            let spy = jasmine.createSpy();
+            MockNgRedux.getInstance().dispatch = spy;
+
             positionStub.next(
                 { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime()}
             );
-
-            expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy(spy.calls.all()[0].args[0]);
+            
+            expect(spy.calls.all().length).toBe(1);
+            expect((spy.calls.all()[0].args[0] as AddRecordingPointsAction).payload.latlngs.length).toBe(1);
         }));
 
     it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService,
