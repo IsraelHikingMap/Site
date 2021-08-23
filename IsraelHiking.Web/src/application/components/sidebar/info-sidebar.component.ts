@@ -127,7 +127,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendGuidepost);
 
         this.removeItemInSection(this.resources.legendAreas, this.resources.legendBeach);
-        this.removeItemInSection(this.resources.legendAreas, this.resources.legendConstructionSite);
     }
 
     private removeIhmUnwantedLegend() {
