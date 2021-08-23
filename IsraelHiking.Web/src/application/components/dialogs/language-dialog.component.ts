@@ -1,9 +1,10 @@
 import { Component } from "@angular/core";
+import { MatDialog } from "@angular/material/dialog";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { NgRedux } from "../../reducers/infra/ng-redux.module";
-import { ApplicationState, Language, LanguageCode } from "../../models/models";
+import { ApplicationState, LanguageCode } from "../../models/models";
 
 @Component({
     selector: "language-dialog",
@@ -11,30 +12,20 @@ import { ApplicationState, Language, LanguageCode } from "../../models/models";
 })
 export class LanguageDialogComponent extends BaseMapComponent {
     public selectedLanguageCode: LanguageCode;
-    public availableLanguages: Language[];
 
     constructor(resources: ResourcesService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
-        this.availableLanguages = [
-            {
-                code: "he",
-                rtl: true,
-            },
-            {
-                code: "en-US",
-                rtl: false,
-            }
-        ];
         this.selectedLanguageCode = this.ngRedux.getState().configuration.language.code;
     }
 
-    public saveLanguage() {
-        let language = this.availableLanguages.find((l) => l.code === this.selectedLanguageCode);
-        this.resources.setLanguage(language);
+    public static openDialog(dialog: MatDialog) {
+        dialog.open(LanguageDialogComponent, {
+            minWidth: "300px"
+        });
     }
 
-    public getLabel(code: LanguageCode): string {
-        return code === "he" ? "עברית" : "English";
+    public saveLanguage() {
+        this.resources.setLanguage(this.selectedLanguageCode);
     }
 }

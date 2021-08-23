@@ -40,7 +40,7 @@ describe("ResourcesService", () => {
         });
         MockNgRedux.getInstance().dispatch = jasmine.createSpy();
 
-        let promise = service.setLanguage({ code: "he", rtl: true}).then(() => {
+        let promise = service.setLanguage("he").then(() => {
             expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
             expect(MockNgRedux.getInstance().dispatch).toHaveBeenCalled();
         });

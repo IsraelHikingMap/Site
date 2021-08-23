@@ -4,7 +4,7 @@ import { Direction } from "@angular/cdk/bidi";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetLanguageAction } from "../reducers/configuration.reducer";
-import { ApplicationState, Language } from "../models/models";
+import { ApplicationState, Language, LanguageCode } from "../models/models";
 import { Urls } from "../urls";
 
 @Injectable()
@@ -13,6 +13,7 @@ export class ResourcesService {
     public direction: Direction;
     public start: string;
     public end: string;
+    public availableLanguages: Language[];
     private iconsCache: Map<string, string> = new Map();
     public endOfBaseLayer = "end-of-base-layer";
     public endOfOverlays = "end-of-overlays";
@@ -218,6 +219,14 @@ export class ResourcesService {
     public facebookWarning: string;
     public moreInfoFacebook: string;
     public showSlopes: string;
+    public next: string;
+    public back: string;
+    public maps: string;
+    public introMapsDescription: string;
+    public routesAndPoints: string;
+    public introRoutesAndPointsDescription: string;
+    public andSoMuchMore: string;
+    public introAndSoMuchMoreDescription: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -420,10 +429,20 @@ export class ResourcesService {
 
     constructor(private readonly gettextCatalog: GetTextCatalogService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
+        this.availableLanguages = [
+            {
+                code: "he",
+                rtl: true,
+            },
+            {
+                code: "en-US",
+                rtl: false,
+            }
+        ];
     }
 
     public async initialize() {
-        await this.setLanguage(this.ngRedux.getState().configuration.language);
+        await this.setLanguageInternal(this.ngRedux.getState().configuration.language);
     }
 
     private setRtl(rtl: boolean) {
@@ -438,8 +457,8 @@ export class ResourcesService {
         }
     }
 
-    public async setLanguage(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1626798555254");
+    private async setLanguageInternal(language: Language): Promise<void> {
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1629751030095");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -642,6 +661,14 @@ export class ResourcesService {
         this.facebookWarning = this.gettextCatalog.getString("Explanation on how to open Facebook link out side facebook");
         this.moreInfoFacebook = this.gettextCatalog.getString("More Info...");
         this.showSlopes = this.gettextCatalog.getString("Show Slopes");
+        this.next = this.gettextCatalog.getString("Next");
+        this.back = this.gettextCatalog.getString("Back");
+        this.maps = this.gettextCatalog.getString("Maps");
+        this.introMapsDescription = this.gettextCatalog.getString("Intro dialog description for maps");
+        this.routesAndPoints = this.gettextCatalog.getString("Routes and Points");
+        this.introRoutesAndPointsDescription = this.gettextCatalog.getString("Intro dialog description for routes and points");
+        this.andSoMuchMore = this.gettextCatalog.getString("And So Much More!");
+        this.introAndSoMuchMoreDescription = this.gettextCatalog.getString("Intro dialog description for 'so much more'");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -867,6 +894,15 @@ export class ResourcesService {
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
         this.ngRedux.dispatch(new SetLanguageAction({language}));
+    }
+
+    public async setLanguage(code: LanguageCode) {
+        let language = this.availableLanguages.find((l) => l.code === code);
+        await this.setLanguageInternal(language);
+    }
+
+    public getLabelForCode(code: LanguageCode): string {
+        return code === "he" ? "עברית" : "English";
     }
 
     public translate(word: string): string {

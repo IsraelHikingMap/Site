@@ -1,0 +1,42 @@
+<div [dir]="resources.direction">
+    <div mat-dialog-content>
+        <div *ngIf="step === 0">
+            <h2>{{resources.language}}</h2>
+            <mat-radio-group (change)=resources.setLanguage($event.value) value="he">
+                <div *ngFor="let language of resources.availableLanguages">
+                    <mat-radio-button [value]="language.code" color="primary" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Select language {{language.code}}">{{resources.getLabelForCode(language.code)}}</mat-radio-button>
+                </div>
+            </mat-radio-group>
+            <br />
+            <img src="content/default-poi.png" class="img-responsive" />
+        </div>
+        <div *ngIf="step === 1">
+            <h2>{{resources.maps}}</h2>
+            <p>{{resources.introMapsDescription}}</p>
+            <img src="content/default-poi.png" class="img-responsive" />
+        </div>
+        <div *ngIf="step === 2">
+            <h2>{{resources.routesAndPoints}}</h2>
+            <p>{{resources.introRoutesAndPointsDescription}}</p>
+            <img src="content/default-poi.png" class="img-responsive"/>
+        </div>
+        <div *ngIf="step === 3">
+            <h2>{{resources.andSoMuchMore}}</h2>
+            <p>{{resources.introAndSoMuchMoreDescription}}</p>
+            <img src="content/default-poi.png" class="img-responsive"/>
+        </div>
+    </div>
+    <div mat-dialog-actions>
+        <div fxLayout="row" fxFlex>
+            <div fxFlex>
+                <button *ngIf="step !== 0" mat-button fxFill (click)="step = step - 1" angulartics2On="click" angularticsCategory="Progress" angularticsAction="Error progress dialog">{{resources.back}}</button>
+            </div>
+            <div fxFlex *ngIf="step !== 3">
+                <button mat-button fxFill (click)="step = step + 1" angulartics2On="click" angularticsCategory="Progress" angularticsAction="Error progress dialog">{{resources.next}}</button>
+            </div>
+            <div fxFlex *ngIf="step === 3">
+                <button mat-raised-button color="primary" fxFill (click)="close()" angulartics2On="click" angularticsCategory="Progress" angularticsAction="Error progress dialog">{{resources.close}}</button>
+            </div>
+        </div>
+    </div>
+</div>

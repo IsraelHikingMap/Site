@@ -3,6 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-warning-dialog.component";
+import { IntroDialogComponent } from "../components/dialogs/intro-dialog.component";
 import { LoggingService } from "./logging.service";
 import { ScreenService } from "./screen.service";
 import { DatabaseService } from "./database.service";
@@ -30,7 +31,7 @@ export class ApplicationInitializeService {
                 private readonly applicationExitService: ApplicationExitService,
                 private readonly openWithService: OpenWithService,
                 private readonly purchaseService: PurchaseService,
-                private readonly runnincContextService: RunningContextService,
+                private readonly runningContextService: RunningContextService,
                 private readonly dragAndDropService: DragAndDropService,
                 private readonly poiService: PoiService,
                 private readonly deviceOrientationService: DeviceOrientationService,
@@ -55,14 +56,17 @@ export class ApplicationInitializeService {
             this.purchaseService.initialize();
             this.geoLocationService.initialize();
             this.dragAndDropService.initialize();
-            if (this.runnincContextService.isMobile
-                && !this.runnincContextService.isCordova
-                && !this.runnincContextService.isIFrame) {
-                    if (this.runnincContextService.isFacebook) {
+            if (this.runningContextService.isMobile
+                && !this.runningContextService.isCordova
+                && !this.runningContextService.isIFrame) {
+                    if (this.runningContextService.isFacebook) {
                         FacebookWarningDialogComponent.openDialog(this.dialog);
                     } else {
                         UseAppDialogComponent.openDialog(this.dialog);
                     }
+            } else if (!this.runningContextService.isIFrame) {
+                // HM TODO: condition this!
+                IntroDialogComponent.openDialog(this.dialog);
             }
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();

@@ -167,6 +167,7 @@ import { MainMenuComponent } from "./components/main-menu.component";
 import { FilesSharesDialogComponent } from "./components/dialogs/files-shares-dialog.component";
 import { CenterMeComponent } from "./components/center-me.component";
 import { FacebookWarningDialogComponent } from "./components/dialogs/facebook-warning-dialog.component";
+import { IntroDialogComponent } from "./components/dialogs/intro-dialog.component";
 import { PhotoSwpieComponent } from "./components/photoswipe.component";
 
 // variables and functions
@@ -306,6 +307,7 @@ const initializeApplication = (injector: Injector) => async () => {
             TracesDialogComponent,
             SharesDialogComponent,
             LanguageDialogComponent,
+            IntroDialogComponent,
             DrawingComponent,
             CoordinatesComponent,
             RoutePointOverlayComponent,
