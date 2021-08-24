@@ -37,8 +37,8 @@ import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgxMapLibreGLModule } from "ngx-maplibre-gl";
 import { NgIdleModule } from "@ng-idle/core";
-import { LottieModule } from 'ngx-lottie';
-import player from 'lottie-web';
+import { LottieModule } from "ngx-lottie";
+import player from "lottie-web";
 // Cordova plugins
 import { Brightness } from "@ionic-native/brightness/ngx";
 import { Camera } from "@ionic-native/camera/ngx";
