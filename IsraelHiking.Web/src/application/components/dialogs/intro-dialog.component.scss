@@ -1,0 +1,15 @@
+.squareContainer {
+    // width: 100%;
+    max-width: 528px;
+    padding-top: 100%; /* 1:1 Aspect Ratio */
+    position: relative; /* If you want text inside of it */
+
+    ng-lottie {
+        /* If you want content inside of the container */
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+    }
+}
