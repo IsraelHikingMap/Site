@@ -220,7 +220,7 @@ const initializeApplication = (injector: Injector) => async () => {
             NgxMapLibreGLModule,
             NgIdleModule.forRoot(),
             HammerModule,
-            LottieModule.forRoot({ player: playerFactory })
+            LottieModule.forRoot({ player: () => player })
         ],
         providers: [
             AuthorizationService,
@@ -358,8 +358,4 @@ export class ApplicationModule {
     constructor(angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics) {
         angulartics2GoogleAnalytics.startTracking();
     }
-}
-
-export function playerFactory() {
-    return player;
 }

@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 
+import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-warning-dialog.component";
 import { IntroDialogComponent } from "../components/dialogs/intro-dialog.component";
@@ -20,6 +21,7 @@ import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
+import { ApplicationState } from "../models/models";
 
 @Injectable()
 export class ApplicationInitializeService {
@@ -39,7 +41,8 @@ export class ApplicationInitializeService {
                 private readonly tracesService: TracesService,
                 private readonly shareUrlsService: ShareUrlsService,
                 private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
-                private readonly geoLocationService: GeoLocationService
+                private readonly geoLocationService: GeoLocationService,
+                private readonly ngRedux: NgRedux<ApplicationState>
     ) {
     }
 
@@ -64,9 +67,9 @@ export class ApplicationInitializeService {
                     } else {
                         UseAppDialogComponent.openDialog(this.dialog);
                     }
-            } else if (!this.runningContextService.isIFrame) {
-                // HM TODO: condition this!
-                IntroDialogComponent.openDialog(this.dialog);
+            } else if (!this.runningContextService.isIFrame
+                && this.ngRedux.getState().configuration.isShowIntro) {
+                    IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
             }
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();

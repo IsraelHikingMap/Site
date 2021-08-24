@@ -1,14 +1,18 @@
 import { Component } from "@angular/core";
-import { MatDialog, MatDialogRef } from "@angular/material/dialog";
+import { MatDialog, MatDialogConfig, MatDialogRef } from "@angular/material/dialog";
+import { AnimationOptions } from "ngx-lottie";
 
 import { BaseMapComponent } from "../base-map.component";
 import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ResourcesService } from "../../services/resources.service";
 import { ApplicationState } from "../../models/models";
-import { ConfigurationActions } from "application/reducers/configuration.reducer";
+import { ConfigurationActions } from "../../reducers/configuration.reducer";
+import { RunningContextService } from "../../services/running-context.service";
+import languageAnimationData from "../../../content/lottie/dialog-language.json";
+import mapsAnimationData from "../../../content/lottie/dialog-maps.json";
+import planAnimationData from "../../../content/lottie/dialog-plan.json";
+import moreAnimationData from "../../../content/lottie/dialog-more.json";
 
-import { AnimationItem } from "lottie-web";
-import { AnimationOptions } from "ngx-lottie";
 @Component({
     selector: "intro-dialog",
     templateUrl: "./intro-dialog.component.html",
@@ -16,18 +20,10 @@ import { AnimationOptions } from "ngx-lottie";
 })
 export class IntroDialogComponent extends BaseMapComponent {
 
-    lottieLanguage: AnimationOptions = {
-        path: "../../../content/lottie/dialog-language.json",
-    };
-    lottieMaps: AnimationOptions = {
-        path: "../../../content/lottie/dialog-maps.json",
-    };
-    lottiePlan: AnimationOptions = {
-        path: "../../../content/lottie/dialog-plan.json",
-    };
-    lottieMore: AnimationOptions = {
-        path: "../../../content/lottie/dialog-more.json",
-    };
+    lottieLanguage: AnimationOptions = { animationData: languageAnimationData };
+    lottieMaps: AnimationOptions = { animationData: mapsAnimationData };
+    lottiePlan: AnimationOptions = { animationData: planAnimationData };
+    lottieMore: AnimationOptions = { animationData: moreAnimationData };
 
     public step: number;
 
@@ -38,10 +34,23 @@ export class IntroDialogComponent extends BaseMapComponent {
         this.step = 0;
     }
 
-    public static openDialog(dialog: MatDialog) {
-        dialog.open(IntroDialogComponent, {
-            maxWidth: "576px"
-        });
+    public static openDialog(dialog: MatDialog, runningContextSerivce: RunningContextService) {
+        let options: MatDialogConfig = {};
+        if (runningContextSerivce.isMobile) {
+            options.maxWidth = "100vw";
+            options.width = "100vw";
+            options.maxHeight = "100vh";
+            options.height = "100vh";
+            options.position = {
+                bottom: "0px",
+                top: "0px",
+                left: "0px",
+                right: "0px"
+            }
+        } else {
+            options.width = "450px";
+        }
+        dialog.open(IntroDialogComponent, options);
     }
 
     public close() {
