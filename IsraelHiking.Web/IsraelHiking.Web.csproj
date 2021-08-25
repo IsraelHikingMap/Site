@@ -60,7 +60,6 @@
     <Content Remove="tsconfig.app.json" />
     <Content Remove="tsconfig.json" />
     <Content Remove="tsconfig.spec.json" />
-    <Content Remove="tslint.json" />
     <Content Remove="build-ios-parameters.json" />
   </ItemGroup>
 
@@ -72,7 +71,6 @@
     <None Include="angular.json" />
     <None Include="package.json" />
     <None Include="tsconfig.json" />
-    <None Include="tslint.json" />
     <None Include="tsconfig.app.json" />
     <None Include="tsconfig.spec.json" />
     <Content Update="appsettings.json">
