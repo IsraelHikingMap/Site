@@ -8,7 +8,8 @@ const IS_BATTERY_OPTIMIZATION_TOGGLE = "IS_BATTERY_OPTIMIZATION_TOGGLE";
 const IS_AUTOMATIC_RECORDING_UPLOAD_TOGGLE = "IS_AUTOMATIC_RECORDING_UPLOAD_TOGGLE";
 // const IS_FIND_MISSING_ROUTES_AFTER_UPLOAD = "IS_FIND_MISSING_ROUTES_AFTER_UPLOAD";
 const IS_GOT_LOST_WARNINGS_TOGGLE = "IS_GOT_LOST_WARNINGS_TOGGLE";
-const IS_SHOW_BATTERY_CONFIRMATION = "IS_SHOW_BATTERY_CONFIRMATION";
+const STOP_SHOW_BATTERY_CONFIRMATION = "STOP_SHOW_BATTERY_CONFIRMATION";
+const STOP_SHOW_INTRO = "STOP_SHOW_INTRO";
 const SET_LANGUAGE = "SET_LANGUAGE";
 
 export class ConfigurationActions {
@@ -16,7 +17,8 @@ export class ConfigurationActions {
     public static readonly toggleIsAutomaticRecordingUploadAction: Action = { type: IS_AUTOMATIC_RECORDING_UPLOAD_TOGGLE };
     // public static readonly toggleFindMissingRoutesAfterUploadAction: Action = { type: IS_FIND_MISSING_ROUTES_AFTER_UPLOAD };
     public static readonly toggleIsGotLostWarningsAction: Action = { type: IS_GOT_LOST_WARNINGS_TOGGLE };
-    public static readonly isShowBatteryConfirmationAction: Action = { type: IS_SHOW_BATTERY_CONFIRMATION };
+    public static readonly stopShowBatteryConfirmationAction: Action = { type: STOP_SHOW_BATTERY_CONFIRMATION };
+    public static readonly stopShowIntroAction: Action = { type: STOP_SHOW_INTRO };
 }
 
 export interface SetLanguagePayload {
@@ -62,11 +64,19 @@ class ConfigurationReducer {
         };
     }
 
-    @ReduxAction(IS_SHOW_BATTERY_CONFIRMATION)
+    @ReduxAction(STOP_SHOW_BATTERY_CONFIRMATION)
     public stopShowingBatteryConfirmation(lastState: Configuration, _: Action): Configuration {
         return {
             ...lastState,
             isShowBatteryConfirmation: false
+        };
+    }
+
+    @ReduxAction(STOP_SHOW_INTRO)
+    public stopShowingIntro(lastState: Configuration, _: Action): Configuration {
+        return {
+            ...lastState,
+            isShowIntro: false
         };
     }
 

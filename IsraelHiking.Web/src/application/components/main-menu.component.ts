@@ -217,7 +217,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public openLanguage() {
-        this.dialog.open(LanguageDialogComponent);
+        LanguageDialogComponent.openDialog(this.dialog);
     }
 
     public isShowEditOsmButton() {

@@ -194,7 +194,7 @@ export class LocationComponent extends BaseMapComponent {
                     message: this.resources.makeSureBatteryOptimizationIsOff,
                     type: "Custom",
                     declineAction: () => {
-                        this.ngRedux.dispatch(ConfigurationActions.isShowBatteryConfirmationAction);
+                        this.ngRedux.dispatch(ConfigurationActions.stopShowBatteryConfirmationAction);
                     },
                     customConfirmText: this.resources.ok,
                     customDeclineText: this.resources.dontShowThisMessageAgain
