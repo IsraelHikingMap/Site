@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Valid;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -305,14 +306,24 @@ namespace IsraelHiking.API.Executors
                         .Concat(nonPointGeometries.OfType<Polygon>())
                         .ToArray();
                     feature.Geometry = _geometryFactory.CreateMultiPolygon(polygons);
-                    if (!feature.Geometry.IsValid)
+                    var isValidOp = new IsValidOp(feature.Geometry);
+                    if (!isValidOp.IsValid)
                     {
                         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, false);
-                        _reportLogger.LogWarning("There was a problem merging the following feature " + feature.GetTitle(Languages.HEBREW) + " (" + feature.GetId() + ") ");
+                        _reportLogger.LogWarning($"There was a problem merging the following feature into a multypolygon {feature.GetTitle(Languages.HEBREW)}, {GetWebsite(feature)} {isValidOp.ValidationError.Message} ({ isValidOp.ValidationError.Coordinate.X}, {isValidOp.ValidationError.Coordinate.Y})");
                     }
                     continue;
                 }
-                _reportLogger.LogWarning("The following merge created a weird geometry: " + feature.GetTitle(Languages.HEBREW) + " (" + feature.GetId() + ") " + string.Join(", ", geometryCollection.Geometries.Select(g => g.GeometryType)));
+                if (nonPointGeometries.All(g => g is Polygon || g is LineString) && feature.Attributes.GetNames().Contains("highway"))
+                {
+                    var lineStrings = nonPointGeometries
+                        .OfType<LineString>()
+                        .Concat(nonPointGeometries.OfType<Polygon>().Select(p => _geometryFactory.CreateLineString(p.Coordinates)))
+                        .ToArray();
+                    feature.Geometry = _geometryFactory.CreateMultiLineString(lineStrings);
+                    continue;
+                }
+                _reportLogger.LogWarning($"The following merge created a weird geometry: {feature.GetTitle(Languages.HEBREW)} {GetWebsite(feature)} {string.Join(", ", geometryCollection.Geometries.Select(g => g.GeometryType))}");
                 feature.Geometry = nonPointGeometries.FirstOrDefault();
             }
         }

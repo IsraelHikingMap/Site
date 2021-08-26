@@ -324,6 +324,39 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
+        public void MergeFeatures_PolygonsAndLinestringOfHighway_ShouldMerge()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Geometry = new Polygon(new LinearRing(new[]
+            {
+                new Coordinate(0, 0),
+                new Coordinate(0, 1),
+                new Coordinate(1, 1),
+                new Coordinate(1, 0),
+                new Coordinate(0, 0)
+            }));
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.Attributes.AddOrUpdate("highway", "residental");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Geometry = new LineString(new[]
+            {
+                new Coordinate(-0.0001, -0.0001),
+                new Coordinate(0, 0.5),
+                new Coordinate(0.5, 0.5),
+                new Coordinate(0.5, 0)
+            });
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.Attributes.AddOrUpdate("highway", "residental");
+            feature2.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(OgcGeometryType.MultiLineString, results.First().Geometry.OgcGeometryType);
+        }
+
+        [TestMethod]
         public void MergeFeatures_MultiLineWithLine_ShouldMergeAndCreateASingleMultiLine()
         {
             var feature1 = CreateFeature("1", 0, 0);
