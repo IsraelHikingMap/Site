@@ -8,28 +8,28 @@
                 </div>
             </mat-radio-group>
             <br />
-            <div class="squareContainer">
+            <div class="square-container">
                 <ng-lottie class="img-responsive" style="padding-right: 13px;" [options]="lottieLanguage"></ng-lottie>
             </div>
         </div>
         <div *ngIf="step === 1">
             <h2>{{resources.maps}}</h2>
             <p>{{resources.introMapsDescription}}</p>
-            <div class="squareContainer">
+            <div class="square-container">
                 <ng-lottie class="img-responsive" [options]="lottieMaps"></ng-lottie>
             </div>
         </div>
         <div *ngIf="step === 2">
             <h2>{{resources.routesAndPoints}}</h2>
             <p>{{resources.introRoutesAndPointsDescription}}</p>
-            <div class="squareContainer">
+            <div class="square-container">
                 <ng-lottie class="img-responsive" [options]="lottiePlan"></ng-lottie>
             </div>
         </div>
         <div *ngIf="step === 3">
             <h2>{{resources.andSoMuchMore}}</h2>
             <p>{{resources.introAndSoMuchMoreDescription}}</p>
-            <div class="squareContainer">
+            <div class="square-container">
                 <ng-lottie class="img-responsive" [options]="lottieMore"></ng-lottie>
             </div>
         </div>

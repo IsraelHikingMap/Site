@@ -1,4 +1,4 @@
-.squareContainer {
+.square-container {
     // width: 100%;
     max-width: 528px;
     padding-top: 100%; /* 1:1 Aspect Ratio */
@@ -11,5 +11,6 @@
         left: 0;
         bottom: 0;
         right: 0;
+        max-height: 30vh;
     }
 }
