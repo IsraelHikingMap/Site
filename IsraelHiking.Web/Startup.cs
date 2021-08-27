@@ -4,7 +4,6 @@ using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -64,6 +63,7 @@ namespace IsraelHiking.Web
             services.AddProxies();
             services.AddResponseCompression();
             services.AddMemoryCache();
+            services.AddHealthChecks();
             services.AddDetection();
             services.AddHttpClient();
             services.AddIHMDataAccess();
@@ -158,6 +158,7 @@ namespace IsraelHiking.Web
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
             });
             SetupStaticFilesAndProxies(app);
 

@@ -5,6 +5,8 @@ import { debounceTime, delay, retryWhen, startWith, switchMap, tap } from "rxjs/
 import { HttpClient } from "@angular/common/http";
 import { clone, defaults, isNil } from "lodash-es";
 
+import { Urls } from "../urls";
+
 /**
  * Instance of this interface is used to report current connection status.
  */
@@ -57,7 +59,7 @@ export const ConnectionServiceOptionsToken: InjectionToken<ConnectionServiceOpti
 })
 export class ConnectionService implements OnDestroy {
     private static DEFAULT_OPTIONS: ConnectionServiceOptions = {
-        heartbeatUrl: "https://israelhiking.osm.org.il/favicon.ico",
+        heartbeatUrl: Urls.baseAddress +  "/health",
         heartbeatInterval: 15000,
         heartbeatRetryInterval: 1000,
         requestMethod: "get"
