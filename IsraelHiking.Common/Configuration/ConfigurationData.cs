@@ -150,10 +150,6 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public Dictionary<string, string> ProxiesDictionary { get; set; }
         /// <summary>
-        /// A list of reverse-proxies that the site will redirect
-        /// </summary>
-        public Dictionary<string, string> ProxiesDictionaryCleared { get; set; }
-        /// <summary>
         /// A list of external sources - address and file name
         /// </summary>
         public Dictionary<string, string> CsvsDictionary { get; set; }

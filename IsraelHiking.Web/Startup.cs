@@ -183,26 +183,6 @@ namespace IsraelHiking.Web
 
             app.UseProxies(proxies =>
             {
-                // HM TODO: remove this section after HTTP/2 issue is resolved
-                foreach (var proxyEntry in configurationData.ProxiesDictionaryCleared ?? new Dictionary<string, string>())
-                {
-                    proxies.Map(proxyEntry.Key,
-                        proxy => proxy.UseHttp((_, args) =>
-                        {
-                            var targetAddress = proxyEntry.Value;
-                            foreach (var argValuePair in args)
-                            {
-                                targetAddress = targetAddress.Replace("{" + argValuePair.Key + "}", argValuePair.Value.ToString());
-                            }
-                            return targetAddress;
-                        }, options => options.WithAfterReceive((context, response) =>
-                        {
-                            response.Headers.Clear();
-                            return Task.CompletedTask;
-                        })
-                    ));
-                }
-
                 foreach (var proxyEntry in configurationData.ProxiesDictionary ?? new Dictionary<string, string>())
                 {
                     proxies.Map(proxyEntry.Key,
