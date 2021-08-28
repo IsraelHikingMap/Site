@@ -1,5 +1,4 @@
-﻿using AspNetCore.Proxy;
-using IsraelHiking.API;
+﻿using IsraelHiking.API;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common.Configuration;
