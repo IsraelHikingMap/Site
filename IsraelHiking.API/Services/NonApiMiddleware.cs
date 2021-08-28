@@ -53,13 +53,6 @@ namespace IsraelHiking.API.Services
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context, IDetectionService detectionService)
         {
-            if (_options.ListingDictionary.Keys.Any(k => context.Request.Path.StartsWithSegments("/" + k)))
-            {
-                context.Response.StatusCode = 404;
-                var file = _environment.WebRootFileProvider.GetFileInfo("/resource-not-found.html");
-                await SendFile(context, file);
-                return;
-            }
             var isCrawler = detectionService.Crawler.IsCrawler;
             var isWhatsApp = detectionService.Crawler.Name == Wangkanai.Detection.Models.Crawler.WhatsApp;
             if (isCrawler && context.Request.Path.StartsWithSegments("/share"))

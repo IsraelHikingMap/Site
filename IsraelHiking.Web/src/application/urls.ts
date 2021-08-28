@@ -7,6 +7,7 @@ export class Urls {
     public static readonly emptyHtml = Urls.baseAddress + "/empty-for-oauth.html";
     public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";
+    public static readonly health = Urls.apiBase + "health/";
     public static readonly elevation = Urls.apiBase + "elevation";
     public static readonly routing = Urls.apiBase + "routing";
     public static readonly itmGrid = Urls.apiBase + "itmGrid";

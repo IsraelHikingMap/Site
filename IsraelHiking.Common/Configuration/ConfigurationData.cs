@@ -142,14 +142,6 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public OsmConfiguraionData OsmConfiguration { get; set; }
         /// <summary>
-        /// A list of directories that are visible to the user for folder navigation
-        /// </summary>
-        public Dictionary<string, string> ListingDictionary { get; set; }
-        /// <summary>
-        /// A list of reverse-proxies that the site will redirect
-        /// </summary>
-        public Dictionary<string, string> ProxiesDictionary { get; set; }
-        /// <summary>
         /// A list of external sources - address and file name
         /// </summary>
         public Dictionary<string, string> CsvsDictionary { get; set; }
@@ -198,8 +190,6 @@ namespace IsraelHiking.Common.Configuration
                 BaseAddress = "https://www.openstreetmap.org"
             };
             CsvsDictionary = new Dictionary<string, string>();
-            ListingDictionary = new Dictionary<string, string>();
-            ProxiesDictionary = new Dictionary<string, string>();
             Colors = new List<string>
             {
                 "#0000FF", // blue

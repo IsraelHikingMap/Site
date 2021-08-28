@@ -1,6 +1,5 @@
 ﻿using AspNetCore.Proxy;
 using IsraelHiking.API;
-using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common.Configuration;
@@ -27,12 +26,10 @@ using NetTopologySuite.IO;
 using Newtonsoft.Json.Converters;
 using OsmSharp.IO.API;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace IsraelHiking.Web
 {
@@ -140,100 +137,38 @@ namespace IsraelHiking.Web
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseWhen(context => !context.Request.Path.StartsWithSegments("/.well-known/acme-challenge"), httpApp =>
-                {
-                    httpApp.UseHttpsRedirection();
-                });
-            }
             app.UseResponseCompression();
             app.UseRouting();
             app.UseCors(builder =>
             {
-                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();//.AllowCredentials();
+                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
             });
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health");
+                endpoints.MapHealthChecks("/api/health");
             });
-            SetupStaticFilesAndProxies(app);
+            SetupStaticFiles(app);
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Israel Hiking API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Israel Hiking Map API V1");
             });
             // This should be the last middleware
             app.UseMiddleware<NonApiMiddleware>();
             InitializeServices(app.ApplicationServices);
         }
 
-        private static void SetupStaticFilesAndProxies(IApplicationBuilder app)
+        private static void SetupStaticFiles(IApplicationBuilder app)
         {
             app.UseDefaultFiles();
-            var configurationData = app.ApplicationServices.GetRequiredService<IOptions<ConfigurationData>>().Value;
             var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
             fileExtensionContentTypeProvider.Mappings.Add(".pbf", "application/x-protobuf");
             fileExtensionContentTypeProvider.Mappings.Add(".db", "application/octet-stream");
             fileExtensionContentTypeProvider.Mappings.Add(".geojson", "application/json");
-
-            app.UseProxies(proxies =>
-            {
-                foreach (var proxyEntry in configurationData.ProxiesDictionary ?? new Dictionary<string, string>())
-                {
-                    proxies.Map(proxyEntry.Key,
-                        proxy => proxy.UseHttp((_, args) =>
-                        {
-                            var targetAddress = proxyEntry.Value;
-                            foreach (var argValuePair in args)
-                            {
-                                targetAddress = targetAddress.Replace("{" + argValuePair.Key + "}", argValuePair.Value.ToString());
-                            }
-                            return targetAddress;
-                        }
-                    ));
-                }
-            });
-
-            foreach (var directory in configurationData.ListingDictionary)
-            {
-                var fullPath = Path.IsPathRooted(directory.Value) ? directory.Value : Path.GetFullPath(Path.Combine(configurationData.BinariesFolder, directory.Value));
-                var fileServerOptions = new FileServerOptions
-                {
-                    FileProvider = new PhysicalFileProvider(fullPath),
-                    RequestPath = new PathString("/" + directory.Key),
-                    EnableDirectoryBrowsing = true,
-                    DirectoryBrowserOptions =
-                    {
-                        FileProvider = new PhysicalFileProvider(fullPath),
-                        RequestPath = new PathString("/" + directory.Key),
-                        Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices
-                            .GetRequiredService<IFileSystemHelper>())
-                    },
-                    StaticFileOptions = {
-                        OnPrepareResponse = GetPrepareCORSResponse(),
-                        ContentTypeProvider = fileExtensionContentTypeProvider
-                    },
-                };
-                app.UseFileServer(fileServerOptions);
-            }
-
-            // serve https certificate folder
-            var wellKnownFolder = Path.Combine(Directory.GetCurrentDirectory(), ".well-known");
-            if (Directory.Exists(wellKnownFolder))
-            {
-                app.UseStaticFiles(new StaticFileOptions
-                {
-                    FileProvider = new PhysicalFileProvider(wellKnownFolder),
-                    RequestPath = new PathString("/.well-known"),
-                    ServeUnknownFileTypes = true, // serve extensionless file
-                    DefaultContentType = "application/json"
-                });
-            }
 
             // wwwroot
             app.UseStaticFiles(new StaticFileOptions

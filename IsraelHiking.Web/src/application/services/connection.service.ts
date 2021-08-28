@@ -59,7 +59,7 @@ export const ConnectionServiceOptionsToken: InjectionToken<ConnectionServiceOpti
 })
 export class ConnectionService implements OnDestroy {
     private static DEFAULT_OPTIONS: ConnectionServiceOptions = {
-        heartbeatUrl: Urls.baseAddress +  "/health",
+        heartbeatUrl: Urls.health,
         heartbeatInterval: 15000,
         heartbeatRetryInterval: 1000,
         requestMethod: "get"

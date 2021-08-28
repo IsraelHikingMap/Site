@@ -78,7 +78,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AspNetCore.Proxy" Version="4.2.0" />
     <PackageReference Include="Codecov" Version="1.13.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
@@ -104,7 +103,4 @@
     <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj" />
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <MakeDir Directories="$(OutDir)PointsOfInterest" />
-  </Target>
 </Project>
