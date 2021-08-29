@@ -1,5 +1,5 @@
 In order to release a version the following steps need to be made:
-1. Go to appveyor to see what's the last version that is there: https://ci.appveyor.com/project/IsraelHikingHost/site
+1. Go to appveyor to see what's the last version that is there: https://ci.appveyor.com/project/IsraelHikingHost/site/history
 2. Create a git tag with an incremented by 1 version number: `git tag v9.9.99`
 3. Push the tag to make the appveyor build run: `git push origin v9.9.99`
 4. If everything is finished successfully you'll have a new docker image in dockerhub, ipa file in testfilght, aab file in internal release in android and a draft release on github
