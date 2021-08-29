@@ -48,7 +48,7 @@ When the docker and tests are finished successfully.
   - Click "Publish release" below.
   - Login to the site server.
     - Modify the website version in the `docker-compose.yml` file.
-    - Run `make pull-dockerhub website`.
+    - Run `make recreate-website`.
     - Open the website in incognito mode or with cache disabled.
     - Run `git commit -e -a`.
     - Run `git push`.
