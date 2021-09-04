@@ -7,7 +7,6 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
@@ -27,7 +26,6 @@ using OsmSharp.IO.API;
 using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -92,7 +90,6 @@ namespace IsraelHiking.Web
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer();
-            services.AddCors();
             services.AddOptions();
 
             var config = new ConfigurationBuilder()
@@ -138,10 +135,6 @@ namespace IsraelHiking.Web
             }
             app.UseResponseCompression();
             app.UseRouting();
-            app.UseCors(builder =>
-            {
-                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-            });
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
@@ -172,22 +165,8 @@ namespace IsraelHiking.Web
             // wwwroot
             app.UseStaticFiles(new StaticFileOptions
             {
-                OnPrepareResponse = GetPrepareCORSResponse(),
                 ContentTypeProvider = fileExtensionContentTypeProvider
             });
-        }
-
-        private static Action<StaticFileResponseContext> GetPrepareCORSResponse()
-        {
-            return (StaticFileResponseContext ctx) =>
-            {
-                if (ctx.Context.Response.Headers.Keys.Contains("Access-Control-Allow-Origin"))
-                {
-                    ctx.Context.Response.Headers.Remove("Access-Control-Allow-Origin");
-                }
-                ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-                ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-            };
         }
 
         private void InitializeServices(IServiceProvider serviceProvider)
