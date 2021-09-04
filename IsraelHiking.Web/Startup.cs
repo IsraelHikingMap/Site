@@ -29,6 +29,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.Web
 {
@@ -197,7 +198,11 @@ namespace IsraelHiking.Web
             var initializableServices = serviceProvider.GetServices<IInitializable>();
             foreach (var service in initializableServices)
             {
-                service.Initialize();
+                var serviceName = service.GetType().ToString();
+                service.Initialize().ContinueWith((t) =>
+                {
+                    logger.LogError(t.Exception, $"Failed to initialize service {serviceName}");
+                }, TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 

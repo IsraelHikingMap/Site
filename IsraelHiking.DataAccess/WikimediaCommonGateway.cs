@@ -51,7 +51,6 @@ namespace IsraelHiking.DataAccess
             {
                 _logger.LogError("Wikimedia user is empty!");
             }
-            _logger.LogInformation("Finished initializing Wikimedia common service");
         }
 
         public async Task Initialize()
@@ -66,6 +65,7 @@ namespace IsraelHiking.DataAccess
             await _site.Initialization;
             await _site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
             _site.AccountAssertionFailureHandler = new LoginAgainAccountAssertionFailureHandler(_options);
+            _logger.LogInformation("Finished initializing Wikimedia common service");
         }
 
         public async Task<string> UploadImage(string title, string description, string author, string fileName, Stream contentStream, Coordinate location)
