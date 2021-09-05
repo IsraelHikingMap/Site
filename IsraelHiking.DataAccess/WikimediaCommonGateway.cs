@@ -57,7 +57,7 @@ namespace IsraelHiking.DataAccess
         {
             var wikiClient = new WikiClient
             {
-                ClientUserAgent = "IsraelHikingMapSite/5.x",
+                ClientUserAgent = "IsraelHikingMapSite/5.x bot (https://israelhiking.osm.org.il; israelhikingmap@gmail.com)",
                 Timeout = new TimeSpan(0, 5, 0) // allow large images upload
             };
 
