@@ -90,6 +90,7 @@ namespace IsraelHiking.Web
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer();
+            services.AddCors();
             services.AddOptions();
 
             var config = new ConfigurationBuilder()
@@ -135,6 +136,7 @@ namespace IsraelHiking.Web
             }
             app.UseResponseCompression();
             app.UseRouting();
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
