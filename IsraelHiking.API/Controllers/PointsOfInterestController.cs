@@ -217,6 +217,19 @@ namespace IsraelHiking.API.Controllers
             {
                 return "Title must not be more than 255 characters...";
             }
+
+            var invalidWebsites = feature.Attributes.GetNames()
+                .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
+                .Select(n => feature.Attributes[n].ToString())
+                .Any(w => w.Length > 255);
+            var invalidAddedWebsites = feature.Attributes.GetNames()
+                .Where(n => n == FeatureAttributes.POI_ADDED_URLS)
+                .SelectMany(n => feature.Attributes[n] as IEnumerable<object>)
+                .Any(w => w.ToString().Length > 255);
+            if (invalidWebsites || invalidAddedWebsites)
+            {
+                return "Website address length must not be more than 255 characters...";
+            }
             return string.Empty;
         }
 

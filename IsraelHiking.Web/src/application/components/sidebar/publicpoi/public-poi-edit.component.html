@@ -18,7 +18,7 @@
     <div *ngFor="let url of info.urls; let i = index; trackBy:trackByIndex" fxLayout="row">
         <div fxFlex="90">
             <mat-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
-                <input matInput type="text" [dir]="'ltr'" [(ngModel)]="info.urls[i]" placeholder="{{resources.website}}" fxFill />
+                <input matInput maxlength="255" type="text" [dir]="'ltr'" [(ngModel)]="info.urls[i]" placeholder="{{resources.website}}" fxFill />
             </mat-form-field>
         </div>
         <div fxFlex="10">

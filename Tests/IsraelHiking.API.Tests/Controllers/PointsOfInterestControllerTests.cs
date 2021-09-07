@@ -1,5 +1,4 @@
 ﻿using IsraelHiking.API.Controllers;
-using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
@@ -18,6 +17,8 @@ using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp.IO.API;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace IsraelHiking.API.Tests.Controllers
@@ -134,6 +135,20 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
+        public void CreatePointOfInterest_AddressTooLong_ShouldReturnBadRequest()
+        {
+            var poi = new Feature(new Point(0, 0), new AttributesTable
+            {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.WEBSITE, string.Join("", Enumerable.Repeat("i", 256)) }
+            });
+            
+            var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(result);
+        }
+        
+        [TestMethod]
         public void CreatePointOfInterest_ExistsInCacheAndInTheDatabase_ShouldAdd()
         {
             _controller.SetupIdentity(_cache);
@@ -210,6 +225,23 @@ namespace IsraelHiking.API.Tests.Controllers
             _pointsOfInterestProvider.DidNotReceive().UpdateFeature(Arg.Any<Feature>(), _osmGateway, Arg.Any<string>());
         }
 
+        [TestMethod]
+        public void UpdatePointOfInterest_WebsiteTooLong_ShouldNotUpdate()
+        {
+            _controller.SetupIdentity(_cache);
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.POI_ID, "1" },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.POI_ADDED_URLS, new [] { string.Join("", Enumerable.Repeat("i", 256)) } },
+            });
+            poi.SetLocation(new Coordinate());
+
+            var result = _controller.UpdatePointOfInterest(poi.GetId(), poi, Languages.HEBREW).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(result);
+        }
+        
         [TestMethod]
         public void UpdatePointOfInterest_ValidFeature_ShouldUpdate()
         {
