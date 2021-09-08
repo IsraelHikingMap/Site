@@ -36,9 +36,21 @@ export class GpsReducer {
 
     @ReduxAction(SET_CURRENT_LOCATION)
     public setCurrentPosition(lastState: GpsState, action: SetCurrentPositionAction): GpsState {
+        // Clone position before setting into state since this object can't be cloned regularly
+        let currentPoistion = action.payload.position == null ? null : {
+            coords: {
+                accuracy: action.payload.position.coords.accuracy,
+                altitude: action.payload.position.coords.altitude,
+                latitude: action.payload.position.coords.latitude,
+                longitude: action.payload.position.coords.longitude,
+                speed: action.payload.position.coords.speed,
+                heading: action.payload.position.coords.heading
+            },
+            timestamp: action.payload.position.timestamp
+        } as GeolocationPosition;
         return {
             ...lastState,
-            currentPoistion: action.payload.position
+            currentPoistion
         };
     }
 }
