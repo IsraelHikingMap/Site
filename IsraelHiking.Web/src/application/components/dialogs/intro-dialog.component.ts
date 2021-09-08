@@ -46,7 +46,7 @@ export class IntroDialogComponent extends BaseMapComponent {
                 top: "0px",
                 left: "0px",
                 right: "0px"
-            }
+            };
         } else {
             options.width = "450px";
         }
