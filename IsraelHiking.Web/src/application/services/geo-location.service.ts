@@ -197,6 +197,7 @@ export class GeoLocationService {
 
     private stopNavigator() {
         if (this.watchNumber !== -1) {
+            this.loggingService.info("[GeoLocation] Stopping browser tracking");
             window.navigator.geolocation.clearWatch(this.watchNumber);
             this.watchNumber = -1;
         }
