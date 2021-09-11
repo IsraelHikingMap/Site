@@ -8,7 +8,8 @@ import { ApplicationState } from "../models/models";
 
 @Component({
     selector: "center-me",
-    templateUrl: "./center-me.component.html"
+    templateUrl: "./center-me.component.html",
+    styleUrls: ["./center-me.component.scss"]
 })
 export class CenterMeComponent extends BaseMapComponent {
 
