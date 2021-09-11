@@ -331,7 +331,7 @@ export class DatabaseService {
         if (!this.runningContext.isCordova) {
             storedState.routes = initialState.routes;
             storedState.poiState = initialState.poiState;
-            storedState.gpsState.tracking = initialState.gpsState.tracking;
+            storedState.gpsState = initialState.gpsState;
         }
         return storedState;
     }
