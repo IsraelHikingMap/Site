@@ -63,14 +63,15 @@ namespace IsraelHiking.Web
             services.AddIHMDataAccess();
             services.AddIHMApi();
             services.AddSqliteCache(@"./cache.sqlite");
-            services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
+            //services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
+            services.AddSingleton<OsmAccessTokenHelper>();
             services.AddSingleton<IClientsFactory>(serviceProvider =>
                 new ClientsFactory(serviceProvider.GetRequiredService<ILogger>(),
                 serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(),
                 serviceProvider.GetRequiredService<IOptions<ConfigurationData>>().Value.OsmConfiguration.BaseAddress + "/api/"));
             var geometryFactory = new GeometryFactory(new PrecisionModel(100000000));
             services.AddSingleton<GeometryFactory, GeometryFactory>(serviceProvider => geometryFactory);
-            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerOptionsValidatorConfigureOptions>();
+            //services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerOptionsValidatorConfigureOptions>();
             services.AddControllers(options =>
             {
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
@@ -89,7 +90,17 @@ namespace IsraelHiking.Web
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer();
+            }).AddJwtBearer(jwtBearerOptions =>
+            {
+                jwtBearerOptions.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var tokenService = context.HttpContext.RequestServices.GetService<OsmAccessTokenHelper>();
+                        return tokenService?.OnMessageReceived(context);
+                    }
+                };
+            });
             services.AddCors();
             services.AddOptions();
 

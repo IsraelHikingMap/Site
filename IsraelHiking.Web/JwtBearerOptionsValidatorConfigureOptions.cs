@@ -10,12 +10,12 @@ namespace IsraelHiking.Web
     /// </summary>
     public class JwtBearerOptionsValidatorConfigureOptions : PostConfigureOptions<JwtBearerOptions>
     {
-        public JwtBearerOptionsValidatorConfigureOptions(ISecurityTokenValidator securityTokenValidator) : base(
+        public JwtBearerOptionsValidatorConfigureOptions(/*ISecurityTokenValidator securityTokenValidator*/) : base(
             JwtBearerDefaults.AuthenticationScheme,
             options =>
             {
-                options.SecurityTokenValidators.Clear();
-                options.SecurityTokenValidators.Add(securityTokenValidator);
+                //options.SecurityTokenValidators.Clear();
+                //options.SecurityTokenValidators.Add(securityTokenValidator);
             })
         {}
     }
