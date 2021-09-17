@@ -92,21 +92,18 @@ namespace IsraelHiking.API.Services
         ///<inheritdoc />
         public Task<byte[]> Convert(byte[] content, string inputFileNameOrFormat, string outputFileExtension)
         {
-            return Task.Run(() =>
+            var inputFormat = GetGpsBabelFormat(inputFileNameOrFormat, content);
+            var outputFormat = GetGpsBabelFormat(outputFileExtension);
+            if (inputFormat == outputFormat)
             {
-                var inputFormat = GetGpsBabelFormat(inputFileNameOrFormat, content);
-                var outputFormat = GetGpsBabelFormat(outputFileExtension);
-                if (inputFormat == outputFormat)
-                {
-                    return content;
-                }
-                var convertersList = GetConvertersList(inputFormat, outputFormat);
-                if (!convertersList.Any())
-                {
-                    convertersList.Add(new GpsBabelConverterFlow(_gpsBabelGateway, inputFormat, outputFormat));
-                }
-                return convertersList.Aggregate(content, (current, converter) => converter.Transform(current));
-            });
+                return Task.FromResult(content);
+            }
+            var convertersList = GetConvertersList(inputFormat, outputFormat);
+            if (!convertersList.Any())
+            {
+                convertersList.Add(new GpsBabelConverterFlow(_gpsBabelGateway, inputFormat, outputFormat));
+            }
+            return Task.FromResult(convertersList.Aggregate(content, (current, converter) => converter.Transform(current)));
         }
 
         /// <summary>
