@@ -65,18 +65,9 @@ namespace IsraelHiking.DataAccess
                 (b, c) => new JsonNetSerializer(b, c, null, null, GeoJsonSerializer.Create(GeometryFactory.Default, 3).Converters))
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
-            if ((await _elasticClient.Indices.ExistsAsync(OSM_POIS_INDEX1)).Exists == false &&
-                (await _elasticClient.Indices.ExistsAsync(OSM_POIS_INDEX2)).Exists == false)
-            {
-                await CreatePointsOfInterestIndex(OSM_POIS_INDEX1);
-                await _elasticClient.Indices.BulkAliasAsync(a => a.Add(add => add.Alias(OSM_POIS_ALIAS).Index(OSM_POIS_INDEX1)));
-            }
-            if ((await _elasticClient.Indices.ExistsAsync(OSM_HIGHWAYS_INDEX1)).Exists == false &&
-                (await _elasticClient.Indices.ExistsAsync(OSM_HIGHWAYS_INDEX2)).Exists == false)
-            {
-                await CreateHighwaysIndex(OSM_HIGHWAYS_INDEX1);
-                await _elasticClient.Indices.BulkAliasAsync(a => a.Add(add => add.Alias(OSM_HIGHWAYS_ALIAS).Index(OSM_HIGHWAYS_INDEX1)));
-            }
+            await InitializeIndexWithAlias(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS, CreatePointsOfInterestIndex);
+            await InitializeIndexWithAlias(OSM_HIGHWAYS_INDEX1, OSM_HIGHWAYS_INDEX2, OSM_HIGHWAYS_ALIAS, CreateHighwaysIndex);
+
             if ((await _elasticClient.Indices.ExistsAsync(SHARES)).Exists == false)
             {
                 await CreateSharesIndex();
@@ -92,6 +83,42 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
         }
 
+        private async Task InitializeIndexWithAlias(string index1, string index2, string alias, Func<string, Task> creatIndexAction)
+        {
+            if ((await _elasticClient.Indices.ExistsAsync(index1)).Exists == false &&
+                (await _elasticClient.Indices.ExistsAsync(index2)).Exists == false)
+            {
+                await creatIndexAction(index1);
+                await _elasticClient.Indices.BulkAliasAsync(a => a.Add(add => add.Alias(alias).Index(index1)));
+                _logger.LogInformation($"Initialing elasticsearch alias: {alias}, no indices existed");
+                return;
+            }
+
+            if ((await _elasticClient.Indices.ExistsAsync(index1)).Exists &&
+                (await _elasticClient.GetIndicesPointingToAliasAsync(alias)).Contains(index1))
+            {
+                return;
+            }
+            if ((await _elasticClient.Indices.ExistsAsync(index2)).Exists &&
+                (await _elasticClient.GetIndicesPointingToAliasAsync(alias)).Contains(index2))
+            {
+                return;
+            }
+
+            if ((await _elasticClient.Indices.ExistsAsync(index1)).Exists)
+            {
+                await _elasticClient.Indices.BulkAliasAsync(a => a.Add(add => add.Alias(alias).Index(index1)));
+                _logger.LogWarning($"Initialing elasticsearch alias: {alias}, for index {index1}, index existed without alias");
+                return;
+            }
+            
+            if ((await _elasticClient.Indices.ExistsAsync(index2)).Exists)
+            {
+                await _elasticClient.Indices.BulkAliasAsync(a => a.Add(add => add.Alias(alias).Index(index2)));
+                _logger.LogWarning($"Initialing elasticsearch alias: {alias}, for index {index2}, index existed without alias");
+            }
+        }
+        
         private List<T> GetAllItemsByScrolling<T>(ISearchResponse<T> response) where T: class
         {
             var list = new List<T>();
