@@ -1,11 +1,6 @@
 ﻿import { StateWithHistory } from "redux-undo";
 
-import {
-    ApplicationState,
-    Location,
-    Configuration,
-    RouteData
-} from "../models/models";
+import { ApplicationState, RouteData } from "../models/models";
 import { Urls } from "../urls";
 
 export const ISRAEL_HIKING_MAP = "Israel Hiking Map";
@@ -23,6 +18,7 @@ export const initialState =
             // isFindMissingRoutesAfterUpload: false,
             isGotLostWarnings: false,
             isShowBatteryConfirmation: true,
+            isShowIntro: true,
             version: "9.9",
             language: {
                 code: "he",
@@ -33,7 +29,7 @@ export const initialState =
             longitude: 35.12,
             latitude: 31.773,
             zoom: 13
-        } as Location,
+        },
         routes: {
             past: [],
             present: [],
@@ -133,8 +129,11 @@ export const initialState =
             pannedTimestamp: null,
             shareUrl: null,
             fileUrl: null,
-            baseLayer: null,
-            geoLocation: "disabled"
+            baseLayer: null
+        },
+        gpsState: {
+            tracking: "disabled",
+            currentPoistion: null
         },
         offlineState: {
             isOfflineAvailable: false,

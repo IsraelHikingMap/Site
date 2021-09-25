@@ -55,46 +55,70 @@ namespace IsraelHiking.DataAccess
             _logger = logger;
         }
 
-        public Task Initialize()
+        public async Task Initialize()
         {
-            return Task.Run(() =>
+            var uri = _options.ElasticsearchServerAddress;
+            var pool = new SingleNodeConnectionPool(new Uri(uri));
+            var connectionString = new ConnectionSettings(
+                pool,
+                new HttpConnection(),
+                (b, c) => new JsonNetSerializer(b, c, null, null, GeoJsonSerializer.Create(GeometryFactory.Default, 3).Converters))
+                .PrettyJson();
+            _elasticClient = new ElasticClient(connectionString);
+            await InitializeIndexWithAlias(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS, CreatePointsOfInterestIndex);
+            await InitializeIndexWithAlias(OSM_HIGHWAYS_INDEX1, OSM_HIGHWAYS_INDEX2, OSM_HIGHWAYS_ALIAS, CreateHighwaysIndex);
+
+            if ((await _elasticClient.Indices.ExistsAsync(SHARES)).Exists == false)
             {
-                var uri = _options.ElasticsearchServerAddress;
-                var pool = new SingleNodeConnectionPool(new Uri(uri));
-                var connectionString = new ConnectionSettings(
-                    pool,
-                    new HttpConnection(),
-                    (b, c) => new JsonNetSerializer(b, c, null, null, GeoJsonSerializer.Create(GeometryFactory.Default, 3).Converters))
-                    .PrettyJson();
-                _elasticClient = new ElasticClient(connectionString);
-                if (_elasticClient.Indices.Exists(OSM_POIS_INDEX1).Exists == false &&
-                    _elasticClient.Indices.Exists(OSM_POIS_INDEX2).Exists == false)
-                {
-                    CreatePointsOfInterestIndex(OSM_POIS_INDEX1);
-                    _elasticClient.Indices.BulkAlias(a => a.Add(add => add.Alias(OSM_POIS_ALIAS).Index(OSM_POIS_INDEX1)));
-                }
-                if (_elasticClient.Indices.Exists(OSM_HIGHWAYS_INDEX1).Exists == false &&
-                    _elasticClient.Indices.Exists(OSM_HIGHWAYS_INDEX2).Exists == false)
-                {
-                    CreateHighwaysIndex(OSM_HIGHWAYS_INDEX1);
-                    _elasticClient.Indices.BulkAlias(a => a.Add(add => add.Alias(OSM_HIGHWAYS_ALIAS).Index(OSM_HIGHWAYS_INDEX1)));
-                }
-                if (_elasticClient.Indices.Exists(SHARES).Exists == false)
-                {
-                    CreateSharesIndex();
-                }
-                if (_elasticClient.Indices.Exists(CUSTOM_USER_LAYERS).Exists == false)
-                {
-                    _elasticClient.Indices.Create(CUSTOM_USER_LAYERS);
-                }
-                if (_elasticClient.Indices.Exists(IMAGES).Exists == false)
-                {
-                    CreateImagesIndex();
-                }
-                _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
-            });
+                await CreateSharesIndex();
+            }
+            if ((await _elasticClient.Indices.ExistsAsync(CUSTOM_USER_LAYERS)).Exists == false)
+            {
+                await _elasticClient.Indices.CreateAsync(CUSTOM_USER_LAYERS);
+            }
+            if ((await _elasticClient.Indices.ExistsAsync(IMAGES)).Exists == false)
+            {
+                await CreateImagesIndex();
+            }
+            _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
         }
 
+        private async Task InitializeIndexWithAlias(string index1, string index2, string alias, Func<string, Task> creatIndexAction)
+        {
+            if ((await _elasticClient.Indices.ExistsAsync(index1)).Exists == false &&
+                (await _elasticClient.Indices.ExistsAsync(index2)).Exists == false)
+            {
+                await creatIndexAction(index1);
+                await _elasticClient.Indices.BulkAliasAsync(a => a.Add(add => add.Alias(alias).Index(index1)));
+                _logger.LogInformation($"Initialing elasticsearch alias: {alias}, no indices existed");
+                return;
+            }
+
+            if ((await _elasticClient.Indices.ExistsAsync(index1)).Exists &&
+                (await _elasticClient.GetIndicesPointingToAliasAsync(alias)).Contains(index1))
+            {
+                return;
+            }
+            if ((await _elasticClient.Indices.ExistsAsync(index2)).Exists &&
+                (await _elasticClient.GetIndicesPointingToAliasAsync(alias)).Contains(index2))
+            {
+                return;
+            }
+
+            if ((await _elasticClient.Indices.ExistsAsync(index1)).Exists)
+            {
+                await _elasticClient.Indices.BulkAliasAsync(a => a.Add(add => add.Alias(alias).Index(index1)));
+                _logger.LogWarning($"Initialing elasticsearch alias: {alias}, for index {index1}, index existed without alias");
+                return;
+            }
+            
+            if ((await _elasticClient.Indices.ExistsAsync(index2)).Exists)
+            {
+                await _elasticClient.Indices.BulkAliasAsync(a => a.Add(add => add.Alias(alias).Index(index2)));
+                _logger.LogWarning($"Initialing elasticsearch alias: {alias}, for index {index2}, index existed without alias");
+            }
+        }
+        
         private List<T> GetAllItemsByScrolling<T>(ISearchResponse<T> response) where T: class
         {
             var list = new List<T>();
@@ -168,7 +192,7 @@ namespace IsraelHiking.DataAccess
             return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
-        public async Task<List<Feature>> SearchByLocation(Coordinate nortEast, Coordinate southWest, string searchTerm, string language)
+        public async Task<List<Feature>> SearchByLocation(Coordinate northEast, Coordinate southWest, string searchTerm, string language)
         {
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_POIS_ALIAS)
@@ -177,7 +201,7 @@ namespace IsraelHiking.DataAccess
                     .Sort(f => f.Descending("_score"))
                     .Query(
                         q => FeatureNameSearchQueryWithFactor(q, searchTerm, language) &&
-                             q.GeoBoundingBox(b => ConvertToGeoBoundingBox(b, nortEast, southWest))
+                             q.GeoBoundingBox(b => ConvertToGeoBoundingBox(b, northEast, southWest))
                     )
             );
             return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
@@ -190,7 +214,7 @@ namespace IsraelHiking.DataAccess
                     .Size(100)
                     .Query(q =>
                         q.GeoShape(g =>
-                            g.Shape(s => s.Point(ConvertCoordinate(coordinate)))
+                            g.Shape(sh => sh.Point(ConvertCoordinate(coordinate)))
                                 .Field(f => f.Geometry)
                                 .Relation(GeoShapeRelation.Contains))
                         && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CONTAINER}").Value(true)))
@@ -281,7 +305,7 @@ namespace IsraelHiking.DataAccess
                     .Size(5000)
                     .Query(
                         q => q.GeoShape(g => 
-                            g.Shape(s => s.Envelope(ConvertCoordinate(new Coordinate(southWest.X, northEast.Y)), ConvertCoordinate(new Coordinate(northEast.X, southWest.Y))))
+                            g.Shape(sh => sh.Envelope(ConvertCoordinate(new Coordinate(southWest.X, northEast.Y)), ConvertCoordinate(new Coordinate(northEast.X, southWest.Y))))
                             .Field(f => f.Geometry)
                             .Relation(GeoShapeRelation.Intersects)
                         )
@@ -314,7 +338,7 @@ namespace IsraelHiking.DataAccess
 
         public async Task<List<Feature>> GetAllPointsOfInterest(bool withDeleted)
         {
-            _elasticClient.Indices.Refresh(OSM_POIS_ALIAS);
+            await _elasticClient.Indices.RefreshAsync(OSM_POIS_ALIAS);
             var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
             var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000)
@@ -340,7 +364,6 @@ namespace IsraelHiking.DataAccess
 
         public async Task<List<Feature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate, DateTime modifiedUntil)
         {
-            var list = new List<Feature>();
             var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
             var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000)
@@ -398,7 +421,7 @@ namespace IsraelHiking.DataAccess
 
         public async Task AddExternalPois(List<Feature> features)
         {
-            if (_elasticClient.Indices.Exists(EXTERNAL_POIS).Exists == false)
+            if ((await _elasticClient.Indices.ExistsAsync(EXTERNAL_POIS)).Exists == false)
             {
                 await CreateExternalPoisIndex();
             }
@@ -631,13 +654,13 @@ namespace IsraelHiking.DataAccess
 
         public async Task<DateTime> GetLastSuccessfulRebuildTime()
         {
-            const string MAX_DATE = "max_date";
+            const string maxDate = "max_date";
             var response = await _elasticClient.SearchAsync<RebuildContext>(s => s.Index(REBUILD_LOG)
                     .Size(1)
                     .Query(q => q.Term(t => t.Field(r => r.Succeeded).Value(true)))
-                    .Aggregations(a => a.Max(MAX_DATE, m => m.Field(r => r.StartTime)))
+                    .Aggregations(a => a.Max(maxDate, m => m.Field(r => r.StartTime)))
                     );
-            if (DateTime.TryParse(response.Aggregations.Max(MAX_DATE).ValueAsString, out var date))
+            if (DateTime.TryParse(response.Aggregations.Max(maxDate).ValueAsString, out var date))
             {
                 return date;
             }

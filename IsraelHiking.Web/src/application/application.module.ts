@@ -37,6 +37,8 @@ import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgxMapLibreGLModule } from "ngx-maplibre-gl";
 import { NgIdleModule } from "@ng-idle/core";
+import { LottieModule } from "ngx-lottie";
+import player from "lottie-web";
 // Cordova plugins
 import { Brightness } from "@ionic-native/brightness/ngx";
 import { Camera } from "@ionic-native/camera/ngx";
@@ -167,6 +169,7 @@ import { MainMenuComponent } from "./components/main-menu.component";
 import { FilesSharesDialogComponent } from "./components/dialogs/files-shares-dialog.component";
 import { CenterMeComponent } from "./components/center-me.component";
 import { FacebookWarningDialogComponent } from "./components/dialogs/facebook-warning-dialog.component";
+import { IntroDialogComponent } from "./components/dialogs/intro-dialog.component";
 import { PhotoSwpieComponent } from "./components/photoswipe.component";
 
 // variables and functions
@@ -216,7 +219,8 @@ const initializeApplication = (injector: Injector) => async () => {
             NgReduxModule,
             NgxMapLibreGLModule,
             NgIdleModule.forRoot(),
-            HammerModule
+            HammerModule,
+            LottieModule.forRoot({ player: () => player })
         ],
         providers: [
             AuthorizationService,
@@ -306,6 +310,7 @@ const initializeApplication = (injector: Injector) => async () => {
             TracesDialogComponent,
             SharesDialogComponent,
             LanguageDialogComponent,
+            IntroDialogComponent,
             DrawingComponent,
             CoordinatesComponent,
             RoutePointOverlayComponent,

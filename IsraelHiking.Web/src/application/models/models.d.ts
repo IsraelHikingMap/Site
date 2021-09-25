@@ -24,6 +24,7 @@ export { LayersState } from "./state/layers-state";
 export { ShareUrlsState } from "./state/share-urls-state";
 export { UserState } from "./state/user-state";
 export { PointsOfInterestState } from "./state/poi-state";
-export { InMemoryState, GeoLocationStateType } from "./state/in-memory-state";
+export { InMemoryState } from "./state/in-memory-state";
 export { OfflineState } from "./state/offline-state";
 export { UICompoentsState } from "./state/ui-components-state";
+export { GpsState, TrackingStateType } from "./state/gps-state";

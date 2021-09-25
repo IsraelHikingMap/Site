@@ -378,8 +378,9 @@ export class RouteEditRouteInteraction {
     }
 
     private getSnappingForRoute(latlng: LatLngAlt, additionalLatlngs: LatLngAlt[]): LatLngAlt {
-        if (this.ngRedux.getState().inMemoryState.geoLocation === "tracking") {
-            additionalLatlngs.push(this.geoLocationService.currentLocation);
+        if (this.ngRedux.getState().gpsState.tracking === "tracking") {
+            let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+            additionalLatlngs.push(currentLocation);
         }
         // private POIs + Geo Location + Additional Point:
         let points = additionalLatlngs.map(l => ({

@@ -6,6 +6,7 @@ export interface Configuration {
     //isFindMissingRoutesAfterUpload: boolean;
     isGotLostWarnings: boolean;
     isShowBatteryConfirmation: boolean;
+    isShowIntro: boolean;
     version: string;
     language: Language;
 }

@@ -1,16 +1,12 @@
-﻿using AspNetCore.Proxy;
-using IsraelHiking.API;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
@@ -28,10 +24,8 @@ using NetTopologySuite.IO;
 using Newtonsoft.Json.Converters;
 using OsmSharp.IO.API;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -61,22 +55,21 @@ namespace IsraelHiking.Web
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddProxies();
             services.AddResponseCompression();
             services.AddMemoryCache();
+            services.AddHealthChecks();
             services.AddDetection();
             services.AddHttpClient();
             services.AddIHMDataAccess();
             services.AddIHMApi();
             services.AddSqliteCache(@"./cache.sqlite");
-            services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
+            services.AddSingleton<OsmAccessTokenEventsHelper>();
             services.AddSingleton<IClientsFactory>(serviceProvider =>
                 new ClientsFactory(serviceProvider.GetRequiredService<ILogger>(),
                 serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(),
                 serviceProvider.GetRequiredService<IOptions<ConfigurationData>>().Value.OsmConfiguration.BaseAddress + "/api/"));
             var geometryFactory = new GeometryFactory(new PrecisionModel(100000000));
             services.AddSingleton<GeometryFactory, GeometryFactory>(serviceProvider => geometryFactory);
-            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerOptionsValidatorConfigureOptions>();
             services.AddControllers(options =>
             {
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
@@ -95,7 +88,17 @@ namespace IsraelHiking.Web
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer();
+            }).AddJwtBearer(jwtBearerOptions =>
+            {
+                jwtBearerOptions.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var tokenService = context.HttpContext.RequestServices.GetService<OsmAccessTokenEventsHelper>();
+                        return tokenService?.OnMessageReceived(context);
+                    }
+                };
+            });
             services.AddCors();
             services.AddOptions();
 
@@ -140,139 +143,41 @@ namespace IsraelHiking.Web
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseWhen(context => !context.Request.Path.StartsWithSegments("/.well-known/acme-challenge"), httpApp =>
-                {
-                    httpApp.UseHttpsRedirection();
-                });
-            }
             app.UseResponseCompression();
             app.UseRouting();
-            app.UseCors(builder =>
-            {
-                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();//.AllowCredentials();
-            });
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/api/health");
             });
-            SetupStaticFilesAndProxies(app);
+            SetupStaticFiles(app);
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Israel Hiking API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Israel Hiking Map API V1");
             });
             // This should be the last middleware
             app.UseMiddleware<NonApiMiddleware>();
             InitializeServices(app.ApplicationServices);
         }
 
-        private static void SetupStaticFilesAndProxies(IApplicationBuilder app)
+        private static void SetupStaticFiles(IApplicationBuilder app)
         {
             app.UseDefaultFiles();
-            var configurationData = app.ApplicationServices.GetRequiredService<IOptions<ConfigurationData>>().Value;
             var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
             fileExtensionContentTypeProvider.Mappings.Add(".pbf", "application/x-protobuf");
             fileExtensionContentTypeProvider.Mappings.Add(".db", "application/octet-stream");
             fileExtensionContentTypeProvider.Mappings.Add(".geojson", "application/json");
 
-            app.UseProxies(proxies =>
-            {
-                // HM TODO: remove this section after HTTP/2 issue is resolved
-                foreach (var proxyEntry in configurationData.ProxiesDictionaryCleared ?? new Dictionary<string, string>())
-                {
-                    proxies.Map(proxyEntry.Key,
-                        proxy => proxy.UseHttp((_, args) =>
-                        {
-                            var targetAddress = proxyEntry.Value;
-                            foreach (var argValuePair in args)
-                            {
-                                targetAddress = targetAddress.Replace("{" + argValuePair.Key + "}", argValuePair.Value.ToString());
-                            }
-                            return targetAddress;
-                        }, options => options.WithAfterReceive((context, response) =>
-                        {
-                            response.Headers.Clear();
-                            return Task.CompletedTask;
-                        })
-                    ));
-                }
-
-                foreach (var proxyEntry in configurationData.ProxiesDictionary ?? new Dictionary<string, string>())
-                {
-                    proxies.Map(proxyEntry.Key,
-                        proxy => proxy.UseHttp((_, args) =>
-                        {
-                            var targetAddress = proxyEntry.Value;
-                            foreach (var argValuePair in args)
-                            {
-                                targetAddress = targetAddress.Replace("{" + argValuePair.Key + "}", argValuePair.Value.ToString());
-                            }
-                            return targetAddress;
-                        }
-                    ));
-                }
-            });
-
-            foreach (var directory in configurationData.ListingDictionary)
-            {
-                var fullPath = Path.IsPathRooted(directory.Value) ? directory.Value : Path.GetFullPath(Path.Combine(configurationData.BinariesFolder, directory.Value));
-                var fileServerOptions = new FileServerOptions
-                {
-                    FileProvider = new PhysicalFileProvider(fullPath),
-                    RequestPath = new PathString("/" + directory.Key),
-                    EnableDirectoryBrowsing = true,
-                    DirectoryBrowserOptions =
-                    {
-                        FileProvider = new PhysicalFileProvider(fullPath),
-                        RequestPath = new PathString("/" + directory.Key),
-                        Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices
-                            .GetRequiredService<IFileSystemHelper>())
-                    },
-                    StaticFileOptions = {
-                        OnPrepareResponse = GetPrepareCORSResponse(),
-                        ContentTypeProvider = fileExtensionContentTypeProvider
-                    },
-                };
-                app.UseFileServer(fileServerOptions);
-            }
-
-            // serve https certificate folder
-            var wellKnownFolder = Path.Combine(Directory.GetCurrentDirectory(), ".well-known");
-            if (Directory.Exists(wellKnownFolder))
-            {
-                app.UseStaticFiles(new StaticFileOptions
-                {
-                    FileProvider = new PhysicalFileProvider(wellKnownFolder),
-                    RequestPath = new PathString("/.well-known"),
-                    ServeUnknownFileTypes = true, // serve extensionless file
-                    DefaultContentType = "application/json"
-                });
-            }
-
             // wwwroot
             app.UseStaticFiles(new StaticFileOptions
             {
-                OnPrepareResponse = GetPrepareCORSResponse(),
                 ContentTypeProvider = fileExtensionContentTypeProvider
             });
-        }
-
-        private static Action<StaticFileResponseContext> GetPrepareCORSResponse()
-        {
-            return (StaticFileResponseContext ctx) =>
-            {
-                if (ctx.Context.Response.Headers.Keys.Contains("Access-Control-Allow-Origin"))
-                {
-                    ctx.Context.Response.Headers.Remove("Access-Control-Allow-Origin");
-                }
-                ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-                ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-            };
         }
 
         private void InitializeServices(IServiceProvider serviceProvider)
@@ -283,7 +188,11 @@ namespace IsraelHiking.Web
             var initializableServices = serviceProvider.GetServices<IInitializable>();
             foreach (var service in initializableServices)
             {
-                service.Initialize();
+                var serviceName = service.GetType().ToString();
+                service.Initialize().ContinueWith((t) =>
+                {
+                    logger.LogError(t.Exception, $"Failed to initialize service {serviceName}");
+                }, TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 

@@ -29,6 +29,9 @@ export class LocationComponent extends BaseMapComponent {
     @select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
     public pannedTimestamp$: Observable<Date>;
 
+    @select((state: ApplicationState) => state.gpsState.currentPoistion)
+    private currentPoistion$: Observable<GeolocationPosition>;
+
     private lastSpeed: number;
     private lastSpeedTime: number;
     private isPanned: boolean;
@@ -83,33 +86,28 @@ export class LocationComponent extends BaseMapComponent {
             this.mapComponent.mapInstance.on("move", () => {
                 this.updateDistanceFeatureCollection();
             });
-        });
 
-        this.geoLocationService.positionChanged.subscribe(
-            (position: GeolocationPosition) => {
+            this.currentPoistion$.subscribe((position: GeolocationPosition) => {
                 if (position != null) {
                     this.handlePositionChange(position);
                 }
             });
-        this.geoLocationService.bulkPositionChanged.subscribe(
-            (positions: GeolocationPosition[]) => {
-                this.handlePositionChange(positions[positions.length - 1]);
-            });
 
-        this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
-            if (!this.isActive() || this.locationFeatures.features.length === 0) {
-                return;
-            }
-            if (this.lastSpeed != null && new Date().getTime() - this.lastSpeedTime < 5000) {
-                return;
-            }
-            this.lastSpeed = null;
-            let center = this.getCenterFromLocationFeatureCollection();
-            let radius = this.getRadiusFromLocationFeatureCollection();
-            this.updateLocationFeatureCollection(center, radius, bearing);
-            if (!this.mapComponent.mapInstance.isMoving() && this.isFollowingLocation()) {
-                this.moveMapToGpsPosition();
-            }
+            this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
+                if (!this.isActive() || this.locationFeatures.features.length === 0) {
+                    return;
+                }
+                if (this.lastSpeed != null && new Date().getTime() - this.lastSpeedTime < 5000) {
+                    return;
+                }
+                this.lastSpeed = null;
+                let center = this.getCenterFromLocationFeatureCollection();
+                let radius = this.getRadiusFromLocationFeatureCollection();
+                this.updateLocationFeatureCollection(center, radius, bearing);
+                if (!this.mapComponent.mapInstance.isMoving() && this.isFollowingLocation()) {
+                    this.moveMapToGpsPosition();
+                }
+            });
         });
     }
 
@@ -196,7 +194,7 @@ export class LocationComponent extends BaseMapComponent {
                     message: this.resources.makeSureBatteryOptimizationIsOff,
                     type: "Custom",
                     declineAction: () => {
-                        this.ngRedux.dispatch(ConfigurationActions.isShowBatteryConfirmationAction);
+                        this.ngRedux.dispatch(ConfigurationActions.stopShowBatteryConfirmationAction);
                     },
                     customConfirmText: this.resources.ok,
                     customDeclineText: this.resources.dontShowThisMessageAgain
@@ -207,15 +205,15 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public isDisabled() {
-        return this.ngRedux.getState().inMemoryState.geoLocation === "disabled";
+        return this.ngRedux.getState().gpsState.tracking === "disabled";
     }
 
     public isActive() {
-        return this.ngRedux.getState().inMemoryState.geoLocation === "tracking";
+        return this.ngRedux.getState().gpsState.tracking === "tracking";
     }
 
     public isLoading() {
-        return this.ngRedux.getState().inMemoryState.geoLocation === "searching";
+        return this.ngRedux.getState().gpsState.tracking === "searching";
     }
 
     private handlePositionChange(position: GeolocationPosition) {

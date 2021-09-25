@@ -93,10 +93,10 @@ export class ApplicationExitService {
     private async exitApp() {
         this.toastService.info(this.resources.wrappingThingsUp);
         this.loggingService.debug("Starting IHM Application Exit");
-        await this.databaseService.close();
-        await this.geoLocationService.disable();
+        await this.geoLocationService.uninitialize();
+        await this.databaseService.uninitialize();
         this.loggingService.debug("Finished IHM Application Exit");
-        await this.loggingService.close();
+        await this.loggingService.uninitialize();
         navigator.app.exitApp();
     }
 }

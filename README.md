@@ -33,6 +33,8 @@ The technology stack of this site is based on the following frameworks:
 * [Redux using angular-redux](https://github.com/angular-redux/platform)
 * [Dexie](https://dexie.org/) - Used for client side storage
 * [Docker](https://www.docker.com/)
+* [Lottie](https://github.com/airbnb/lottie-web)
+* [ngx-lottie](https://github.com/ngx-lottie/ngx-lottie)
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:

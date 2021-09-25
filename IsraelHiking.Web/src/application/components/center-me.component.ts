@@ -8,7 +8,8 @@ import { ApplicationState } from "../models/models";
 
 @Component({
     selector: "center-me",
-    templateUrl: "./center-me.component.html"
+    templateUrl: "./center-me.component.html",
+    styleUrls: ["./center-me.component.scss"]
 })
 export class CenterMeComponent extends BaseMapComponent {
 
@@ -19,7 +20,8 @@ export class CenterMeComponent extends BaseMapComponent {
 
     public showButton() {
         let inMemeoryState = this.ngRedux.getState().inMemoryState;
-        return inMemeoryState.pannedTimestamp != null && inMemeoryState.geoLocation === "tracking";
+        let tracking = this.ngRedux.getState().gpsState.tracking;
+        return inMemeoryState.pannedTimestamp != null && tracking === "tracking";
     }
 
     public centerMe() {

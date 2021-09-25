@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { last } from "lodash-es";
+import { Observable } from "rxjs";
 
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { LoggingService } from "./logging.service";
@@ -9,7 +10,7 @@ import { GeoLocationService } from "./geo-location.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
 import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
-import { NgRedux } from "../reducers/infra/ng-redux.module";
+import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { StopRecordingAction, StartRecordingAction } from "../reducers/route-editing-state.reducer";
 import { AddTraceAction } from "../reducers/traces.reducer";
 import { AddRouteAction, AddRecordingPointsAction } from "../reducers/routes.reducer";
@@ -22,6 +23,9 @@ export class RecordedRouteService {
     private static readonly MIN_ACCURACY = 100; // meters
 
     private rejectedPosition: ILatLngTime;
+
+    @select((state: ApplicationState )=> state.gpsState.currentPoistion)
+    private currentPosition$: Observable<GeolocationPosition>;
 
     constructor(private readonly resources: ResourcesService,
                 private readonly geoLocationService: GeoLocationService,
@@ -53,7 +57,7 @@ export class RecordedRouteService {
             });
         }
 
-        this.geoLocationService.positionChanged.subscribe(
+        this.currentPosition$.subscribe(
             (position: GeolocationPosition) => {
                 if (position != null) {
                     this.updateRecordingRoute([position]);
@@ -76,7 +80,7 @@ export class RecordedRouteService {
             name = this.resources.route + " " + dateString;
         }
         let route = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
-        let currentLocation = this.geoLocationService.currentLocation;
+        let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
         route.segments.push({
             routingType,

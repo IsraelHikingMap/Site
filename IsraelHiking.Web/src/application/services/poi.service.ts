@@ -138,7 +138,7 @@ export class PoiService {
             this.updatePois(this.ngRedux.getState().offlineState.poisLastModifiedDate == null);
         });
         this.categoriesGroups.pipe(skip(1)).subscribe(() => {
-            this.loggingService.info("[POIs] Categoris changed, updating pois");
+            this.loggingService.info("[POIs] Categories changed, updating pois");
             this.updatePois(this.ngRedux.getState().offlineState.poisLastModifiedDate == null);
         });
         await this.syncCategories();

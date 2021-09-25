@@ -106,6 +106,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     @select((state: ApplicationState) => state.location.zoom)
     private zoom$: Observable<number>;
 
+    @select((state: ApplicationState) => state.gpsState.currentPoistion)
+    private currentPoistion$: Observable<GeolocationPosition>;
+
     @select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
     public statisticsVisible$: Observable<boolean>;
 
@@ -247,7 +250,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.componentSubscriptions.push(this.language$.subscribe(() => {
             this.redrawChart();
         }));
-        this.componentSubscriptions.push(this.geoLocationService.positionChanged.subscribe(p => {
+        this.componentSubscriptions.push(this.currentPoistion$.subscribe(p => {
             this.onGeolocationChanged(p);
         }));
         this.routeChanged();
@@ -863,7 +866,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private refreshLocationGroup() {
-        let point = this.getPointFromLatLng(this.geoLocationService.currentLocation, this.heading);
+        let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+        let point = this.getPointFromLatLng(currentLocation, this.heading);
         if (!point) {
             this.hideLocationGroup();
             return;
@@ -907,14 +911,15 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.setViewStatisticsValues(null);
             return;
         }
-        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation,
+        let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation,
             this.heading);
         let routeIsRecording = this.selectedRouteService.getRecordingRoute() != null &&
             this.selectedRouteService.getRecordingRoute().id === route.id;
         this.statistics = this.routeStatisticsService.getStatistics(
             route,
             closestRouteToGps,
-            this.geoLocationService.currentLocation,
+            currentLocation,
             this.heading,
             routeIsRecording);
         this.routeColor = closestRouteToGps ? closestRouteToGps.color : route.color;
@@ -924,8 +929,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private getRouteForChart() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(this.geoLocationService.currentLocation,
-            this.heading);
+        let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
         return selectedRoute || closestRouteToGps;
     }
 

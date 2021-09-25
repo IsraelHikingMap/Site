@@ -4,6 +4,7 @@ import { throttleTime } from "rxjs/operators";
 import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
 
 import { LoggingService } from "./logging.service";
+import { RunningContextService } from "./running-context.service";
 
 @Injectable()
 export class DeviceOrientationService {
@@ -16,13 +17,17 @@ export class DeviceOrientationService {
 
     constructor(private readonly ngZone: NgZone,
                 private readonly loggingService: LoggingService,
-                private readonly deviceOrientation: DeviceOrientation) {
+                private readonly deviceOrientation: DeviceOrientation,
+                private readonly runningContextService: RunningContextService) {
         this.orientationChanged = new EventEmitter();
         this.isBackground = false;
         this.subscription = null;
     }
 
     public initialize() {
+        if (!this.runningContextService.isCordova) {
+            return;
+        }
         document.addEventListener("resume", () => {
             this.isBackground = false;
         });
@@ -58,6 +63,9 @@ export class DeviceOrientationService {
     }
 
     public enable() {
+        if (!this.runningContextService.isCordova) {
+            return;
+        }
         this.loggingService.info("[Orientation] Enabling device orientation service");
         this.subscription = this.deviceOrientation.watchHeading().pipe(
             throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })).subscribe(d => {
@@ -66,6 +74,9 @@ export class DeviceOrientationService {
     }
 
     public disable() {
+        if (!this.runningContextService.isCordova) {
+            return;
+        }
         if (this.subscription != null) {
             this.loggingService.info("[Orientation] Disabling device orientation service");
             this.subscription.unsubscribe();

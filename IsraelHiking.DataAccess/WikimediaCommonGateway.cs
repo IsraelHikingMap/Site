@@ -51,14 +51,13 @@ namespace IsraelHiking.DataAccess
             {
                 _logger.LogError("Wikimedia user is empty!");
             }
-            _logger.LogInformation("Finished initializing Wikimedia common service");
         }
 
         public async Task Initialize()
         {
             var wikiClient = new WikiClient
             {
-                ClientUserAgent = "IsraelHikingMapSite/5.x",
+                ClientUserAgent = "IsraelHikingMapSite/5.x bot (https://israelhiking.osm.org.il; israelhikingmap@gmail.com)",
                 Timeout = new TimeSpan(0, 5, 0) // allow large images upload
             };
 
@@ -66,6 +65,7 @@ namespace IsraelHiking.DataAccess
             await _site.Initialization;
             await _site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
             _site.AccountAssertionFailureHandler = new LoginAgainAccountAssertionFailureHandler(_options);
+            _logger.LogInformation("Finished initializing Wikimedia common service");
         }
 
         public async Task<string> UploadImage(string title, string description, string author, string fileName, Stream contentStream, Coordinate location)

@@ -106,7 +106,7 @@ export class LoggingService {
         this.writeToStorage(logLine);
     }
 
-    public async close(): Promise<void> {
+    public async uninitialize(): Promise<void> {
         if (this.runningContextService.isProduction) {
             return;
         }

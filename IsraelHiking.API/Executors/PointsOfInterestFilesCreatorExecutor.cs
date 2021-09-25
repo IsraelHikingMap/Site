@@ -142,10 +142,7 @@ namespace IsraelHiking.API.Executors
             _logger.LogInformation("Finished Image file creation: " + items.Count());
             zipStream.Finish();
             outputMemStream.Position = 0;
-            var listingValue = _options.ListingDictionary["PointsOfInterest"];
-            var fullFolderPath = Path.IsPathRooted(listingValue) 
-                ? listingValue : 
-                Path.GetFullPath(Path.Combine(_options.BinariesFolder, listingValue));
+            var fullFolderPath = Path.GetFullPath(_options.OfflineFilesFolder);
             _fileSystemHelper.WriteAllBytes(Path.Combine(fullFolderPath, "pois.zip"), outputMemStream.ToArray());
         }
     }

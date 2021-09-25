@@ -1,8 +1,10 @@
 import { Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 
+import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-warning-dialog.component";
+import { IntroDialogComponent } from "../components/dialogs/intro-dialog.component";
 import { LoggingService } from "./logging.service";
 import { ScreenService } from "./screen.service";
 import { DatabaseService } from "./database.service";
@@ -18,6 +20,8 @@ import { TracesService } from "./traces.service";
 import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
+import { GeoLocationService } from "./geo-location.service";
+import { ApplicationState } from "../models/models";
 
 @Injectable()
 export class ApplicationInitializeService {
@@ -29,14 +33,16 @@ export class ApplicationInitializeService {
                 private readonly applicationExitService: ApplicationExitService,
                 private readonly openWithService: OpenWithService,
                 private readonly purchaseService: PurchaseService,
-                private readonly runnincContextService: RunningContextService,
+                private readonly runningContextService: RunningContextService,
                 private readonly dragAndDropService: DragAndDropService,
                 private readonly poiService: PoiService,
                 private readonly deviceOrientationService: DeviceOrientationService,
                 private readonly recordedRouteService: RecordedRouteService,
                 private readonly tracesService: TracesService,
                 private readonly shareUrlsService: ShareUrlsService,
-                private readonly offlineFilesDownloadService: OfflineFilesDownloadService
+                private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
+                private readonly geoLocationService: GeoLocationService,
+                private readonly ngRedux: NgRedux<ApplicationState>
     ) {
     }
 
@@ -51,15 +57,19 @@ export class ApplicationInitializeService {
             this.applicationExitService.initialize();
             this.openWithService.initialize();
             this.purchaseService.initialize();
+            this.geoLocationService.initialize();
             this.dragAndDropService.initialize();
-            if (this.runnincContextService.isMobile
-                && !this.runnincContextService.isCordova
-                && !this.runnincContextService.isIFrame) {
-                    if (this.runnincContextService.isFacebook) {
+            if (this.runningContextService.isMobile
+                && !this.runningContextService.isCordova
+                && !this.runningContextService.isIFrame) {
+                    if (this.runningContextService.isFacebook) {
                         FacebookWarningDialogComponent.openDialog(this.dialog);
                     } else {
                         UseAppDialogComponent.openDialog(this.dialog);
                     }
+            } else if (!this.runningContextService.isIFrame
+                && this.ngRedux.getState().configuration.isShowIntro) {
+                    IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
             }
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();

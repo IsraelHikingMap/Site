@@ -91,6 +91,10 @@ export class DatabaseService {
         if (dbState != null) {
             storedState = this.initialStateUpgrade(dbState.state);
         } else {
+            // initial load ever:
+            if (this.runningContext.isCordova) {
+                initialState.gpsState.tracking = "tracking";
+            }
             this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).put({
                 id: DatabaseService.STATE_DOC_ID,
                 state: initialState
@@ -127,7 +131,7 @@ export class DatabaseService {
         });
     }
 
-    public async close() {
+    public async uninitialize() {
         let finalState = this.ngRedux.getState();
         // reduce database size and memory footprint
         finalState.routes.past = [];
@@ -156,11 +160,16 @@ export class DatabaseService {
             return;
         }
         this.updating = true;
-        await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).put({
-            id: DatabaseService.STATE_DOC_ID,
-            state
-        });
-        this.updating = false;
+        try {
+            await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).put({
+                id: DatabaseService.STATE_DOC_ID,
+                state
+            });
+        } catch (ex) {
+            this.loggingService.warning("[Database] Unable to store the state: " + ex.message);
+        } finally {
+            this.updating = false;
+        }
     }
 
     private getSourceNameFromUrl(url: string) {
@@ -322,6 +331,7 @@ export class DatabaseService {
         if (!this.runningContext.isCordova) {
             storedState.routes = initialState.routes;
             storedState.poiState = initialState.poiState;
+            storedState.gpsState = initialState.gpsState;
         }
         return storedState;
     }
