@@ -46,6 +46,7 @@ for:
         - PRODUCT: tests
     install:
       - sh: nvm install 14.17
+      - sh: npm install -g npm@7.24.1
     before_build:
       - pwsh: dotnet restore
     build:
@@ -64,7 +65,8 @@ for:
       only:
         - PRODUCT: android
     install:
-      - ps: Install-Product node LTS    
+      - ps: Install-Product node LTS
+      - sh: npm install -g npm@7.24.1 
     build_script:
     - pwsh: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
@@ -78,6 +80,7 @@ for:
       fast_finish: true
     install:
       - sh: nvm install 14.17
+      - sh: npm install -g npm@7.24.1
     build_script: 
     - pwsh: >-
         $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishIOS.ps1"
