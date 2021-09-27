@@ -3,7 +3,7 @@ import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
 import { Device } from "@ionic-native/device/ngx";
 import { AppVersion } from "@ionic-native/app-version/ngx";
-import { EmailComposer } from "@ionic-native/email-composer/ngx";
+import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
 
 import { BaseMapComponent } from "./base-map.component";
@@ -56,7 +56,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     public statisticsVisible$: Observable<boolean>;
 
     constructor(resources: ResourcesService,
-                private readonly emailComposer: EmailComposer,
+                private readonly socialSharing: SocialSharing,
                 private readonly device: Device,
                 private readonly appVersion: AppVersion,
                 private readonly authorizationService: AuthorizationService,
@@ -200,16 +200,18 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             ].join("\n");
             let infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
-            this.emailComposer.open({
-                to: ["israelhikingmap@gmail.com"],
-                subject: "Issue reported by " + userInfo.displayName,
-                body: this.resources.reportAnIssueInstructions,
-                attachments: [
-                    "base64:log.zip//" + logBase64zipped,
-                    "base64:geolocation-log.zip//" + logBase64zippedGeoLocation,
-                    `base64:info-${userInfo.id}.txt//${infoBase64}`
+            this.socialSharing.shareViaEmail(
+                this.resources.reportAnIssueInstructions,
+                "Issue reported by " + userInfo.displayName,
+                ["israelhikingmap@gmail.com"],
+                null,
+                null,
+                [
+                    `df:log.zip;data:application/zip;base64,${logBase64zipped}`,
+                    `df:geolocation-log.zip;data:application/zip;base64,${logBase64zippedGeoLocation}`,
+                    `df:info-${userInfo.id}.txt;data:text/plain;base64,${infoBase64}`
                 ]
-            });
+            );
         } catch (ex) {
             alert("Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?" +
                 `\nSend issue failed: ${ex.toString()}`);

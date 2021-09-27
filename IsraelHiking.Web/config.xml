@@ -23,10 +23,11 @@
     </host>
   </universal-links>
   <platform name="android">
+    <resource-file src="custom-repos.gradle" target="repositories.gradle" />
+    <resource-file src="custom-repos.gradle" target="app/repositories.gradle" />
+    <resource-file src="custom-repos.gradle" target="CordovaLib/repositories.gradle" /> 
     <hook type="after_prepare" src="remove-permissions.js" />
     <allow-intent href="market:*" />
-    <preference name="android-targetSdkVersion" value="29" />
-    <preference name="android-minSdkVersion" value="22" />
     <preference name="AndroidLaunchMode" value="singleInstance" />
     <icon density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />
     <splash density="ldpi" src="www/content/favicons/android-chrome-36x36.png" />

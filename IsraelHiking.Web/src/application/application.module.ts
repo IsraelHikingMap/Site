@@ -42,7 +42,6 @@ import player from "lottie-web";
 // Cordova plugins
 import { Brightness } from "@ionic-native/brightness/ngx";
 import { Camera } from "@ionic-native/camera/ngx";
-import { EmailComposer } from "@ionic-native/email-composer/ngx";
 import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 import { InAppBrowser } from "@ionic-native/in-app-browser/ngx";
 import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
@@ -275,7 +274,6 @@ const initializeApplication = (injector: Injector) => async () => {
             AudioPlayerFactory,
             Brightness,
             Camera,
-            EmailComposer,
             FileSystemWrapper,
             InAppBrowser,
             InAppPurchase2,
