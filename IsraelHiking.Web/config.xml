@@ -26,6 +26,7 @@
     <resource-file src="custom-repos.gradle" target="repositories.gradle" />
     <resource-file src="custom-repos.gradle" target="app/repositories.gradle" />
     <resource-file src="custom-repos.gradle" target="CordovaLib/repositories.gradle" /> 
+    <preference name="AndroidInsecureFileModeEnabled" value="true" />
     <hook type="after_prepare" src="remove-permissions.js" />
     <allow-intent href="market:*" />
     <preference name="AndroidLaunchMode" value="singleInstance" />
