@@ -17,6 +17,8 @@ Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;andro
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 # Building android:
+Write-Host "npm cache verify"
+npm cache verify
 Write-Host "npm install"
 npm install
 
