@@ -42,8 +42,8 @@ Copy-Item "./signing/appveyor.mobileprovision" -Destination "~/Library/MobileDev
 Copy-Item "./signing/appveyorshareextention.mobileprovision" -Destination "~/Library/MobileDevice/Provisioning Profiles/"
 
 # Building ios:
-Write-Host "npm install --loglevel=error"
-npm install --loglevel=error
+Write-Host "npm ci"
+npm ci
 
 Write-Host "npm run build:cordova -- --no-progress"
 npm run build:cordova -- --no-progress

@@ -17,8 +17,8 @@ Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;andro
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 # Building android:
-Write-Host "npm install --loglevel=error"
-npm install --loglevel=error
+Write-Host "npm ci"
+npm ci
 
 Write-Host "npm run build:cordova -- --no-progress"
 npm run build:cordova -- --no-progress

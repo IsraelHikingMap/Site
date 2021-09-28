@@ -3,7 +3,8 @@ FROM node:14.17 as build-node
 WORKDIR /angular
 COPY ./IsraelHiking.Web/ ./
 
-RUN npm install
+RUN npm install -g npm@7.24.1
+RUN npm ci
 RUN npm run build:prod -- --no-progress
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0.300 as build-net

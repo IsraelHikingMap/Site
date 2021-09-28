@@ -66,7 +66,7 @@ for:
         - PRODUCT: android
     install:
       - ps: Install-Product node LTS
-      - sh: npm install -g npm@7.24.1 
+      - ps: npm install -g npm@7.24.1 
     build_script:
     - pwsh: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
