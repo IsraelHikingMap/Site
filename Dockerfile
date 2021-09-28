@@ -3,7 +3,6 @@ FROM node:14.17 as build-node
 WORKDIR /angular
 COPY ./IsraelHiking.Web/ ./
 
-RUN npm install -g npm@7.24.1
 RUN npm ci
 RUN npm run build:prod -- --no-progress
 
