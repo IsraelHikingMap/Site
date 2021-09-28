@@ -12,7 +12,7 @@ Invoke-Expression """$response"" | sdkmanager.bat --licenses"
 
 Invoke-Expression """$response"" | sdkmanager.bat --update | out-null"
 
-Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
+Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-30"" ""build-tools;30.0.2"" ""extras;google;m2repository"" | out-null"
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
