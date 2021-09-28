@@ -6,7 +6,7 @@ $env:PATH += ";$env:ANDROID_HOME/tools/bin/"
 
 for($i=0;$i -lt 30;$i++) { $response += "y`n"};
 
-Invoke-Expression """$response"" | sdkmanager.bat --licenses"
+Invoke-Expression """$response"" | sdkmanager.bat --licenses | out-null"
 
 Invoke-Expression """$response"" | sdkmanager.bat --update | out-null"
 
