@@ -4,15 +4,13 @@ refreshenv
 
 $env:PATH += ";$env:ANDROID_HOME/tools/bin/"
 
-gradle --version
-
 for($i=0;$i -lt 30;$i++) { $response += "y`n"};
 
 Invoke-Expression """$response"" | sdkmanager.bat --licenses | out-null"
 
 Invoke-Expression """$response"" | sdkmanager.bat --update | out-null"
 
-Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-30"" ""build-tools;31.0.0"" ""extras;google;m2repository"" | out-null"
+Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-30"" ""build-tools;30.0.3"" ""extras;google;m2repository"" | out-null"
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
