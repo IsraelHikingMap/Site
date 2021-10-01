@@ -185,6 +185,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public toggleRoute(routeData: RouteData) {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null && routeData.id === selectedRoute.id && routeData.state !== "Hidden") {
+            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: null }));
             routeData.state = "Hidden";
             this.ngRedux.dispatch(new ChangeRoutePropertiesAction(
                 {
@@ -223,7 +224,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public isRouteInEditMode(routeData: RouteData): boolean {
-        return routeData.state === "Route";
+        return routeData.state === "Route" || routeData.state === "Poi";
     }
 
     public isShowActive(routeData: RouteData): boolean {
