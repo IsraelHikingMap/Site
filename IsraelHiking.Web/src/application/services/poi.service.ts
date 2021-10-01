@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { NgProgress } from "@ngx-progressbar/core";
+import { NgProgress } from "ngx-progressbar";
 import { uniq, cloneDeep } from "lodash-es";
 import { Observable, fromEvent, Subscription } from "rxjs";
 import { timeout, throttleTime, skip } from "rxjs/operators";

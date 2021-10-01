@@ -1,24 +1,22 @@
-choco install gradle --version 4.10.3 --no-progress
+choco install gradle --version 7.1.1 --no-progress
 
 refreshenv
 
 $env:PATH += ";$env:ANDROID_HOME/tools/bin/"
 
-gradle --version
-
 for($i=0;$i -lt 30;$i++) { $response += "y`n"};
 
-Invoke-Expression """$response"" | sdkmanager.bat --licenses"
+Invoke-Expression """$response"" | sdkmanager.bat --licenses | out-null"
 
 Invoke-Expression """$response"" | sdkmanager.bat --update | out-null"
 
-Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
+Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-30"" ""build-tools;30.0.3"" ""extras;google;m2repository"" | out-null"
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 # Building android:
-Write-Host "npm install --loglevel=error"
-npm install --loglevel=error
+Write-Host "npm ci"
+npm ci
 
 Write-Host "npm run build:cordova -- --no-progress"
 npm run build:cordova -- --no-progress
