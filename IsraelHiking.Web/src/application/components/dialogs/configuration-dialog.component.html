@@ -11,14 +11,14 @@
         <br />
         <div fxLayout="row" *ngIf="isApp()">
             <div fxFlex>
-                <mat-checkbox [checked]="isBatteryOptimization | async" (change)="toggleBatteryOprimization()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle battery optimization">{{resources.batteryOptimization}}</mat-checkbox>
+                <mat-checkbox [checked]="isBatteryOptimization | async" (change)="toggleBatteryOprimization()" color="primary" angulartics2On="click" angularticsCategory="Configuration" angularticsAction="Toggle battery optimization">{{resources.batteryOptimization}}</mat-checkbox>
                 <br />
                 <span class="text-small">{{resources.batteryOptimizationHint}}</span>
             </div>
         </div>
         <div fxLayout="row" *ngIf="isApp()">
             <div fxFlex>
-                <mat-checkbox [checked]="isAutomaticRecordingUpload | async" (change)="toggleAutomaticRecordingUpload()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle automatic upload">{{resources.automaticRecordingUpload}}</mat-checkbox>
+                <mat-checkbox [checked]="isAutomaticRecordingUpload | async" (change)="toggleAutomaticRecordingUpload()" color="primary" angulartics2On="click" angularticsCategory="Configuration" angularticsAction="Toggle automatic upload">{{resources.automaticRecordingUpload}}</mat-checkbox>
                 <br />
                 <span class="text-small">{{resources.automaticRecordingUploadHint}}</span>
             </div>
@@ -26,7 +26,7 @@
         <!--
     <div fxLayout="row">
         <div fxFlex>
-            <mat-checkbox [checked]="isFindMissingRoutesAfterUpload | async" (change)="toggleFindMissingRoutesAfterUpload()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle find missing routes after upload button">{{resources.findMissingRoutesAfterUpload}}</mat-checkbox>
+            <mat-checkbox [checked]="isFindMissingRoutesAfterUpload | async" (change)="toggleFindMissingRoutesAfterUpload()" color="primary" angulartics2On="click" angularticsCategory="Configuration" angularticsAction="Toggle find missing routes after upload button">{{resources.findMissingRoutesAfterUpload}}</mat-checkbox>
             <br />
             <span class="text-small">{{resources.findMissingRoutesAfterUploadHint}}</span>
         </div>
@@ -34,10 +34,17 @@
         -->
         <div fxLayout="row" *ngIf="isApp()">
             <div fxFlex>
-                <mat-checkbox [checked]="isGotLostWarnings | async" (change)="toggleGotLostWarnings()" color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Toggle got lost warnings">{{resources.gotLostWarnings}}</mat-checkbox>
+                <mat-checkbox [checked]="isGotLostWarnings | async" (change)="toggleGotLostWarnings()" color="primary" angulartics2On="click" angularticsCategory="Configuration" angularticsAction="Toggle got lost warnings">{{resources.gotLostWarnings}}</mat-checkbox>
                 <br />
                 <span class="text-small">{{resources.gotLostWarningsHint}}</span>
             </div>
         </div>
         <br />
+    </div>
+    <div mat-dialog-actions>
+        <div fxLayout="row" fxFlex>
+            <div fxFlex>
+                <button mat-raised-button fxFill (click)="clearData()" color="warn" angulartics2On="click" angularticsCategory="Configuration" angularticsAction="Reset data">{{resources.resetData}}</button>
+            </div>
+        </div>
     </div>

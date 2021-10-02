@@ -47,12 +47,9 @@
                         <button mat-menu-item (click)="selectLegendAndAbout()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show legend and info">
                             <span><i class="fa fa-lg icon-info mat-icon"></i> {{resources.about}} - {{resources.legend}}</span>
                         </button>
-                        <button mat-menu-item *ngIf="isApp() && !isIFrame()" (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Report an issue">
+                        <button mat-menu-item *ngIf="!isIFrame()" (click)="reportAnIssue()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Report an issue">
                             <span><i class="fa fa-lg icon-envelope mat-icon"></i> {{resources.reportAnIssue}}</span>
                         </button>
-                        <a mat-menu-item *ngIf="!isApp() && !isIFrame()" href="https://github.com/IsraelHikingMap/Site/issues/new" target="_blank" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Report an issue github">
-                            <span><i class="fa fa-lg icon-envelope mat-icon"></i> {{resources.reportAnIssue}}</span>
-                        </a>
                         <button mat-menu-item (click)="openLanguage()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open language selection">
                             <span><i class="fa fa-lg icon-language mat-icon"></i> {{resources.language}}</span>
                         </button>
@@ -78,7 +75,7 @@
                     <button mat-menu-item (click)="openShares()" angulartics2On="click" angularticsCategory="User Menu" angularticsAction="User shares open">
                         <span><i class="fa fa-lg icon-mixcloud"></i> {{resources.myShares}}</span>
                     </button>
-                    <button mat-menu-item *ngIf="isApp()" (click)="openConfigurationDialog()" angulartics2On="click" angularticsCategory="User Menu" angularticsAction="Advanced settings open">
+                    <button mat-menu-item (click)="openConfigurationDialog()" angulartics2On="click" angularticsCategory="User Menu" angularticsAction="Advanced settings open">
                         <span><i class="fa fa-lg icon-cogs"></i> {{resources.advancedSettings}}</span>
                     </button>
                     <button mat-menu-item (click)="logout()" angulartics2On="click" angularticsCategory="User Menu" angularticsAction="Logout">

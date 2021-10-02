@@ -152,6 +152,13 @@ export class FileService {
         });
     }
 
+    public async saveToZipFile(fileName: string, content: string) {
+        let zip = new JSZip();
+        zip.file("log.txt", content);
+        let blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
+        this.nonAngularObjectsFactory.saveAsWrapper(blob, fileName, { autoBom: false });
+    }
+
     public async getFileFromUrl(url: string, type?: string): Promise<File> {
         let entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
         let file = await new Promise((resolve, reject) => {

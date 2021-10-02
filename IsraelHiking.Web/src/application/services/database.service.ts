@@ -95,10 +95,7 @@ export class DatabaseService {
             if (this.runningContext.isCordova) {
                 initialState.gpsState.tracking = "tracking";
             }
-            this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).put({
-                id: DatabaseService.STATE_DOC_ID,
-                state: initialState
-            });
+            this.updateState(initialState);
         }
         if (storedState.offlineState.lastModifiedDate !== null) {
             if (await Dexie.exists("IHM")) {

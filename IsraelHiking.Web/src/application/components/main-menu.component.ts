@@ -23,6 +23,7 @@ import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
+import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
@@ -169,40 +170,45 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public async reportAnIssue() {
-        if (!this.runningContextService.isCordova) {
-            return;
-        }
         this.toastService.info(this.resources.preparingDataForIssueReport);
+        let state = this.ngRedux.getState();
+        let baseLayer = this.layersService.getSelectedBaseLayer();
+        this.loggingService.info("--- Reporting an issue ---");
+        let logs = await this.loggingService.getLog();
+        let userInfo = this.userInfo || {
+            displayName: "non-registered user",
+            id: "----"
+        } as UserInfo;
+        let infoString = [
+            `User ID: ${userInfo.id}`,
+            `Username: ${userInfo.displayName}`,
+            `Map Location: ${this.hashService.getMapAddress()}`,
+            `Baselayer: ${baseLayer.key}, ${baseLayer.address}`,
+            `Visible overlays: ${JSON.stringify(state.layersState.overlays.filter(o => o.visible))}`,
+        ].join("\n");
+        let subject = "Issue reported by " + userInfo.displayName;
         try {
-            let state = this.ngRedux.getState();
-            let baseLayer = this.layersService.getSelectedBaseLayer();
-            this.loggingService.info("--- Reporting an issue ---");
-            let logs = await this.loggingService.getLog();
-            let logBase64zipped = await this.fileService.compressTextToBase64Zip(logs);
-            logs = await this.geoLocationService.getLog();
-            let logBase64zippedGeoLocation = await this.fileService.compressTextToBase64Zip(logs);
-            let userInfo = this.userInfo || {
-                displayName: "non-registered user",
-                id: "----"
-            } as UserInfo;
-            let infoString = [
-                `User ID: ${userInfo.id}`,
-                `Username: ${userInfo.displayName}`,
+            if (!this.runningContextService.isCordova) {
+                await this.fileService.saveToZipFile(`support-${userInfo.id}.zip`, infoString + logs);
+                SendReportDialogComponent.openDialog(this.dialog, subject);
+                return;
+            }
+            infoString += [
+                "", // for extra new line
                 `Manufacture: ${this.device.manufacturer}`,
                 `Model: ${this.device.model}`,
                 `Platform: ${this.device.platform}`,
                 `OS version: ${this.device.version}`,
-                `App version: ${await this.appVersion.getVersionNumber()}`,
-                `Map Location: ${this.hashService.getMapAddress()}`,
-                `Baselayer: ${baseLayer.key}, ${baseLayer.address}`,
-                `Visible overlays: ${JSON.stringify(state.layersState.overlays.filter(o => o.visible))}`,
-
+                `App version: ${await this.appVersion.getVersionNumber()}`
             ].join("\n");
+            let logBase64zipped = await this.fileService.compressTextToBase64Zip(logs);
+            logs = await this.geoLocationService.getLog();
+            let logBase64zippedGeoLocation = await this.fileService.compressTextToBase64Zip(logs);
             let infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
             this.socialSharing.shareViaEmail(
                 this.resources.reportAnIssueInstructions,
-                "Issue reported by " + userInfo.displayName,
+                subject,
                 ["israelhikingmap@gmail.com"],
                 null,
                 null,

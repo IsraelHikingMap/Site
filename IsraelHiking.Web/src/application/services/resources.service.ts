@@ -187,6 +187,7 @@ export class ResourcesService {
     public kmPerHourUnit: string;
     public reportAnIssue: string;
     public reportAnIssueInstructions: string;
+    public reportAnIssueSiteInstructions: string;
     public addPointToActiveRoute: string;
     public advancedSettings: string;
     public batteryOptimization: string;
@@ -228,6 +229,7 @@ export class ResourcesService {
     public andSoMuchMore: string;
     public introAndSoMuchMoreDescription: string;
     public centerMe: string;
+    public resetData: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -459,7 +461,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1631284599348");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1633171532508");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -628,6 +630,7 @@ export class ResourcesService {
         this.kmPerHourUnit = this.gettextCatalog.getString("km per hour");
         this.reportAnIssue = this.gettextCatalog.getString("Report an issue");
         this.reportAnIssueInstructions = this.gettextCatalog.getString("Report an issue instructions");
+        this.reportAnIssueSiteInstructions = this.gettextCatalog.getString("Report an issue site instructions");
         this.addPointToActiveRoute = this.gettextCatalog.getString("Add point to active route");
         this.advancedSettings = this.gettextCatalog.getString("Advanced Settings");
         this.batteryOptimization = this.gettextCatalog.getString("Battery optimization");
@@ -671,6 +674,7 @@ export class ResourcesService {
         this.andSoMuchMore = this.gettextCatalog.getString("And So Much More!");
         this.introAndSoMuchMoreDescription = this.gettextCatalog.getString("Intro dialog description for 'so much more'");
         this.centerMe = this.gettextCatalog.getString("Center Me");
+        this.resetData = this.gettextCatalog.getString("Reset Data");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
