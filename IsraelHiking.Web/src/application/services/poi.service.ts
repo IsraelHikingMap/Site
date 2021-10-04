@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { NgProgress } from "ngx-progressbar";
 import { uniq, cloneDeep } from "lodash-es";
 import { Observable, fromEvent, Subscription } from "rxjs";
-import { timeout, throttleTime, skip } from "rxjs/operators";
+import { timeout, throttleTime, skip, filter } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import JSZip from "jszip";
 import MiniSearch from "minisearch";
@@ -144,9 +144,16 @@ export class PoiService {
         await this.syncCategories();
         this.updatePois(true); // don't wait
         await this.mapService.initializationPromise;
+        let lastLocation = this.mapService.map.getCenter();
         this.moveEndSubsription = fromEvent(this.mapService.map as any, "moveend")
-            .pipe(throttleTime(500, undefined, { trailing: true }))
-            .subscribe(() => {
+            .pipe(
+                throttleTime(500, undefined, { trailing: true }),
+                filter(() => {
+                    let lastLocationPoint = this.mapService.map.project(lastLocation);
+                    return lastLocationPoint.dist(this.mapService.map.project(this.mapService.map.getCenter())) > 200;
+                }),
+            ).subscribe(() => {
+                lastLocation = this.mapService.map.getCenter();
                 this.ngZone.run(() => {
                     this.updatePois(true);
                 });
