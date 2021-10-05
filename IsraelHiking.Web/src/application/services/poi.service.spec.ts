@@ -34,6 +34,7 @@ describe("Poi Service", () => {
             map: {
                 on: () => { },
                 off: () => { },
+                getCenter: () => ({ lat: 0, lng: 0})
             }
         };
         let loggingService = {
