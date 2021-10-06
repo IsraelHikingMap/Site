@@ -28,8 +28,7 @@ import {
     LatLngAlt,
     ApplicationState,
     EditablePublicPointData,
-    Contribution,
-    NorthEast
+    Contribution
 } from "../../../models/models";
 
 export interface SourceImageUrlPair {
@@ -53,7 +52,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public updateLocation: boolean;
     public sourceImageUrls: SourceImageUrlPair[];
     public latlng: LatLngAlt;
-    public itmCoordinates: NorthEast;
     public shareLinks: IPoiSocialLinks;
     public contribution: Contribution;
 
@@ -190,9 +188,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     private initFromFeature(feature: GeoJSON.Feature) {
         this.fullFeature = feature;
         this.latlng = this.poiService.getLocation(feature);
-        this.sourceImageUrls = Object.keys(feature.properties).filter(k => k.startsWith("poiSourceImageUrl")).map(k => {
-            let imageUrl = feature.properties[k];
-            let url = feature.properties[k.replace("poiSourceImageUrl", "website")] as string;
+        this.sourceImageUrls = Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => {
+            let url = feature.properties[k];
+            let imageUrl = feature.properties[k.replace("website", "poiSourceImageUrl")] as string;
             if (this.isBadWikipediaUrl(url)) {
                 url = null;
             }
@@ -203,7 +201,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         }).filter(iup => iup.url != null);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.contribution = this.poiService.getContribution(feature);
-        this.itmCoordinates = this.poiService.getItmCoordinates(feature);
         this.info = this.poiService.getEditableDataFromFeature(feature);
     }
 
