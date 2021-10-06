@@ -17,6 +17,7 @@ import { SpatialService } from "../../../services/spatial.service";
 import { RunningContextService } from "../../../services/running-context.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { NavigateHereService } from "../../../services/navigate-here.service";
+import { GpxDataContainerConverterService } from "../../../services/gpx-data-container-converter.service";
 import { GeoJsonParser } from "../../../services/geojson.parser";
 import { sidebarAnimate } from "../sidebar.component";
 import { NgRedux, select } from "../../../reducers/infra/ng-redux.module";
@@ -289,6 +290,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             newRoute.description = this.info.description;
             newRoute.segments = routeData.segments;
             newRoute.markers = routeData.markers;
+            GpxDataContainerConverterService.SplitRouteSegments(newRoute);
             this.ngRedux.dispatch(new AddRouteAction({
                 routeData: newRoute
             }));

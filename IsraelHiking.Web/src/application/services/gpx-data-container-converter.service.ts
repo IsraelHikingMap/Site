@@ -68,11 +68,46 @@ interface Gpx {
 
 @Injectable()
 export class GpxDataContainerConverterService {
+    public static SplitRouteSegments(routeData: RouteData): void {
+        if (routeData.segments.length > 2) {
+            return;
+        }
+        let newSegments = [];
+        for (let segment of routeData.segments) {
+            if (segment.latlngs.length < 3) {
+                newSegments.push(segment);
+                continue;
+            }
+            let splitCount = Math.floor(segment.latlngs.length / 10);
+            let latlngs = [...segment.latlngs];
+            while (latlngs.length > 1) {
+                if (splitCount >= latlngs.length) {
+                    splitCount = latlngs.length - 1;
+                }
+                let segmentEndLatLng = latlngs[splitCount];
+                let start = latlngs.slice(0, splitCount + 1);
+                latlngs = latlngs.slice(splitCount);
+                let routeSegment = {
+                    routePoint: segmentEndLatLng,
+                    latlngs: start,
+                    routingType: routeData.segments[0].routingType
+                };
+                newSegments.push(routeSegment);
+            }
+        }
+        routeData.segments = newSegments;
+    }
+
     public canConvert(gpxXmlString: string) {
         let subString = gpxXmlString.substr(0, 200).toLocaleLowerCase();
         return (subString.indexOf("<gpx") !== -1);
     }
 
+    /**
+     * This method converts a datacontainer to gpx base64 sting
+     * @param dataContainer a data container object 
+     * @returns a base64 encoded gpx xml string
+     */
     public async toGpx(dataContainer: DataContainer): Promise<string> {
         let options = { rootName: "gpx" };
 
@@ -236,6 +271,7 @@ export class GpxDataContainerConverterService {
                 routePoint: firstLatlng as LatLngAlt,
                 routingType: "Hike"
             } as RouteSegmentData);
+            GpxDataContainerConverterService.SplitRouteSegments(route);
         }
 
         return dataContainer;
