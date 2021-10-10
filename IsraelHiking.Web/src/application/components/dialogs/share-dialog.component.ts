@@ -29,7 +29,9 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     public lastShareUrl: ShareUrl;
     public canUpdate: boolean;
     public updateCurrentShare: boolean;
-    public shareOverlays: boolean;
+    public shareOverlays: boolean
+    public showUnhide: boolean;
+    public unhideRoutes: boolean;
 
     constructor(resources: ResourcesService,
                 private readonly sanitizer: DomSanitizer,
@@ -56,6 +58,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.updateCurrentShare = false;
         this.shareOverlays = false;
         this.canUpdate = false;
+        this.unhideRoutes = true;
         if (shareUrl != null) {
             this.title = shareUrl.title;
             this.description = shareUrl.description;
@@ -69,6 +72,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 this.description = selectedRoute.description;
             }
         }
+        this.showUnhide = this.dataContainerService.getData().routes.find(r => r.state === "Hidden") != null;
     }
 
     public async ngAfterViewInit(): Promise<void> {
@@ -114,9 +118,12 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
 
     private getDataFiltered(): DataContainer {
         // clone:
-        let filteredData = JSON.parse(JSON.stringify(this.dataContainerService.getData()));
+        let filteredData = JSON.parse(JSON.stringify(this.dataContainerService.getData())) as DataContainer;
         for (let routeIndex = filteredData.routes.length - 1; routeIndex >= 0; routeIndex--) {
             let route = filteredData.routes[routeIndex];
+            if (route.state === "Hidden" && this.unhideRoutes) {
+                route.state = "ReadOnly";
+            }
             if (route.segments.length === 0 && route.markers.length === 0 || route.state === "Hidden") {
                 filteredData.routes.splice(routeIndex, 1);
             }

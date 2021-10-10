@@ -231,6 +231,7 @@ export class ResourcesService {
     public centerMe: string;
     public resetData: string;
     public seeAlso: string;
+    public unhideHiddenRoutes: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -286,6 +287,7 @@ export class ResourcesService {
     public largeFilesUseWifi: string;
     public thisWillDeteleAllCurrentRoutesAreYouSure: string;
     public pleaseFillReport: string;
+    public hiddenRoutesWillNotBeSaved: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -462,7 +464,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1633556607661");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1633892780331");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -677,6 +679,7 @@ export class ResourcesService {
         this.centerMe = this.gettextCatalog.getString("Center Me");
         this.resetData = this.gettextCatalog.getString("Reset Data");
         this.seeAlso = this.gettextCatalog.getString("See Also");
+        this.unhideHiddenRoutes = this.gettextCatalog.getString("Unhide hidden routes");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -748,6 +751,7 @@ export class ResourcesService {
             .getString("This will delete all current routes. Are you sure?");
         this.pleaseFillReport = this.gettextCatalog
             .getString("Please fill in the details of the issue in the e-mail message that will be shown soon and send it");
+        this.hiddenRoutesWillNotBeSaved = this.gettextCatalog.getString("Hidden routes will not be saved...");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog
