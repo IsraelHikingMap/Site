@@ -13,7 +13,7 @@ describe("GpxDataContainerConverterService", () => {
         });
     });
 
-    it("Should roundtrip empty datacontainer", inject([GpxDataContainerConverterService], 
+    it("Should roundtrip empty datacontainer", inject([GpxDataContainerConverterService],
         async (service: GpxDataContainerConverterService) => {
         let gpxBase64String = await service.toGpx({
             baseLayer: { address: "address", key: "key", maxZoom: 1, minZoom: 0, opacity: 1},
@@ -26,7 +26,7 @@ describe("GpxDataContainerConverterService", () => {
         expect(dataContainer.routes.length).toBe(0);
     }));
 
-    it("Should roundtrip datacontiner with one marker", inject([GpxDataContainerConverterService], 
+    it("Should roundtrip datacontiner with one marker", inject([GpxDataContainerConverterService],
         async (service: GpxDataContainerConverterService) => {
         let gpxBase64String = await service.toGpx({
             baseLayer: { address: "address", key: "key", maxZoom: 1, minZoom: 0, opacity: 1},
@@ -47,7 +47,7 @@ describe("GpxDataContainerConverterService", () => {
         expect(dataContainer.routes[0].markers[0].latlng.alt).toBe(3);
     }));
 
-    it("Should roundtrip datacontiner with one route", inject([GpxDataContainerConverterService], 
+    it("Should roundtrip datacontiner with one route", inject([GpxDataContainerConverterService],
         async (service: GpxDataContainerConverterService) => {
         let gpxBase64String = await service.toGpx({
             baseLayer: { address: "address", key: "key", maxZoom: 1, minZoom: 0, opacity: 1},
@@ -56,10 +56,10 @@ describe("GpxDataContainerConverterService", () => {
             overlays: [],
             routes: [
                 {
-                    id: "id", 
-                    description: "", 
-                    markers: [], 
-                    name: "name", 
+                    id: "id",
+                    description: "",
+                    markers: [],
+                    name: "name",
                     segments: [{
                         latlngs: [
                             {lat: 0, lng: 0, timestamp: new Date()},
@@ -67,7 +67,7 @@ describe("GpxDataContainerConverterService", () => {
                         ],
                         routePoint: { lat: 1, lng: 1},
                         routingType: "Hike"
-                    }], 
+                    }],
                     state: "ReadOnly",
                     color: "color",
                     opacity: 1,
@@ -82,7 +82,7 @@ describe("GpxDataContainerConverterService", () => {
         expect(dataContainer.routes[0].segments[0].latlngs[0].lng).toBe(0);
     }));
 
-    it("Should roundtrip datacontiner with one route and split it - pretend the GPX was not create in IHM site", 
+    it("Should roundtrip datacontiner with one route and split it - pretend the GPX was not create in IHM site",
         inject([GpxDataContainerConverterService], async (service: GpxDataContainerConverterService) => {
         let gpxBase64String = await service.toGpx({
             baseLayer: { address: "address", key: "key", maxZoom: 1, minZoom: 0, opacity: 1},
@@ -91,10 +91,10 @@ describe("GpxDataContainerConverterService", () => {
             overlays: [],
             routes: [
                 {
-                    id: "id", 
-                    description: "", 
-                    markers: [], 
-                    name: "name", 
+                    id: "id",
+                    description: "",
+                    markers: [],
+                    name: "name",
                     segments: [{
                         latlngs: [
                             {lat: 0, lng: 0, timestamp: new Date()},
@@ -110,7 +110,7 @@ describe("GpxDataContainerConverterService", () => {
                         ],
                         routePoint: { lat: 9, lng: 9},
                         routingType: "Hike"
-                    }], 
+                    }],
                     state: "ReadOnly",
                     color: "color",
                     opacity: 1,
@@ -118,7 +118,7 @@ describe("GpxDataContainerConverterService", () => {
                 }]
         });
         // as if this was a not create in IHM site
-        let gpxString = (await new Response(decode(gpxBase64String)).text()).replace("IsraelHikingMap", ""); 
+        let gpxString = (await new Response(decode(gpxBase64String)).text()).replace("IsraelHikingMap", "");
         let dataContainer = await service.toDataContainer(gpxString);
         expect(dataContainer.routes.length).toBe(1);
         expect(dataContainer.routes[0].segments.length).toBe(10);
@@ -128,6 +128,6 @@ describe("GpxDataContainerConverterService", () => {
         expect(dataContainer.routes[0].segments[9].latlngs.length).toBe(2);
         expect(dataContainer.routes[0].segments[9].latlngs[1].lat).toBe(9);
         expect(dataContainer.routes[0].segments[9].latlngs[1].lng).toBe(9);
-        
+
     }));
 });

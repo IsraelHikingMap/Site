@@ -105,7 +105,8 @@ export class GpxDataContainerConverterService {
 
     /**
      * This method converts a datacontainer to gpx base64 sting
-     * @param dataContainer a data container object 
+     *
+     * @param dataContainer a data container object
      * @returns a base64 encoded gpx xml string
      */
     public async toGpx(dataContainer: DataContainer): Promise<string> {
