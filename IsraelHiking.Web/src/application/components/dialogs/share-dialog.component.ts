@@ -29,7 +29,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     public lastShareUrl: ShareUrl;
     public canUpdate: boolean;
     public updateCurrentShare: boolean;
-    public shareOverlays: boolean
+    public shareOverlays: boolean;
     public showUnhide: boolean;
     public unhideRoutes: boolean;
 
