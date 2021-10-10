@@ -4,7 +4,7 @@ import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "application/services/resources.service";
 
-export interface ISendReportDialogData {
+export type SendReportDialogData = {
     subject: string;
 }
 
@@ -16,7 +16,7 @@ export class SendReportDialogComponent extends BaseMapComponent {
     public mailToLink: string;
 
     constructor(resources: ResourcesService,
-        @Inject(MAT_DIALOG_DATA) data: ISendReportDialogData) {
+        @Inject(MAT_DIALOG_DATA) data: SendReportDialogData) {
         super(resources);
         let body = encodeURIComponent(this.resources.reportAnIssueInstructions);
         let to = "israelhikingmap@gmail.com";
@@ -30,7 +30,7 @@ export class SendReportDialogComponent extends BaseMapComponent {
                 maxWidth: "378px",
                 data: {
                     subject
-                } as ISendReportDialogData
+                } as SendReportDialogData
             });
     }
 }

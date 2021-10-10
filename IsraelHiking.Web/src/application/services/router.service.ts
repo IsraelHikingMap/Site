@@ -6,7 +6,7 @@ import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
-import { LatLngAlt, RoutingType, RouteSegmentData } from "../models/models";
+import type { LatLngAlt, RoutingType, RouteSegmentData } from "../models/models";
 
 @Injectable()
 export class RouterService {

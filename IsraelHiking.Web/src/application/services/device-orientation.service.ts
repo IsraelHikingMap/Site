@@ -6,7 +6,7 @@ import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class DeviceOrientationService {

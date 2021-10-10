@@ -9,7 +9,7 @@ import { DataContainerService } from "../services/data-container.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
-import { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 @Component({
     selector: "application-state",

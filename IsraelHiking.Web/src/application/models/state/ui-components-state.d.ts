@@ -1,4 +1,4 @@
-export interface UICompoentsState {
+export type UICompoentsState = {
     searchVisible: boolean;
     drawingVisible: boolean;
     statisticsVisible: boolean;

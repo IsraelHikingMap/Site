@@ -1,9 +1,9 @@
-﻿export interface LatLngAlt {
+﻿export type LatLngAlt = {
     lat: number;
     lng: number;
     alt?: number;
 }
 
-export interface ILatLngTime extends LatLngAlt {
+export type LatLngAltTime = LatLngAlt & {
     timestamp: Date;
 }

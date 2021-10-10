@@ -1,6 +1,6 @@
 import { BaseAction, ReduxAction, createReducerFromClass } from "./infra/ng-redux.module";
-import { ShareUrl, ShareUrlsState } from "../models/models";
 import { initialState } from "./initial-state";
+import type { ShareUrl, ShareUrlsState } from "../models/models";
 
 const ADD_SHARE_URL = "ADD_SHARE_URL";
 const REMOVE_SHARE_URL = "REMOVED_SHARE_URL";

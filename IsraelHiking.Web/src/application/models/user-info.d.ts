@@ -1,4 +1,4 @@
-﻿export interface UserInfo {
+﻿export type UserInfo = {
     displayName: string;
     imageUrl: string;
     id: string;

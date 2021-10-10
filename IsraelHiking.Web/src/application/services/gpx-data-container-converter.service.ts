@@ -4,7 +4,15 @@ import { parseString, Builder } from "isomorphic-xml2js";
 import { encode } from "base64-arraybuffer";
 import XmlBeautify from "xml-beautify";
 
-import { DataContainer, RouteData, RouteSegmentData, ILatLngTime, MarkerData, LinkData, LatLngAlt } from "../models/models";
+import type { 
+    DataContainer, 
+    RouteData, 
+    RouteSegmentData, 
+    LatLngAltTime, 
+    MarkerData, 
+    LinkData, 
+    LatLngAlt 
+} from "../models/models";
 
 interface Link {
     $: { href: string };
@@ -379,14 +387,14 @@ export class GpxDataContainerConverterService {
                         lat: +p.$.lat,
                         lng: +p.$.lon,
                         timestamp: p.time ? new Date(p.time) : undefined
-                    } as ILatLngTime)),
+                    } as LatLngAltTime)),
                     routingType: this.convertExtensionAfterXmlnsRemoval(s.extensions, { RoutingType: { _: "Hike" } }).RoutingType._,
                     routePoint: last(s.trkpt.map(p => ({
                         alt: +p.ele,
                         lat: +p.$.lat,
                         lng: +p.$.lon,
                         timestamp: p.time ? new Date(p.time) : undefined
-                    } as ILatLngTime)))
+                    } as LatLngAltTime)))
                 } as RouteSegmentData)),
                 markers: []
             } as RouteData;

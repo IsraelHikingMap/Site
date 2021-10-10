@@ -11,7 +11,7 @@ import { FileService } from "../../services/file.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
 import { select } from "../../reducers/infra/ng-redux.module";
-import { LatLngAlt, ApplicationState, RouteData } from "../../models/models";
+import type { LatLngAlt, ApplicationState, RouteData } from "../../models/models";
 
 interface RoutePointViewData {
     latlng: LatLngAlt;

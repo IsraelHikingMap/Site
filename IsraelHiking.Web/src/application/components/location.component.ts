@@ -14,7 +14,7 @@ import { RecordedRouteService } from "../services/recorded-route.service";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { ToggleDistanceAction, SetPannedAction } from "../reducers/in-memory.reducer";
 import { ConfigurationActions } from "../reducers/configuration.reducer";
-import { LatLngAlt, ApplicationState } from "../models/models";
+import type { LatLngAlt, ApplicationState } from "../models/models";
 
 @Component({
     selector: "location",

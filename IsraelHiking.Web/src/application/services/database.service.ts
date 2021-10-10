@@ -14,9 +14,9 @@ import { ResourcesService } from "./resources.service";
 import { initialState } from "../reducers/initial-state";
 import { NgRedux, classToActionMiddleware } from "../reducers/infra/ng-redux.module";
 import { rootReducer } from "../reducers/root.reducer";
-import { ApplicationState, ShareUrl, Trace } from "../models/models";
+import type { ApplicationState, ShareUrl, Trace } from "../models/models";
 
-export interface ImageUrlAndData {
+export type ImageUrlAndData = {
     imageUrl: string;
     data: string;
 }

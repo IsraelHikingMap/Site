@@ -6,7 +6,7 @@ import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers/layers.service";
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
-import { LayerData, Overlay } from "../../../models/models";
+import type { LayerData, Overlay } from "../../../models/models";
 
 @Component({
     selector: "overlay-edit-dialog",

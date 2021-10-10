@@ -5,7 +5,7 @@ import { Observable } from "rxjs";
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
-import { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class MapService {

@@ -3,10 +3,10 @@ import { Router } from "@angular/router";
 
 import { MapService } from "./map.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
-import { ApplicationState, LatLngAlt } from "../models/models";
 import { Urls } from "../urls";
+import type { ApplicationState, LatLngAlt } from "../models/models";
 
-export interface IPoiRouterData {
+export type PoiRouterData = {
     source: string;
     id: string;
     language: string;
@@ -106,7 +106,7 @@ export class HashService {
         });
     }
 
-    public getFullUrlFromPoiId(poiSourceAndId: IPoiRouterData) {
+    public getFullUrlFromPoiId(poiSourceAndId: PoiRouterData) {
         let urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
             { queryParams: { language: poiSourceAndId.language } });
         return Urls.baseAddress + urlTree.toString();

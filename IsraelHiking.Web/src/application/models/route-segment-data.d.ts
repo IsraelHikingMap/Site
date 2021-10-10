@@ -1,9 +1,9 @@
-﻿import { LatLngAlt, ILatLngTime } from "./models";
+﻿import type { LatLngAlt, LatLngAltTime } from "./models";
 
 export type RoutingType = "Hike" | "Bike" | "4WD" | "None";
 
-export interface RouteSegmentData {
+export type RouteSegmentData = {
     routePoint: LatLngAlt;
-    latlngs: ILatLngTime[];
+    latlngs: LatLngAltTime[];
     routingType: RoutingType;
 }

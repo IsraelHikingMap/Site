@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { LatLngAlt, Bounds } from "../models/models";
 import { Map, LngLatBoundsLike, LngLatBounds } from "maplibre-gl";
 import { lineString, featureCollection, Units } from "@turf/helpers";
 import simplify from "@turf/simplify";
@@ -8,6 +7,8 @@ import center from "@turf/center";
 import bbox from "@turf/bbox";
 import circle from "@turf/circle";
 import pointToLineDistance from "@turf/point-to-line-distance";
+
+import type { LatLngAlt, Bounds } from "../models/models";
 
 @Injectable()
 export class SpatialService {

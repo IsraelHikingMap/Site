@@ -1,6 +1,5 @@
 import { Action, combineReducers, ReducersMapObject } from "redux";
 
-import { ApplicationState } from "../models/models";
 import { configurationReducer } from "./configuration.reducer";
 import { locationReducer } from "./location.reducer";
 import { routesReducer } from "./routes.reducer";
@@ -15,6 +14,7 @@ import { gpsReducer } from "./gps.reducer";
 import { offlineReducer } from "./offline.reducer";
 import { uiComponentsReducer } from "./ui-components.reducer";
 import { initialState } from "./initial-state";
+import type { ApplicationState } from "../models/models";
 
 const appReducer = combineReducers<ApplicationState>({
     configuration: configurationReducer,

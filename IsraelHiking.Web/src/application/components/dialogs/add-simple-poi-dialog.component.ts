@@ -6,9 +6,9 @@ import { ResourcesService } from "../../services/resources.service";
 import { PoiService, SimplePointType} from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
-import { LatLngAlt, LinkData } from "../../models/models";
+import type { LatLngAlt, LinkData } from "../../models/models";
 
-export interface IAddSimplePoiDialogData {
+export type AddSimplePoiDialogData = {
     latlng: LatLngAlt;
     imageLink: LinkData;
     title: string;
@@ -21,18 +21,18 @@ export interface IAddSimplePoiDialogData {
     templateUrl: "./add-simple-poi-dialog.component.html"
 })
 export class AddSimplePoiDialogComponent extends BaseMapComponent {
-    private data: IAddSimplePoiDialogData;
+    private data: AddSimplePoiDialogData;
 
     constructor(resources: ResourcesService,
                 private readonly poiService: PoiService,
                 private readonly privatePoiUploaderService: PrivatePoiUploaderService,
                 private readonly toastService: ToastService,
-                @Inject(MAT_DIALOG_DATA) data: IAddSimplePoiDialogData) {
+                @Inject(MAT_DIALOG_DATA) data: AddSimplePoiDialogData) {
         super(resources);
         this.data = data;
     }
 
-    public static openDialog(matDialog: MatDialog, data: IAddSimplePoiDialogData) {
+    public static openDialog(matDialog: MatDialog, data: AddSimplePoiDialogData) {
         matDialog.open(AddSimplePoiDialogComponent, { data });
     }
 

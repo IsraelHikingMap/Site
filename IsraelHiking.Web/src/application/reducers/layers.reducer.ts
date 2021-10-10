@@ -2,7 +2,7 @@ import { orderBy, remove, some } from "lodash-es";
 
 import { createReducerFromClass, ReduxAction, BaseAction } from "./infra/ng-redux.module";
 import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS } from "./initial-state";
-import { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models/models";
+import type { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models/models";
 
 const ADD_BASE_LAYER = "ADD_BASE_LAYER";
 const ADD_OVERLAY = "ADD_OVERLAY";
@@ -18,53 +18,53 @@ const ADD_CATEGORY = "ADD_CATEGORY";
 const SET_CATEGORY_VISIBILITY = "SET_CATEGORY_VISIBILITY";
 const TOGGLE_OFFLINE = "TOGGLE_OFFLINE";
 
-export interface AddBaseLayerPayload {
+export type AddBaseLayerPayload = {
     layerData: EditableLayer;
 }
 
-export interface AddOverlayPayload {
+export type AddOverlayPayload = {
     layerData: Overlay;
 }
 
-export interface RemoveLayerPayload {
+export type RemoveLayerPayload = {
     key: string;
 }
 
-export interface UpdateBaseLayerPayload {
+export type UpdateBaseLayerPayload = {
     key: string;
     layerData: EditableLayer;
 }
 
-export interface UpdateOverlayPayload {
+export type UpdateOverlayPayload = {
     key: string;
     layerData: Overlay;
 }
 
-export interface SelectBaseLayerPayload {
+export type SelectBaseLayerPayload = {
     key: string;
 }
 
-export interface ToggleGroupPayload {
+export type ToggleGroupPayload = {
     name: string;
 }
 
-export interface SetCategoriesGroupVisibilityPayload {
+export type SetCategoriesGroupVisibilityPayload = {
     groupType: CategoriesGroupType;
     visible: boolean;
 }
 
-export interface AddCategoryPayload {
+export type AddCategoryPayload = {
     groupType: CategoriesGroupType;
     category: Category;
 }
 
-export interface SetCategoryVisibilityPayload {
+export type SetCategoryVisibilityPayload = {
     name: string;
     groupType: CategoriesGroupType;
     visible: boolean;
 }
 
-export interface ToggleOfflinePayload {
+export type ToggleOfflinePayload = {
     key: string;
     isOverlay: boolean;
 }

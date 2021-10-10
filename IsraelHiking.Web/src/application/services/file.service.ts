@@ -16,10 +16,10 @@ import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
-import { DataContainer } from "../models/models";
 import { Urls } from "../urls";
+import type { DataContainer } from "../models/models";
 
-export interface IFormatViewModel {
+export type FormatViewModel = {
     label: string;
     outputFormat: string;
     extension: string;
@@ -27,7 +27,7 @@ export interface IFormatViewModel {
 
 @Injectable()
 export class FileService {
-    public formats: IFormatViewModel[];
+    public formats: FormatViewModel[];
 
     constructor(private readonly httpClient: HttpClient,
                 private readonly fileSystemWrapper: FileSystemWrapper,

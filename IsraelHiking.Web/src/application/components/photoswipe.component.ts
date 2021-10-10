@@ -7,7 +7,7 @@ import { ResourcesService } from "../services/resources.service";
 
 export const PHOTO_SWIPE_DATA = new InjectionToken<PhotoSwipeData>("PHOTO_SWIPE_DATA");
 
-export interface PhotoSwipeData {
+export type PhotoSwipeData = {
     imageUrls: string[];
     index: number;
 }

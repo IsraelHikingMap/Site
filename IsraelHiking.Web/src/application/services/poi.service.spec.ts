@@ -17,8 +17,8 @@ import { FileService } from "./file.service";
 import { ToastService } from "./toast.service";
 import { MapService } from "./map.service";
 import { GeoJsonParser } from "./geojson.parser";
-import { ApplicationState } from "../models/models";
 import { Urls } from "../urls";
+import type { ApplicationState } from "../models/models";
 
 describe("Poi Service", () => {
 

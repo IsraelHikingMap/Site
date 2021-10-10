@@ -27,7 +27,7 @@ import { SendReportDialogComponent } from "./dialogs/send-report-dialog.componen
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
-import { UserInfo, ApplicationState } from "../models/models";
+import type { UserInfo, ApplicationState } from "../models/models";
 
 @Component({
     selector: "main-menu",

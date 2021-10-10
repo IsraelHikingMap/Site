@@ -22,7 +22,7 @@ import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing-state.reducer";
-import { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
+import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
 
 @Component({
     selector: "layers-sidebar",

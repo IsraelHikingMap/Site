@@ -9,7 +9,7 @@ import { TracesService } from "../../services/traces.service";
 import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import { AddRouteAction } from "../../reducers/routes.reducer";
 import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
-import { ApplicationState, LatLngAlt } from "../../models/models";
+import type { ApplicationState, LatLngAlt } from "../../models/models";
 
 @Component({
     selector: "traces",

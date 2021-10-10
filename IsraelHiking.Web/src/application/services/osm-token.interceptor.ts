@@ -3,8 +3,8 @@ import { HttpInterceptor, HttpHandler, HttpRequest, HttpEvent } from "@angular/c
 import { Observable } from "rxjs";
 
 import { NgRedux } from "../reducers/infra/ng-redux.module";
-import { ApplicationState } from "../models/models";
 import { Urls } from "../urls";
+import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class OsmTokenInterceptor implements HttpInterceptor {

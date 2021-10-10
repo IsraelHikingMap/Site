@@ -28,19 +28,19 @@ import { SpatialService } from "../services/spatial.service";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
-import { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt, SearchResultsPointOfInterest } from "../models/models";
+import type { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt, SearchResultsPointOfInterest } from "../models/models";
 
-export interface ISearchContext {
+export type SearchContext = {
     searchTerm: string;
     searchResults: SearchResultsPointOfInterest[];
     selectedSearchResults: SearchResultsPointOfInterest;
 }
 
-interface ISearchRequestQueueItem {
+type SearchRequestQueueItem = {
     searchTerm: string;
 }
 
-interface IDirectionalContext {
+type DirectionalContext = {
     isOn: boolean;
     overlayLocation: LatLngAlt;
     showResults: boolean;
@@ -58,16 +58,16 @@ interface IDirectionalContext {
 export class SearchComponent extends BaseMapComponent {
 
     public isOpen: boolean;
-    public fromContext: ISearchContext;
-    public toContext: ISearchContext;
+    public fromContext: SearchContext;
+    public toContext: SearchContext;
     public routingType: RoutingType;
     public searchFrom: FormControl;
     public searchTo: FormControl;
     public hasFocus: boolean;
     public hideCoordinates: boolean;
-    public directional: IDirectionalContext;
+    public directional: DirectionalContext;
 
-    private requestsQueue: ISearchRequestQueueItem[];
+    private requestsQueue: SearchRequestQueueItem[];
     private selectFirstSearchResults: boolean;
 
     @ViewChild("searchFromInput")
@@ -105,12 +105,12 @@ export class SearchComponent extends BaseMapComponent {
             searchTerm: "",
             searchResults: [],
             selectedSearchResults: null
-        } as ISearchContext;
+        } as SearchContext;
         this.toContext = {
             searchTerm: "",
             searchResults: [],
             selectedSearchResults: null
-        } as ISearchContext;
+        } as SearchContext;
         this.searchFrom = new FormControl();
         this.searchTo = new FormControl();
         this.configureInputFormControl(this.searchFrom, this.fromContext);
@@ -126,7 +126,7 @@ export class SearchComponent extends BaseMapComponent {
         });
     }
 
-    private configureInputFormControl(input: FormControl, context: ISearchContext) {
+    private configureInputFormControl(input: FormControl, context: SearchContext) {
         input.valueChanges.pipe(
             tap(x => {
                 if (typeof x !== "string") {
@@ -175,7 +175,7 @@ export class SearchComponent extends BaseMapComponent {
         this.directional.isOn = !this.directional.isOn;
     }
 
-    public search(searchContext: ISearchContext) {
+    public search(searchContext: SearchContext) {
         if (searchContext.searchTerm.length <= 2) {
             searchContext.searchResults = [];
             return;
@@ -195,7 +195,7 @@ export class SearchComponent extends BaseMapComponent {
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
 
-    private selectResults(searchContext: ISearchContext, searchResult: SearchResultsPointOfInterest) {
+    private selectResults(searchContext: SearchContext, searchResult: SearchResultsPointOfInterest) {
         searchContext.selectedSearchResults = searchResult;
         if (!this.directional.isOn) {
             this.moveToResults(searchResult);
@@ -296,11 +296,11 @@ export class SearchComponent extends BaseMapComponent {
         return false;
     }
 
-    private async internalSearch(searchContext: ISearchContext) {
+    private async internalSearch(searchContext: SearchContext) {
         let searchTerm = searchContext.searchTerm;
         this.requestsQueue.push({
             searchTerm
-        } as ISearchRequestQueueItem);
+        } as SearchRequestQueueItem);
         try {
             let results = await this.searchResultsProvider.getResults(searchTerm, this.resources.hasRtlCharacters(searchTerm));
             let queueItem = this.requestsQueue.find(itemToFind => itemToFind.searchTerm === searchTerm);

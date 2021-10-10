@@ -6,7 +6,7 @@ import { SearchResultsProvider } from "./search-results.provider";
 import { GeoJsonParser } from "./geojson.parser";
 import { RunningContextService } from "./running-context.service";
 import { PoiService } from "./poi.service";
-import { SearchResultsPointOfInterest } from "../models/models";
+import type { SearchResultsPointOfInterest } from "../models/models";
 
 describe("SearchResultsProvider", () => {
     beforeEach(() => {

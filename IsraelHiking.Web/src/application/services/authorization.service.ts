@@ -3,20 +3,20 @@ import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 
 import { RunningContextService } from "./running-context.service";
-import { NonAngularObjectsFactory, IOhAuth, IOAuthResponse, IOAuthParams } from "./non-angular-objects.factory";
+import { NonAngularObjectsFactory, IOhAuth, OAuthResponse, IOAuthParams } from "./non-angular-objects.factory";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetTokenAction, SetUserInfoAction } from "../reducers/user.reducer";
-import { ApplicationState, OsmUserDetails, UserState, UserInfo } from "../models/models";
 import { Urls } from "../urls";
+import type { ApplicationState, OsmUserDetails, UserState, UserInfo } from "../models/models";
 
-export interface IAuthorizationServiceOptions {
+export type AuthorizationServiceOptions = {
     url: string;
     oauthSecret: string;
     landing: string;
     oauthConsumerKey: string;
 }
 
-interface IOsmConfiguration {
+type OsmConfiguration = {
     baseAddress: string;
     consumerKey: string;
     consumerSecret: string;
@@ -25,7 +25,7 @@ interface IOsmConfiguration {
 @Injectable()
 export class AuthorizationService {
 
-    private options: IAuthorizationServiceOptions;
+    private options: AuthorizationServiceOptions;
     private ohauth: IOhAuth;
 
     @select((state: ApplicationState) => state.userState)
@@ -38,7 +38,7 @@ export class AuthorizationService {
                 private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.ohauth = this.nonAngularObjectsFactory.createOhAuth();
-        this.setOptions({} as IAuthorizationServiceOptions);
+        this.setOptions({} as AuthorizationServiceOptions);
         this.userState$.subscribe(us => this.userState = us);
     }
 
@@ -66,13 +66,13 @@ export class AuthorizationService {
 
         this.logout();
         let popup = this.openWindow(); // this has to be here in order to support browsers that only open a window on click event
-        let data = await this.httpClient.get(Urls.osmConfiguration).toPromise() as IOsmConfiguration;
+        let data = await this.httpClient.get(Urls.osmConfiguration).toPromise() as OsmConfiguration;
         this.setOptions({
             oauthConsumerKey: data.consumerKey,
             oauthSecret: data.consumerSecret,
             landing: Urls.emptyHtml,
             url: data.baseAddress
-        } as IAuthorizationServiceOptions);
+        } as AuthorizationServiceOptions);
 
         let requestTokenResponse = await this.getRequestToken();
         let authorizeUrl = this.options.url + "/oauth/authorize?" + this.ohauth.qsString({
@@ -101,7 +101,7 @@ export class AuthorizationService {
         }));
     };
 
-    private async getAccessToken(oauthToken: string, oauthRequestTokenSecret: string): Promise<IOAuthResponse> {
+    private async getAccessToken(oauthToken: string, oauthRequestTokenSecret: string): Promise<OAuthResponse> {
         let accessTokenUrl = this.options.url + "/oauth/access_token";
         let params = this.getParams();
         params.oauth_token = oauthToken;
@@ -114,13 +114,13 @@ export class AuthorizationService {
         return this.ohauth.stringQs(response);
     }
 
-    private setOptions(options: IAuthorizationServiceOptions) {
+    private setOptions(options: AuthorizationServiceOptions) {
         this.options = options;
         this.options.url = this.options.url || "https://www.openstreetmap.org";
         this.options.landing = this.options.landing || "land.html";
     }
 
-    private async getRequestToken(): Promise<IOAuthResponse> {
+    private async getRequestToken(): Promise<OAuthResponse> {
         let params = this.getParams();
         let requestTokenUrl = this.options.url + "/oauth/request_token";
 
@@ -130,7 +130,7 @@ export class AuthorizationService {
             this.ohauth.baseString("POST", requestTokenUrl, params));
 
         let response = await this.xhrPromise(requestTokenUrl, params);
-        return this.ohauth.stringQs(response) as IOAuthResponse;
+        return this.ohauth.stringQs(response) as OAuthResponse;
     }
 
     private getParams(): IOAuthParams {

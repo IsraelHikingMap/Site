@@ -1,6 +1,6 @@
 ﻿import { Language } from "../language";
 
-export interface Configuration {
+export type Configuration = {
     isBatteryOptimization: boolean;
     isAutomaticRecordingUpload: boolean;
     //isFindMissingRoutesAfterUpload: boolean;

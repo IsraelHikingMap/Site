@@ -9,7 +9,7 @@ import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
 import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ConfigurationActions } from "../../reducers/configuration.reducer";
-import { ApplicationState } from "../../models/models";
+import type { ApplicationState } from "../../models/models";
 
 @Component({
     selector: "configuration-dialog",

@@ -8,7 +8,7 @@ import { RouterService } from "./router.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { AddSegmentAction, AddRouteAction, ChangeRoutePropertiesAction } from "../reducers/routes.reducer";
-import { ApplicationState, LatLngAlt } from "../models/models";
+import type { ApplicationState, LatLngAlt } from "../models/models";
 
 @Injectable()
 export class NavigateHereService {

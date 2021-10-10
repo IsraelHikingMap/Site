@@ -1,10 +1,10 @@
-import { Location } from "../models/models";
 import { initialState } from "./initial-state";
 import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
+import type { Location } from "../models/models";
 
 const SET_LOCATION = "SET_LOCATION";
 
-export interface SetLocationPayload {
+export type SetLocationPayload = {
     longitude: number;
     latitude: number;
     zoom?: number;

@@ -11,7 +11,7 @@ import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { SetLocationAction } from "../../reducers/location.reducer";
-import { ApplicationState, Location } from "../../models/models";
+import type { ApplicationState, Location } from "../../models/models";
 
 @Component({
     selector: "main-map",

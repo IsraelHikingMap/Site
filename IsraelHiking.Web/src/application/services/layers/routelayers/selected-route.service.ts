@@ -20,11 +20,11 @@ import {
     AddPrivatePoiAction,
     ChangeEditStateAction
 } from "../../../reducers/routes.reducer";
-import {
+import type {
     RouteData,
     ApplicationState,
     RouteSegmentData,
-    ILatLngTime,
+    LatLngAltTime,
     LatLngAlt,
 } from "../../../models/models";
 
@@ -170,7 +170,7 @@ export class SelectedRouteService {
         return null;
     }
 
-    public getClosestRouteToGPS(currentLocation: ILatLngTime, heading: number): RouteData {
+    public getClosestRouteToGPS(currentLocation: LatLngAltTime, heading: number): RouteData {
         if (currentLocation == null) {
             return null;
         }
@@ -208,7 +208,7 @@ export class SelectedRouteService {
         return routeData.segments[routeData.segments.length - 1];
     }
 
-    public getLastLatLng(routeData: RouteData): ILatLngTime {
+    public getLastLatLng(routeData: RouteData): LatLngAltTime {
         let lastSegmentLatLngs = this.getLastSegment(routeData).latlngs;
         return lastSegmentLatLngs[lastSegmentLatLngs.length - 1];
     }

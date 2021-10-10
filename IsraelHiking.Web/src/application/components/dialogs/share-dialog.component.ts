@@ -10,7 +10,7 @@ import { SelectedRouteService } from "../../services/layers/routelayers/selected
 import { AuthorizationService } from "../../services/authorization.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { DataContainer, ShareUrl } from "../../models/models";
+import type { DataContainer, ShareUrl } from "../../models/models";
 
 @Component({
     selector: "share-dialog",

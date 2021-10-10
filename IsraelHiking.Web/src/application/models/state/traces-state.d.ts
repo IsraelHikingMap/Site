@@ -1,6 +1,6 @@
-﻿import { Trace } from "../models";
+﻿import type { Trace } from "../models";
 
-export interface TracesState {
+export type TracesState = {
     visibleTraceId: string;
     missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     traces: Trace[];

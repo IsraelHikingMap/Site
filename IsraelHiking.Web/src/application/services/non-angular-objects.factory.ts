@@ -3,12 +3,12 @@ import { saveAs } from "file-saver-es";
 import type { FileSaverOptions } from "file-saver";
 import * as ohauth from "ohauth";
 
-export interface IOAuthResponse {
+export type OAuthResponse = {
     oauth_token: string;
     oauth_token_secret: string;
 }
 
-export interface IOAuthParams {
+export type IOAuthParams = {
     oauth_consumer_key: string;
     oauth_signature_method: string;
     oauth_timestamp: number;
@@ -27,7 +27,7 @@ export interface IOhAuth {
     /**
      * generate an object from a querystring
      */
-    stringQs: (str: string) => IOAuthResponse;
+    stringQs: (str: string) => OAuthResponse;
     timestamp: () => number;
     nonce: () => string;
     xhr: (method: string, url: string, params: any, data: any, options: any, callback: (err: Error, xhr: XMLHttpRequest) => void) => void;

@@ -12,7 +12,7 @@ import { GeoLocationService } from "./geo-location.service";
 import { RecordedRouteService } from "./recorded-route.service";
 import { ImageGalleryService } from "./image-gallery.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
-import { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 declare let navigator: Navigator;
 

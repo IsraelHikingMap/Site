@@ -21,7 +21,7 @@ import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
-import { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class ApplicationInitializeService {

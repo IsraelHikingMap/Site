@@ -1,8 +1,8 @@
 import { Action } from "redux";
 
-import { RoutingType, RouteEditingState } from "../models/models";
 import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
 import { initialState } from "./initial-state";
+import type { RoutingType, RouteEditingState } from "../models/models";
 
 const SET_ROUTING_TYPE = "SET_ROUTING_TYPE";
 const SET_SELECTED_ROUTE = "SET_SELECTED_ROUTE";
@@ -10,15 +10,15 @@ const START_RECORDING = "START_RECORDING";
 const STOP_RECORDING = "STOP_RECORDING";
 const SET_OPACITY_AND_WEIGHT = "SET_OPACITY_AND_WEIGHT";
 
-export interface RoutePayload {
+export type RoutePayload = {
     routeId: string;
 }
 
-export interface SetRouteEditingStatePayload {
+export type SetRouteEditingStatePayload = {
     routingType: RoutingType;
 }
 
-export interface SetOpacityAndWeightPayload {
+export type SetOpacityAndWeightPayload = {
     opacity: number;
     weight: number;
 }

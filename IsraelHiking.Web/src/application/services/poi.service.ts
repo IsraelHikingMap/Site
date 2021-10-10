@@ -9,7 +9,7 @@ import JSZip from "jszip";
 import MiniSearch from "minisearch";
 
 import { ResourcesService } from "./resources.service";
-import { HashService, IPoiRouterData } from "./hash.service";
+import { HashService, PoiRouterData } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService, ImageUrlAndData } from "./database.service";
 import { RunningContextService } from "./running-context.service";
@@ -22,7 +22,8 @@ import { ConnectionService } from "./connection.service";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
 import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducers/layers.reducer";
-import {
+import { Urls } from "../urls";
+import type {
     MarkerData,
     LatLngAlt,
     ApplicationState,
@@ -35,22 +36,21 @@ import {
     Language,
     EditablePublicPointData
 } from "../models/models";
-import { Urls } from "../urls";
 
 export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "ClosedGate" | "Block" | "PicnicSite";
 
-interface IImageItem {
+type ImageItem = {
     thumbnail: string;
     imageUrls: string[];
 }
 
-interface IUpdatesResponse {
+type UpdatesResponse = {
     features: GeoJSON.Feature<GeoJSON.Geometry>[];
-    images: IImageItem[];
+    images: ImageItem[];
     lastModified: Date;
 }
 
-export interface IPoiSocialLinks {
+export type PoiSocialLinks = {
     poiLink: string;
     facebook: string;
     whatsapp: string;
@@ -327,7 +327,7 @@ export class PoiService {
             modifiedUntil = new Date(lastModified.getTime() + 3 * 24 * 60 * 60 * 1000); // last modified + 3 days
             this.loggingService.info(`[POIs] Getting POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()}`);
             let updates = await this.httpClient.get(`${Urls.poiUpdates}${lastModified.toISOString()}/${modifiedUntil.toISOString()}`)
-                .pipe(timeout(60000)).toPromise() as IUpdatesResponse;
+                .pipe(timeout(60000)).toPromise() as UpdatesResponse;
             this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()},` +
                 `got: ${ updates.features.length }`);
             let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => f.properties.poiId);
@@ -373,7 +373,7 @@ export class PoiService {
         let imagesFileNames = Object.keys(zip.files).filter(name => name.startsWith("images/") && name.endsWith(".json"));
         for (let imagesFileIndex = 0; imagesFileIndex < imagesFileNames.length; imagesFileIndex++) {
             let imagesFile = imagesFileNames[imagesFileIndex];
-            let imagesJson = JSON.parse(await zip.file(imagesFile).async("text") as string) as IImageItem[];
+            let imagesJson = JSON.parse(await zip.file(imagesFile).async("text") as string) as ImageItem[];
             let imagesUrl = this.imageItemToUrl(imagesJson);
             await this.databaseService.storeImages(imagesUrl);
             progressCallback((imagesFileIndex + 1) * 40.0 / imagesFileNames.length + 50, this.resources.downloadingPoisForOfflineUsage);
@@ -392,7 +392,7 @@ export class PoiService {
         return lastModified;
     }
 
-    private imageItemToUrl(images: IImageItem[]): ImageUrlAndData[] {
+    private imageItemToUrl(images: ImageItem[]): ImageUrlAndData[] {
         let imageAndData = [] as ImageUrlAndData[];
         for (let image of images) {
             for (let imageUrl of image.imageUrls) {
@@ -533,13 +533,13 @@ export class PoiService {
         this.ngRedux.dispatch(new AddToPoiQueueAction({featureId: feature.properties.poiId}));
     }
 
-    public getPoiSocialLinks(feature: GeoJSON.Feature): IPoiSocialLinks {
+    public getPoiSocialLinks(feature: GeoJSON.Feature): PoiSocialLinks {
         let language = this.resources.getCurrentLanguageCodeSimplified();
         let poiLink = this.hashService.getFullUrlFromPoiId({
             source: feature.properties.poiSource,
             id: feature.properties.identifier,
             language
-        } as IPoiRouterData);
+        } as PoiRouterData);
         let escaped = encodeURIComponent(poiLink);
         let location = this.getLocation(feature);
         return {

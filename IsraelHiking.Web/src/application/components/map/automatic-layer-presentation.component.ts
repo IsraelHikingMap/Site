@@ -8,7 +8,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
 import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
-import { ApplicationState, EditableLayer, Language } from "../../models/models";
+import type { ApplicationState, EditableLayer, Language } from "../../models/models";
 
 @Component({
     selector: "auto-layer",

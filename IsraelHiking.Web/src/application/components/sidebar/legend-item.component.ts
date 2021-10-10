@@ -4,7 +4,7 @@ import { LayersService } from "../../services/layers/layers.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
-import { LatLngAlt } from "../../models/models";
+import type { LatLngAlt } from "../../models/models";
 
 type LegendItemType = "POI" | "Way";
 

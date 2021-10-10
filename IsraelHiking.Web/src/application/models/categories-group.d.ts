@@ -1,12 +1,12 @@
 ﻿export type CategoriesGroupType = "Points of Interest" | "Routes";
 
-export interface IconColorLabel {
+export type IconColorLabel = {
     icon: string;
     color: string;
     label: string;
 }
 
-export interface Category {
+export type Category = {
     name: string;
     icon: string;
     color: string;
@@ -14,7 +14,7 @@ export interface Category {
     items: { iconColorCategory: IconColorLabel; tags: any[] }[];
 }
 
-export interface CategoriesGroup {
+export type CategoriesGroup = {
     type: CategoriesGroupType;
     visible: boolean;
     categories: Category[];

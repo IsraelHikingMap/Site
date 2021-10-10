@@ -6,10 +6,10 @@ import { cloneDeep } from "lodash-es";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
-import { PoiService, IPoiSocialLinks } from "../../../services/poi.service";
+import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
 import { AuthorizationService } from "../../../services/authorization.service";
 import { ToastService } from "../../../services/toast.service";
-import { HashService, RouteStrings, IPoiRouterData } from "../../../services/hash.service";
+import { HashService, RouteStrings, PoiRouterData } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
@@ -23,7 +23,7 @@ import { sidebarAnimate } from "../sidebar.component";
 import { NgRedux, select } from "../../../reducers/infra/ng-redux.module";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducers/poi.reducer";
-import {
+import type {
     LinkData,
     LatLngAlt,
     ApplicationState,
@@ -31,7 +31,7 @@ import {
     Contribution
 } from "../../../models/models";
 
-export interface SourceImageUrlPair {
+export type SourceImageUrlPair = {
     imageUrl: string;
     url: string;
 }
@@ -52,7 +52,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public updateLocation: boolean;
     public sourceImageUrls: SourceImageUrlPair[];
     public latlng: LatLngAlt;
-    public shareLinks: IPoiSocialLinks;
+    public shareLinks: PoiSocialLinks;
     public contribution: Contribution;
 
     @select((state: ApplicationState) => state.poiState.isSidebarOpen)
@@ -83,7 +83,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.isLoading = true;
         this.showLocationUpdate = false;
         this.updateLocation = false;
-        this.shareLinks = {} as IPoiSocialLinks;
+        this.shareLinks = {} as PoiSocialLinks;
         this.contribution = {} as Contribution;
         this.info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
         this.subscriptions = [];
@@ -118,7 +118,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             id: params.get(RouteStrings.ID),
             source: params.get(RouteStrings.SOURCE),
             language: queryParams.get(RouteStrings.LANGUAGE)
-        } as IPoiRouterData;
+        } as PoiRouterData;
     }
 
     public ngOnDestroy() {
@@ -131,7 +131,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         return this.runningContextSerivce.isCordova;
     }
 
-    private async fillUiWithData(data: IPoiRouterData) {
+    private async fillUiWithData(data: PoiRouterData) {
         try {
             this.ngRedux.dispatch(new SetSidebarAction({
                 isOpen: true

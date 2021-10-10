@@ -8,14 +8,14 @@ import { LinePaint } from "maplibre-gl";
 import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
-import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "../services/route-statistics.service";
+import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "../services/route-statistics.service";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
 import { select, NgRedux } from "../reducers/infra/ng-redux.module";
-import { LatLngAlt, RouteData, ApplicationState, Language } from "../models/models";
+import type { LatLngAlt, RouteData, ApplicationState, Language } from "../models/models";
 
 declare type DragState = "start" | "drag" | "none";
 
@@ -115,7 +115,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     @select((state: ApplicationState) => state.configuration.language)
     public language$: Observable<Language>;
 
-    private statistics: IRouteStatistics;
+    private statistics: RouteStatistics;
     private chartElements: IChartElements;
     private componentSubscriptions: Subscription[];
     private zoom: number;
@@ -173,7 +173,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.componentSubscriptions.push(this.selectedRouteService.selectedRouteHover.subscribe(this.onSelectedRouteHover));
     }
 
-    private setViewStatisticsValues(statistics: IRouteStatistics): void {
+    private setViewStatisticsValues(statistics: RouteStatistics): void {
         if (statistics == null) {
             this.length = 0;
             this.gain = 0;
@@ -362,7 +362,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         };
     }
 
-    private showChartHover(point: IRouteStatisticsPoint) {
+    private showChartHover(point: RouteStatisticsPoint) {
         if (!point) {
             this.hideChartHover();
             return;
@@ -382,7 +382,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.updatePointOnMap(point);
     }
 
-    private updatePointOnMap(point: IRouteStatisticsPoint) {
+    private updatePointOnMap(point: RouteStatisticsPoint) {
         this.chartHoverSource = {
             type: "FeatureCollection",
             features: [{
@@ -632,7 +632,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             });
     }
 
-    private buildAllTextInHoverBox(point: IRouteStatisticsPoint) {
+    private buildAllTextInHoverBox(point: RouteStatisticsPoint) {
         this.chartElements.hoverGroup.selectAll("text").remove();
         this.createHoverBoxText(this.resources.distance, point.coordinate[0].toFixed(2), " " + this.resources.kmUnit, 20);
         this.createHoverBoxText(this.resources.height, point.coordinate[1].toFixed(0), " " + this.resources.meterUnit, 40, true);
@@ -701,8 +701,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (this.isSlopeOn && data.length > 0) {
             // smoothing the slope data for the chart
             slopeData = regressionLoess()
-                .x((d: IRouteStatisticsPoint) => d.coordinate[0])
-                .y((d: IRouteStatisticsPoint) => d.slope)
+                .x((d: RouteStatisticsPoint) => d.coordinate[0])
+                .y((d: RouteStatisticsPoint) => d.slope)
                 .bandwidth(0.03)(this.statistics.points);
         }
         let maxAbsSlope = RouteStatisticsComponent.MAX_SLOPE;
@@ -890,7 +890,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
     }
 
-    private getPointFromLatLng(latlng: LatLngAlt, heading: number): IRouteStatisticsPoint {
+    private getPointFromLatLng(latlng: LatLngAlt, heading: number): RouteStatisticsPoint {
         if (latlng == null) {
             return null;
         }

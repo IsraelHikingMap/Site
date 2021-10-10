@@ -5,9 +5,9 @@ import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
 import { StatusBar } from "@ionic-native/status-bar/ngx";
 
 import { RunningContextService } from "./running-context.service";
-import { ApplicationState } from "../models/models";
 import { LoggingService } from "./logging.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
+import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class ScreenService {

@@ -7,7 +7,7 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
-import { ApplicationState, ILatLngTime } from "../models/models";
+import type { ApplicationState, LatLngAltTime } from "../models/models";
 
 declare let BackgroundGeolocation: BackgroundGeolocationPlugin;
 
@@ -216,7 +216,7 @@ export class GeoLocationService {
         });
     }
 
-    public positionToLatLngTime(position: GeolocationPosition): ILatLngTime {
+    public positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {
         if (position == null) {
             return null;
         }

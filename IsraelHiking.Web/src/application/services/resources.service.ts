@@ -4,8 +4,8 @@ import { Direction } from "@angular/cdk/bidi";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetLanguageAction } from "../reducers/configuration.reducer";
-import { ApplicationState, Language, LanguageCode } from "../models/models";
 import { Urls } from "../urls";
+import type { ApplicationState, Language, LanguageCode } from "../models/models";
 
 @Injectable()
 export class ResourcesService {
