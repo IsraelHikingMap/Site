@@ -218,7 +218,7 @@ export class ResourcesService {
     public files: string;
     public shareLocation: string;
     public facebookWarning: string;
-    public moreInfoFacebook: string;
+    public moreInfo: string;
     public showSlopes: string;
     public next: string;
     public back: string;
@@ -666,7 +666,7 @@ export class ResourcesService {
         this.files = this.gettextCatalog.getString("Files");
         this.shareLocation = this.gettextCatalog.getString("Share Location");
         this.facebookWarning = this.gettextCatalog.getString("Explanation on how to open Facebook link out side facebook");
-        this.moreInfoFacebook = this.gettextCatalog.getString("More Info...");
+        this.moreInfo = this.gettextCatalog.getString("More Info...");
         this.showSlopes = this.gettextCatalog.getString("Show Slopes");
         this.next = this.gettextCatalog.getString("Next");
         this.back = this.gettextCatalog.getString("Back");
