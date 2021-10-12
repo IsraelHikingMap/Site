@@ -8,7 +8,6 @@ using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,7 +16,6 @@ using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp.IO.API;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -31,7 +29,6 @@ namespace IsraelHiking.API.Tests.Controllers
         private ITagsHelper _tagHelper;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
         private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
-        private UsersIdAndTokensCache _cache;
         private IDistributedCache _persistantCache;
         private ISimplePointAdderExecutor _simplePointAdderExecutor;
 
@@ -46,7 +43,6 @@ namespace IsraelHiking.API.Tests.Controllers
             _simplePointAdderExecutor = Substitute.For<ISimplePointAdderExecutor>();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
-            _cache = new UsersIdAndTokensCache(optionsProvider, Substitute.For<ILogger>(), new MemoryCache(new MemoryCacheOptions()));
             var factory = Substitute.For<IClientsFactory>();
             factory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(_osmGateway);
             _controller = new PointsOfInterestController(factory, 
@@ -56,8 +52,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 _simplePointAdderExecutor,
                 _persistantCache,
                 Substitute.For<ILogger>(),
-                optionsProvider, 
-                _cache);
+                optionsProvider);
         }
 
         [TestMethod]
@@ -151,7 +146,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void CreatePointOfInterest_ExistsInCacheAndInTheDatabase_ShouldAdd()
         {
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
             var poi = new Feature(new Point(0, 0), new AttributesTable {
                 { FeatureAttributes.POI_SOURCE, Sources.OSM },
                 { FeatureAttributes.POI_ICON, "icon" },
@@ -170,7 +165,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void CreatePointOfInterest_ExistsInCacheButNotInTheDatabase_ShouldAdd()
         {
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
             var poi = new Feature(new Point(0, 0), new AttributesTable {
                 { FeatureAttributes.POI_SOURCE, Sources.OSM },
                 { FeatureAttributes.POI_ICON, "icon" },
@@ -189,7 +184,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void CreatePointOfInterest_DoesNotExistInCache_ShouldNotAdd()
         {
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
             var poi = new Feature(new Point(0, 0), new AttributesTable {
                 { FeatureAttributes.POI_SOURCE, Sources.OSM },
                 { FeatureAttributes.POI_ICON, "icon" },
@@ -211,7 +206,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void UploadPointOfInterest_IncorrectId_ShouldNotUpdate()
         {
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
             var poi = new Feature(new Point(0, 0), new AttributesTable {
                 { FeatureAttributes.POI_SOURCE, Sources.OSM },
                 { FeatureAttributes.POI_ID, "1" },
@@ -228,7 +223,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void UpdatePointOfInterest_WebsiteTooLong_ShouldNotUpdate()
         {
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
             var poi = new Feature(new Point(0, 0), new AttributesTable {
                 { FeatureAttributes.POI_SOURCE, Sources.OSM },
                 { FeatureAttributes.POI_ID, "1" },
@@ -245,7 +240,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void UpdatePointOfInterest_ValidFeature_ShouldUpdate()
         {
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
             var poi = new Feature(new Point(0, 0), new AttributesTable {
                 { FeatureAttributes.POI_SOURCE, Sources.OSM },
                 { FeatureAttributes.POI_ID, "1" },
@@ -272,7 +267,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void CreateSimplePoint_DoesNotExistInCache_ShouldAddIt()
         {
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
             var simpleFeature = new Feature
             {
                 Attributes = new AttributesTable

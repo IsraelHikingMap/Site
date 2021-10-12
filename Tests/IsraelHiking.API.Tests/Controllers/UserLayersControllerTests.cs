@@ -26,7 +26,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var layers = new List<MapLayerData> {new MapLayerData()};
             var osmUser = "osmUser";
-            _controller.SetupIdentity(null, osmUser);
+            _controller.SetupIdentity(osmUser);
             _repository.GetUserLayers(osmUser).Returns(layers);
             
             var result = _controller.GetUserLayers().Result as OkObjectResult;
@@ -59,7 +59,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var id = "id";
             var osmUserId = "osmUserId";
             var layer = new MapLayerData {Key = "key", Address = "address"};
-            _controller.SetupIdentity(null, osmUserId);
+            _controller.SetupIdentity(osmUserId);
             _repository.AddUserLayer(layer).Returns(layer).AndDoes(l => (l[0] as MapLayerData).Id = id);
 
             var results = _controller.PostUserLayer(layer).Result as OkObjectResult;
@@ -96,7 +96,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var id = "id";
             var osmUserId = "osmUserId";
-            _controller.SetupIdentity(null, osmUserId);
+            _controller.SetupIdentity(osmUserId);
             var layer = new MapLayerData { Id = id, OsmUserId = osmUserId };
 
             var results = _controller.PutUserLayer(id, layer).Result as BadRequestObjectResult;
@@ -109,7 +109,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var id = "id";
             var osmUserId = "osmUserId";
-            _controller.SetupIdentity(null, osmUserId);
+            _controller.SetupIdentity(osmUserId);
             _repository.GetUserLayers(osmUserId).Returns(new List<MapLayerData>());
             var layer = new MapLayerData { Key = "key", Address = "address", Id = id, OsmUserId = osmUserId };
 
@@ -124,7 +124,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var id = "id";
             var osmUserId = "osmUserId";
             var layer = new MapLayerData { Key = "key", Address = "address", Id = id, OsmUserId = osmUserId };
-            _controller.SetupIdentity(null, osmUserId);
+            _controller.SetupIdentity(osmUserId);
             _repository.GetUserLayers(osmUserId).Returns(new List<MapLayerData> { layer });
             
 
@@ -151,7 +151,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var id = "id";
             var osmUserId = "osmUserId";
             var layer = new MapLayerData { Id = id, OsmUserId = osmUserId };
-            _controller.SetupIdentity(null, osmUserId);
+            _controller.SetupIdentity(osmUserId);
             _repository.GetUserLayerById(id).Returns(layer);
             _repository.GetUserLayers(osmUserId).Returns(new List<MapLayerData> { layer });
 
@@ -166,7 +166,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var id = "id";
             var osmUserId = "osmUserId";
             var layer = new MapLayerData { Key = "key", Address = "address", Id = id, OsmUserId = osmUserId };
-            _controller.SetupIdentity(null, osmUserId);
+            _controller.SetupIdentity(osmUserId);
             _repository.GetUserLayerById(id).Returns(layer);
             _repository.GetUserLayers(osmUserId).Returns(new List<MapLayerData> { layer });
 

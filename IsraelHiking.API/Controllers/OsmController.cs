@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.Common;
 using GpxFile = NetTopologySuite.IO.GpxFile;
 
 namespace IsraelHiking.API.Controllers
@@ -32,7 +33,6 @@ namespace IsraelHiking.API.Controllers
         private readonly IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
         private readonly IOsmLineAdderService _osmLineAdderService;
         private readonly GeometryFactory _geometryFactory;
-        private readonly UsersIdAndTokensCache _cache;
         private readonly ConfigurationData _options;
         private readonly MathTransform _itmWgs84MathTransform;
         private readonly MathTransform _wgs84ItmMathTransform;
@@ -47,15 +47,13 @@ namespace IsraelHiking.API.Controllers
         /// <param name="osmLineAdderService"></param>
         /// <param name="options"></param>
         /// <param name="geometryFactory"></param>
-        /// <param name="cache"></param>
         public OsmController(IClientsFactory clentsFactory,
             IDataContainerConverterService dataContainerConverterService,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IAddibleGpxLinesFinderService addibleGpxLinesFinderService,
             IOsmLineAdderService osmLineAdderService,
             IOptions<ConfigurationData> options,
-            GeometryFactory geometryFactory,
-            UsersIdAndTokensCache cache)
+            GeometryFactory geometryFactory)
         {
             _clentsFactory = clentsFactory;
             _dataContainerConverterService = dataContainerConverterService;
@@ -65,7 +63,6 @@ namespace IsraelHiking.API.Controllers
             _osmLineAdderService = osmLineAdderService;
             _options = options.Value;
             _geometryFactory = geometryFactory;
-            _cache = cache;
         }
 
         /// <summary>
@@ -92,16 +89,17 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Adds a route to OSM - this requires to be logged in to OSM
+        /// Adds a missing route part to OSM
         /// </summary>
         /// <param name="feature"></param>
         /// <returns></returns>
         [Authorize]
         [HttpPut]
-        public async Task PutGpsTraceIntoOsm([FromBody]Feature feature)
+        public async Task PutAddUnmappedPartIntoOsm([FromBody]Feature feature)
         {
             var tags = feature.Attributes.GetNames().ToDictionary(n => n, n => feature.Attributes[n].ToString());
-            await _osmLineAdderService.Add(feature.Geometry as LineString, tags, _cache.Get(User.Identity.Name));
+            var tokenAndSecret = User.Claims.FirstOrDefault(c => c.Type == TokenAndSecret.CLAIM_KEY)?.Value;
+            await _osmLineAdderService.Add(feature.Geometry as LineString, tags, TokenAndSecret.FromString(tokenAndSecret));
         }
 
         /// <summary>
@@ -220,7 +218,8 @@ namespace IsraelHiking.API.Controllers
 
         private IAuthClient CreateOsmGateway()
         {
-            var token = _cache.Get(User.Identity.Name);
+            var tokenAndSecret = User.Claims.FirstOrDefault(c => c.Type == TokenAndSecret.CLAIM_KEY)?.Value;
+            var token = TokenAndSecret.FromString(tokenAndSecret);
             return _clentsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, token.Token, token.TokenSecret);
         }
     }

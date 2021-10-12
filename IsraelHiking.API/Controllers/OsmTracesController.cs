@@ -33,7 +33,6 @@ namespace IsraelHiking.API.Controllers
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IImageCreationService _imageCreationService;
         private readonly ISearchRepository _searchRepository;
-        private readonly UsersIdAndTokensCache _cache;
         private readonly ConfigurationData _options;
 
         /// <summary>
@@ -45,14 +44,12 @@ namespace IsraelHiking.API.Controllers
         /// <param name="options"></param>
         /// <param name="imageCreationService"></param>
         /// <param name="searchRepository"></param>
-        /// <param name="cache"></param>
         public OsmTracesController(IClientsFactory clientsFactory,
             IElevationDataStorage elevationDataStorage,
             IDataContainerConverterService dataContainerConverterService,
             IImageCreationService imageCreationService,
             ISearchRepository searchRepository,
-            IOptions<ConfigurationData> options,
-            UsersIdAndTokensCache cache)
+            IOptions<ConfigurationData> options)
         {
             _clientsFactory = clientsFactory;
             _elevationDataStorage = elevationDataStorage;
@@ -60,7 +57,6 @@ namespace IsraelHiking.API.Controllers
             _imageCreationService = imageCreationService;
             _searchRepository = searchRepository;
             _options = options.Value;
-            _cache = cache;
         }
 
         /// <summary>
@@ -225,8 +221,9 @@ namespace IsraelHiking.API.Controllers
 
         private IAuthClient CreateClient()
         {
-            var user = _cache.Get(User.Identity.Name);
-            return _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, user.Token, user.TokenSecret);
+            var tokenAndSecretString = User.Claims.FirstOrDefault(c => c.Type == TokenAndSecret.CLAIM_KEY)?.Value;
+            var tokenAndSecret = TokenAndSecret.FromString(tokenAndSecretString);
+            return _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
         }
 
         private Trace GpxFileToTrace(GpxFile gpxFile)
