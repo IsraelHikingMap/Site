@@ -6,8 +6,6 @@ using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -22,7 +20,6 @@ namespace IsraelHiking.API.Tests.Controllers
     {
         private OsmTracesController _controller;
         private IClientsFactory _clientsFactory;
-        private UsersIdAndTokensCache _cache;
 
         [TestInitialize]
         public void TestInitialize()
@@ -31,14 +28,13 @@ namespace IsraelHiking.API.Tests.Controllers
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
-            _cache = new UsersIdAndTokensCache(optionsProvider, Substitute.For<ILogger>(), new MemoryCache(new MemoryCacheOptions()));
-            _controller = new OsmTracesController(_clientsFactory, Substitute.For<IElevationDataStorage>(), Substitute.For<IDataContainerConverterService>(), Substitute.For<IImageCreationService>(), Substitute.For<ISearchRepository>(), optionsProvider, _cache);
+            _controller = new OsmTracesController(_clientsFactory, Substitute.For<IElevationDataStorage>(), Substitute.For<IDataContainerConverterService>(), Substitute.For<IImageCreationService>(), Substitute.For<ISearchRepository>(), optionsProvider);
         }
 
         [TestMethod]
         public void GetTraces_ShouldGetThemFromOsm()
         {
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
             var osmGateWay = SetupOAuthClient();
 
             _controller.GetTraces().Wait();
@@ -61,7 +57,7 @@ namespace IsraelHiking.API.Tests.Controllers
             file.FileName.Returns("SomeFile.gpx");
             var osmGateWay = SetupOAuthClient();
 
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
         
             _controller.PostUploadGpsTrace(file).Wait();
 
@@ -72,7 +68,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PutGpsTrace_ShouldUpdate()
         {
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
             var osmGateWay = SetupOAuthClient();
 
             _controller.PutGpsTrace("42", new Trace { Id = "42", Visibility = "public" }).Wait();
@@ -83,7 +79,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PutGpsTrace_WrongId_ShouldNotUpdate()
         {
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
             var osmGateWay = SetupOAuthClient();
 
             _controller.PutGpsTrace("7", new Trace { Id = "42", Visibility = "public" }).Wait();
@@ -95,7 +91,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void DeleteGpsTrace_ShouldDeleteIt()
         {
             long id = 1;
-            _controller.SetupIdentity(_cache);
+            _controller.SetupIdentity();
             var osmGateWay = SetupOAuthClient();
 
             _controller.DeleteGpsTrace(id).Wait();

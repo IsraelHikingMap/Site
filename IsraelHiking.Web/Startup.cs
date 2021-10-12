@@ -57,6 +57,7 @@ namespace IsraelHiking.Web
         {
             services.AddResponseCompression();
             services.AddMemoryCache();
+            services.AddLazyCache();
             services.AddHealthChecks();
             services.AddDetection();
             services.AddHttpClient();
