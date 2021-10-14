@@ -5,6 +5,7 @@ import { Device } from "@ionic-native/device/ngx";
 import { AppVersion } from "@ionic-native/app-version/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
+import platform from "platform";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -185,16 +186,22 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             `Map Location: ${this.hashService.getMapAddress()}`,
             `Baselayer: ${baseLayer.key}, ${baseLayer.address}`,
             `Visible overlays: ${JSON.stringify(state.layersState.overlays.filter(o => o.visible))}`,
+            ""
         ].join("\n");
         let subject = "Issue reported by " + userInfo.displayName;
         try {
             if (!this.runningContextService.isCordova) {
-                await this.fileService.saveToZipFile(`support-${userInfo.id}.zip`, infoString + "\n\n" + logs);
+                
+                infoString += [
+                    `Browser: ${platform.name} ${platform.version}`,
+                    `OS: ${platform.os}`,
+                    ""
+                ].join("\n");
+                await this.fileService.saveToZipFile(`support-${userInfo.id}.zip`, infoString + "\n" + logs);
                 SendReportDialogComponent.openDialog(this.dialog, subject);
                 return;
             }
             infoString += [
-                "", // for extra new line
                 `Manufacture: ${this.device.manufacturer}`,
                 `Model: ${this.device.model}`,
                 `Platform: ${this.device.platform}`,
