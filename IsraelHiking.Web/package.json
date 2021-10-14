@@ -122,7 +122,7 @@
     "cordova-plugin-vibration": "^3.1.1",
     "cordova-plugin-x-socialsharing": "^6.0.3",
     "cordova-plugin-zip": "^3.1.0",
-    "cordova-sqlite-ext": "^5.0.1",
+    "cordova-sqlite-ext": "^6.0.0",
     "es6-promise-plugin": "^4.2.2",
     "eslint": "^7.32.0",
     "eslint-plugin-import": "2.24.2",
