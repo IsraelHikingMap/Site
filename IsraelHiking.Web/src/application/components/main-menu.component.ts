@@ -189,7 +189,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         let subject = "Issue reported by " + userInfo.displayName;
         try {
             if (!this.runningContextService.isCordova) {
-                await this.fileService.saveToZipFile(`support-${userInfo.id}.zip`, infoString + logs);
+                await this.fileService.saveToZipFile(`support-${userInfo.id}.zip`, infoString + "\n\n" + logs);
                 SendReportDialogComponent.openDialog(this.dialog, subject);
                 return;
             }
