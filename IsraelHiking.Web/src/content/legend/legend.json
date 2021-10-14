@@ -107,17 +107,6 @@
         "link": "https://www.openstreetmap.org/relation/1314299"
       },
       {
-        "key": "legendSeaToSeaTrail",
-        "latlng": {
-          "lat": 33.0039669,
-          "lng": 35.384796
-        },
-        "zoom": 15,
-        "type": "Way",
-        "osmTags": [ "Relation \"מים אל ים\"" ],
-        "link": "https://www.openstreetmap.org/relation/2860967"
-      },
-      {
         "key": "legendGolanTrail",
         "latlng": {
           "lat": 32.9979383,

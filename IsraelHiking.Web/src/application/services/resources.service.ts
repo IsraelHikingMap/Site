@@ -403,7 +403,6 @@ export class ResourcesService {
     public legendFirstAid: string;
     public legendRegionalTrails: string;
     public legendJerusalemTrail: string;
-    public legendSeaToSeaTrail: string;
     public legendGolanTrail: string;
     public legendKinneretTrail: string;
     public legendHaifaWadisTrail: string;
@@ -464,7 +463,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1633892780331");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1634197383993");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -872,7 +871,6 @@ export class ResourcesService {
         this.legendFirstAid = this.gettextCatalog.getString("First Aid");
         this.legendRegionalTrails = this.gettextCatalog.getString("Regional Trails");
         this.legendJerusalemTrail = this.gettextCatalog.getString("Jerusalem Trail");
-        this.legendSeaToSeaTrail = this.gettextCatalog.getString("Sea to Sea Trail");
         this.legendGolanTrail = this.gettextCatalog.getString("Golan Trail");
         this.legendKinneretTrail = this.gettextCatalog.getString("Kinneret Trail");
         this.legendHaifaWadisTrail = this.gettextCatalog.getString("Haifa Wadis Trail");
