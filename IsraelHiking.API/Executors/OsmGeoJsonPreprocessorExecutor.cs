@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Executors
     {
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
-        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IElevationGateway _elevationGateway;
         private readonly MathTransform _wgs84ItmConverter;
         private readonly ITagsHelper _tagsHelper;
 
@@ -41,19 +41,19 @@ namespace IsraelHiking.API.Executors
         /// Constructor
         /// </summary>
         /// <param name="logger"></param>
-        /// <param name="elevationDataStorage"></param>
+        /// <param name="elevationGateway"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="osmGeoJsonConverter"></param>
         /// <param name="tagsHelper"></param>
         public OsmGeoJsonPreprocessorExecutor(ILogger logger,
-            IElevationDataStorage elevationDataStorage,
+            IElevationGateway elevationGateway,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IOsmGeoJsonConverter osmGeoJsonConverter,
             ITagsHelper tagsHelper)
         {
             _logger = logger;
             _osmGeoJsonConverter = osmGeoJsonConverter;
-            _elevationDataStorage = elevationDataStorage;
+            _elevationGateway = elevationGateway;
             _wgs84ItmConverter = itmWgs84MathTransfromFactory.CreateInverse();
             _tagsHelper = tagsHelper;
         }
@@ -64,6 +64,7 @@ namespace IsraelHiking.API.Executors
             _logger.LogInformation("Preprocessing OSM data to GeoJson, total entities: " + osmEntities.Count);
             osmEntities = RemoveDuplicateWaysThatExistInRelations(osmEntities);
             var featuresToReturn = osmEntities.Select(ConvertToFeature).Where(f => f != null).ToList();
+            UpdateAltitude(featuresToReturn);
             ChangeLwnHikingRoutesToNoneCategory(featuresToReturn);
             _logger.LogInformation("Finished GeoJson conversion: " + featuresToReturn.Count);
             return featuresToReturn;
@@ -179,11 +180,22 @@ namespace IsraelHiking.API.Executors
                 geoLocation = feature.Geometry.Centroid.Coordinate;
             }
             feature.Attributes.SetLocation(geoLocation);
-            feature.Attributes.Add(FeatureAttributes.POI_ALT, _elevationDataStorage.GetElevation(geoLocation).Result);
             var (x, y) = _wgs84ItmConverter.Transform(geoLocation.X, geoLocation.Y);
             feature.Attributes.Add(FeatureAttributes.POI_ITM_EAST, x);
             feature.Attributes.Add(FeatureAttributes.POI_ITM_NORTH, y);
+        }
 
+        private void UpdateAltitude(List<Feature> features)
+        {
+            _logger.LogInformation("Starting to get altitude for features " + features.Count);
+            var coordinates = features.Select(f => f.GetLocation()).ToArray();
+            var elevationValues = _elevationGateway.GetElevation(coordinates).Result;
+            for (var index = 0; index < features.Count; index++)
+            {
+                var feature = features[index];
+                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ALT, elevationValues[index]);
+            }
+            _logger.LogInformation("Finished to get altitude for features " + features.Count);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestInitialize]
         public void TestInitialize()
         {
-            InitializeSubstitues();
+            InitializeSubstitutes();
             _nakebGateway = Substitute.For<INakebGateway>();
             _adapter = new NakebPointsOfInterestAdapter(_nakebGateway, Substitute.For<ILogger>());
         }

@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using System.Linq;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
@@ -13,16 +14,17 @@ namespace IsraelHiking.API.Tests.Services.Poi
 {
     public abstract class BasePointsOfInterestAdapterTestsHelper
     {
-        protected IElevationDataStorage _elevationDataStorage;
+        protected IElevationGateway ElevationGateway;
         protected IDataContainerConverterService _dataContainerConverterService;
         protected IItmWgs84MathTransfromFactory _itmWgs84MathTransfromFactory;
         protected IOptions<ConfigurationData> _options;
 
-        protected void InitializeSubstitues()
+        protected void InitializeSubstitutes()
         {
             _itmWgs84MathTransfromFactory = new ItmWgs84MathTransfromFactory();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _elevationDataStorage = Substitute.For<IElevationDataStorage>();
+            ElevationGateway = Substitute.For<IElevationGateway>();
+            ElevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
             _options = Substitute.For<IOptions<ConfigurationData>>();
             _options.Value.Returns(new ConfigurationData());
         }

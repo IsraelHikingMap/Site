@@ -21,7 +21,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestInitialize]
         public void TestInialize()
         {
-            InitializeSubstitues();
+            InitializeSubstitutes();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
             _overpassTurboGateway = Substitute.For<IOverpassTurboGateway>();
             _adapter = new WikipediaPointsOfInterestAdapter(_wikipediaGateway, _overpassTurboGateway, Substitute.For<ILogger>());

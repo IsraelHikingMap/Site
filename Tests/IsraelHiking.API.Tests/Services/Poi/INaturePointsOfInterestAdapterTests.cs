@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestInitialize]
         public void TestInitialize()
         {
-            InitializeSubstitues();
+            InitializeSubstitutes();
             _iNatureGateway = Substitute.For<IINatureGateway>();
             _repository = Substitute.For<IShareUrlsRepository>();
             _adapter = new INaturePointsOfInterestAdapter(_dataContainerConverterService, _iNatureGateway, _repository, Substitute.For<ILogger>());

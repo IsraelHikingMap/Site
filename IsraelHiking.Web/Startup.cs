@@ -110,13 +110,6 @@ namespace IsraelHiking.Web
             services.Configure<NonPublicConfigurationData>(_nonPublicConfiguration);
 
             services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IHM"));
-            var binariesFolder = "";
-            services.AddTransient<IFileProvider, PhysicalFileProvider>((serviceProvider) =>
-            {
-                binariesFolder = GetBinariesFolder(serviceProvider);
-                return new PhysicalFileProvider(binariesFolder);
-            });
-
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Israel Hiking API", Version = GetType().Assembly.GetName().Version.ToString() });
@@ -132,7 +125,9 @@ namespace IsraelHiking.Web
                     }
                 );
                 c.OperationFilter<AssignOAuthSecurityRequirements>();
-                c.IncludeXmlComments(Path.Combine(binariesFolder, "IsraelHiking.API.xml"));
+                var xmlFile = "IsraelHiking.API.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
             services.AddDirectoryBrowser();
         }
@@ -195,12 +190,6 @@ namespace IsraelHiking.Web
                     logger.LogError(t.Exception, $"Failed to initialize service {serviceName}");
                 }, TaskContinuationOptions.OnlyOnFaulted);
             }
-        }
-
-        private string GetBinariesFolder(IServiceProvider serviceProvider)
-        {
-            var binariesFolder = serviceProvider.GetService<IOptions<ConfigurationData>>().Value.BinariesFolder;
-            return Path.Combine(Directory.GetCurrentDirectory(), binariesFolder);
         }
     }
 }
