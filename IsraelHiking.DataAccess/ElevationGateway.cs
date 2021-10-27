@@ -30,7 +30,7 @@ namespace IsraelHiking.DataAccess
         public async Task<double> GetElevation(Coordinate latLng)
         {
             var client = _httpClientFactory.CreateClient();
-            var response = await client.GetAsync($"${_options.ElevationServerAddress}?points={latLng.X}%2C{latLng.Y}");
+            var response = await client.GetAsync($"{_options.ElevationServerAddress}?points={latLng.X},{latLng.Y}");
             if (!response.IsSuccessStatusCode)
             {
                 return 0;
