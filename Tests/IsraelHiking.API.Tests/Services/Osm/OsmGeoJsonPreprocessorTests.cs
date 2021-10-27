@@ -30,8 +30,10 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
+            var elevationGateway = Substitute.For<IElevationGateway>();
+            elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
             _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), 
-                Substitute.For<IElevationDataStorage>(), 
+                elevationGateway, 
                 new ItmWgs84MathTransfromFactory(), 
                 new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(optionsProvider));
         }

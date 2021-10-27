@@ -47,6 +47,14 @@ services:
     ports:
       - 11911:80
     restart: always
+  elevation:
+    image: israelhikingmap/elevationwebapi
+    container_name: elevation
+    ports:
+      - 11211:80
+    restart: always
+    volumes:
+      - ./elevation-cashe:/app/elevation-cache
 volumes:
   esdata:
     driver: local

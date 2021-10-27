@@ -31,7 +31,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestInitialize]
         public void TestInitialize()
         {
-            InitializeSubstitues();
+            InitializeSubstitutes();
             _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
             _adapter = new CsvPointsOfInterestAdapter(_dataContainerConverterService, _remoteFileFetcherGateway, Substitute.For<ILogger>());
         }

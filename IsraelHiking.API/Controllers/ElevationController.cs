@@ -12,15 +12,15 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class ElevationController : ControllerBase
     {
-        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IElevationGateway _elevationGateway;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="elevationDataStorage"></param>
-        public ElevationController(IElevationDataStorage elevationDataStorage)
+        /// <param name="elevationGateway"></param>
+        public ElevationController(IElevationGateway elevationGateway)
         {
-            _elevationDataStorage = elevationDataStorage;
+            _elevationGateway = elevationGateway;
         }
 
         /// <summary>
@@ -29,10 +29,9 @@ namespace IsraelHiking.API.Controllers
         /// <param name="points">The points array - each point should be latitude,longitude and use '|' to separate between points</param>
         /// <returns>An array of elevation values according to given points order</returns>
         [HttpGet]
-        public async Task<double[]> GetElevation(string points)
+        public Task<double[]> GetElevation(string points)
         {
-            var tasks = points.Split('|').Select(async p => await _elevationDataStorage.GetElevation(p.ToCoordinate()));
-            return await Task.WhenAll(tasks);
+            return _elevationGateway.GetElevation(points.Split('|').Select(p => p.ToCoordinate()).ToArray());
         }
     }
 }

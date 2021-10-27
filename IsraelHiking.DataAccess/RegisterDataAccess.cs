@@ -21,7 +21,7 @@ namespace IsraelHiking.DataAccess
             services.AddSingleton<IUserLayersRepository>(x => x.GetService<ElasticSearchGateway>());
             services.AddSingleton<IImagesRepository>(x => x.GetService<ElasticSearchGateway>());
             services.AddSingleton<IExternalSourcesRepository>(x => x.GetService<ElasticSearchGateway>());
-            services.AddSingleton<IElevationDataStorage, ElevationDataStorage>();
+            services.AddSingleton<IElevationGateway, ElevationGateway>();
             services.AddTransient<IOsmRepository, OsmRepository>();
             services.AddTransient<INakebGateway, NakebGateway>();
             services.AddSingleton<IWikipediaGateway, WikipediaGateway>();
@@ -33,7 +33,6 @@ namespace IsraelHiking.DataAccess
             services.AddTransient<IOsmLatestFileGateway, OsmLatestFileGateway>();
             // Initializables
             services.AddSingleton<IInitializable>(x => x.GetService<ElasticSearchGateway>());
-            services.AddSingleton<IInitializable>(x => x.GetService<IElevationDataStorage>());
             services.AddSingleton<IInitializable>(x => x.GetService<IINatureGateway>());
             services.AddSingleton<IInitializable>(x => x.GetService<IWikimediaCommonGateway>());
             services.AddSingleton<IInitializable>(x => x.GetService<IWikipediaGateway>());

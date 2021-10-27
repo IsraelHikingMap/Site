@@ -2,7 +2,6 @@
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +27,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
-            _controller = new OsmTracesController(_clientsFactory, Substitute.For<IElevationDataStorage>(), Substitute.For<IDataContainerConverterService>(), Substitute.For<IImageCreationService>(), Substitute.For<ISearchRepository>(), optionsProvider);
+            _controller = new OsmTracesController(_clientsFactory, Substitute.For<IDataContainerConverterService>(), Substitute.For<IImageCreationService>(), Substitute.For<ISearchRepository>(), optionsProvider);
         }
 
         [TestMethod]
