@@ -18,7 +18,7 @@ export type { CategoriesGroup, Category, IconColorLabel, CategoriesGroupType } f
 export type { Language, LanguageCode } from "./language";
 // states:
 export type { ApplicationState } from "./state/application-state";
-export type { Configuration } from "./state/configuration";
+export type { Configuration, BatteryOptimizationType } from "./state/configuration";
 export type { TracesState } from "./state/traces-state";
 export type { LayersState } from "./state/layers-state";
 export type { ShareUrlsState } from "./state/share-urls-state";

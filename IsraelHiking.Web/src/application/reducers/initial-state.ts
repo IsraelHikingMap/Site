@@ -13,9 +13,8 @@ export const BICYCLE_TRAILS = "Bicycle Trails";
 export const initialState =
     {
         configuration: {
-            isBatteryOptimization: false,
+            batteryOptimizationType: "screen-on",
             isAutomaticRecordingUpload: true,
-            // isFindMissingRoutesAfterUpload: false,
             isGotLostWarnings: false,
             isShowBatteryConfirmation: true,
             isShowIntro: true,

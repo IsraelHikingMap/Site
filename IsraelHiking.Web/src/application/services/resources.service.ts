@@ -232,6 +232,9 @@ export class ResourcesService {
     public resetData: string;
     public seeAlso: string;
     public unhideHiddenRoutes: string;
+    public screenOn: string;
+    public screenOff: string;
+    public screenDark: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -463,7 +466,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1634739715530");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1635511838323");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -679,6 +682,9 @@ export class ResourcesService {
         this.resetData = this.gettextCatalog.getString("Reset Data");
         this.seeAlso = this.gettextCatalog.getString("See Also");
         this.unhideHiddenRoutes = this.gettextCatalog.getString("Unhide hidden routes");
+        this.screenOn = this.gettextCatalog.getString("Keep screen on");
+        this.screenOff = this.gettextCatalog.getString("Allow turning off the screen");
+        this.screenDark = this.gettextCatalog.getString("Darken the screen");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

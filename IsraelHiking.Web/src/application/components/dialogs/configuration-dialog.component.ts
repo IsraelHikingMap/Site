@@ -8,8 +8,8 @@ import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
 import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
-import { ConfigurationActions } from "../../reducers/configuration.reducer";
-import type { ApplicationState } from "../../models/models";
+import { ConfigurationActions, SetBatteryOptimizationTypeAction } from "../../reducers/configuration.reducer";
+import type { ApplicationState, BatteryOptimizationType } from "../../models/models";
 
 @Component({
     selector: "configuration-dialog",
@@ -17,14 +17,11 @@ import type { ApplicationState } from "../../models/models";
 })
 export class ConfigurationDialogComponent extends BaseMapComponent {
 
-    @select((state: ApplicationState) => state.configuration.isBatteryOptimization)
-    public isBatteryOptimization: Observable<boolean>;
+    @select((state: ApplicationState) => state.configuration.batteryOptimizationType)
+    public batteryOptimizationType: Observable<BatteryOptimizationType>;
 
     @select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload)
     public isAutomaticRecordingUpload: Observable<boolean>;
-
-    // @select((state: ApplicationState) => state.configuration.isFindMissingRoutesAfterUpload)
-    // public isFindMissingRoutesAfterUpload: Observable<boolean>;
 
     @select((state: ApplicationState) => state.configuration.isGotLostWarnings)
     public isGotLostWarnings: Observable<boolean>;
@@ -50,9 +47,9 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
         this.ngRedux.dispatch(ConfigurationActions.toggleIsAutomaticRecordingUploadAction);
     }
 
-    // public toggleFindMissingRoutesAfterUpload() {
-    //    this.ngRedux.dispatch(ConfigurationActions.toggleFindMissingRoutesAfterUploadAction);
-    // }
+    public setBatteryOptimizationType(batteryOptimizationType: BatteryOptimizationType) {
+        this.ngRedux.dispatch(new SetBatteryOptimizationTypeAction({batteryOptimizationType}));
+    }
 
     public toggleGotLostWarnings() {
         this.ngRedux.dispatch(ConfigurationActions.toggleIsGotLostWarningsAction);
