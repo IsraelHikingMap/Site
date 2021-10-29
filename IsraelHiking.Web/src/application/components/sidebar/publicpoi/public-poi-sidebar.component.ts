@@ -247,6 +247,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         return this.fullFeature && this.fullFeature.properties.poiSource === "OSM";
     }
 
+    public isShowSeeAlso() {
+        return this.fullFeature && this.fullFeature.properties.poiSource !== "Coordinates";
+    }
+
     public isRoute() {
         return this.fullFeature && (this.fullFeature.geometry.type === "LineString" ||
             this.fullFeature.geometry.type === "MultiLineString");

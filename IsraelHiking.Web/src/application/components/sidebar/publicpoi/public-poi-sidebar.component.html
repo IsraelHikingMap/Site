@@ -77,7 +77,7 @@
                     <div fxLayout="row" *ngIf="contribution.userName" class="text-small">
                         <span><a [href]="contribution.userAddress" [target]="'_blank'">{{contribution.userName}}</a> - {{contribution.lastModifiedDate | date:'dd/MM/yyyy' }}</span>
                     </div>
-                    <div fxLayout="row">
+                    <div fxLayout="row" *ngIf="isShowSeeAlso()">
                         <h4>{{resources.seeAlso}}</h4>
                     </div>
                     <div fxLayout="row">
