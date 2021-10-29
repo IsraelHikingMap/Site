@@ -79,6 +79,9 @@ export class ApplicationInitializeService {
             this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
             await this.loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
+            if (this.runningContextService.isIFrame) {
+                return;
+            }
             if (ex.toString().indexOf("A mutation operation was attempted on a database that did not allow mutations") !== -1) {
                 alert("Sorry, this site does not support running FireFox in private mode...");
             } else {
