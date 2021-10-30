@@ -73,6 +73,7 @@ export class ScreenService {
     }
 
     private setKeepScreenOn() {
+        this.logger.info(`[Screen] Setting mode: ${this.ngRedux.getState().configuration.batteryOptimizationType}`);
         this.brightness.setKeepScreenOn(this.ngRedux.getState().configuration.batteryOptimizationType !== "screen-off");
     }
 }
