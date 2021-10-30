@@ -10,7 +10,7 @@ export class GlobalErrorHandler implements ErrorHandler {
     }
 
     public handleError(error: Error) {
-        let message = error.message || error.toString();
+        let message = error.message || JSON.stringify(error);
         if (error.stack) {
             message += `\n${error.stack}`;
         }
