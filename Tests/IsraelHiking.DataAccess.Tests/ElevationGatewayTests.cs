@@ -5,6 +5,7 @@ using System.Net.Http;
 using IsraelHiking.Common.Configuration;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess.Tests
 {
@@ -20,7 +21,7 @@ namespace IsraelHiking.DataAccess.Tests
             factory.CreateClient().Returns(new HttpClient());
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
-            _elevationGateway = new ElevationGateway(options, factory);
+            _elevationGateway = new ElevationGateway(options, factory, Substitute.For<ILogger>());
         }
 
         [TestMethod]

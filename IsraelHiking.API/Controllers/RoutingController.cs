@@ -70,7 +70,7 @@ namespace IsraelHiking.API.Controllers
                     To = pointTo,
                     Profile = profile,
                 });
-            ElevationSetterHelper.SetElevation(feature.Geometry, _elevationGateway);
+            ElevationSetterHelper.SetMissingElevation(feature.Geometry, _elevationGateway);
             feature.Attributes.AddOrUpdate("Name", $"Routing from {@from} to {to} profile type: {profile}");
             feature.Attributes.AddOrUpdate("Creator", "IsraelHikingMap");
             return Ok(new FeatureCollection{ feature });

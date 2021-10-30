@@ -39,15 +39,18 @@ namespace IsraelHiking.API.Executors
 
             public void Filter(CoordinateSequence seq, int i)
             {
-                seq.SetZ(i, _elevationValue[i]);
+                if (_elevationValue.ContainsKey(i))
+                {
+                    seq.SetZ(i, _elevationValue[i]);
+                }
             }
         }
 
         /// <summary>
         /// Main helper function to set the elevation for a geometry
         /// </summary>
-        /// <param name="geometry"></param>
-        /// <param name="elevationGateway"></param>
+        /// <param name="geometry">The geometry to update</param>
+        /// <param name="elevationGateway">The elevation gateway</param>
         public static void SetElevation(Geometry geometry, IElevationGateway elevationGateway)
         {
             var getCoordinatesFilter = new GetCoordinatesFilter();
@@ -69,14 +72,42 @@ namespace IsraelHiking.API.Executors
         /// <summary>
         /// Main helper function to set the elevation for a coleection of features
         /// </summary>
-        /// <param name="features"></param>
-        /// <param name="elevationGateway"></param>
+        /// <param name="features">The features to update</param>
+        /// <param name="elevationGateway">The elevation gateway</param>
         public static void SetElevation(IEnumerable<Feature> features, IElevationGateway elevationGateway)
         {
             foreach (var feature in features)
             {
                 SetElevation(feature.Geometry, elevationGateway);
             }
+        }
+
+        /// <summary>
+        /// Adds elevation to coordinates that does not have elevation value
+        /// </summary>
+        /// <param name="geometry">The geometry to update</param>
+        /// <param name="elevationGateway">The elevation gateway</param>
+        public static void SetMissingElevation(Geometry geometry, IElevationGateway elevationGateway)
+        {
+            var getCoordinatesFilter = new GetCoordinatesFilter();
+            geometry.Apply(getCoordinatesFilter);
+            var coordinates = getCoordinatesFilter.CoordinatesMap
+                .OrderBy(k => k.Key)
+                .ToArray();
+            var elevationValues = elevationGateway.GetElevation(coordinates
+                .Where(c => double.IsNaN(c.Value.Z))
+                .Select(c => c.Value)
+                .ToArray()
+            ).Result;
+            var elevationDictionary = new Dictionary<int, double>();
+            var missingIndex = 0;
+            foreach (var keyValuePair in coordinates.Where(k => double.IsNaN(k.Value.Z)))
+            {
+                elevationDictionary[keyValuePair.Key] = elevationValues[missingIndex];
+                missingIndex++;
+            }
+            var setElevationValuesFilter = new SetElevationValuesFilter(elevationDictionary);
+            geometry.Apply(setElevationValuesFilter);
         }
     }
 

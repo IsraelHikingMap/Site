@@ -1,11 +1,12 @@
-﻿using IsraelHiking.DataAccessInterfaces;
+﻿using System;
+using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Geometries;
-
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using IsraelHiking.Common.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.DataAccess
@@ -13,13 +14,16 @@ namespace IsraelHiking.DataAccess
     public class ElevationGateway : IElevationGateway
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger _logger;
 
         private readonly ConfigurationData _options;
         public ElevationGateway(IOptions<ConfigurationData> options, 
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            ILogger logger)
         {
             _options = options.Value;
             _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
         
         /// <summary>
@@ -42,11 +46,15 @@ namespace IsraelHiking.DataAccess
 
         public async Task<double[]> GetElevation(Coordinate[] latLngs)
         {
+            if (latLngs.Length == 0) {
+                return Array.Empty<double>();
+            }
             var client = _httpClientFactory.CreateClient();
             var arrays = latLngs.Select(l => new[] {l.X, l.Y}).ToArray();
             var response = await client.PostAsync(_options.ElevationServerAddress, JsonContent.Create(arrays));
             if (!response.IsSuccessStatusCode)
             {
+                _logger.LogError($"Failed to get elevation from service for {arrays.Length} points");
                 return Enumerable.Repeat(0.0, arrays.Length).ToArray();
             }
             var json = await response.Content.ReadFromJsonAsync<double[]>();
