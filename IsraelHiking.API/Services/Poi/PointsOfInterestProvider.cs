@@ -298,7 +298,9 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<Feature> GetFeatureById(string source, string id)
         {
             var feature = await _pointsOfInterestRepository.GetPointOfInterestById(id, source);
-            ElevationSetterHelper.SetElevation(feature.Geometry, _elevationGateway);
+            if (feature != null) {
+                ElevationSetterHelper.SetElevation(feature.Geometry, _elevationGateway);
+            }
             return feature;
         }
 
