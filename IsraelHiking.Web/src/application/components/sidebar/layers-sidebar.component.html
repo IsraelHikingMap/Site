@@ -23,7 +23,7 @@
                         <span><i class="fa" [ngClass]="{'icon-eye': isBaseLayerSelected(baseLayer), 'icon-eye-slash': !isBaseLayerSelected(baseLayer)}"></i></span>
                     </div>
                     <div fxFlex>
-                        <span>{{resources.translate(baseLayer.key)}}</span>
+                        <span class="break-all">{{resources.translate(baseLayer.key)}}</span>
                     </div>
                     <div *ngIf="baseLayer.isEditable" fxFlex="10">
                         <button fxFill mat-button class="short-button" (click)="editBaseLayer($event, baseLayer)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-ellipsis-v"></i></button>
@@ -53,7 +53,7 @@
                         <span><i class="fa" [ngClass]="{'icon-eye': overlay.visible, 'icon-eye-slash': !overlay.visible}"></i></span>
                     </div>
                     <div fxFlex>
-                        <span>{{resources.translate(overlay.key)}}</span>
+                        <span class="break-all">{{resources.translate(overlay.key)}}</span>
                     </div>
                     <div *ngIf="overlay.isEditable" fxFlex="10">
                         <button mat-button fxFill class="short-button" (click)="editOverlay($event, overlay)" matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-ellipsis-v"></i></button>
@@ -89,7 +89,7 @@
                             </span>
                         </div>
                         <div fxFlex matTooltip="{{route.description}}" matTooltipPosition="below" class="cursor-move">
-                            <span [style.color]="route.color">{{route.name}}</span>
+                            <span [style.color]="route.color" class="break-all">{{route.name}}</span>
                         </div>
                         <div fxFlex="10">
                             <button fxFill mat-button class="short-button" (click)="editRoute(route, $event)" matTooltip="{{resources.routeProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Route" angularticsAction="Edit route"><i class="fa icon-ellipsis-v"></i></button>
