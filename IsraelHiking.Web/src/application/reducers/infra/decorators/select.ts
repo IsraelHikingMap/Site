@@ -32,12 +32,12 @@ export const select = <T>(
     decorate(adjustedSelector, undefined, comparator)(target, key);
   };
 
-function decorate(
+const decorate = (
   selector: Selector<any, any>,
   transformer?: Transformer<any, any>,
   comparator?: Comparator,
-): PropertyDecorator {
-  return function decorator(target: any, key): void {
+): PropertyDecorator => {
+  const decorator = (target: any, key: string | symbol): void => {
     function getter(this: any) {
       return getInstanceSelection(this, key, selector, transformer, comparator);
     }
@@ -51,4 +51,5 @@ function decorate(
       });
     }
   };
-}
+  return decorator;
+};

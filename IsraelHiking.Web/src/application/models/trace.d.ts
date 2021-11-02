@@ -1,8 +1,8 @@
-﻿import { DataContainer } from "./models";
+﻿import type { DataContainer } from "./models";
 
 export type TraceVisibility = "private" | "public" | "local" | "identifiable" | "trackable";
 
-export interface Trace {
+export type Trace = {
     id: string;
     name: string;
     description: string;

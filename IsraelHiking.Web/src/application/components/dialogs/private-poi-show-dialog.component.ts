@@ -9,7 +9,7 @@ import { ImageGalleryService } from "../../services/image-gallery.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
-import { ApplicationState, MarkerData, LinkData } from "../../models/models";
+import type { ApplicationState, MarkerData, LinkData } from "../../models/models";
 
 interface IPrivatePoiShowDialogData {
     marker: MarkerData;

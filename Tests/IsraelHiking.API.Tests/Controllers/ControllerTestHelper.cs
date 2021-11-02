@@ -8,19 +8,16 @@ namespace IsraelHiking.API.Tests.Controllers
 {
     public static class ControllerTestHelper
     {
-        public static void SetupIdentity(this ControllerBase controller, UsersIdAndTokensCache cache = null, string osmUserId = "42")
+        public static void SetupIdentity(this ControllerBase controller, string osmUserId = "42")
         {
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-                new Claim(ClaimTypes.Name, osmUserId)
+                new Claim(ClaimTypes.Name, osmUserId),
+                new Claim(TokenAndSecret.CLAIM_KEY, "a;b")
             }));
             controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext { User = user }
             };
-            if (cache != null)
-            {
-                cache.Add(osmUserId, new TokenAndSecret("", ""));
-            }
         }
     }
 }

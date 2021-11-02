@@ -14,7 +14,7 @@ import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { StopRecordingAction, StartRecordingAction } from "../reducers/route-editing-state.reducer";
 import { AddTraceAction } from "../reducers/traces.reducer";
 import { AddRouteAction, AddRecordingPointsAction } from "../reducers/routes.reducer";
-import { TraceVisibility, DataContainer, ApplicationState, RouteData, ILatLngTime } from "../models/models";
+import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime } from "../models/models";
 
 @Injectable()
 export class RecordedRouteService {
@@ -22,7 +22,7 @@ export class RecordedRouteService {
     private static readonly MAX_SPPED = 55; // meters / seconds =~ 200 Km/hs
     private static readonly MIN_ACCURACY = 100; // meters
 
-    private rejectedPosition: ILatLngTime;
+    private rejectedPosition: LatLngAltTime;
 
     @select((state: ApplicationState )=> state.gpsState.currentPoistion)
     private currentPosition$: Observable<GeolocationPosition>;
@@ -171,7 +171,7 @@ export class RecordedRouteService {
         }));
     }
 
-    private validateRecordingAndUpdateState(position: GeolocationPosition, lastValidLocation: ILatLngTime): boolean {
+    private validateRecordingAndUpdateState(position: GeolocationPosition, lastValidLocation: LatLngAltTime): boolean {
         let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
             this.loggingService.debug(`[Record] Valid position, updating: (${position.coords.latitude}, ${position.coords.longitude})`);
@@ -196,7 +196,7 @@ export class RecordedRouteService {
         return false;
     }
 
-    private isValid(test: ILatLngTime, position: GeolocationPosition): string {
+    private isValid(test: LatLngAltTime, position: GeolocationPosition): string {
         let distance = SpatialService.getDistanceInMeters(test, this.geoLocationService.positionToLatLngTime(position));
         let timeDifference = Math.abs(position.timestamp - test.timestamp.getTime()) / 1000;
         if (timeDifference === 0) {

@@ -1,4 +1,4 @@
-version: 9.9.{build}
+version: 9.11.{build}
 clone_depth: 3
 configuration: Release
 skip_branch_with_pr: true
@@ -64,7 +64,7 @@ for:
       only:
         - PRODUCT: android
     install:
-      - ps: Install-Product node LTS    
+      - ps: Install-Product node LTS
     build_script:
     - pwsh: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"

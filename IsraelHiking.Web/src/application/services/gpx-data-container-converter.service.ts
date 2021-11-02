@@ -4,7 +4,15 @@ import { parseString, Builder } from "isomorphic-xml2js";
 import { encode } from "base64-arraybuffer";
 import XmlBeautify from "xml-beautify";
 
-import { DataContainer, RouteData, RouteSegmentData, ILatLngTime, MarkerData, LinkData, LatLngAlt } from "../models/models";
+import type { 
+    DataContainer, 
+    RouteData, 
+    RouteSegmentData, 
+    LatLngAltTime, 
+    MarkerData, 
+    LinkData, 
+    LatLngAlt 
+} from "../models/models";
 
 interface Link {
     $: { href: string };
@@ -68,11 +76,47 @@ interface Gpx {
 
 @Injectable()
 export class GpxDataContainerConverterService {
+    public static SplitRouteSegments(routeData: RouteData): void {
+        if (routeData.segments.length > 2) {
+            return;
+        }
+        let newSegments = [];
+        for (let segment of routeData.segments) {
+            if (segment.latlngs.length < 3) {
+                newSegments.push(segment);
+                continue;
+            }
+            let splitCount = Math.floor(segment.latlngs.length / 10);
+            let latlngs = [...segment.latlngs];
+            while (latlngs.length > 1) {
+                if (splitCount >= latlngs.length) {
+                    splitCount = latlngs.length - 1;
+                }
+                let segmentEndLatLng = latlngs[splitCount];
+                let start = latlngs.slice(0, splitCount + 1);
+                latlngs = latlngs.slice(splitCount);
+                let routeSegment = {
+                    routePoint: segmentEndLatLng,
+                    latlngs: start,
+                    routingType: routeData.segments[0].routingType
+                };
+                newSegments.push(routeSegment);
+            }
+        }
+        routeData.segments = newSegments;
+    }
+
     public canConvert(gpxXmlString: string) {
         let subString = gpxXmlString.substr(0, 200).toLocaleLowerCase();
         return (subString.indexOf("<gpx") !== -1);
     }
 
+    /**
+     * This method converts a datacontainer to gpx base64 sting
+     *
+     * @param dataContainer a data container object
+     * @returns a base64 encoded gpx xml string
+     */
     public async toGpx(dataContainer: DataContainer): Promise<string> {
         let options = { rootName: "gpx" };
 
@@ -236,6 +280,7 @@ export class GpxDataContainerConverterService {
                 routePoint: firstLatlng as LatLngAlt,
                 routingType: "Hike"
             } as RouteSegmentData);
+            GpxDataContainerConverterService.SplitRouteSegments(route);
         }
 
         return dataContainer;
@@ -342,14 +387,14 @@ export class GpxDataContainerConverterService {
                         lat: +p.$.lat,
                         lng: +p.$.lon,
                         timestamp: p.time ? new Date(p.time) : undefined
-                    } as ILatLngTime)),
+                    } as LatLngAltTime)),
                     routingType: this.convertExtensionAfterXmlnsRemoval(s.extensions, { RoutingType: { _: "Hike" } }).RoutingType._,
                     routePoint: last(s.trkpt.map(p => ({
                         alt: +p.ele,
                         lat: +p.$.lat,
                         lng: +p.$.lon,
                         timestamp: p.time ? new Date(p.time) : undefined
-                    } as ILatLngTime)))
+                    } as LatLngAltTime)))
                 } as RouteSegmentData)),
                 markers: []
             } as RouteData;

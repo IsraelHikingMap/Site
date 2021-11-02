@@ -1,5 +1,5 @@
-﻿import { ShareUrl } from "../models";
+﻿import type { ShareUrl } from "../models";
 
-export interface ShareUrlsState {
+export type ShareUrlsState = {
     shareUrls: ShareUrl[];
 }

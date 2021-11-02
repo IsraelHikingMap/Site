@@ -198,7 +198,10 @@ namespace IsraelHiking.API.Executors
             (var way, var closestHighways) = await GetClosestHighways(osmGateway, request.LatLng);
             if (!closestHighways.Any())
             {
-                throw new Exception("There's no close enough highway to add a gate");
+                return new OsmChange
+                {
+                    Create = new[] { newNode }
+                };
             }
             (var closestNodeCoordinate, var closetNodeIndex, var nodeId, var isJunction) = GetClosestNodeAndCheckIsJunction(request.LatLng, closestHighways);
             var newNodeCoordinate = request.LatLng.ToCoordinate();

@@ -5,7 +5,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { ClosableOverlayComponent } from "./closable-overlay.component";
 import { Urls } from "../../urls";
-import { LatLngAlt } from "../../models/models";
+import type { LatLngAlt } from "../../models/models";
 
 @Component({
     selector: "missing-part-overlay",

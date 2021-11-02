@@ -16,10 +16,10 @@ import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
-import { DataContainer } from "../models/models";
 import { Urls } from "../urls";
+import type { DataContainer } from "../models/models";
 
-export interface IFormatViewModel {
+export type FormatViewModel = {
     label: string;
     outputFormat: string;
     extension: string;
@@ -27,7 +27,7 @@ export interface IFormatViewModel {
 
 @Injectable()
 export class FileService {
-    public formats: IFormatViewModel[];
+    public formats: FormatViewModel[];
 
     constructor(private readonly httpClient: HttpClient,
                 private readonly fileSystemWrapper: FileSystemWrapper,
@@ -150,6 +150,13 @@ export class FileService {
         this.socialSharing.shareWithOptions({
             files: [`df:${fileName};data:${contentType};base64,${responseData}`]
         });
+    }
+
+    public async saveToZipFile(fileName: string, content: string) {
+        let zip = new JSZip();
+        zip.file("log.txt", content);
+        let blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
+        this.nonAngularObjectsFactory.saveAsWrapper(blob, fileName, { autoBom: false });
     }
 
     public async getFileFromUrl(url: string, type?: string): Promise<File> {

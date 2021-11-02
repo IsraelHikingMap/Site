@@ -34,7 +34,6 @@ namespace IsraelHiking.API.Controllers
         private readonly IDistributedCache _persistantCache;
         private readonly ILogger _logger;
         private readonly ConfigurationData _options;
-        private readonly UsersIdAndTokensCache _cache;
 
         /// <summary>
         /// Controller's constructor
@@ -47,7 +46,6 @@ namespace IsraelHiking.API.Controllers
         /// <param name="persistantCache"></param>
         /// <param name="logger"></param>
         /// <param name="options"></param>
-        /// <param name="cache"></param>
         public PointsOfInterestController(IClientsFactory clientsFactory,
             ITagsHelper tagsHelper,
             IPointsOfInterestProvider pointsOfInterestProvider,
@@ -55,12 +53,10 @@ namespace IsraelHiking.API.Controllers
             ISimplePointAdderExecutor simplePointAdderExecutor,
             IDistributedCache persistantCache,
             ILogger logger,
-            IOptions<ConfigurationData> options,
-            UsersIdAndTokensCache cache)
+            IOptions<ConfigurationData> options)
         {
             _clientsFactory = clientsFactory;
             _tagsHelper = tagsHelper;
-            _cache = cache;
             _imageUrlStoreExecutor = imageUrlStoreExecutor;
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _simplePointAdderExecutor = simplePointAdderExecutor;
@@ -289,7 +285,8 @@ namespace IsraelHiking.API.Controllers
 
         private IAuthClient CreateOsmGateway()
         {
-            var tokenAndSecret = _cache.Get(User.Identity.Name);
+            var tokenAndSecretString = User.Claims.FirstOrDefault(c => c.Type == TokenAndSecret.CLAIM_KEY)?.Value;
+            var tokenAndSecret = TokenAndSecret.FromString(tokenAndSecretString);
             return _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
         }
     }

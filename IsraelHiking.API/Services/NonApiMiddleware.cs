@@ -89,6 +89,7 @@ namespace IsraelHiking.API.Services
                 {
                     thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/200px-$3");
                 }
+                feature.SetTitles();
                 await Write(context, GetPage(feature.GetTitle(language), thumbnailUrl, feature.GetDescription(language)));
                 return;
             }

@@ -1,4 +1,4 @@
-﻿export interface LayerData {
+﻿export type LayerData = {
     key: string;
     address: string;
     minZoom: number;
@@ -6,13 +6,13 @@
     opacity: number;
 }
 
-export interface EditableLayer extends LayerData {
+export type EditableLayer = LayerData & {
     isEditable: boolean;
     isOfflineAvailable: boolean;
     isOfflineOn: boolean;
     id: string;
 }
 
-export interface Overlay extends EditableLayer {
+export type Overlay = EditableLayer & {
     visible: boolean;
 }

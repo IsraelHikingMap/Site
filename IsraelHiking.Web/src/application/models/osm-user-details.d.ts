@@ -1,4 +1,4 @@
-﻿export interface OsmUserDetails {
+﻿export type OsmUserDetails = {
     displayName: string;
     image: string;
     changeSetCount: number;

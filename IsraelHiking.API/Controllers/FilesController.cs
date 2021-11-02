@@ -21,7 +21,7 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class FilesController : ControllerBase
     {
-        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IElevationGateway _elevationGateway;
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IOfflineFilesService _offlineFilesService;
@@ -29,16 +29,16 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="elevationDataStorage"></param>
+        /// <param name="elevationGateway"></param>
         /// <param name="remoteFileFetcherGateway"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="offlineFilesService"></param>
-        public FilesController(IElevationDataStorage elevationDataStorage,
+        public FilesController(IElevationGateway elevationGateway,
             IRemoteFileFetcherGateway remoteFileFetcherGateway,
             IDataContainerConverterService dataContainerConverterService,
             IOfflineFilesService offlineFilesService)
         {
-            _elevationDataStorage = elevationDataStorage;
+            _elevationGateway = elevationGateway;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
             _dataContainerConverterService = dataContainerConverterService;
             _offlineFilesService = offlineFilesService;
@@ -94,11 +94,13 @@ namespace IsraelHiking.API.Controllers
         private async Task<DataContainerPoco> ConvertToDataContainer(byte[] data, string fileName)
         {
             var dataContainer = await _dataContainerConverterService.ToDataContainer(data, fileName);
-            foreach (var latLng in dataContainer.Routes.SelectMany(routeData => routeData.Segments
-                    .SelectMany(routeSegmentData => routeSegmentData.Latlngs)
-                ).Where(l => l.Alt.HasValue == false || l.Alt == 0))
+            var needUpdate = dataContainer.Routes.SelectMany(routeData => routeData.Segments
+                .SelectMany(routeSegmentData => routeSegmentData.Latlngs))
+                .Where(l => l.Alt.HasValue == false || l.Alt == 0).ToArray();
+            var elevations = await _elevationGateway.GetElevation(needUpdate.Select(l => l.ToCoordinate()).ToArray());
+            for (var index = 0; index < needUpdate.Length; index++)
             {
-                latLng.Alt = await _elevationDataStorage.GetElevation(latLng.ToCoordinate());
+                needUpdate[index].Alt = elevations[index];
             }
             return dataContainer;
         }

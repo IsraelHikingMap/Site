@@ -5,7 +5,7 @@ import { MapService } from "./map.service";
 import { SpatialService } from "./spatial.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
-import { Bounds, LatLngAlt, ApplicationState } from "../models/models";
+import type { Bounds, LatLngAlt, ApplicationState } from "../models/models";
 
 @Injectable()
 export class FitBoundsService {

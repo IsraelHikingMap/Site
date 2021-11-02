@@ -77,13 +77,18 @@
                     <div fxLayout="row" *ngIf="contribution.userName" class="text-small">
                         <span><a [href]="contribution.userAddress" [target]="'_blank'">{{contribution.userName}}</a> - {{contribution.lastModifiedDate | date:'dd/MM/yyyy' }}</span>
                     </div>
-                    <coordinates *ngIf="!isLoading" [latlng]="latlng" [itmCoordinates]="itmCoordinates"></coordinates>
+                    <div fxLayout="row" *ngIf="isShowSeeAlso()">
+                        <h4>{{resources.seeAlso}}</h4>
+                    </div>
                     <div fxLayout="row">
-                        <a *ngFor="let urlPair of sourceImageUrls" [href]="urlPair.url" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site">
-                            <img [src]="urlPair.imageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(info.title)" />
-                        </a>
                         <a *ngIf="getElementOsmAddress()" [href]="getElementOsmAddress()" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View element in OSM">
                             <img src="content/openstreetmap-logo.png" height="32" width="32" />
+                        </a>
+                        <a *ngFor="let urlPair of sourceImageUrls" [href]="urlPair.url" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site">
+                            <div *ngIf="!urlPair.imageUrl" style="width: 32px; height: 32px">
+                                <i class="fa fa-2x icon-external-link"></i>
+                            </div>
+                            <img *ngIf="urlPair.imageUrl" [src]="urlPair.imageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(info.title)" />
                         </a>
                     </div>
                 </mat-card-content>

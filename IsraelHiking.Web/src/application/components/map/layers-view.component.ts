@@ -10,7 +10,7 @@ import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
 import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
-import { ApplicationState, Overlay } from "../../models/models";
+import type { ApplicationState, Overlay } from "../../models/models";
 
 @Component({
     selector: "layers-view",

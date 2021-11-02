@@ -1,6 +1,6 @@
-﻿import { UserInfo } from "../models";
+﻿import type { UserInfo } from "../models";
 
-export interface UserState {
+export type UserState = {
     userInfo: UserInfo;
     token: string;
     agreedToTheTermsOfService: boolean;

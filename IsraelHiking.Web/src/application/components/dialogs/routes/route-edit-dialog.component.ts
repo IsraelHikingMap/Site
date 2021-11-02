@@ -11,7 +11,7 @@ import { SelectedRouteService } from "../../../services/layers/routelayers/selec
 import { SpatialService } from "../../../services/spatial.service";
 import { NgRedux } from "../../../reducers/infra/ng-redux.module";
 import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducers/routes.reducer";
-import { DataContainer, RouteData, ApplicationState, LatLngAlt } from "../../../models/models";
+import type { DataContainer, RouteData, ApplicationState, LatLngAlt } from "../../../models/models";
 
 @Component({
     selector: "route-edit-dialog",

@@ -7,7 +7,7 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
-import { ApplicationState, ILatLngTime } from "../models/models";
+import type { ApplicationState, LatLngAltTime } from "../models/models";
 
 declare let BackgroundGeolocation: BackgroundGeolocationPlugin;
 
@@ -131,8 +131,8 @@ export class GeoLocationService {
             fastestInterval: 1000,
             activitiesInterval: 10000,
             startForeground: true,
-            notificationIconLarge: "ic_launcher",
-            notificationIconSmall: "ic_launcher",
+            notificationIconLarge: "screen",
+            notificationIconSmall: "screen",
         });
 
         BackgroundGeolocation.on("location").subscribe(async (_: Location) => {
@@ -216,7 +216,7 @@ export class GeoLocationService {
         });
     }
 
-    public positionToLatLngTime(position: GeolocationPosition): ILatLngTime {
+    public positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {
         if (position == null) {
             return null;
         }

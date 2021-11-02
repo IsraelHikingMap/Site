@@ -10,13 +10,13 @@ import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { FileService } from "./file.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { ImageResizeService } from "./image-resize.service";
-import { Urls } from "../urls";
-import { DataContainer, MarkerData, RouteData } from "../models/models";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { LoggingService } from "./logging.service";
+import { Urls } from "../urls";
+import type { DataContainer, MarkerData, RouteData } from "../models/models";
 
 describe("FileService", () => {
 

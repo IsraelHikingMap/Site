@@ -13,7 +13,7 @@ import { HashService } from "../../services/hash.service";
 import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { ToggleDistanceAction } from "../../reducers/in-memory.reducer";
-import { ApplicationState, LatLngAlt, LinkData } from "../../models/models";
+import type { ApplicationState, LatLngAlt, LinkData } from "../../models/models";
 
 @Component({
     selector: "gps-location-overlay",

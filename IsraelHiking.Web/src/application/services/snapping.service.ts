@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
 
 import { SpatialService } from "./spatial.service";
-import { LatLngAlt, MarkerData } from "../models/models";
 import { MapService } from "./map.service";
+import type { LatLngAlt, MarkerData } from "../models/models";
 
-export interface ISnappingPointResponse {
+export type SnappingPointResponse = {
     latlng: LatLngAlt;
     markerData: MarkerData;
 }
@@ -18,12 +18,12 @@ export class SnappingService {
     /**
      * This method will snap to the nearest point. markerData will be null in case there were no points near by.
      */
-    public snapToPoint(latlng: LatLngAlt, points: MarkerData[]): ISnappingPointResponse {
+    public snapToPoint(latlng: LatLngAlt, points: MarkerData[]): SnappingPointResponse {
         let response = {
             latlng,
             markerData: null,
             id: null
-        } as ISnappingPointResponse;
+        } as SnappingPointResponse;
         let pointOnScreen = this.mapService.map.project(latlng);
         for (let markerData of points) {
             let markerPointOnScreen = this.mapService.map.project(markerData.latlng);

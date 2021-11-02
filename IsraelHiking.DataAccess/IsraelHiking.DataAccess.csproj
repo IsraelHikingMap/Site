@@ -20,16 +20,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="elevation-cache\*.zip" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="elevation-cache\*.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.7.5" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />

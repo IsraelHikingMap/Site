@@ -1,9 +1,9 @@
 import { Component, Input, HostListener, OnChanges, Output, EventEmitter } from "@angular/core";
 
+import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
-import { LatLngAlt } from "../../models/models";
-import { BaseMapComponent } from "../base-map.component";
+import type { LatLngAlt } from "../../models/models";
 
 @Component({
     selector: "route-point-overlay",

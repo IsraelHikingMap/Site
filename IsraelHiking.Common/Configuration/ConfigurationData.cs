@@ -102,10 +102,6 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public double ClosestNodeForGates { get; set; }
         /// <summary>
-        /// The folder where the binary files are at
-        /// </summary>
-        public string BinariesFolder { get; set; }
-        /// <summary>
         /// GraphHopper server address
         /// </summary>
         public string GraphhopperServerAddress { get; set; }
@@ -118,9 +114,13 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public string GpsBabelServerAddress { get; set; }
         /// <summary>
-        /// GPSBabel server address
+        /// OsmPbf server address
         /// </summary>
         public string OsmCToolsServerAddress { get; set; }
+        /// <summary>
+        /// Elevation server address
+        /// </summary>
+        public string ElevationServerAddress { get; set; }
         /// <summary>
         /// The address of the OSM file to download for daily rebuild
         /// </summary>
@@ -175,11 +175,11 @@ namespace IsraelHiking.Common.Configuration
             ClosestPointsOfInterestThreshold = 0.001; // around 100m
             ClosestHighwayForGates = 0.0003; // around 30m
             ClosestNodeForGates = 0.00005; // around 5m
-            BinariesFolder = string.Empty;
             GraphhopperServerAddress = "http://localhost:8989/";
             ElasticsearchServerAddress = "http://localhost:9200/";
             GpsBabelServerAddress = "http://localhost:11987/";
             OsmCToolsServerAddress = "http://localhost:11911/";
+            ElevationServerAddress = "http://localhost:11211/";
             OsmFileAddress = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine-latest.osm.pbf";
             OsmFileTimeStampAddress = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine.state.txt";
             OsmMinutsFileBaseAddress = "http://download.openstreetmap.fr/replication/asia/israel_and_palestine";

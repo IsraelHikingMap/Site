@@ -4,7 +4,6 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.Common.Extensions;
-using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -29,38 +28,30 @@ namespace IsraelHiking.API.Controllers
     public class OsmTracesController : ControllerBase
     {
         private readonly IClientsFactory _clientsFactory;
-        private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IImageCreationService _imageCreationService;
         private readonly ISearchRepository _searchRepository;
-        private readonly UsersIdAndTokensCache _cache;
         private readonly ConfigurationData _options;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="clientsFactory"></param>
-        /// <param name="elevationDataStorage"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="options"></param>
         /// <param name="imageCreationService"></param>
         /// <param name="searchRepository"></param>
-        /// <param name="cache"></param>
         public OsmTracesController(IClientsFactory clientsFactory,
-            IElevationDataStorage elevationDataStorage,
             IDataContainerConverterService dataContainerConverterService,
             IImageCreationService imageCreationService,
             ISearchRepository searchRepository,
-            IOptions<ConfigurationData> options,
-            UsersIdAndTokensCache cache)
+            IOptions<ConfigurationData> options)
         {
             _clientsFactory = clientsFactory;
-            _elevationDataStorage = elevationDataStorage;
             _dataContainerConverterService = dataContainerConverterService;
             _imageCreationService = imageCreationService;
             _searchRepository = searchRepository;
             _options = options.Value;
-            _cache = cache;
         }
 
         /// <summary>
@@ -77,9 +68,10 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Get OSM user traces
+        /// Get OSM user trace
         /// </summary>
-        /// <returns>A list of traces</returns>
+        /// <param name="id">The trace id</param>
+        /// <returns>A trace converted to data container</returns>
         [Authorize]
         [HttpGet("{id}")]
         public async Task<DataContainerPoco> GetTraceById(int id)
@@ -89,10 +81,6 @@ namespace IsraelHiking.API.Controllers
             using MemoryStream memoryStream = new MemoryStream();
             file.Stream.CopyTo(memoryStream);
             var dataContainer = await _dataContainerConverterService.ToDataContainer(memoryStream.ToArray(), file.FileName);
-            foreach (var latLng in dataContainer.Routes.SelectMany(routeData => routeData.Segments.SelectMany(routeSegmentData => routeSegmentData.Latlngs)))
-            {
-                latLng.Alt = await _elevationDataStorage.GetElevation(latLng.ToCoordinate());
-            }
             return dataContainer;
         }
 
@@ -225,8 +213,9 @@ namespace IsraelHiking.API.Controllers
 
         private IAuthClient CreateClient()
         {
-            var user = _cache.Get(User.Identity.Name);
-            return _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, user.Token, user.TokenSecret);
+            var tokenAndSecretString = User.Claims.FirstOrDefault(c => c.Type == TokenAndSecret.CLAIM_KEY)?.Value;
+            var tokenAndSecret = TokenAndSecret.FromString(tokenAndSecretString);
+            return _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
         }
 
         private Trace GpxFileToTrace(GpxFile gpxFile)

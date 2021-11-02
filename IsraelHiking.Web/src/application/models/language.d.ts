@@ -1,6 +1,6 @@
 export type LanguageCode = "en-US" | "he";
 
-export interface Language {
+export type Language = {
     code: LanguageCode;
     rtl: boolean;
 }

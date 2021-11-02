@@ -1,6 +1,6 @@
 ﻿import { StateWithHistory } from "redux-undo";
 
-import {
+import type {
     RouteData,
     Configuration,
     Location,
@@ -16,7 +16,7 @@ import {
     UICompoentsState
 } from "../models";
 
-export interface ApplicationState {
+export type ApplicationState = {
     configuration: Configuration;
     location: Location;
     routes: StateWithHistory<RouteData[]>;

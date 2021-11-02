@@ -1,20 +1,20 @@
 import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
-import { UserInfo, UserState } from "../models/models";
 import { initialState } from "./initial-state";
+import type { UserInfo, UserState } from "../models/models";
 
 const SET_USER_INFO = "SET_USER_INFO";
 const SET_TOKEN = "SET_TOKEN";
 const SET_AGREED_TO_TERMS = "SET_AGREED_TO_TERMS";
 
-export interface SetUserInfoPayload {
+export type SetUserInfoPayload = {
     userInfo: UserInfo;
 }
 
-export interface SetTokenPayload {
+export type SetTokenPayload = {
     token: string;
 }
 
-export interface SetArgreeToTermsPayload {
+export type SetArgreeToTermsPayload = {
     agree: boolean;
 }
 

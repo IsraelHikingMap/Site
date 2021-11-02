@@ -4,8 +4,8 @@ import { Direction } from "@angular/cdk/bidi";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetLanguageAction } from "../reducers/configuration.reducer";
-import { ApplicationState, Language, LanguageCode } from "../models/models";
 import { Urls } from "../urls";
+import type { ApplicationState, Language, LanguageCode } from "../models/models";
 
 @Injectable()
 export class ResourcesService {
@@ -187,6 +187,7 @@ export class ResourcesService {
     public kmPerHourUnit: string;
     public reportAnIssue: string;
     public reportAnIssueInstructions: string;
+    public reportAnIssueSiteInstructions: string;
     public addPointToActiveRoute: string;
     public advancedSettings: string;
     public batteryOptimization: string;
@@ -217,7 +218,7 @@ export class ResourcesService {
     public files: string;
     public shareLocation: string;
     public facebookWarning: string;
-    public moreInfoFacebook: string;
+    public moreInfo: string;
     public showSlopes: string;
     public next: string;
     public back: string;
@@ -228,6 +229,12 @@ export class ResourcesService {
     public andSoMuchMore: string;
     public introAndSoMuchMoreDescription: string;
     public centerMe: string;
+    public resetData: string;
+    public seeAlso: string;
+    public unhideHiddenRoutes: string;
+    public screenOn: string;
+    public screenOff: string;
+    public screenDark: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -283,6 +290,7 @@ export class ResourcesService {
     public largeFilesUseWifi: string;
     public thisWillDeteleAllCurrentRoutesAreYouSure: string;
     public pleaseFillReport: string;
+    public hiddenRoutesWillNotBeSaved: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -398,7 +406,6 @@ export class ResourcesService {
     public legendFirstAid: string;
     public legendRegionalTrails: string;
     public legendJerusalemTrail: string;
-    public legendSeaToSeaTrail: string;
     public legendGolanTrail: string;
     public legendKinneretTrail: string;
     public legendHaifaWadisTrail: string;
@@ -459,7 +466,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1631284599348");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1635511838323");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -628,6 +635,7 @@ export class ResourcesService {
         this.kmPerHourUnit = this.gettextCatalog.getString("km per hour");
         this.reportAnIssue = this.gettextCatalog.getString("Report an issue");
         this.reportAnIssueInstructions = this.gettextCatalog.getString("Report an issue instructions");
+        this.reportAnIssueSiteInstructions = this.gettextCatalog.getString("Report an issue site instructions");
         this.addPointToActiveRoute = this.gettextCatalog.getString("Add point to active route");
         this.advancedSettings = this.gettextCatalog.getString("Advanced Settings");
         this.batteryOptimization = this.gettextCatalog.getString("Battery optimization");
@@ -660,7 +668,7 @@ export class ResourcesService {
         this.files = this.gettextCatalog.getString("Files");
         this.shareLocation = this.gettextCatalog.getString("Share Location");
         this.facebookWarning = this.gettextCatalog.getString("Explanation on how to open Facebook link out side facebook");
-        this.moreInfoFacebook = this.gettextCatalog.getString("More Info...");
+        this.moreInfo = this.gettextCatalog.getString("More Info...");
         this.showSlopes = this.gettextCatalog.getString("Show Slopes");
         this.next = this.gettextCatalog.getString("Next");
         this.back = this.gettextCatalog.getString("Back");
@@ -671,6 +679,12 @@ export class ResourcesService {
         this.andSoMuchMore = this.gettextCatalog.getString("And So Much More!");
         this.introAndSoMuchMoreDescription = this.gettextCatalog.getString("Intro dialog description for 'so much more'");
         this.centerMe = this.gettextCatalog.getString("Center Me");
+        this.resetData = this.gettextCatalog.getString("Reset Data");
+        this.seeAlso = this.gettextCatalog.getString("See Also");
+        this.unhideHiddenRoutes = this.gettextCatalog.getString("Unhide hidden routes");
+        this.screenOn = this.gettextCatalog.getString("Keep screen on");
+        this.screenOff = this.gettextCatalog.getString("Allow turning off the screen");
+        this.screenDark = this.gettextCatalog.getString("Darken the screen");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -742,6 +756,7 @@ export class ResourcesService {
             .getString("This will delete all current routes. Are you sure?");
         this.pleaseFillReport = this.gettextCatalog
             .getString("Please fill in the details of the issue in the e-mail message that will be shown soon and send it");
+        this.hiddenRoutesWillNotBeSaved = this.gettextCatalog.getString("Hidden routes will not be saved...");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog
@@ -862,7 +877,6 @@ export class ResourcesService {
         this.legendFirstAid = this.gettextCatalog.getString("First Aid");
         this.legendRegionalTrails = this.gettextCatalog.getString("Regional Trails");
         this.legendJerusalemTrail = this.gettextCatalog.getString("Jerusalem Trail");
-        this.legendSeaToSeaTrail = this.gettextCatalog.getString("Sea to Sea Trail");
         this.legendGolanTrail = this.gettextCatalog.getString("Golan Trail");
         this.legendKinneretTrail = this.gettextCatalog.getString("Kinneret Trail");
         this.legendHaifaWadisTrail = this.gettextCatalog.getString("Haifa Wadis Trail");

@@ -3,8 +3,9 @@ import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
 import { Device } from "@ionic-native/device/ngx";
 import { AppVersion } from "@ionic-native/app-version/ngx";
-import { EmailComposer } from "@ionic-native/email-composer/ngx";
+import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
+import platform from "platform";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -23,10 +24,11 @@ import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.component";
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
+import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
-import { UserInfo, ApplicationState } from "../models/models";
+import type { UserInfo, ApplicationState } from "../models/models";
 
 @Component({
     selector: "main-menu",
@@ -56,7 +58,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     public statisticsVisible$: Observable<boolean>;
 
     constructor(resources: ResourcesService,
-                private readonly emailComposer: EmailComposer,
+                private readonly socialSharing: SocialSharing,
                 private readonly device: Device,
                 private readonly appVersion: AppVersion,
                 private readonly authorizationService: AuthorizationService,
@@ -169,47 +171,60 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public async reportAnIssue() {
-        if (!this.runningContextService.isCordova) {
-            return;
-        }
         this.toastService.info(this.resources.preparingDataForIssueReport);
+        let state = this.ngRedux.getState();
+        let baseLayer = this.layersService.getSelectedBaseLayer();
+        this.loggingService.info("--- Reporting an issue ---");
+        let logs = await this.loggingService.getLog();
+        let userInfo = this.userInfo || {
+            displayName: "non-registered user",
+            id: "----"
+        } as UserInfo;
+        let infoString = [
+            `User ID: ${userInfo.id}`,
+            `Username: ${userInfo.displayName}`,
+            `Map Location: ${this.hashService.getMapAddress()}`,
+            `Baselayer: ${baseLayer.key}, ${baseLayer.address}`,
+            `Visible overlays: ${JSON.stringify(state.layersState.overlays.filter(o => o.visible))}`,
+            ""
+        ].join("\n");
+        let subject = "Issue reported by " + userInfo.displayName;
         try {
-            let state = this.ngRedux.getState();
-            let baseLayer = this.layersService.getSelectedBaseLayer();
-            this.loggingService.info("--- Reporting an issue ---");
-            let logs = await this.loggingService.getLog();
-            let logBase64zipped = await this.fileService.compressTextToBase64Zip(logs);
-            logs = await this.geoLocationService.getLog();
-            let logBase64zippedGeoLocation = await this.fileService.compressTextToBase64Zip(logs);
-            let userInfo = this.userInfo || {
-                displayName: "non-registered user",
-                id: "----"
-            } as UserInfo;
-            let infoString = [
-                `User ID: ${userInfo.id}`,
-                `Username: ${userInfo.displayName}`,
+            if (!this.runningContextService.isCordova) {
+                
+                infoString += [
+                    `Browser: ${platform.name} ${platform.version}`,
+                    `OS: ${platform.os}`,
+                    ""
+                ].join("\n");
+                await this.fileService.saveToZipFile(`support-${userInfo.id}.zip`, infoString + "\n" + logs);
+                SendReportDialogComponent.openDialog(this.dialog, subject);
+                return;
+            }
+            infoString += [
                 `Manufacture: ${this.device.manufacturer}`,
                 `Model: ${this.device.model}`,
                 `Platform: ${this.device.platform}`,
                 `OS version: ${this.device.version}`,
-                `App version: ${await this.appVersion.getVersionNumber()}`,
-                `Map Location: ${this.hashService.getMapAddress()}`,
-                `Baselayer: ${baseLayer.key}, ${baseLayer.address}`,
-                `Visible overlays: ${JSON.stringify(state.layersState.overlays.filter(o => o.visible))}`,
-
+                `App version: ${await this.appVersion.getVersionNumber()}`
             ].join("\n");
+            let logBase64zipped = await this.fileService.compressTextToBase64Zip(logs);
+            logs = await this.geoLocationService.getLog();
+            let logBase64zippedGeoLocation = await this.fileService.compressTextToBase64Zip(logs);
             let infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
-            this.emailComposer.open({
-                to: ["israelhikingmap@gmail.com"],
-                subject: "Issue reported by " + userInfo.displayName,
-                body: this.resources.reportAnIssueInstructions,
-                attachments: [
-                    "base64:log.zip//" + logBase64zipped,
-                    "base64:geolocation-log.zip//" + logBase64zippedGeoLocation,
-                    `base64:info-${userInfo.id}.txt//${infoBase64}`
+            this.socialSharing.shareViaEmail(
+                this.resources.reportAnIssueInstructions,
+                subject,
+                ["israelhikingmap@gmail.com"],
+                null,
+                null,
+                [
+                    `df:log.zip;data:application/zip;base64,${logBase64zipped}`,
+                    `df:geolocation-log.zip;data:application/zip;base64,${logBase64zippedGeoLocation}`,
+                    `df:info-${userInfo.id}.txt;data:text/plain;base64,${infoBase64}`
                 ]
-            });
+            );
         } catch (ex) {
             alert("Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?" +
                 `\nSend issue failed: ${ex.toString()}`);

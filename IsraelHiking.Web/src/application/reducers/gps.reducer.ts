@@ -1,15 +1,15 @@
 import { BaseAction, createReducerFromClass, ReduxAction } from "./infra/ng-redux.module";
-import { GpsState, TrackingStateType } from "../models/models";
+import type { GpsState, TrackingStateType } from "../models/models";
 import { initialState } from "./initial-state";
 
 const SET_TRAKING_STATE = "SET_TRAKING_STATE";
 const SET_CURRENT_LOCATION = "SET_CURRENT_LOCATION";
 
-export interface SetTrackingStatePayload {
+export type SetTrackingStatePayload = {
     state: TrackingStateType;
 }
 
-export interface SetCurrentPoistionPayload {
+export type SetCurrentPoistionPayload = {
     position: GeolocationPosition;
 }
 

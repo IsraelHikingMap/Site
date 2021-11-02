@@ -28,7 +28,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private FilesController _controller;
 
         private IGpsBabelGateway _gpsBabelGateway;
-        private IElevationDataStorage _elevationDataStorage;
+        private IElevationGateway _elevationGateway;
         private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private IDataContainerConverterService _dataContainerConverterService;
         private IGpxDataContainerConverter _gpxDataContainerConverter;
@@ -55,13 +55,14 @@ namespace IsraelHiking.API.Tests.Controllers
         public void TestInitialize()
         {
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
-            _elevationDataStorage = Substitute.For<IElevationDataStorage>();
+            _elevationGateway = Substitute.For<IElevationGateway>();
+            _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
             _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
             _gpxDataContainerConverter = new GpxDataContainerConverter();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
             _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, _gpxDataContainerConverter, new RouteDataSplitterService(new ItmWgs84MathTransfromFactory(), optionsProvider), new IConverterFlowItem[0]);
-            _controller = new FilesController(_elevationDataStorage, _remoteFileFetcherGateway, _dataContainerConverterService, null);
+            _controller = new FilesController(_elevationGateway, _remoteFileFetcherGateway, _dataContainerConverterService, null);
         }
 
         [TestMethod]
@@ -72,7 +73,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _remoteFileFetcherGateway.GetFileContent(url).Returns(new RemoteFileFetcherGatewayResponse { Content = bytes, FileName = "file.KML" });
             _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Is<string>(x => x.Contains("kml")), Arg.Is<string>(x => x.Contains("gpx"))).Returns(bytes);
             _controller.SetupIdentity();
-
+            
             var dataContainer = _controller.GetRemoteFile(url).Result;
 
             Assert.AreEqual(1, dataContainer.Routes.Count);
@@ -125,7 +126,6 @@ namespace IsraelHiking.API.Tests.Controllers
             var file = Substitute.For<IFormFile>();
             file.FileName.Returns("somefile.gpx");
             file.When(f => f.CopyToAsync(Arg.Any<MemoryStream>())).Do(x => (x[0] as MemoryStream).Write(Encoding.ASCII.GetBytes(GPX_DATA), 0, Encoding.ASCII.GetBytes(GPX_DATA).Length));
-            _elevationDataStorage.GetElevation(Arg.Any<Coordinate>()).Returns(1);
 
             var results = _controller.PostOpenFile(file).Result as OkObjectResult;
             Assert.IsNotNull(results);

@@ -18,7 +18,7 @@ import { RecordedRouteService } from "../../services/recorded-route.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
-import { ApplicationState, Trace, TraceVisibility } from "../../models/models";
+import type { ApplicationState, Trace, TraceVisibility } from "../../models/models";
 
 @Component({
     selector: "traces-dialog",

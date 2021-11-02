@@ -1,6 +1,6 @@
-﻿import { DataContainer } from "./models";
+﻿import type { DataContainer } from "./models";
 
-export interface ShareUrl {
+export type ShareUrl = {
     id: string;
     title: string;
     description: string;

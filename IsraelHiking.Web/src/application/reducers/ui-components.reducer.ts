@@ -1,7 +1,7 @@
 import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
 
-import { UICompoentsState } from "../models/models";
 import { initialState } from "./initial-state";
+import type { UICompoentsState } from "../models/models";
 
 const SET_UI_COMPONENT_VISIBILITY = "SET_UI_COMPONENT_VISIBILITY";
 

@@ -25,7 +25,7 @@ import {
     AddOverlayAction,
     ToggleOfflineAction,
 } from "../../reducers/layers.reducer";
-import {
+import type {
     DataContainer,
     LayerData,
     EditableLayer,

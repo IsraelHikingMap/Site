@@ -10,7 +10,7 @@ import { Urls } from "../urls";
 /**
  * Instance of this interface is used to report current connection status.
  */
-export interface ConnectionState {
+export type ConnectionState = {
     /**
      * "True" if browser has network connection. Determined by Window objects "online" / "offline" events.
      */
@@ -22,9 +22,9 @@ export interface ConnectionState {
 }
 
 /**
- * Instance of this interface could be used to configure "ConnectionService".
+ * Instance of this type could be used to configure "ConnectionService".
  */
-export interface ConnectionServiceOptions {
+export type ConnectionServiceOptions = {
     /**
      * Controls the Internet connectivity heartbeat system. Default value is 'true'.
      */
