@@ -51,14 +51,18 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
-        public void AddGate_NearNoWhere_ShouldThrow()
+        public void AddGate_NearNoWhere_ShouldSucceed()
         {
             _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature>());
-            Assert.ThrowsException<AggregateException>(() => _executor.Add(_authClient, new AddSimplePointOfInterestRequest
+            
+            _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
                 LatLng = new LatLng(1, 0),
                 PointType = SimplePointType.CattleGrid
-            }).Wait());
+            });
+            
+            _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c => c.Create.Length == 1));
+
         }
 
         [TestMethod]

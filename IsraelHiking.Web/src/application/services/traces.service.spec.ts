@@ -10,7 +10,7 @@ import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
 import { Urls } from "../urls";
-import { Trace } from "../models/models";
+import type { Trace } from "../models/models";
 
 describe("Traces Service", () => {
     beforeEach(() => {

@@ -7,13 +7,13 @@ import { SidebarService } from "./sidebar.service";
 import { DatabaseService } from "./database.service";
 import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
-import { ApplicationState } from "../models/models";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { ToggleOfflineAction } from "../reducers/layers.reducer";
 import { SetOfflineLastModifiedAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
+import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class OfflineFilesDownloadService {

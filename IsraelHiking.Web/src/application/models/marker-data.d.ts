@@ -1,6 +1,6 @@
-﻿import { LinkData, LatLngAlt} from "./models";
+﻿import type { LinkData, LatLngAlt } from "./models";
 
-export interface MarkerData {
+export type MarkerData = {
     latlng: LatLngAlt;
     title: string;
     description: string;

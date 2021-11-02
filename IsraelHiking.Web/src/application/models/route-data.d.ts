@@ -1,8 +1,8 @@
-﻿import { RouteSegmentData, MarkerData } from "./models";
+﻿import type { RouteSegmentData, MarkerData } from "./models";
 
 export type RouteStateName = "Poi" | "Route" | "ReadOnly" | "Hidden";
 
-export interface RouteData {
+export type RouteData = {
     id: string;
     name: string;
     description: string;

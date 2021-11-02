@@ -8,8 +8,8 @@ import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducers/traces.reducer";
-import { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
 import { Urls } from "../urls";
+import type { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
 
 @Injectable()
 export class TracesService {

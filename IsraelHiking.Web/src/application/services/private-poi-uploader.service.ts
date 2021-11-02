@@ -8,7 +8,7 @@ import { ToastService } from "./toast.service";
 import { RouteStrings } from "./hash.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
-import { LinkData, LatLngAlt, MarkerData, ApplicationState } from "../models/models";
+import type { LinkData, LatLngAlt, MarkerData, ApplicationState } from "../models/models";
 
 @Injectable()
 export class PrivatePoiUploaderService {

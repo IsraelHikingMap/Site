@@ -25,6 +25,12 @@
             <div fxLayout="row">
                 <mat-checkbox color="primary" [(ngModel)]="shareOverlays">{{resources.shareMapOverlays}}</mat-checkbox>
             </div>
+            <div fxLayout="row" *ngIf="showUnhide">
+                <mat-checkbox color="primary" [(ngModel)]="unhideRoutes">{{resources.unhideHiddenRoutes}}</mat-checkbox>
+            </div>
+            <div fxLayout="row" *ngIf="showUnhide && !unhideRoutes">
+                <mat-hint class="text-small">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
+            </div>
             <div fxLayout="row" *ngIf="canUpdate">
                 <mat-checkbox color="primary" [(ngModel)]="updateCurrentShare">{{resources.updateCurrentShare}}</mat-checkbox>
             </div>

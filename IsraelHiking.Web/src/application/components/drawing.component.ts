@@ -17,7 +17,7 @@ import {
 } from "../reducers/routes.reducer";
 import { SetRouteEditingStateAction } from "../reducers/route-editing-state.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
-import { RoutingType, ApplicationState } from "../models/models";
+import type { RoutingType, ApplicationState } from "../models/models";
 
 @Component({
     selector: "drawing",

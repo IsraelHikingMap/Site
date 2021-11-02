@@ -1,6 +1,6 @@
-﻿import { RoutingType } from "./models";
+﻿import type { RoutingType } from "./models";
 
-export interface RouteEditingState {
+export type RouteEditingState = {
     routingType: RoutingType;
     selectedRouteId: string;
     recordingRouteId: string;

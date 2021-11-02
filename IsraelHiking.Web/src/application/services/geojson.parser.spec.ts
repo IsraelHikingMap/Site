@@ -1,5 +1,5 @@
 import { GeoJsonParser } from "./geojson.parser";
-import { MarkerData, RouteSegmentData, RouteData, DataContainer } from "../models/models";
+import type { MarkerData, RouteSegmentData, RouteData, DataContainer } from "../models/models";
 
 describe("GeoJsonParser", () => {
 

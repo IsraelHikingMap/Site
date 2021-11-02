@@ -1,6 +1,6 @@
 export declare type TrackingStateType = "disabled" | "searching" | "tracking";
 
-export interface GpsState {
+export type GpsState = {
     tracking: TrackingStateType;
     currentPoistion: GeolocationPosition;
 }

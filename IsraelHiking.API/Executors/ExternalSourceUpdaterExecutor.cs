@@ -17,7 +17,7 @@ namespace IsraelHiking.API.Executors
     public class ExternalSourceUpdaterExecutor : IExternalSourceUpdaterExecutor
     {
         private readonly IPointsOfInterestAdapterFactory _adaptersFactory;
-        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IElevationGateway _elevationGateway;
         private readonly IExternalSourcesRepository _externalSourcesRepository;
         private readonly ILogger _logger;
         private readonly MathTransform _wgs84ItmTransform;
@@ -26,18 +26,18 @@ namespace IsraelHiking.API.Executors
         /// Constructor
         /// </summary>
         /// <param name="adaptersFactory"></param>
-        /// <param name="elevationDataStorage"></param>
+        /// <param name="elevationGateway"></param>
         /// <param name="externalSourcesRepository"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="logger"></param>
         public ExternalSourceUpdaterExecutor(IPointsOfInterestAdapterFactory adaptersFactory,
-            IElevationDataStorage elevationDataStorage,
+            IElevationGateway elevationGateway,
             IExternalSourcesRepository externalSourcesRepository,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             ILogger logger)
         {
             _adaptersFactory = adaptersFactory;
-            _elevationDataStorage = elevationDataStorage;
+            _elevationGateway = elevationGateway;
             _externalSourcesRepository = externalSourcesRepository;
             _wgs84ItmTransform = itmWgs84MathTransfromFactory.CreateInverse();
             _logger = logger;
@@ -78,13 +78,16 @@ namespace IsraelHiking.API.Executors
 
         private void UpdateItmAndAltitude(List<Feature> features)
         {
-            foreach (var feature in features)
+            var coordinates = features.Select(f => f.GetLocation()).ToArray();
+            var elevationValues = _elevationGateway.GetElevation(coordinates).Result;
+            for (var index = 0; index < features.Count; index++)
             {
+                var feature = features[index];
                 var geoLocationCoordinate = feature.GetLocation();
-                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ALT, _elevationDataStorage.GetElevation(geoLocationCoordinate).Result);
+                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ALT, elevationValues[index]);
                 var northEast = _wgs84ItmTransform.Transform(geoLocationCoordinate.X, geoLocationCoordinate.Y);
-                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_EAST, (int)northEast.x);
-                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_NORTH, (int)northEast.y);
+                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_EAST, (int) northEast.x);
+                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_NORTH, (int) northEast.y);
             }
         }
     }

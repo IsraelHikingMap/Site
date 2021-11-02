@@ -1,7 +1,11 @@
-﻿namespace IsraelHiking.Common
+﻿using System.Linq;
+
+namespace IsraelHiking.Common
 {
     public class TokenAndSecret
     {
+        public const string CLAIM_KEY = "osm_token";
+        
         public string Token { get; }
         public string TokenSecret { get; }
 
@@ -33,6 +37,14 @@
         public override string ToString()
         {
             return $"{Token};{TokenSecret}";
+        }
+
+        public static TokenAndSecret FromString(string tokenAndSecretString)
+        {
+            var split = tokenAndSecretString.Split(';');
+            var token = split.First().Trim('"');
+            var tokenSecret = split.Last().Trim('"');
+            return new TokenAndSecret(token, tokenSecret);
         }
     }
 

@@ -9,9 +9,9 @@ import { WhatsAppService } from "./whatsapp.service";
 import { HashService } from "./hash.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { Urls } from "../urls";
-import { ShareUrl, DataContainer } from "../models/models";
 import { DatabaseService } from "./database.service";
+import { Urls } from "../urls";
+import type { ShareUrl, DataContainer } from "../models/models";
 
 describe("Share Urls Service", () => {
     beforeEach(() => {

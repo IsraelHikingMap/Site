@@ -21,7 +21,7 @@ import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
-import { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class ApplicationInitializeService {
@@ -51,8 +51,8 @@ export class ApplicationInitializeService {
             await this.loggingService.initialize();
             await this.loggingService.info("---------------------------------------");
             await this.loggingService.info("Starting IHM Application Initialization");
-            this.screenService.initialize();
             await this.databaseService.initialize();
+            this.screenService.initialize();
             await this.resources.initialize();
             this.applicationExitService.initialize();
             this.openWithService.initialize();
@@ -79,6 +79,9 @@ export class ApplicationInitializeService {
             this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
             await this.loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
+            if (this.runningContextService.isIFrame) {
+                return;
+            }
             if (ex.toString().indexOf("A mutation operation was attempted on a database that did not allow mutations") !== -1) {
                 alert("Sorry, this site does not support running FireFox in private mode...");
             } else {

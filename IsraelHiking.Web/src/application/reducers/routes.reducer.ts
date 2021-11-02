@@ -1,9 +1,9 @@
 import { Action } from "redux";
 import undoable, { UndoableOptions, includeAction, groupByActionTypes } from "redux-undo";
 
-import { RouteData, MarkerData, RouteSegmentData, RouteStateName, ILatLngTime } from "../models/models";
 import { initialState } from "./initial-state";
 import { ReduxAction, createReducerFromClass, BaseAction } from "./infra/ng-redux.module";
+import type { RouteData, MarkerData, RouteSegmentData, RouteStateName, LatLngAltTime } from "../models/models";
 
 const ADD_ROUTE = "ADD_ROUTE";
 const DELETE_ROUTE = "DELETE_ROUTE";
@@ -27,75 +27,75 @@ const DELETE_ALL_ROUTES = "DELETE_ALL_ROUTES";
 const TOGGLE_ALL_ROUTES = "TOGGLE_ALL_ROUTES";
 const BULK_REPLACE_ROUTES = "BULK_REPLACE_ROUTES";
 
-export interface RoutePayload {
+export type RoutePayload = {
     routeId: string;
 }
 
-export interface AddRoutePayload {
+export type AddRoutePayload = {
     routeData: RouteData;
 }
 
-export interface ChangeRoutePropertiesActionPayload extends RoutePayload {
+export type ChangeRoutePropertiesActionPayload = RoutePayload & {
     routeData: RouteData;
 }
 
-export interface AddPrivatePoiPayload extends RoutePayload {
+export type AddPrivatePoiPayload = RoutePayload & {
     markerData: MarkerData;
 }
 
-export interface UpdatePrivatePoiPayload extends RoutePayload {
+export type UpdatePrivatePoiPayload = RoutePayload & {
     index: number;
     markerData: MarkerData;
 }
 
-export interface DeletePrivatePoiPayload extends RoutePayload {
+export type DeletePrivatePoiPayload = RoutePayload & {
     index: number;
 }
 
-export interface AddSegmentPayload extends RoutePayload {
+export type AddSegmentPayload = RoutePayload & {
     segmentData: RouteSegmentData;
 }
 
-export interface UpdateSegmentsPayload extends RoutePayload {
+export type UpdateSegmentsPayload = RoutePayload & {
     indices: number[];
     segmentsData: RouteSegmentData[];
 }
 
-export interface ReplaceSegmentsPayload extends RoutePayload {
+export type ReplaceSegmentsPayload = RoutePayload & {
     segmentsData: RouteSegmentData[];
 }
 
-export interface DeleteSegmentPayload extends RoutePayload {
+export type DeleteSegmentPayload = RoutePayload & {
     index: number;
 }
 
-export interface ChangeVisibilityPayload extends RoutePayload {
+export type ChangeVisibilityPayload = RoutePayload & {
     isVisible: boolean;
 }
 
-export interface ChangeEditStatePayload extends RoutePayload {
+export type ChangeEditStatePayload = RoutePayload & {
     state: RouteStateName;
 }
 
-export interface ReverseRoutePayload extends RoutePayload {
+export type ReverseRoutePayload = RoutePayload & {
     routeData: RouteData;
 }
 
-export interface SplitRoutePayload extends RoutePayload {
+export type SplitRoutePayload = RoutePayload & {
     routeData: RouteData;
     splitRouteData: RouteData;
 }
 
-export interface MergeRoutesPayload extends RoutePayload {
+export type MergeRoutesPayload = RoutePayload & {
     secondaryRouteId: string;
     mergedRouteData: RouteData;
 }
 
-export interface AddRecordingPointsPayload extends RoutePayload {
-    latlngs: ILatLngTime[];
+export type AddRecordingPointsPayload = RoutePayload & {
+    latlngs: LatLngAltTime[];
 }
 
-export interface BulkReplaceRoutesPayload {
+export type BulkReplaceRoutesPayload = {
     routesData: RouteData[];
 }
 

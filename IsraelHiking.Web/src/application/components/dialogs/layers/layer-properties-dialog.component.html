@@ -20,7 +20,7 @@
             </mat-form-field>
         </div>
         <div fxLayout="row">
-            <a [ngStyle]="{'font-size': 'small' }" href="https://qms.nextgis.com/" target="_blank">{{resources.moreMapAddresses}}</a>
+            <a class="text-small" href="https://github.com/IsraelHikingMap/Site/wiki/Custom-maps" target="_blank">{{resources.moreInfo}}</a>
         </div>
         <div class="input-wrapper-spacer"></div>
         <div fxLayout="row">
@@ -40,7 +40,8 @@
                 <div style="width: 100%; height: 138px">
                     <mgl-map [zoom]="[(layerData.minZoom + layerData.maxZoom) / 2]"
                              [center]="[(location | async)?.longitude, (location | async)?.latitude]"
-                             [style]='{"version": 8, "sources": {}, "layers": [] }'>
+                             [style]='{"version": 8, "sources": {}, "layers": [] }'
+                             [attributionControl]="false">
                         <auto-layer [layerData]="layerData"
                                     [visible]="true"
                                     [isBaselayer]="!isOverlay">

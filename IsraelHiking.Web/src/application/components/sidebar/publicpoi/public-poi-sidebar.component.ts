@@ -6,10 +6,10 @@ import { cloneDeep } from "lodash-es";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
-import { PoiService, IPoiSocialLinks } from "../../../services/poi.service";
+import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
 import { AuthorizationService } from "../../../services/authorization.service";
 import { ToastService } from "../../../services/toast.service";
-import { HashService, RouteStrings, IPoiRouterData } from "../../../services/hash.service";
+import { HashService, RouteStrings, PoiRouterData } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
@@ -17,21 +17,21 @@ import { SpatialService } from "../../../services/spatial.service";
 import { RunningContextService } from "../../../services/running-context.service";
 import { SidebarService } from "../../../services/sidebar.service";
 import { NavigateHereService } from "../../../services/navigate-here.service";
+import { GpxDataContainerConverterService } from "../../../services/gpx-data-container-converter.service";
 import { GeoJsonParser } from "../../../services/geojson.parser";
 import { sidebarAnimate } from "../sidebar.component";
 import { NgRedux, select } from "../../../reducers/infra/ng-redux.module";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducers/poi.reducer";
-import {
+import type {
     LinkData,
     LatLngAlt,
     ApplicationState,
     EditablePublicPointData,
-    Contribution,
-    NorthEast
+    Contribution
 } from "../../../models/models";
 
-export interface SourceImageUrlPair {
+export type SourceImageUrlPair = {
     imageUrl: string;
     url: string;
 }
@@ -52,8 +52,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public updateLocation: boolean;
     public sourceImageUrls: SourceImageUrlPair[];
     public latlng: LatLngAlt;
-    public itmCoordinates: NorthEast;
-    public shareLinks: IPoiSocialLinks;
+    public shareLinks: PoiSocialLinks;
     public contribution: Contribution;
 
     @select((state: ApplicationState) => state.poiState.isSidebarOpen)
@@ -84,7 +83,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.isLoading = true;
         this.showLocationUpdate = false;
         this.updateLocation = false;
-        this.shareLinks = {} as IPoiSocialLinks;
+        this.shareLinks = {} as PoiSocialLinks;
         this.contribution = {} as Contribution;
         this.info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
         this.subscriptions = [];
@@ -119,7 +118,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             id: params.get(RouteStrings.ID),
             source: params.get(RouteStrings.SOURCE),
             language: queryParams.get(RouteStrings.LANGUAGE)
-        } as IPoiRouterData;
+        } as PoiRouterData;
     }
 
     public ngOnDestroy() {
@@ -132,7 +131,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         return this.runningContextSerivce.isCordova;
     }
 
-    private async fillUiWithData(data: IPoiRouterData) {
+    private async fillUiWithData(data: PoiRouterData) {
         try {
             this.ngRedux.dispatch(new SetSidebarAction({
                 isOpen: true
@@ -189,9 +188,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     private initFromFeature(feature: GeoJSON.Feature) {
         this.fullFeature = feature;
         this.latlng = this.poiService.getLocation(feature);
-        this.sourceImageUrls = Object.keys(feature.properties).filter(k => k.startsWith("poiSourceImageUrl")).map(k => {
-            let imageUrl = feature.properties[k];
-            let url = feature.properties[k.replace("poiSourceImageUrl", "website")] as string;
+        this.sourceImageUrls = Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => {
+            let url = feature.properties[k];
+            let imageUrl = feature.properties[k.replace("website", "poiSourceImageUrl")] as string;
             if (this.isBadWikipediaUrl(url)) {
                 url = null;
             }
@@ -202,7 +201,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         }).filter(iup => iup.url != null);
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.contribution = this.poiService.getContribution(feature);
-        this.itmCoordinates = this.poiService.getItmCoordinates(feature);
         this.info = this.poiService.getEditableDataFromFeature(feature);
     }
 
@@ -249,6 +247,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         return this.fullFeature && this.fullFeature.properties.poiSource === "OSM";
     }
 
+    public isShowSeeAlso() {
+        return this.fullFeature && this.fullFeature.properties.poiSource !== "Coordinates";
+    }
+
     public isRoute() {
         return this.fullFeature && (this.fullFeature.geometry.type === "LineString" ||
             this.fullFeature.geometry.type === "MultiLineString");
@@ -289,6 +291,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             newRoute.description = this.info.description;
             newRoute.segments = routeData.segments;
             newRoute.markers = routeData.markers;
+            GpxDataContainerConverterService.SplitRouteSegments(newRoute);
             this.ngRedux.dispatch(new AddRouteAction({
                 routeData: newRoute
             }));

@@ -2,13 +2,14 @@ import { Injectable } from "@angular/core";
 import { last } from "lodash-es";
 import { resample } from "@thi.ng/geom-resample";
 import createMedianFilter from "moving-median";
+
 import { SpatialService } from "./spatial.service";
-import { LatLngAlt, RouteData, ILatLngTime } from "../models/models";
+import type { LatLngAlt, RouteData, LatLngAltTime } from "../models/models";
 
 export const MINIMAL_DISTANCE = 50;
 export const MINIMAL_ANGLE = 30;
 
-export interface IRouteStatisticsPoint {
+export type RouteStatisticsPoint = {
     /**
      * x - distance in KM, y - altitude in meters
      */
@@ -17,8 +18,8 @@ export interface IRouteStatisticsPoint {
     slope: number;
 }
 
-export interface IRouteStatistics {
-    points: IRouteStatisticsPoint[];
+export type RouteStatistics = {
+    points: RouteStatisticsPoint[];
     /**
      * Route length in meters
      */
@@ -47,16 +48,16 @@ export interface IRouteStatistics {
 
 @Injectable()
 export class RouteStatisticsService {
-    public getStatisticsByRange(route: RouteData, start: IRouteStatisticsPoint, end: IRouteStatisticsPoint): IRouteStatistics {
+    public getStatisticsByRange(route: RouteData, start: RouteStatisticsPoint, end: RouteStatisticsPoint): RouteStatistics {
         let routeStatistics = {
-            points: [] as IRouteStatisticsPoint[],
+            points: [] as RouteStatisticsPoint[],
             length: 0,
             gain: 0,
             loss: 0,
             remainingDistance: null,
             duration: null,
             averageSpeed: null
-        } as IRouteStatistics;
+        } as RouteStatistics;
         if (route.segments.length <= 0) {
             return routeStatistics;
         }
@@ -72,7 +73,7 @@ export class RouteStatisticsService {
                     coordinate: [(routeStatistics.length / 1000), latlng.alt],
                     latlng,
                     slope: 0
-                } as IRouteStatisticsPoint;
+                } as RouteStatisticsPoint;
                 if (start == null || (point.coordinate[0] > start.coordinate[0] && point.coordinate[0] < end.coordinate[0])) {
                     routeStatistics.points.push(point);
                 }
@@ -128,9 +129,9 @@ export class RouteStatisticsService {
 
     public getStatistics(route: RouteData,
                          closestRouteToRecording: RouteData,
-                         latLng: ILatLngTime,
+                         latLng: LatLngAltTime,
                          heading: number,
-                         routeIsRecording: boolean): IRouteStatistics {
+                         routeIsRecording: boolean): RouteStatistics {
         let routeStatistics = this.getStatisticsByRange(route, null, null);
         let closestRouteStatistics = closestRouteToRecording ? this.getStatisticsByRange(closestRouteToRecording, null, null) : null;
         if (closestRouteStatistics == null) {
@@ -149,7 +150,7 @@ export class RouteStatisticsService {
         return closestRouteStatistics;
     }
 
-    private addDurationAndAverageSpeed(route: RouteData, length: number, fullStatistics: IRouteStatistics) {
+    private addDurationAndAverageSpeed(route: RouteData, length: number, fullStatistics: RouteStatistics) {
         if (route.segments.length === 0) {
             return;
         }
@@ -161,7 +162,7 @@ export class RouteStatisticsService {
         }
     }
 
-    public interpolateStatistics(statistics: IRouteStatistics, x: number) {
+    public interpolateStatistics(statistics: RouteStatistics, x: number) {
         if (statistics == null || statistics.points.length < 2) {
             return null;
         }
@@ -179,7 +180,7 @@ export class RouteStatisticsService {
                 continue;
             }
             let ratio = (x - previousPoint.coordinate[0]) / (currentPoint.coordinate[0] - previousPoint.coordinate[0]);
-            let point = { coordinate: [x, 0] } as IRouteStatisticsPoint;
+            let point = { coordinate: [x, 0] } as RouteStatisticsPoint;
             point.coordinate[1] = this.getInterpolatedValue(previousPoint.coordinate[1], currentPoint.coordinate[1], ratio);
             point.slope = this.getInterpolatedValue(previousPoint.slope, currentPoint.slope, ratio);
             point.latlng = SpatialService.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio, point.coordinate[1]);
@@ -192,7 +193,7 @@ export class RouteStatisticsService {
         return (value2 - value1) * ratio + value1;
     }
 
-    public findDistanceForLatLngInKM(statistics: IRouteStatistics, latLng: LatLngAlt, heading: number): number {
+    public findDistanceForLatLngInKM(statistics: RouteStatistics, latLng: LatLngAlt, heading: number): number {
         if (statistics.points.length < 2) {
             return 0;
         }

@@ -12,7 +12,7 @@ import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
 import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
-import { LinkData, MarkerData, ApplicationState } from "../../models/models";
+import type { LinkData, MarkerData, ApplicationState } from "../../models/models";
 
 interface IIconsGroup {
     icons: string[];

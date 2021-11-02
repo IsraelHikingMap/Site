@@ -1,23 +1,23 @@
 import { Action } from "redux";
 
 import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
-import { ShareUrl, InMemoryState } from "../models/models";
 import { initialState } from "./initial-state";
+import type { ShareUrl, InMemoryState } from "../models/models";
 
 const TOGGLE_DISTNACE = "TOGGLE_DISTNACE";
 const SET_PANNED = "SET_PANNED";
 const SET_SHARE_URL = "SET_SHARE_URL";
 const SET_FILE_URL_AND_BASE_LAYER = "SET_FILE_URL_AND_BASE_LAYER";
 
-export interface SetPannedPayload {
+export type SetPannedPayload = {
     pannedTimestamp: Date;
 }
 
-export interface SetShareUrlPayload {
+export type SetShareUrlPayload = {
     shareUrl: ShareUrl;
 }
 
-export interface SetFileUrlAndBaseLayerPayload {
+export type SetFileUrlAndBaseLayerPayload = {
     fileUrl: string;
     baseLayer: string;
 }

@@ -1,33 +1,33 @@
 import { Injectable } from "@angular/core";
 import piexif from "piexifjs";
 
-import { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models/models";
+import type { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models/models";
 
 export interface IPiexifGPSHelper {
     dmsRationalToDeg(dmsArray: number[], ref: string): number;
 }
 
-export interface IPiexifGPSIFD {
+export type IPiexifGPSIFD = {
     GPSLatitude: string;
     GPSLatitudeRef: string;
     GPSLongitude: string;
     GPSLongitudeRef: string;
 }
 
-export interface IPiexifObject {
+export type PiexifObject = {
     GPS: any[];
 }
 
-export interface IPiexifImageIFD {
+export type PiexifImageIFD = {
     Orientation: number;
 }
 
 export interface IPiexif {
     GPSHelper: IPiexifGPSHelper;
     GPSIFD: IPiexifGPSIFD;
-    ImageIFD: IPiexifImageIFD;
-    load(binaryStringData: string): IPiexifObject;
-    dump(exifObject: IPiexifObject): any[];
+    ImageIFD: PiexifImageIFD;
+    load(binaryStringData: string): PiexifObject;
+    dump(exifObject: PiexifObject): any[];
     insert(exifBytes: any[], binaryStringData: string): string;
 }
 

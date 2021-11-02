@@ -4,9 +4,9 @@ import { timeout } from "rxjs/operators";
 
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
-import { Urls } from "../urls";
-import { LatLngAlt } from "../models/models";
 import { LoggingService } from "./logging.service";
+import { Urls } from "../urls";
+import type { LatLngAlt } from "../models/models";
 
 @Injectable()
 export class ElevationProvider {

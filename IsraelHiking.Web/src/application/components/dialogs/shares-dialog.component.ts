@@ -14,7 +14,7 @@ import { DataContainerService } from "../../services/data-container.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { RecordedRouteService } from "../../services/recorded-route.service";
 import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
-import { ApplicationState, ShareUrl } from "../../models/models";
+import type { ApplicationState, ShareUrl } from "../../models/models";
 
 @Component({
     selector: "shares-dialog",

@@ -3,8 +3,10 @@ import { Subscription } from "rxjs";
 import { throttleTime } from "rxjs/operators";
 import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
 
+import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
+import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class DeviceOrientationService {
@@ -18,7 +20,8 @@ export class DeviceOrientationService {
     constructor(private readonly ngZone: NgZone,
                 private readonly loggingService: LoggingService,
                 private readonly deviceOrientation: DeviceOrientation,
-                private readonly runningContextService: RunningContextService) {
+                private readonly runningContextService: RunningContextService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         this.orientationChanged = new EventEmitter();
         this.isBackground = false;
         this.subscription = null;
@@ -37,6 +40,9 @@ export class DeviceOrientationService {
         document.addEventListener("pause", () => {
             this.isBackground = true;
         });
+        if (this.ngRedux.getState().gpsState.tracking !== "disabled") {
+            this.enable();
+        }
     }
 
     private fireOrientationChange(heading: number) {
@@ -65,6 +71,9 @@ export class DeviceOrientationService {
     public enable() {
         if (!this.runningContextService.isCordova) {
             return;
+        }
+        if (this.subscription != null) {
+            this.disable();
         }
         this.loggingService.info("[Orientation] Enabling device orientation service");
         this.subscription = this.deviceOrientation.watchHeading().pipe(

@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Controllers
     public class RoutingController : ControllerBase
     {
         private readonly IGraphHopperGateway _graphHopperGateway;
-        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IElevationGateway _elevationGateway;
         private readonly GeometryFactory _geometryFactory;
         private readonly MathTransform _wgs84ItmMathTransform;
 
@@ -28,16 +28,16 @@ namespace IsraelHiking.API.Controllers
         /// Controller's constructor
         /// </summary>
         /// <param name="graphHopperGateway"></param>
-        /// <param name="elevationDataStorage"></param>
+        /// <param name="elevationGateway"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="geometryFactory"></param>
         public RoutingController(IGraphHopperGateway graphHopperGateway,
-            IElevationDataStorage elevationDataStorage,
+            IElevationGateway elevationGateway,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             GeometryFactory geometryFactory)
         {
             _graphHopperGateway = graphHopperGateway;
-            _elevationDataStorage = elevationDataStorage;
+            _elevationGateway = elevationGateway;
             _geometryFactory = geometryFactory;
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
         }
@@ -70,7 +70,7 @@ namespace IsraelHiking.API.Controllers
                     To = pointTo,
                     Profile = profile,
                 });
-            ElevationSetterHelper.SetElevation(feature.Geometry, _elevationDataStorage);
+            ElevationSetterHelper.SetMissingElevation(feature.Geometry, _elevationGateway);
             feature.Attributes.AddOrUpdate("Name", $"Routing from {@from} to {to} profile type: {profile}");
             feature.Attributes.AddOrUpdate("Creator", "IsraelHikingMap");
             return Ok(new FeatureCollection{ feature });
@@ -98,7 +98,7 @@ namespace IsraelHiking.API.Controllers
             }
             var lat = double.Parse(splitted.First());
             var lng = double.Parse(splitted.Last());
-            var elevation = await _elevationDataStorage.GetElevation(position.ToCoordinate());
+            var elevation = await _elevationGateway.GetElevation(position.ToCoordinate());
             return new CoordinateZ(lng, lat, elevation);
         }
 

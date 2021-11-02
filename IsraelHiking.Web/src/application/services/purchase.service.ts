@@ -6,7 +6,7 @@ import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
-import { ApplicationState, UserInfo } from "../models/models";
+import type { ApplicationState, UserInfo } from "../models/models";
 
 @Injectable()
 export class PurchaseService {

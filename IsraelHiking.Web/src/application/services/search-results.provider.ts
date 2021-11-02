@@ -4,7 +4,7 @@ import { timeout } from "rxjs/operators";
 
 import { PoiService } from "./poi.service";
 import { Urls } from "../urls";
-import { SearchResultsPointOfInterest } from "../models/models";
+import type { SearchResultsPointOfInterest } from "../models/models";
 
 @Injectable()
 export class SearchResultsProvider {

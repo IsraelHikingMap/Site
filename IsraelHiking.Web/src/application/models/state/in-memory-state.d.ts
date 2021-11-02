@@ -1,9 +1,9 @@
-﻿import { ShareUrl } from "../models";
+﻿import type { ShareUrl } from "../models";
 
 /**
  * this state should be clean every time the app starts
  */
-export interface InMemoryState {
+export type InMemoryState = {
     distance: boolean;
     pannedTimestamp: Date;
     baseLayer: string;

@@ -6,13 +6,13 @@ import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
 import { DataContainerService } from "../../services/data-container.service";
 import { DatabaseService } from "../../services/database.service";
-import { FileService, IFormatViewModel } from "../../services/file.service";
+import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
 import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { SetOfflineLastModifiedAction } from "../../reducers/offline.reducer";
-import { ApplicationState, DataContainer } from "../../models/models";
+import type { ApplicationState, DataContainer } from "../../models/models";
 
 @Component({
     selector: "files-share-dialog",
@@ -21,7 +21,7 @@ import { ApplicationState, DataContainer } from "../../models/models";
 export class FilesSharesDialogComponent extends BaseMapComponent {
 
     public isSaveAsOpen: boolean;
-    public formats: IFormatViewModel[];
+    public formats: FormatViewModel[];
 
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
@@ -85,7 +85,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         }
     }
 
-    public async saveAs(format: IFormatViewModel) {
+    public async saveAs(format: FormatViewModel) {
         let outputFormat = format.outputFormat;
         let data = this.dataContainerService.getDataForFileExport();
         if (outputFormat === "all_gpx_single_track") {

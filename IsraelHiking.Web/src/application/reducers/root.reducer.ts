@@ -1,6 +1,5 @@
-import { combineReducers, ReducersMapObject } from "redux";
+import { Action, combineReducers, ReducersMapObject } from "redux";
 
-import { ApplicationState } from "../models/models";
 import { configurationReducer } from "./configuration.reducer";
 import { locationReducer } from "./location.reducer";
 import { routesReducer } from "./routes.reducer";
@@ -14,8 +13,10 @@ import { inMemoryReducer } from "./in-memory.reducer";
 import { gpsReducer } from "./gps.reducer";
 import { offlineReducer } from "./offline.reducer";
 import { uiComponentsReducer } from "./ui-components.reducer";
+import { initialState } from "./initial-state";
+import type { ApplicationState } from "../models/models";
 
-export const rootReducer = combineReducers<ApplicationState>({
+const appReducer = combineReducers<ApplicationState>({
     configuration: configurationReducer,
     location: locationReducer,
     routes: routesReducer,
@@ -30,3 +31,10 @@ export const rootReducer = combineReducers<ApplicationState>({
     offlineState: offlineReducer,
     uiComponentsState: uiComponentsReducer
 } as ReducersMapObject<ApplicationState>);
+
+export const rootReducer = (state: ApplicationState, action: Action) => {
+    if (action.type === "RESET") {
+        return appReducer(initialState, action);
+    }
+    return appReducer(state, action);
+};

@@ -4,7 +4,7 @@ import { Observable } from "rxjs";
 import { HashService } from "./hash.service";
 import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetSidebarAction } from "../reducers/poi.reducer";
-import { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 export type SidebarView = "info" | "layers" | "public-poi" | "";
 

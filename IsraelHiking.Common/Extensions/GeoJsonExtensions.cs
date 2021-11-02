@@ -155,7 +155,7 @@ namespace IsraelHiking.Common.Extensions
             {
                 return string.Empty;
             }
-            if (!titleByLanguage.Exists(language))
+            if (string.IsNullOrEmpty(language) || !titleByLanguage.Exists(language))
             {
                 language = Languages.ALL;
             }

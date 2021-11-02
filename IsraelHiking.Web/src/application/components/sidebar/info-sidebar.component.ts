@@ -13,10 +13,10 @@ import { LayersService } from "../../services/layers/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { select } from "../../reducers/infra/ng-redux.module";
 import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducers/initial-state";
-import { ApplicationState, Language } from "../../models/models";
+import type { ApplicationState, Language } from "../../models/models";
 import legendSectionsJson from "../../../content/legend/legend.json";
 
-export interface ILegendSection {
+export type LegendSection = {
     key: keyof ResourcesService;
     items: ILegendItem[];
     title: string;
@@ -28,9 +28,9 @@ export interface ILegendSection {
     styleUrls: ["./info-sidebar.component.scss"]
 })
 export class InfoSidebarComponent extends BaseMapComponent {
-    public legendSections: ILegendSection[];
+    public legendSections: LegendSection[];
     public selectedTabIndex: number;
-    private selectedSection: ILegendSection;
+    private selectedSection: LegendSection;
 
     @select((state: ApplicationState) => state.configuration.language)
     private language$: Observable<Language>;
@@ -63,11 +63,11 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.angulartics2GoogleAnalytics.eventTrack((tabIndex === 1 ? "Legend" : "About") + " tab selected", { category: "Info" });
     }
 
-    public openSection(section: ILegendSection) {
+    public openSection(section: LegendSection) {
         this.selectedSection = section;
     }
 
-    public isSectionOpen(section: ILegendSection) {
+    public isSectionOpen(section: LegendSection) {
         return this.selectedSection != null && this.selectedSection.key === section.key;
     }
 
@@ -120,7 +120,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.removeItemInSection(this.resources.legendPoi, this.resources.legendPowerLine);
 
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendMilitaryTraining);
-        this.removeItemInSection(this.resources.legendBorders, this.resources.legendMinefield);
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendTheGreenLine);
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendThePurpleLine);
 

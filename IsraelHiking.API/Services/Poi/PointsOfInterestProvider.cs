@@ -40,7 +40,7 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IOsmRepository _osmRepository;
         private readonly ITagsHelper _tagsHelper;
         private readonly IOsmLatestFileGateway _latestFileGateway;
-        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IElevationGateway _elevationGateway;
         private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
         private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
@@ -53,7 +53,7 @@ namespace IsraelHiking.API.Services.Poi
         /// Class constructor
         /// </summary>
         /// <param name="pointsOfInterestRepository"></param>
-        /// <param name="elevationDataStorage"></param>
+        /// <param name="elevationGateway"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
@@ -65,7 +65,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="options"></param>
         /// <param name="logger"></param>
         public PointsOfInterestProvider(IPointsOfInterestRepository pointsOfInterestRepository,
-            IElevationDataStorage elevationDataStorage,
+            IElevationGateway elevationGateway,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
@@ -81,7 +81,7 @@ namespace IsraelHiking.API.Services.Poi
             _osmRepository = osmRepository;
             _tagsHelper = tagsHelper;
             _latestFileGateway = latestFileGateway;
-            _elevationDataStorage = elevationDataStorage;
+            _elevationGateway = elevationGateway;
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
             _options = options.Value;
             _pointsOfInterestRepository = pointsOfInterestRepository;
@@ -278,13 +278,14 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public async Task<UpdatesResponse> GetUpdates(DateTime lastMoidifiedDate, DateTime modifiedUntil)
+        public async Task<UpdatesResponse> GetUpdates(DateTime lastModifiedDate, DateTime modifiedUntil)
         {
-            var results = (lastMoidifiedDate.Year < 2010)
-                ? throw new ArgumentException("Last modified date must be higher than 2010", nameof(lastMoidifiedDate))
-                : await _pointsOfInterestRepository.GetPointsOfInterestUpdates(lastMoidifiedDate, modifiedUntil);
+            var results = (lastModifiedDate.Year < 2010)
+                ? throw new ArgumentException("Last modified date must be higher than 2010", nameof(lastModifiedDate))
+                : await _pointsOfInterestRepository.GetPointsOfInterestUpdates(lastModifiedDate, modifiedUntil);
             var lastModified = await _pointsOfInterestRepository.GetLastSuccessfulRebuildTime();
-            ElevationSetterHelper.SetElevation(results, _elevationDataStorage);
+            // HM TODO: think about performance here
+            ElevationSetterHelper.SetElevation(results, _elevationGateway);
             return new UpdatesResponse
             {
                 Features = results.ToArray(),
@@ -297,7 +298,9 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<Feature> GetFeatureById(string source, string id)
         {
             var feature = await _pointsOfInterestRepository.GetPointOfInterestById(id, source);
-            ElevationSetterHelper.SetElevation(feature.Geometry, _elevationDataStorage);
+            if (feature != null) {
+                ElevationSetterHelper.SetElevation(feature.Geometry, _elevationGateway);
+            }
             return feature;
         }
 
@@ -498,7 +501,7 @@ namespace IsraelHiking.API.Services.Poi
         {
             var coordinate = latLng.ToCoordinate();
             var (east, north) = _wgs84ItmMathTransform.Transform(coordinate.X, coordinate.Y);
-            var alt = _elevationDataStorage.GetElevation(coordinate).Result;
+            var alt = _elevationGateway.GetElevation(coordinate).Result;
             var feautre = new Feature(new Point(coordinate), new AttributesTable
                 {
                     { FeatureAttributes.NAME, id },

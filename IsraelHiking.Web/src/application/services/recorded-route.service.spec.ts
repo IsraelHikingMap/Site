@@ -15,8 +15,7 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
-import { AddRecordingPointsAction } from "../reducers/routes.reducer";
-import { ApplicationState, RouteData } from "../models/models";
+import type { RouteData } from "../models/models";
 
 describe("RecordedRouteService", () => {
     beforeEach(() => {

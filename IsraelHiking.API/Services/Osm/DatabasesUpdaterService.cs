@@ -36,7 +36,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
-        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IElevationGateway _elevationGateway;
         private readonly ILogger _logger;
         /// <summary>
         /// Service's constructor
@@ -55,7 +55,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="imagesUrlsStorageExecutor"></param>
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="externalSourceUpdaterExecutor"></param>
-        /// <param name="elevationDataStorage"></param>
+        /// <param name="elevationGateway"></param>
         /// <param name="logger"></param>
         public DatabasesUpdaterService(IClientsFactory clinetsFactory,
             IExternalSourcesRepository externalSourcesRepository,
@@ -70,7 +70,7 @@ namespace IsraelHiking.API.Services.Osm
             IImagesUrlsStorageExecutor imagesUrlsStorageExecutor,
             IPointsOfInterestProvider pointsOfInterestProvider,
             IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor,
-            IElevationDataStorage elevationDataStorage,
+            IElevationGateway elevationGateway,
             ILogger logger)
         {
             _externalSourcesRepository = externalSourcesRepository;
@@ -87,7 +87,7 @@ namespace IsraelHiking.API.Services.Osm
             _osmGateway = clinetsFactory.CreateNonAuthClient();
             _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
             _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
-            _elevationDataStorage = elevationDataStorage;
+            _elevationGateway = elevationGateway;
             _logger = logger;
         }
 
@@ -298,7 +298,7 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation($"Starting rebuilding offline pois file for date: {context.StartTime.ToInvariantString()}");
             var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
             features = features.Where(f => f.GetLastModified() <= context.StartTime).ToList();
-            ElevationSetterHelper.SetElevation(features, _elevationDataStorage);
+            ElevationSetterHelper.SetElevation(features, _elevationGateway);
             _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
             _logger.LogInformation("Finished rebuilding offline pois file.");
         }

@@ -25,9 +25,6 @@ export class LoggingService {
     }
 
     public async initialize() {
-        if (!this.runningContextService.isCordova) {
-            return;
-        }
         this.loggingDatabase = new Dexie(LoggingService.LOGGING_TABLE_NAME);
         this.loggingDatabase.version(1).stores({
             logging: "date"
@@ -49,9 +46,6 @@ export class LoggingService {
     }
 
     private writeToStorage(logLine: LogLine): void {
-        if (!this.runningContextService.isCordova) {
-            return;
-        }
         if (this.loggingDatabase) {
             this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).add({
                 message: logLine.message,

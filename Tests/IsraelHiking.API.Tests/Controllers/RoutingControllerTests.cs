@@ -17,14 +17,15 @@ namespace IsraelHiking.API.Tests.Controllers
     {
         private RoutingController _controller;
         private IGraphHopperGateway _graphHopperGateway;
-        private IElevationDataStorage _elevationDataStorage;
+        private IElevationGateway _elevationGateway;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
-            _elevationDataStorage = Substitute.For<IElevationDataStorage>();
-            _controller = new RoutingController(_graphHopperGateway, _elevationDataStorage, new ItmWgs84MathTransfromFactory(), new GeometryFactory());
+            _elevationGateway = Substitute.For<IElevationGateway>();
+            _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
+            _controller = new RoutingController(_graphHopperGateway, _elevationGateway, new ItmWgs84MathTransfromFactory(), new GeometryFactory());
         }
 
         [TestMethod]

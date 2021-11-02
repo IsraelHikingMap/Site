@@ -1,6 +1,6 @@
-﻿import { RouteData, LayerData, LatLngAlt  } from "./models";
+﻿import type { RouteData, LayerData, LatLngAlt  } from "./models";
 
-export interface DataContainer {
+export type DataContainer = {
     routes: RouteData[];
     baseLayer: LayerData;
     overlays: LayerData[];

@@ -1,6 +1,6 @@
-﻿import { EditableLayer, Overlay, CategoriesGroup } from "../models";
+﻿import type { EditableLayer, Overlay, CategoriesGroup } from "../models";
 
-export interface LayersState {
+export type LayersState = {
     baseLayers: EditableLayer[];
     overlays: Overlay[];
     selectedBaseLayerKey: string;

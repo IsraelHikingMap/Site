@@ -15,7 +15,7 @@ import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
-import { DataContainer, ApplicationState, LayerData } from "../models/models";
+import type { DataContainer, ApplicationState, LayerData } from "../models/models";
 
 @Injectable()
 export class DataContainerService {

@@ -1,6 +1,6 @@
-﻿import { MarkerData } from "../models";
+﻿import type { MarkerData } from "../models";
 
-export interface PointsOfInterestState {
+export type PointsOfInterestState = {
     selectedPointOfInterest: GeoJSON.Feature;
     uploadMarkerData: MarkerData;
     isSidebarOpen: boolean;

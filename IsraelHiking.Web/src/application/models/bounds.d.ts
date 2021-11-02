@@ -1,6 +1,6 @@
 ﻿import { LatLngAlt } from "./lat-lng";
 
-export interface Bounds {
+export type Bounds = {
     northEast: LatLngAlt;
     southWest: LatLngAlt;
 }

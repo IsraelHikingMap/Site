@@ -1,4 +1,4 @@
-﻿export interface OfflineState {
+﻿export type OfflineState = {
     /**
      * Maps last modified date
      */

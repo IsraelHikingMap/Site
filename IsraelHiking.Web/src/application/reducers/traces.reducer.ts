@@ -1,7 +1,6 @@
 import { ReduxAction, createReducerFromClass, BaseAction } from "./infra/ng-redux.module";
 import { initialState } from "./initial-state";
-
-import { TracesState, Trace } from "../models/models";
+import type { TracesState, Trace } from "../models/models";
 
 const ADD_TRACE = "ADD_TRACE";
 const UPDATE_TRACE = "UPDATE_TRACE";
@@ -10,28 +9,28 @@ const SET_VISIBLE_TRACE = "SET_VISIBLE_TRACE";
 const SET_MISSING_PARTS = "SET_MISSING_PARTS";
 const REMOVE_MISSING_PART = "REMOVE_MISSING_PART";
 
-export interface AddTracePayload {
+export type AddTracePayload = {
     trace: Trace;
 }
 
-export interface UpdateTracePayload {
+export type UpdateTracePayload = {
     traceId: string;
     trace: Trace;
 }
 
-export interface RemoveTracePayload {
+export type RemoveTracePayload = {
     traceId: string;
 }
 
-export interface SetVisibleTracePayload {
+export type SetVisibleTracePayload = {
     traceId: string;
 }
 
-export interface SetMissingPartsPayload {
+export type SetMissingPartsPayload = {
     missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>;
 }
 
-export interface RemoveMissingPartPayload {
+export type RemoveMissingPartPayload = {
     missingPartIndex: number;
 }
 

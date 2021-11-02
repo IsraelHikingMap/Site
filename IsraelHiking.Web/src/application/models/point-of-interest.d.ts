@@ -1,11 +1,11 @@
-﻿import { LatLngAlt } from "./models";
-export interface Contribution {
+﻿import type { LatLngAlt } from "./models";
+export type Contribution = {
     userName: string;
     userAddress: string;
     lastModifiedDate: Date;
 }
 
-export interface SearchResultsPointOfInterest {
+export type SearchResultsPointOfInterest = {
     icon: string;
     iconColor: string;
     title: string;
@@ -16,7 +16,7 @@ export interface SearchResultsPointOfInterest {
     id: string;
 }
 
-export interface EditablePublicPointData {
+export type EditablePublicPointData = {
     id: string;
     title: string;
     description: string;

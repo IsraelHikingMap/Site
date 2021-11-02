@@ -6,8 +6,8 @@ import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
-import { ApplicationState } from "../../../models/models";
 import { AddRouteAction } from "../../../reducers/routes.reducer";
+import type { ApplicationState } from "../../../models/models";
 
 @Component({
     selector: "route-add-dialog",

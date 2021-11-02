@@ -14,9 +14,9 @@ import { ResourcesService } from "./resources.service";
 import { initialState } from "../reducers/initial-state";
 import { NgRedux, classToActionMiddleware } from "../reducers/infra/ng-redux.module";
 import { rootReducer } from "../reducers/root.reducer";
-import { ApplicationState, ShareUrl, Trace } from "../models/models";
+import type { ApplicationState, ShareUrl, Trace } from "../models/models";
 
-export interface ImageUrlAndData {
+export type ImageUrlAndData = {
     imageUrl: string;
     data: string;
 }
@@ -95,10 +95,7 @@ export class DatabaseService {
             if (this.runningContext.isCordova) {
                 initialState.gpsState.tracking = "tracking";
             }
-            this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).put({
-                id: DatabaseService.STATE_DOC_ID,
-                state: initialState
-            });
+            this.updateState(initialState);
         }
         if (storedState.offlineState.lastModifiedDate !== null) {
             if (await Dexie.exists("IHM")) {
@@ -195,7 +192,7 @@ export class DatabaseService {
         ];
         return new Promise<ArrayBuffer>((resolve, reject) => {
             db.transaction((tx) => {
-                tx.executeSql("SELECT BASE64(tile_data) AS base64_tile_data FROM tiles " +
+                tx.executeSql("SELECT HEX(tile_data) as tile_data_hex FROM tiles " +
                     "WHERE zoom_level = ? AND tile_column = ? AND tile_row = ? limit 1",
                     params,
                     (_: any, res: any) => {
@@ -203,8 +200,8 @@ export class DatabaseService {
                             reject(new Error("No tile..."));
                             return;
                         }
-                        const base64Data = res.rows.item(0).base64_tile_data;
-                        let binData = new Uint8Array(decode(base64Data));
+                        const hexData = res.rows.item(0).tile_data_hex;
+                        let binData = new Uint8Array(hexData.match(/.{1,2}/g).map((byte: string) => parseInt(byte, 16)));
                         let isGzipped = binData[0] === 0x1f && binData[1] === 0x8b;
                         if (isGzipped) {
                             binData = pako.inflate(binData);
@@ -229,6 +226,7 @@ export class DatabaseService {
                 config.iosDatabaseLocation = "Documents";
             } else {
                 config.location = "default";
+                (config as any).androidDatabaseProvider = "system";
             }
             let db = await this.sqlite.create(config);
             this.sourceDatabases.set(dbName, db);

@@ -5,12 +5,12 @@ import { MatDialog } from "@angular/material/dialog";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { GeoLocationService } from "../../services/geo-location.service";
-import { SnappingService, ISnappingPointResponse } from "../../services/snapping.service";
+import { SnappingService, SnappingPointResponse } from "../../services/snapping.service";
 import { PoiService } from "../../services/poi.service";
 import { ResourcesService } from "../../services/resources.service";
 import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { AddPrivatePoiAction, UpdatePrivatePoiAction } from "../../reducers/routes.reducer";
-import { ApplicationState, MarkerData, LatLngAlt } from "../../models/models";
+import type { ApplicationState, MarkerData, LatLngAlt } from "../../models/models";
 
 @Injectable()
 export class RouteEditPoiInteraction {
@@ -89,7 +89,7 @@ export class RouteEditPoiInteraction {
         PrivatePoiEditDialogComponent.openDialog(this.matDialog, selectedRoute.markers[index], selectedRoute.id, index);
     }
 
-    private async getSnappingForPoint(latlng: LatLngAlt): Promise<ISnappingPointResponse> {
+    private async getSnappingForPoint(latlng: LatLngAlt): Promise<SnappingPointResponse> {
         if (this.ngRedux.getState().gpsState.tracking === "tracking") {
             let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
             let snappingPointResponse = this.snappingService.snapToPoint(latlng,

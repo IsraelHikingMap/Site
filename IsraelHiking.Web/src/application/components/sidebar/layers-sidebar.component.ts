@@ -22,7 +22,7 @@ import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing-state.reducer";
-import { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
+import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
 
 @Component({
     selector: "layers-sidebar",
@@ -185,6 +185,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public toggleRoute(routeData: RouteData) {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null && routeData.id === selectedRoute.id && routeData.state !== "Hidden") {
+            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: null }));
             routeData.state = "Hidden";
             this.ngRedux.dispatch(new ChangeRoutePropertiesAction(
                 {
@@ -223,7 +224,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public isRouteInEditMode(routeData: RouteData): boolean {
-        return routeData.state === "Route";
+        return routeData.state === "Route" || routeData.state === "Poi";
     }
 
     public isShowActive(routeData: RouteData): boolean {

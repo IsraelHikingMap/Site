@@ -5,7 +5,7 @@ import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { ElevationProvider } from "../services/elevation.provider";
 import { Urls } from "../urls";
-import { LatLngAlt, NorthEast } from "../models/models";
+import type { LatLngAlt, NorthEast } from "../models/models";
 
 @Component({
     selector: "coordinates",

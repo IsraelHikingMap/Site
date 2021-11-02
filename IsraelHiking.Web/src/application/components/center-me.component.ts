@@ -4,7 +4,7 @@ import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
-import { ApplicationState } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 @Component({
     selector: "center-me",

@@ -1,5 +1,5 @@
-import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "./route-statistics.service";
-import { RouteData } from "../models/models";
+import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "./route-statistics.service";
+import type { RouteData } from "../models/models";
 
 describe("RouteStatisticsService", () => {
     let service: RouteStatisticsService;
@@ -220,7 +220,7 @@ describe("RouteStatisticsService", () => {
     });
 
     it("Should not interpolate statistics with less than 2 points", () => {
-        let interpolated = service.interpolateStatistics({ points: [] } as IRouteStatistics, null);
+        let interpolated = service.interpolateStatistics({ points: [] } as RouteStatistics, null);
 
         expect(interpolated).toBeNull();
     });
@@ -231,21 +231,21 @@ describe("RouteStatisticsService", () => {
                 {
                     coordinate: [0, 0],
                     latlng: { lat: 0, lng: 0 }
-                } as IRouteStatisticsPoint,
+                } as RouteStatisticsPoint,
                 {
                     coordinate: [1, 1],
                     latlng: { lat: 1, lng: 1 }
-                } as IRouteStatisticsPoint,
+                } as RouteStatisticsPoint,
                 {
                     coordinate: [2, 2],
                     latlng: { lat: 2, lng: 2 }
-                } as IRouteStatisticsPoint,
+                } as RouteStatisticsPoint,
                 {
                     coordinate: [3, 3],
                     latlng: { lat: 3, lng: 3 }
-                } as IRouteStatisticsPoint
+                } as RouteStatisticsPoint
             ]
-        } as IRouteStatistics, 2.5);
+        } as RouteStatistics, 2.5);
 
         expect(interpolated.coordinate[1]).toBe(2.5);
         expect(interpolated.latlng.lat).toBe(2.5);
@@ -253,7 +253,7 @@ describe("RouteStatisticsService", () => {
     });
 
     it("Should return 0 for statistics with less than 2 points", () => {
-        let distance = service.findDistanceForLatLngInKM({ points: [] } as IRouteStatistics, null, null);
+        let distance = service.findDistanceForLatLngInKM({ points: [] } as RouteStatistics, null, null);
 
         expect(distance).toBe(0);
     });
@@ -278,7 +278,7 @@ describe("RouteStatisticsService", () => {
                     latlng: { lat: 3, lng: 3 }
                 }
             ]
-        } as IRouteStatistics, { lat: 0.6, lng: 0.6 }, null);
+        } as RouteStatistics, { lat: 0.6, lng: 0.6 }, null);
 
         expect(distance).not.toBe(0);
     });
@@ -303,7 +303,7 @@ describe("RouteStatisticsService", () => {
                     latlng: { lat: 0.0003, lng: 0.0003 }
                 }
             ]
-        } as IRouteStatistics, { lat: 0.005, lng: 0.005 }, null);
+        } as RouteStatistics, { lat: 0.005, lng: 0.005 }, null);
 
         expect(distance).toBe(0);
     });
@@ -328,7 +328,7 @@ describe("RouteStatisticsService", () => {
                     latlng: { lat: 0.0003, lng: 0.0003 }
                 }
             ]
-        } as IRouteStatistics, { lat: 0.00015, lng: 0.00015 }, null);
+        } as RouteStatistics, { lat: 0.00015, lng: 0.00015 }, null);
 
         expect(distance).not.toBe(0);
     });
@@ -353,7 +353,7 @@ describe("RouteStatisticsService", () => {
                     latlng: { lat: 0, lng: 0.0003 }
                 }
             ]
-        } as IRouteStatistics, { lat: 0, lng: 0.00015 }, 0);
+        } as RouteStatistics, { lat: 0, lng: 0.00015 }, 0);
 
         expect(distance).toBe(0);
     });

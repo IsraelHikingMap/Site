@@ -39,11 +39,11 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestInitialize]
         public void TestInitialize()
         {
-            InitializeSubstitues();
+            InitializeSubstitutes();
             _clientsFactory = Substitute.For<IClientsFactory>();
             _tagsHelper = new TagsHelper(_options);
             _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(),
-                Substitute.For<IElevationDataStorage>(), 
+                ElevationGateway, 
                 new ItmWgs84MathTransfromFactory(),
                 new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
             _osmRepository = Substitute.For<IOsmRepository>();
@@ -52,7 +52,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
             _adapter = new PointsOfInterestProvider(_pointsOfInterestRepository,
-                _elevationDataStorage,
+                ElevationGateway,
                 _osmGeoJsonPreprocessorExecutor,
                 _osmRepository,
                 _itmWgs84MathTransfromFactory,
@@ -528,7 +528,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void CreateFeatureFromCoordinates_ShouldCreate()
         {
             var alt = 10;
-            _elevationDataStorage.GetElevation(Arg.Any<Coordinate>()).Returns(alt);
+            ElevationGateway.GetElevation(Arg.Any<Coordinate>()).Returns(alt);
             var feature = _adapter.GetCoordinatesFeature(new LatLng(35, 32), "32_35");
 
             Assert.IsNotNull(feature);

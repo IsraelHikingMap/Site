@@ -1,7 +1,7 @@
 ﻿import { StateWithHistory } from "redux-undo";
 
-import { ApplicationState, RouteData } from "../models/models";
 import { Urls } from "../urls";
+import type { ApplicationState, RouteData } from "../models/models";
 
 export const ISRAEL_HIKING_MAP = "Israel Hiking Map";
 export const ISRAEL_MTB_MAP = "Israel MTB Map";
@@ -13,9 +13,8 @@ export const BICYCLE_TRAILS = "Bicycle Trails";
 export const initialState =
     {
         configuration: {
-            isBatteryOptimization: false,
+            batteryOptimizationType: "screen-on",
             isAutomaticRecordingUpload: true,
-            // isFindMissingRoutesAfterUpload: false,
             isGotLostWarnings: false,
             isShowBatteryConfirmation: true,
             isShowIntro: true,
