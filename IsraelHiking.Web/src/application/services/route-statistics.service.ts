@@ -120,11 +120,10 @@ export class RouteStatisticsService {
         let previousFilteredCoordinate = filteredCoordinates[0];
         for (let filteredCoordinate of filteredCoordinates) {
             let elevationDiff = filteredCoordinate[1] - previousFilteredCoordinate[1]
-            if (elevationDiff !=NaN)
-                if (elevationDiff >= 0)
-                    routeStatistics.gain += elevationDiff
-                else
-                    routeStatistics.loss += elevationDiff
+            if (elevationDiff >= 0)
+                routeStatistics.gain += elevationDiff
+            else
+                routeStatistics.loss += elevationDiff
             previousFilteredCoordinate = filteredCoordinate;
         }
         return routeStatistics;
