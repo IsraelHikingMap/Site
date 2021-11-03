@@ -195,8 +195,8 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
-        expect(statistics.gain).toBeCloseTo(278.4,1);
-        expect(statistics.loss).toBeCloseTo(-238.4,1);
+        expect(statistics.gain).toBeCloseTo(37.5,1);
+        expect(statistics.loss).toBeCloseTo(-10,1);
         expect(statistics.length).not.toBe(0);
     });
 
@@ -204,16 +204,16 @@ describe("RouteStatisticsService", () => {
         let routeData = {
             segments: [
                 {
-                    latlngs: [{ lat: 0, lng: 0, alt: 0 }, { lat: 0, lng: 0.01, alt: 200 }, { lat: 0, lng: 0.02, alt: 100 }]
+                    latlngs: [{ lat: 0, lng: 0, alt: 0 }, { lat: 0, lng: 0.01, alt: 2 }, { lat: 0, lng: 0.02, alt: 1 }]
                 }
             ]
         } as RouteData;
         let statistics = service.getStatistics(routeData, null, null, null, false);
-        let start = service.interpolateStatistics(statistics, 100);
-        let end = service.interpolateStatistics(statistics, 200);
+        let start = service.interpolateStatistics(statistics, 0.5);
+        let end = service.interpolateStatistics(statistics, 1);
         statistics = service.getStatisticsByRange(routeData, start, end);
 
-        expect(statistics.gain).toBeCloseTo(9, 1);
+        expect(statistics.gain).toBeCloseTo(0.6, 1);
         expect(statistics.loss).toBe(0);
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(2);
@@ -358,7 +358,7 @@ describe("RouteStatisticsService", () => {
         expect(distance).toBe(0);
     });
 
-    it("Should get simplified statistics on route with outliers", () => {
+    it("Should get simplified statistics on actual route", () => {
         let routeData = {
             segments: [
                 {
@@ -371,8 +371,8 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
-        expect(statistics.gain).toBeCloseTo(634.4,1);
-        expect(statistics.loss).toBeCloseTo(-633,1);
+        expect(statistics.gain).toBeCloseTo(634.2,1);
+        expect(statistics.loss).toBeCloseTo(-632.9,1);
         expect(statistics.length).not.toBe(0);
     });
 });

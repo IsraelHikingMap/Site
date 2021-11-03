@@ -69,7 +69,7 @@ export class RouteStatisticsService {
                 let distance = SpatialService.getDistanceInMeters(previousLatlng, latlng);
                 routeStatistics.length += distance;
                 let point = {
-                    coordinate: [routeStatistics.length, latlng.alt],
+                    coordinate: [(routeStatistics.length / 1000), latlng.alt],
                     latlng,
                     slope: 0
                 } as RouteStatisticsPoint;
@@ -81,7 +81,7 @@ export class RouteStatisticsService {
         }
         if (start != null && end != null) {
             routeStatistics.points.push(end);
-            routeStatistics.length = end.coordinate[0] - start.coordinate[0];
+            routeStatistics.length = (end.coordinate[0] - start.coordinate[0]) * 1000;
         }
 
         // filter invalid points for the rest of the calculations
@@ -107,10 +107,10 @@ export class RouteStatisticsService {
 
 	    // calculate total gain & loss:
         // resample coordinates along route at uniform resolution
-        let coordinates = routeStatistics.points.map(p=>[p.coordinate[0], p.coordinate[1]]);
+        let coordinates = routeStatistics.points.map(p => p.coordinate);
         let linterp = linearInterpolator(coordinates);
         var interpolatedCoordinates = [];
-        for(let x = coordinates[0][0]; x <= coordinates[coordinates.length-1][0]; x+=25) {
+        for(let x = coordinates[0][0]; x <= coordinates[coordinates.length-1][0]; x+=0.025) {
             interpolatedCoordinates.push([x, linterp(x)]);
         }
         // filter resampled coordinates to remove sudden jumps
@@ -119,12 +119,12 @@ export class RouteStatisticsService {
         // compute total route gain & loss
         let previousFilteredCoordinate = filteredCoordinates[0];
         for (let filteredCoordinate of filteredCoordinates) {
-            let elevation_diff = filteredCoordinate[1] - previousFilteredCoordinate[1]
-            if (elevation_diff !=NaN)
-                if (elevation_diff >= 0)
-                    routeStatistics.gain += elevation_diff
+            let elevationDiff = filteredCoordinate[1] - previousFilteredCoordinate[1]
+            if (elevationDiff !=NaN)
+                if (elevationDiff >= 0)
+                    routeStatistics.gain += elevationDiff
                 else
-                    routeStatistics.loss += elevation_diff
+                    routeStatistics.loss += elevationDiff
             previousFilteredCoordinate = filteredCoordinate;
         }
         return routeStatistics;
