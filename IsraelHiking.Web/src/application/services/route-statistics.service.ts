@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core";
 import { last } from "lodash-es";
-import { resample } from "@thi.ng/geom-resample";
 import createMedianFilter from "moving-median";
-
+import linearInterpolator from "linear-interpolator";
 import { SpatialService } from "./spatial.service";
 import type { LatLngAlt, RouteData, LatLngAltTime } from "../models/models";
 
@@ -70,7 +69,7 @@ export class RouteStatisticsService {
                 let distance = SpatialService.getDistanceInMeters(previousLatlng, latlng);
                 routeStatistics.length += distance;
                 let point = {
-                    coordinate: [(routeStatistics.length / 1000), latlng.alt],
+                    coordinate: [routeStatistics.length, latlng.alt],
                     latlng,
                     slope: 0
                 } as RouteStatisticsPoint;
@@ -82,7 +81,7 @@ export class RouteStatisticsService {
         }
         if (start != null && end != null) {
             routeStatistics.points.push(end);
-            routeStatistics.length = (end.coordinate[0] - start.coordinate[0]) * 1000;
+            routeStatistics.length = end.coordinate[0] - start.coordinate[0];
         }
 
         // filter invalid points for the rest of the calculations
@@ -94,7 +93,6 @@ export class RouteStatisticsService {
                 routeStatistics.points.splice(pointIndex, 1);
             }
         }
-
         if (routeStatistics.points.length < 1) {
             return routeStatistics;
         }
@@ -107,22 +105,27 @@ export class RouteStatisticsService {
                 (currentPoint.coordinate[0] - prevPoint.coordinate[0]);
         }
 
-        let pts = resample(routeStatistics.points.map(p=>p.coordinate), { dist: 0.025 }, false);
+	    // calculate total gain & loss:
+        // resample coordinates along route at uniform resolution
+        let coordinates = routeStatistics.points.map(p=>[p.coordinate[0], p.coordinate[1]]);
+        let linterp = linearInterpolator(coordinates);
+        var interpolatedCoordinates = [];
+        for(let x = coordinates[0][0]; x <= coordinates[coordinates.length-1][0]; x+=25) {
+            interpolatedCoordinates.push([x, linterp(x)]);
+        }
+        // filter resampled coordinates to remove sudden jumps
         let median = createMedianFilter(11);
-        let simplifiedCoordinates = pts.map(p => [p[0], median(p[1])]);
-        let previousSimplifiedPoint = simplifiedCoordinates[0];
-        for (let simplifiedPoint of simplifiedCoordinates) {
-            routeStatistics.gain += ((simplifiedPoint[1] - previousSimplifiedPoint[1]) > 0 &&
-                    simplifiedPoint[1] !== 0 &&
-                    previousSimplifiedPoint[1] !== 0)
-                ? (simplifiedPoint[1] - previousSimplifiedPoint[1])
-                : 0;
-            routeStatistics.loss += ((simplifiedPoint[1] - previousSimplifiedPoint[1]) < 0 &&
-                    simplifiedPoint[1] !== 0 &&
-                    previousSimplifiedPoint[1] !== 0)
-                ? (simplifiedPoint[1] - previousSimplifiedPoint[1])
-                : 0;
-            previousSimplifiedPoint = simplifiedPoint;
+        let filteredCoordinates = interpolatedCoordinates.map(p => [p[0], median(p[1])]);
+        // compute total route gain & loss
+        let previousFilteredCoordinate = filteredCoordinates[0];
+        for (let filteredCoordinate of filteredCoordinates) {
+            let elevation_diff = filteredCoordinate[1] - previousFilteredCoordinate[1]
+            if (elevation_diff !=NaN)
+                if (elevation_diff >= 0)
+                    routeStatistics.gain += elevation_diff
+                else
+                    routeStatistics.loss += elevation_diff
+            previousFilteredCoordinate = filteredCoordinate;
         }
         return routeStatistics;
     }
