@@ -180,12 +180,14 @@ describe("RouteStatisticsService", () => {
                     latlngs: [
                         { lat: 31.3401, lng: 35.1014, alt: 10 },
                         { lat: 31.3403, lng: 35.1014, alt: 30 },
-                        { lat: 31.340305, lng: 35.1014, alt: 700 },
+                        { lat: 31.34031, lng: 35.1014, alt: 700 },
+                        { lat: 31.34032, lng: 35.1014, alt: 30 },
                         { lat: 31.3404, lng: 35.1014, alt: 50 },
                         { lat: 31.3407, lng: 35.1014, alt: 70 },
                         { lat: 31.3408, lng: 35.1014, alt: 60 },
                         { lat: 31.3410, lng: 35.1014, alt: 40 },
-                        { lat: 31.341005, lng: 35.1014, alt: -700 },
+                        { lat: 31.34101, lng: 35.1014, alt: -700 },
+                        { lat: 31.34102, lng: 35.1014, alt: 40 },
                         { lat: 31.3411, lng: 35.1014, alt: 30 },
                         { lat: 31.3413, lng: 35.1014, alt: 10 }
                     ]
@@ -195,8 +197,8 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
-        expect(statistics.gain).toBeCloseTo(37.5,1);
-        expect(statistics.loss).toBeCloseTo(-10,1);
+        expect(statistics.gain).toBeCloseTo(44,1);
+        expect(statistics.loss).toBeCloseTo(-12.7,1);
         expect(statistics.length).not.toBe(0);
     });
 
@@ -213,7 +215,7 @@ describe("RouteStatisticsService", () => {
         let end = service.interpolateStatistics(statistics, 1);
         statistics = service.getStatisticsByRange(routeData, start, end);
 
-        expect(statistics.gain).toBeCloseTo(0.6, 1);
+        expect(statistics.gain).toBeCloseTo(0.7, 1);
         expect(statistics.loss).toBe(0);
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(2);
@@ -371,8 +373,8 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatistics(routeData, null, null, null, false);
 
-        expect(statistics.gain).toBeCloseTo(634.2,1);
-        expect(statistics.loss).toBeCloseTo(-632.9,1);
+        expect(statistics.gain).toBeCloseTo(686.7,1);
+        expect(statistics.loss).toBeCloseTo(-686.2,1);
         expect(statistics.length).not.toBe(0);
     });
 });

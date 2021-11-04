@@ -110,11 +110,11 @@ export class RouteStatisticsService {
         let coordinates = routeStatistics.points.map(p => p.coordinate);
         let linterp = linearInterpolator(coordinates);
         var interpolatedCoordinates = [];
-        for(let x = coordinates[0][0]; x <= coordinates[coordinates.length-1][0]; x+=0.025) {
+        for(let x = coordinates[0][0]; x <= coordinates[coordinates.length-1][0]; x+=0.01) {
             interpolatedCoordinates.push([x, linterp(x)]);
         }
         // filter resampled coordinates to remove sudden jumps
-        let median = createMedianFilter(11);
+        let median = createMedianFilter(19);
         let filteredCoordinates = interpolatedCoordinates.map(p => [p[0], median(p[1])]);
         // compute total route gain & loss
         let previousFilteredCoordinate = filteredCoordinates[0];
