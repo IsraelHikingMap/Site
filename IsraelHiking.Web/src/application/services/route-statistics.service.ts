@@ -109,13 +109,30 @@ export class RouteStatisticsService {
         // resample coordinates along route at uniform resolution
         let coordinates = routeStatistics.points.map(p => p.coordinate);
         let linterp = linearInterpolator(coordinates);
+        let resampling_resolution_km = 0.01;
         var interpolatedCoordinates = [];
-        for(let x = coordinates[0][0]; x <= coordinates[coordinates.length-1][0]; x+=0.01) {
+        for (let x = coordinates[0][0]; x <= coordinates[coordinates.length-1][0]; x += resampling_resolution_km) {
             interpolatedCoordinates.push([x, linterp(x)]);
         }
-        // filter resampled coordinates to remove sudden jumps
-        let median = createMedianFilter(19);
-        let filteredCoordinates = interpolatedCoordinates.map(p => [p[0], median(p[1])]);
+                
+        // pad interpolated coordinates towards applying moving median filter
+        let median_filter_size = 19
+        let half_median_filter = Math.floor(median_filter_size/2)
+        let paddedInterpolatedCoordinates = []
+        for (let i = 0; i < half_median_filter; i++)
+            paddedInterpolatedCoordinates.push(interpolatedCoordinates[0]);
+        paddedInterpolatedCoordinates = paddedInterpolatedCoordinates.concat(interpolatedCoordinates);
+        for (let i = 0; i < half_median_filter; i++)
+            paddedInterpolatedCoordinates.push(interpolatedCoordinates[interpolatedCoordinates.length-1]);
+        
+        // apply moving median filter to remove outliers
+        let filteredCoordinates = []
+        for (let i = half_median_filter; i < paddedInterpolatedCoordinates.length-half_median_filter; i++)
+        {
+            let window = paddedInterpolatedCoordinates.slice(i-half_median_filter, i+half_median_filter+1);
+            filteredCoordinates.push([paddedInterpolatedCoordinates[i][0], this.median(window.map(x => x[1]))])
+        }
+
         // compute total route gain & loss
         let previousFilteredCoordinate = filteredCoordinates[0];
         for (let filteredCoordinate of filteredCoordinates) {
@@ -126,7 +143,17 @@ export class RouteStatisticsService {
                 routeStatistics.loss += elevationDiff
             previousFilteredCoordinate = filteredCoordinate;
         }
+
         return routeStatistics;
+    }
+
+    private median(numbers: any[]) {
+        const sorted = numbers.slice().sort((a, b) => a - b);
+        const middle = Math.floor(sorted.length / 2);
+        if (sorted.length % 2 === 0) {
+            return (sorted[middle - 1] + sorted[middle]) / 2;
+        }
+        return sorted[middle];
     }
 
     public getStatistics(route: RouteData,
