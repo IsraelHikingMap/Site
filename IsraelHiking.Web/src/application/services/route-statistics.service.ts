@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core";
 import { last } from "lodash-es";
-import { resample } from "@thi.ng/geom-resample";
 import createMedianFilter from "moving-median";
-
+import linearInterpolator from "linear-interpolator";
 import { SpatialService } from "./spatial.service";
 import type { LatLngAlt, RouteData, LatLngAltTime } from "../models/models";
 
@@ -94,7 +93,6 @@ export class RouteStatisticsService {
                 routeStatistics.points.splice(pointIndex, 1);
             }
         }
-
         if (routeStatistics.points.length < 1) {
             return routeStatistics;
         }
@@ -107,24 +105,55 @@ export class RouteStatisticsService {
                 (currentPoint.coordinate[0] - prevPoint.coordinate[0]);
         }
 
-        let pts = resample(routeStatistics.points.map(p=>p.coordinate), { dist: 0.025 }, false);
-        let median = createMedianFilter(11);
-        let simplifiedCoordinates = pts.map(p => [p[0], median(p[1])]);
-        let previousSimplifiedPoint = simplifiedCoordinates[0];
-        for (let simplifiedPoint of simplifiedCoordinates) {
-            routeStatistics.gain += ((simplifiedPoint[1] - previousSimplifiedPoint[1]) > 0 &&
-                    simplifiedPoint[1] !== 0 &&
-                    previousSimplifiedPoint[1] !== 0)
-                ? (simplifiedPoint[1] - previousSimplifiedPoint[1])
-                : 0;
-            routeStatistics.loss += ((simplifiedPoint[1] - previousSimplifiedPoint[1]) < 0 &&
-                    simplifiedPoint[1] !== 0 &&
-                    previousSimplifiedPoint[1] !== 0)
-                ? (simplifiedPoint[1] - previousSimplifiedPoint[1])
-                : 0;
-            previousSimplifiedPoint = simplifiedPoint;
+	    // calculate total gain & loss:
+        // resample coordinates along route at uniform resolution
+        let coordinates = routeStatistics.points.map(p => p.coordinate);
+        let linterp = linearInterpolator(coordinates);
+        let resampling_resolution_km = 0.01;
+        var interpolatedCoordinates = [];
+        for (let x = coordinates[0][0]; x <= coordinates[coordinates.length-1][0]; x += resampling_resolution_km) {
+            interpolatedCoordinates.push([x, linterp(x)]);
         }
+                
+        // pad interpolated coordinates towards applying moving median filter
+        let median_filter_size = 19
+        let half_median_filter = Math.floor(median_filter_size/2)
+        let paddedInterpolatedCoordinates = []
+        for (let i = 0; i < half_median_filter; i++)
+            paddedInterpolatedCoordinates.push(interpolatedCoordinates[0]);
+        paddedInterpolatedCoordinates = paddedInterpolatedCoordinates.concat(interpolatedCoordinates);
+        for (let i = 0; i < half_median_filter; i++)
+            paddedInterpolatedCoordinates.push(interpolatedCoordinates[interpolatedCoordinates.length-1]);
+        
+        // apply moving median filter to remove outliers
+        let filteredCoordinates = []
+        for (let i = half_median_filter; i < paddedInterpolatedCoordinates.length-half_median_filter; i++)
+        {
+            let window = paddedInterpolatedCoordinates.slice(i-half_median_filter, i+half_median_filter+1);
+            filteredCoordinates.push([paddedInterpolatedCoordinates[i][0], this.median(window.map(x => x[1]))])
+        }
+
+        // compute total route gain & loss
+        let previousFilteredCoordinate = filteredCoordinates[0];
+        for (let filteredCoordinate of filteredCoordinates) {
+            let elevationDiff = filteredCoordinate[1] - previousFilteredCoordinate[1]
+            if (elevationDiff >= 0)
+                routeStatistics.gain += elevationDiff
+            else
+                routeStatistics.loss += elevationDiff
+            previousFilteredCoordinate = filteredCoordinate;
+        }
+
         return routeStatistics;
+    }
+
+    private median(numbers: any[]) {
+        const sorted = numbers.slice().sort((a, b) => a - b);
+        const middle = Math.floor(sorted.length / 2);
+        if (sorted.length % 2 === 0) {
+            return (sorted[middle - 1] + sorted[middle]) / 2;
+        }
+        return sorted[middle];
     }
 
     public getStatistics(route: RouteData,
