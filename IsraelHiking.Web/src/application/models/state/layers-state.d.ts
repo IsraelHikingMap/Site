@@ -6,4 +6,4 @@ export type LayersState = {
     selectedBaseLayerKey: string;
     expanded: string[];
     categoriesGroups: CategoriesGroup[];
-}
+};

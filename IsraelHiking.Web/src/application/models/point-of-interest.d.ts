@@ -3,7 +3,7 @@ export type Contribution = {
     userName: string;
     userAddress: string;
     lastModifiedDate: Date;
-}
+};
 
 export type SearchResultsPointOfInterest = {
     icon: string;
@@ -14,7 +14,7 @@ export type SearchResultsPointOfInterest = {
     displayName: string;
     source: string;
     id: string;
-}
+};
 
 export type EditablePublicPointData = {
     id: string;
@@ -27,4 +27,4 @@ export type EditablePublicPointData = {
     category: string;
     isPoint: boolean;
     lengthInKm?: number;
-}
+};

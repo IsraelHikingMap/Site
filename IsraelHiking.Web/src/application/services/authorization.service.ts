@@ -14,13 +14,13 @@ export type AuthorizationServiceOptions = {
     oauthSecret: string;
     landing: string;
     oauthConsumerKey: string;
-}
+};
 
 type OsmConfiguration = {
     baseAddress: string;
     consumerKey: string;
     consumerSecret: string;
-}
+};
 
 @Injectable()
 export class AuthorizationService {

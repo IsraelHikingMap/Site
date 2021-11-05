@@ -2,4 +2,4 @@
 
 export type ShareUrlsState = {
     shareUrls: ShareUrl[];
-}
+};

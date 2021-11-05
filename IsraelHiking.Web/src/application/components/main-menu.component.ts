@@ -191,7 +191,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         let subject = "Issue reported by " + userInfo.displayName;
         try {
             if (!this.runningContextService.isCordova) {
-                
+
                 infoString += [
                     `Browser: ${platform.name} ${platform.version}`,
                     `OS: ${platform.os}`,

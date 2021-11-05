@@ -4,4 +4,4 @@ export type PointsOfInterestState = {
     selectedPointOfInterest: GeoJSON.Feature;
     uploadMarkerData: MarkerData;
     isSidebarOpen: boolean;
-}
+};

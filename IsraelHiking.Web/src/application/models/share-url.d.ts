@@ -9,4 +9,4 @@ export type ShareUrl = {
     creationDate: Date;
     lastModifiedDate: Date;
     dataContainer: DataContainer;
-}
+};

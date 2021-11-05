@@ -30,4 +30,4 @@ export type ApplicationState = {
     gpsState: GpsState;
     offlineState: OfflineState;
     uiComponentsState: UICompoentsState;
-}
+};

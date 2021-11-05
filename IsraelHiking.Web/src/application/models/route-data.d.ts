@@ -12,4 +12,4 @@ export type RouteData = {
     state: RouteStateName;
     markers: MarkerData[];
     segments: RouteSegmentData[];
-}
+};

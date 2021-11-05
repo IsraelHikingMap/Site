@@ -29,75 +29,75 @@ const BULK_REPLACE_ROUTES = "BULK_REPLACE_ROUTES";
 
 export type RoutePayload = {
     routeId: string;
-}
+};
 
 export type AddRoutePayload = {
     routeData: RouteData;
-}
+};
 
 export type ChangeRoutePropertiesActionPayload = RoutePayload & {
     routeData: RouteData;
-}
+};
 
 export type AddPrivatePoiPayload = RoutePayload & {
     markerData: MarkerData;
-}
+};
 
 export type UpdatePrivatePoiPayload = RoutePayload & {
     index: number;
     markerData: MarkerData;
-}
+};
 
 export type DeletePrivatePoiPayload = RoutePayload & {
     index: number;
-}
+};
 
 export type AddSegmentPayload = RoutePayload & {
     segmentData: RouteSegmentData;
-}
+};
 
 export type UpdateSegmentsPayload = RoutePayload & {
     indices: number[];
     segmentsData: RouteSegmentData[];
-}
+};
 
 export type ReplaceSegmentsPayload = RoutePayload & {
     segmentsData: RouteSegmentData[];
-}
+};
 
 export type DeleteSegmentPayload = RoutePayload & {
     index: number;
-}
+};
 
 export type ChangeVisibilityPayload = RoutePayload & {
     isVisible: boolean;
-}
+};
 
 export type ChangeEditStatePayload = RoutePayload & {
     state: RouteStateName;
-}
+};
 
 export type ReverseRoutePayload = RoutePayload & {
     routeData: RouteData;
-}
+};
 
 export type SplitRoutePayload = RoutePayload & {
     routeData: RouteData;
     splitRouteData: RouteData;
-}
+};
 
 export type MergeRoutesPayload = RoutePayload & {
     secondaryRouteId: string;
     mergedRouteData: RouteData;
-}
+};
 
 export type AddRecordingPointsPayload = RoutePayload & {
     latlngs: LatLngAltTime[];
-}
+};
 
 export type BulkReplaceRoutesPayload = {
     routesData: RouteData[];
-}
+};
 
 export class AddRouteAction extends BaseAction<AddRoutePayload> {
     constructor(payload: AddRoutePayload) {

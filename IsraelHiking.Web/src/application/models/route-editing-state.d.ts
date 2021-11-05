@@ -6,4 +6,4 @@ export type RouteEditingState = {
     recordingRouteId: string;
     opacity: number;
     weight: number;
-}
+};

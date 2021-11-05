@@ -20,54 +20,54 @@ const TOGGLE_OFFLINE = "TOGGLE_OFFLINE";
 
 export type AddBaseLayerPayload = {
     layerData: EditableLayer;
-}
+};
 
 export type AddOverlayPayload = {
     layerData: Overlay;
-}
+};
 
 export type RemoveLayerPayload = {
     key: string;
-}
+};
 
 export type UpdateBaseLayerPayload = {
     key: string;
     layerData: EditableLayer;
-}
+};
 
 export type UpdateOverlayPayload = {
     key: string;
     layerData: Overlay;
-}
+};
 
 export type SelectBaseLayerPayload = {
     key: string;
-}
+};
 
 export type ToggleGroupPayload = {
     name: string;
-}
+};
 
 export type SetCategoriesGroupVisibilityPayload = {
     groupType: CategoriesGroupType;
     visible: boolean;
-}
+};
 
 export type AddCategoryPayload = {
     groupType: CategoriesGroupType;
     category: Category;
-}
+};
 
 export type SetCategoryVisibilityPayload = {
     name: string;
     groupType: CategoriesGroupType;
     visible: boolean;
-}
+};
 
 export type ToggleOfflinePayload = {
     key: string;
     isOverlay: boolean;
-}
+};
 
 export class AddBaseLayerAction extends BaseAction<AddBaseLayerPayload> {
     constructor(payload: AddBaseLayerPayload) {

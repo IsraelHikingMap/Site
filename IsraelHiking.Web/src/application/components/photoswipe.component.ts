@@ -10,7 +10,7 @@ export const PHOTO_SWIPE_DATA = new InjectionToken<PhotoSwipeData>("PHOTO_SWIPE_
 export type PhotoSwipeData = {
     imageUrls: string[];
     index: number;
-}
+};
 
 @Component({
     selector: "photoswipe",

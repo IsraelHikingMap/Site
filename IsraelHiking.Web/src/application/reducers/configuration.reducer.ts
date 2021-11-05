@@ -23,11 +23,11 @@ export class ConfigurationActions {
 
 export type SetLanguagePayload = {
     language: Language;
-}
+};
 
 export type SetBatteryOptimizationTypePayload = {
     batteryOptimizationType: BatteryOptimizationType;
-}
+};
 
 export class SetLanguageAction extends BaseAction<SetLanguagePayload> {
     constructor(payload: SetLanguagePayload) {

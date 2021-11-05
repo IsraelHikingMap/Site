@@ -10,7 +10,7 @@ export type PoiRouterData = {
     source: string;
     id: string;
     language: string;
-}
+};
 
 export class RouteStrings {
     public static readonly MAP = "map";

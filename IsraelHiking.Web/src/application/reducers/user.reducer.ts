@@ -8,15 +8,15 @@ const SET_AGREED_TO_TERMS = "SET_AGREED_TO_TERMS";
 
 export type SetUserInfoPayload = {
     userInfo: UserInfo;
-}
+};
 
 export type SetTokenPayload = {
     token: string;
-}
+};
 
 export type SetArgreeToTermsPayload = {
     agree: boolean;
-}
+};
 
 export class SetUserInfoAction extends BaseAction<SetUserInfoPayload> {
     constructor(payload: SetUserInfoPayload) {

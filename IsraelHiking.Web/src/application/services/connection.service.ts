@@ -19,7 +19,7 @@ export type ConnectionState = {
      * "True" if browser has Internet access. Determined by heartbeat system which periodically makes request to heartbeat Url.
      */
     hasInternetAccess: boolean;
-}
+};
 
 /**
  * Instance of this type could be used to configure "ConnectionService".
@@ -47,7 +47,7 @@ export type ConnectionServiceOptions = {
      */
     requestMethod?: "get" | "post" | "head" | "options";
 
-}
+};
 
 /**
  * InjectionToken for specifing ConnectionService options.

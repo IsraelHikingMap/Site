@@ -3,4 +3,4 @@
 export type Bounds = {
     northEast: LatLngAlt;
     southWest: LatLngAlt;
-}
+};

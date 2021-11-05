@@ -6,4 +6,4 @@ export type RouteSegmentData = {
     routePoint: LatLngAlt;
     latlngs: LatLngAltTime[];
     routingType: RoutingType;
-}
+};

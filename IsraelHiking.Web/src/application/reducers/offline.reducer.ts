@@ -11,23 +11,23 @@ const REMOVE_FROM_POI_QUEUE = "REMOVE_FROM_POI_QUEUE";
 
 export type SetOfflineAvailablePayload = {
     isAvailble: boolean;
-}
+};
 
 export type SetOfflineLastModifiedPayload = {
     lastModifiedDate: Date;
-}
+};
 
 export type SetShareUrlsLastModifiedPayload = {
     lastModifiedDate: Date;
-}
+};
 
 export type AddToPoiQueuePayload = {
     featureId: string;
-}
+};
 
 export type RemoveFromPoiQueuePayload = {
     featureId: string;
-}
+};
 
 export class SetOfflineAvailableAction extends BaseAction<SetOfflineAvailablePayload> {
     constructor(payload: SetOfflineAvailablePayload) {

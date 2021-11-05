@@ -42,20 +42,20 @@ export type SimplePointType = "Tap" | "CattleGrid" | "Parking" | "OpenGate" | "C
 type ImageItem = {
     thumbnail: string;
     imageUrls: string[];
-}
+};
 
 type UpdatesResponse = {
     features: GeoJSON.Feature<GeoJSON.Geometry>[];
     images: ImageItem[];
     lastModified: Date;
-}
+};
 
 export type PoiSocialLinks = {
     poiLink: string;
     facebook: string;
     whatsapp: string;
     waze: string;
-}
+};
 
 export interface ISelectableCategory extends Category {
     isSelected: boolean;

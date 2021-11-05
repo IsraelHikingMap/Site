@@ -20,7 +20,7 @@ export type LegendSection = {
     key: keyof ResourcesService;
     items: ILegendItem[];
     title: string;
-}
+};
 
 @Component({
     selector: "info-sidebar",

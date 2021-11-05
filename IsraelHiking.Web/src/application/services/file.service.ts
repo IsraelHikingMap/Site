@@ -23,7 +23,7 @@ export type FormatViewModel = {
     label: string;
     outputFormat: string;
     extension: string;
-}
+};
 
 @Injectable()
 export class FileService {

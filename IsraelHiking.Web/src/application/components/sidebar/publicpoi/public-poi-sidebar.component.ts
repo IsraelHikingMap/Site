@@ -34,7 +34,7 @@ import type {
 export type SourceImageUrlPair = {
     imageUrl: string;
     url: string;
-}
+};
 
 @Component({
     selector: "public-poi-sidebar",

@@ -7,11 +7,11 @@ const SET_CURRENT_LOCATION = "SET_CURRENT_LOCATION";
 
 export type SetTrackingStatePayload = {
     state: TrackingStateType;
-}
+};
 
 export type SetCurrentPoistionPayload = {
     position: GeolocationPosition;
-}
+};
 
 export class SetTrackingStateAction extends BaseAction<SetTrackingStatePayload> {
     constructor(payload: SetTrackingStatePayload) {

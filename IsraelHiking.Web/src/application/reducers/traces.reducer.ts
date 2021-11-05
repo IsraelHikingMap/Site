@@ -11,28 +11,28 @@ const REMOVE_MISSING_PART = "REMOVE_MISSING_PART";
 
 export type AddTracePayload = {
     trace: Trace;
-}
+};
 
 export type UpdateTracePayload = {
     traceId: string;
     trace: Trace;
-}
+};
 
 export type RemoveTracePayload = {
     traceId: string;
-}
+};
 
 export type SetVisibleTracePayload = {
     traceId: string;
-}
+};
 
 export type SetMissingPartsPayload = {
     missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>;
-}
+};
 
 export type RemoveMissingPartPayload = {
     missingPartIndex: number;
-}
+};
 
 export class AddTraceAction extends BaseAction<AddTracePayload> {
     constructor(payload: AddTracePayload) {

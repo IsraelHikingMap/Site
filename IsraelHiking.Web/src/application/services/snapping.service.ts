@@ -7,7 +7,7 @@ import type { LatLngAlt, MarkerData } from "../models/models";
 export type SnappingPointResponse = {
     latlng: LatLngAlt;
     markerData: MarkerData;
-}
+};
 
 @Injectable()
 export class SnappingService {

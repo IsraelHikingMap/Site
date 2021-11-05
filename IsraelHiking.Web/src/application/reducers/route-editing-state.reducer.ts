@@ -12,16 +12,16 @@ const SET_OPACITY_AND_WEIGHT = "SET_OPACITY_AND_WEIGHT";
 
 export type RoutePayload = {
     routeId: string;
-}
+};
 
 export type SetRouteEditingStatePayload = {
     routingType: RoutingType;
-}
+};
 
 export type SetOpacityAndWeightPayload = {
     opacity: number;
     weight: number;
-}
+};
 
 export class SetRouteEditingStateAction extends BaseAction<SetRouteEditingStatePayload> {
     constructor(payload: SetRouteEditingStatePayload) {

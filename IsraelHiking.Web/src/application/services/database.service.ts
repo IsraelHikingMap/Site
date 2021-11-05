@@ -19,7 +19,7 @@ import type { ApplicationState, ShareUrl, Trace } from "../models/models";
 export type ImageUrlAndData = {
     imageUrl: string;
     data: string;
-}
+};
 
 @Injectable()
 export class DatabaseService {

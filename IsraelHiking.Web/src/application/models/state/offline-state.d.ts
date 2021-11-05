@@ -19,4 +19,4 @@
      * A Queue to represent the IDs of items waiting to be uploaded to the server
      */
     uploadPoiQueue: string[];
-}
+};

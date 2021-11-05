@@ -34,11 +34,11 @@ export type SearchContext = {
     searchTerm: string;
     searchResults: SearchResultsPointOfInterest[];
     selectedSearchResults: SearchResultsPointOfInterest;
-}
+};
 
 type SearchRequestQueueItem = {
     searchTerm: string;
-}
+};
 
 type DirectionalContext = {
     isOn: boolean;
@@ -47,7 +47,7 @@ type DirectionalContext = {
     routeCoordinates: PointLike[];
     routeTitle: string;
     routeSegments: RouteSegmentData[];
-}
+};
 
 @Component({
     selector: "search",

@@ -12,4 +12,4 @@ export type Trace = {
     tagsString: string;
     visibility: TraceVisibility;
     dataContainer?: DataContainer;
-}
+};

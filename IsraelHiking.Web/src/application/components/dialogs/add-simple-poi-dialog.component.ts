@@ -14,7 +14,7 @@ export type AddSimplePoiDialogData = {
     title: string;
     description: string;
     markerType: string;
-}
+};
 
 @Component({
     selector: "add-simple-poi-doalog",

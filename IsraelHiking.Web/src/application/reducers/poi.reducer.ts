@@ -8,15 +8,15 @@ const SET_SIDEBAR = "SET_SIDEBAR";
 
 export type SetSelectedPoiPayload = {
     poi: GeoJSON.Feature;
-}
+};
 
 export type SetUploadMarkerDataPayload = {
     markerData: MarkerData;
-}
+};
 
 export type SetSidebarPayload = {
     isOpen: boolean;
-}
+};
 
 export class SetSelectedPoiAction extends BaseAction<SetSelectedPoiPayload> {
     constructor(payload: SetSelectedPoiPayload) {

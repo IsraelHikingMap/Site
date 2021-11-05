@@ -7,4 +7,4 @@ export type MarkerData = {
     type: string;
     id?: string;
     urls: LinkData[];
-}
+};

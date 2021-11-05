@@ -4,7 +4,7 @@ export type IconColorLabel = {
     icon: string;
     color: string;
     label: string;
-}
+};
 
 export type Category = {
     name: string;
@@ -12,10 +12,10 @@ export type Category = {
     color: string;
     visible: boolean;
     items: { iconColorCategory: IconColorLabel; tags: any[] }[];
-}
+};
 
 export type CategoriesGroup = {
     type: CategoriesGroupType;
     visible: boolean;
     categories: Category[];
-}
+};

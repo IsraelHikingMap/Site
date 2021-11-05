@@ -4,14 +4,14 @@ import { parseString, Builder } from "isomorphic-xml2js";
 import { encode } from "base64-arraybuffer";
 import XmlBeautify from "xml-beautify";
 
-import type { 
-    DataContainer, 
-    RouteData, 
-    RouteSegmentData, 
-    LatLngAltTime, 
-    MarkerData, 
-    LinkData, 
-    LatLngAlt 
+import type {
+    DataContainer,
+    RouteData,
+    RouteSegmentData,
+    LatLngAltTime,
+    MarkerData,
+    LinkData,
+    LatLngAlt
 } from "../models/models";
 
 interface Link {

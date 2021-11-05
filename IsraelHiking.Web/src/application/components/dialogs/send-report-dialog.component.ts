@@ -6,7 +6,7 @@ import { ResourcesService } from "application/services/resources.service";
 
 export type SendReportDialogData = {
     subject: string;
-}
+};
 
 @Component({
     selector: "send-report",

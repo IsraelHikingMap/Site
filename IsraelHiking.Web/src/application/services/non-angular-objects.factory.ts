@@ -6,7 +6,7 @@ import * as ohauth from "ohauth";
 export type OAuthResponse = {
     oauth_token: string;
     oauth_token_secret: string;
-}
+};
 
 export type IOAuthParams = {
     oauth_consumer_key: string;
@@ -15,7 +15,7 @@ export type IOAuthParams = {
     oauth_nonce: string;
     oauth_token: string;
     oauth_signature: string;
-}
+};
 
 export interface IOhAuth {
     signature: (authSecret: string, tokenSecret: string, parameters: string) => string;

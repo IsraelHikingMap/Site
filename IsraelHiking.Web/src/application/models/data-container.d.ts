@@ -6,4 +6,4 @@ export type DataContainer = {
     overlays: LayerData[];
     northEast: LatLngAlt;
     southWest: LatLngAlt;
-}
+};

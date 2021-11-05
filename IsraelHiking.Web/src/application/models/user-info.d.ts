@@ -3,4 +3,4 @@
     imageUrl: string;
     id: string;
     changeSets: number;
-}
+};

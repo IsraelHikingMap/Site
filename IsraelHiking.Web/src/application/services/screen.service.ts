@@ -40,7 +40,7 @@ export class ScreenService {
         this.logger.info(`[Screen] Original brightness is: ${this.originalBrightness}`);
         document.addEventListener("resume", () => {
             this.logger.info(`[Screen] Resume app, setting brightness to original: ${this.originalBrightness}`);
-            this.setKeepScreenOn();    
+            this.setKeepScreenOn();
             this.brightness.setBrightness(this.originalBrightness); // this is just to be on the safe side...
             this.userIdleService.watch();
         }, false);

@@ -8,7 +8,7 @@ export type SetLocationPayload = {
     longitude: number;
     latitude: number;
     zoom?: number;
-}
+};
 
 export class SetLocationAction extends BaseAction<SetLocationPayload> {
     constructor(payload: SetLocationPayload) {

@@ -3,4 +3,4 @@
     image: string;
     changeSetCount: number;
     id: string;
-}
+};

@@ -12,15 +12,15 @@ export type IPiexifGPSIFD = {
     GPSLatitudeRef: string;
     GPSLongitude: string;
     GPSLongitudeRef: string;
-}
+};
 
 export type PiexifObject = {
     GPS: any[];
-}
+};
 
 export type PiexifImageIFD = {
     Orientation: number;
-}
+};
 
 export interface IPiexif {
     GPSHelper: IPiexifGPSHelper;

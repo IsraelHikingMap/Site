@@ -11,16 +11,16 @@ const SET_FILE_URL_AND_BASE_LAYER = "SET_FILE_URL_AND_BASE_LAYER";
 
 export type SetPannedPayload = {
     pannedTimestamp: Date;
-}
+};
 
 export type SetShareUrlPayload = {
     shareUrl: ShareUrl;
-}
+};
 
 export type SetFileUrlAndBaseLayerPayload = {
     fileUrl: string;
     baseLayer: string;
-}
+};
 
 export class ToggleDistanceAction implements Action {
     public type: string;

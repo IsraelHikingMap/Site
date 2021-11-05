@@ -1,6 +1,6 @@
 ﻿import { Language } from "../language";
 
-export type BatteryOptimizationType = "screen-on" | "dark" | "screen-off"
+export type BatteryOptimizationType = "screen-on" | "dark" | "screen-off";
 
 export type Configuration = {
     batteryOptimizationType: BatteryOptimizationType;
@@ -10,4 +10,4 @@ export type Configuration = {
     isShowIntro: boolean;
     version: string;
     language: Language;
-}
+};
