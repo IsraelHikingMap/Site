@@ -103,7 +103,7 @@ export class GeoLocationService {
             (position: GeolocationPosition): void => this.handlePoistionChange(position),
             (err) => {
                 this.ngZone.run(() => {
-                    this.loggingService.error("[GeoLocation] Failed to start tracking " + JSON.stringify(err));
+                    this.loggingService.error("[GeoLocation] Failed to start browser tracking " + JSON.stringify(err));
                     this.toastService.warning(this.resources.unableToFindYourLocation);
                     this.disable();
                 });
@@ -119,6 +119,7 @@ export class GeoLocationService {
             BackgroundGeolocation.start();
             return;
         }
+        this.loggingService.info("[GeoLocation] Starting background tracking");
         this.wasInitialized = true;
         BackgroundGeolocation.configure({
             locationProvider: BackgroundGeolocation.RAW_PROVIDER,
@@ -165,6 +166,11 @@ export class GeoLocationService {
                 this.isBackground = false;
                 await this.onLocationUpdate();
             });
+        BackgroundGeolocation.on("error").subscribe((error) => {
+            this.loggingService.error(`[GeoLocation] Failed to start background tracking ${error.message}`);
+            this.toastService.warning(this.resources.unableToFindYourLocation);
+            this.disable();
+        })
         BackgroundGeolocation.start();
     }
 
