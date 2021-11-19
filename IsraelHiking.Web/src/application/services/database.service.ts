@@ -1,10 +1,9 @@
 import { Injectable } from "@angular/core";
 import { debounceTime } from "rxjs/operators";
-import { decode } from "base64-arraybuffer";
 import { SQLite, SQLiteDatabaseConfig, SQLiteObject } from "@ionic-native/sqlite/ngx";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
-import * as maplibregl from "maplibre-gl";
+import maplibregl from "maplibre-gl";
 import * as pako from "pako";
 
 import { LoggingService } from "./logging.service";

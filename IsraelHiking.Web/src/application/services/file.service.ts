@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
-import { Style } from "maplibre-gl";
+import { StyleSpecification } from "maplibre-gl";
 import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
 import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
@@ -128,11 +128,11 @@ export class FileService {
         return url;
     }
 
-    public getStyleJsonContent(url: string, isOffline: boolean): Promise<Style> {
+    public getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
         if (isOffline) {
             url = last(url.split("/"));
         }
-        return this.httpClient.get(this.getDataUrl(url)).toPromise() as Promise<Style>;
+        return this.httpClient.get(this.getDataUrl(url)).toPromise() as Promise<StyleSpecification>;
     }
 
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {

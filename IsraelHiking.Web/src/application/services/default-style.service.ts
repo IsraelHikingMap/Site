@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
-import { Style } from "maplibre-gl";
+import { StyleSpecification } from "maplibre-gl";
 
 import { FileService } from "./file.service";
 
 @Injectable()
 export class DefaultStyleService {
-    public style: Style;
+    public style: StyleSpecification;
 
     constructor(private readonly fileService: FileService) {
         this.style = {

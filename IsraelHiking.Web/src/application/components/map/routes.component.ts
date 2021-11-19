@@ -252,7 +252,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.mapComponent.mapLoad.subscribe(() => {
             this.setInteractionAccordingToState();
             let fullFilePath = this.fileService.getFullFilePath("content/arrow.png");
-            this.mapComponent.mapInstance.loadImage(fullFilePath, (_: Error, image: HTMLImageElement) => {
+            this.mapComponent.mapInstance.loadImage(fullFilePath, (_: Error, image: HTMLImageElement | ImageBitmap) => {
                 this.mapComponent.mapInstance.addImage("arrow", image, { sdf: true });
             });
         });
