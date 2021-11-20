@@ -172,6 +172,7 @@ import { CategoriesGroupComponent } from "./components/sidebar/categories-group.
 import { MainMenuComponent } from "./components/main-menu.component";
 import { CenterMeComponent } from "./components/center-me.component";
 import { PhotoSwpieComponent } from "./components/photoswipe.component";
+import { BackgroundTextComponent } from "./components/background-text.component";
 
 // variables and functions
 import { routes } from "./routes";
@@ -349,6 +350,7 @@ const initializeApplication = (injector: Injector) => async () => {
             FilesSharesDialogComponent,
             AddSimplePoiDialogComponent,
             FacebookWarningDialogComponent,
+            BackgroundTextComponent,
             NameInUseValidatorDirective,
             ImageCaptureDirective,
             OfflineImagePipe,
