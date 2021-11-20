@@ -291,6 +291,7 @@ export class ResourcesService {
     public thisWillDeteleAllCurrentRoutesAreYouSure: string;
     public pleaseFillReport: string;
     public hiddenRoutesWillNotBeSaved: string;
+    public noLocationPermissionOpenAppSettings: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -466,7 +467,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1635511838323");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1637440747439");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -757,6 +758,8 @@ export class ResourcesService {
         this.pleaseFillReport = this.gettextCatalog
             .getString("Please fill in the details of the issue in the e-mail message that will be shown soon and send it");
         this.hiddenRoutesWillNotBeSaved = this.gettextCatalog.getString("Hidden routes will not be saved...");
+        this.noLocationPermissionOpenAppSettings = this.gettextCatalog.getString("There's no permission to use your location. " +
+            "Would you like to open the app settings?");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

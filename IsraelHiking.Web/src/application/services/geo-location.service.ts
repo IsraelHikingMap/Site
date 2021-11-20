@@ -166,11 +166,27 @@ export class GeoLocationService {
                 this.isBackground = false;
                 await this.onLocationUpdate();
             });
-        BackgroundGeolocation.on("error").subscribe((error) => {
-            this.loggingService.error(`[GeoLocation] Failed to start background tracking ${error.message}`);
-            this.toastService.warning(this.resources.unableToFindYourLocation);
-            this.disable();
-        })
+
+        BackgroundGeolocation.on("authorization").subscribe(
+            (status) => {
+                if (status === BackgroundGeolocation.NOT_AUTHORIZED) {
+                    this.loggingService.error("[GeoLocation] Failed to start background tracking - unauthorized");
+                    this.disable();
+                    this.toastService.confirm({
+                        message: this.resources.noLocationPermissionOpenAppSettings,
+                        type: "OkCancel",
+                        confirmAction: () => BackgroundGeolocation.showAppSettings(),
+                        declineAction: () => { }
+                    });
+                }
+            });
+
+        BackgroundGeolocation.on("error").subscribe(
+            (error) => {
+                this.loggingService.error(`[GeoLocation] Failed to start background tracking ${error.message}`);
+                this.toastService.warning(this.resources.unableToFindYourLocation);
+                this.disable();
+            });
         BackgroundGeolocation.start();
     }
 
