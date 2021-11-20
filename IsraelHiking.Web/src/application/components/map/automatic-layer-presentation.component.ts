@@ -57,7 +57,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     public async ngOnInit() {
-        if (this.mapComponent.mapInstance == null) {
+        if (this.mapComponent.mapInstance == null || !this.mapComponent.mapInstance.loaded()) {
             this.subscriptions.push(this.mapComponent.mapLoad.subscribe(async () => {
                 await this.createLayer();
                 this.sourceAdded = true;
