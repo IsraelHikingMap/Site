@@ -168,7 +168,7 @@ namespace IsraelHiking.API.Services
 
             var addressTemplates = new List<AddressAndOpacity>
             {
-                new AddressAndOpacity { Address = FixAdrressTemplate(address), Opacity = context.DataContainer.BaseLayer.Opacity ?? 1.0 }
+                new AddressAndOpacity { Address = FixAddressTemplate(address), Opacity = context.DataContainer.BaseLayer.Opacity ?? 1.0 }
             };
             foreach (var layerData in context.DataContainer.Overlays ?? new List<LayerData>())
             {
@@ -178,7 +178,7 @@ namespace IsraelHiking.API.Services
                 }
                 var addressAndOpacity = new AddressAndOpacity
                 {
-                    Address = FixAdrressTemplate(layerData.Address),
+                    Address = FixAddressTemplate(layerData.Address),
                     Opacity = layerData.Opacity ?? 1.0
                 };
                 addressTemplates.Add(addressAndOpacity);
@@ -251,7 +251,7 @@ namespace IsraelHiking.API.Services
             return image;
         }
 
-        private static string FixAdrressTemplate(string addressTemplate)
+        private static string FixAddressTemplate(string addressTemplate)
         {
             addressTemplate = addressTemplate.Trim();
             var lowerAddress = addressTemplate.ToLower();
@@ -332,7 +332,7 @@ namespace IsraelHiking.API.Services
         /// <summary>
         /// This method will fetch the relevant image
         /// If the required zoom is too big it will fetch and image from a lower zoom and split the relevant part of it
-        /// This allow the other parts of the algorithm to be ignorat to the max zoom .
+        /// This allow the other parts of the algorithm to be ignorant to the max zoom.
         /// </summary>
         /// <param name="topLeft">Top left corner</param>
         /// <param name="offset">Offset from corner</param>
