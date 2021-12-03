@@ -116,7 +116,7 @@ namespace IsraelHiking.Common.Configuration
         /// <summary>
         /// OsmPbf server address
         /// </summary>
-        public string OsmCToolsServerAddress { get; set; }
+        public string OsmPbfAddress { get; set; }
         /// <summary>
         /// Elevation server address
         /// </summary>
@@ -178,7 +178,7 @@ namespace IsraelHiking.Common.Configuration
             GraphhopperServerAddress = "http://localhost:8989/";
             ElasticsearchServerAddress = "http://localhost:9200/";
             GpsBabelServerAddress = "http://localhost:11987/";
-            OsmCToolsServerAddress = "http://localhost:11911/";
+            OsmPbfAddress = "https://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf";
             ElevationServerAddress = "http://localhost:11211/";
             OsmFileAddress = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine-latest.osm.pbf";
             OsmFileTimeStampAddress = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine.state.txt";

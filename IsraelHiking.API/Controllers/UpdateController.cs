@@ -15,8 +15,7 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class UpdateController : ControllerBase
     {
-        private static readonly Semaphore RebuildSemaphore = new Semaphore(1, 1);
-        private static readonly SemaphoreSlim UpdateSemaphore = new SemaphoreSlim(1, 1);
+        private static readonly Semaphore RebuildSemaphore = new(1, 1);
 
         private readonly ILogger _logger;
         private readonly IDatabasesUpdaterService _databasesUpdaterService;
@@ -37,7 +36,7 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// This operation updates elastic search and graph hopper with data stored in osm pbf file.
         /// If OsmFile is set to false it will download and use the daily file without updating it to latest version.
-        /// This opertaion should have minimal down time.
+        /// This operation should have minimal down time.
         /// This operation can only be ran from the hosting server.
         /// </summary>
         /// <returns></returns>
@@ -59,8 +58,6 @@ namespace IsraelHiking.API.Controllers
                     request.Highways == false &&
                     request.AllExternalSources == false &&
                     request.PointsOfInterest == false &&
-                    request.UpdateOsmFile == false &&
-                    request.DownloadOsmFile == false &&
                     request.Images == false &&
                     request.SiteMap == false &&
                     request.OfflinePoisFile == false)
@@ -70,8 +67,6 @@ namespace IsraelHiking.API.Controllers
                         Highways = true,
                         AllExternalSources = true,
                         PointsOfInterest = true,
-                        UpdateOsmFile = true,
-                        DownloadOsmFile = true,
                         SiteMap = true,
                         Images = true,
                         OfflinePoisFile = true
@@ -86,38 +81,6 @@ namespace IsraelHiking.API.Controllers
             finally
             {
                 RebuildSemaphore.Release();
-            }
-        }
-
-        /// <summary>
-        /// This operation will only update the data since last full update
-        /// It will only add missing data to the database
-        /// It will not run when a full update runs
-        /// </summary>
-        /// <returns></returns>
-        [HttpPut]
-        [Route("")]
-        public async Task<IActionResult> PutUpdateData()
-        {
-            // HM TODO: update this code according to changes in POIs
-            if (!IsRequestLocal())
-            {
-                return BadRequest("This operation can't be done from a remote client, please run this from the server");
-            }
-            if (!RebuildSemaphore.WaitOne(0))
-            {
-                return BadRequest("Can't run update while full update is running");
-            }
-            RebuildSemaphore.Release();
-            await UpdateSemaphore.WaitAsync();
-            try
-            {
-                await _databasesUpdaterService.Update();
-                return Ok();
-            }
-            finally
-            {
-                UpdateSemaphore.Release();
             }
         }
 

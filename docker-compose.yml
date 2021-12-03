@@ -41,12 +41,6 @@ services:
     ports:
       - 11987:80
     restart: always
-  osmpbfwebapi:
-    image: israelhikingmap/osmpbfwebapi
-    container_name: osmpbfwebapi
-    ports:
-      - 11911:80
-    restart: always
   elevation:
     image: israelhikingmap/elevationwebapi
     container_name: elevation

@@ -6,28 +6,20 @@ using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
-using NetTopologySuite.Geometries;
 using OsmSharp;
-using OsmSharp.Changesets;
-using OsmSharp.Complete;
-using OsmSharp.IO.API;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace IsraelHiking.API.Services.Osm
 {
     /// <inheritdoc />
     public class DatabasesUpdaterService : IDatabasesUpdaterService
     {
-        private readonly INonAuthClient _osmGateway;
         private readonly IExternalSourcesRepository _externalSourcesRepository;
         private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
         private readonly IHighwaysRepository _highwaysRepository;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
-        private readonly ITagsHelper _tagsHelper;
         private readonly IOsmRepository _osmRepository;
         private readonly IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
@@ -38,15 +30,14 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
         private readonly IElevationGateway _elevationGateway;
         private readonly ILogger _logger;
+
         /// <summary>
         /// Service's constructor
         /// </summary>
-        /// <param name="clinetsFactory"></param>
         /// <param name="externalSourcesRepository"></param>
         /// <param name="pointsOfInterestRepository"></param>
         /// <param name="highwaysRepository"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
-        /// <param name="tagsHelper"></param>
         /// <param name="osmRepository"></param>
         /// <param name="pointsOfInterestAdapterFactory"></param>
         /// <param name="featuresMergeExecutor"></param>
@@ -57,12 +48,11 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="externalSourceUpdaterExecutor"></param>
         /// <param name="elevationGateway"></param>
         /// <param name="logger"></param>
-        public DatabasesUpdaterService(IClientsFactory clinetsFactory,
-            IExternalSourcesRepository externalSourcesRepository,
+        public DatabasesUpdaterService(IExternalSourcesRepository externalSourcesRepository,
             IPointsOfInterestRepository pointsOfInterestRepository,
             IHighwaysRepository highwaysRepository,
-            IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
-            ITagsHelper tagsHelper, IOsmRepository osmRepository,
+            IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
+            IOsmRepository osmRepository,
             IPointsOfInterestAdapterFactory pointsOfInterestAdapterFactory,
             IFeaturesMergeExecutor featuresMergeExecutor,
             IOsmLatestFileGateway latestFileGateway,
@@ -77,101 +67,16 @@ namespace IsraelHiking.API.Services.Osm
             _pointsOfInterestRepository = pointsOfInterestRepository;
             _highwaysRepository = highwaysRepository;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
-            _tagsHelper = tagsHelper;
             _osmRepository = osmRepository;
             _pointsOfInterestAdapterFactory = pointsOfInterestAdapterFactory;
             _pointsOfInterestFilesCreatorExecutor = pointsOfInterestFilesCreatorExecutor;
             _featuresMergeExecutor = featuresMergeExecutor;
             _osmLatestFileGateway = latestFileGateway;
             _pointsOfInterestProvider = pointsOfInterestProvider;
-            _osmGateway = clinetsFactory.CreateNonAuthClient();
             _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
             _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
             _elevationGateway = elevationGateway;
             _logger = logger;
-        }
-
-        /// <inheritdoc />
-        public async Task Update()
-        {
-            _logger.LogInformation("Staring updating from OSM change file");
-            using var updatesStream = await _osmLatestFileGateway.GetUpdates();
-            XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
-            var changes = (OsmChange)serializer.Deserialize(updatesStream);
-            await UpdateHighways(changes);
-            await UpdatePointsOfInterest(changes);
-            _logger.LogInformation("Finished updating from OSM change file");
-        }
-
-        private async Task UpdateHighways(OsmChange changes)
-        {
-            var deleteTasks = new List<Task>();
-            foreach (var highwaysToRemove in changes.Delete.OfType<Way>())
-            {
-                var task = _highwaysRepository.DeleteHighwaysById(highwaysToRemove.GetId());
-                deleteTasks.Add(task);
-            }
-            await Task.WhenAll(deleteTasks);
-            var updateTasks = new List<Task<CompleteWay>>();
-            foreach (var highwaysToUpdate in changes.Modify
-                .Concat(changes.Create)
-                .OfType<Way>()
-                .Where(w => w.Tags != null && w.Tags.ContainsKey("highway")))
-            {
-                var task = _osmGateway.GetCompleteWay(highwaysToUpdate.Id.Value);
-                updateTasks.Add(task);
-            }
-            var updatedWays = await Task.WhenAll(updateTasks);
-            var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(updatedWays.ToList());
-            await _highwaysRepository.UpdateHighwaysData(geoJsonHighways);
-        }
-
-        private async Task UpdatePointsOfInterest(OsmChange changes)
-        {
-            var deleteTasks = new List<Task>();
-            var relevantTagsDictionary = _tagsHelper.GetAllTags();
-            foreach (var poiToRemove in changes.Delete)
-            {
-                var task = _pointsOfInterestRepository.DeleteOsmPointOfInterestById(poiToRemove.GetId(), poiToRemove.TimeStamp);
-                deleteTasks.Add(task);
-            }
-            await Task.WhenAll(deleteTasks);
-            var updateTasks = new List<Task<ICompleteOsmGeo>>();
-            foreach (var poiToUpdate in changes.Modify
-                .Concat(changes.Create)
-                .Where(o => IsRelevantPointOfInterest(o, relevantTagsDictionary)))
-            {
-                var task = _osmGateway.GetCompleteElement(poiToUpdate.Id.Value, poiToUpdate.Type);
-                updateTasks.Add(task);
-            }
-            var allElemets = await Task.WhenAll(updateTasks);
-            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(allElemets.ToList());
-
-            foreach (var poiToUpdate in changes.Modify
-                .Where(o => IsRelevantPointOfInterest(o, relevantTagsDictionary)))
-            {
-                var featureFromDb = await _pointsOfInterestRepository.GetPointOfInterestById(poiToUpdate.GetId(), Sources.OSM);
-                if (featureFromDb == null)
-                {
-                    continue;
-                }
-                var featureToUpdate = features.First(f => f.GetId().Equals(featureFromDb.GetId()));
-                foreach (var attributeKey in featureFromDb.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_PREFIX)))
-                {
-                    featureToUpdate.Attributes.AddOrUpdate(attributeKey, featureFromDb.Attributes[attributeKey]);
-                }
-                if (featureToUpdate.Geometry.OgcGeometryType == OgcGeometryType.Point &&
-                    featureFromDb.Geometry.OgcGeometryType != OgcGeometryType.Point)
-                {
-                    featureToUpdate.Geometry = featureFromDb.Geometry;
-                }
-            }
-            await _pointsOfInterestRepository.UpdatePointsOfInterestData(features);
-        }
-
-        private bool IsRelevantPointOfInterest(OsmGeo osm, List<KeyValuePair<string, string>> relevantTagsDictionary)
-        {
-            return osm.Tags != null && (osm.Tags.GetName() != string.Empty || osm.Tags.HasAny(relevantTagsDictionary));
         }
 
         /// <inheritdoc />
@@ -189,10 +94,6 @@ namespace IsraelHiking.API.Services.Osm
                 if (request.AllExternalSources)
                 {
                     await UpdateExternalSources();
-                }
-                if (request.UpdateOsmFile || request.DownloadOsmFile)
-                {
-                    await _osmLatestFileGateway.Update(request.DownloadOsmFile, request.UpdateOsmFile);
                 }
                 if (request.Highways)
                 {
@@ -262,7 +163,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildHighways()
         {
             _logger.LogInformation("Starting rebuilding highways database.");
-            using var stream = await _osmLatestFileGateway.Get();
+            await using var stream = await _osmLatestFileGateway.Get();
             var osmHighways = await _osmRepository.GetAllHighways(stream);
             var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
             await _highwaysRepository.UpdateHighwaysZeroDownTime(geoJsonHighways);
@@ -273,7 +174,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildImages()
         {
             _logger.LogInformation("Starting rebuilding images database.");
-            using var stream = await _osmLatestFileGateway.Get();
+            await using var stream = await _osmLatestFileGateway.Get();
             var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
             var featuresUrls = features.SelectMany(f =>
                 f.Attributes.GetNames()
