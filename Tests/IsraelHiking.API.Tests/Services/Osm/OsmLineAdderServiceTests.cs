@@ -34,7 +34,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var options = new ConfigurationData
             {
                 MinimalDistanceToClosestPoint = 30,
-                MaxDistanceToExisitngLineForMerge = 1
+                MaxDistanceToExistingLineForMerge = 1
             };
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);

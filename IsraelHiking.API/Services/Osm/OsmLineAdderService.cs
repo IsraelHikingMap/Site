@@ -92,7 +92,7 @@ namespace IsraelHiking.API.Services.Osm
                 {
                     continue;
                 }
-                if (closestItmPointInWay.Distance(itmPoint.Coordinate) <= _options.MaxDistanceToExisitngLineForMerge)
+                if (closestItmPointInWay.Distance(itmPoint.Coordinate) <= _options.MaxDistanceToExistingLineForMerge)
                 {
                     // close highway, adding the node id from that highway
                     newWayNodes.Add(closestNode);
@@ -176,12 +176,12 @@ namespace IsraelHiking.API.Services.Osm
         {
             var previousItmPoint = GetItmCoordinate(previousCoordinate);
             var lineSegment = _geometryFactory.CreateLineString(new [] { previousItmPoint.Coordinate, GetItmCoordinate(coordinate).Coordinate});
-            var closeItmLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _options.MaxDistanceToExisitngLineForMerge &&
-                                                     hw.Distance(previousItmPoint) > _options.MaxDistanceToExisitngLineForMerge);
+            var closeItmLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _options.MaxDistanceToExistingLineForMerge &&
+                                                     hw.Distance(previousItmPoint) > _options.MaxDistanceToExistingLineForMerge);
             foreach (var closeItmLine in closeItmLines)
             {
                 var closestPointInExistingLine = closeItmLine.Coordinates.Select(c => new Point(c)).OrderBy(p => p.Distance(lineSegment)).First();
-                if (closestPointInExistingLine.Distance(lineSegment) > _options.MaxDistanceToExisitngLineForMerge)
+                if (closestPointInExistingLine.Distance(lineSegment) > _options.MaxDistanceToExistingLineForMerge)
                 {
                     continue;
                 }
@@ -234,7 +234,7 @@ namespace IsraelHiking.API.Services.Osm
             if (indexOnWay != closestItmHighway.Coordinates.Length - 1)
             {
                 var postItmLine = new LineString(new[] { closestItmHighway.Coordinates[indexOnWay], closestItmHighway.Coordinates[indexOnWay + 1] });
-                if (postItmLine.Distance(itmPoint) <= _options.MaxDistanceToExisitngLineForMerge)
+                if (postItmLine.Distance(itmPoint) <= _options.MaxDistanceToExistingLineForMerge)
                 {
                     indexToInsert = indexOnWay + 1;
                 }
@@ -272,7 +272,7 @@ namespace IsraelHiking.API.Services.Osm
             {
                 return null;
             }
-            var closestHighway = itmHighways.Where(l => l.Distance(point) <= _options.MaxDistanceToExisitngLineForMerge)
+            var closestHighway = itmHighways.Where(l => l.Distance(point) <= _options.MaxDistanceToExistingLineForMerge)
                 .OrderBy(l => l.Distance(point))
                 .FirstOrDefault();
             if (closestHighway == null)
@@ -362,7 +362,7 @@ namespace IsraelHiking.API.Services.Osm
             for (int indexOnLine = indexOfFirstDistantPoint + 1; indexOnLine < itmLine.Coordinates.Length; indexOnLine++)
             {
                 var segment = new LineSegment(itmLine.Coordinates[indexOnLine - 1], itmLine.Coordinates[indexOnLine]);
-                if (segment.Distance(firstItmCoordinate) > _options.MaxDistanceToExisitngLineForMerge)
+                if (segment.Distance(firstItmCoordinate) > _options.MaxDistanceToExistingLineForMerge)
                 {
                     continue;
                 }

@@ -12,7 +12,6 @@ using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using SixLabors.ImageSharp;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

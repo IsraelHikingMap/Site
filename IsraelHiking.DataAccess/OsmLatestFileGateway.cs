@@ -32,7 +32,7 @@ namespace IsraelHiking.DataAccess
         {
             var client = _httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromMinutes(20);
-            var response = await client.GetAsync(_options.OsmPbfAddress);
+            var response = await client.GetAsync(_options.OsmFileAddress);
             return await response.Content.ReadAsStreamAsync();
         }
     }

@@ -58,7 +58,7 @@ namespace IsraelHiking.API.Tests.Services
             _options.MaxLengthPerLine = 5;
             _options.MinimalMissingPartLength = 0;
             _options.MinimalDistanceToClosestPoint = 0;
-            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.MinimalMissingSelfLoopPartLength = 0;
             _options.SimplificationDistanceTolerance = 0;
             SetupHighways();
 
@@ -83,7 +83,7 @@ namespace IsraelHiking.API.Tests.Services
             _options.MaxNumberOfPointsPerLine = 3;
             _options.MinimalMissingPartLength = 0;
             _options.MinimalDistanceToClosestPoint = 0;
-            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.MinimalMissingSelfLoopPartLength = 0;
             _options.SimplificationDistanceTolerance = 0;
             _options.MaxDistanceBetweenGpsRecordings = 10;
             SetupHighways();
@@ -108,7 +108,7 @@ namespace IsraelHiking.API.Tests.Services
             _options.MaxNumberOfPointsPerLine = 3;
             _options.MinimalMissingPartLength = 0;
             _options.MinimalDistanceToClosestPoint = 0;
-            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.MinimalMissingSelfLoopPartLength = 0;
             _options.SimplificationDistanceTolerance = 0;
             _options.MaxDistanceBetweenGpsRecordings = 10;
             SetupHighways();
@@ -134,7 +134,7 @@ namespace IsraelHiking.API.Tests.Services
             _options.MaxNumberOfPointsPerLine = 3;
             _options.MinimalMissingPartLength = 0;
             _options.MinimalDistanceToClosestPoint = 0;
-            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.MinimalMissingSelfLoopPartLength = 0;
             _options.SimplificationDistanceTolerance = 0;
             SetupHighways();
 
@@ -159,9 +159,9 @@ namespace IsraelHiking.API.Tests.Services
             });
             _options.MaxNumberOfPointsPerLine = 3;
             _options.MinimalDistanceToClosestPoint = 5;
-            _options.MaxDistanceToExisitngLineForMerge = 1;
+            _options.MaxDistanceToExistingLineForMerge = 1;
             _options.MinimalMissingPartLength = 0;
-            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.MinimalMissingSelfLoopPartLength = 0;
             _options.SimplificationDistanceTolerance = 0;
             SetupHighways(new List<LineString> {
                 new LineString(new [] { new Coordinate(0,0), new Coordinate(0,10)}),
@@ -229,10 +229,10 @@ namespace IsraelHiking.API.Tests.Services
             });
             _options.MaxNumberOfPointsPerLine = 3;
             _options.MinimalDistanceToClosestPoint = 5;
-            _options.MaxDistanceToExisitngLineForMerge = 1;
+            _options.MaxDistanceToExistingLineForMerge = 1;
             _options.MaxProlongLineLength = 200;
             _options.MinimalMissingPartLength = 0;
-            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.MinimalMissingSelfLoopPartLength = 0;
             _options.SimplificationDistanceTolerance = 0;
 
             SetupHighways(new List<LineString> {
@@ -273,10 +273,10 @@ namespace IsraelHiking.API.Tests.Services
             _options.MaxNumberOfPointsPerLine = 1000;
             _options.MinimalDistanceToClosestPoint = 10;
             _options.MaxLengthPerLine = 3000;
-            _options.MaxDistanceToExisitngLineForMerge = 5;
+            _options.MaxDistanceToExistingLineForMerge = 5;
             _options.MaxProlongLineLength = 200;
             _options.MinimalMissingPartLength = 0;
-            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.MinimalMissingSelfLoopPartLength = 0;
             _options.SimplificationDistanceTolerance = 0;
 
             SetupHighways();
