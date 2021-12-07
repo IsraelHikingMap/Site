@@ -223,7 +223,7 @@ namespace IsraelHiking.API.Services.Poi
             }
         }
 
-        private void SetWebsiteUrl(TagsCollectionBase tags, List<string> urls)
+        private void SetWebsiteAndWikipediaTags(TagsCollectionBase tags, List<string> urls)
         {
             var regexp = new Regex(@"((https?://)|^)([a-z]+)(\.m)?\.wikipedia.org/wiki/(.*)");
             var nonWikipediaUrls = new List<string>();
@@ -335,7 +335,7 @@ namespace IsraelHiking.API.Services.Poi
                 Longitude = location.X,
                 Tags = new TagsCollection()
             };
-            SetWebsiteUrl(node.Tags, feature.Attributes.GetNames()
+            SetWebsiteAndWikipediaTags(node.Tags, feature.Attributes.GetNames()
                     .Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
                     .Select(p => feature.Attributes[p].ToString())
                     .ToList());
@@ -417,7 +417,6 @@ namespace IsraelHiking.API.Services.Poi
                      .ToList();
             if (partialFeature.Attributes.Exists(FeatureAttributes.POI_ADDED_URLS))
             {    
-                var user = await osmGateway.GetUserDetails();
                 foreach (var url in partialFeature.Attributes[FeatureAttributes.POI_ADDED_URLS] as IEnumerable<object>)
                 {
                     existingUrls.Add(url.ToString());
@@ -425,12 +424,25 @@ namespace IsraelHiking.API.Services.Poi
             }
             if (partialFeature.Attributes.Exists(FeatureAttributes.POI_REMOVED_URLS))
             {
-                foreach(var urlToRemove in partialFeature.Attributes[FeatureAttributes.POI_REMOVED_URLS] as IEnumerable<object>)
+                var urlsToRemove = (partialFeature.Attributes[FeatureAttributes.POI_REMOVED_URLS] as IEnumerable<object>)
+                    .Select(u => u.ToString())
+                    .ToList();
+                var wikipediaTagsToRemove = new TagsCollection();
+                SetWebsiteAndWikipediaTags(wikipediaTagsToRemove, urlsToRemove);
+                foreach(var urlToRemove in urlsToRemove)
                 {
-                    existingUrls.Remove(urlToRemove.ToString());
+                    existingUrls.Remove(urlToRemove);
+                }
+
+                foreach (var tag in wikipediaTagsToRemove)
+                {
+                    if (completeOsmGeo.Tags.Contains(tag))
+                    {
+                        completeOsmGeo.Tags.RemoveKeyValue(tag);
+                    }
                 }
             }
-            SetWebsiteUrl(completeOsmGeo.Tags, existingUrls.Distinct().ToList());
+            SetWebsiteAndWikipediaTags(completeOsmGeo.Tags, existingUrls.Distinct().ToList());
 
             var existingImages = featureAfterTagsUpdates.Attributes.GetNames()
                     .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))

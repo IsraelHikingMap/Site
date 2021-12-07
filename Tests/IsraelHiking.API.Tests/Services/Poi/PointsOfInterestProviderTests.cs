@@ -491,7 +491,75 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 o.Tags.All(t => t.Key != "website1") && o.Tags.Any(t => t.Value == "url-to-keep")
             ));
         }
+        
+        [TestMethod]
+        public void UpdateFeature_RemoveWikiUrl_ShouldUpdateInOSM()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            var id = "Node_42";
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+                { FeatureAttributes.POI_ICON, "icon-ruins" },
+                { FeatureAttributes.POI_REMOVED_URLS, new [] { "https://he.wikipedia.org/wiki/123" } }
+            });
+            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ICON, "icon-ruins" }
+                }
+            });
+            gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
+                { "wikipedia", "he:123" },
+                { "wikipedia:he", "123" },
+                { "website", "url-to-keep" }
+            }, Latitude = 0, Longitude = 0, Id = 42 });
 
+            _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+            gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+                o.Tags.All(t => !t.Key.Contains("wikipedia")) && o.Tags.Any(t => t.Value == "url-to-keep")
+            ));
+        }
+
+        [TestMethod]
+        public void UpdateFeature_RemoveWikiUrl_ShouldUpdateInOSMButNotRemoveEnglishWikipedia()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            var id = "Node_42";
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.ID, id },
+                { FeatureAttributes.POI_ICON, "icon-ruins" },
+                { FeatureAttributes.POI_REMOVED_URLS, new [] { "https://he.wikipedia.org/wiki/123" } }
+            });
+            _pointsOfInterestRepository.GetPointOfInterestById(id, Sources.OSM).Returns(new Feature
+            {
+                Attributes = new AttributesTable
+                {
+                    { FeatureAttributes.POI_ICON, "icon-ruins" }
+                }
+            });
+            gateway.GetNode(42).Returns(new Node { Tags = new TagsCollection {
+                { "wikipedia", "en:456" },
+                { "wikipedia:he", "123" },
+                { "website", "url-to-keep" }
+            }, Latitude = 0, Longitude = 0, Id = 42 });
+
+            _adapter.UpdateFeature(poi, gateway, Languages.HEBREW).Wait();
+
+            gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(o =>
+                o.Tags.All(t => t.Key != "wikipedia:he") &&
+                o.Tags.Any(t => t.Key == "wikipedia") &&
+                o.Tags.Any(t => t.Value == "url-to-keep")
+            ));
+        }
+        
         [TestMethod]
         public void UpdateFeature_RemoveImage_ShouldUpdateInOSM()
         {
