@@ -56,7 +56,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="elevationGateway"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="itmWgs84MathTransformFactory"></param>
         /// <param name="latestFileGateway"></param>
         /// <param name="base64ImageConverter"></param>
         /// <param name="wikimediaCommonGateway"></param>
@@ -68,7 +68,7 @@ namespace IsraelHiking.API.Services.Poi
             IElevationGateway elevationGateway,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            IItmWgs84MathTransfromFactory itmWgs84MathTransformFactory,
             IOsmLatestFileGateway latestFileGateway,
             IWikimediaCommonGateway wikimediaCommonGateway,
             IBase64ImageStringToFileConverter base64ImageConverter,
@@ -82,7 +82,7 @@ namespace IsraelHiking.API.Services.Poi
             _tagsHelper = tagsHelper;
             _latestFileGateway = latestFileGateway;
             _elevationGateway = elevationGateway;
-            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
+            _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
             _options = options.Value;
             _pointsOfInterestRepository = pointsOfInterestRepository;
             _wikimediaCommonGateway = wikimediaCommonGateway;
@@ -145,7 +145,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 foreach (var attributeKey in featureFromDb.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_PREFIX)))
                 {
-                    if (!feature.Attributes.GetNames().Any(n => n == attributeKey)) {
+                    if (feature.Attributes.GetNames().All(n => n != attributeKey)) {
                         feature.Attributes.AddOrUpdate(attributeKey, featureFromDb.Attributes[attributeKey]);
                     }
                 }
@@ -387,7 +387,7 @@ namespace IsraelHiking.API.Services.Poi
             await UpdateLists(partialFeature, completeOsmGeo, osmGateway, language);
 
             RemoveEmptyTags(completeOsmGeo.Tags);
-            if (Enumerable.SequenceEqual(oldTags, completeOsmGeo.Tags.ToArray()) &&
+            if (oldTags.SequenceEqual(completeOsmGeo.Tags.ToArray()) &&
                 !locationWasUpdated)
             {
                 return featureBeforeUpdate;
@@ -408,7 +408,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="osmGateway">The gateway to get the user details from</param>
         /// <param name="language">The language to use for the tags</param>
         /// <returns></returns>
-        private async Task UpdateLists(Feature partialFeature, ICompleteOsmGeo completeOsmGeo, IAuthClient osmGateway, string language)
+        private async Task UpdateLists(IFeature partialFeature, ICompleteOsmGeo completeOsmGeo, IAuthClient osmGateway, string language)
         {
             var featureAfterTagsUpdates = ConvertOsmToFeature(completeOsmGeo);
             var existingUrls = featureAfterTagsUpdates.Attributes.GetNames()
@@ -514,7 +514,7 @@ namespace IsraelHiking.API.Services.Poi
             var coordinate = latLng.ToCoordinate();
             var (east, north) = _wgs84ItmMathTransform.Transform(coordinate.X, coordinate.Y);
             var alt = _elevationGateway.GetElevation(coordinate).Result;
-            var feautre = new Feature(new Point(coordinate), new AttributesTable
+            var feature = new Feature(new Point(coordinate), new AttributesTable
                 {
                     { FeatureAttributes.NAME, id },
                     { FeatureAttributes.POI_ICON, SEARCH_ICON },
@@ -525,9 +525,9 @@ namespace IsraelHiking.API.Services.Poi
                     { FeatureAttributes.POI_ITM_NORTH, north },
                     { FeatureAttributes.POI_ALT, alt }
                 });
-            feautre.SetTitles();
-            feautre.SetLocation(coordinate);
-            return feautre;
+            feature.SetTitles();
+            feature.SetLocation(coordinate);
+            return feature;
         }
     }
 }
