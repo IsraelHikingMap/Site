@@ -690,7 +690,8 @@ export class ResourcesService {
         this.screenOn = this.gettextCatalog.getString("Keep screen on");
         this.screenOff = this.gettextCatalog.getString("Allow turning off the screen");
         this.screenDark = this.gettextCatalog.getString("Darken the screen");
-        this.ifYouManageToReadThis = this.gettextCatalog.getString("If you manage to read this click the main menu button and then click layers:");
+        this.ifYouManageToReadThis = this.gettextCatalog
+            .getString("If you manage to read this click the main menu button and then click layers:");
         this.youNeedToDownloadOfflineMaps = this.gettextCatalog.getString("Background text: You need to download offline maps");
         this.youNeedToToggleOfflineMaps = this.gettextCatalog.getString("Background text: You need to toggle offline maps");
         this.youNeedToPurchaseOfflineMaps = this.gettextCatalog.getString("Background text: You need to purchase offline maps");
