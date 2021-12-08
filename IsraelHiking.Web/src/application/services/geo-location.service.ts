@@ -140,7 +140,6 @@ export class GeoLocationService {
             if (this.isBackground) {
                 return;
             }
-            this.loggingService.debug("[GeoLocation] Recieved location(s) while in foreground");
             await this.onLocationUpdate();
         });
 
@@ -196,7 +195,6 @@ export class GeoLocationService {
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
         } else if (positions.length === 1) {
-            this.loggingService.debug("[GeoLocation] Sending a location update");
             this.handlePoistionChange(positions[positions.length - 1]);
         } else {
             this.loggingService.debug(`[GeoLocation] Sending bulk location update: ${positions.length}`);
