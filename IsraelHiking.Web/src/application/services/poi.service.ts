@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse, HttpParams } from "@angular/common/http";
 import { NgProgress } from "ngx-progressbar";
 import { uniq, cloneDeep } from "lodash-es";
 import { Observable, fromEvent, Subscription } from "rxjs";
@@ -208,14 +208,19 @@ export class PoiService {
             this.queueIsProcessing = false;
             this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
         } catch (ex) {
-            this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, ${ex.message}`);
-            if (ex.name !== "TimeoutError") {
-                // No timeout - i.e. error from server - need to remove this feature from queue
-                this.queueIsProcessing = false;
+            this.queueIsProcessing = false;
+            if (ex.name === "TimeoutError") {
+                this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, but will try later due to ` +
+                    `client side timeout error: ${ex.message}`);
+            } else if ((ex as HttpErrorResponse).error instanceof ProgressEvent) {
+                this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, but will try later due to ` +
+                    `client side general error: ${ex.message}`);
+            } else {
+                this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, removing from queue due to ` +
+                    `server side error: ${ex.message}`);
+                // No timeout and not a client side error - i.e. error from server - need to remove this feature from queue
                 this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
             }
-        } finally {
-            this.queueIsProcessing = false;
         }
     }
 
