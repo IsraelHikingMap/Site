@@ -174,7 +174,7 @@ export class RecordedRouteService {
     private validateRecordingAndUpdateState(position: GeolocationPosition, lastValidLocation: LatLngAltTime): boolean {
         let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
-            this.loggingService.debug(`[Record] Valid position, updating: (${position.coords.latitude}, ${position.coords.longitude})`);
+            this.loggingService.debug(`[Record] Valid position, updating. coord: (${position.coords.latitude}, ${position.coords.longitude}), time: ${new Date(position.timestamp).toISOString()}`);
             this.rejectedPosition = null;
             return true;
         }
