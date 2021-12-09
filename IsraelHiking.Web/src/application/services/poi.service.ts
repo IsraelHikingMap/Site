@@ -212,7 +212,7 @@ export class PoiService {
             if (ex.name === "TimeoutError") {
                 this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, but will try later due to ` +
                     `client side timeout error: ${ex.message}`);
-            } else if ((ex as HttpErrorResponse).error instanceof ProgressEvent) {
+            } else if ((ex as HttpErrorResponse).error && (ex as HttpErrorResponse).error.constructor.name === "ProgressEvent") {
                 this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, but will try later due to ` +
                     `client side general error: ${ex.message}`);
             } else {
