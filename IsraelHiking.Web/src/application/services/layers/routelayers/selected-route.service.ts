@@ -1,13 +1,13 @@
 import { Injectable, EventEmitter } from "@angular/core";
 import { Observable } from "rxjs";
 import { some } from "lodash-es";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "../../resources.service";
 import { SpatialService } from "../../spatial.service";
 import { RouterService } from "../../router.service";
 import { MINIMAL_ANGLE, MINIMAL_DISTANCE } from "../../route-statistics.service";
-import { NgRedux, select } from "../../../reducers/infra/ng-redux.module";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing-state.reducer";
 import {
     AddRouteAction,

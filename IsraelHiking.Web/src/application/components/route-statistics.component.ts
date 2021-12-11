@@ -4,6 +4,7 @@ import { Subscription, Observable, interval } from "rxjs";
 import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "@katze/ngx-d3";
 import { regressionLoess } from "d3-regression";
 import { LinePaint } from "maplibre-gl";
+import { select, NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
@@ -14,7 +15,6 @@ import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
-import { select, NgRedux } from "../reducers/infra/ng-redux.module";
 import type { LatLngAlt, RouteData, ApplicationState, Language } from "../models/models";
 
 declare type DragState = "start" | "drag" | "none";

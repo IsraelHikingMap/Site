@@ -1,9 +1,9 @@
 import { Component } from "@angular/core";
 import { Observable } from "rxjs";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import type { ApplicationState, Language } from "../models/models";
 
 @Component({

@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
+import { NgRedux } from "@angular-redux2/store";
 
 import { SidebarService } from "./sidebar.service";
 import { MapService } from "./map.service";
 import { SpatialService } from "./spatial.service";
-import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import type { Bounds, LatLngAlt, ApplicationState } from "../models/models";
 

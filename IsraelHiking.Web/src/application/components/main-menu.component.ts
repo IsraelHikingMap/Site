@@ -6,6 +6,7 @@ import { AppVersion } from "@ionic-native/app-version/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
 import platform from "platform";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -25,7 +26,6 @@ import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.com
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
 import type { UserInfo, ApplicationState } from "../models/models";

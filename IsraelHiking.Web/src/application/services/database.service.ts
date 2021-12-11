@@ -6,13 +6,13 @@ import Dexie from "dexie";
 import deepmerge from "deepmerge";
 import * as maplibregl from "maplibre-gl";
 import * as pako from "pako";
+import { NgRedux, classToActionMiddleware } from "@angular-redux2/store";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { initialState } from "../reducers/initial-state";
-import { NgRedux, classToActionMiddleware } from "../reducers/infra/ng-redux.module";
 import { rootReducer } from "../reducers/root.reducer";
 import type { ApplicationState, ShareUrl, Trace } from "../models/models";
 

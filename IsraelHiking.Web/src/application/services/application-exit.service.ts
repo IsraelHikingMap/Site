@@ -1,4 +1,5 @@
 import { Injectable, NgZone } from "@angular/core";
+import { NgRedux } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
 import { ResourcesService } from "./resources.service";
@@ -11,7 +12,6 @@ import { SetSidebarAction } from "../reducers/poi.reducer";
 import { GeoLocationService } from "./geo-location.service";
 import { RecordedRouteService } from "./recorded-route.service";
 import { ImageGalleryService } from "./image-gallery.service";
-import { NgRedux } from "../reducers/infra/ng-redux.module";
 import type { ApplicationState } from "../models/models";
 
 declare let navigator: Navigator;

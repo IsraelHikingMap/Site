@@ -2,8 +2,8 @@ import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { Subscription } from "rxjs";
 import { throttleTime } from "rxjs/operators";
 import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
+import { NgRedux } from "@angular-redux2/store";
 
-import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import type { ApplicationState } from "../models/models";

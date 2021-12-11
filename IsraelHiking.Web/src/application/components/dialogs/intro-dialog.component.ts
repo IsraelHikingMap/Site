@@ -1,9 +1,9 @@
 import { Component } from "@angular/core";
 import { MatDialog, MatDialogConfig, MatDialogRef } from "@angular/material/dialog";
 import { AnimationOptions } from "ngx-lottie";
+import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
-import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ResourcesService } from "../../services/resources.service";
 import { ConfigurationActions } from "../../reducers/configuration.reducer";
 import { RunningContextService } from "../../services/running-context.service";

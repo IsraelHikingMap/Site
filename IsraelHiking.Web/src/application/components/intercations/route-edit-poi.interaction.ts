@@ -1,6 +1,7 @@
 import { Injectable, NgZone } from "@angular/core";
 import { MapMouseEvent, Map } from "maplibre-gl";
 import { MatDialog } from "@angular/material/dialog";
+import { NgRedux } from "@angular-redux2/store";
 
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
@@ -8,7 +9,6 @@ import { GeoLocationService } from "../../services/geo-location.service";
 import { SnappingService, SnappingPointResponse } from "../../services/snapping.service";
 import { PoiService } from "../../services/poi.service";
 import { ResourcesService } from "../../services/resources.service";
-import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { AddPrivatePoiAction, UpdatePrivatePoiAction } from "../../reducers/routes.reducer";
 import type { ApplicationState, MarkerData, LatLngAlt } from "../../models/models";
 

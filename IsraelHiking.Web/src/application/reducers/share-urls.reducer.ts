@@ -1,4 +1,5 @@
-import { BaseAction, ReduxAction, createReducerFromClass } from "./infra/ng-redux.module";
+import { BaseAction, ReduxAction, createReducerFromClass } from "@angular-redux2/store";
+
 import { initialState } from "./initial-state";
 import type { ShareUrl, ShareUrlsState } from "../models/models";
 

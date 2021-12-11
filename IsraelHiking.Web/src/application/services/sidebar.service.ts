@@ -1,8 +1,8 @@
 import { Injectable, EventEmitter } from "@angular/core";
 import { Observable } from "rxjs";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { HashService } from "./hash.service";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetSidebarAction } from "../reducers/poi.reducer";
 import type { ApplicationState } from "../models/models";
 

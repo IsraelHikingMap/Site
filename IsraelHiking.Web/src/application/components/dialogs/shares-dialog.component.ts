@@ -4,6 +4,7 @@ import { FormControl } from "@angular/forms";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
 import { Observable, Subscription } from "rxjs";
+import { select, NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
@@ -13,7 +14,6 @@ import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { RecordedRouteService } from "../../services/recorded-route.service";
-import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import type { ApplicationState, ShareUrl } from "../../models/models";
 
 @Component({

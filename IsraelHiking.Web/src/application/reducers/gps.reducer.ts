@@ -1,4 +1,5 @@
-import { BaseAction, createReducerFromClass, ReduxAction } from "./infra/ng-redux.module";
+import { BaseAction, createReducerFromClass, ReduxAction } from "@angular-redux2/store";
+
 import type { GpsState, TrackingStateType } from "../models/models";
 import { initialState } from "./initial-state";
 
