@@ -234,10 +234,10 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public getVisibilityTranslation(visibility: TraceVisibility) {
         switch (visibility) {
             case "private":
+            case "trackable":
                 return this.resources.private;
             case "public":
             case "identifiable":
-            case "trackable":
                 return this.resources.public;
             case "local":
                 return this.resources.local;
