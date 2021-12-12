@@ -1,12 +1,11 @@
 import { Injectable } from "@angular/core";
+import { NgRedux } from "@angular-redux2/store";
 import { debounceTime } from "rxjs/operators";
-import { decode } from "base64-arraybuffer";
 import { SQLite, SQLiteDatabaseConfig, SQLiteObject } from "@ionic-native/sqlite/ngx";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
 import * as maplibregl from "maplibre-gl";
 import * as pako from "pako";
-import { NgRedux, classToActionMiddleware } from "@angular-redux2/store";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
@@ -20,6 +19,8 @@ export type ImageUrlAndData = {
     imageUrl: string;
     data: string;
 };
+
+const classToActionMiddleware = (state: any) => (next: any) => (action: any) => next({ ...action });
 
 @Injectable()
 export class DatabaseService {

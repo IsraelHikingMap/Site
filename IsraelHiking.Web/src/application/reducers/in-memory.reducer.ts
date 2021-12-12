@@ -1,7 +1,7 @@
 import { Action } from "redux";
-import { ReduxAction, BaseAction, createReducerFromClass } from "@angular-redux2/store";
+import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
 
-import { initialState } from "./initial-state";
+import { initialState, BaseAction } from "./initial-state";
 import type { ShareUrl, InMemoryState } from "../models/models";
 
 const TOGGLE_DISTNACE = "TOGGLE_DISTNACE";

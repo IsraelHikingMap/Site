@@ -1,7 +1,7 @@
 import { Action } from "redux";
-import { ReduxAction, createReducerFromClass, BaseAction } from "@angular-redux2/store";
+import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
 
-import { initialState } from "./initial-state";
+import { initialState, BaseAction } from "./initial-state";
 import type { Configuration, Language } from "../models/models";
 import { BatteryOptimizationType } from "application/models/state/configuration";
 

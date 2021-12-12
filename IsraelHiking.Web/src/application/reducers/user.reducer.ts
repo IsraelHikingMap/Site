@@ -1,6 +1,6 @@
-import { ReduxAction, BaseAction, createReducerFromClass } from "@angular-redux2/store";
+import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
 
-import { initialState } from "./initial-state";
+import { initialState, BaseAction } from "./initial-state";
 import type { UserInfo, UserState } from "../models/models";
 
 const SET_USER_INFO = "SET_USER_INFO";

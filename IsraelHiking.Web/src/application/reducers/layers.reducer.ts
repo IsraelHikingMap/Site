@@ -1,7 +1,7 @@
 import { orderBy, remove, some } from "lodash-es";
-import { createReducerFromClass, ReduxAction, BaseAction } from "@angular-redux2/store";
+import { createReducerFromClass, Action as ReduxAction } from "@angular-redux2/store";
 
-import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS } from "./initial-state";
+import { initialState, BaseAction, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS } from "./initial-state";
 import type { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models/models";
 
 const ADD_BASE_LAYER = "ADD_BASE_LAYER";

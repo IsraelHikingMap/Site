@@ -1,4 +1,5 @@
-﻿import { StateWithHistory } from "redux-undo";
+﻿import { Action } from "redux";
+import { StateWithHistory } from "redux-undo";
 
 import { Urls } from "../urls";
 import type { ApplicationState, RouteData } from "../models/models";
@@ -9,6 +10,10 @@ export const ESRI = "ESRI";
 export const SATELLITE = "Satellite Imagery";
 export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
+
+export abstract class BaseAction<TPayload> implements Action {
+    constructor(public type: string, public payload: TPayload) { }
+}
 
 export const initialState =
     {
