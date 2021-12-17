@@ -2,6 +2,7 @@ import { inject, TestBed } from "@angular/core/testing";
 import { decode } from "base64-arraybuffer";
 
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
+import { RouteData } from "../models/models";
 
 describe("GpxDataContainerConverterService", () => {
     beforeEach(() => {
@@ -121,13 +122,41 @@ describe("GpxDataContainerConverterService", () => {
         let gpxString = (await new Response(decode(gpxBase64String)).text()).replace("IsraelHikingMap", "");
         let dataContainer = await service.toDataContainer(gpxString);
         expect(dataContainer.routes.length).toBe(1);
-        expect(dataContainer.routes[0].segments.length).toBe(10);
+        expect(dataContainer.routes[0].segments.length).toBe(4);
         expect(dataContainer.routes[0].segments[0].latlngs.length).toBe(2);
         expect(dataContainer.routes[0].segments[0].latlngs[0].lat).toBe(0);
         expect(dataContainer.routes[0].segments[0].latlngs[0].lng).toBe(0);
-        expect(dataContainer.routes[0].segments[9].latlngs.length).toBe(2);
-        expect(dataContainer.routes[0].segments[9].latlngs[1].lat).toBe(9);
-        expect(dataContainer.routes[0].segments[9].latlngs[1].lng).toBe(9);
+        expect(dataContainer.routes[0].segments[3].latlngs.length).toBe(2);
+        expect(dataContainer.routes[0].segments[3].latlngs[1].lat).toBe(9);
+        expect(dataContainer.routes[0].segments[3].latlngs[1].lng).toBe(9);
 
     }));
+
+    it("Should split a short route", () => {
+        let routeData = {
+            name: "name",
+            description: "desc",
+            segments: [
+                {
+                    latlngs: [
+                        {lat: 0, lng: 0, timestamp: new Date(0)}, 
+                        {lat: 1, lng: 1, timestamp: new Date(1)}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                },
+                {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date(1)}, 
+                        {lat: 2, lng: 2, timestamp: new Date(2)},
+                        {lat: 3, lng: 3, timestamp: new Date(3)}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }
+            ]
+        } as RouteData;
+        GpxDataContainerConverterService.SplitRouteSegments(routeData);
+        expect(routeData.segments.length).toBe(2);
+    });
 });
