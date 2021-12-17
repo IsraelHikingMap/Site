@@ -1,5 +1,6 @@
-import { createReducerFromClass, ReduxAction, BaseAction } from "./infra/ng-redux.module";
-import { initialState } from "./initial-state";
+import { createReducerFromClass, Action as ReduxAction } from "@angular-redux2/store";
+
+import { initialState, BaseAction } from "./initial-state";
 import type { PointsOfInterestState, MarkerData } from "../models/models";
 
 const SET_SELECTED_POI = "SET_SELECTED_POI";

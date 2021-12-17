@@ -2,13 +2,13 @@ import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { GeoJSONSourceComponent } from "ngx-maplibre-gl";
+import { select, NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
-import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import type { ApplicationState, Overlay } from "../../models/models";
 

@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { every } from "lodash-es";
+import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
@@ -10,7 +11,6 @@ import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
-import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { SetOfflineLastModifiedAction } from "../../reducers/offline.reducer";
 import type { ApplicationState, DataContainer } from "../../models/models";
 

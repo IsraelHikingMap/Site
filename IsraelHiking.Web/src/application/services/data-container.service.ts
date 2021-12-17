@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { NgRedux } from "@angular-redux2/store";
 
 import { LayersService } from "./layers/layers.service";
 import { ToastService } from "./toast.service";
@@ -11,7 +12,6 @@ import { SelectedRouteService } from "./layers/routelayers/selected-route.servic
 import { MapService } from "./map.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
 import { RunningContextService } from "./running-context.service";
-import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";

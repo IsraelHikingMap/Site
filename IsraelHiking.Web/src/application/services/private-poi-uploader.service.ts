@@ -1,12 +1,12 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { flatten } from "lodash-es";
+import { NgRedux } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
 import { PoiService } from "./poi.service";
 import { ToastService } from "./toast.service";
 import { RouteStrings } from "./hash.service";
-import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
 import type { LinkData, LatLngAlt, MarkerData, ApplicationState } from "../models/models";
 

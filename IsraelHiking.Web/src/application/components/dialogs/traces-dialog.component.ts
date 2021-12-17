@@ -3,6 +3,7 @@ import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash-es";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -16,7 +17,6 @@ import { RunningContextService } from "../../services/running-context.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RecordedRouteService } from "../../services/recorded-route.service";
 import { DataContainerService } from "../../services/data-container.service";
-import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
 import type { ApplicationState, Trace, TraceVisibility } from "../../models/models";
 

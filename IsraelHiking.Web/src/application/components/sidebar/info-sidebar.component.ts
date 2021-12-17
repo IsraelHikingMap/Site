@@ -3,6 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { remove } from "lodash-es";
 import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 import { Observable } from "rxjs";
+import { select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
@@ -11,7 +12,6 @@ import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
-import { select } from "../../reducers/infra/ng-redux.module";
 import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, Language } from "../../models/models";
 import legendSectionsJson from "../../../content/legend/legend.json";

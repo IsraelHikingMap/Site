@@ -7,6 +7,7 @@ import { timeout, throttleTime, skip, filter } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import JSZip from "jszip";
 import MiniSearch from "minisearch";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouterData } from "./hash.service";
@@ -19,7 +20,6 @@ import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
 import { FileService } from "./file.service";
 import { ConnectionService } from "./connection.service";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
 import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducers/layers.reducer";
 import { Urls } from "../urls";

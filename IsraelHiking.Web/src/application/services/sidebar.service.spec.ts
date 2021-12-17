@@ -1,5 +1,5 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { MockNgRedux, NgReduxTestingModule } from "../reducers/infra/ng-redux-testing.module";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
 
 import { SidebarService } from "./sidebar.service";
 import { HashService } from "./hash.service";
@@ -12,9 +12,7 @@ describe("SidebarService", () => {
             resetAddressbar: () => { }
         } as any as HashService;
         TestBed.configureTestingModule({
-            imports: [
-                NgReduxTestingModule
-            ],
+            imports: [MockNgReduxModule],
             providers: [
                 { provide: HashService, useValue: hashServiceMock },
                 SidebarService

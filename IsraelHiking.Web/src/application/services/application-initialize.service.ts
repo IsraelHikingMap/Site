@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
+import { NgRedux } from "@angular-redux2/store";
 
-import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-warning-dialog.component";
 import { IntroDialogComponent } from "../components/dialogs/intro-dialog.component";

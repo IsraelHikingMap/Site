@@ -1,5 +1,5 @@
 import { Router } from "@angular/router";
-import { MockNgRedux, NgReduxTestingModule } from "../reducers/infra/ng-redux-testing.module";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
 import { TestBed, inject } from "@angular/core/testing";
 import { RouterTestingModule } from "@angular/router/testing";
 import { Subject } from "rxjs";
@@ -16,7 +16,7 @@ describe("HashService", () => {
             createUrlTree: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [RouterTestingModule, NgReduxTestingModule],
+            imports: [RouterTestingModule, MockNgReduxModule],
             providers: [
                 { provide: Router, useValue: routerMock },
                 { provide: MapService, useValue: null },
@@ -30,7 +30,7 @@ describe("HashService", () => {
     it("Should return base url",
         inject([HashService], (hashService: HashService) => {
 
-            MockNgRedux.getInstance().getState = () => ({
+            MockNgRedux.store.getState = () => ({
                 inMemoryState: {}
             });
 
@@ -43,7 +43,7 @@ describe("HashService", () => {
         inject([HashService, Router], (hashService: HashService, routerMock: any) => {
 
             routerMock.createUrlTree = () => "share-address";
-            MockNgRedux.getInstance().getState = () => ({
+            MockNgRedux.store.getState = () => ({
                 inMemoryState: {
                     shareUrl: { id: "1" }
                 }
@@ -57,7 +57,7 @@ describe("HashService", () => {
     it("Should return external url",
         inject([HashService, Router], (hashService: HashService, routerMock: any) => {
             routerMock.createUrlTree = () => "file-address";
-            MockNgRedux.getInstance().getState = () => ({
+            MockNgRedux.store.getState = () => ({
                 inMemoryState: {
                     fileUrl: "fileUrl"
                 }

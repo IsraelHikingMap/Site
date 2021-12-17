@@ -1,13 +1,13 @@
 import { Component } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Observable } from "rxjs";
+import { select, NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
-import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ConfigurationActions, SetBatteryOptimizationTypeAction } from "../../reducers/configuration.reducer";
 import type { ApplicationState, BatteryOptimizationType } from "../../models/models";
 

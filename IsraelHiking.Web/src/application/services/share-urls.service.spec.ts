@@ -1,7 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { NgReduxTestingModule, MockNgRedux } from "../reducers/infra/ng-redux-testing.module";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
 import { Device } from "@ionic-native/device/ngx";
 
 import { ShareUrlsService } from "./share-urls.service";
@@ -30,7 +30,7 @@ describe("Share Urls Service", () => {
             imports: [
                 HttpClientModule,
                 HttpClientTestingModule,
-                NgReduxTestingModule
+                MockNgReduxModule
             ],
             providers: [
                 { provide: HashService, useValue: hashService },
@@ -62,10 +62,10 @@ describe("Share Urls Service", () => {
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
 
             let shareUrl = { id: "42" } as ShareUrl;
-            MockNgRedux.getInstance().dispatch = jasmine.createSpy();
+            MockNgRedux.store.dispatch = jasmine.createSpy();
 
             let promise = shareUrlsService.deleteShareUrl(shareUrl).then(() => {
-                expect(MockNgRedux.getInstance().dispatch).toHaveBeenCalled();
+                expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
                 expect(databaseService.deleteShareUrlById).toHaveBeenCalled();
             });
 

@@ -1,11 +1,11 @@
 import invert from "invert-color";
+import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
-import { NgRedux } from "../../../reducers/infra/ng-redux.module";
 import { SetOpacityAndWeightAction } from "../../../reducers/route-editing-state.reducer";
 import type { ApplicationState, RouteData } from "../../../models/models";
 

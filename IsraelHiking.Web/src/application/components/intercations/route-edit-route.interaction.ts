@@ -1,5 +1,6 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { MapMouseEvent, Map, GeoJSONSource, Point } from "maplibre-gl";
+import { NgRedux } from "@angular-redux2/store";
 
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
@@ -8,7 +9,6 @@ import { ElevationProvider } from "../../services/elevation.provider";
 import { SnappingService } from "../../services/snapping.service";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { ResourcesService } from "../../services/resources.service";
-import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducers/routes.reducer";
 import type {
     ApplicationState,

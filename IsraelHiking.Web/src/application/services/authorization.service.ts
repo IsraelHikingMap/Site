@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
 import { NonAngularObjectsFactory, IOhAuth, OAuthResponse, IOAuthParams } from "./non-angular-objects.factory";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetTokenAction, SetUserInfoAction } from "../reducers/user.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, OsmUserDetails, UserState, UserInfo } from "../models/models";

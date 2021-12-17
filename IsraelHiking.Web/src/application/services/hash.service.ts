@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
+import { NgRedux } from "@angular-redux2/store";
 
 import { MapService } from "./map.service";
-import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { Urls } from "../urls";
 import type { ApplicationState, LatLngAlt } from "../models/models";
 

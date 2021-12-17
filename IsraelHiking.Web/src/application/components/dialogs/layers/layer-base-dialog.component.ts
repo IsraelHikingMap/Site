@@ -1,12 +1,12 @@
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
+import { select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers/layers.service";
-import { select } from "../../../reducers/infra/ng-redux.module";
 import type { LayerData, ApplicationState, EditableLayer, Location } from "../../../models/models";
 
 export abstract class LayerBaseDialogComponent extends BaseMapComponent {

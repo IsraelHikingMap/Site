@@ -1,6 +1,7 @@
 import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
 import { MapComponent, CustomControl } from "ngx-maplibre-gl";
 import { Style, setRTLTextPlugin, ScaleControl } from "maplibre-gl";
+import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -9,7 +10,6 @@ import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
-import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { SetLocationAction } from "../../reducers/location.reducer";
 import type { ApplicationState, Location } from "../../models/models";
 

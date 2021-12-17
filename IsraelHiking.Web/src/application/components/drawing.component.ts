@@ -1,13 +1,13 @@
 import { Component, HostListener } from "@angular/core";
 import { Observable } from "rxjs";
 import { ActionCreators } from "redux-undo";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { ToastService } from "../services/toast.service";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import {
     ChangeEditStateAction,
     ReplaceSegmentsAction,

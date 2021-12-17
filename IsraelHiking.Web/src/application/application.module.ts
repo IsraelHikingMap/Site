@@ -57,8 +57,8 @@ import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { WebIntent } from "@ionic-native/web-intent/ngx";
 import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
+import { NgReduxModule } from "@angular-redux2/store";
 // services
-import { NgReduxModule } from "./reducers/infra/ng-redux.module";
 import { ScrollToModule } from "./infra/scroll-to/scroll-to.module";
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";

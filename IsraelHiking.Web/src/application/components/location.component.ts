@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { MapComponent } from "ngx-maplibre-gl";
 import { Observable } from "rxjs";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -11,7 +12,6 @@ import { SelectedRouteService } from "../services/layers/routelayers/selected-ro
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { ToggleDistanceAction, SetPannedAction } from "../reducers/in-memory.reducer";
 import { ConfigurationActions } from "../reducers/configuration.reducer";
 import type { LatLngAlt, ApplicationState } from "../models/models";

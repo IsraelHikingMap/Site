@@ -2,13 +2,13 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@
 import { MapComponent } from "ngx-maplibre-gl";
 import { RasterSource, RasterLayout, Layer, Style, Sources, RasterLayer, AnyLayer } from "maplibre-gl";
 import { Observable, Subscription } from "rxjs";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "application/services/map.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
-import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import type { ApplicationState, EditableLayer, Language } from "../../models/models";
 
 @Component({

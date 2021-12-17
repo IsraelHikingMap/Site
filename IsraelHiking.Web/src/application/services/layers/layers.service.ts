@@ -2,11 +2,11 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { timeout } from "rxjs/operators";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { ResourcesService } from "../resources.service";
 import { AuthorizationService } from "../authorization.service";
 import { ToastService } from "../toast.service";
-import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import {
     ISRAEL_HIKING_MAP,
     ISRAEL_MTB_MAP,

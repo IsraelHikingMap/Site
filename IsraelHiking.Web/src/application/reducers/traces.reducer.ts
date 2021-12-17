@@ -1,5 +1,6 @@
-import { ReduxAction, createReducerFromClass, BaseAction } from "./infra/ng-redux.module";
-import { initialState } from "./initial-state";
+import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
+
+import { initialState, BaseAction } from "./initial-state";
 import type { TracesState, Trace } from "../models/models";
 
 const ADD_TRACE = "ADD_TRACE";
