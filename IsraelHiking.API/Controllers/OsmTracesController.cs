@@ -120,7 +120,7 @@ namespace IsraelHiking.API.Controllers
             {
                 Name = file.FileName,
                 Description = Path.GetFileNameWithoutExtension(file.FileName),
-                Visibility = Visibility.Private
+                Visibility = Visibility.Trackable
             }, memoryStream);
             return Ok();
         }
@@ -170,7 +170,7 @@ namespace IsraelHiking.API.Controllers
             {
                 Name = routeData.Name + "." + FlowFormats.GPX,
                 Description = description,
-                Visibility = Visibility.Private
+                Visibility = Visibility.Trackable
             }, memoryStream);
             return Ok();
         }

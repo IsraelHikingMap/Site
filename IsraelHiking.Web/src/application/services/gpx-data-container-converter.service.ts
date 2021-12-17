@@ -86,15 +86,15 @@ export class GpxDataContainerConverterService {
                 newSegments.push(segment);
                 continue;
             }
-            let splitCount = Math.floor(segment.latlngs.length / 10);
+            let pointsInSegment = Math.max(Math.floor(segment.latlngs.length / 10), 4);
             let latlngs = [...segment.latlngs];
             while (latlngs.length > 1) {
-                if (splitCount >= latlngs.length) {
-                    splitCount = latlngs.length - 1;
+                if (pointsInSegment >= latlngs.length) {
+                    pointsInSegment = latlngs.length - 1;
                 }
-                let segmentEndLatLng = latlngs[splitCount];
-                let start = latlngs.slice(0, splitCount + 1);
-                latlngs = latlngs.slice(splitCount);
+                let segmentEndLatLng = latlngs[pointsInSegment];
+                let start = latlngs.slice(0, pointsInSegment + 1);
+                latlngs = latlngs.slice(pointsInSegment);
                 let routeSegment = {
                     routePoint: segmentEndLatLng,
                     latlngs: start,

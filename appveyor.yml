@@ -64,7 +64,7 @@ for:
       only:
         - PRODUCT: android
     install:
-      - ps: Install-Product node LTS
+      - ps: Install-Product node 14.17
     build_script:
     - pwsh: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"

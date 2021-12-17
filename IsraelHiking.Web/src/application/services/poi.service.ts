@@ -748,9 +748,12 @@ export class PoiService {
             featureContainingOnlyChanges.properties.poiRemovedUrls = removedUrls;
             hasChages = true;
         }
-        if (hasChages) {
-            await this.addPointToUploadQueue(featureContainingOnlyChanges);
+        if (!hasChages) {
+            this.loggingService.info(`[POIs] No updates were made to feature with id ${originalFeature.properties.poiId}, ` +
+                "no need to add to queue");
+            return;
         }
+        await this.addPointToUploadQueue(featureContainingOnlyChanges);
     }
 
     public getEditableDataFromFeature(feature: GeoJSON.Feature): EditablePublicPointData {

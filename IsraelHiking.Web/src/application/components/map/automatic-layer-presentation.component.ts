@@ -6,6 +6,7 @@ import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
+import { MapService } from "application/services/map.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
 import type { ApplicationState, EditableLayer, Language } from "../../models/models";
@@ -42,6 +43,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
 
     constructor(resources: ResourcesService,
                 private readonly mapComponent: MapComponent,
+                private readonly mapService: MapService,
                 private readonly fileService: FileService,
                 private readonly connectionSerive: ConnectionService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -57,15 +59,9 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     public async ngOnInit() {
-        if (this.mapComponent.mapInstance == null || !this.mapComponent.mapInstance.loaded()) {
-            this.subscriptions.push(this.mapComponent.mapLoad.subscribe(async () => {
-                await this.createLayer();
-                this.sourceAdded = true;
-            }));
-        } else {
-            await this.createLayer();
-            this.sourceAdded = true;
-        }
+        await this.mapService.initializationPromise;
+        await this.createLayer();
+        this.sourceAdded = true;
         this.subscriptions.push(this.language$.subscribe(async () => {
             if (this.sourceAdded) {
                 this.removeLayer(this.layerData.address);
