@@ -300,6 +300,10 @@ namespace IsraelHiking.API.Services.Poi
             var feature = await _pointsOfInterestRepository.GetPointOfInterestById(id, source);
             if (feature != null) {
                 ElevationSetterHelper.SetElevation(feature.Geometry, _elevationGateway);
+                if (string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_ICON]?.ToString()))
+                {
+                    feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, SEARCH_ICON);
+                }
             }
             return feature;
         }
