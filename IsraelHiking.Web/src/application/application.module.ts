@@ -219,7 +219,6 @@ const initializeApplication = (injector: Injector) => async () => {
             DragDropModule,
             InfiniteScrollModule,
             NgReduxModule,
-            //NgReduxModule2,
             NgxMapLibreGLModule,
             NgIdleModule.forRoot(),
             HammerModule,
