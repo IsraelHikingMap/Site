@@ -139,7 +139,7 @@ describe("GpxDataContainerConverterService", () => {
             segments: [
                 {
                     latlngs: [
-                        {lat: 0, lng: 0, timestamp: new Date(0)}, 
+                        {lat: 0, lng: 0, timestamp: new Date(0)},
                         {lat: 1, lng: 1, timestamp: new Date(1)}
                     ],
                     routePoint: {lat: 1, lng: 1},
@@ -147,7 +147,7 @@ describe("GpxDataContainerConverterService", () => {
                 },
                 {
                     latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date(1)}, 
+                        {lat: 1, lng: 1, timestamp: new Date(1)},
                         {lat: 2, lng: 2, timestamp: new Date(2)},
                         {lat: 3, lng: 3, timestamp: new Date(3)}
                     ],
