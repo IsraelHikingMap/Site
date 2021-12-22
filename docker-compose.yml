@@ -49,6 +49,12 @@ services:
     restart: always
     volumes:
       - ./elevation-cache:/app/elevation-cache
+  imagecreator:
+    image: israelhikingmap/imagecreatorwebapi
+    container_name: imagecreator
+    ports:
+      - 11311:80
+    restart: always
 volumes:
   esdata:
     driver: local

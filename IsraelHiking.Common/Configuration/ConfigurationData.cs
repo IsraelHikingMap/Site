@@ -110,6 +110,10 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public string ElevationServerAddress { get; set; }
         /// <summary>
+        /// Image creator server address
+        /// </summary>
+        public string ImageCreatorServerAddress { get; set; }
+        /// <summary>
         /// The address of the OSM file to download for daily rebuild
         /// </summary>
         public string OsmFileAddress { get; set; }
@@ -126,10 +130,6 @@ namespace IsraelHiking.Common.Configuration
         /// A list of external sources - address and file name
         /// </summary>
         public Dictionary<string, string> CsvsDictionary { get; set; }
-        /// <summary>
-        /// A list of colors to select the route color from
-        /// </summary>
-        public List<string> Colors { get; set; }
 
         public ConfigurationData()
         {
@@ -159,6 +159,7 @@ namespace IsraelHiking.Common.Configuration
             ElasticsearchServerAddress = "http://localhost:9200/";
             GpsBabelServerAddress = "http://localhost:11987/";
             ElevationServerAddress = "http://localhost:11211/";
+            ImageCreatorServerAddress = "http://localhost:11311/";
             OsmFileAddress = "https://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf";
             OfflineFilesFolder = "./";
             OsmConfiguration = new OsmConfiguraionData
@@ -168,21 +169,6 @@ namespace IsraelHiking.Common.Configuration
                 BaseAddress = "https://www.openstreetmap.org"
             };
             CsvsDictionary = new Dictionary<string, string>();
-            Colors = new List<string>
-            {
-                "#0000FF", // blue
-                "#FF0000", // red
-                "#FF6600", // orange
-                "#FF00DD", // pink
-                "#008000", // green
-                "#B700FF", // purple
-                "#00B0A4", // turquoise
-                "#FFFF00", // yellow
-                "#9C3E00", // brown
-                "#00FFFF", // cyan
-                "#7F8282", // gray
-                "#101010", // dark
-            };
         }
     }
 }

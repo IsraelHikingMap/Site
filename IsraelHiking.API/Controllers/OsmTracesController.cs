@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -29,7 +30,7 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly IClientsFactory _clientsFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
-        private readonly IImageCreationService _imageCreationService;
+        private readonly IImageCreationGateway _imageCreationGateway;
         private readonly ISearchRepository _searchRepository;
         private readonly ConfigurationData _options;
 
@@ -39,17 +40,17 @@ namespace IsraelHiking.API.Controllers
         /// <param name="clientsFactory"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="options"></param>
-        /// <param name="imageCreationService"></param>
+        /// <param name="imageCreationGateway"></param>
         /// <param name="searchRepository"></param>
         public OsmTracesController(IClientsFactory clientsFactory,
             IDataContainerConverterService dataContainerConverterService,
-            IImageCreationService imageCreationService,
+            IImageCreationGateway imageCreationGateway,
             ISearchRepository searchRepository,
             IOptions<ConfigurationData> options)
         {
             _clientsFactory = clientsFactory;
             _dataContainerConverterService = dataContainerConverterService;
-            _imageCreationService = imageCreationService;
+            _imageCreationGateway = imageCreationGateway;
             _searchRepository = searchRepository;
             _options = options.Value;
         }
@@ -95,7 +96,7 @@ namespace IsraelHiking.API.Controllers
         {
             var container = await GetTraceById(id);
             container.BaseLayer = new LayerData();
-            var image = await _imageCreationService.Create(container, 128, 128);
+            var image = await _imageCreationGateway.Create(container, 128, 128);
             return new FileContentResult(image, new MediaTypeHeaderValue("image/png"));
         }
 

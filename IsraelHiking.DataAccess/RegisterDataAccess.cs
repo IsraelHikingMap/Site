@@ -13,6 +13,7 @@ namespace IsraelHiking.DataAccess
             services.AddTransient<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
             services.AddTransient<IGpsBabelGateway, GpsBabelGateway>();
             services.AddTransient<IGraphHopperGateway, GraphHopperGateway>();
+            services.AddTransient<IImageCreationGateway, ImageCreationGateway>();
             services.AddSingleton<ElasticSearchGateway, ElasticSearchGateway>();
             services.AddSingleton<IPointsOfInterestRepository>(x => x.GetService<ElasticSearchGateway>());
             services.AddSingleton<IHighwaysRepository>(x => x.GetService<ElasticSearchGateway>());

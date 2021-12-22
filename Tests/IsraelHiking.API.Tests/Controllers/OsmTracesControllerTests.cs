@@ -11,6 +11,7 @@ using NSubstitute;
 using OsmSharp.API;
 using OsmSharp.IO.API;
 using System.IO;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -27,7 +28,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
-            _controller = new OsmTracesController(_clientsFactory, Substitute.For<IDataContainerConverterService>(), Substitute.For<IImageCreationService>(), Substitute.For<ISearchRepository>(), optionsProvider);
+            _controller = new OsmTracesController(_clientsFactory, Substitute.For<IDataContainerConverterService>(), Substitute.For<IImageCreationGateway>(), Substitute.For<ISearchRepository>(), optionsProvider);
         }
 
         [TestMethod]
