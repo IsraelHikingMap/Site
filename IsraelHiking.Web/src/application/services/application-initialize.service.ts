@@ -85,8 +85,9 @@ export class ApplicationInitializeService {
             if (ex.message.indexOf("A mutation operation was attempted on a database that did not allow mutations") !== -1) {
                 alert("Sorry, this site does not support running FireFox in private mode...");
             } else {
-                alert("Ooopppss... We have encountered an unexpected failure. Please try again.\nIf that does not help, please take a screenshot and send it to israelhikingmap@gmail.com?" +
-                    `\nInit failed: ${ex.message}`);
+                alert("Ooopppss... We have encountered an unexpected failure. Please try again.\n" +
+                      "If that does not help, please take a screenshot and send it to israelhikingmap@gmail.com\n" +
+                      `Init failed: ${ex.message}`);
             }
             this.loggingService.error(`Failed IHM Application Initialization: ${ex.message}`);
         }
