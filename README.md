@@ -13,6 +13,10 @@ This repository holds all the files that the site needs in order to run.
 * [Starting a debug session](#starting-a-debug-session)
 * [Setup the server](#setup-the-server)
 
+## Architecture Diagram
+![image](https://user-images.githubusercontent.com/3269297/147354486-3bfb5216-aef9-4ef6-9efe-67352a892752.png)
+
+
 # Technology stack
 The technology stack of this site is based on the following frameworks:
 * [Typescript](http://www.typescriptlang.org/)
