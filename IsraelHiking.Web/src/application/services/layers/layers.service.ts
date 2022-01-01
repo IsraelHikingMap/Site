@@ -173,7 +173,7 @@ export class LayersService {
                 }));
             }
         } catch (error) {
-            this.loggingService.warning("Unable to sync user layer from server - using local layers");
+            this.loggingService.warning("[Layers] Unable to sync user layer from server - using local layers");
         }
     }
 
@@ -332,6 +332,7 @@ export class LayersService {
     }
 
     public selectBaseLayer(key: string) {
+        this.loggingService.info(`[Layers] Selecting base layer ${key}`);
         this.ngRedux.dispatch(new SelectBaseLayerAction({
             key
         }));
@@ -339,6 +340,7 @@ export class LayersService {
 
     public toggleOverlay(overlay: Overlay) {
         let newVisibility = !overlay.visible;
+        this.loggingService.info(`[Layers] Changing visiblity of ${overlay.key} to ${newVisibility ? "visible" : "hidden"}`);
         this.ngRedux.dispatch(new UpdateOverlayAction({
             key: overlay.key,
             layerData: {

@@ -3,7 +3,7 @@
             [before]="resources.endOfBaseLayer"
             [isBaselayer]="true">
 </auto-layer>
-<div *ngFor="let overlay of (overlays | async)">
+<div *ngFor="let overlay of (overlays | async); trackBy:trackByKey">
     <auto-layer [layerData]="overlay"
                 [visible]="overlay.visible"
                 [before]="resources.endOfOverlays"

@@ -6,7 +6,6 @@ import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { MapService } from "application/services/map.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
 import type { ApplicationState, EditableLayer, Language } from "../../models/models";
@@ -37,13 +36,13 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private jsonSourcesIds: string[];
     private jsonLayersIds: string[];
     private hasInternetAccess: boolean;
+    private mapLoadedPromise: Promise<void>;
 
     @select((state: ApplicationState) => state.configuration.language)
     private language$: Observable<Language>;
 
     constructor(resources: ResourcesService,
                 private readonly mapComponent: MapComponent,
-                private readonly mapService: MapService,
                 private readonly fileService: FileService,
                 private readonly connectionSerive: ConnectionService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -56,10 +55,15 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         this.jsonSourcesIds = [];
         this.jsonLayersIds = [];
         this.subscriptions = [];
+        this.mapLoadedPromise = new Promise((resolve, _) => 
+            this.mapComponent.mapLoad.subscribe(() => {
+                resolve();
+            })
+        );
     }
 
     public async ngOnInit() {
-        await this.mapService.initializationPromise;
+        await this.mapLoadedPromise;
         await this.createLayer();
         this.sourceAdded = true;
         this.subscriptions.push(this.language$.subscribe(async () => {

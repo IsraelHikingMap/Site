@@ -128,4 +128,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     public hasExtraData(feature: GeoJSON.Feature<GeoJSON.Point>): boolean {
         return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
+
+    public trackByKey(_: number, el: Overlay) {
+        return el.key;
+    }
 }
