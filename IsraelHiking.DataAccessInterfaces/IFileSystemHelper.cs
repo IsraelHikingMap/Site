@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Microsoft.Extensions.FileProviders;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
@@ -11,5 +12,6 @@ namespace IsraelHiking.DataAccessInterfaces
         void CreateDirectory(string path);
         void Move(string sourceFileName, string targetFileName);
         Stream CreateWriteStream(string filePath);
+        IFileProvider CreateFileProvider(string path);
     }
 }

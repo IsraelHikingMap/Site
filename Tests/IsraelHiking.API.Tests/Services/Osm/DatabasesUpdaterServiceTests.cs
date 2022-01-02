@@ -13,6 +13,11 @@ using NSubstitute;
 using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
+using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Tests.Services.Osm
 {
@@ -32,7 +37,10 @@ namespace IsraelHiking.API.Tests.Services.Osm
         private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
-
+        private IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
+        private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
+        private IElevationGateway _elevationGateway;
+        
         [TestInitialize]
         public void TestInitialize()
         {
@@ -52,6 +60,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
             _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
+            _externalSourceUpdaterExecutor = Substitute.For<IExternalSourceUpdaterExecutor>();
+            _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
+            _elevationGateway = Substitute.For<IElevationGateway>();
             _service = new DatabasesUpdaterService(_externalSourcesRepository,
                 _pointsOfInterestRepository,
                 _highwaysRepository,
@@ -61,31 +72,108 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 _featuresMergeExecutor,
                 _osmLatestFileGateway,
                 _pointsOfInterestFilesCreatorExecutor,
-                null,
+                _imagesUrlsStorageExecutor,
                 _pointsOfInterestProvider,
-                null,
-                null,
+                _externalSourceUpdaterExecutor,
+                _elevationGateway,
                 Substitute.For<ILogger>());
         }
 
         [TestMethod]
-        public void TestRebuild_ShouldRebuildHighwaysAndPoints()
+        public void TestRebuild_ExternalSources_ShouldRebuildExternalSources()
+        {
+            _pointsOfInterestAdapterFactory.GetAll().Returns(new[] {Substitute.For<IPointsOfInterestAdapter>()});
+            
+            _service.Rebuild(new UpdateRequest {AllExternalSources = true}).Wait();
+
+            _externalSourceUpdaterExecutor.Received(1).UpdateSource(Arg.Any<string>());
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+        }
+        
+        [TestMethod]
+        public void TestRebuild_Highways_ShouldRebuildHighwaysAndPoints()
+        { 
+            _service.Rebuild(new UpdateRequest {Highways = true}).Wait();
+
+            _highwaysRepository.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+        }
+
+        [TestMethod] public void TestRebuild_Points_ShouldRebuildPointsWhileMarkingOneAsDeleted()
         {
             var adapter = Substitute.For<IPointsOfInterestAdapter>();
             adapter.GetAll().Returns(new List<Feature>());
-            _pointsOfInterestAdapterFactory.GetBySource(Arg.Any<string>()).Returns(adapter);
+            _pointsOfInterestAdapterFactory.GetAll().Returns(new[] {adapter});
             _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns(new List<Feature>());
-            _pointsOfInterestRepository.GetAllPointsOfInterest(Arg.Any<bool>()).Returns(new List<Feature>());
+            var feature = new Feature(new Point(0, 0), new AttributesTable
+            {
+                {FeatureAttributes.NAME, "feature in database that needs to be deleted"},
+                {FeatureAttributes.POI_ID, "42"}
+            });
+            feature.SetLastModified(new DateTime(0));
+            _pointsOfInterestRepository.GetAllPointsOfInterest(Arg.Any<bool>()).Returns(new List<Feature> {feature});
             _pointsOfInterestRepository.GetPointsOfInterestUpdates(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<Feature>());
-            _featuresMergeExecutor.Merge(Arg.Any<List<Feature>>(), Arg.Any<List<Feature>>()).Returns(new List<Feature>());
+            _featuresMergeExecutor.Merge(Arg.Any<List<Feature>>(), Arg.Any<List<Feature>>()).Returns(new List<Feature>
+            {
+                new (new Point(0,0), new AttributesTable { {FeatureAttributes.POI_ID, "1"}})
+            });
             _pointsOfInterestProvider.GetAll().Returns(new List<Feature>());
             
-            _service.Rebuild(new UpdateRequest { Highways = true, PointsOfInterest = true, SiteMap = true }).Wait();
-
-            _highwaysRepository.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
+            _service.Rebuild(new UpdateRequest {PointsOfInterest = true}).Wait();
+            
             _pointsOfInterestRepository.Received(2).StorePointsOfInterestDataToSecondaryIndex(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.Received(1).StorePointsOfInterestDataToSecondaryIndex(Arg.Is<List<Feature>>(l => l.Any(f => f.Attributes.Exists(FeatureAttributes.POI_DELETED))));
             _pointsOfInterestRepository.Received(1).SwitchPointsOfInterestIndices();
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+        }
+        
+        [TestMethod]
+        public void TestRebuild_Images_ShouldRebuildImages()
+        {
+            const string imageUrl = "imageUrl";
+            var feature = new Feature(new Point(0, 0), new AttributesTable
+            {
+                {FeatureAttributes.IMAGE_URL, "imageUrl2"}
+            });
+            feature.SetLastModified(new DateTime(0));
+            _pointsOfInterestRepository.GetAllPointsOfInterest(false).Returns(new List<Feature> {feature});
+            _osmRepository.GetImagesUrls(Arg.Any<Stream>()).Returns(new List<string> {imageUrl});
+            
+            _service.Rebuild(new UpdateRequest {Images = true}).Wait();
+
+            _imagesUrlsStorageExecutor.Received(1).DownloadAndStoreUrls(Arg.Is<List<string>>(l => l.All(i => i.StartsWith(imageUrl))));
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+        }
+        
+        [TestMethod]
+        public void TestRebuild_SiteMap_ShouldRebuildSiteMap()
+        {
+            _service.Rebuild(new UpdateRequest {SiteMap = true}).Wait();
+
             _pointsOfInterestFilesCreatorExecutor.Received(1).CreateSiteMapXmlFile(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+        }
+        
+        [TestMethod]
+        public void TestRebuild_OfflinePointsFile_ShouldRebuildIt()
+        {
+            var feature = new Feature(new Point(0, 0), new AttributesTable());
+            feature.SetLastModified(new DateTime(0));
+            _pointsOfInterestRepository.GetAllPointsOfInterest(false).Returns(new List<Feature> {feature});
+            _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(new[] {1.0});
+            
+            _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
+
+            _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+        }
+        
+        [TestMethod]
+        public void TestRebuild_GotException_ShouldStoreException()
+        {
+            _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
+
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == false));
         }
     }
 }

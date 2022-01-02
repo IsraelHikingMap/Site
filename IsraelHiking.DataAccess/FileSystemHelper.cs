@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.FileProviders;
 
 namespace IsraelHiking.DataAccess
 {
@@ -51,6 +52,11 @@ namespace IsraelHiking.DataAccess
         public Stream CreateWriteStream(string filePath)
         {
             return File.Create(filePath);
+        }
+
+        public IFileProvider CreateFileProvider(string path)
+        {
+            return new PhysicalFileProvider(path);
         }
     }
 }
