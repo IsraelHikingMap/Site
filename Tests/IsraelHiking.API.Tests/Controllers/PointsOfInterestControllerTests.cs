@@ -29,7 +29,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private ITagsHelper _tagHelper;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
         private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
-        private IDistributedCache _persistantCache;
+        private IDistributedCache _persistentCache;
         private ISimplePointAdderExecutor _simplePointAdderExecutor;
 
         [TestInitialize]
@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _tagHelper = Substitute.For<ITagsHelper>();
             _osmGateway = Substitute.For<IAuthClient>();
             _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
-            _persistantCache = Substitute.For<IDistributedCache>();
+            _persistentCache = Substitute.For<IDistributedCache>();
             _simplePointAdderExecutor = Substitute.For<ISimplePointAdderExecutor>();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
@@ -50,7 +50,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 _pointsOfInterestProvider, 
                 _imagesUrlsStorageExecutor,
                 _simplePointAdderExecutor,
-                _persistantCache,
+                _persistentCache,
                 Substitute.For<ILogger>(),
                 optionsProvider);
         }
@@ -66,7 +66,7 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetPointsOfIntereset_NoCategory_ShouldReturnEmptyList()
+        public void GetPointsOfInterest_NoCategory_ShouldReturnEmptyList()
         {
             var result = _controller.GetPointsOfInterest(string.Empty, string.Empty, string.Empty).Result;
 
@@ -75,7 +75,7 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetPointsOfIntereset_OneAdapter_ShouldReturnPoi()
+        public void GetPointsOfInterest_OneAdapter_ShouldReturnPoi()
         {
             _pointsOfInterestProvider.GetFeatures(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(),
                 Arg.Any<string>()).Returns(new[] { new Feature() });
@@ -86,7 +86,7 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetPointOfIntereset_WrongSource_ShouldReturnBadRequest()
+        public void GetPointOfInterest_WrongSource_ShouldReturnBadRequest()
         {
             var result = _controller.GetPointOfInterest("wrong source", string.Empty).Result as NotFoundResult;
 
@@ -94,7 +94,7 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetPointOfInteresetCoordinates_BySourceAndId_ShouldReturnIt()
+        public void GetPointOfInterestCoordinates_BySourceAndId_ShouldReturnIt()
         {
             var id = "32_35";
             var source = Sources.COORDINATES;
@@ -108,7 +108,7 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetPointOfIntereset_BySourceAndId_ShouldReturnIt()
+        public void GetPointOfInterest_BySourceAndId_ShouldReturnIt()
         {
             var id = "way_1";
             var source = "source";
@@ -153,7 +153,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 { FeatureAttributes.POI_ID, Guid.NewGuid().ToString() },
             });
             poi.SetLocation(new Coordinate());
-            _persistantCache.Get(Arg.Any<string>()).Returns(Encoding.UTF8.GetBytes("the id in the cache"));
+            _persistentCache.Get(Arg.Any<string>()).Returns(Encoding.UTF8.GetBytes("the id in the cache"));
             _pointsOfInterestProvider.GetFeatureById(Sources.OSM, "the id in the cache").Returns(poi);
 
             var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as OkObjectResult;
@@ -172,7 +172,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 { FeatureAttributes.POI_ID, Guid.NewGuid().ToString() },
             });
             poi.SetLocation(new Coordinate());
-            _persistantCache.Get(Arg.Any<string>()).Returns(Encoding.UTF8.GetBytes("the id in the cache"));
+            _persistentCache.Get(Arg.Any<string>()).Returns(Encoding.UTF8.GetBytes("the id in the cache"));
             _pointsOfInterestProvider.GetFeatureById(Sources.OSM, "the id in the cache").Returns((Feature)null);
 
             var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as BadRequestObjectResult;
@@ -191,7 +191,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 { FeatureAttributes.POI_ID, Guid.NewGuid().ToString() },
             });
             poi.SetLocation(new Coordinate(0, 0));
-            _persistantCache.Get(Arg.Any<string>()).Returns((byte[])null);
+            _persistentCache.Get(Arg.Any<string>()).Returns((byte[])null);
             _pointsOfInterestProvider.AddFeature(poi, _osmGateway, Languages.HEBREW).Returns(new Feature(new Point(0,0), new AttributesTable
             {
                 { FeatureAttributes.ID, "new id" }
@@ -200,7 +200,9 @@ namespace IsraelHiking.API.Tests.Controllers
             var result = _controller.CreatePointOfInterest(poi, Languages.HEBREW).Result as OkObjectResult;
 
             Assert.IsNotNull(result);
-            Assert.IsTrue((result.Value as Feature).Attributes.Exists(FeatureAttributes.ID));
+            var feature = result.Value as Feature;
+            Assert.IsNotNull(feature);
+            Assert.IsTrue(feature.Attributes.Exists(FeatureAttributes.ID));
         }
 
         [TestMethod]
@@ -289,7 +291,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void CreateSimplePoint_ExistsInCache_ShouldNotAddIt()
         {
             var guidString = Guid.NewGuid().ToString();
-            _persistantCache.Get(guidString).Returns(new byte[] { 1 });
+            _persistentCache.Get(guidString).Returns(new byte[] { 1 });
             var simpleFeature = new Feature
             {
                 Attributes = new AttributesTable
