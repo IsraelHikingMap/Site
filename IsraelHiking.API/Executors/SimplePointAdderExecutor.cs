@@ -105,7 +105,7 @@ namespace IsraelHiking.API.Executors
         /// <returns>The way from OSM and the equivalent feature, and also all the other closest highways</returns>
         private async Task<(Way, Feature[])> GetClosestHighways(IAuthClient osmGateway, LatLng latLng)
         {
-            var diff = 0.003; // get hihgways around 300 m radius not to miss highways (elastic bug?)
+            var diff = 0.003; // get highways around 300 m radius not to miss highways (elastic bug?)
             var highways = await _highwaysRepository.GetHighways(new Coordinate(latLng.Lng + diff, latLng.Lat + diff),
                 new Coordinate(latLng.Lng - diff, latLng.Lat - diff));
             var point = new Point(latLng.Lng, latLng.Lat);
@@ -120,7 +120,7 @@ namespace IsraelHiking.API.Executors
             // check for version matching and get updates if needed.
             var closestHighway = closestHighways.First();
             var simpleWay = await osmGateway.GetWay(closestHighway.GetOsmId());
-            if (simpleWay.Version == long.Parse(closestHighway.Attributes[FeatureAttributes.POI_VERSION].ToString()))
+            if (simpleWay.Version == long.Parse(closestHighway.Attributes[FeatureAttributes.POI_VERSION].ToString() ?? string.Empty))
             {
                 return (simpleWay, closestHighways.ToArray());
             }
@@ -141,28 +141,23 @@ namespace IsraelHiking.API.Executors
 
         private double DistanceWithPolygonFix(Geometry geometry, Point point)
         {
-            if (geometry is Polygon polygon)
+            return geometry switch
             {
-                return DistanceToPolygon(polygon, point);
-            }
-            if (geometry is MultiPolygon multiPolygon)
-            {
-                return multiPolygon.OfType<Polygon>().Min(p => DistanceToPolygon(p, point));
-            }
-            return geometry.Distance(point);
+                Polygon polygon => DistanceToPolygon(polygon, point),
+                MultiPolygon multiPolygon => multiPolygon.OfType<Polygon>().Min(p => DistanceToPolygon(p, point)),
+                _ => geometry.Distance(point)
+            };
         }
 
         private double DistanceToPolygon(Polygon polygon, Point point)
         {
-            if (!polygon.Contains(point))
-            {
-                return polygon.Distance(point);
-            }
-            return polygon.InteriorRings.Concat(new[] { polygon.ExteriorRing }).Min(l => l.Distance(point));
+            return !polygon.Contains(point)
+                ? polygon.Distance(point)
+                : polygon.InteriorRings.Concat(new[] {polygon.ExteriorRing}).Min(l => l.Distance(point));
         }
 
         /// <summary>
-        /// This method receives the closest highways and finds the closest node, and checks if it is a juction node
+        /// This method receives the closest highways and finds the closest node, and checks if it is a junction node
         /// </summary>
         /// <param name="latLng"></param>
         /// <param name="closestHighways"></param>
@@ -172,8 +167,8 @@ namespace IsraelHiking.API.Executors
             var coordinate = latLng.ToCoordinate();
             var closestHighway = closestHighways.First();
             var closestNodeCoordinate = closestHighway.Geometry.Coordinates.OrderBy(n => n.Distance(coordinate)).FirstOrDefault();
-            var closetNodeIndex = Array.FindIndex(closestHighway.Geometry.Coordinates.ToArray(), n => n == closestNodeCoordinate);
-            var nodeId = long.Parse(((List<object>)closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[closetNodeIndex].ToString());
+            var closetNodeIndex = Array.FindIndex(closestHighway.Geometry.Coordinates.ToArray(), n => n.Equals(closestNodeCoordinate));
+            var nodeId = long.Parse(((List<object>)closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[closetNodeIndex].ToString() ?? string.Empty);
             var isJunction = closestHighways.Skip(1).Any(f => ((List<object>)f.Attributes[FeatureAttributes.POI_OSM_NODES]).Any(nId => nId.ToString() == nodeId.ToString()));
             return (closestNodeCoordinate, closetNodeIndex, nodeId, isJunction);
         }
@@ -191,19 +186,19 @@ namespace IsraelHiking.API.Executors
             {
                 return new OsmChange
                 {
-                    Create = new[] { newNode }
+                    Create = new OsmGeo[] { newNode }
                 };
             }
 
-            (var way, var closestHighways) = await GetClosestHighways(osmGateway, request.LatLng);
+            var (way, closestHighways) = await GetClosestHighways(osmGateway, request.LatLng);
             if (!closestHighways.Any())
             {
                 return new OsmChange
                 {
-                    Create = new[] { newNode }
+                    Create = new OsmGeo[] { newNode }
                 };
             }
-            (var closestNodeCoordinate, var closetNodeIndex, var nodeId, var isJunction) = GetClosestNodeAndCheckIsJunction(request.LatLng, closestHighways);
+            var (closestNodeCoordinate, closetNodeIndex, nodeId, isJunction) = GetClosestNodeAndCheckIsJunction(request.LatLng, closestHighways);
             var newNodeCoordinate = request.LatLng.ToCoordinate();
             if (isJunction || closestNodeCoordinate.Distance(newNodeCoordinate) >= _options.ClosestNodeForGates)
             {
@@ -211,7 +206,7 @@ namespace IsraelHiking.API.Executors
                 var indexToInsert = GetIndexToInsert(closetNodeIndex, closestNodeCoordinate, closestHighways, newNodeCoordinate);
                 return CreateUpdateWayChangeFromData(way, indexToInsert, newNode, closestHighways.First());
             }
-            // Close enough to a node and not a juction -> updating this node
+            // Close enough to a node and not a junction -> updating this node
             var nodeToUpdate = await osmGateway.GetNode(nodeId);
             if (nodeToUpdate.Tags == null)
             {
@@ -227,7 +222,7 @@ namespace IsraelHiking.API.Executors
 
             return new OsmChange
             {
-                Modify = new[] { nodeToUpdate }
+                Modify = new OsmGeo[] { nodeToUpdate }
             };
         }
 
@@ -285,8 +280,8 @@ namespace IsraelHiking.API.Executors
             way.Nodes = updatedList.ToArray();
             return new OsmChange
             {
-                Create = new[] { newNode },
-                Modify = new[] { way }
+                Create = new OsmGeo[] { newNode },
+                Modify = new OsmGeo[] { way }
             };
         }
     }
