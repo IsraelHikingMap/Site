@@ -109,10 +109,10 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetUpdates(DateTime lastMoidifiedDate)
+        public async Task<List<Feature>> GetUpdates(DateTime lastModifiedDate)
         {
             var features = await GetAll();
-            return features.Where(f => f.GetLastModified() > lastMoidifiedDate).ToList();
+            return features.Where(f => f.GetLastModified() > lastModifiedDate).ToList();
         }
     }
 }

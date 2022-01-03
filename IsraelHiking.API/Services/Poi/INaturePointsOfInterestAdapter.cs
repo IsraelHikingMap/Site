@@ -74,9 +74,9 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetUpdates(DateTime lastMoidifiedDate)
+        public async Task<List<Feature>> GetUpdates(DateTime lastModifiedDate)
         {
-            return await _iNatureGateway.GetUpdates(lastMoidifiedDate);
+            return await _iNatureGateway.GetUpdates(lastModifiedDate);
         }
     }
 }

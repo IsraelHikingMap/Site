@@ -187,10 +187,10 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetUpdates(DateTime lastMoidifiedDate)
+        public async Task<List<Feature>> GetUpdates(DateTime lastModifiedDate)
         {
             var features = await GetAllFeaturesWithoutGeometry();
-            features = features.Where(f => f.GetLastModified() > lastMoidifiedDate).ToList();
+            features = features.Where(f => f.GetLastModified() > lastModifiedDate).ToList();
             foreach (var feature in features)
             {
                 await UpdateGeometry(feature);
