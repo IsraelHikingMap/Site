@@ -74,7 +74,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
-        public void GetPointsOfInterest_FilterRelevant_ShouldReturnEmptyList()
+        public void GetFeature_FilterRelevant_ShouldReturnEmptyList()
         {
             var feature = new Feature
             {
@@ -90,7 +90,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
-        public void GetPointsOfInterest_EnglishTitleOnly_ShouldReturnIt()
+        public void GetFeature_EnglishTitleOnly_ShouldReturnIt()
         {
             var name = "English name";
             var feature = GetValidFeature("poiId", Sources.OSM);
@@ -106,7 +106,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
-        public void GetPointsOfInterest_ImageAndDescriptionOnly_ShouldReturnIt()
+        public void GetFeature_ImageAndDescriptionOnly_ShouldReturnIt()
         {
             var feature = GetValidFeature("poiId", Sources.OSM);
             feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
@@ -121,7 +121,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
-        public void GetPointsOfInterest_NoIcon_ShouldReturnItWithSearchIcon()
+        public void GetFeature_NoIcon_ShouldReturnItWithSearchIcon()
         {
             var feature = GetValidFeature("poiId", Sources.OSM);
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, string.Empty);
@@ -134,7 +134,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
-        public void GetPointsOfInterestById_RouteWithMultipleAttributes_ShouldReturnIt()
+        public void GetFeatureById_RouteWithMultipleAttributes_ShouldReturnIt()
         {
             var poiId = "poiId";
             var feature = GetValidFeature(poiId, Sources.OSM);
@@ -160,7 +160,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
-        public void GetPointsOfInterestById_NonValidWikiTag_ShouldReturnIt()
+        public void GetFeatureById_NonValidWikiTag_ShouldReturnIt()
         {
             var poiId = "poiId";
             var feature = GetValidFeature(poiId, Sources.OSM);
@@ -173,9 +173,23 @@ namespace IsraelHiking.API.Tests.Services.Poi
             Assert.IsNotNull(result);
             Assert.AreEqual("website", result.Attributes[FeatureAttributes.WEBSITE]);
         }
+        
+        [TestMethod]
+        public void GetFeatureById_NoIcon_ShouldReturnItWithSearchIcon()
+        {
+            var poiId = "poiId";
+            var feature = GetValidFeature(poiId, Sources.OSM);
+            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, string.Empty);
+            _pointsOfInterestRepository.GetPointOfInterestById(poiId, Sources.OSM).Returns(feature);
+
+            var result = _adapter.GetFeatureById(Sources.OSM, poiId).Result;
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(PointsOfInterestProvider.SEARCH_ICON, result.Attributes[FeatureAttributes.POI_ICON]);
+        }
 
         [TestMethod]
-        public void GetPointsOfInterestById_WithMultipleWebsiteAndSourceImages_ShouldNotFail()
+        public void GetFeatureById_WithMultipleWebsiteAndSourceImages_ShouldNotFail()
         {
             var poiId = "poiId";
             var feature = GetValidFeature(poiId, Sources.OSM);
@@ -199,7 +213,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
-        public void AddPointOfInterest_ShouldUpdateOsmAndElasticSearch()
+        public void AddFeature_ShouldUpdateOsmAndElasticSearch()
         {
             var user = new User { DisplayName = "DisplayName" };
             var gateway = SetupHttpFactory();
@@ -213,15 +227,15 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D");
             _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
 
-            var resutls = _adapter.AddFeature(feature, gateway, language).Result;
+            var results = _adapter.AddFeature(feature, gateway, language).Result;
 
-            Assert.IsNotNull(resutls);
+            Assert.IsNotNull(results);
             _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("תל שלם")));
         }
 
         [TestMethod]
-        public void AddPointOfInterest_WikipediaMobileLink_ShouldUpdateOsmAndElasticSearch()
+        public void AddFeature_WikipediaMobileLink_ShouldUpdateOsmAndElasticSearch()
         {
             var gateway = SetupHttpFactory();
             var language = "he";
@@ -230,9 +244,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
             feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "https://he.m.wikipedia.org/wiki/%D7%96%D7%95%D7%94%D7%A8_(%D7%9E%D7%95%D7%A9%D7%91)");            
             
-            var resutls = _adapter.AddFeature(feature, gateway, language).Result;
+            var results = _adapter.AddFeature(feature, gateway, language).Result;
 
-            Assert.IsNotNull(resutls);
+            Assert.IsNotNull(results);
             _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("זוהר")));
         }
@@ -261,6 +275,95 @@ namespace IsraelHiking.API.Tests.Services.Poi
             gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA + ":en") && x.Tags.Contains(FeatureAttributes.WIKIPEDIA, "en:Literary Hall")));
         }
 
+        [TestMethod]
+        public void UpdateFeature_HasLanguageSpecificDescription_ShouldUpdateBoth()
+        {
+            var gateway = SetupHttpFactory();
+            var feature = GetValidFeature("Node_1", Sources.OSM);
+            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "oldIcon");
+            feature.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION, "new description");
+            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(GetValidFeature("Node_1", Sources.OSM));
+            gateway.GetNode(1).Returns(new Node
+            {
+                Id = 1,
+                Tags = new TagsCollection
+                {
+                    { FeatureAttributes.DESCRIPTION + ":en", "description" },
+                    { FeatureAttributes.DESCRIPTION, "description" }
+                },
+                Latitude = 0,
+                Longitude = 0
+            });
+            
+            _adapter.UpdateFeature(feature, gateway, "en").Wait();
+
+            gateway.Received().UpdateElement(Arg.Any<long>(),
+                Arg.Is<ICompleteOsmGeo>(x =>
+                    x.Tags.GetValue(FeatureAttributes.DESCRIPTION + ":en") == "new description" &&
+                    x.Tags.GetValue(FeatureAttributes.DESCRIPTION) == "new description"));
+        }
+        
+        [TestMethod]
+        public void UpdateFeature_UpdateLocationToALocationTooClose_ShouldNotUpdate()
+        {
+            var gateway = SetupHttpFactory();
+            var feature = GetValidFeature("Node_1", Sources.OSM);
+            feature.SetLocation(new Coordinate(1.00000000001,1));
+            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(GetValidFeature("Node_1", Sources.OSM));
+            gateway.GetNode(1).Returns(new Node
+            {
+                Id = 1,
+                Tags = new TagsCollection
+                {
+                    {FeatureAttributes.NAME, "name"},
+                    {FeatureAttributes.NAME + ":en", "name"}
+                },
+                Latitude = 1,
+                Longitude = 1
+            });
+            
+            _adapter.UpdateFeature(feature, gateway, "en").Wait();
+
+            gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
+        }
+        
+        [TestMethod]
+        public void UpdateFeature_UpdateLocationOfWay_ShouldNotUpdate()
+        {
+            var gateway = SetupHttpFactory();
+            var feature = GetValidFeature("Way_1", Sources.OSM);
+            feature.SetLocation(new Coordinate(1,1));
+            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(GetValidFeature("Node_1", Sources.OSM));
+            gateway.GetCompleteWay(1).Returns(new CompleteWay
+            {
+                Id = 1,
+                Tags = new TagsCollection
+                {
+                    {FeatureAttributes.NAME, "name"},
+                    {FeatureAttributes.NAME + ":en", "name"}
+                },
+                Nodes = new []
+                {
+                    new Node
+                    {
+                        Id = 2,
+                        Latitude = 1,
+                        Longitude = 1
+                    },
+                    new Node
+                    {
+                        Id = 3,
+                        Latitude = 2,
+                        Longitude = 2
+                    },
+                } 
+            });
+            
+            _adapter.UpdateFeature(feature, gateway, "en").Wait();
+
+            gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
+        }
+        
         [TestMethod]
         public void GetPointsForIndexing_ShouldGetThem()
         {
@@ -299,6 +402,24 @@ namespace IsraelHiking.API.Tests.Services.Poi
             Assert.AreEqual(list.Last(), results);
         }
 
+        [TestMethod]
+        public void GetUpdates_TooOld_ShouldThrow()
+        {
+            Assert.ThrowsException<AggregateException>(() => _adapter.GetUpdates(DateTime.MinValue, DateTime.Now).Result);
+        }
+        
+        [TestMethod]
+        public void GetUpdates_ShouldReturnThem()
+        {
+            _pointsOfInterestRepository.GetPointsOfInterestUpdates(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+                .Returns(new List<Feature>());
+            _pointsOfInterestRepository.GetLastSuccessfulRebuildTime().Returns(DateTime.Now);
+            
+            var results = _adapter.GetUpdates(DateTime.Now, DateTime.Now).Result;
+            
+            Assert.AreEqual(0, results.Features.Length);
+        }
+        
         [TestMethod]
         public void UpdateFeature_WithImageIdExists_ShouldUpdate()
         {
