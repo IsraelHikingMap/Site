@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Services.Poi;
+﻿using System;
+using IsraelHiking.API.Services.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
@@ -6,6 +7,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NSubstitute;
 using System.Collections.Generic;
+using IsraelHiking.API.Gpx;
+using IsraelHiking.Common;
+using IsraelHiking.Common.DataContainer;
+using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Tests.Services.Poi
 {
@@ -26,14 +31,47 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
+        public void GetSourceName_ShouldReturnINature()
+        {
+            Assert.AreEqual(Sources.INATURE, _adapter.Source);
+        }
+        
+        [TestMethod]
         public void GetPointsForIndexing_ShouldGetFromGateway()
         {
-            var features = new List<Feature>();
+            var features = new List<Feature>
+            {
+                new (new Point(0,0), new AttributesTable()),
+                new (new LineString(new [] { new Coordinate(0,0), new Coordinate(1,1)}),
+                    new AttributesTable
+                    {
+                        {FeatureAttributes.POI_SHARE_REFERENCE, "missing-url"}
+                    }),
+                new (new LineString(new [] { new Coordinate(0,0), new Coordinate(1,1)}),
+                    new AttributesTable
+                    {
+                        {FeatureAttributes.POI_SHARE_REFERENCE, "share-url"}
+                    })
+            };
             _iNatureGateway.GetAll().Returns(features);
-
+            _repository.GetUrlById("share-url").Returns(new ShareUrl());
+            _dataContainerConverterService.ToAnyFormat(Arg.Any<DataContainerPoco>(), Arg.Any<string>())
+                .Returns(new FeatureCollection().ToBytes());
+            
             var results = _adapter.GetAll().Result;
 
             Assert.AreEqual(features.Count, results.Count);
+        }
+
+        [TestMethod]
+        public void GetUpdates_ShouldGetThem()
+        {
+            var list = new List<Feature>();
+            _iNatureGateway.GetUpdates(Arg.Any<DateTime>()).Returns(list);
+
+            var results = _adapter.GetUpdates(DateTime.Now).Result;
+            
+            Assert.AreEqual(list.Count, results.Count);
         }
     }
 }
