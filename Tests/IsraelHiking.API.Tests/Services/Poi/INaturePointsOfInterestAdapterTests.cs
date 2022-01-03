@@ -31,9 +31,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var features = new List<Feature>();
             _iNatureGateway.GetAll().Returns(features);
 
-            var resutls = _adapter.GetAll().Result;
+            var results = _adapter.GetAll().Result;
 
-            Assert.AreEqual(features.Count, resutls.Count);
+            Assert.AreEqual(features.Count, results.Count);
         }
     }
 }

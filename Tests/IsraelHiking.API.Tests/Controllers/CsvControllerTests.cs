@@ -43,19 +43,19 @@ namespace IsraelHiking.API.Tests.Controllers
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), FlowFormats.GEOJSON)
                 .Returns(featureCollection.ToBytes());
 
-            var resutls = _controller.UploadCsv(file, "\\?id=(.*)", "http://sourceImageUrl/1.png", "icon", "icon-color", Categories.ROUTE_HIKE).Result as FileStreamResult;
+            var results = _controller.UploadCsv(file, "\\?id=(.*)", "http://sourceImageUrl/1.png", "icon", "icon-color", Categories.ROUTE_HIKE).Result as FileStreamResult;
 
-            Assert.IsNotNull(resutls);
+            Assert.IsNotNull(results);
             var memoryStream = new MemoryStream();
-            resutls.FileStream.CopyTo(memoryStream);
-            var resutlsString = Encoding.UTF8.GetString(memoryStream.ToArray());
-            Assert.IsTrue(resutlsString.Contains("42"));
-            Assert.IsTrue(resutlsString.Contains("11"));
-            Assert.IsTrue(resutlsString.Contains("12"));
-            Assert.IsTrue(resutlsString.Contains("icon"));
-            Assert.IsTrue(resutlsString.Contains("icon-color"));
-            Assert.IsTrue(resutlsString.Contains("http://sourceImageUrl/1.png"));
-            Assert.IsTrue(resutlsString.Contains("Hiking"));
+            results.FileStream.CopyTo(memoryStream);
+            var resultsString = Encoding.UTF8.GetString(memoryStream.ToArray());
+            Assert.IsTrue(resultsString.Contains("42"));
+            Assert.IsTrue(resultsString.Contains("11"));
+            Assert.IsTrue(resultsString.Contains("12"));
+            Assert.IsTrue(resultsString.Contains("icon"));
+            Assert.IsTrue(resultsString.Contains("icon-color"));
+            Assert.IsTrue(resultsString.Contains("http://sourceImageUrl/1.png"));
+            Assert.IsTrue(resultsString.Contains("Hiking"));
         }
     }
 }
