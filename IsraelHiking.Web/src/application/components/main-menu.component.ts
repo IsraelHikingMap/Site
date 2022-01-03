@@ -80,6 +80,11 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         this.subscriptions.push(this.searchVisible$.subscribe(v => this.searchVisible = v));
         this.subscriptions.push(this.drawingVisible$.subscribe(v => this.drawingVisible = v));
         this.subscriptions.push(this.statisticsVisible$.subscribe(v => this.statisticsVisible = v));
+        if (this.runningContextService.isCordova) {
+            this.appVersion.getVersionNumber().then((version) => {
+                this.loggingService.info(`App version: ${version}`);
+            });
+        }
     }
 
     public ngOnDestroy(): void {
