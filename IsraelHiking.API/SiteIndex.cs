@@ -8,6 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 // 
@@ -22,6 +23,7 @@ using System.Xml.Serialization;
 [System.ComponentModel.DesignerCategoryAttribute("code")]
 [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.sitemaps.org/schemas/sitemap/0.9")]
 [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.sitemaps.org/schemas/sitemap/0.9", IsNullable=false)]
+[ExcludeFromCodeCoverage]
 public partial class sitemapindex {
     
     private System.Xml.XmlElement[] anyField;
