@@ -59,6 +59,7 @@ public partial class urlset {
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
 [System.Xml.Serialization.XmlTypeAttribute(Namespace="http://www.sitemaps.org/schemas/sitemap/0.9")]
+[ExcludeFromCodeCoverage]
 public partial class tUrl {
     
     private string locField;
