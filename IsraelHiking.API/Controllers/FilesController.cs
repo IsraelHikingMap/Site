@@ -46,7 +46,7 @@ namespace IsraelHiking.API.Controllers
         /// Gets a file from an external Url and converts it to <see cref="DataContainerPoco"/>
         /// </summary>
         /// <param name="url">The url to fetch the file from</param>
-        /// <returns>A data container after convertion</returns>
+        /// <returns>A data container after conversion</returns>
         [HttpGet]
         // GET api/files?url=http://jeeptrip.co.il/routes/pd6bccre.twl
         public async Task<DataContainerPoco> GetRemoteFile(string url)
@@ -57,7 +57,7 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Converts <see cref="DataContainerPoco"/> (client side presention) to any given format.
+        /// Converts <see cref="DataContainerPoco"/> (client side presentation) to any given format.
         /// </summary>
         /// <param name="format">The format to convert to</param>
         /// <param name="dataContainer">The container to convert</param>
@@ -82,7 +82,8 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest();
             }
-            using var memoryStream = new MemoryStream();
+
+            await using var memoryStream = new MemoryStream();
             var fileName = file.FileName;
             await file.CopyToAsync(memoryStream);
             var dataContainer = await ConvertToDataContainer(memoryStream.ToArray(), fileName);
@@ -113,7 +114,7 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         public Task<Dictionary<string, DateTime>> GetOfflineFiles([FromQuery] DateTime lastModified)
         {
-            return _offlineFilesService.GetUpdatedFilesList(User.Identity.Name, lastModified);
+            return _offlineFilesService.GetUpdatedFilesList(User.Identity?.Name, lastModified);
         }
 
         /// <summary>
@@ -126,7 +127,7 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetOfflineFile(string id)
         {
-            var file = await _offlineFilesService.GetFileContent(User.Identity.Name, id);
+            var file = await _offlineFilesService.GetFileContent(User.Identity?.Name, id);
             return File(file, "application/zip", id);
         }
     }

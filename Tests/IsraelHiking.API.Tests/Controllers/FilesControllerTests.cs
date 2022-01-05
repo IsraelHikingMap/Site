@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Controllers;
+﻿using System;
+using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Executors;
@@ -32,7 +33,8 @@ namespace IsraelHiking.API.Tests.Controllers
         private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private IDataContainerConverterService _dataContainerConverterService;
         private IGpxDataContainerConverter _gpxDataContainerConverter;
-
+        private IOfflineFilesService _offlineFilesService;
+        
         private const string GPX_DATA = @"<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
             <gpx xmlns='http://www.topografix.com/GPX/1/1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd' version='1.1' creator='IsraelHikingMap'>
             <wpt lat='31.85073184447357' lon='34.964332580566406'>
@@ -61,14 +63,15 @@ namespace IsraelHiking.API.Tests.Controllers
             _gpxDataContainerConverter = new GpxDataContainerConverter();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
-            _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, _gpxDataContainerConverter, new RouteDataSplitterService(new ItmWgs84MathTransfromFactory(), optionsProvider), new IConverterFlowItem[0]);
-            _controller = new FilesController(_elevationGateway, _remoteFileFetcherGateway, _dataContainerConverterService, null);
+            _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, _gpxDataContainerConverter, new RouteDataSplitterService(new ItmWgs84MathTransfromFactory(), optionsProvider), Array.Empty<IConverterFlowItem>());
+            _offlineFilesService = Substitute.For<IOfflineFilesService>();
+            _controller = new FilesController(_elevationGateway, _remoteFileFetcherGateway, _dataContainerConverterService, _offlineFilesService);
         }
 
         [TestMethod]
         public void GetRemoteFile_ConvertKmlToGeoJson_ShouldReturnOnePointAndOneLineString()
         {
-            var url = "someurl";
+            var url = "someUrl";
             byte[] bytes = Encoding.ASCII.GetBytes(GPX_DATA);
             _remoteFileFetcherGateway.GetFileContent(url).Returns(new RemoteFileFetcherGatewayResponse { Content = bytes, FileName = "file.KML" });
             _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Is<string>(x => x.Contains("kml")), Arg.Is<string>(x => x.Contains("gpx"))).Returns(bytes);
@@ -124,19 +127,44 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PostOpenFile_GpxFile_ShouldReturnDataContainerAndUpdateElevation()
         {
             var file = Substitute.For<IFormFile>();
-            file.FileName.Returns("somefile.gpx");
-            file.When(f => f.CopyToAsync(Arg.Any<MemoryStream>())).Do(x => (x[0] as MemoryStream).Write(Encoding.ASCII.GetBytes(GPX_DATA), 0, Encoding.ASCII.GetBytes(GPX_DATA).Length));
+            file.FileName.Returns("someFile.gpx");
+            file.When(f => f.CopyToAsync(Arg.Any<MemoryStream>())).Do(x => (x[0] as MemoryStream)?.Write(Encoding.ASCII.GetBytes(GPX_DATA), 0, Encoding.ASCII.GetBytes(GPX_DATA).Length));
 
             var results = _controller.PostOpenFile(file).Result as OkObjectResult;
             Assert.IsNotNull(results);
             var dataContainer = results.Value as DataContainerPoco;
 
+            Assert.IsNotNull(dataContainer);
             Assert.AreEqual(1, dataContainer.Routes.Count);
             Assert.AreEqual(1, dataContainer.Routes.First().Segments.Count);
             Assert.AreEqual(6, dataContainer.Routes.First().Segments.First().Latlngs.Count);
             Assert.AreEqual(1, dataContainer.Routes.First().Markers.Count);
             Assert.IsTrue(dataContainer.Routes.SelectMany(r => r.Segments.SelectMany(s => s.Latlngs)).All(l => l.Alt != 0));
             Assert.AreEqual(1, dataContainer.Routes.SelectMany(r => r.Segments.SelectMany(s => s.Latlngs)).Count(l => l.Alt == 1));
+        }
+
+        [TestMethod]
+        public void GetOfflineFiles_ShouldGetTheList()
+        {
+            _controller.SetupIdentity();
+            var dict = new Dictionary<string, DateTime>(); 
+            _offlineFilesService.GetUpdatedFilesList(Arg.Any<string>(), Arg.Any<DateTime>())
+                .Returns(dict);
+
+            var results = _controller.GetOfflineFiles(DateTime.Now).Result;
+            
+            Assert.AreEqual(dict.Count, results.Count);
+        }
+
+        [TestMethod]
+        public void GetOfflineFile_ShouldGetIt()
+        {
+            _controller.SetupIdentity();
+            _offlineFilesService.GetFileContent(Arg.Any<string>(), "file").Returns(new MemoryStream());
+            
+            var results = _controller.GetOfflineFile("file").Result as FileResult;
+            
+            Assert.IsNotNull(results);
         }
     }
 }
