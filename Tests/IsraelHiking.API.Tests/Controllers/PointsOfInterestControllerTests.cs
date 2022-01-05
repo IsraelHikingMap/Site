@@ -206,7 +206,7 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void UploadPointOfInterest_IncorrectId_ShouldNotUpdate()
+        public void UpdatePointOfInterest_IncorrectId_ShouldNotUpdate()
         {
             _controller.SetupIdentity();
             var poi = new Feature(new Point(0, 0), new AttributesTable {
@@ -232,6 +232,41 @@ namespace IsraelHiking.API.Tests.Controllers
                 { FeatureAttributes.POI_ICON, "icon" },
                 { FeatureAttributes.POI_ADDED_URLS, new [] { string.Join("", Enumerable.Repeat("i", 256)) } },
             });
+            poi.SetLocation(new Coordinate());
+
+            var result = _controller.UpdatePointOfInterest(poi.GetId(), poi, Languages.HEBREW).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(result);
+        }
+        
+        [TestMethod]
+        public void UpdatePointOfInterest_DescriptionTooLong_ShouldNotUpdate()
+        {
+            _controller.SetupIdentity();
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.POI_ID, "1" },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.DESCRIPTION, string.Join("", Enumerable.Repeat("i", 256)) },
+            });
+            poi.SetLocation(new Coordinate());
+
+            var result = _controller.UpdatePointOfInterest(poi.GetId(), poi, Languages.HEBREW).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(result);
+        }
+        
+        [TestMethod]
+        public void UpdatePointOfInterest_TitleTooLong_ShouldNotUpdate()
+        {
+            _controller.SetupIdentity();
+            var poi = new Feature(new Point(0, 0), new AttributesTable {
+                { FeatureAttributes.POI_SOURCE, Sources.OSM },
+                { FeatureAttributes.POI_ID, "1" },
+                { FeatureAttributes.POI_ICON, "icon" },
+                { FeatureAttributes.NAME, string.Join("", Enumerable.Repeat("i", 256)) },
+            });
+            poi.SetTitles();
             poi.SetLocation(new Coordinate());
 
             var result = _controller.UpdatePointOfInterest(poi.GetId(), poi, Languages.HEBREW).Result as BadRequestObjectResult;
@@ -266,6 +301,25 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(results);
         }
 
+        [TestMethod]
+        public void GetPointOfInterestUpdates_ShouldGetThem()
+        {
+            _pointsOfInterestProvider.GetUpdates(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new UpdatesResponse
+            {
+                Features = new[] {new Feature(null, new AttributesTable
+                {
+                    {FeatureAttributes.IMAGE_URL, "imageUrl"}
+                })},
+                Images = Array.Empty<ImageItem>(),
+                LastModified = DateTime.Now
+            });
+            
+            var results = _controller.GetPointOfInterestUpdates(DateTime.MinValue, DateTime.Now).Result;
+
+            _imagesUrlsStorageExecutor.Received(1).GetAllImagesForUrls(Arg.Any<string[]>());
+            Assert.AreEqual(1, results.Features.Length);
+        }
+        
         [TestMethod]
         public void CreateSimplePoint_DoesNotExistInCache_ShouldAddIt()
         {
