@@ -589,7 +589,7 @@ export class PoiService {
         };
     }
 
-    public getTitle(feature: GeoJSON.Feature, language: string) {
+    public getTitle(feature: GeoJSON.Feature, language: string): string {
         if (feature.properties["name:" + language]) {
             return feature.properties["name:" + language];
         }
@@ -599,11 +599,11 @@ export class PoiService {
         return "";
     }
 
-    public getDescription(feature: GeoJSON.Feature, language: string) {
+    public getDescription(feature: GeoJSON.Feature, language: string): string {
         return feature.properties["description:" + language] || feature.properties.description;
     }
 
-    public getExternalDescription(feature: GeoJSON.Feature, language: string) {
+    public getExternalDescription(feature: GeoJSON.Feature, language: string): string {
         return feature.properties["poiExternalDescription:" + language] || feature.properties.poiExternalDescription;
     }
 

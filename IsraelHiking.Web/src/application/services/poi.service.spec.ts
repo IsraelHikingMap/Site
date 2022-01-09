@@ -18,13 +18,15 @@ import { ToastService } from "./toast.service";
 import { MapService } from "./map.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState, MarkerData } from "../models/models";
 
 describe("Poi Service", () => {
 
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
-        let hashService = {};
+        let hashService = {
+            getFullUrlFromPoiId: () => {}
+        };
         let fileServiceMock = {};
         let databaseServiceMock = {
             getPoisForClustering: () => Promise.resolve([]),
@@ -308,4 +310,57 @@ describe("Poi Service", () => {
             }
         )
     );
+
+    it("should get closest point from server", (inject([PoiService, HttpTestingController],
+        async (poiService: PoiService, mockBackend: HttpTestingController) => {
+
+            let promise = poiService.getClosestPoint({lat: 0, lng: 0}).then((data: MarkerData) => {
+                expect(data.latlng.lat).toBe(1);
+                expect(data.latlng.lng).toBe(1);
+            });
+
+            mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(Urls.poiClosest))
+                .flush({ 
+                    type: "Feature",
+                    properties: { "name:he": "name" },
+                    geometry: { type: "Point", coordinates: [1, 1]}, } as GeoJSON.Feature);
+
+            return promise;
+        })
+    ));
+
+    it("should return has extra data for feature", inject([PoiService], (poiService: PoiService) => {
+        expect(poiService.hasExtraData({properties: { "description:he": "desc"}} as any as GeoJSON.Feature, "he")).toBeTruthy();
+    }));
+
+    it("should return the itm coordinates for feature", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getItmCoordinates({properties: { poiItmEast: 1, poiItmNorth: 2}} as any as GeoJSON.Feature);
+        expect(results.east).toBe(1);
+        expect(results.north).toBe(2);
+    }));
+
+    it("should get contribution", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getContribution({properties: { 
+            poiLastModified: 1000, poiUserAddress: "address", poiUserName: "name"}
+        } as any as GeoJSON.Feature);
+        expect(results.lastModifiedDate).not.toBeNull();
+        expect(results.userAddress).toBe("address");
+        expect(results.userName).toBe("name");
+    }));
+
+    it("should get extenal description", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getExternalDescription({properties: { "poiExternalDescription:he": "desc"}} as any as GeoJSON.Feature, "he");
+        expect(results).toBe("desc");
+    }));
+
+    it("should get title even when there's no title for language description", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getTitle({properties: { "name": "name"}} as any as GeoJSON.Feature, "he");
+        expect(results).toBe("name");
+    }));
+
+    it("should get social links", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getPoiSocialLinks({properties: { "name": "name", poiGeolocation: {lat: 0, lng: 0}}} as any as GeoJSON.Feature);
+        expect(results.facebook.includes(Urls.facebook)).toBeTruthy();
+        expect(results.waze.includes(Urls.waze)).toBeTruthy();
+    }));
 });
