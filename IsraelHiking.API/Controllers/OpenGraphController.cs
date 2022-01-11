@@ -42,7 +42,7 @@ namespace IsraelHiking.API.Controllers
             var title = string.IsNullOrWhiteSpace(url.Title) ? "Israel Hiking Map Route Share" : url.Title;
             var contentResult = new ContentResult
             {
-                Content = NonApiMiddleware.GetPage(title, Url.Content("~/api/images/" + url.Id), url.Description),
+                Content = NonApiMiddleware.GetPage(title, "https://israelhiking.osm.org.il/api/images/" + url.Id, url.Description),
                 ContentType = "text/html"
             };
             return contentResult;

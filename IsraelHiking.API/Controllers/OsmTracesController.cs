@@ -232,7 +232,7 @@ namespace IsraelHiking.API.Controllers
                 Id = gpxFile.Id.ToString(),
                 Name = gpxFile.Name,
                 Description = gpxFile.Description,
-                ImageUrl = Request.Scheme + "://" + Request.Host + Url.Content("~/api/osm/trace/") + gpxFile.Id + "/picture",
+                ImageUrl = $"https://israelhiking.osm.org.il/api/osm/trace/{gpxFile.Id}/picture",
                 Url = $"https://www.openstreetmap.org/user/{gpxFile.User}/traces/{gpxFile.Id}",
                 TagsString = string.Join(",", gpxFile.Tags),
                 TimeStamp = gpxFile.TimeStamp,
