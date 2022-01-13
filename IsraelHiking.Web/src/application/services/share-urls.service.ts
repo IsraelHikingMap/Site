@@ -98,7 +98,8 @@ export class ShareUrlsService {
             let sharesToGetFromServer = [] as ShareUrl[];
             this.loggingService.info("[Shares] Starting shares sync, last modified:" +
                 (sharesLastSuccessfullSync || new Date(0)).toUTCString());
-            let shareUrls = await this.httpClient.get(Urls.urls).pipe(timeout(10000)).toPromise() as ShareUrl[];
+            let shareUrls = await this.httpClient.get(Urls.urls).pipe(timeout(20000)).toPromise() as ShareUrl[];
+            this.loggingService.info("[Shares] Got the list of shares, statring to compare against exiting list");
             let exitingShareUrls = this.ngRedux.getState().shareUrlsState.shareUrls;
             for (let shareUrl of shareUrls) {
                 shareUrl.lastModifiedDate = new Date(shareUrl.lastModifiedDate);
@@ -132,6 +133,7 @@ export class ShareUrlsService {
     }
 
     public async createShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
+        this.loggingService.info(`[Shares] Creating share with title: ${shareUrl.title}`);
         let createdShareUrl = await this.httpClient.post(Urls.urls, shareUrl).toPromise() as ShareUrl;
         this.ngRedux.dispatch(new AddShareUrlAction({ shareUrl: createdShareUrl }));
         return createdShareUrl;
