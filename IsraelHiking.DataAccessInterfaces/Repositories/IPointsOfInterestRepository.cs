@@ -16,7 +16,6 @@ namespace IsraelHiking.DataAccessInterfaces.Repositories
         Task<List<Feature>> GetAllPointsOfInterest(bool withDeleted);
         Task<List<Feature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate, DateTime modifiedUntil);
         Task<Feature> GetPointOfInterestById(string id, string source);
-        Task DeleteOsmPointOfInterestById(string id, DateTime? timeStamp);
         Task DeletePointOfInterestById(string id, string source);
         Task StoreRebuildContext(RebuildContext context);
         Task<DateTime> GetLastSuccessfulRebuildTime();

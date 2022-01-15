@@ -1,6 +1,5 @@
 ﻿using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
-using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp.IO.API;

@@ -1,10 +1,8 @@
 ﻿using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
-using IsraelHiking.Common.DataContainer;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using System.Linq;
 
 namespace IsraelHiking.API.Converters
@@ -12,7 +10,7 @@ namespace IsraelHiking.API.Converters
     /// <summary>
     /// This class converts location to point of interest
     /// </summary>
-    public class SearchResultsPointOfInterestConverter
+    public static class SearchResultsPointOfInterestConverter
     {
         private const string ID_SEPARATOR = "_";
 

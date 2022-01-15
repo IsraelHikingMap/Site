@@ -35,7 +35,7 @@ $APIResultsFile = Get-ChildItem *.trx -recurse | select-object -first 1 | select
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/Tests/IsraelHiking.DataAccess.Tests"
 $DataAccessResultsFile = Get-ChildItem *.trx -recurse | select-object -first 1 | select -expand FullName
 
-# Upload test resutls
+# Upload test results
 
 $wc = New-Object 'System.Net.WebClient'
 $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $APIResultsFile)

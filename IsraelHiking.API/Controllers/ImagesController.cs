@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class ImagesController : ControllerBase
     {
-        private readonly IImageCreationService _imageCreationService;
+        private readonly IImageCreationGateway _imageCreationGateway;
         private readonly IImgurGateway _imgurGateway;
         private readonly IShareUrlsRepository _repository;
         private readonly ConfigurationData _options;
@@ -29,16 +29,16 @@ namespace IsraelHiking.API.Controllers
         /// Controller's constructor
         /// </summary>
         /// <param name="repository"></param>
-        /// <param name="imageCreationService"></param>
+        /// <param name="imageCreationGateway"></param>
         /// <param name="imgurGateway"></param>
         /// <param name="options"></param>
         public ImagesController(IShareUrlsRepository repository,
-            IImageCreationService imageCreationService,
+            IImageCreationGateway imageCreationGateway,
             IImgurGateway imgurGateway,
             IOptions<ConfigurationData> options)
         {
             _repository = repository;
-            _imageCreationService = imageCreationService;
+            _imageCreationGateway = imageCreationGateway;
             _imgurGateway = imgurGateway;
             _options = options.Value;
         }
@@ -83,7 +83,7 @@ namespace IsraelHiking.API.Controllers
                     }
                 }
             };
-            var imageData = await _imageCreationService.Create(container, width ?? 512, height ?? 512);
+            var imageData = await _imageCreationGateway.Create(container, width ?? 512, height ?? 512);
             return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
         }
 
@@ -104,7 +104,7 @@ namespace IsraelHiking.API.Controllers
             {
                 return NotFound();
             }
-            var imageData = await _imageCreationService.Create(url.DataContainer, width ?? 600, height ?? 315);
+            var imageData = await _imageCreationGateway.Create(url.DataContainer, width ?? 600, height ?? 315);
             return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
         }
 
@@ -117,7 +117,7 @@ namespace IsraelHiking.API.Controllers
         [Route("")]
         public async Task<IActionResult> PostDataContainer([FromBody]DataContainerPoco dataContainer)
         {
-            var imageData = await _imageCreationService.Create(dataContainer, 600, 315);
+            var imageData = await _imageCreationGateway.Create(dataContainer, 600, 315);
             return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
         }
 

@@ -47,11 +47,11 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetUpdates(DateTime lastMoidifiedDate)
+        public async Task<List<Feature>> GetUpdates(DateTime lastModifiedDate)
         {
             var slimFeatures = await _nakebGateway.GetAll();
             var features = new List<Feature>();
-            foreach (var slimFeature in slimFeatures.Where(f => f.GetLastModified() > lastMoidifiedDate))
+            foreach (var slimFeature in slimFeatures.Where(f => f.GetLastModified() > lastModifiedDate))
             {
                 features.Add(await _nakebGateway.GetById(slimFeature.Attributes[FeatureAttributes.ID].ToString()));
             }

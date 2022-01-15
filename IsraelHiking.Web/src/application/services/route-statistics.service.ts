@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
 import { last } from "lodash-es";
-import createMedianFilter from "moving-median";
 import linearInterpolator from "linear-interpolator";
 import { SpatialService } from "./spatial.service";
 import type { LatLngAlt, RouteData, LatLngAltTime } from "../models/models";

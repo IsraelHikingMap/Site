@@ -253,12 +253,6 @@ namespace IsraelHiking.DataAccess
             await SwitchIndices(currentIndex, newIndex, OSM_HIGHWAYS_ALIAS);
         }
 
-        public async Task DeleteHighwaysById(string id)
-        {
-            var fullId = GeoJsonExtensions.GetId(Sources.OSM, id);
-            await _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_HIGHWAYS_ALIAS));
-        }
-
         public async Task StorePointsOfInterestDataToSecondaryIndex(List<Feature> pointsOfInterest)
         {
             var (_, newIndex) = GetIndicesStatus(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS);
@@ -379,17 +373,6 @@ namespace IsraelHiking.DataAccess
             var fullId = GeoJsonExtensions.GetId(source, id);
             var response = await _elasticClient.GetAsync<Feature>(fullId, r => r.Index(OSM_POIS_ALIAS));
             return response.Source;
-        }
-
-        public async Task DeleteOsmPointOfInterestById(string id, DateTime? timeStamp)
-        {
-            var feature = await GetPointOfInterestById(id, Sources.OSM);
-            if (feature != null)
-            {
-                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_DELETED, true);
-                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_LAST_MODIFIED, (timeStamp ?? DateTime.Now).ToString("o"));
-                await UpdatePointsOfInterestData(new List<Feature> { feature });
-            }
         }
 
         public Task DeletePointOfInterestById(string id, string source)

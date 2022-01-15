@@ -8,7 +8,6 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Valid;
 using OsmSharp.Complete;
-using OsmSharp.Tags;
 using ProjNet.CoordinateSystems.Transformations;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,37 +23,24 @@ namespace IsraelHiking.API.Executors
         private readonly MathTransform _wgs84ItmConverter;
         private readonly ITagsHelper _tagsHelper;
 
-        private class TagKeyComparer : IEqualityComparer<Tag>
-        {
-            public bool Equals(Tag x, Tag y)
-            {
-                return x.Key == y.Key;
-            }
-
-            public int GetHashCode(Tag obj)
-            {
-                return obj.Key.GetHashCode();
-            }
-        }
-
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="elevationGateway"></param>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="itmWgs84MathTransformFactory"></param>
         /// <param name="osmGeoJsonConverter"></param>
         /// <param name="tagsHelper"></param>
         public OsmGeoJsonPreprocessorExecutor(ILogger logger,
             IElevationGateway elevationGateway,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            IItmWgs84MathTransfromFactory itmWgs84MathTransformFactory,
             IOsmGeoJsonConverter osmGeoJsonConverter,
             ITagsHelper tagsHelper)
         {
             _logger = logger;
             _osmGeoJsonConverter = osmGeoJsonConverter;
             _elevationGateway = elevationGateway;
-            _wgs84ItmConverter = itmWgs84MathTransfromFactory.CreateInverse();
+            _wgs84ItmConverter = itmWgs84MathTransformFactory.CreateInverse();
             _tagsHelper = tagsHelper;
         }
 
@@ -110,7 +96,7 @@ namespace IsraelHiking.API.Executors
             var feature = _osmGeoJsonConverter.ToGeoJson(osmEntity);
             if (feature == null)
             {
-                _logger.LogError("Unable to convert " + osmEntity.ToString());
+                _logger.LogError("Unable to convert " + osmEntity);
                 return null;
             }
             var isValidOp = new IsValidOp(feature.Geometry);
@@ -125,7 +111,7 @@ namespace IsraelHiking.API.Executors
                 return null;
             }
 
-            (var searchFactor, var iconColorCategory) = _tagsHelper.GetInfo(feature.Attributes);
+            var (searchFactor, iconColorCategory) = _tagsHelper.GetInfo(feature.Attributes);
             feature.Attributes.Add(FeatureAttributes.POI_SEARCH_FACTOR, searchFactor);
             feature.Attributes.Add(FeatureAttributes.POI_ICON, iconColorCategory.Icon);
             feature.Attributes.Add(FeatureAttributes.POI_ICON_COLOR, iconColorCategory.Color);

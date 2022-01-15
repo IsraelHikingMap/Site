@@ -128,11 +128,21 @@ export class FileService {
         return url;
     }
 
-    public getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
-        if (isOffline) {
-            url = last(url.split("/"));
+    public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
+        try {
+            if (isOffline) {
+                url = last(url.split("/"));
+            }
+            return await this.httpClient.get(this.getDataUrl(url)).toPromise() as Promise<StyleSpecification>;
+        } catch (ex) {
+            this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${ex.message}`);
+            return {
+                version: 8.0,
+                layers: [],
+                sources: {}
+            }
         }
-        return this.httpClient.get(this.getDataUrl(url)).toPromise() as Promise<StyleSpecification>;
+        
     }
 
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {

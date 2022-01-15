@@ -15,6 +15,7 @@ import { remove } from "lodash-es";
 import { PointLike } from "maplibre-gl";
 import { Observable } from "rxjs";
 import { skip } from "rxjs/operators";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -25,7 +26,6 @@ import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
 import { RoutesFactory } from "../services/layers/routelayers/routes.factory";
 import { SpatialService } from "../services/spatial.service";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import type { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt, SearchResultsPointOfInterest } from "../models/models";

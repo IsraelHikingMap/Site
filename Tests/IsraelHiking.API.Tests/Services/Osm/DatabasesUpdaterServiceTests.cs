@@ -1,29 +1,23 @@
 ﻿using IsraelHiking.API.Executors;
-using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.API.Services.Poi;
-using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
-using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using NSubstitute;
-using OsmSharp;
-using OsmSharp.Changesets;
-using OsmSharp.Complete;
 using OsmSharp.IO.API;
-using OsmSharp.Tags;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml.Serialization;
+using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
+using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Tests.Services.Osm
 {
@@ -43,7 +37,10 @@ namespace IsraelHiking.API.Tests.Services.Osm
         private IPointsOfInterestFilesCreatorExecutor _pointsOfInterestFilesCreatorExecutor;
         private IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
-
+        private IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
+        private IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
+        private IElevationGateway _elevationGateway;
+        
         [TestInitialize]
         public void TestInitialize()
         {
@@ -63,166 +60,120 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _pointsOfInterestFilesCreatorExecutor = Substitute.For<IPointsOfInterestFilesCreatorExecutor>();
             _pointsOfInterestAdapterFactory = Substitute.For<IPointsOfInterestAdapterFactory>();
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
-            _service = new DatabasesUpdaterService(_clientsFactory,
-                _externalSourcesRepository,
+            _externalSourceUpdaterExecutor = Substitute.For<IExternalSourceUpdaterExecutor>();
+            _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
+            _elevationGateway = Substitute.For<IElevationGateway>();
+            _service = new DatabasesUpdaterService(_externalSourcesRepository,
                 _pointsOfInterestRepository,
                 _highwaysRepository,
                 _geoJsonPreprocessorExecutor,
-                new TagsHelper(optionsProvider),
                 _osmRepository,
                 _pointsOfInterestAdapterFactory,
                 _featuresMergeExecutor,
                 _osmLatestFileGateway,
                 _pointsOfInterestFilesCreatorExecutor,
-                null,
+                _imagesUrlsStorageExecutor,
                 _pointsOfInterestProvider,
-                null,
-                null,
+                _externalSourceUpdaterExecutor,
+                _elevationGateway,
                 Substitute.For<ILogger>());
         }
 
         [TestMethod]
-        public void TestRebuild_ShouldRebuildHighwaysAndPoints()
+        public void TestRebuild_ExternalSources_ShouldRebuildExternalSources()
+        {
+            _pointsOfInterestAdapterFactory.GetAll().Returns(new[] {Substitute.For<IPointsOfInterestAdapter>()});
+            
+            _service.Rebuild(new UpdateRequest {AllExternalSources = true}).Wait();
+
+            _externalSourceUpdaterExecutor.Received(1).UpdateSource(Arg.Any<string>());
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+        }
+        
+        [TestMethod]
+        public void TestRebuild_Highways_ShouldRebuildHighwaysAndPoints()
+        { 
+            _service.Rebuild(new UpdateRequest {Highways = true}).Wait();
+
+            _highwaysRepository.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+        }
+
+        [TestMethod] public void TestRebuild_Points_ShouldRebuildPointsWhileMarkingOneAsDeleted()
         {
             var adapter = Substitute.For<IPointsOfInterestAdapter>();
             adapter.GetAll().Returns(new List<Feature>());
-            _pointsOfInterestAdapterFactory.GetBySource(Arg.Any<string>()).Returns(adapter);
+            _pointsOfInterestAdapterFactory.GetAll().Returns(new[] {adapter});
             _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns(new List<Feature>());
-            _pointsOfInterestRepository.GetAllPointsOfInterest(Arg.Any<bool>()).Returns(new List<Feature>());
+            var feature = new Feature(new Point(0, 0), new AttributesTable
+            {
+                {FeatureAttributes.NAME, "feature in database that needs to be deleted"},
+                {FeatureAttributes.POI_ID, "42"}
+            });
+            feature.SetLastModified(new DateTime(0));
+            _pointsOfInterestRepository.GetAllPointsOfInterest(Arg.Any<bool>()).Returns(new List<Feature> {feature});
             _pointsOfInterestRepository.GetPointsOfInterestUpdates(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<Feature>());
-            _featuresMergeExecutor.Merge(Arg.Any<List<Feature>>(), Arg.Any<List<Feature>>()).Returns(new List<Feature>());
+            _featuresMergeExecutor.Merge(Arg.Any<List<Feature>>(), Arg.Any<List<Feature>>()).Returns(new List<Feature>
+            {
+                new (new Point(0,0), new AttributesTable { {FeatureAttributes.POI_ID, "1"}})
+            });
             _pointsOfInterestProvider.GetAll().Returns(new List<Feature>());
             
-            _service.Rebuild(new UpdateRequest { Highways = true, PointsOfInterest = true, SiteMap = true }).Wait();
-
-            _highwaysRepository.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
+            _service.Rebuild(new UpdateRequest {PointsOfInterest = true}).Wait();
+            
             _pointsOfInterestRepository.Received(2).StorePointsOfInterestDataToSecondaryIndex(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.Received(1).StorePointsOfInterestDataToSecondaryIndex(Arg.Is<List<Feature>>(l => l.Any(f => f.Attributes.Exists(FeatureAttributes.POI_DELETED))));
             _pointsOfInterestRepository.Received(1).SwitchPointsOfInterestIndices();
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+        }
+        
+        [TestMethod]
+        public void TestRebuild_Images_ShouldRebuildImages()
+        {
+            const string imageUrl = "imageUrl";
+            var feature = new Feature(new Point(0, 0), new AttributesTable
+            {
+                {FeatureAttributes.IMAGE_URL, "imageUrl2"}
+            });
+            feature.SetLastModified(new DateTime(0));
+            _pointsOfInterestRepository.GetAllPointsOfInterest(false).Returns(new List<Feature> {feature});
+            _osmRepository.GetImagesUrls(Arg.Any<Stream>()).Returns(new List<string> {imageUrl});
+            
+            _service.Rebuild(new UpdateRequest {Images = true}).Wait();
+
+            _imagesUrlsStorageExecutor.Received(1).DownloadAndStoreUrls(Arg.Is<List<string>>(l => l.All(i => i.StartsWith(imageUrl))));
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
+        }
+        
+        [TestMethod]
+        public void TestRebuild_SiteMap_ShouldRebuildSiteMap()
+        {
+            _service.Rebuild(new UpdateRequest {SiteMap = true}).Wait();
+
             _pointsOfInterestFilesCreatorExecutor.Received(1).CreateSiteMapXmlFile(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
         }
-
+        
         [TestMethod]
-        public void TestUpdate_EmptyOsmChangeFile_ShouldNotUpdateAnything()
+        public void TestRebuild_OfflinePointsFile_ShouldRebuildIt()
         {
-            var changes = new OsmChange { Create = new OsmGeo[0], Modify = new OsmGeo[0], Delete = new OsmGeo[0] };
-            _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<List<ICompleteOsmGeo>>(x => x.Count == 0))
-                .Returns(new List<Feature>());
-            _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 0))
-                .Returns(new List<Feature>());
-            _osmLatestFileGateway.GetUpdates().Returns(CreateStream(changes));
+            var feature = new Feature(new Point(0, 0), new AttributesTable());
+            feature.SetLastModified(new DateTime(0));
+            _pointsOfInterestRepository.GetAllPointsOfInterest(false).Returns(new List<Feature> {feature});
+            _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(new[] {1.0});
+            
+            _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-            _service.Update().Wait();
-
-            _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Is<List<Feature>>(x => x.Count == 0));
-            _highwaysRepository.Received(1).UpdateHighwaysData(Arg.Is<List<Feature>>(x => x.Count == 0));
+            _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<Feature>>());
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
         }
-
+        
         [TestMethod]
-        public void TestUpdate_OsmChangeFileWithDeletion_ShouldDeleteFromDatabase()
+        public void TestRebuild_GotException_ShouldStoreException()
         {
-            var changes = new OsmChange
-            {
-                Create = new OsmGeo[0],
-                Modify = new OsmGeo[0],
-                Delete = new OsmGeo[] {
-            new Way() { Id = 1, Tags = new TagsCollection { { "highway", "track" } } } }
-            };
-            _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<List<ICompleteOsmGeo>>(x => x.Count == 0))
-                .Returns(new List<Feature>());
-            _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 0))
-                .Returns(new List<Feature>());
-            _osmLatestFileGateway.GetUpdates().Returns(CreateStream(changes));
+            _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-            _service.Update().Wait();
-
-            _highwaysRepository.Received(1).DeleteHighwaysById("way_1");
-            _pointsOfInterestRepository.Received(1).DeleteOsmPointOfInterestById("way_1", Arg.Any<DateTime?>());
-        }
-
-        [TestMethod]
-        public void TestUpdate_OsmChangeFileWithModification_ShouldUpdateDatabase()
-        {
-            var way = new CompleteWay()
-            {
-                Id = 1,
-                Tags = new TagsCollection { { "highway", "track" }, { "route", "bicycle" } },
-                Nodes = new Node[0]
-            };
-            var changes = new OsmChange
-            {
-                Create = new OsmGeo[0],
-                Modify = new OsmGeo[] { way.ToSimple() },
-                Delete = new OsmGeo[0]
-            };
-            var list = new List<Feature> { new Feature(new LineString(new Coordinate[0]), new AttributesTable()) };
-            _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<List<ICompleteOsmGeo>>(x => x.Count == 1))
-                    .Returns(list);
-            _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 1))
-                .Returns(list);
-            _osmGateway.GetCompleteWay(1).Returns(way);
-            _osmLatestFileGateway.GetUpdates().Returns(CreateStream(changes));
-
-            _service.Update().Wait();
-
-            _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Is<List<Feature>>(x => x.Count == 1));
-            _highwaysRepository.Received(1).UpdateHighwaysData(Arg.Is<List<Feature>>(x => x.Count == 1));
-        }
-
-        [TestMethod]
-        public void TestUpdate_OsmChangeFileWithModification_ShouldUpdateDatabaseUsingPoiPrefixFromDatabase()
-        {
-            var way = new CompleteWay()
-            {
-                Id = 1,
-                Tags = new TagsCollection { { "highway", "track" }, { "route", "bicycle" } },
-                Nodes = new Node[0]
-            };
-            var changes = new OsmChange
-            {
-                Create = new OsmGeo[0],
-                Modify = new OsmGeo[] { way.ToSimple() },
-                Delete = new OsmGeo[0]
-            };
-            var wayFeature = new Feature(new LineString(new Coordinate[0]), new AttributesTable {
-                { FeatureAttributes.ID, "1" },
-                { FeatureAttributes.POI_SOURCE, Sources.OSM }
-            });
-            wayFeature.SetId();
-            var wayFeatureInDatabase = new Feature(new LineString(new Coordinate[0]), new AttributesTable {
-                { FeatureAttributes.ID, "1" },
-                { FeatureAttributes.POI_CATEGORY, Categories.HISTORIC },
-                { FeatureAttributes.POI_SOURCE, Sources.OSM }
-            });
-            wayFeatureInDatabase.SetId();
-            var list = new List<Feature> { wayFeature };
-            _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<List<ICompleteOsmGeo>>(x => x.Count == 1))
-                    .Returns(list);
-            _geoJsonPreprocessorExecutor
-                .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 1))
-                .Returns(list);
-            _osmGateway.GetCompleteWay(1).Returns(way);
-            _pointsOfInterestRepository.GetPointOfInterestById("way_1", Sources.OSM).Returns(wayFeatureInDatabase);
-            _osmLatestFileGateway.GetUpdates().Returns(CreateStream(changes));
-
-            _service.Update().Wait();
-
-            _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Is<List<Feature>>(x => x.Count == 1 && x.First().Attributes.Exists(FeatureAttributes.POI_CATEGORY)));
-        }
-
-        private Stream CreateStream(OsmChange changes)
-        {
-            Stream stream = new MemoryStream();
-            var serializer = new XmlSerializer(typeof(OsmChange));
-            serializer.Serialize(stream, changes);
-            stream.Seek(0, SeekOrigin.Begin);
-            return stream;
+            _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == false));
         }
     }
 }

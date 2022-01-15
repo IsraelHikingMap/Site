@@ -2,6 +2,7 @@ import { Component, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { Observable } from "rxjs";
+import { select, NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
@@ -18,7 +19,6 @@ import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
-import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing-state.reducer";

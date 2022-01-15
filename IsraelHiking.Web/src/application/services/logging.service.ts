@@ -13,6 +13,7 @@ interface LogLine {
 
 @Injectable()
 export class LoggingService {
+    private static readonly LOGGING_DB_NAME = "Logging";
     private static readonly LOGGING_TABLE_NAME = "logging";
     private static readonly MAX_LOG_LINES = 50000;
 
@@ -25,9 +26,9 @@ export class LoggingService {
     }
 
     public async initialize() {
-        this.loggingDatabase = new Dexie(LoggingService.LOGGING_TABLE_NAME);
+        this.loggingDatabase = new Dexie(LoggingService.LOGGING_DB_NAME);
         this.loggingDatabase.version(1).stores({
-            logging: "date"
+            logging: "++, date"
         });
         let lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).count();
         if (lines > LoggingService.MAX_LOG_LINES) {

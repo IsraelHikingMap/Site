@@ -3,8 +3,8 @@ import { HttpClientModule, HttpRequest } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { Device } from "@ionic-native/device/ngx";
 import { SQLite } from "@ionic-native/sqlite/ngx";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
 
-import { NgReduxTestingModule, MockNgRedux } from "../reducers/infra/ng-redux-testing.module";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -18,13 +18,15 @@ import { ToastService } from "./toast.service";
 import { MapService } from "./map.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState, MarkerData } from "../models/models";
 
 describe("Poi Service", () => {
 
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
-        let hashService = {};
+        let hashService = {
+            getFullUrlFromPoiId: () => {}
+        };
         let fileServiceMock = {};
         let databaseServiceMock = {
             getPoisForClustering: () => Promise.resolve([]),
@@ -44,7 +46,7 @@ describe("Poi Service", () => {
             imports: [
                 HttpClientModule,
                 HttpClientTestingModule,
-                NgReduxTestingModule
+                MockNgReduxModule
             ],
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
@@ -68,7 +70,7 @@ describe("Poi Service", () => {
     it("Should initialize and sync categories from server", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-            MockNgRedux.getInstance().getState = () => ({
+            MockNgRedux.store.getState = () => ({
                 layersState: {
                     categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
                 }
@@ -103,10 +105,10 @@ describe("Poi Service", () => {
         inject([PoiService],
             async (poiService: PoiService) => {
 
-                MockNgRedux.getInstance().dispatch = jasmine.createSpy();
+                MockNgRedux.store.dispatch = jasmine.createSpy();
 
                 let promise = poiService.addSimplePoint({ lat: 0, lng: 0}, "Tap").then(() => {
-                    expect(MockNgRedux.getInstance().dispatch).toHaveBeenCalled();
+                    expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
                 });
 
                 return promise;
@@ -118,7 +120,7 @@ describe("Poi Service", () => {
         inject([PoiService, DatabaseService],
             async (poiService: PoiService, dbMock: DatabaseService) => {
 
-                MockNgRedux.getInstance().dispatch = jasmine.createSpy();
+                MockNgRedux.store.dispatch = jasmine.createSpy();
                 let spy = spyOn(dbMock, "addPoiToUploadQueue");
                 let promise = poiService.addComplexPoi({
                     id: "poiId",
@@ -131,7 +133,7 @@ describe("Poi Service", () => {
                     title: "title",
                     urls: ["some-url"]
                 }, { lat: 0, lng: 0}).then(() => {
-                    expect(MockNgRedux.getInstance().dispatch).toHaveBeenCalled();
+                    expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
                     expect(spy.calls.mostRecent().args[0].properties.poiId).not.toBeNull();
                     expect(spy.calls.mostRecent().args[0].properties.poiSource).toBe("OSM");
                     expect(spy.calls.mostRecent().args[0].properties["description:he"]).toBe("description");
@@ -150,8 +152,8 @@ describe("Poi Service", () => {
         inject([PoiService, DatabaseService],
             async (poiService: PoiService, dbMock: DatabaseService) => {
 
-                MockNgRedux.getInstance().dispatch = jasmine.createSpy();
-                MockNgRedux.getInstance().getState = () => ({
+                MockNgRedux.store.dispatch = jasmine.createSpy();
+                MockNgRedux.store.getState = () => ({
                         poiState: {
                             selectedPointOfInterest: {
                                 properties: {
@@ -181,7 +183,7 @@ describe("Poi Service", () => {
                     title: "title",
                     urls: ["some-url"]
                 }, { lat: 1, lng: 2}).then(() => {
-                    expect(MockNgRedux.getInstance().dispatch).toHaveBeenCalled();
+                    expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
                     let feature = spy.calls.mostRecent().args[0];
                     expect(feature.properties.poiId).not.toBeNull();
                     expect(feature.properties.poiSource).toBe("OSM");
@@ -222,8 +224,8 @@ describe("Poi Service", () => {
                 } as GeoJSON.Feature;
                 poiService.setLocation(featureInQueue, { lat: 1, lng: 2 });
                 dbMock.getPoiFromUploadQueue = () => Promise.resolve(featureInQueue);
-                MockNgRedux.getInstance().dispatch = jasmine.createSpy();
-                MockNgRedux.getInstance().getState = () => ({
+                MockNgRedux.store.dispatch = jasmine.createSpy();
+                MockNgRedux.store.getState = () => ({
                         poiState: {
                             selectedPointOfInterest: {
                                 properties: {
@@ -255,7 +257,7 @@ describe("Poi Service", () => {
                     title: "title",
                     urls: ["some-url"]
                 }).then(() => {
-                    expect(MockNgRedux.getInstance().dispatch).toHaveBeenCalled();
+                    expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
                     let feature = spy.calls.mostRecent().args[0];
                     expect(feature.properties.poiId).not.toBeNull();
                     expect(feature.properties.poiSource).toBe("OSM");
@@ -308,4 +310,57 @@ describe("Poi Service", () => {
             }
         )
     );
+
+    it("should get closest point from server", (inject([PoiService, HttpTestingController],
+        async (poiService: PoiService, mockBackend: HttpTestingController) => {
+
+            let promise = poiService.getClosestPoint({lat: 0, lng: 0}).then((data: MarkerData) => {
+                expect(data.latlng.lat).toBe(1);
+                expect(data.latlng.lng).toBe(1);
+            });
+
+            mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(Urls.poiClosest))
+                .flush({ 
+                    type: "Feature",
+                    properties: { "name:he": "name" },
+                    geometry: { type: "Point", coordinates: [1, 1]}, } as GeoJSON.Feature);
+
+            return promise;
+        })
+    ));
+
+    it("should return has extra data for feature", inject([PoiService], (poiService: PoiService) => {
+        expect(poiService.hasExtraData({properties: { "description:he": "desc"}} as any as GeoJSON.Feature, "he")).toBeTruthy();
+    }));
+
+    it("should return the itm coordinates for feature", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getItmCoordinates({properties: { poiItmEast: 1, poiItmNorth: 2}} as any as GeoJSON.Feature);
+        expect(results.east).toBe(1);
+        expect(results.north).toBe(2);
+    }));
+
+    it("should get contribution", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getContribution({properties: { 
+            poiLastModified: 1000, poiUserAddress: "address", poiUserName: "name"}
+        } as any as GeoJSON.Feature);
+        expect(results.lastModifiedDate).not.toBeNull();
+        expect(results.userAddress).toBe("address");
+        expect(results.userName).toBe("name");
+    }));
+
+    it("should get extenal description", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getExternalDescription({properties: { "poiExternalDescription:he": "desc"}} as any as GeoJSON.Feature, "he");
+        expect(results).toBe("desc");
+    }));
+
+    it("should get title even when there's no title for language description", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getTitle({properties: { "name": "name"}} as any as GeoJSON.Feature, "he");
+        expect(results).toBe("name");
+    }));
+
+    it("should get social links", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getPoiSocialLinks({properties: { "name": "name", poiGeolocation: {lat: 0, lng: 0}}} as any as GeoJSON.Feature);
+        expect(results.facebook.includes(Urls.facebook)).toBeTruthy();
+        expect(results.waze.includes(Urls.waze)).toBeTruthy();
+    }));
 });

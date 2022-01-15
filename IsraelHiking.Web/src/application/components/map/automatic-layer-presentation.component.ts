@@ -1,13 +1,15 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
-import { MapComponent } from "ngx-maplibre-gl";
+import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { StyleSpecification, RasterSourceSpecification, RasterLayerSpecification, SourceSpecification, LayerSpecification } from "maplibre-gl";
 import { Observable, Subscription } from "rxjs";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
-import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
+import { MapService } from "../../services/map.service";
+import { LoggingService } from "../../services/logging.service";
 import type { ApplicationState, EditableLayer, Language } from "../../models/models";
 
 @Component({
@@ -28,6 +30,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     public isBaselayer: boolean;
     @Input()
     public layerData: EditableLayer;
+    @Input()
+    public isMainMap: boolean;
 
     private rasterSourceId: string;
     private rasterLayerId: string;
@@ -36,6 +40,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private jsonSourcesIds: string[];
     private jsonLayersIds: string[];
     private hasInternetAccess: boolean;
+    private mapLoadedPromise: Promise<void>;
 
     @select((state: ApplicationState) => state.configuration.language)
     private language$: Observable<Language>;
@@ -44,6 +49,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 private readonly mapComponent: MapComponent,
                 private readonly fileService: FileService,
                 private readonly connectionSerive: ConnectionService,
+                private readonly mapService: MapService,
+                private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
@@ -54,18 +61,17 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         this.jsonSourcesIds = [];
         this.jsonLayersIds = [];
         this.subscriptions = [];
+        this.mapLoadedPromise = new Promise((resolve, _) => {
+            this.subscriptions.push(this.mapComponent.mapLoad.subscribe(() => {
+                resolve();
+            }));
+        });
     }
 
     public async ngOnInit() {
-        if (this.mapComponent.mapInstance == null) {
-            this.subscriptions.push(this.mapComponent.mapLoad.subscribe(async () => {
-                await this.createLayer();
-                this.sourceAdded = true;
-            }));
-        } else {
-            await this.createLayer();
-            this.sourceAdded = true;
-        }
+        await (this.isMainMap ? this.mapService.initializationPromise : this.mapLoadedPromise);
+        await this.createLayer();
+        this.sourceAdded = true;
         this.subscriptions.push(this.language$.subscribe(async () => {
             if (this.sourceAdded) {
                 this.removeLayer(this.layerData.address);
@@ -73,16 +79,16 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             }
         }));
         this.subscriptions.push(this.connectionSerive.monitor(true).subscribe(async (state) => {
-            if (this.ngRedux.getState().offlineState.lastModifiedDate == null || this.layerData.isOfflineAvailable === false) {
+            if (state.hasInternetAccess === this.hasInternetAccess) {
                 return;
             }
-            if (state.hasInternetAccess === this.hasInternetAccess) {
+            this.hasInternetAccess = state.hasInternetAccess;
+            if (this.ngRedux.getState().offlineState.lastModifiedDate == null || this.layerData.isOfflineAvailable === false) {
                 return;
             }
             if (this.layerData.isOfflineOn === true) {
                 return;
             }
-            this.hasInternetAccess = state.hasInternetAccess;
             if (this.sourceAdded) {
                 this.removeLayer(this.layerData.address);
                 await this.createLayer();
@@ -170,8 +176,15 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                     source.attribution = attributiuonUpdated === false ? AutomaticLayerPresentationComponent.ATTRIBUTION : "";
                     attributiuonUpdated = true;
                 }
-                this.jsonSourcesIds.push(sourceKey);
-                this.mapComponent.mapInstance.addSource(sourceKey, source);
+                
+                try {
+                    this.mapComponent.mapInstance.addSource(sourceKey, source);
+                    this.jsonSourcesIds.push(sourceKey);
+                } catch (ex) {
+                    this.loggingService.error(`[ALP] Unable to add source with ID: ${sourceKey} for ${this.layerData.key}`);
+                    throw ex;
+                }
+                
             }
         }
         for (let layer of layers) {
@@ -182,18 +195,38 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 layer.id = this.layerData.key + "_" + layer.id;
                 (layer as any).source = this.layerData.key + "_" + (layer as any).source;
             }
-            this.jsonLayersIds.push(layer.id);
-            this.mapComponent.mapInstance.addLayer(layer, this.before);
+            try {
+                this.mapComponent.mapInstance.addLayer(layer, this.before);
+                this.jsonLayersIds.push(layer.id);
+            } catch (ex) {
+                this.loggingService.error(`[ALP] Unable to add layer with ID: ${layer.id} for ${this.layerData.key}`);
+                throw ex;
+            }
+            
         }
     }
 
     private removeJsonLayer() {
         for (let layerId of this.jsonLayersIds) {
-            this.mapComponent.mapInstance.removeLayer(layerId);
+            try {
+                // HM TODO: remove this!
+                this.mapComponent.mapInstance.removeLayer(layerId);
+            } catch (ex) {
+                this.loggingService.error(`[ALP] Unable to remove layer with ID: ${layerId} for ${this.layerData.key}`);
+                throw ex;
+            }
+            
         }
         this.jsonLayersIds = [];
         for (let sourceId of this.jsonSourcesIds) {
-            this.mapComponent.mapInstance.removeSource(sourceId);
+            try {
+                // HM TODO: remove this!
+                this.mapComponent.mapInstance.removeSource(sourceId);
+            } catch (ex) {
+                this.loggingService.error(`[ALP] Unable to remove source with ID: ${sourceId} for ${this.layerData.key}`);
+                throw ex;
+            }
+            
         }
         this.jsonSourcesIds = [];
     }

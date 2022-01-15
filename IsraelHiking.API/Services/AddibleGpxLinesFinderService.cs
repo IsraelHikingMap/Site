@@ -113,13 +113,13 @@ namespace IsraelHiking.API.Services
                 {
                     var currentCoordinate = coordinates[coordinateIndex];
                     var nextCoordinate = coordinates[coordinateIndex + 1];
-                    if (currentCoordinate.Distance(nextCoordinate) > 2 * _options.MaxDistanceToExisitngLineForMerge)
+                    if (currentCoordinate.Distance(nextCoordinate) > 2 * _options.MaxDistanceToExistingLineForMerge)
                     {
                         var directionSegment = new LineSegment(currentCoordinate, nextCoordinate);
-                        var coordinate = directionSegment.PointAlong((_options.MaxDistanceToExisitngLineForMerge) /( 2.0 * directionSegment.Length ));
+                        var coordinate = directionSegment.PointAlong((_options.MaxDistanceToExistingLineForMerge) /( 2.0 * directionSegment.Length ));
                         coordinates.Insert(coordinateIndex + 1, coordinate);
                     }
-                    else if (currentCoordinate.Distance(nextCoordinate) > _options.MaxDistanceToExisitngLineForMerge)
+                    else if (currentCoordinate.Distance(nextCoordinate) > _options.MaxDistanceToExistingLineForMerge)
                     {
                         var middle = new Coordinate((currentCoordinate.X + nextCoordinate.X) / 2.0, (currentCoordinate.Y + nextCoordinate.Y) / 2.0);
                         coordinates.Insert(coordinateIndex + 1, middle);
@@ -143,7 +143,7 @@ namespace IsraelHiking.API.Services
             {
                 var linesToAdd = _gpxLoopsSplitterExecutor.GetMissingLines(missingLineWithoutLoops,
                     missingLinesWithoutLoopsAndDuplications.ToArray(),
-                    _options.MinimalMissingSelfLoopPartLegth,
+                    _options.MinimalMissingSelfLoopPartLength,
                     _options.MinimalDistanceToClosestPoint);
                 linesToAdd.Reverse();
                 missingLinesWithoutLoopsAndDuplications.AddRange(linesToAdd);
@@ -327,7 +327,7 @@ namespace IsraelHiking.API.Services
                 {
                     OriginalCoordinates = coordinates,
                     ExistingItmHighways = await GetExistingCloseLines(_geometryFactory.CreateLineString(coordinates)),
-                    MinimalDistance = _options.MaxDistanceToExisitngLineForMerge,
+                    MinimalDistance = _options.MaxDistanceToExistingLineForMerge,
                     MinimalAreaSize = _options.MinimalAreaSize,
                     MinimalLength = _options.MinimalProlongLineLength
                 });
@@ -368,13 +368,13 @@ namespace IsraelHiking.API.Services
         private LineString GetLineWithExtraPoints(LineString currentLine, Coordinate coordinateToAddIfNeeded)
         {
             var point = new Point(coordinateToAddIfNeeded);
-            if (currentLine.Distance(point) >= _options.MaxDistanceToExisitngLineForMerge * 2)
+            if (currentLine.Distance(point) >= _options.MaxDistanceToExistingLineForMerge * 2)
             {
                 // coordinate not close enough
                 return currentLine;
             }
             var closestCoordinateOnGpx = currentLine.Coordinates.OrderBy(c => c.Distance(coordinateToAddIfNeeded)).First();
-            if (closestCoordinateOnGpx.Distance(coordinateToAddIfNeeded) < 2 * _options.MaxDistanceToExisitngLineForMerge)
+            if (closestCoordinateOnGpx.Distance(coordinateToAddIfNeeded) < 2 * _options.MaxDistanceToExistingLineForMerge)
             {
                 // line already has a close enough coordinate
                 return currentLine;
@@ -391,7 +391,7 @@ namespace IsraelHiking.API.Services
         private void ReplaceEdgeIfNeeded(List<LineString> adjustedLines, Coordinate coordinate, List<Coordinate> currentCoordinates)
         {
             var coordinateReplacement = adjustedLines.SelectMany(l => l.Coordinates)
-                .Where(c => c.Distance(coordinate) < 2 * _options.MaxDistanceToExisitngLineForMerge)
+                .Where(c => c.Distance(coordinate) < 2 * _options.MaxDistanceToExistingLineForMerge)
                 .OrderBy(c => c.Distance(coordinate))
                 .FirstOrDefault();
             if (coordinateReplacement != null)

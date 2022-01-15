@@ -1,12 +1,12 @@
-﻿using IsraelHiking.Common.DataContainer;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using IsraelHiking.Common.DataContainer;
 
-namespace IsraelHiking.API.Services
+namespace IsraelHiking.DataAccessInterfaces
 {
     /// <summary>
     /// This service is responsible for creating images for data container
     /// </summary>
-    public interface IImageCreationService
+    public interface IImageCreationGateway
     {
         /// <summary>
         /// Creates an image from the data in <see cref="DataContainerPoco"/>

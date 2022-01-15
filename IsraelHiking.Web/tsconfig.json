@@ -16,6 +16,8 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
+    // HM TODO: this needs to be removed once maplibre.d.ts is fixed.
+    "skipLibCheck": true,
     "module": "es2020",
     "importHelpers": true,
     "target": "es5",

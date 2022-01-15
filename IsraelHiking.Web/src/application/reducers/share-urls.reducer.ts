@@ -1,5 +1,6 @@
-import { BaseAction, ReduxAction, createReducerFromClass } from "./infra/ng-redux.module";
-import { initialState } from "./initial-state";
+import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
+
+import { initialState, BaseAction } from "./initial-state";
 import type { ShareUrl, ShareUrlsState } from "../models/models";
 
 const ADD_SHARE_URL = "ADD_SHARE_URL";

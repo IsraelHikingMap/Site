@@ -1,6 +1,7 @@
-import { BaseAction, createReducerFromClass, ReduxAction } from "./infra/ng-redux.module";
+import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
+
 import type { GpsState, TrackingStateType } from "../models/models";
-import { initialState } from "./initial-state";
+import { initialState, BaseAction } from "./initial-state";
 
 const SET_TRAKING_STATE = "SET_TRAKING_STATE";
 const SET_CURRENT_LOCATION = "SET_CURRENT_LOCATION";

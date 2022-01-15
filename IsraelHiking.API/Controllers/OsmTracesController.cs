@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -29,7 +30,7 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly IClientsFactory _clientsFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
-        private readonly IImageCreationService _imageCreationService;
+        private readonly IImageCreationGateway _imageCreationGateway;
         private readonly ISearchRepository _searchRepository;
         private readonly ConfigurationData _options;
 
@@ -39,17 +40,17 @@ namespace IsraelHiking.API.Controllers
         /// <param name="clientsFactory"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="options"></param>
-        /// <param name="imageCreationService"></param>
+        /// <param name="imageCreationGateway"></param>
         /// <param name="searchRepository"></param>
         public OsmTracesController(IClientsFactory clientsFactory,
             IDataContainerConverterService dataContainerConverterService,
-            IImageCreationService imageCreationService,
+            IImageCreationGateway imageCreationGateway,
             ISearchRepository searchRepository,
             IOptions<ConfigurationData> options)
         {
             _clientsFactory = clientsFactory;
             _dataContainerConverterService = dataContainerConverterService;
-            _imageCreationService = imageCreationService;
+            _imageCreationGateway = imageCreationGateway;
             _searchRepository = searchRepository;
             _options = options.Value;
         }
@@ -78,8 +79,8 @@ namespace IsraelHiking.API.Controllers
         {
             var gateway = CreateClient();
             var file = await gateway.GetTraceData(id);
-            using MemoryStream memoryStream = new MemoryStream();
-            file.Stream.CopyTo(memoryStream);
+            await using var memoryStream = new MemoryStream();
+            await file.Stream.CopyToAsync(memoryStream);
             var dataContainer = await _dataContainerConverterService.ToDataContainer(memoryStream.ToArray(), file.FileName);
             return dataContainer;
         }
@@ -95,7 +96,7 @@ namespace IsraelHiking.API.Controllers
         {
             var container = await GetTraceById(id);
             container.BaseLayer = new LayerData();
-            var image = await _imageCreationService.Create(container, 128, 128);
+            var image = await _imageCreationGateway.Create(container, 128, 128);
             return new FileContentResult(image, new MediaTypeHeaderValue("image/png"));
         }
 
@@ -112,7 +113,8 @@ namespace IsraelHiking.API.Controllers
             {
                 return new BadRequestResult();
             }
-            using var memoryStream = new MemoryStream();
+
+            await using var memoryStream = new MemoryStream();
             await file.CopyToAsync(memoryStream);
             var gateway = CreateClient();
             memoryStream.Seek(0, SeekOrigin.Begin);
@@ -120,7 +122,7 @@ namespace IsraelHiking.API.Controllers
             {
                 Name = file.FileName,
                 Description = Path.GetFileNameWithoutExtension(file.FileName),
-                Visibility = Visibility.Private
+                Visibility = Visibility.Trackable
             }, memoryStream);
             return Ok();
         }
@@ -140,41 +142,46 @@ namespace IsraelHiking.API.Controllers
                 return BadRequest("There are not enough points in the route");
             }
             var bytes = await  _dataContainerConverterService.ToAnyFormat(new DataContainerPoco { Routes = new List<RouteData> { routeData } }, FlowFormats.GPX);
-            using var memoryStream = new MemoryStream(bytes);
+            await using var memoryStream = new MemoryStream(bytes);
             var gateway = CreateClient();
             var description = routeData.Name;
             if (isDefaultName)
             {
-                var containersStart = await _searchRepository.GetContainers(allPoints.First());
-                var containersEnd = await _searchRepository.GetContainers(allPoints.Last());
-                var containers = containersStart.Concat(containersEnd)
-                    .GroupBy(f => f.GetId())
-                    .Select(g => g.First())
-                    .OrderBy(c => c.Geometry.Area)
-                    .ToList();
-                string bestContainerName = string.Empty;
-                foreach (var container in containers)
-                {
-                    var pointsInside = allPoints.Count(c => container.Geometry.Contains(new Point(c)));
-                    if (pointsInside * 100.0 / allPoints.Count > 20.0)
-                    {
-                        container.SetTitles();
-                        description = language == "he" 
-                            ? description.Replace("מסלול", "מסלול ב" + container.GetTitle(language)) 
-                            : description.Replace("Route", "A route in " + container.GetTitle(language));
-                        break;
-                    }
-                }
+                description = await GetDescriptionByArea(language, allPoints, description);
             }
             await gateway.CreateTrace(new GpxFile
             {
                 Name = routeData.Name + "." + FlowFormats.GPX,
                 Description = description,
-                Visibility = Visibility.Private
+                Visibility = Visibility.Trackable
             }, memoryStream);
             return Ok();
         }
 
+        private async Task<string> GetDescriptionByArea(string language, List<Coordinate> allPoints, string defaultDescription)
+        {
+            var containersStart = await _searchRepository.GetContainers(allPoints.First());
+            var containersEnd = await _searchRepository.GetContainers(allPoints.Last());
+            var containers = containersStart.Concat(containersEnd)
+                .GroupBy(f => f.GetId())
+                .Select(g => g.First())
+                .OrderBy(c => c.Geometry.Area)
+                .ToList();
+            foreach (var container in containers)
+            {
+                var pointsInside = allPoints.Count(c => container.Geometry.Contains(new Point(c)));
+                if (pointsInside * 100.0 / allPoints.Count <= 20.0)
+                {
+                    continue;
+                }
+                container.SetTitles();
+                return language == "he"
+                    ? defaultDescription.Replace("מסלול", "מסלול ב" + container.GetTitle(language))
+                    : defaultDescription.Replace("Route", "A route in " + container.GetTitle(language));
+            }
+
+            return defaultDescription;
+        }
 
         /// <summary>
         /// Allows update OSM trace meta data
@@ -225,11 +232,11 @@ namespace IsraelHiking.API.Controllers
                 Id = gpxFile.Id.ToString(),
                 Name = gpxFile.Name,
                 Description = gpxFile.Description,
-                ImageUrl = Request.Scheme + "://" + Request.Host + Url.Content("~/api/osm/trace/") + gpxFile.Id + "/picture",
+                ImageUrl = $"https://israelhiking.osm.org.il/api/osm/trace/{gpxFile.Id}/picture",
                 Url = $"https://www.openstreetmap.org/user/{gpxFile.User}/traces/{gpxFile.Id}",
                 TagsString = string.Join(",", gpxFile.Tags),
                 TimeStamp = gpxFile.TimeStamp,
-                Visibility = gpxFile.Visibility.ToString().ToLower()
+                Visibility = gpxFile.Visibility?.ToString().ToLower()
             };
         }
 

@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { last } from "lodash-es";
 import { Observable } from "rxjs";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { LoggingService } from "./logging.service";
@@ -10,7 +11,6 @@ import { GeoLocationService } from "./geo-location.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
 import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { StopRecordingAction, StartRecordingAction } from "../reducers/route-editing-state.reducer";
 import { AddTraceAction } from "../reducers/traces.reducer";
 import { AddRouteAction, AddRecordingPointsAction } from "../reducers/routes.reducer";
@@ -174,7 +174,8 @@ export class RecordedRouteService {
     private validateRecordingAndUpdateState(position: GeolocationPosition, lastValidLocation: LatLngAltTime): boolean {
         let nonValidReason = this.isValid(lastValidLocation, position);
         if (nonValidReason === "") {
-            this.loggingService.debug(`[Record] Valid position, updating: (${position.coords.latitude}, ${position.coords.longitude})`);
+            this.loggingService.debug("[Record] Valid position, updating. coord: " +
+                `(${position.coords.latitude}, ${position.coords.longitude}), time: ${new Date(position.timestamp).toISOString()}`);
             this.rejectedPosition = null;
             return true;
         }

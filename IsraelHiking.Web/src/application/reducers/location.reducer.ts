@@ -1,5 +1,6 @@
-import { initialState } from "./initial-state";
-import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
+import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
+
+import { initialState, BaseAction } from "./initial-state";
 import type { Location } from "../models/models";
 
 const SET_LOCATION = "SET_LOCATION";

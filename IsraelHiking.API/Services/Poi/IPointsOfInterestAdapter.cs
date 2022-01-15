@@ -25,6 +25,6 @@ namespace IsraelHiking.API.Services.Poi
         /// Get all the points' updates from the adapter in order to index them in a database
         /// </summary>
         /// <returns></returns>
-        Task<List<Feature>> GetUpdates(DateTime lastMoidifiedDate);
+        Task<List<Feature>> GetUpdates(DateTime lastModifiedDate);
     }
 }

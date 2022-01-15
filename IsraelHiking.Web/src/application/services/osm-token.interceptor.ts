@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpInterceptor, HttpHandler, HttpRequest, HttpEvent } from "@angular/common/http";
 import { Observable } from "rxjs";
+import { NgRedux } from "@angular-redux2/store";
 
-import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models/models";
 

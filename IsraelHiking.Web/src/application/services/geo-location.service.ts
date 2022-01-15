@@ -1,11 +1,11 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { BackgroundGeolocationPlugin, Location } from "cordova-background-geolocation-plugin";
+import { NgRedux } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
-import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
 
@@ -35,7 +35,7 @@ export class GeoLocationService {
     }
 
     public initialize() {
-        if (this.ngRedux.getState().gpsState.tracking === "tracking") {
+        if (this.ngRedux.getState().gpsState.tracking !== "disabled") {
             this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
             this.enable();
         }
@@ -103,7 +103,7 @@ export class GeoLocationService {
             (position: GeolocationPosition): void => this.handlePoistionChange(position),
             (err) => {
                 this.ngZone.run(() => {
-                    this.loggingService.error("[GeoLocation] Failed to start tracking " + JSON.stringify(err));
+                    this.loggingService.error("[GeoLocation] Failed to start browser tracking " + JSON.stringify(err));
                     this.toastService.warning(this.resources.unableToFindYourLocation);
                     this.disable();
                 });
@@ -119,6 +119,7 @@ export class GeoLocationService {
             BackgroundGeolocation.start();
             return;
         }
+        this.loggingService.info("[GeoLocation] Starting background tracking");
         this.wasInitialized = true;
         BackgroundGeolocation.configure({
             locationProvider: BackgroundGeolocation.RAW_PROVIDER,
@@ -139,7 +140,6 @@ export class GeoLocationService {
             if (this.isBackground) {
                 return;
             }
-            this.loggingService.debug("[GeoLocation] Recieved location(s) while in foreground");
             await this.onLocationUpdate();
         });
 
@@ -165,6 +165,27 @@ export class GeoLocationService {
                 this.isBackground = false;
                 await this.onLocationUpdate();
             });
+
+        BackgroundGeolocation.on("authorization").subscribe(
+            (status) => {
+                if (status === BackgroundGeolocation.NOT_AUTHORIZED) {
+                    this.loggingService.error("[GeoLocation] Failed to start background tracking - unauthorized");
+                    this.disable();
+                    this.toastService.confirm({
+                        message: this.resources.noLocationPermissionOpenAppSettings,
+                        type: "OkCancel",
+                        confirmAction: () => BackgroundGeolocation.showAppSettings(),
+                        declineAction: () => { }
+                    });
+                }
+            });
+
+        BackgroundGeolocation.on("error").subscribe(
+            (error) => {
+                this.loggingService.error(`[GeoLocation] Failed to start background tracking ${error.message}`);
+                this.toastService.warning(this.resources.unableToFindYourLocation);
+                this.disable();
+            });
         BackgroundGeolocation.start();
     }
 
@@ -174,7 +195,6 @@ export class GeoLocationService {
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
         } else if (positions.length === 1) {
-            this.loggingService.debug("[GeoLocation] Sending a location update");
             this.handlePoistionChange(positions[positions.length - 1]);
         } else {
             this.loggingService.debug(`[GeoLocation] Sending bulk location update: ${positions.length}`);

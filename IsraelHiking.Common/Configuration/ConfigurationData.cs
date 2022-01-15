@@ -5,15 +5,11 @@ namespace IsraelHiking.Common.Configuration
     public class ConfigurationData
     {
         /// <summary>
-        /// Maximum time in seconds to keep a user in the cache
-        /// </summary>
-        public int MaxUserTimeInCache { get; set; }
-        /// <summary>
         /// The maximal number of points per line for splitting
         /// </summary>
         public int MaxNumberOfPointsPerLine { get; set; }
         /// <summary>
-        /// The maximal legnth of a line for splitting
+        /// The maximal length of a line for splitting
         /// </summary>
         public int MaxLengthPerLine { get; set; }
         /// <summary>
@@ -21,25 +17,21 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public int MaxSegmentsNumber { get; set; }
         /// <summary>
-        /// The number of days to keep a point of interest in the cache.
-        /// </summary>
-        public int DaysToKeepPoiInCache { get; set; }
-        /// <summary>
-        /// The minimal segment legth when splitting a route for D-P in meters
+        /// The minimal segment length when splitting a route for D-P in meters
         /// </summary>
         public double MinimalSegmentLength { get; set; }
         /// <summary>
-        /// An initial value to start the route simplfication D-P algorithm in meters
+        /// An initial value to start the route simplification D-P algorithm in meters
         /// </summary>
-        public double InitialSplitSimplificationDistanceTolerace { get; set; }
+        public double InitialSplitSimplificationDistanceTolerance { get; set; }
         /// <summary>
-        /// The minimal legnth of a part of a line in meters
+        /// The minimal length of a part of a line in meters
         /// </summary>
         public double MinimalMissingPartLength { get; set; }
         /// <summary>
-        /// The minimal legnth of a self loop part in meters to be considered as a new segment
+        /// The minimal length of a self loop part in meters to be considered as a new segment
         /// </summary>
-        public double MinimalMissingSelfLoopPartLegth { get; set; }
+        public double MinimalMissingSelfLoopPartLength { get; set; }
         /// <summary>
         /// The distance in meters for the radial simplification to consider a point within a radius and angle to simplify
         /// </summary>
@@ -47,7 +39,7 @@ namespace IsraelHiking.Common.Configuration
         /// <summary>
         /// The maximal distance that is considered the same line in meters
         /// </summary>
-        public double MaxDistanceToExisitngLineForMerge { get; set; }
+        public double MaxDistanceToExistingLineForMerge { get; set; }
         /// <summary>
         /// The maximal length before giving up the search to prolong a line in meters
         /// </summary>
@@ -98,7 +90,7 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public double ClosestHighwayForGates { get; set; }
         /// <summary>
-        /// This distance to the closest node for updaing gates in degrees
+        /// This distance to the closest node for updating gates in degrees
         /// </summary>
         public double ClosestNodeForGates { get; set; }
         /// <summary>
@@ -114,25 +106,18 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public string GpsBabelServerAddress { get; set; }
         /// <summary>
-        /// OsmPbf server address
-        /// </summary>
-        public string OsmCToolsServerAddress { get; set; }
-        /// <summary>
         /// Elevation server address
         /// </summary>
         public string ElevationServerAddress { get; set; }
         /// <summary>
+        /// Image creator server address
+        /// </summary>
+        public string ImageCreatorServerAddress { get; set; }
+        /// <summary>
         /// The address of the OSM file to download for daily rebuild
         /// </summary>
         public string OsmFileAddress { get; set; }
-        /// <summary>
-        /// The address of the OSM file time stamp to update the osm file regarding its modification day and time 
-        /// </summary>
-        public string OsmFileTimeStampAddress { get; set; }
-        /// <summary>
-        /// The base address to fetch minutes updates for OSM. used by osm-c-tools
-        /// </summary>
-        public string OsmMinutsFileBaseAddress { get; set; }
+
         /// <summary>
         /// A location where offline files are saved in order to allow them to be downloaded
         /// </summary>
@@ -145,17 +130,12 @@ namespace IsraelHiking.Common.Configuration
         /// A list of external sources - address and file name
         /// </summary>
         public Dictionary<string, string> CsvsDictionary { get; set; }
-        /// <summary>
-        /// A list of colors to select the route color from
-        /// </summary>
-        public List<string> Colors { get; set; }
 
         public ConfigurationData()
         {
-            MaxUserTimeInCache = 20 * 60;
             MaxSegmentsNumber = 40;
-            InitialSplitSimplificationDistanceTolerace = 50;
-            MaxDistanceToExisitngLineForMerge = 5;
+            InitialSplitSimplificationDistanceTolerance = 50;
+            MaxDistanceToExistingLineForMerge = 5;
             MaxProlongLineLength = 350;
             MaxDistanceBetweenGpsRecordings = 50;
             MinimalSegmentLength = 500;
@@ -164,7 +144,7 @@ namespace IsraelHiking.Common.Configuration
             MinimalAreaSize = 1000;
             SimplificationDistanceTolerance = 3;
             MinimalMissingPartLength = 200;
-            MinimalMissingSelfLoopPartLegth = MinimalDistanceToClosestPoint;
+            MinimalMissingSelfLoopPartLength = MinimalDistanceToClosestPoint;
             RadialDistanceTolerance = 10;
             MaxNumberOfPointsPerLine = 1000;
             MaxLengthPerLine = 3000;
@@ -178,11 +158,10 @@ namespace IsraelHiking.Common.Configuration
             GraphhopperServerAddress = "http://localhost:8989/";
             ElasticsearchServerAddress = "http://localhost:9200/";
             GpsBabelServerAddress = "http://localhost:11987/";
-            OsmCToolsServerAddress = "http://localhost:11911/";
             ElevationServerAddress = "http://localhost:11211/";
-            OsmFileAddress = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine-latest.osm.pbf";
-            OsmFileTimeStampAddress = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine.state.txt";
-            OsmMinutsFileBaseAddress = "http://download.openstreetmap.fr/replication/asia/israel_and_palestine";
+            ImageCreatorServerAddress = "http://localhost:11311/";
+            OsmFileAddress = "https://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf";
+            OfflineFilesFolder = "./";
             OsmConfiguration = new OsmConfiguraionData
             {
                 ConsumerKey = "E8p0RX0rnQPxDaj3IijgpMNeK8lRTyy6rlKxQ8IF",
@@ -190,21 +169,6 @@ namespace IsraelHiking.Common.Configuration
                 BaseAddress = "https://www.openstreetmap.org"
             };
             CsvsDictionary = new Dictionary<string, string>();
-            Colors = new List<string>
-            {
-                "#0000FF", // blue
-                "#FF0000", // red
-                "#FF6600", // orange
-                "#FF00DD", // pink
-                "#008000", // green
-                "#B700FF", // purple
-                "#00B0A4", // turquize
-                "#FFFF00", // yellow
-                "#9C3E00", // brown
-                "#00FFFF", // cyan
-                "#7F8282", // gray
-                "#101010", // dark
-            };
         }
     }
 }

@@ -15,6 +15,7 @@ using OsmSharp.IO.API;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OsmSharp.Tags;
 
 namespace IsraelHiking.API.Tests.Executors
 {
@@ -39,12 +40,46 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
-        public void AddDringkingWater_ShouldSucceed()
+        public void AddInvalidValue_ShouldThrow()
+        {
+            Assert.ThrowsException<AggregateException>(() => _executor.Add(_authClient, new AddSimplePointOfInterestRequest
+            {
+                LatLng = new LatLng(1, 1),
+                PointType = SimplePointType.None
+            }).Wait());
+        }
+        
+        [TestMethod]
+        public void AddDrinkingWater_ShouldSucceed()
         {
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
                 LatLng = new LatLng(1, 1),
                 PointType = SimplePointType.Tap
+            }).Wait();
+
+            _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c => c.Create.Length == 1));
+        }
+        
+        [TestMethod]
+        public void AddPicnicSite_ShouldSucceed()
+        {
+            _executor.Add(_authClient, new AddSimplePointOfInterestRequest
+            {
+                LatLng = new LatLng(1, 1),
+                PointType = SimplePointType.PicnicSite
+            }).Wait();
+
+            _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c => c.Create.Length == 1));
+        }
+        
+        [TestMethod]
+        public void AddParking_ShouldSucceed()
+        {
+            _executor.Add(_authClient, new AddSimplePointOfInterestRequest
+            {
+                LatLng = new LatLng(1, 1),
+                PointType = SimplePointType.Parking
             }).Wait();
 
             _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c => c.Create.Length == 1));
@@ -66,7 +101,7 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
-        public void AddGate_NearAWayAndVeryCloseToExistingNode_ShouldUpdateExsitingNode()
+        public void AddGate_NearAWayAndVeryCloseToExistingNode_ShouldUpdateExistingNodeAndKeepTags()
         {
             var feature = new Feature(new LineString(new[] {
                     new Coordinate(0,0),
@@ -80,19 +115,50 @@ namespace IsraelHiking.API.Tests.Executors
             foreach (var coordinate in feature.Geometry.Coordinates)
             {
                 _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
-                    .Returns(new Node() { Longitude = coordinate.X, Latitude = coordinate.Y });
+                    .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y, Tags = new TagsCollection { {"tourism", "viewpoint"}}});
             }
             _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 1, Nodes = new long[] { 0, 1, 2 } });
             _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
                 LatLng = new LatLng(0, 1),
-                PointType = SimplePointType.CattleGrid
+                PointType = SimplePointType.Block
+            }).Wait();
+
+            _authClient.Received().UploadChangeset(Arg.Any<long>(),
+                Arg.Is<OsmChange>(c => c.Modify.Length == 1 &&
+                                       c.Modify.First().Tags.Contains("tourism", "viewpoint") &&
+                                       c.Create == null));
+        }
+
+        [TestMethod]
+        public void AddGate_NearAWayAndVeryCloseToExistingNode_ShouldUpdateExistingNodeWithNullTags()
+        {
+            var feature = new Feature(new LineString(new[] {
+                new Coordinate(0,0),
+                new Coordinate(1.00001,0),
+                new Coordinate(2,0)
+            }), new AttributesTable {
+                {FeatureAttributes.POI_OSM_NODES, new List<object> { 0, 1, 2} },
+                {FeatureAttributes.ID, "Way_42"},
+                {FeatureAttributes.POI_VERSION, 1 }
+            });
+            foreach (var coordinate in feature.Geometry.Coordinates)
+            {
+                _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
+                    .Returns(new Node {Longitude = coordinate.X, Latitude = coordinate.Y});
+            }
+            _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 1, Nodes = new long[] { 0, 1, 2 } });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+            _executor.Add(_authClient, new AddSimplePointOfInterestRequest
+            {
+                LatLng = new LatLng(0, 1),
+                PointType = SimplePointType.Block
             }).Wait();
 
             _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c => c.Modify.Length == 1 && c.Create == null));
         }
-
+        
         [TestMethod]
         public void AddGate_ABitAfterTheEndOfTheHighway_ShouldProlongTheHighway()
         {
@@ -108,14 +174,14 @@ namespace IsraelHiking.API.Tests.Executors
             foreach (var coordinate in feature.Geometry.Coordinates)
             {
                 _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
-                    .Returns(new Node() { Longitude = coordinate.X, Latitude = coordinate.Y });
+                    .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 1, Nodes = new long[] { 0, 1, 2 } });
             _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
                 LatLng = new LatLng(0, 2.0001),
-                PointType = SimplePointType.CattleGrid
+                PointType = SimplePointType.ClosedGate
             }).Wait();
 
             _authClient.Received().UploadChangeset(Arg.Any<long>(),
@@ -138,14 +204,14 @@ namespace IsraelHiking.API.Tests.Executors
             foreach (var coordinate in feature.Geometry.Coordinates)
             {
                 _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
-                    .Returns(new Node() { Longitude = coordinate.X, Latitude = coordinate.Y });
+                    .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 1, Nodes = new long[] { 0, 1, 2 } });
             _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
                 LatLng = new LatLng(0, 1),
-                PointType = SimplePointType.CattleGrid
+                PointType = SimplePointType.OpenGate
             }).Wait();
 
             _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c =>
@@ -168,7 +234,7 @@ namespace IsraelHiking.API.Tests.Executors
             foreach (var coordinate in feature.Geometry.Coordinates)
             {
                 _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
-                    .Returns(new Node() { Longitude = coordinate.X, Latitude = coordinate.Y });
+                    .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 1, Nodes = new long[] { 0, 1, 2 } });
             _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
@@ -186,7 +252,7 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
-        public void AddGate_NearAJunction_ShouldAddItNotOnTheJuctionsNode()
+        public void AddGate_NearAJunction_ShouldAddItNotOnTheJunctionsNode()
         {
             var feature = new Feature(new LineString(new[] {
                     new Coordinate(0,0),
@@ -209,7 +275,7 @@ namespace IsraelHiking.API.Tests.Executors
             foreach (var coordinate in feature.Geometry.Coordinates)
             {
                 _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
-                    .Returns(new Node() { Longitude = coordinate.X, Latitude = coordinate.Y });
+                    .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(1).Returns(new Way { Id = 1, Version = 1, Nodes = new long[] { 0, 1, 2 } });
             _authClient.GetWay(2).Returns(new Way { Id = 2, Version = 1, Nodes = new long[] { 3, 1, 4 } });
@@ -241,7 +307,7 @@ namespace IsraelHiking.API.Tests.Executors
             foreach (var coordinate in feature.Geometry.Coordinates)
             {
                 _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
-                    .Returns(new Node() { Longitude = coordinate.X, Latitude = coordinate.Y });
+                    .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(1).Returns(new Way { Id = 1, Version = 1, Nodes = new long[] { 0, 1, 2 } });
             _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
@@ -272,7 +338,7 @@ namespace IsraelHiking.API.Tests.Executors
             foreach (var coordinate in feature.Geometry.Coordinates)
             {
                 _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
-                    .Returns(new Node() { Longitude = coordinate.X, Latitude = coordinate.Y });
+                    .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(1).Returns(new Way { Id = 1, Version = 1, Nodes = new long[] { 0, 1, 2 } });
             _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
@@ -309,7 +375,7 @@ namespace IsraelHiking.API.Tests.Executors
             foreach (var coordinate in feature.Geometry.Coordinates)
             {
                 _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
-                    .Returns(new Node() { Longitude = coordinate.X, Latitude = coordinate.Y });
+                    .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(1).Returns(new Way { Id = 1, Version = 1, Nodes = new long[] { 0, 1 } });
             _authClient.GetWay(2).Returns(new Way { Id = 2, Version = 1, Nodes = new long[] { 2, 3, 4, 5, 2 } });
@@ -328,6 +394,47 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
+        public void AddGate_NearMultipolygon_ShouldAddIt()
+        {
+            var feature = new Feature(new MultiPolygon(new[]
+                {
+                    new Polygon(
+                        new LinearRing(new[]
+                        {
+                            new Coordinate(0, 0),
+                            new Coordinate(1, 0),
+                            new Coordinate(1, 1),
+                            new Coordinate(0, 1),
+                            new Coordinate(0, 0)
+                        })
+                    )
+                }),
+                new AttributesTable
+                {
+                    {FeatureAttributes.POI_OSM_NODES, new List<object> {2, 3, 4, 5, 2}},
+                    {FeatureAttributes.ID, "Way_2"},
+                    {FeatureAttributes.POI_VERSION, 1}
+                }
+            );
+            foreach (var coordinate in feature.Geometry.Coordinates)
+            {
+                _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
+                    .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
+            }
+            _authClient.GetWay(2).Returns(new Way { Id = 2, Version = 1, Nodes = new long[] { 2, 3, 4, 5, 2 } });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+
+            _executor.Add(_authClient, new AddSimplePointOfInterestRequest
+            {
+                LatLng = new LatLng(0.00001, 0.0),
+                PointType = SimplePointType.ClosedGate
+            }).Wait();
+
+            _authClient.Received().UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(c =>
+                c.Modify.Length == 1 && c.Create == null));
+        }
+        
+        [TestMethod]
         public void AddGate_NearAnOutdatedWay_ShouldAddItInTheRightPlace()
         {
             var feature = new Feature(new LineString(new[] {
@@ -342,7 +449,7 @@ namespace IsraelHiking.API.Tests.Executors
             foreach (var coordinate in feature.Geometry.Coordinates)
             {
                 _authClient.GetNode(feature.Geometry.Coordinates.ToList().IndexOf(coordinate))
-                    .Returns(new Node() { Longitude = coordinate.X, Latitude = coordinate.Y });
+                    .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 2, Nodes = new long[] { 0, 1, 2, 3 } });
             _authClient.GetCompleteWay(42).Returns(new CompleteWay());

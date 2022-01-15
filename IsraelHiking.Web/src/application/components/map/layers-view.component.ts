@@ -1,14 +1,14 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
-import { GeoJSONSourceComponent } from "ngx-maplibre-gl";
+import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
+import { select, NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
-import { select, NgRedux } from "../../reducers/infra/ng-redux.module";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import type { ApplicationState, Overlay } from "../../models/models";
 
@@ -127,5 +127,9 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
 
     public hasExtraData(feature: GeoJSON.Feature<GeoJSON.Point>): boolean {
         return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
+    }
+
+    public trackByKey(_: number, el: Overlay) {
+        return el.key;
     }
 }

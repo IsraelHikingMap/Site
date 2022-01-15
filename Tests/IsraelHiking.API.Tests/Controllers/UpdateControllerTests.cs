@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -62,57 +61,13 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void PostUpdateData_RemoteIs10101010Defaultrequest_ShouldUpdateAllGateways()
+        public void PostUpdateData_RemoteIs10101010DefaultRequest_ShouldUpdateAllGateways()
         {
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Parse("10.10.10.10"));
             
             _controller.PostUpdateData(new UpdateRequest()).Wait();
 
             _databasesUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>());
-        }
-
-        [TestMethod]
-        public void PutUpdateData_NonLocal_ShouldReturnBadReqeust()
-        {
-            SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Parse("5.6.7.8"));
-
-            var results = _controller.PutUpdateData().Result as BadRequestObjectResult;
-
-            Assert.IsNotNull(results);
-        }
-
-        [TestMethod]
-        public void PutUpdateData_Local_ShouldUpdate()
-        {
-            SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
-
-            _controller.PutUpdateData().Wait();
-
-            _databasesUpdaterService.Received(1).Update();
-        }
-
-        [TestMethod]
-        public void PutUpdateData_FromTwoThreads_ShouldUpdateTwice()
-        {
-            SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
-
-            _controller.PutUpdateData().ContinueWith((t) => { });
-            _controller.PutUpdateData().Wait();
-
-            _databasesUpdaterService.Received(2).Update();
-        }
-
-        [TestMethod]
-        public void PutUpdateData_WhileRebuildIsRunning_ShouldNotUpdate()
-        {
-            _databasesUpdaterService.Rebuild(Arg.Any<UpdateRequest>()).Returns(Task.Delay(100));
-            SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
-
-            _controller.PostUpdateData(new UpdateRequest()).ContinueWith((t) => { });
-            var results = _controller.PutUpdateData().Result as BadRequestObjectResult;
-
-            _databasesUpdaterService.DidNotReceive().Update();
-            Assert.IsNotNull(results);
         }
     }
 }

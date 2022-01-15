@@ -3,14 +3,11 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 

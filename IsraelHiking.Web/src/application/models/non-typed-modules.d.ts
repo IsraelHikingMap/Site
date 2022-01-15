@@ -1,6 +1,5 @@
 /// <reference types="file-saver" />
 
-declare module "moving-median";
 declare module "linear-interpolator";
 declare module "piexifjs";
 declare module "ohauth";

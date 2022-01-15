@@ -1,7 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { NgReduxTestingModule } from "../reducers/infra/ng-redux-testing.module";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
 
 import { TracesService } from "./traces.service";
 import { LoggingService } from "./logging.service";
@@ -22,7 +22,7 @@ describe("Traces Service", () => {
             imports: [
                 HttpClientModule,
                 HttpClientTestingModule,
-                NgReduxTestingModule
+                MockNgReduxModule
             ],
             providers: [
                 TracesService,
@@ -32,6 +32,7 @@ describe("Traces Service", () => {
                 { provide: DatabaseService, useValue: null }
             ]
         });
+        MockNgRedux.reset();
     });
 
     it("Should get missing parts", inject([TracesService, HttpTestingController],

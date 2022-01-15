@@ -10,6 +10,5 @@ namespace IsraelHiking.DataAccessInterfaces.Repositories
         Task UpdateHighwaysZeroDownTime(List<Feature> highways);
         Task UpdateHighwaysData(List<Feature> features);
         Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest);
-        Task DeleteHighwaysById(string id);
     }
 }

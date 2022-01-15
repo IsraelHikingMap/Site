@@ -3,6 +3,7 @@ import { Router, ActivatedRoute, ParamMap } from "@angular/router";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { Subscription, Observable } from "rxjs";
 import { cloneDeep } from "lodash-es";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -20,7 +21,6 @@ import { NavigateHereService } from "../../../services/navigate-here.service";
 import { GpxDataContainerConverterService } from "../../../services/gpx-data-container-converter.service";
 import { GeoJsonParser } from "../../../services/geojson.parser";
 import { sidebarAnimate } from "../sidebar.component";
-import { NgRedux, select } from "../../../reducers/infra/ng-redux.module";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
 import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducers/poi.reducer";
 import type {

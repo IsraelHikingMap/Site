@@ -1,5 +1,6 @@
 import { Component, ViewEncapsulation, Inject } from "@angular/core";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { NgRedux } from "@angular-redux2/store";
 
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -9,7 +10,6 @@ import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
-import { NgRedux } from "../../../reducers/infra/ng-redux.module";
 import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducers/routes.reducer";
 import type { DataContainer, RouteData, ApplicationState, LatLngAlt } from "../../../models/models";
 

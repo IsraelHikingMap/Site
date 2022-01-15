@@ -23,7 +23,7 @@ namespace IsraelHiking.API.Executors
         private readonly ILogger _logger;
 
         /// <summary>
-        /// Constrcutor
+        /// Constructor
         /// </summary>
         /// <param name="imagesRepository"></param>
         /// <param name="remoteFileFetcherGateway"></param>
@@ -67,7 +67,7 @@ namespace IsraelHiking.API.Executors
                             return;
                         }
                     }
-                    var content = new byte[0];
+                    var content = Array.Empty<byte>();
                     for (int retryIndex = 0; retryIndex < 3; retryIndex++)
                     {
                         try

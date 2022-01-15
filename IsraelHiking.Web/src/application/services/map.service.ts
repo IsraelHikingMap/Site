@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
 import { Map } from "maplibre-gl";
 import { Observable } from "rxjs";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models/models";
 

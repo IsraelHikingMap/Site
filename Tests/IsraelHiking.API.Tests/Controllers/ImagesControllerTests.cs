@@ -19,19 +19,19 @@ namespace IsraelHiking.API.Tests.Controllers
     {
         private ImagesController _controller;
         private IShareUrlsRepository _repository;
-        private IImageCreationService _imageCreationService;
+        private IImageCreationGateway _imageCreationGateway;
         private IImgurGateway _imgurGateway;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _repository = Substitute.For<IShareUrlsRepository>();
-            _imageCreationService = Substitute.For<IImageCreationService>();
+            _imageCreationGateway = Substitute.For<IImageCreationGateway>();
             _imgurGateway = Substitute.For<IImgurGateway>();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
             
-            _controller = new ImagesController(_repository, _imageCreationService, _imgurGateway, options);
+            _controller = new ImagesController(_repository, _imageCreationGateway, _imgurGateway, options);
         }
 
         [TestMethod]
@@ -72,7 +72,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             _controller.PostDataContainer(dataContainer).Wait();
 
-            _imageCreationService.Received(1).Create(dataContainer, Arg.Any<int>(), Arg.Any<int>());
+            _imageCreationGateway.Received(1).Create(dataContainer, Arg.Any<int>(), Arg.Any<int>());
         }
 
         [TestMethod]

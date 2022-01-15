@@ -332,12 +332,13 @@ namespace IsraelHiking.API.Services
             {
                 return (1, new IconColorCategory("icon-wikipedia-w", Categories.WIKIPEDIA));
             }
-            if (attributesTable.GetNames().Any(k => k.Equals("highway", StringComparison.OrdinalIgnoreCase)))
+            if (attributesTable.GetNames().Any(k => k == "highway"))
             {
                 var icon = attributesTable["highway"].ToString() == "bus_stop"
                     ? new IconColorCategory("icon-bus-stop")
                     : new IconColorCategory("icon-map-signs");
-                return (_options.SearchFactor, icon);
+                var importantHighway = attributesTable["highway"].ToString() == "path" || attributesTable["highway"].ToString() == "track";
+                return (importantHighway ? 1 : _options.SearchFactor, icon);
             }
             return (_options.SearchFactor, new IconColorCategory());
         }

@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse, HttpParams } from "@angular/common/http";
 import { NgProgress } from "ngx-progressbar";
 import { uniq, cloneDeep } from "lodash-es";
 import { Observable, fromEvent, Subscription } from "rxjs";
@@ -7,6 +7,7 @@ import { timeout, throttleTime, skip, filter } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import JSZip from "jszip";
 import MiniSearch from "minisearch";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouterData } from "./hash.service";
@@ -19,7 +20,6 @@ import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
 import { FileService } from "./file.service";
 import { ConnectionService } from "./connection.service";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
 import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducers/layers.reducer";
 import { Urls } from "../urls";
@@ -208,14 +208,19 @@ export class PoiService {
             this.queueIsProcessing = false;
             this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
         } catch (ex) {
-            this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, ${ex.message}`);
-            if (ex.name !== "TimeoutError") {
-                // No timeout - i.e. error from server - need to remove this feature from queue
-                this.queueIsProcessing = false;
+            this.queueIsProcessing = false;
+            if (ex.name === "TimeoutError") {
+                this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, but will try later due to ` +
+                    `client side timeout error: ${ex.message}`);
+            } else if ((ex as HttpErrorResponse).error && (ex as HttpErrorResponse).error.constructor.name === "ProgressEvent") {
+                this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, but will try later due to ` +
+                    `client side general error: ${ex.message}`);
+            } else {
+                this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, removing from queue due to ` +
+                    `server side error: ${ex.message}`);
+                // No timeout and not a client side error - i.e. error from server - need to remove this feature from queue
                 this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
             }
-        } finally {
-            this.queueIsProcessing = false;
         }
     }
 
@@ -584,7 +589,7 @@ export class PoiService {
         };
     }
 
-    public getTitle(feature: GeoJSON.Feature, language: string) {
+    public getTitle(feature: GeoJSON.Feature, language: string): string {
         if (feature.properties["name:" + language]) {
             return feature.properties["name:" + language];
         }
@@ -594,11 +599,11 @@ export class PoiService {
         return "";
     }
 
-    public getDescription(feature: GeoJSON.Feature, language: string) {
+    public getDescription(feature: GeoJSON.Feature, language: string): string {
         return feature.properties["description:" + language] || feature.properties.description;
     }
 
-    public getExternalDescription(feature: GeoJSON.Feature, language: string) {
+    public getExternalDescription(feature: GeoJSON.Feature, language: string): string {
         return feature.properties["poiExternalDescription:" + language] || feature.properties.poiExternalDescription;
     }
 
@@ -743,9 +748,12 @@ export class PoiService {
             featureContainingOnlyChanges.properties.poiRemovedUrls = removedUrls;
             hasChages = true;
         }
-        if (hasChages) {
-            await this.addPointToUploadQueue(featureContainingOnlyChanges);
+        if (!hasChages) {
+            this.loggingService.info(`[POIs] No updates were made to feature with id ${originalFeature.properties.poiId}, ` +
+                "no need to add to queue");
+            return;
         }
+        await this.addPointToUploadQueue(featureContainingOnlyChanges);
     }
 
     public getEditableDataFromFeature(feature: GeoJSON.Feature): EditablePublicPointData {

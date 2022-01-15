@@ -1,7 +1,7 @@
 import { Action } from "redux";
+import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
 
-import { ReduxAction, BaseAction, createReducerFromClass } from "./infra/ng-redux.module";
-import { initialState } from "./initial-state";
+import { initialState, BaseAction } from "./initial-state";
 import type { RoutingType, RouteEditingState } from "../models/models";
 
 const SET_ROUTING_TYPE = "SET_ROUTING_TYPE";

@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { NgRedux } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
 import { GeoLocationService } from "./geo-location.service";
@@ -6,7 +7,6 @@ import { SelectedRouteService } from "./layers/routelayers/selected-route.servic
 import { ToastService } from "./toast.service";
 import { RouterService } from "./router.service";
 import { RoutesFactory } from "./layers/routelayers/routes.factory";
-import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { AddSegmentAction, AddRouteAction, ChangeRoutePropertiesAction } from "../reducers/routes.reducer";
 import type { ApplicationState, LatLngAlt } from "../models/models";
 

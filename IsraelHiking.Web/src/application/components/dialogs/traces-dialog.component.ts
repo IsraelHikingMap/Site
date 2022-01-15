@@ -3,6 +3,7 @@ import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash-es";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -16,7 +17,6 @@ import { RunningContextService } from "../../services/running-context.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RecordedRouteService } from "../../services/recorded-route.service";
 import { DataContainerService } from "../../services/data-container.service";
-import { NgRedux, select } from "../../reducers/infra/ng-redux.module";
 import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
 import type { ApplicationState, Trace, TraceVisibility } from "../../models/models";
 
@@ -234,10 +234,10 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public getVisibilityTranslation(visibility: TraceVisibility) {
         switch (visibility) {
             case "private":
+            case "trackable":
                 return this.resources.private;
             case "public":
             case "identifiable":
-            case "trackable":
                 return this.resources.public;
             case "local":
                 return this.resources.local;

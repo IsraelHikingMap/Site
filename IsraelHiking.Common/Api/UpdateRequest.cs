@@ -3,14 +3,6 @@
     public class UpdateRequest
     {
         /// <summary>
-        /// Download daily OSM file, this is done if update OSM is true
-        /// </summary>
-        public bool DownloadOsmFile { get; set; }
-        /// <summary>
-        /// Updates OSM file to be the lastet.
-        /// </summary>
-        public bool UpdateOsmFile { get; set; }
-        /// <summary>
         /// Update all external sources with latest updates
         /// </summary>
         public bool AllExternalSources { get; set; }

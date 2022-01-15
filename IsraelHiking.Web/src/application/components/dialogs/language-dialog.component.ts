@@ -1,9 +1,9 @@
 import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
+import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { ApplicationState, LanguageCode } from "../../models/models";
 
 @Component({

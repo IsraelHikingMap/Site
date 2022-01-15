@@ -1,40 +1,34 @@
 # Intro
-This repository holds all the files that the site needs in order to run.
+This repository holds the main server side module the web and mobile clients interact with, it also hold the web and mobile related code.
 
 [![AppVeyor](https://img.shields.io/appveyor/ci/IsraelHikingHost/site/master.svg)](https://ci.appveyor.com/project/IsraelHikingHost/site)
 [![AppVeyor tests](https://img.shields.io/appveyor/tests/IsraelHikingHost/site/master.svg)](https://ci.appveyor.com/project/IsraelHikingHost/site/build/tests)
 [![Codecov](https://img.shields.io/codecov/c/github/israelhikingmap/site/master.svg)](https://codecov.io/gh/IsraelHikingMap/Site/list/master/)
 
-## Contents
-* [Technology stack](#technology-stack)
-* [Architecture and folder stucture of UI](#architecture-and-folder-stucture-of-ui)
-* [Architecture of Server](#architecture-of-server)
-* [Setting Up the Project for Development](#setting-up-the-project-for-development)
-* [Starting a debug session](#starting-a-debug-session)
-* [Setup the server](#setup-the-server)
+## Architecture Diagram
+![image](https://user-images.githubusercontent.com/3269297/147603985-883f216d-f7b6-48bc-b5ca-bfbee2ca14bb.png)
 
 # Technology stack
 The technology stack of this site is based on the following frameworks:
-* [Typescript](http://www.typescriptlang.org/)
-* [Angular](https://angular.io/)
-* [Angular-Material](https://material.angular.io/)
-* [MapLibre](https://docs.maplibre.org/)
-* [ngx-maplibre-gl](https://github.com/maplibre/ngx-maplibre-gl/)
-* [Jasmine](http://jasmine.github.io/) + [Karma](https://karma-runner.github.io/) - for unit testing.
-* [Asp.Net core](https://docs.microsoft.com/en-us/aspnet/core/)
-* [NSubstitute](http://nsubstitute.github.io/)
-* [GraphHopper](https://graphhopper.com/)
-* [Elastic Search and NEST](https://www.elastic.co/)
-* [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite)
-* [OsmSharp](http://www.osmsharp.com/)
-* [Wikipedia using Wiki client library](https://github.com/CXuesong/WikiClientLibrary) Wikipedia and upload images to Wikimedia common
-* [Imgur](https://imgur.com/) - Used for uploading anonymous images
-* [Cordova](https://cordova.apache.org/) - Used to wrap the site as a mobile application and add some native capabilities
-* [Redux using angular-redux](https://github.com/angular-redux/platform)
-* [Dexie](https://dexie.org/) - Used for client side storage
-* [Docker](https://www.docker.com/)
-* [Lottie](https://github.com/airbnb/lottie-web)
-* [ngx-lottie](https://github.com/ngx-lottie/ngx-lottie)
+* [Typescript](http://www.typescriptlang.org/) - for sanity
+* [Angular](https://angular.io/) and [Angular-Material](https://material.angular.io/) - for UI framework and components 
+* [MapLibre](https://docs.maplibre.org/) using [ngx-maplibre-gl](https://github.com/maplibre/ngx-maplibre-gl/) - for map presentation and interaction
+* [Jasmine](http://jasmine.github.io/) and [Karma](https://karma-runner.github.io/) - for unit testing.
+* [Asp.Net core](https://docs.microsoft.com/en-us/aspnet/core/) - for server side
+* [NSubstitute](http://nsubstitute.github.io/) - for mocking server side tests
+* [GraphHopper](https://graphhopper.com/) - for routing between points
+* [Elastic Search and NEST](https://www.elastic.co/) - for database and search capabilities
+* [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite) - for server side spatial mathmatics
+* [Turf](https://turfjs.org/) - for client side spatial mathematics
+* [OsmSharp](http://www.osmsharp.com/) - for OSM capabilities
+* [Wikipedia using Wiki client library](https://github.com/CXuesong/WikiClientLibrary) - for Wikipedia data and upload images to Wikimedia common
+* [Imgur](https://imgur.com/) - for uploading anonymous images
+* [Cordova](https://cordova.apache.org/) - for wrapping the site as a mobile application and add some native capabilities
+* [Redux](https://redux.js.org/) and [angular-redux2](https://github.com/angular-redux2/store) - for state management in the client
+* [Dexie](https://dexie.org/) - for client side storage
+* [Docker](https://www.docker.com/) - for image creation and micro-server architecture
+* [D3](https://d3js.org/) and [ngx-d3](https://github.com/ZeevKatz/ngx-d3) - for advanced client side chart capablilities
+* [Lottie](https://github.com/airbnb/lottie-web) and [ngx-lottie](https://github.com/ngx-lottie/ngx-lottie) - for image animations
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:
@@ -73,7 +67,7 @@ In order to be able to build this site you'll need some tools:
 * Run `docker compose up graphhopper` - it should fail for the first time
 * Run `gh-update.ps1` (set chmod +x if needed) to generate the graphhopper routing data
 * Run `docker compose up` to load the rest of the sercives
-* Run `dotnet run --project IsraelHiking.Web --launch_profile IsraelHiking.Web`
+* Run `dotnet run --project IsraelHiking.Web`
 * If you want to update the translations or upload images from your debug environment, you'll need to add the following secrets to `IsraelHiking.Web`. Otherwise, skip this step.    
   <img width="397" alt="2017-10-22 10_47_32-" src="https://user-images.githubusercontent.com/1304610/31860867-3b283092-b72a-11e7-8119-fe04ecd13852.png">    
   In the `secrets.json` at the end there should be these fields.
@@ -83,7 +77,7 @@ In order to be able to build this site you'll need some tools:
     "wikiMediaPassword": "your wikimedia password"
     "zanataUserName": "your zanata user",
     "zanataApiKey": "your zanata api key",
-    "imgurClientId": "your imgur clinet ID"
+    "imgurClientId": "your imgur client ID"
   }
   ```
 

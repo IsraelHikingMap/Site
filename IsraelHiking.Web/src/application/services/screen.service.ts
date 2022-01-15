@@ -4,10 +4,10 @@ import { Brightness } from "@ionic-native/brightness/ngx";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
 import { StatusBar } from "@ionic-native/status-bar/ngx";
 import { Observable } from "rxjs";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { NgRedux, select } from "../reducers/infra/ng-redux.module";
 import type { ApplicationState, BatteryOptimizationType } from "../models/models";
 
 @Injectable()

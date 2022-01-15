@@ -1,5 +1,6 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { MapMouseEvent, Map, GeoJSONSource, Point } from "maplibre-gl";
+import { MapMouseEvent, Map, Point } from "maplibre-gl";
+import { NgRedux } from "@angular-redux2/store";
 
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
@@ -8,7 +9,6 @@ import { ElevationProvider } from "../../services/elevation.provider";
 import { SnappingService } from "../../services/snapping.service";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { ResourcesService } from "../../services/resources.service";
-import { NgRedux } from "../../reducers/infra/ng-redux.module";
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducers/routes.reducer";
 import type {
     ApplicationState,
@@ -70,7 +70,7 @@ export class RouteEditRouteInteraction {
         let features = this.geoJsonData.features.filter(f => f.id !== feature.id);
         features.push(feature);
         this.geoJsonData.features = features;
-        (this.map.getSource("editing-route-source") as GeoJSONSource).setData(this.geoJsonData);
+        (this.map.getSource("editing-route-source") as any).setData(this.geoJsonData);
     }
 
     private getFeatureById<TGeometry extends GeoJSON.Geometry>(id: string): GeoJSON.Feature<TGeometry> {

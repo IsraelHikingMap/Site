@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
+import { NgRedux } from "@angular-redux2/store";
 
 import { GetTextCatalogService } from "./gettext-catalog.service";
-import { NgRedux } from "../reducers/infra/ng-redux.module";
 import { SetLanguageAction } from "../reducers/configuration.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, Language, LanguageCode } from "../models/models";
@@ -235,6 +235,10 @@ export class ResourcesService {
     public screenOn: string;
     public screenOff: string;
     public screenDark: string;
+    public ifYouManageToReadThis: string;
+    public youNeedToPurchaseOfflineMaps: string;
+    public youNeedToDownloadOfflineMaps: string;
+    public youNeedToToggleOfflineMaps: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -291,6 +295,7 @@ export class ResourcesService {
     public thisWillDeteleAllCurrentRoutesAreYouSure: string;
     public pleaseFillReport: string;
     public hiddenRoutesWillNotBeSaved: string;
+    public noLocationPermissionOpenAppSettings: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -466,7 +471,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1635511838323");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1641819980622");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -685,6 +690,11 @@ export class ResourcesService {
         this.screenOn = this.gettextCatalog.getString("Keep screen on");
         this.screenOff = this.gettextCatalog.getString("Allow turning off the screen");
         this.screenDark = this.gettextCatalog.getString("Darken the screen");
+        this.ifYouManageToReadThis = this.gettextCatalog
+            .getString("If you manage to read this click the main menu button and then click layers:");
+        this.youNeedToDownloadOfflineMaps = this.gettextCatalog.getString("Background text: You need to download offline maps");
+        this.youNeedToToggleOfflineMaps = this.gettextCatalog.getString("Background text: You need to toggle offline maps");
+        this.youNeedToPurchaseOfflineMaps = this.gettextCatalog.getString("Background text: You need to purchase offline maps");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -757,6 +767,8 @@ export class ResourcesService {
         this.pleaseFillReport = this.gettextCatalog
             .getString("Please fill in the details of the issue in the e-mail message that will be shown soon and send it");
         this.hiddenRoutesWillNotBeSaved = this.gettextCatalog.getString("Hidden routes will not be saved...");
+        this.noLocationPermissionOpenAppSettings = this.gettextCatalog.getString("There's no permission to use your location. " +
+            "Would you like to open the app settings?");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

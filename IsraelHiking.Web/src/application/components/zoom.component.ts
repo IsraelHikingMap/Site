@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { MapComponent } from "ngx-maplibre-gl";
+import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";

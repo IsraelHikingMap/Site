@@ -35,7 +35,7 @@ import { NgProgressModule } from "ngx-progressbar";
 import { NgProgressHttpModule } from "ngx-progressbar/http";
 import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
-import { NgxMapLibreGLModule } from "ngx-maplibre-gl";
+import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { NgIdleModule } from "@ng-idle/core";
 import { LottieModule } from "ngx-lottie";
 import player from "lottie-web";
@@ -57,8 +57,8 @@ import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { WebIntent } from "@ionic-native/web-intent/ngx";
 import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
+import { NgReduxModule } from "@angular-redux2/store";
 // services
-import { NgReduxModule } from "./reducers/infra/ng-redux.module";
 import { ScrollToModule } from "./infra/scroll-to/scroll-to.module";
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -172,6 +172,7 @@ import { CategoriesGroupComponent } from "./components/sidebar/categories-group.
 import { MainMenuComponent } from "./components/main-menu.component";
 import { CenterMeComponent } from "./components/center-me.component";
 import { PhotoSwpieComponent } from "./components/photoswipe.component";
+import { BackgroundTextComponent } from "./components/background-text.component";
 
 // variables and functions
 import { routes } from "./routes";
@@ -349,6 +350,7 @@ const initializeApplication = (injector: Injector) => async () => {
             FilesSharesDialogComponent,
             AddSimplePoiDialogComponent,
             FacebookWarningDialogComponent,
+            BackgroundTextComponent,
             NameInUseValidatorDirective,
             ImageCaptureDirective,
             OfflineImagePipe,

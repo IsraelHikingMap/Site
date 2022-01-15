@@ -13,7 +13,7 @@ namespace IsraelHiking.API.Services
     /// <inheritdoc/>
     public class OfflineFilesService : IOfflineFilesService
     {
-        private readonly PhysicalFileProvider _fileProvider;
+        private readonly IFileProvider _fileProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IReceiptValidationGateway _receiptValidationGateway;
         private readonly ILogger _logger;
@@ -31,17 +31,16 @@ namespace IsraelHiking.API.Services
             ILogger logger)
         {
             _logger = logger;
+            _fileSystemHelper = fileSystemHelper;
+            _receiptValidationGateway = receiptValidationGateway;
             if (string.IsNullOrEmpty(options.Value.OfflineFilesFolder))
             {
                 _logger.LogWarning("offlineFilesFolder was not provided! This mean you won't be able to use this service");
             }
             else
             {
-                _fileProvider = new PhysicalFileProvider(options.Value.OfflineFilesFolder);
+                _fileProvider = _fileSystemHelper.CreateFileProvider(options.Value.OfflineFilesFolder);
             }
-            
-            _fileSystemHelper = fileSystemHelper;
-            _receiptValidationGateway = receiptValidationGateway;
         }
 
         /// <inheritdoc/>

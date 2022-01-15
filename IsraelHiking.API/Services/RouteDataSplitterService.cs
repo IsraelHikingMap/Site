@@ -36,7 +36,7 @@ namespace IsraelHiking.API.Services
             var allRoutePoints = routeData.Segments.SelectMany(s => s.Latlngs).ToList();
             var coordinates = ToWgs84Coordinates(allRoutePoints);
             int maximumPoints = Math.Max(3, Math.Min((int)(new LineString(coordinates).Length / _options.MinimalSegmentLength), _options.MaxSegmentsNumber));
-            var currentDistanceTolerance = _options.InitialSplitSimplificationDistanceTolerace;
+            var currentDistanceTolerance = _options.InitialSplitSimplificationDistanceTolerance;
             Coordinate[] simplifiedCoordinates;
             do
             {

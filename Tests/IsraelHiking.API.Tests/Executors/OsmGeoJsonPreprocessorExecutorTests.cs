@@ -1,4 +1,6 @@
-﻿using IsraelHiking.API.Converters;
+﻿using System.Collections.Generic;
+using System.Linq;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
@@ -8,19 +10,16 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.Tags;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace IsraelHiking.API.Tests.Services.Osm
+namespace IsraelHiking.API.Tests.Executors
 {
     [TestClass]
-    public class OsmGeoJsonPreprocessorTests
+    public class OsmGeoJsonPreprocessorExecutorTests
     {
         private IOsmGeoJsonPreprocessorExecutor _preprocessorExecutor;
 
@@ -134,7 +133,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             {
                 Nodes = new[] { node3, node1 },
             };
-            var relaction = new CompleteRelation
+            var relation = new CompleteRelation
             {
                 Members = new []
                 {
@@ -146,7 +145,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                     {"route", "bike"}
                 }
             };
-            var osmElements = new List<ICompleteOsmGeo> { relaction };
+            var osmElements = new List<ICompleteOsmGeo> { relation };
 
             var results = _preprocessorExecutor.Preprocess(osmElements);
 
@@ -168,7 +167,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 Nodes = new[] {node1, node2}
             };
             way1.Tags.Add("name", "name");
-            var relaction = new CompleteRelation
+            var relation = new CompleteRelation
             {
                 Members = new[]
                 {
@@ -179,7 +178,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                     {"name", "name"}
                 }
             };
-            var osmElements = new List<ICompleteOsmGeo> { way1, relaction };
+            var osmElements = new List<ICompleteOsmGeo> { way1, relation };
 
             var results = _preprocessorExecutor.Preprocess(osmElements);
 
@@ -199,7 +198,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 Nodes = new[] { node1, node2 }
             };
             way1.Tags.Add("name", "name1");
-            var relaction = new CompleteRelation
+            var relation = new CompleteRelation
             {
                 Members = new[]
                 {
@@ -210,13 +209,48 @@ namespace IsraelHiking.API.Tests.Services.Osm
                     {"name", "name"}
                 }
             };
-            var osmElements = new List<ICompleteOsmGeo> { way1, relaction };
+            var osmElements = new List<ICompleteOsmGeo> { way1, relation };
 
             var results = _preprocessorExecutor.Preprocess(osmElements);
 
             Assert.AreEqual(2, results.Count);
             Assert.AreEqual(1, results.Count(f => f.Geometry is MultiLineString));
             Assert.AreEqual(1, results.Count(f => f.Geometry is LineString));
+        }
+
+        [TestMethod]
+        public void Preprocess_Highways_ShouldPreProcess()
+        {
+            var list = new List<CompleteWay>
+            {
+                new CompleteWay
+                {
+                    Id = 1,
+                    Tags = new TagsCollection
+                    {
+                        {FeatureAttributes.NAME, "name"}
+                    },
+                    Nodes = new []
+                    {
+                        new Node
+                        {
+                            Id = 2,
+                            Latitude = 1,
+                            Longitude = 1
+                        },
+                        new Node
+                        {
+                            Id = 3,
+                            Latitude = 2,
+                            Longitude = 2
+                        }
+                    }
+                }
+            };
+
+            var results = _preprocessorExecutor.Preprocess(list);
+            
+            Assert.AreEqual(list.Count, results.Count);
         }
     }
 }

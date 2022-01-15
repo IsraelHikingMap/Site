@@ -1,5 +1,4 @@
-﻿using IsraelHiking.API.Services;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

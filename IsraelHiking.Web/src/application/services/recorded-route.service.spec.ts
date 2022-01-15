@@ -1,8 +1,7 @@
 import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { TestBed, inject } from "@angular/core/testing";
-import { MockNgRedux, NgReduxTestingModule } from "../reducers/infra/ng-redux-testing.module";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
 import { Device } from "@ionic-native/device/ngx";
-import { Subject } from "rxjs";
 
 import { RecordedRouteService } from "./recorded-route.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
@@ -32,7 +31,7 @@ describe("RecordedRouteService", () => {
         };
         TestBed.configureTestingModule({
             imports: [
-                NgReduxTestingModule,
+                MockNgReduxModule,
                 HttpClientTestingModule
             ],
             providers: [
@@ -75,7 +74,7 @@ describe("RecordedRouteService", () => {
                     }]
                 }]
             } as RouteData;
-            MockNgRedux.getInstance().getState = () => ({
+            MockNgRedux.store.getState = () => ({
                 userState: {}
             });
             selectedRouteService.getRecordingRoute = () => recordingRoute;
@@ -83,7 +82,7 @@ describe("RecordedRouteService", () => {
                 state => state.gpsState.currentPoistion
             );
             let spy = jasmine.createSpy();
-            MockNgRedux.getInstance().dispatch = spy;
+            MockNgRedux.store.dispatch = spy;
 
             positionStub.next(
                 { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime()}

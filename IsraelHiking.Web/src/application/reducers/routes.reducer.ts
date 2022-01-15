@@ -1,8 +1,8 @@
 import { Action } from "redux";
 import undoable, { UndoableOptions, includeAction, groupByActionTypes } from "redux-undo";
+import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
 
-import { initialState } from "./initial-state";
-import { ReduxAction, createReducerFromClass, BaseAction } from "./infra/ng-redux.module";
+import { initialState, BaseAction } from "./initial-state";
 import type { RouteData, MarkerData, RouteSegmentData, RouteStateName, LatLngAltTime } from "../models/models";
 
 const ADD_ROUTE = "ADD_ROUTE";
