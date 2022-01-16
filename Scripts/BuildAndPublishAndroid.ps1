@@ -36,24 +36,25 @@ $xml.Load($filePath)
 $xml.widget.version = $env:APPVEYOR_BUILD_VERSION
 $xml.Save($filePath)
 
-Write-Host "cordova build android --release --  --packageType=apk"
-npx cordova build android --release -- --keystore=./signing/IHM.jks --storePassword=$env:STORE_PASSWORD --alias=ihmkey --password=$env:PASSWORD --packageType=apk
-$preVersionApkLocation = "./platforms/android/app/build/outputs/apk/release/app-release.apk";
-
-if (-not (Test-Path -Path $preVersionApkLocation)) {
-	throw "Failed to create android apk file"
-}
-
-$apkVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.apk"
-Copy-Item -Path $preVersionApkLocation -Destination $apkVersioned
-Push-AppveyorArtifact $apkVersioned
-
 Write-Host "cordova build android --release --  --packageType=bundle"
 npx cordova build android --release -- --keystore=./signing/IHM.jks --storePassword=$env:STORE_PASSWORD --alias=ihmkey --password=$env:PASSWORD --packageType=bundle
 $aabVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.aab"
 $preVersionAabLocation = "./platforms/android/app/build/outputs/bundle/release/app-release.aab";
+
+if (-not (Test-Path -Path $preVersionAabLocation)) {
+	throw "Failed to create android aab file"
+}
+
 Copy-Item -Path $preVersionAabLocation -Destination $aabVersioned
 Push-AppveyorArtifact $aabVersioned
+
+Write-Host "cordova build android --release --  --packageType=apk"
+npx cordova build android --release -- --keystore=./signing/IHM.jks --storePassword=$env:STORE_PASSWORD --alias=ihmkey --password=$env:PASSWORD --packageType=apk
+$preVersionApkLocation = "./platforms/android/app/build/outputs/apk/release/app-release.apk";
+$apkVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.apk"
+Copy-Item -Path $preVersionApkLocation -Destination $apkVersioned
+Push-AppveyorArtifact $apkVersioned
+
 
 
 if ($env:APPVEYOR_REPO_TAG -eq "true")
