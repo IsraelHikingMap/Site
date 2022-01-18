@@ -1,6 +1,12 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
-import { StyleSpecification, RasterSourceSpecification, RasterLayerSpecification, SourceSpecification, LayerSpecification } from "maplibre-gl";
+import {
+    StyleSpecification,
+    RasterSourceSpecification,
+    RasterLayerSpecification,
+    SourceSpecification,
+    LayerSpecification
+} from "maplibre-gl";
 import { Observable, Subscription } from "rxjs";
 import { NgRedux, select } from "@angular-redux2/store";
 
@@ -164,7 +170,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         this.updateSourcesAndLayers(styleJson.sources, styleJson.layers);
     }
 
-    private updateSourcesAndLayers(sources: {[_:string]: SourceSpecification}, layers: LayerSpecification[]) {
+    private updateSourcesAndLayers(sources: {[_: string]: SourceSpecification}, layers: LayerSpecification[]) {
         let attributiuonUpdated = false;
         for (let sourceKey of Object.keys(sources)) {
             if (sources.hasOwnProperty(sourceKey) && this.visible) {
@@ -176,7 +182,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                     source.attribution = attributiuonUpdated === false ? AutomaticLayerPresentationComponent.ATTRIBUTION : "";
                     attributiuonUpdated = true;
                 }
-                
+
                 try {
                     this.mapComponent.mapInstance.addSource(sourceKey, source);
                     this.jsonSourcesIds.push(sourceKey);
@@ -184,7 +190,6 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                     this.loggingService.error(`[ALP] Unable to add source with ID: ${sourceKey} for ${this.layerData.key}`);
                     throw ex;
                 }
-                
             }
         }
         for (let layer of layers) {
@@ -202,7 +207,6 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 this.loggingService.error(`[ALP] Unable to add layer with ID: ${layer.id} for ${this.layerData.key}`);
                 throw ex;
             }
-            
         }
     }
 
@@ -215,7 +219,6 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 this.loggingService.error(`[ALP] Unable to remove layer with ID: ${layerId} for ${this.layerData.key}`);
                 throw ex;
             }
-            
         }
         this.jsonLayersIds = [];
         for (let sourceId of this.jsonSourcesIds) {
@@ -226,7 +229,6 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 this.loggingService.error(`[ALP] Unable to remove source with ID: ${sourceId} for ${this.layerData.key}`);
                 throw ex;
             }
-            
         }
         this.jsonSourcesIds = [];
     }

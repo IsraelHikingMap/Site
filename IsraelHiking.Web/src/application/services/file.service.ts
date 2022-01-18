@@ -140,9 +140,8 @@ export class FileService {
                 version: 8.0,
                 layers: [],
                 sources: {}
-            }
+            };
         }
-        
     }
 
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {
