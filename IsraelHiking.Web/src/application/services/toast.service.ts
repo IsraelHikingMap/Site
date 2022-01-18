@@ -27,8 +27,8 @@ export class ToastService {
                 private readonly loggingService: LoggingService) {
     }
 
-    public error(ex: Error, message: string, title?: string) {
-        this.loggingService.error(message + ": " + ex.message);
+    public error(ex: Error | unknown, message: string, title?: string) {
+        this.loggingService.error(message + ": " + (ex as Error).message);
         this.snackbar.open(message, title, {
             direction: this.resources.direction,
             duration: ToastService.DURATION,

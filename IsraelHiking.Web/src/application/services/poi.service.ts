@@ -209,15 +209,15 @@ export class PoiService {
             this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
         } catch (ex) {
             this.queueIsProcessing = false;
-            if (ex.name === "TimeoutError") {
+            if ((ex as Error).name === "TimeoutError") {
                 this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, but will try later due to ` +
-                    `client side timeout error: ${ex.message}`);
+                    `client side timeout error: ${(ex as Error).message}`);
             } else if ((ex as HttpErrorResponse).error && (ex as HttpErrorResponse).error.constructor.name === "ProgressEvent") {
                 this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, but will try later due to ` +
-                    `client side general error: ${ex.message}`);
+                    `client side general error: ${(ex as Error).message}`);
             } else {
                 this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, removing from queue due to ` +
-                    `server side error: ${ex.message}`);
+                    `server side error: ${(ex as Error).message}`);
                 // No timeout and not a client side error - i.e. error from server - need to remove this feature from queue
                 this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
             }
@@ -297,7 +297,7 @@ export class PoiService {
             }
             await this.updateOfflinePoisByPaging(lastModified);
         } catch (ex) {
-            this.loggingService.warning("[POIs] Unable to sync public pois and categories - using local data: " + ex.message);
+            this.loggingService.warning("[POIs] Unable to sync public pois and categories - using local data: " + (ex as Error).message);
         }
         this.loggingService.info("[POIs] Getting POIs for clustering from database");
         await this.rebuildPois();
@@ -643,7 +643,7 @@ export class PoiService {
         try {
             feature = await this.httpClient.get(Urls.poiClosest, { params }).pipe(timeout(1000)).toPromise() as GeoJSON.Feature;
         } catch (ex) {
-            this.loggingService.warning(`[POIs] Unable to get closest POI: ${ex.message}`);
+            this.loggingService.warning(`[POIs] Unable to get closest POI: ${(ex as Error).message}`);
         }
         if (feature == null) {
             return null;

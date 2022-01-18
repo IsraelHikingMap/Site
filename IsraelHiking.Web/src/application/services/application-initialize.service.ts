@@ -82,14 +82,14 @@ export class ApplicationInitializeService {
             if (this.runningContextService.isIFrame) {
                 return;
             }
-            if (ex.message.indexOf("A mutation operation was attempted on a database that did not allow mutations") !== -1) {
+            if ((ex as Error).message.indexOf("A mutation operation was attempted on a database that did not allow mutations") !== -1) {
                 alert("Sorry, this site does not support running FireFox in private mode...");
             } else {
                 alert("Ooopppss... We have encountered an unexpected failure. Please try again.\n" +
                       "If that does not help, please take a screenshot and send it to israelhikingmap@gmail.com\n" +
-                      `Init failed: ${ex.message}`);
+                      `Init failed: ${(ex as Error).message}`);
             }
-            this.loggingService.error(`Failed IHM Application Initialization: ${ex.message}`);
+            this.loggingService.error(`Failed IHM Application Initialization: ${(ex as Error).message}`);
         }
     }
 }

@@ -135,7 +135,7 @@ export class FileService {
             }
             return await this.httpClient.get(this.getDataUrl(url)).toPromise() as Promise<StyleSpecification>;
         } catch (ex) {
-            this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${ex.message}`);
+            this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {
                 version: 8.0,
                 layers: [],
@@ -295,7 +295,7 @@ export class FileService {
         try {
             return await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.cacheDirectory, fileName);
         } catch (ex) {
-            this.loggingService.warning("[Files] Unable to get file from cache: " + ex.message);
+            this.loggingService.warning("[Files] Unable to get file from cache: " + (ex as Error).message);
             return null;
         }
     }

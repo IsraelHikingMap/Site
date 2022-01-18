@@ -126,7 +126,7 @@ export class ShareUrlsService {
             this.ngRedux.dispatch(new SetShareUrlsLastModifiedDateAction({lastModifiedDate: operationStartTimeStamp}));
             this.loggingService.info(`[Shares] Finished shares sync, last modified: ${operationStartTimeStamp.toUTCString()}`);
         } catch (ex) {
-            this.loggingService.error("[Shares] Unable to sync shares: " + ex.message);
+            this.loggingService.error("[Shares] Unable to sync shares: " + (ex as Error).message);
         } finally {
             this.syncying = false;
         }

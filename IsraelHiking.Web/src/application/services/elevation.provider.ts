@@ -37,7 +37,7 @@ export class ElevationProvider {
                 latlngs[relevantIndexes[index]].alt = response[index];
             }
         } catch (ex) {
-            this.loggingService.warning(`Unable to get elevation data for ${latlngs.length} points. ` + ex.message);
+            this.loggingService.warning(`Unable to get elevation data for ${latlngs.length} points. ` + (ex as Error).message);
             this.toastService.warning(this.resources.unableToGetElevationData);
         }
         return latlngs;

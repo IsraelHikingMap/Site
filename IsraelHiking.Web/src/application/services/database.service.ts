@@ -164,7 +164,7 @@ export class DatabaseService {
                 state
             });
         } catch (ex) {
-            this.loggingService.warning("[Database] Unable to store the state: " + ex.message);
+            this.loggingService.warning("[Database] Unable to store the state: " + (ex as Error).message);
         } finally {
             this.updating = false;
         }
