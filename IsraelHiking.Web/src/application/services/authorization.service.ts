@@ -8,6 +8,7 @@ import { NonAngularObjectsFactory, IOhAuth, OAuthResponse, IOAuthParams } from "
 import { SetTokenAction, SetUserInfoAction } from "../reducers/user.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, OsmUserDetails, UserState, UserInfo } from "../models/models";
+import { LoggingService } from "./logging.service";
 
 export type AuthorizationServiceOptions = {
     url: string;
@@ -36,6 +37,7 @@ export class AuthorizationService {
     constructor(private readonly httpClient: HttpClient,
                 private readonly runningContextService: RunningContextService,
                 private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+                private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.ohauth = this.nonAngularObjectsFactory.createOhAuth();
         this.setOptions({} as AuthorizationServiceOptions);
@@ -63,7 +65,7 @@ export class AuthorizationService {
         if (this.isLoggedIn()) {
             return;
         }
-
+        this.loggingService.info("[Authorization] User initiated login");
         this.logout();
         let popup = this.openWindow(); // this has to be here in order to support browsers that only open a window on click event
         let data = await this.httpClient.get(Urls.osmConfiguration).toPromise() as OsmConfiguration;
@@ -99,6 +101,7 @@ export class AuthorizationService {
         this.ngRedux.dispatch(new SetUserInfoAction({
             userInfo
         }));
+        this.loggingService.info(`[Authorization] User ${userInfo.displayName} logged-in successfully`);
     };
 
     private async getAccessToken(oauthToken: string, oauthRequestTokenSecret: string): Promise<OAuthResponse> {

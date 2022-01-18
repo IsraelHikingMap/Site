@@ -63,7 +63,7 @@ namespace IsraelHiking.API.Services
                     return;
                 }
                 var title = string.IsNullOrWhiteSpace(url.Title) ? "Israel Hiking Map Route Share" : url.Title;
-                var thumbnailUrl = context.Request.GetDisplayUrl().Replace("/share/", "/api/images/");
+                var thumbnailUrl = "https://israelhiking.osm.org.il/api/images/" + url.Id;
                 if (isWhatsApp)
                 {
                     thumbnailUrl += "?width=256&height=256";
