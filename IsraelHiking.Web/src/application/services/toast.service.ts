@@ -5,6 +5,7 @@ import { ResourcesService } from "./resources.service";
 import { ConfirmDialogComponent, ConfirmType } from "../components/dialogs/confirm-dialog.component";
 import { ProgressDialogComponent, IProgressDialogConfig } from "../components/dialogs/progress-dialog.component";
 import { LoggingService } from "./logging.service";
+import { firstValueFrom } from "rxjs";
 
 export interface IConfirmOptions {
     message: string;
@@ -102,6 +103,6 @@ export class ToastService {
 
     public progress(config: IProgressDialogConfig): Promise<any> {
         let dialogRef = ProgressDialogComponent.openDialog(this.matDialog, config);
-        return dialogRef.afterClosed().toPromise();
+        return firstValueFrom(dialogRef.afterClosed());
     }
 }

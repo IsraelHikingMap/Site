@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { encode } from "base64-arraybuffer";
+import { firstValueFrom } from "rxjs";
 
 import { RunningContextService } from "../services/running-context.service";
 import { DatabaseService } from "../services/database.service";
@@ -19,7 +20,7 @@ export class OfflineImagePipe implements PipeTransform {
                 return data;
             }
         } else if (cache && value) {
-            this.http.get(value, { responseType: "blob" }).toPromise()
+            firstValueFrom(this.http.get(value, { responseType: "blob" }))
                 .then(async (res: Blob) => this.databaseService.storeImages([{
                     imageUrl: value,
                     data: `data:${res.type};base64,${encode(await new Response(res).arrayBuffer())}`

@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
+import { firstValueFrom } from "rxjs";
 
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
@@ -32,9 +33,9 @@ export class ElevationProvider {
         }
         try {
             let params = new HttpParams().set("points", points.join("|"));
-            let response = await this.httpClient.get(Urls.elevation, { params }).pipe(timeout(1000)).toPromise() as number[];
+            let response = await firstValueFrom(this.httpClient.get(Urls.elevation, { params }).pipe(timeout(1000)));
             for (let index = 0; index < relevantIndexes.length; index++) {
-                latlngs[relevantIndexes[index]].alt = response[index];
+                latlngs[relevantIndexes[index]].alt = (response as number[])[index];
             }
         } catch (ex) {
             this.loggingService.warning(`Unable to get elevation data for ${latlngs.length} points. ` + (ex as Error).message);

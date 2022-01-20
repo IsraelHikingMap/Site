@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
+import { firstValueFrom } from "rxjs";
 import { NgRedux } from "@angular-redux2/store";
 
 import { LayersService } from "./layers/layers.service";
@@ -100,11 +101,11 @@ export class OfflineFilesDownloadService {
     private async getFilesToDownloadDictionary(): Promise<Record<string, string>> {
         let lastModified = this.ngRedux.getState().offlineState.lastModifiedDate;
         let lastModifiedString = lastModified ? lastModified.toISOString() : null;
-        let fileNames = await this.httpClient.get(Urls.offlineFiles, {
+        let fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
             params: { lastModified: lastModifiedString }
-        }).pipe(timeout(5000)).toPromise() as Record<string, string>;
+        }).pipe(timeout(5000)));
         this.loggingService.info(
             `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
-        return fileNames;
+        return fileNames as Record<string, string>;
     }
 }

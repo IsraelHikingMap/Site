@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { orderBy } from "lodash-es";
 import { NgRedux } from "@angular-redux2/store";
+import { firstValueFrom } from "rxjs";
 
 import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -66,9 +67,9 @@ export class ShareUrlsService {
 
     private async getShareFromServerAndCacheIt(shareUrlId: string): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Getting share by id ${shareUrlId}`);
-        let shareUrl = await this.httpClient.get(Urls.urls + shareUrlId).pipe(timeout(60000)).toPromise() as ShareUrl;
-        this.databaseService.storeShareUrl(shareUrl);
-        return shareUrl;
+        let shareUrl = await firstValueFrom(this.httpClient.get(Urls.urls + shareUrlId).pipe(timeout(60000)));
+        this.databaseService.storeShareUrl(shareUrl as ShareUrl);
+        return shareUrl as ShareUrl;
     }
 
     public async getShareUrl(shareUrlId: string): Promise<ShareUrl> {
@@ -77,7 +78,8 @@ export class ShareUrlsService {
             return await this.getShareFromServerAndCacheIt(shareUrlId);
         }
         // Refresh it in the background if needed...
-        this.httpClient.get(Urls.urls + shareUrlId + "/timestamp").pipe(timeout(2000)).toPromise().then((timestamp: any) => {
+
+        firstValueFrom(this.httpClient.get(Urls.urls + shareUrlId + "/timestamp").pipe(timeout(2000))).then((timestamp: any) => {
             if (new Date(timestamp as string) > new Date(shareUrl.lastModifiedDate)) {
                 this.loggingService.warning("[Shares] Cached share is outdated, fetching it again...");
                 this.getShareFromServerAndCacheIt(shareUrlId);
@@ -98,7 +100,8 @@ export class ShareUrlsService {
             let sharesToGetFromServer = [] as ShareUrl[];
             this.loggingService.info("[Shares] Starting shares sync, last modified:" +
                 (sharesLastSuccessfullSync || new Date(0)).toUTCString());
-            let shareUrls = await this.httpClient.get(Urls.urls).pipe(timeout(20000)).toPromise() as ShareUrl[];
+            let shareUrls$ = this.httpClient.get(Urls.urls).pipe(timeout(20000));
+            let shareUrls = await firstValueFrom(shareUrls$) as ShareUrl[];
             this.loggingService.info("[Shares] Got the list of shares, statring to compare against exiting list");
             let exitingShareUrls = this.ngRedux.getState().shareUrlsState.shareUrls;
             for (let shareUrl of shareUrls) {
@@ -134,19 +137,19 @@ export class ShareUrlsService {
 
     public async createShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Creating share with title: ${shareUrl.title}`);
-        let createdShareUrl = await this.httpClient.post(Urls.urls, shareUrl).toPromise() as ShareUrl;
-        this.ngRedux.dispatch(new AddShareUrlAction({ shareUrl: createdShareUrl }));
-        return createdShareUrl;
+        let createdShareUrl = await firstValueFrom(this.httpClient.post(Urls.urls, shareUrl)) ;
+        this.ngRedux.dispatch(new AddShareUrlAction({ shareUrl: createdShareUrl as ShareUrl}));
+        return createdShareUrl as ShareUrl;
     }
 
     public updateShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Updating share with id: ${shareUrl.id}`);
-        return this.httpClient.put(Urls.urls + shareUrl.id, shareUrl).toPromise() as Promise<ShareUrl>;
+        return firstValueFrom(this.httpClient.put(Urls.urls + shareUrl.id, shareUrl)) as Promise<ShareUrl>;
     }
 
     public async deleteShareUrl(shareUrl: ShareUrl): Promise<void> {
         this.loggingService.info(`[Shares] Deleting share with id: ${shareUrl.id}`);
-        await this.httpClient.delete(Urls.urls + shareUrl.id).toPromise();
+        await firstValueFrom(this.httpClient.delete(Urls.urls + shareUrl.id));
         this.ngRedux.dispatch(new RemoveShareUrlAction({ shareUrl }));
         await this.databaseService.deleteShareUrlById(shareUrl.id);
     }
@@ -160,7 +163,7 @@ export class ShareUrlsService {
     }
 
     public async getImagePreview(dataContainer: DataContainer) {
-        let image = await this.httpClient.post(Urls.images, dataContainer, { responseType: "blob" }).toPromise();
+        let image = await firstValueFrom(this.httpClient.post(Urls.images, dataContainer, { responseType: "blob" }));
         return window.URL.createObjectURL(image);
     }
 

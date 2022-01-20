@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
+import { firstValueFrom } from "rxjs";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -30,7 +31,7 @@ export class CoordinatesComponent extends BaseMapComponent implements OnInit {
             .set("lat", this.latlng.lat.toString())
             .set("lon", this.latlng.lng.toString());
         if (!this.itmCoordinates) {
-            this.itmCoordinates = await this.httpClient.get(Urls.itmGrid, { params }).toPromise() as NorthEast;
+            this.itmCoordinates = await firstValueFrom(this.httpClient.get(Urls.itmGrid, { params })) as NorthEast;
         }
         let response = await this.elevationProvider.updateHeights([this.latlng]);
         this.latlng.alt = response[0].alt;

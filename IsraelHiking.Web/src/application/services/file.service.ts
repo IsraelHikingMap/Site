@@ -6,6 +6,7 @@ import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { last } from "lodash-es";
+import { firstValueFrom } from "rxjs";
 import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -133,7 +134,7 @@ export class FileService {
             if (isOffline) {
                 url = last(url.split("/"));
             }
-            return await this.httpClient.get(this.getDataUrl(url)).toPromise() as Promise<StyleSpecification>;
+            return await firstValueFrom(this.httpClient.get(this.getDataUrl(url))) as StyleSpecification;
         } catch (ex) {
             this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {
@@ -147,7 +148,7 @@ export class FileService {
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {
         let responseData = format === "gpx"
             ? await this.gpxDataContainerConverterService.toGpx(dataContainer)
-            : await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
+            : await firstValueFrom(this.httpClient.post(Urls.files + "?format=" + format, dataContainer)) as string;
 
         if (!this.runningContextService.isCordova) {
             let blobToSave = await fetch(`data:application/octet-stream;base64,${responseData}`).then(r => r.blob());
@@ -226,7 +227,7 @@ export class FileService {
             } else {
                 let formData = new FormData();
                 formData.append("file", file, file.name);
-                dataContainer = await this.httpClient.post(Urls.openFile, formData).toPromise() as DataContainer;
+                dataContainer = await firstValueFrom(this.httpClient.post(Urls.openFile, formData)) as DataContainer;
             }
         }
         if (dataContainer.routes.length === 0 ||
@@ -237,7 +238,7 @@ export class FileService {
     }
 
     public openFromUrl(url: string): Promise<DataContainer> {
-        return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<DataContainer>;
+        return firstValueFrom(this.httpClient.get(Urls.files + "?url=" + url)) as Promise<DataContainer>;
     }
 
     public async addRoutesFromUrl(url: string) {

@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { timeout } from "rxjs/operators";
 import { NgRedux, select } from "@angular-redux2/store";
 
@@ -117,7 +117,7 @@ export class LayersService {
             return;
         }
         try {
-            let data = await this.httpClient.get(Urls.userLayers).pipe(timeout(10000)).toPromise() as IUserLayer[];
+            let data = await firstValueFrom(this.httpClient.get(Urls.userLayers).pipe(timeout(10000))) as any as IUserLayer[];
             if (data == null) {
                 return;
             }
@@ -213,7 +213,7 @@ export class LayersService {
         let layerToStore = { ...layer } as LayerData as IUserLayer;
         layerToStore.isOverlay = false;
         layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
-        let response = await this.httpClient.post(Urls.userLayers, layerToStore).toPromise() as IUserLayer;
+        let response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as IUserLayer;
         layer.id = response.id;
         this.ngRedux.dispatch(new UpdateBaseLayerAction({
             key: layer.key,
@@ -228,14 +228,14 @@ export class LayersService {
             layerToStore.isOverlay = isOverlay;
             layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
             layerToStore.id = layer.id;
-            let response = await this.httpClient.put(Urls.userLayers + layerToStore.id, layerToStore).toPromise() as IUserLayer;
+            let response = await firstValueFrom(this.httpClient.put(Urls.userLayers + layerToStore.id, layerToStore)) as IUserLayer;
             layer.id = response.id;
         }
     }
 
     private async deleteUserLayerFromDatabase(id: string) {
         if (this.authorizationService.isLoggedIn()) {
-            await this.httpClient.delete(Urls.userLayers + id).toPromise();
+            await firstValueFrom(this.httpClient.delete(Urls.userLayers + id));
         }
     }
 
@@ -274,7 +274,7 @@ export class LayersService {
         let layerToStore = { ...layer } as LayerData as IUserLayer;
         layerToStore.isOverlay = true;
         layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
-        let response = await this.httpClient.post(Urls.userLayers, layerToStore).toPromise() as IUserLayer;
+        let response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as IUserLayer;
         layer.id = response.id;
         if (layerToStore.isOverlay) {
             this.ngRedux.dispatch(new UpdateOverlayAction({

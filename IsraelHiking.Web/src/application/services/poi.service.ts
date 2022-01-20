@@ -2,7 +2,7 @@ import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { HttpClient, HttpErrorResponse, HttpParams } from "@angular/common/http";
 import { NgProgress } from "ngx-progressbar";
 import { uniq, cloneDeep } from "lodash-es";
-import { Observable, fromEvent, Subscription } from "rxjs";
+import { Observable, fromEvent, Subscription, firstValueFrom } from "rxjs";
 import { timeout, throttleTime, skip, filter } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import JSZip from "jszip";
@@ -195,10 +195,10 @@ export class PoiService {
         try {
             let postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
             let putAddress = Urls.poi + feature.properties.poiId + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-            let poi = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(feature.properties.poiId)
-                ? await this.httpClient.post(postAddress, feature).pipe(timeout(180000)).toPromise() as GeoJSON.Feature
-                : await this.httpClient.put(putAddress, feature).pipe(timeout(180000)).toPromise() as GeoJSON.Feature;
-
+            let poi$ = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(feature.properties.poiId)
+                ? this.httpClient.post(postAddress, feature).pipe(timeout(180000))
+                : this.httpClient.put(putAddress, feature).pipe(timeout(180000));
+            let poi = await firstValueFrom(poi$) as GeoJSON.Feature;
             this.loggingService.info(`[POIs] Uploaded successfully a${feature.properties.poiIsSimple ? " simple" : ""} ` +
                 `feature with id: ${firstItemId}, ` + "removing from upload queue");
             if (this.runningContextService.isCordova && !feature.properties.poiIsSimple) {
@@ -243,9 +243,8 @@ export class PoiService {
             .set("categories", visibleCategories.join(","))
             .set("language", language);
         try {
-            this.poisGeojson.features = await this.httpClient.get(Urls.poi, { params })
-            .pipe(timeout(10000))
-            .toPromise() as GeoJSON.Feature<GeoJSON.Point>[];
+            let features$ = this.httpClient.get(Urls.poi, { params }).pipe(timeout(10000));
+            this.poisGeojson.features = await firstValueFrom(features$) as GeoJSON.Feature<GeoJSON.Point>[];
             return this.poisGeojson.features;
         } catch {
             return this.poisGeojson.features;
@@ -331,8 +330,9 @@ export class PoiService {
             lastModified = modifiedUntil;
             modifiedUntil = new Date(lastModified.getTime() + 3 * 24 * 60 * 60 * 1000); // last modified + 3 days
             this.loggingService.info(`[POIs] Getting POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()}`);
-            let updates = await this.httpClient.get(`${Urls.poiUpdates}${lastModified.toISOString()}/${modifiedUntil.toISOString()}`)
-                .pipe(timeout(60000)).toPromise() as UpdatesResponse;
+            let updates$ = this.httpClient.get(`${Urls.poiUpdates}${lastModified.toISOString()}/${modifiedUntil.toISOString()}`)
+                .pipe(timeout(60000));
+            let updates = await firstValueFrom(updates$) as UpdatesResponse;
             this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()},` +
                 `got: ${ updates.features.length }`);
             let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => f.properties.poiId);
@@ -461,8 +461,8 @@ export class PoiService {
     public async syncCategories(): Promise<void> {
         try {
             for (let categoriesGroup of this.ngRedux.getState().layersState.categoriesGroups) {
-                let categories = await this.httpClient.get(Urls.poiCategories + categoriesGroup.type)
-                    .pipe(timeout(10000)).toPromise() as Category[];
+                let categories$ = this.httpClient.get(Urls.poiCategories + categoriesGroup.type).pipe(timeout(10000));
+                let categories = await firstValueFrom(categories$) as Category[];
                 let visibility = categoriesGroup.visible;
                 if (this.runningContextService.isIFrame) {
                     this.ngRedux.dispatch(new SetCategoriesGroupVisibilityAction({
@@ -514,11 +514,9 @@ export class PoiService {
             return cloneDeep(itemInCache);
         }
         try {
-            let params = new HttpParams()
-            .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-            let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params })
-                .pipe(timeout(6000))
-                .toPromise() as GeoJSON.Feature;
+            let params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
+            let poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
+            let poi = await firstValueFrom(poi$) as GeoJSON.Feature;
             this.poisCache.splice(0, 0, poi);
             return cloneDeep(poi);
         } catch {
@@ -641,7 +639,8 @@ export class PoiService {
             .set("language", language);
         let feature = null;
         try {
-            feature = await this.httpClient.get(Urls.poiClosest, { params }).pipe(timeout(1000)).toPromise() as GeoJSON.Feature;
+            let feature$ = this.httpClient.get(Urls.poiClosest, { params }).pipe(timeout(1000));
+            feature = await firstValueFrom(feature$) as GeoJSON.Feature;
         } catch (ex) {
             this.loggingService.warning(`[POIs] Unable to get closest POI: ${(ex as Error).message}`);
         }
