@@ -102,7 +102,7 @@
     "apkup": "^1.3.1",
     "com-darryncampbell-cordova-plugin-intent": "^2.1.0",
     "cordova": "^10.0.0",
-    "cordova-background-geolocation-plugin": "git+https://github.com/HaylLtd/cordova-background-geolocation-plugin.git#1372d89e8fcffe8403420d1e5572d76c04f7d9f5",
+    "cordova-background-geolocation-plugin": "2.0.2",
     "cordova-ios": "^6.2.0",
     "cordova-plugin-androidx-adapter": "^1.1.3",
     "cordova-plugin-app-version": "^0.1.12",
