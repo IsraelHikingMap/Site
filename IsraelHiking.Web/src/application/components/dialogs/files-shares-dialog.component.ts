@@ -52,7 +52,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
                 await this.fileService.writeStyles(file);
                 this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             } catch (ex) {
-                this.toastService.error(ex, ex.message);
+                this.toastService.error(ex, "Error opening ihm file");
             }
             return;
         }
@@ -68,7 +68,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             await this.fileService.addRoutesFromFile(file);
             this.matDialogRef.close();
         } catch (ex) {
-            this.toastService.error(ex, this.resources.unableToLoadFromFile);
+            this.toastService.error(ex as Error, this.resources.unableToLoadFromFile);
         }
     }
 
@@ -81,7 +81,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         try {
             await this.fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data);
         } catch (ex) {
-            this.toastService.error(ex, this.resources.unableToSaveToFile);
+            this.toastService.error(ex as Error, this.resources.unableToSaveToFile);
         }
     }
 
@@ -100,7 +100,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         try {
             await this.fileService.saveToFile(`${name}.${format.extension}`, outputFormat, data);
         } catch (ex) {
-            this.toastService.error(ex, this.resources.unableToSaveToFile);
+            this.toastService.error(ex as Error, this.resources.unableToSaveToFile);
         }
     }
 

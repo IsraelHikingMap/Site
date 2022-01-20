@@ -3,7 +3,7 @@ import { trigger, style, transition, animate } from "@angular/animations";
 import { Subscription, Observable, interval } from "rxjs";
 import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "@katze/ngx-d3";
 import { regressionLoess } from "d3-regression";
-import { LinePaint } from "maplibre-gl";
+import { LineLayerSpecification } from "maplibre-gl";
 import { select, NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
@@ -92,7 +92,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public chartHoverSource: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public slopeRouteSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public subRouteRange: IChartSubRouteRange;
-    public slopeRoutePaint: LinePaint;
+    public slopeRoutePaint: LineLayerSpecification["paint"];
 
     @ViewChild("lineChartContainer")
     public lineChartContainer: ElementRef;

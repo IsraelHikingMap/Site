@@ -51,7 +51,7 @@ export class MapService {
                 return;
             }
             this.missingImagesArray.push(e.id);
-            this.map.loadImage(e.id, (_: Error, image: HTMLImageElement) => {
+            this.map.loadImage(e.id, (_: Error, image: HTMLImageElement | ImageBitmap) => {
                 this.map.addImage(e.id, image);
             });
         });

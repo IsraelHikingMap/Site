@@ -1,6 +1,12 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
-import { MapComponent } from "ngx-maplibre-gl";
-import { RasterSource, RasterLayout, Layer, Style, Sources, RasterLayer, AnyLayer } from "maplibre-gl";
+import { MapComponent } from "@maplibre/ngx-maplibre-gl";
+import {
+    StyleSpecification,
+    RasterSourceSpecification,
+    RasterLayerSpecification,
+    SourceSpecification,
+    LayerSpecification
+} from "maplibre-gl";
 import { Observable, Subscription } from "rxjs";
 import { NgRedux, select } from "@angular-redux2/store";
 
@@ -135,7 +141,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             scheme,
             tileSize: 256,
             attribution: AutomaticLayerPresentationComponent.ATTRIBUTION
-        } as RasterSource;
+        } as RasterSourceSpecification;
         this.mapComponent.mapInstance.addSource(this.rasterSourceId, source);
         let layer = {
             id: this.rasterLayerId,
@@ -143,11 +149,11 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             source: this.rasterSourceId,
             layout: {
                 visibility: (this.visible ? "visible" : "none") as "visible" | "none"
-            } as RasterLayout,
+            },
             paint: {
                 "raster-opacity": this.layerData.opacity || 1.0
             }
-        } as RasterLayer;
+        } as RasterLayerSpecification;
         this.mapComponent.mapInstance.addLayer(layer, this.before);
     }
 
@@ -160,11 +166,11 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         let response = await this.fileService
             .getStyleJsonContent(this.layerData.address, this.layerData.isOfflineOn || !this.hasInternetAccess);
         let language = this.resources.getCurrentLanguageCodeSimplified();
-        let styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as Style;
+        let styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as StyleSpecification;
         this.updateSourcesAndLayers(styleJson.sources, styleJson.layers);
     }
 
-    private updateSourcesAndLayers(sources: Sources, layers: Layer[]) {
+    private updateSourcesAndLayers(sources: {[_: string]: SourceSpecification}, layers: LayerSpecification[]) {
         let attributiuonUpdated = false;
         for (let sourceKey of Object.keys(sources)) {
             if (sources.hasOwnProperty(sourceKey) && this.visible) {
@@ -176,7 +182,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                     source.attribution = attributiuonUpdated === false ? AutomaticLayerPresentationComponent.ATTRIBUTION : "";
                     attributiuonUpdated = true;
                 }
-                
+
                 try {
                     this.mapComponent.mapInstance.addSource(sourceKey, source);
                     this.jsonSourcesIds.push(sourceKey);
@@ -184,25 +190,23 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                     this.loggingService.error(`[ALP] Unable to add source with ID: ${sourceKey} for ${this.layerData.key}`);
                     throw ex;
                 }
-                
             }
         }
         for (let layer of layers) {
-            if (!this.visible || (!this.isBaselayer && layer.metadata && !layer.metadata["IHM:overlay"])) {
+            if (!this.visible || (!this.isBaselayer && layer.metadata && !(layer.metadata as any)["IHM:overlay"])) {
                 continue;
             }
             if (!this.isBaselayer) {
                 layer.id = this.layerData.key + "_" + layer.id;
-                layer.source = this.layerData.key + "_" + layer.source;
+                (layer as any).source = this.layerData.key + "_" + (layer as any).source;
             }
             try {
-                this.mapComponent.mapInstance.addLayer(layer as AnyLayer, this.before);
+                this.mapComponent.mapInstance.addLayer(layer, this.before);
                 this.jsonLayersIds.push(layer.id);
             } catch (ex) {
                 this.loggingService.error(`[ALP] Unable to add layer with ID: ${layer.id} for ${this.layerData.key}`);
                 throw ex;
             }
-            
         }
     }
 
@@ -215,7 +219,6 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 this.loggingService.error(`[ALP] Unable to remove layer with ID: ${layerId} for ${this.layerData.key}`);
                 throw ex;
             }
-            
         }
         this.jsonLayersIds = [];
         for (let sourceId of this.jsonSourcesIds) {
@@ -226,7 +229,6 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 this.loggingService.error(`[ALP] Unable to remove source with ID: ${sourceId} for ${this.layerData.key}`);
                 throw ex;
             }
-            
         }
         this.jsonSourcesIds = [];
     }

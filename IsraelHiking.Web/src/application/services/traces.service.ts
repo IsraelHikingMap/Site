@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { NgRedux } from "@angular-redux2/store";
+import { firstValueFrom } from "rxjs";
 
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
@@ -24,8 +25,8 @@ export class TracesService {
 
     public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
         this.loggingService.info(`[Traces] Getting missing parts for ${traceId}`);
-        return this.httpClient.post(Urls.osm + "?traceId=" + traceId, null)
-            .toPromise() as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
+        let missingParts$ = this.httpClient.post(Urls.osm + "?traceId=" + traceId, null);
+        return firstValueFrom(missingParts$) as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     }
 
     public async initialize(): Promise<void> {
@@ -59,8 +60,8 @@ export class TracesService {
     public async syncTraces(): Promise<void> {
         try {
             this.loggingService.info("[Traces] Starting syncing traces");
-            let response = await this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)).toPromise() as Trace[];
-            let traces = ([] as Trace[]).concat(response || []);
+            let response = await firstValueFrom(this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)));
+            let traces = ([] as Trace[]).concat(response as Trace[] || []);
             let existingTraces = this.ngRedux.getState().tracesState.traces;
             for (let trace of existingTraces) {
                 // traces' date in the database are saved with strings - converting to object
@@ -101,7 +102,7 @@ export class TracesService {
                 dataContainer: storedTrace.dataContainer
             };
         }
-        let dataContainer = await this.httpClient.get(Urls.osmTrace + traceId).toPromise() as DataContainer;
+        let dataContainer = await firstValueFrom(this.httpClient.get(Urls.osmTrace + traceId)) as DataContainer;
         this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
         trace = {
             ...trace,
@@ -115,28 +116,28 @@ export class TracesService {
         let formData = new FormData();
         formData.append("file", file, file.name);
         this.loggingService.info(`[Traces] Uploading a trace with file name ${file.name}`);
-        return this.httpClient.post(Urls.osmTrace, formData).pipe(timeout(3 * 60 * 1000)).toPromise();
+        return firstValueFrom(this.httpClient.post(Urls.osmTrace, formData).pipe(timeout(3 * 60 * 1000)));
     }
 
     public async uploadRouteAsTrace(route: RouteData): Promise<any> {
         let isDefaultName = route.name.startsWith(this.resources.route) &&
             route.name.replace(this.resources.route, "").trim().startsWith(new Date().toISOString().split("T")[0]);
         this.loggingService.info(`[Traces] Uploading a route as trace with name ${route.name}, default: ${isDefaultName}`);
-        return this.httpClient.post(Urls.osmTraceRoute, route, {
+        return firstValueFrom(this.httpClient.post(Urls.osmTraceRoute, route, {
             params: { isDefaultName: isDefaultName.toString(), language: this.resources.getCurrentLanguageCodeSimplified() }
-        }).pipe(timeout(3 * 60 * 1000)).toPromise();
+        }).pipe(timeout(3 * 60 * 1000)));
     }
 
     public async updateTrace(trace: Trace): Promise<void> {
         this.loggingService.info(`[Traces] Updating a trace with id ${trace.id}`);
-        await this.httpClient.put(Urls.osmTrace + trace.id, trace).toPromise();
+        await firstValueFrom(this.httpClient.put(Urls.osmTrace + trace.id, trace));
         this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace }));
     }
 
     public async deleteTrace(trace: Trace): Promise<void> {
         this.loggingService.info(`[Traces] Deleting a trace with name ${trace.name} and id ${trace.id}, visibility: ${trace.visibility}`);
         if (trace.visibility !== "local") {
-            await this.httpClient.delete(Urls.osmTrace + trace.id).toPromise();
+            await firstValueFrom(this.httpClient.delete(Urls.osmTrace + trace.id));
         }
         this.ngRedux.dispatch(new RemoveTraceAction({ traceId: trace.id }));
         await this.databaseService.deleteTraceById(trace.id);

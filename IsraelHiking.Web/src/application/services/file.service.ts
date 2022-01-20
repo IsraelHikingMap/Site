@@ -1,11 +1,12 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
-import { Style } from "maplibre-gl";
+import { StyleSpecification } from "maplibre-gl";
 import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
 import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { last } from "lodash-es";
+import { firstValueFrom } from "rxjs";
 import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -128,27 +129,26 @@ export class FileService {
         return url;
     }
 
-    public async getStyleJsonContent(url: string, isOffline: boolean): Promise<Style> {
+    public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
         try {
             if (isOffline) {
                 url = last(url.split("/"));
             }
-            return await this.httpClient.get(this.getDataUrl(url)).toPromise() as Promise<Style>;
+            return await firstValueFrom(this.httpClient.get(this.getDataUrl(url))) as StyleSpecification;
         } catch (ex) {
-            this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${ex.message}`);
+            this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {
                 version: 8.0,
                 layers: [],
                 sources: {}
-            }
+            };
         }
-        
     }
 
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {
         let responseData = format === "gpx"
             ? await this.gpxDataContainerConverterService.toGpx(dataContainer)
-            : await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
+            : await firstValueFrom(this.httpClient.post(Urls.files + "?format=" + format, dataContainer)) as string;
 
         if (!this.runningContextService.isCordova) {
             let blobToSave = await fetch(`data:application/octet-stream;base64,${responseData}`).then(r => r.blob());
@@ -227,7 +227,7 @@ export class FileService {
             } else {
                 let formData = new FormData();
                 formData.append("file", file, file.name);
-                dataContainer = await this.httpClient.post(Urls.openFile, formData).toPromise() as DataContainer;
+                dataContainer = await firstValueFrom(this.httpClient.post(Urls.openFile, formData)) as DataContainer;
             }
         }
         if (dataContainer.routes.length === 0 ||
@@ -238,7 +238,7 @@ export class FileService {
     }
 
     public openFromUrl(url: string): Promise<DataContainer> {
-        return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<DataContainer>;
+        return firstValueFrom(this.httpClient.get(Urls.files + "?url=" + url)) as Promise<DataContainer>;
     }
 
     public async addRoutesFromUrl(url: string) {
@@ -295,7 +295,7 @@ export class FileService {
         try {
             return await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.cacheDirectory, fileName);
         } catch (ex) {
-            this.loggingService.warning("[Files] Unable to get file from cache: " + ex.message);
+            this.loggingService.warning("[Files] Unable to get file from cache: " + (ex as Error).message);
             return null;
         }
     }

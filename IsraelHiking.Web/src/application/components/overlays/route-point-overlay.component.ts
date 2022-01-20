@@ -43,22 +43,22 @@ export class RoutePointOverlayComponent extends BaseMapComponent implements OnCh
 
     public split(): void {
         this.selectedRouteService.splitRoute(this.segmentIndex);
-        this.closed.next();
+        this.closed.next(undefined);
     }
 
     public merge() {
         this.selectedRouteService.mergeRoutes(this.isFirst());
-        this.closed.next();
+        this.closed.next(undefined);
     }
 
     public reverse() {
         this.selectedRouteService.reverseRoute();
-        this.closed.next();
+        this.closed.next(undefined);
     }
 
     public remove() {
         this.selectedRouteService.removeSegment(this.segmentIndex);
-        this.closed.next();
+        this.closed.next(undefined);
     }
 
     private isFirst(): boolean {

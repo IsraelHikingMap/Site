@@ -320,7 +320,7 @@ describe("Poi Service", () => {
             });
 
             mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(Urls.poiClosest))
-                .flush({ 
+                .flush({
                     type: "Feature",
                     properties: { "name:he": "name" },
                     geometry: { type: "Point", coordinates: [1, 1]}, } as GeoJSON.Feature);
@@ -340,7 +340,7 @@ describe("Poi Service", () => {
     }));
 
     it("should get contribution", inject([PoiService], (poiService: PoiService) => {
-        let results = poiService.getContribution({properties: { 
+        let results = poiService.getContribution({properties: {
             poiLastModified: 1000, poiUserAddress: "address", poiUserName: "name"}
         } as any as GeoJSON.Feature);
         expect(results.lastModifiedDate).not.toBeNull();
@@ -349,17 +349,19 @@ describe("Poi Service", () => {
     }));
 
     it("should get extenal description", inject([PoiService], (poiService: PoiService) => {
-        let results = poiService.getExternalDescription({properties: { "poiExternalDescription:he": "desc"}} as any as GeoJSON.Feature, "he");
+        let results = poiService.getExternalDescription(
+            {properties: { "poiExternalDescription:he": "desc"}} as any as GeoJSON.Feature, "he");
         expect(results).toBe("desc");
     }));
 
     it("should get title even when there's no title for language description", inject([PoiService], (poiService: PoiService) => {
-        let results = poiService.getTitle({properties: { "name": "name"}} as any as GeoJSON.Feature, "he");
+        let results = poiService.getTitle({properties: { name: "name"}} as any as GeoJSON.Feature, "he");
         expect(results).toBe("name");
     }));
 
     it("should get social links", inject([PoiService], (poiService: PoiService) => {
-        let results = poiService.getPoiSocialLinks({properties: { "name": "name", poiGeolocation: {lat: 0, lng: 0}}} as any as GeoJSON.Feature);
+        let results = poiService.getPoiSocialLinks(
+            {properties: { name: "name", poiGeolocation: {lat: 0, lng: 0}}} as any as GeoJSON.Feature);
         expect(results.facebook.includes(Urls.facebook)).toBeTruthy();
         expect(results.waze.includes(Urls.waze)).toBeTruthy();
     }));

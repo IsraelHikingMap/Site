@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
-import { GeoJSONSourceComponent } from "ngx-maplibre-gl";
+import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
 import { select, NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";

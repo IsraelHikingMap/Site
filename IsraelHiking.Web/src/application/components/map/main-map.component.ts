@@ -1,6 +1,6 @@
 import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
-import { MapComponent, CustomControl } from "ngx-maplibre-gl";
-import { Style, setRTLTextPlugin, ScaleControl } from "maplibre-gl";
+import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
+import mapliregl, { StyleSpecification, ScaleControl, Unit } from "maplibre-gl";
 import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -37,7 +37,7 @@ export class MainMapComponent extends BaseMapComponent {
     public bottomRightControls: QueryList<ElementRef>;
 
     public location: Location;
-    public initialStyle: Style;
+    public initialStyle: StyleSpecification;
 
     constructor(resources: ResourcesService,
                 public readonly imageGalleryService: ImageGalleryService,
@@ -106,7 +106,7 @@ export class MainMapComponent extends BaseMapComponent {
     }
 
     public mapLoaded() {
-        setRTLTextPlugin("./mapbox-gl-rtl-text.js", () => {});
+        mapliregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", () => {});
 
         this.mapService.setMap(this.mapComponent.mapInstance);
 
@@ -122,7 +122,7 @@ export class MainMapComponent extends BaseMapComponent {
         this.bottomRightControls.forEach(c => {
             this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-right");
         });
-        this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" }), "bottom-left");
+        this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" as Unit}), "bottom-left");
     }
 
     public isMobile() {

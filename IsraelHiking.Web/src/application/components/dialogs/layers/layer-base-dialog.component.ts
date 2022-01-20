@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../../base-map.component";
@@ -71,7 +71,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
         try {
             let address = `${this.layerData.address}/?f=json`;
             address = address.replace("//?f", "/?f"); // in case the address the user set ends with "/".
-            let response = await this.http.get(address).toPromise() as { name: string };
+            let response = await firstValueFrom(this.http.get(address)) as { name: string };
             if (response && response.name) {
                 this.layerData.key = response.name;
             }

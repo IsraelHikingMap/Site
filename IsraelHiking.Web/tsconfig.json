@@ -18,7 +18,7 @@
     "resolveJsonModule": true,
     "module": "es2020",
     "importHelpers": true,
-    "target": "es5",
+    "target": "es2015",
     "lib": [
       "es2018",
       "dom"

@@ -4,7 +4,7 @@ import { debounceTime } from "rxjs/operators";
 import { SQLite, SQLiteDatabaseConfig, SQLiteObject } from "@ionic-native/sqlite/ngx";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
-import * as maplibregl from "maplibre-gl";
+import maplibregl from "maplibre-gl";
 import * as pako from "pako";
 
 import { LoggingService } from "./logging.service";
@@ -164,7 +164,7 @@ export class DatabaseService {
                 state
             });
         } catch (ex) {
-            this.loggingService.warning("[Database] Unable to store the state: " + ex.message);
+            this.loggingService.warning("[Database] Unable to store the state: " + (ex as Error).message);
         } finally {
             this.updating = false;
         }

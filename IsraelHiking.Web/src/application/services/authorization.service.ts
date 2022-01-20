@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { NgRedux, select } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
@@ -68,7 +68,7 @@ export class AuthorizationService {
         this.loggingService.info("[Authorization] User initiated login");
         this.logout();
         let popup = this.openWindow(); // this has to be here in order to support browsers that only open a window on click event
-        let data = await this.httpClient.get(Urls.osmConfiguration).toPromise() as OsmConfiguration;
+        let data = await firstValueFrom(this.httpClient.get(Urls.osmConfiguration)) as OsmConfiguration;
         this.setOptions({
             oauthConsumerKey: data.consumerKey,
             oauthSecret: data.consumerSecret,
@@ -91,7 +91,7 @@ export class AuthorizationService {
     }
 
     private updateUserDetails = async () => {
-        let detailJson = await this.httpClient.get(Urls.osmUser).toPromise() as OsmUserDetails;
+        let detailJson = await firstValueFrom(this.httpClient.get(Urls.osmUser)) as OsmUserDetails;
         let userInfo = {
             displayName: detailJson.displayName,
             id: detailJson.id,

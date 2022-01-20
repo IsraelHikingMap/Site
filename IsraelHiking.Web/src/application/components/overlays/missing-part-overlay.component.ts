@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { firstValueFrom } from "rxjs";
 
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
@@ -53,7 +54,7 @@ export class MissingPartOverlayComponent extends ClosableOverlayComponent {
 
     public async addMissingPartToOsm() {
         try {
-            await this.httpClient.put(Urls.osm, this.feature).toPromise();
+            await firstValueFrom(this.httpClient.put(Urls.osm, this.feature));
             this.toastService.success(this.resources.routeAddedSuccessfullyItWillTakeTime);
             this.remove();
         } catch (ex) {

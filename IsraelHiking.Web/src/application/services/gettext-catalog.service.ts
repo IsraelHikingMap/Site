@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { firstValueFrom } from "rxjs";
 
 @Injectable()
 export class GetTextCatalogService {
@@ -24,7 +25,7 @@ export class GetTextCatalogService {
     }
 
     public async loadRemote(url: string): Promise<void> {
-        let response = await this.httpClient.get(url).toPromise() as Record<string, string>;
+        let response = await firstValueFrom(this.httpClient.get(url)) as Record<string, string>;
         this.strings = response;
     }
 }
