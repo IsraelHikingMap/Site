@@ -1,6 +1,7 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { MapMouseEvent, Map, Point } from "maplibre-gl";
+import { MapMouseEvent, Map } from "maplibre-gl";
 import { NgRedux } from "@angular-redux2/store";
+import type Point from "@mapbox/point-geometry";
 
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";

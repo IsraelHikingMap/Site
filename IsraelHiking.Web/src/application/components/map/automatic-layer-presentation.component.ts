@@ -15,7 +15,6 @@ import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
 import { MapService } from "../../services/map.service";
-import { LoggingService } from "../../services/logging.service";
 import type { ApplicationState, EditableLayer, Language } from "../../models/models";
 
 @Component({
@@ -56,7 +55,6 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 private readonly fileService: FileService,
                 private readonly connectionSerive: ConnectionService,
                 private readonly mapService: MapService,
-                private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
@@ -183,13 +181,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                     attributiuonUpdated = true;
                 }
 
-                try {
-                    this.mapComponent.mapInstance.addSource(sourceKey, source);
-                    this.jsonSourcesIds.push(sourceKey);
-                } catch (ex) {
-                    this.loggingService.error(`[ALP] Unable to add source with ID: ${sourceKey} for ${this.layerData.key}`);
-                    throw ex;
-                }
+                this.mapComponent.mapInstance.addSource(sourceKey, source);
+                this.jsonSourcesIds.push(sourceKey);
             }
         }
         for (let layer of layers) {
@@ -200,35 +193,18 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 layer.id = this.layerData.key + "_" + layer.id;
                 (layer as any).source = this.layerData.key + "_" + (layer as any).source;
             }
-            try {
-                this.mapComponent.mapInstance.addLayer(layer, this.before);
-                this.jsonLayersIds.push(layer.id);
-            } catch (ex) {
-                this.loggingService.error(`[ALP] Unable to add layer with ID: ${layer.id} for ${this.layerData.key}`);
-                throw ex;
-            }
+            this.mapComponent.mapInstance.addLayer(layer, this.before);
+            this.jsonLayersIds.push(layer.id);
         }
     }
 
     private removeJsonLayer() {
         for (let layerId of this.jsonLayersIds) {
-            try {
-                // HM TODO: remove this!
-                this.mapComponent.mapInstance.removeLayer(layerId);
-            } catch (ex) {
-                this.loggingService.error(`[ALP] Unable to remove layer with ID: ${layerId} for ${this.layerData.key}`);
-                throw ex;
-            }
+            this.mapComponent.mapInstance.removeLayer(layerId);
         }
         this.jsonLayersIds = [];
         for (let sourceId of this.jsonSourcesIds) {
-            try {
-                // HM TODO: remove this!
-                this.mapComponent.mapInstance.removeSource(sourceId);
-            } catch (ex) {
-                this.loggingService.error(`[ALP] Unable to remove source with ID: ${sourceId} for ${this.layerData.key}`);
-                throw ex;
-            }
+            this.mapComponent.mapInstance.removeSource(sourceId);
         }
         this.jsonSourcesIds = [];
     }
