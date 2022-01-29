@@ -442,7 +442,7 @@
         },
         "zoom": 13,
         "type": "Way",
-        "osmTags": [ "hihgway=motorway" ],
+        "osmTags": [ "highway=motorway" ],
         "link": "osm-tag-link"
       },
       {
@@ -453,7 +453,7 @@
         },
         "zoom": 14,
         "type": "Way",
-        "osmTags": [ "hihgway=trunk" ],
+        "osmTags": [ "highway=trunk" ],
         "link": "osm-tag-link"
       },
       {
@@ -464,7 +464,7 @@
         },
         "zoom": 14,
         "type": "Way",
-        "osmTags": [ "hihgway=primary" ],
+        "osmTags": [ "highway=primary" ],
         "link": "osm-tag-link"
       },
       {
@@ -475,7 +475,7 @@
         },
         "zoom": 14,
         "type": "Way",
-        "osmTags": [ "hihgway=secondary" ],
+        "osmTags": [ "highway=secondary" ],
         "link": "osm-tag-link"
       },
       {
@@ -486,7 +486,7 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "hihgway=tertiary" ],
+        "osmTags": [ "highway=tertiary" ],
         "link": "osm-tag-link"
       },
       {
@@ -497,7 +497,7 @@
         },
         "zoom": 16,
         "type": "Way",
-        "osmTags": [ "hihgway=unclassified" ],
+        "osmTags": [ "highway=unclassified" ],
         "link": "osm-tag-link"
       },
       {
