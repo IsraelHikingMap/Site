@@ -34,7 +34,7 @@
                     <button mat-menu-item (click)="selectLayers()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show layers">
                         <span><i class="fa fa-lg icon-layers mat-icon"></i> {{resources.layers}}</span>
                     </button>
-                    <button mat-menu-item (click)="selectSharesAndFiles()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open search and files">
+                    <button mat-menu-item (click)="selectSharesAndFiles()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Open share and files">
                         <span><i class="fa fa-lg icon-share-alt mat-icon"></i> {{resources.save}} - {{resources.share}} - {{resources.files}}</span>
                     </button>
                     <button mat-menu-item *ngIf="!isLoggedIn() && !isIFrame()" (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
