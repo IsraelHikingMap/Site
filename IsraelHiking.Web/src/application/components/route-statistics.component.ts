@@ -697,7 +697,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         chartTransition.select(".y-axis")
             .call(d3.axisLeft(this.chartElements.yScale).ticks(5) as any)
             .duration(duration);
-        let slopeData = [];
+        let slopeData = [] as [number, number][];
         if (this.isSlopeOn && data.length > 0) {
             // smoothing the slope data for the chart
             slopeData = regressionLoess()
@@ -705,10 +705,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 .y((d: RouteStatisticsPoint) => d.slope)
                 .bandwidth(0.03)(this.statistics.points);
         }
-        let maxAbsSlope = RouteStatisticsComponent.MAX_SLOPE;
-        if (this.statistics && this.statistics.points) {
-            maxAbsSlope = Math.max(...this.statistics.points.map(p => Math.abs(p.slope)), RouteStatisticsComponent.MAX_SLOPE);
-        }
+        let maxAbsSlope = (slopeData.length === 0)
+            ? RouteStatisticsComponent.MAX_SLOPE
+            : Math.max(...slopeData.map(p => Math.abs(p[1])), RouteStatisticsComponent.MAX_SLOPE);
+
         // making the slope chart be symetric around zero
         this.chartElements.yScaleSlope.domain([-maxAbsSlope, maxAbsSlope]);
         let slopeLine = d3.line()
