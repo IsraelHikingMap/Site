@@ -5,6 +5,10 @@ namespace IsraelHiking.Common.Configuration
     public class ConfigurationData
     {
         /// <summary>
+        /// True if you would like to write the merge report, false otherwise
+        /// </summary>
+        public bool WriteMergeReport { get; set; }
+        /// <summary>
         /// The maximal number of points per line for splitting
         /// </summary>
         public int MaxNumberOfPointsPerLine { get; set; }
@@ -133,6 +137,7 @@ namespace IsraelHiking.Common.Configuration
 
         public ConfigurationData()
         {
+            WriteMergeReport = false;
             MaxSegmentsNumber = 40;
             InitialSplitSimplificationDistanceTolerance = 50;
             MaxDistanceToExistingLineForMerge = 5;

@@ -76,6 +76,7 @@ namespace IsraelHiking.API.Executors
             externalFeatures = MergeWikipediaToOsmByWikipediaTags(osmFeatures, externalFeatures);
             osmFeatures = MergeOsmElementsByName(osmFeatures);
             externalFeatures = MergeExternalFeaturesToOsm(osmFeatures, externalFeatures);
+            externalFeatures = externalFeatures.Where(f => !f.GetLocation().X.Equals(FeatureAttributes.INVALID_LOCATION)).ToList();
             var all = osmFeatures.Concat(externalFeatures).ToList();
             SimplifyGeometriesCollection(all);
             return all;
@@ -282,13 +283,13 @@ namespace IsraelHiking.API.Executors
                     feature.Geometry = _geometryFactory.CreateMultiPoint(points);
                     continue;
                 }
-                var nonPointGeometries = geometryCollection.Geometries.Where(g => !(g is Point));
-                if (nonPointGeometries.Count() == 1)
+                var nonPointGeometries = geometryCollection.Geometries.Where(g => g is not Point).ToArray();
+                if (nonPointGeometries.Length == 1)
                 {
                     feature.Geometry = nonPointGeometries.First();
                     continue;
                 }
-                if (nonPointGeometries.All(g => g is LineString || g is MultiLineString))
+                if (nonPointGeometries.All(g => g is LineString or MultiLineString))
                 {
                     var lines = nonPointGeometries
                         .OfType<MultiLineString>()
@@ -310,11 +311,11 @@ namespace IsraelHiking.API.Executors
                     if (!isValidOp.IsValid)
                     {
                         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, false);
-                        _reportLogger.LogWarning($"There was a problem merging the following feature into a multypolygon {feature.GetTitle(Languages.HEBREW)}, {GetWebsite(feature)} {isValidOp.ValidationError.Message} ({ isValidOp.ValidationError.Coordinate.X}, {isValidOp.ValidationError.Coordinate.Y})");
+                        _reportLogger.LogWarning($"There was a problem merging the following feature into a multipolygon {feature.GetTitle(Languages.HEBREW)}, {GetWebsite(feature)} {isValidOp.ValidationError.Message} ({ isValidOp.ValidationError.Coordinate.X}, {isValidOp.ValidationError.Coordinate.Y})");
                     }
                     continue;
                 }
-                if (nonPointGeometries.All(g => g is Polygon || g is LineString) && feature.Attributes.GetNames().Contains("highway"))
+                if (nonPointGeometries.All(g => g is Polygon or LineString) && feature.Attributes.GetNames().Contains("highway"))
                 {
                     var lineStrings = nonPointGeometries
                         .OfType<LineString>()
@@ -330,6 +331,10 @@ namespace IsraelHiking.API.Executors
 
         private void WriteToReport(Feature featureToMergeTo, Feature feature)
         {
+            if (!_options.WriteMergeReport)
+            {
+                return;
+            }
             if (!feature.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
                 !featureToMergeTo.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM))
             {
@@ -454,7 +459,7 @@ namespace IsraelHiking.API.Executors
                 target.Attributes.GetNames().Contains("railway") &&
                 !source.Attributes.GetNames().Contains("railway"))
             {
-                // don't merge railway with non-raileay.
+                // don't merge railway with non-railway.
                 return false;
             }
 
@@ -503,11 +508,12 @@ namespace IsraelHiking.API.Executors
                 {
                     var title = osmWikiFeature.Attributes[key].ToString();
                     var wikiFeatureToRemove = wikiFeatures.FirstOrDefault(f => f.Attributes.Has(key, title));
-                    if (wikiFeatureToRemove != null)
+                    if (wikiFeatureToRemove == null)
                     {
-                        featureIdsToRemove.Add(wikiFeatureToRemove.GetId());
-                        MergeFeatures(osmWikiFeature, wikiFeatureToRemove);
+                        continue;
                     }
+                    featureIdsToRemove.Add(wikiFeatureToRemove.GetId());
+                    MergeFeatures(osmWikiFeature, wikiFeatureToRemove);
                 }
             }
             WriteToBothLoggers($"Finished joining Wikipedia markers. Merged features: {featureIdsToRemove.Count}");
@@ -625,7 +631,7 @@ namespace IsraelHiking.API.Executors
             foreach (var key in source.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)))
             {
                 var sourceImageUrlKey = key.Replace(FeatureAttributes.WEBSITE, FeatureAttributes.POI_SOURCE_IMAGE_URL);
-                var targetImageUrlKey = string.Empty;
+                string targetImageUrlKey;
                 if (websiteUrls.Contains(source.Attributes[key]))
                 {
                     var websiteKey = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
@@ -681,22 +687,22 @@ namespace IsraelHiking.API.Executors
         {
             var imagesUrls = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
                 .Select(key => target.Attributes[key]).ToList();
-            var lastExsitingIndex = imagesUrls.Count;
+            var lastExistingIndex = imagesUrls.Count;
             foreach (var key in source.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL)))
             {
                 if (imagesUrls.Contains(source.Attributes[key]))
                 {
                     continue;
                 }
-                if (lastExsitingIndex == 0)
+                if (lastExistingIndex == 0)
                 {
                     target.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL, source.Attributes[key]);
                 }
                 else
                 {
-                    target.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL + lastExsitingIndex, source.Attributes[key]);
+                    target.Attributes.AddOrUpdate(FeatureAttributes.IMAGE_URL + lastExistingIndex, source.Attributes[key]);
                 }
-                lastExsitingIndex++;
+                lastExistingIndex++;
             }
         }
 

@@ -68,9 +68,9 @@ namespace IsraelHiking.DataAccess
                 }
                 return features;
             } 
-            catch
+            catch (Exception ex)
             {
-                _logger.LogError("Unable to get wikipedia pages for: " + string.Join(",", titles));
+                _logger.LogError($"Unable to get wikipedia pages due to {ex.Message} for: " + string.Join(",", titles));
             }
             return new List<Feature>();
             
