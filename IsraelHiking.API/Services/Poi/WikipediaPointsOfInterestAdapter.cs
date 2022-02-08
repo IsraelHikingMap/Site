@@ -112,7 +112,11 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<List<Feature>> GetUpdates(DateTime lastModifiedDate)
         {
             var features = await GetAll();
-            return features.Where(f => f.GetLastModified() > lastModifiedDate).ToList();
+            // The features with the invalid location might be added by editing an OSM element,
+            // in that case we need to return them as well. Since we simply bring all of them here,
+            // there's no easy way to know when the OSM element linking to them has been updated.
+            // So the "hack" here is to return those without a location always.
+            return features.Where(f => f.GetLastModified() > lastModifiedDate || f.GetLocation().X.Equals(FeatureAttributes.INVALID_LOCATION)).ToList();
         }
     }
 }
