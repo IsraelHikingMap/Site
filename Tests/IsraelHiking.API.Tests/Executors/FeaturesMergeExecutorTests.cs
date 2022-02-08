@@ -177,6 +177,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
             feature2.SetTitles();
+            feature2.SetLocation(new Coordinate());
 
             var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
 
@@ -497,6 +498,7 @@ namespace IsraelHiking.API.Tests.Executors
             node3.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, "icon-wikipedia");
             node3.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA);
             node3.SetTitles();
+            node3.SetLocation(new Coordinate());
 
             var results = _executor.Merge(new List<Feature> { node1, node2 }, new List<Feature> { node3 });
 
