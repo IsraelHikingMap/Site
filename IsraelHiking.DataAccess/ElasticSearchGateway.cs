@@ -178,6 +178,33 @@ namespace IsraelHiking.DataAccess
             return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
+        public async Task<List<Feature>> SearchExact(string searchTerm, string language)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return new List<Feature>();
+            }
+            var response = await _elasticClient.SearchAsync<Feature>(s => 
+                s.Index(OSM_POIS_ALIAS)
+                .Size(100)
+                .Query(q => 
+                    q.Match(mm => 
+                        mm.Query(searchTerm)
+                        .Field($"{PROPERTIES}.{FeatureAttributes.NAME}")
+                    ) 
+                    ||
+                    q.Match(mm => 
+                        mm.Query(searchTerm)
+                            .Field($"{PROPERTIES}.{FeatureAttributes.NAME}:{language}")
+                    )
+                )
+            );
+            return response.Documents
+                .Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED))
+                .Where(f => f.GetTitles().Contains(searchTerm))
+                .ToList();
+        }
+
         public async Task<List<Feature>> SearchPlaces(string place, string language)
         {
             var response = await _elasticClient.SearchAsync<Feature>(

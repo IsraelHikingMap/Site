@@ -206,6 +206,15 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
             Assert.IsTrue(results > DateTime.MinValue);
         }
+        
+        [TestMethod]
+        [Ignore]
+        public void SearchExact_ShouldSGetAnExactMatch()
+        {
+            var results = _gateway.SearchExact("חיפה", Languages.HEBREW).Result;
+
+            Assert.IsTrue(results.Count > 0);
+        }
     }
 }
 

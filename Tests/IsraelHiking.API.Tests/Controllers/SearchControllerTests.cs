@@ -37,6 +37,20 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(results);
             Assert.AreEqual(list.Count, results.Count());
         }
+        
+        [TestMethod]
+        public void GetSearchResults_UsingQuotes_ShouldGetExactMatch()
+        {
+            var list = new List<Feature>();
+            var searchTerm = "\"searchTerm\"";
+            _searchRepository.SearchExact(Arg.Any<string>(), Languages.ENGLISH).Returns(list);
+
+            var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(list.Count, results.Count());
+            _searchRepository.Received(1).SearchExact(Arg.Any<string>(), Languages.ENGLISH);
+        }
 
         [TestMethod]
         public void GetSearchResults_WithPlaceNameThatDoNotExist_ShouldReturnRegularResults()

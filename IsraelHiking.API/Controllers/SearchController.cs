@@ -50,18 +50,24 @@ namespace IsraelHiking.API.Controllers
             {
                 return new[] {ConvertFromCoordinates(term, coordinates)};
             }
-            
+
+            if ((term.StartsWith("\"") || term.StartsWith("״")) && 
+                (term.EndsWith("\"") || term.StartsWith("״")))
+            {
+                var exactFeatures = await _searchRepository.SearchExact(term.Substring(1, term.Length - 2), language);
+                return await Task.WhenAll(exactFeatures.OfType<IFeature>().ToList().Select(f => ConvertFromFeature(f, language)));
+            }
             if (term.Count(c => c == ',') == 1)
             {
-                var splitted = term.Split(',');
-                var place = splitted.Last().Trim();
-                term = splitted.First().Trim();
+                var split = term.Split(',');
+                var place = split.Last().Trim();
+                term = split.First().Trim();
                 var placesFeatures = await _searchRepository.SearchPlaces(place, language);
                 if (placesFeatures.Any())
                 {
-                    var envolope = placesFeatures.First().Geometry.EnvelopeInternal;
+                    var envelope = placesFeatures.First().Geometry.EnvelopeInternal;
                     var featuresWithinPlaces = await _searchRepository.SearchByLocation(
-                        new Coordinate(envolope.MaxX, envolope.MaxY), new Coordinate(envolope.MinX, envolope.MinY), term, language);
+                        new Coordinate(envelope.MaxX, envelope.MaxY), new Coordinate(envelope.MinX, envelope.MinY), term, language);
                     return await Task.WhenAll(featuresWithinPlaces.OfType<IFeature>().ToList().Select(f => ConvertFromFeature(f,language)));
                 }
             }

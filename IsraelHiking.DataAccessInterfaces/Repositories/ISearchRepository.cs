@@ -10,6 +10,7 @@ namespace IsraelHiking.DataAccessInterfaces.Repositories
         Task<List<Feature>> Search(string searchTerm, string language);
         Task<List<Feature>> SearchPlaces(string place, string language);
         Task<List<Feature>> SearchByLocation(Coordinate northEast, Coordinate southWest, string searchTerm, string language);
+        Task<List<Feature>> SearchExact(string searchTerm, string language);
         Task<List<Feature>> GetContainers(Coordinate coordinate);
     }
 }
