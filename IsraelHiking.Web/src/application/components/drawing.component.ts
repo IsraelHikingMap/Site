@@ -193,6 +193,7 @@ export class DrawingComponent extends BaseMapComponent {
             confirmAction: () => {
                 this.ngRedux.dispatch(new SetShareUrlAction({ shareUrl: null }));
                 this.ngRedux.dispatch(new DeleteAllRoutesAction());
+                this.ngRedux.dispatch(ActionCreators.clearHistory());
             }
         });
     }
