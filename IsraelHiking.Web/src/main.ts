@@ -3,8 +3,6 @@ import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
 import { ApplicationModule } from "./application/application.module";
 import { environment } from "./environments/environment";
 
-declare let cordova: any;
-
 if (environment.production) {
     enableProdMode();
 }
@@ -17,7 +15,6 @@ const bootstrapInitializationFunction = () => {
 
 if (environment.isCordova) {
     let onDeviceReady = () => {
-        window.open = cordova.InAppBrowser.open;
         bootstrapInitializationFunction();
     };
     document.addEventListener("deviceready", onDeviceReady, false);

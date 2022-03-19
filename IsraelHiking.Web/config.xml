@@ -21,6 +21,9 @@
       <path event="map" url="/map/*" />
       <path url="/" />
     </host>
+    <host name="oauth_callback" scheme="ihm">
+      <path event="oauth" url="*" />
+    </host>
   </universal-links>
   <platform name="android">
     <preference name="AndroidInsecureFileModeEnabled" value="true" />

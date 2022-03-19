@@ -127,6 +127,10 @@ export class OpenWithService {
                 if (intent.clipItems && intent.clipItems.length > 0) {
                     data = intent.clipItems[0].uri;
                 }
+                if (data.startsWith("ihm://")) {
+                    // no need to do anything as this is part of the login flow
+                    return;
+                }
                 if (data.startsWith("http") || data.startsWith("geo")) {
                     this.handleExternalUrl(data);
                 } else {
