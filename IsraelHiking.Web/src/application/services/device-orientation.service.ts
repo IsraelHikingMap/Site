@@ -10,7 +10,7 @@ import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class DeviceOrientationService {
-    private static readonly THROTTLE_TIME = 100; // in milliseconds
+    private static readonly THROTTLE_TIME = 500; // in milliseconds
 
     public orientationChanged: EventEmitter<number>;
 
