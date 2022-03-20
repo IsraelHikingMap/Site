@@ -103,6 +103,10 @@ export class OpenWithService {
     }
 
     private handleUrl(url: string) {
+        if (url.startsWith("ihm://")) {
+            // no need to do anything as this is part of the login flow
+            return;
+        }
         this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
         setTimeout(async () => {
                 try {
