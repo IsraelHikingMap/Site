@@ -26,6 +26,8 @@ type OsmConfiguration = {
 @Injectable()
 export class AuthorizationService {
 
+    private static readonly OAUTH_TOKEN = "oauth_token";
+
     private options: AuthorizationServiceOptions;
     private ohauth: IOhAuth;
 
@@ -67,12 +69,13 @@ export class AuthorizationService {
         }
         this.loggingService.info("[Authorization] User initiated login");
         this.logout();
-        let popup = this.openWindow(); // this has to be here in order to support browsers that only open a window on click event
+        // this has to be here in order to support safari on desktop since it can only open a window on click event
+        let popup = this.openWindow();
         let data = await firstValueFrom(this.httpClient.get(Urls.osmConfiguration)) as OsmConfiguration;
         this.setOptions({
             oauthConsumerKey: data.consumerKey,
             oauthSecret: data.consumerSecret,
-            landing: Urls.emptyHtml,
+            landing: this.runningContextService.isCordova ? "ihm://oauth_callback/" : Urls.emptyHtml,
             url: data.baseAddress
         } as AuthorizationServiceOptions);
 
@@ -81,9 +84,8 @@ export class AuthorizationService {
             oauth_token: requestTokenResponse.oauth_token,
             oauth_callback: this.options.landing
         });
-        let urlWhenWindowsCloses = await this.getUrlWhenWindowsCloses(popup, authorizeUrl);
-        let oauthToken = this.ohauth.stringQs(urlWhenWindowsCloses.split("?")[1]);
-        let accessToken = await this.getAccessToken(oauthToken.oauth_token, requestTokenResponse.oauth_token_secret);
+        let oauthToken = await this.getTokenFromWindow(popup, authorizeUrl);
+        let accessToken = await this.getAccessToken(oauthToken, requestTokenResponse.oauth_token_secret);
         this.ngRedux.dispatch(new SetTokenAction({
             token: accessToken.oauth_token + ";" + accessToken.oauth_token_secret
         }));
@@ -157,7 +159,7 @@ export class AuthorizationService {
         });
     }
 
-    private openWindow(): any {
+    private openWindow(): Window {
         if (this.runningContextService.isCordova) {
             return null;
         }
@@ -173,7 +175,7 @@ export class AuthorizationService {
         return window.open("about:blank", "Authorization", settings);
     }
 
-    private getUrlWhenWindowsCloses(popup: any, authorizeUrl: string): Promise<any> {
+    private getTokenFromWindow(popup: Window, authorizeUrl: string): Promise<string> {
         return new Promise((resolve, reject) => {
             if (!this.runningContextService.isCordova) {
                 popup.location.href = authorizeUrl;
@@ -182,31 +184,21 @@ export class AuthorizationService {
                 }
                 setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
             } else {
-                popup = window.open(authorizeUrl, "_blank");
-                let exitListener = () => reject(new Error("The OSM sign in flow was canceled"));
+                let callback = (event: MessageEvent) => {
+                    if (event.data.match(/^oauth::/)) {
+                        let data = JSON.parse(event.data.substring(7));
+                        window.removeEventListener("message", callback);
+                        resolve(data[AuthorizationService.OAUTH_TOKEN]);
+                    }
+                };
+                window.addEventListener("message", callback);
 
-                popup.addEventListener("loaderror",
-                    () => {
-                        popup.removeEventListener("exit", exitListener);
-                        popup.close();
-                        reject(new Error("Error loading login page of OSM"));
-                    });
-
-                popup.addEventListener("loadstart",
-                    async (event: any) => {
-                        if (event.url.indexOf(this.options.landing) !== -1) {
-                            popup.removeEventListener("exit", exitListener);
-                            popup.close();
-                            resolve(event.url);
-                        }
-                    });
-
-                return popup.addEventListener("exit", exitListener);
+                window.open(authorizeUrl, "oauth:osm", "");
             }
         });
     }
 
-    private async watchPopup(popup: any, resolve: (value?: any) => void, reject: (value?: any) => void) {
+    private async watchPopup(popup: Window, resolve: (value: string) => void, reject: (value: Error) => void) {
         try {
             if (popup.closed) {
                 reject(new Error("The OSM sign in flow was canceled"));
@@ -214,7 +206,8 @@ export class AuthorizationService {
             }
             if (popup.location.href.indexOf(this.options.landing) !== -1) {
                 popup.close();
-                resolve(popup.location.href);
+                let data = this.ohauth.stringQs(popup.location.href.split("?")[1]);
+                resolve(data[AuthorizationService.OAUTH_TOKEN]);
                 return;
             }
         } catch { }

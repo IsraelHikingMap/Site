@@ -103,6 +103,10 @@ export class OpenWithService {
     }
 
     private handleUrl(url: string) {
+        if (url.startsWith("ihm://")) {
+            // no need to do anything as this is part of the login flow
+            return;
+        }
         this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
         setTimeout(async () => {
                 try {
@@ -126,6 +130,10 @@ export class OpenWithService {
                 }
                 if (intent.clipItems && intent.clipItems.length > 0) {
                     data = intent.clipItems[0].uri;
+                }
+                if (data.startsWith("ihm://")) {
+                    // no need to do anything as this is part of the login flow
+                    return;
                 }
                 if (data.startsWith("http") || data.startsWith("geo")) {
                     this.handleExternalUrl(data);
