@@ -179,9 +179,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.gain = 0;
             this.loss = 0;
             this.remainingDistance = 0;
-            this.updateDurationString(null);
-            this.currentSpeed = null;
             this.averageSpeed = null;
+            this.updateDurationString(null);
             this.ETA = "--:--";
         } else {
             this.length = statistics.length;
