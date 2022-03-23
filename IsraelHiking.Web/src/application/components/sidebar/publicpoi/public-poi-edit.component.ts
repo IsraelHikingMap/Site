@@ -26,15 +26,15 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
         this.categories = [];
     }
 
-    private async initializeCategories() {
-        let categories = await this.poiService.getSelectableCategories();
+    private initializeCategories() {
+        let categories = this.poiService.getSelectableCategories();
         for (let category of categories) {
             this.categories.push(category);
         }
     }
 
-    public async ngOnInit(): Promise<void> {
-        await this.initializeCategories();
+    public ngOnInit() {
+        this.initializeCategories();
         if (this.info.urls.length === 0) {
             this.addEmptyUrl();
         }

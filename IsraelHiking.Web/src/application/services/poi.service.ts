@@ -487,7 +487,7 @@ export class PoiService {
 
     }
 
-    public async getSelectableCategories(): Promise<ISelectableCategory[]> {
+    public getSelectableCategories(): ISelectableCategory[] {
         let categoriesGroup = this.ngRedux.getState().layersState.categoriesGroups.find(g => g.type === "Points of Interest");
         let selectableCategories = [] as ISelectableCategory[];
         for (let category of categoriesGroup.categories) {

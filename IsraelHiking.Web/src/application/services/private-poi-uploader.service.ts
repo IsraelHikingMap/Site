@@ -50,7 +50,7 @@ export class PrivatePoiUploaderService {
         }
         let message = `${this.resources.wouldYouLikeToUpdate} ${results.title || this.resources.translate(results.type)}?`;
         if (!results.title) {
-            let categories = await this.poiService.getSelectableCategories();
+            let categories = this.poiService.getSelectableCategories();
             let iconWithLabel = flatten(categories.map(c => c.icons))
                 .find(i => i.icon === `icon-${results.type}`);
             if (iconWithLabel) {

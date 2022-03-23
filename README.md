@@ -3,7 +3,7 @@ This repository holds the main server side module the web and mobile clients int
 
 [![AppVeyor](https://img.shields.io/appveyor/ci/IsraelHikingHost/site/master.svg)](https://ci.appveyor.com/project/IsraelHikingHost/site)
 [![AppVeyor tests](https://img.shields.io/appveyor/tests/IsraelHikingHost/site/master.svg)](https://ci.appveyor.com/project/IsraelHikingHost/site/build/tests)
-[![Codecov](https://img.shields.io/codecov/c/github/israelhikingmap/site/master.svg)](https://codecov.io/gh/IsraelHikingMap/Site/list/master/)
+[![Codecov](https://img.shields.io/codecov/c/github/israelhikingmap/site/master.svg)](https://codecov.io/gh/IsraelHikingMap/Site/)
 
 ## Architecture Diagram
 ![image](https://user-images.githubusercontent.com/3269297/147603985-883f216d-f7b6-48bc-b5ca-bfbee2ca14bb.png)
