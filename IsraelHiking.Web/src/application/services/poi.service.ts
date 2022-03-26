@@ -439,7 +439,7 @@ export class PoiService {
         return visibleCategories;
     }
 
-    public async updatePois(fromServer: boolean) {
+    private async updatePois(fromServer: boolean) {
         await this.mapService.initializationPromise;
         let visibleCategories = this.getVisibleCategories();
         if (visibleCategories.length === 0) {

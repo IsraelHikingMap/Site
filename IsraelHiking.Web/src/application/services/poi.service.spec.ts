@@ -1,4 +1,4 @@
-import { TestBed, inject } from "@angular/core/testing";
+import { TestBed, inject, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
 import { HttpClientModule, HttpRequest } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { Device } from "@ionic-native/device/ngx";
@@ -19,6 +19,7 @@ import { MapService } from "./map.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
 import type { ApplicationState, MarkerData } from "../models/models";
+import JSZip from "jszip";
 
 describe("Poi Service", () => {
 
@@ -27,11 +28,18 @@ describe("Poi Service", () => {
         let hashService = {
             getFullUrlFromPoiId: () => {}
         };
-        let fileServiceMock = {};
+        let fileServiceMock = {
+            getFileFromCache: () => Promise.resolve(null),
+            deleteFileFromCache: () => Promise.resolve(),
+            downloadFileToCache: () => Promise.resolve()
+        };
         let databaseServiceMock = {
             getPoisForClustering: () => Promise.resolve([]),
             addPoiToUploadQueue: () => Promise.resolve(),
-            getPoiById: () => Promise.resolve()
+            getPoiById: () => Promise.resolve(),
+            deletePois: jasmine.createSpy().and.returnValue(Promise.resolve()),
+            storePois: jasmine.createSpy().and.returnValue(Promise.resolve()),
+            storeImages: jasmine.createSpy().and.returnValue(Promise.resolve())
         } as any;
         let mapServiceMosk = {
             map: {
@@ -42,7 +50,8 @@ describe("Poi Service", () => {
         };
         let loggingService = {
             info: () => {},
-            warning: () => {}
+            warning: () => {},
+            debug: () => {}
         };
         TestBed.configureTestingModule({
             imports: [
@@ -86,8 +95,81 @@ describe("Poi Service", () => {
             await promise;
 
             expect(changed).toBe(true);
+            expect(poiService.poiGeojsonFiltered.features.length).toBe(0);
         }
     )));
+
+    it("Should initialize and download offline pois file", 
+        (inject([PoiService, HttpTestingController, RunningContextService, FileService, DatabaseService],
+            async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, fileService: FileService, databaseService: DatabaseService) => {
+
+                MockNgRedux.store.getState = () => ({
+                    layersState: {
+                        categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
+                    },
+                    offlineState: {
+                        poisLastModifiedDate: null
+                    }
+                });
+                (runningContextService as any).isCordova = true;
+                let zip = new JSZip();
+                zip.folder("pois");
+                zip.file("pois/001.geojson", JSON.stringify({ features: [{
+                    type: "Feature",
+                    properties: { poiLastModified: new Date("2022-02-22") }
+                }] }));
+                zip.folder("images");
+                zip.file("images/001.json", JSON.stringify([{imageUrls: [{imageUrl: "img", thumbnail: "some-data"}]}]));
+                let zipOutputPromise = zip.generateAsync({type: "blob"});
+                let getFileFromcacheSpy = spyOn(fileService, "getFileFromCache").and.returnValues(Promise.resolve(null), zipOutputPromise);
+
+                let promise = poiService.initialize().then(() => {
+                    expect(poiService.poiGeojsonFiltered.features.length).toBe(0);
+                    expect(getFileFromcacheSpy).toHaveBeenCalledTimes(2);
+                    expect(databaseService.storePois).toHaveBeenCalled();
+                    expect(databaseService.storeImages).toHaveBeenCalled();
+                    expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+                });
+                mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
+
+                return promise;
+            }
+        ))
+    );
+
+    it("Should initialize and update pois by pagination", 
+        fakeAsync(inject([PoiService, HttpTestingController, RunningContextService, DatabaseService],
+            (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, databaseService: DatabaseService) => {
+
+                MockNgRedux.store.getState = () => ({
+                    layersState: {
+                        categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
+                    },
+                    offlineState: {
+                        poisLastModifiedDate: Date.now()
+                    }
+                });
+                (runningContextService as any).isCordova = true;
+                poiService.initialize().then(() => {
+                    expect(poiService.poiGeojsonFiltered.features.length).toBe(0);
+                    expect(databaseService.storePois).toHaveBeenCalled();
+                    expect(databaseService.storeImages).toHaveBeenCalled();
+                    expect(databaseService.deletePois).toHaveBeenCalled();
+                });
+                mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
+                tick();
+                mockBackend.expectOne(r => r.url.startsWith(Urls.poiUpdates)).flush({
+                    features: [{
+                        type: "Feature",
+                        properties: { poiDeleted: true, poiId: "1"}
+                    }],
+                    images: [],
+                    lastModified: Date.now()
+                });
+                discardPeriodicTasks();
+            }
+        ))
+    );
 
     it("Should get selectable categories", (inject([PoiService, HttpTestingController],
         (poiService: PoiService) => {
