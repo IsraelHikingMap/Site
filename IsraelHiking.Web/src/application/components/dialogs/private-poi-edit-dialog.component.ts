@@ -12,6 +12,7 @@ import { NavigateHereService } from "../../services/navigate-here.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
 import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
+import { Urls } from "../../urls";
 import type { LinkData, MarkerData, ApplicationState } from "../../models/models";
 
 interface IIconsGroup {
@@ -212,6 +213,10 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         this.socialSharing.shareWithOptions({
             message: `geo:${this.marker.latlng.lat},${this.marker.latlng.lng}\n${ihmCoordinateUrl}`
         });
+    }
+
+    public getWazeAddress() {
+        return `${Urls.waze}${this.marker.latlng.lat},${this.marker.latlng.lng}`;
     }
 
     @HostListener("window:keydown", ["$event"])

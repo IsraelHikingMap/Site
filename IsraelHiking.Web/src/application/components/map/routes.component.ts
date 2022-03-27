@@ -1,8 +1,9 @@
 import { Component, AfterViewInit, ViewEncapsulation } from "@angular/core";
 import { Observable } from "rxjs";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
+import { MapLayerMouseEvent } from "maplibre-gl";
 import invert from "invert-color";
-import { select } from "@angular-redux2/store";
+import { NgRedux, select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
@@ -11,6 +12,8 @@ import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
+import { Urls } from "../../urls";
+import { ChangeEditStateAction } from "../../reducers/routes.reducer";
 import type { LatLngAlt, ApplicationState, RouteData } from "../../models/models";
 
 interface RoutePointViewData {
@@ -39,6 +42,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     public routeRecordingId$: Observable<string>;
 
     public routePointPopupData: RoutePointViewData;
+    public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string}
 
     public editingRoute: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
@@ -50,7 +54,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
                 private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
                 private readonly fileService: FileService,
-                private readonly mapComponent: MapComponent
+                private readonly mapComponent: MapComponent,
+                private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
         this.routesGeoJson = {
@@ -303,7 +308,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         }
     }
 
-    public routeLineClick(event: any) {
+    public routeLineClick(event: MapLayerMouseEvent) {
         if (event.features == null || event.features.length === 0) {
             return;
         }
@@ -314,4 +319,23 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         }
     }
 
+    public nonEditRoutePointClick(event: MapLayerMouseEvent) {
+        // this event is only fired for routes that are not in edit mode since other interactions are handled in the route edit class
+        if (this.isEditMode()) {
+            return;
+        }
+        let pointId = event.features[0].properties.id as string;
+        let routeId = pointId.replace("_start", "").replace("_end", "");
+        this.nonEditRoutePointPopupData = {
+            latlng: event.lngLat,
+            wazeAddress: `${Urls.waze}${event.lngLat.lat},${event.lngLat.lng}`,
+            routeId
+        }
+    }
+
+    public switchToEditMode(routeId: string) {
+        this.selectedRouteService.setSelectedRoute(routeId);
+        this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: routeId, state: "Route" }));
+        this.nonEditRoutePointPopupData = null;
+    }
 }

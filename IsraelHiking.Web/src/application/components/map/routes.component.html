@@ -43,9 +43,10 @@
            [paint]="{
                 'circle-color': ['get', 'color'],
                 'circle-radius': 7,
-               'circle-stroke-color': 'white',
-               'circle-stroke-width': 3
-            }">
+                'circle-stroke-color': 'white',
+                'circle-stroke-width': 3
+            }"
+            (layerClick)="nonEditRoutePointClick($event)">
 </mgl-layer>
 <mgl-geojson-source id="editing-route-source" [data]="editingRoute"></mgl-geojson-source>
 <mgl-layer id="{{resources.editRouteLines}}"
@@ -76,6 +77,21 @@
            [lngLat]="[routePointPopupData.latlng.lng, routePointPopupData.latlng.lat]"
            (popupClose)="closeRoutePointPopup()">
     <route-point-overlay [latlng]="routePointPopupData.latlng" [segmentIndex]="routePointPopupData.segmentIndex" (closed)="closeRoutePointPopup()"></route-point-overlay>
+</mgl-popup>
+
+<mgl-popup *ngIf="nonEditRoutePointPopupData"
+           [lngLat]="[nonEditRoutePointPopupData.latlng.lng, nonEditRoutePointPopupData.latlng.lat]"
+           (popupClose)="nonEditRoutePointPopupData = null">
+    <div [dir]="resources.direction">
+        <div fxLayour="row">
+            <div fxFlex>
+                <a mat-button [href]="nonEditRoutePointPopupData.wazeAddress" target="_blank" matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="above" fxFill><i class="fa icon-waze"></i></a>
+            </div>
+            <div fxFlex>
+                <button mat-button (click)="switchToEditMode(nonEditRoutePointPopupData.routeId)" matTooltip="{{resources.edit}}" matTooltipPosition="above" fxFill><i class="fa icon-pencil"></i></button>
+            </div>
+        </div>
+    </div>
 </mgl-popup>
 
 

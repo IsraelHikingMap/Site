@@ -71,6 +71,7 @@
                 <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="addUrl()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Add link"><i class="fa icon-external-link"></i> {{resources.aLinkToAWebsite}}</button>
                 <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="navigateHere()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Navigate here"><i class="fa icon-recordings"></i> {{resources.navigateHere}}</button>
                 <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="shareLocation()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Share location" *ngIf="canShareLocation()"><i class="fa icon-share-alt"></i> {{resources.shareLocation}}</button>
+                <a mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" [href]="getWazeAddress()" target="_blank" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Share with Waze"><i class="fa icon-waze"></i> {{resources.navigateWithWaze}}</a>
             </mat-menu>
             <button mat-button [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="More"><i class="fa icon-ellipsis-v fa-lg"></i></button>
         </div>
