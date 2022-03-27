@@ -42,7 +42,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     public routeRecordingId$: Observable<string>;
 
     public routePointPopupData: RoutePointViewData;
-    public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string}
+    public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string};
 
     public editingRoute: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
@@ -330,12 +330,12 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             latlng: event.lngLat,
             wazeAddress: `${Urls.waze}${event.lngLat.lat},${event.lngLat.lng}`,
             routeId
-        }
+        };
     }
 
     public switchToEditMode(routeId: string) {
         this.selectedRouteService.setSelectedRoute(routeId);
-        this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: routeId, state: "Route" }));
+        this.ngRedux.dispatch(new ChangeEditStateAction({ routeId, state: "Route" }));
         this.nonEditRoutePointPopupData = null;
     }
 }

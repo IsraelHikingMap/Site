@@ -99,9 +99,10 @@ describe("Poi Service", () => {
         }
     )));
 
-    it("Should initialize and download offline pois file", 
+    it("Should initialize and download offline pois file",
         (inject([PoiService, HttpTestingController, RunningContextService, FileService, DatabaseService],
-            async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, fileService: FileService, databaseService: DatabaseService) => {
+            async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService,
+                fileService: FileService, databaseService: DatabaseService) => {
 
                 MockNgRedux.store.getState = () => ({
                     layersState: {
@@ -137,9 +138,10 @@ describe("Poi Service", () => {
         ))
     );
 
-    it("Should initialize and update pois by pagination", 
+    it("Should initialize and update pois by pagination",
         fakeAsync(inject([PoiService, HttpTestingController, RunningContextService, DatabaseService],
-            (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, databaseService: DatabaseService) => {
+            (poiService: PoiService, mockBackend: HttpTestingController,
+                runningContextService: RunningContextService, databaseService: DatabaseService) => {
 
                 MockNgRedux.store.getState = () => ({
                     layersState: {
