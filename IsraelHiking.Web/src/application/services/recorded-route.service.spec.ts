@@ -2,6 +2,7 @@ import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { TestBed, inject } from "@angular/core/testing";
 import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
 import { Device } from "@ionic-native/device/ngx";
+import { Subject } from "rxjs";
 
 import { RecordedRouteService } from "./recorded-route.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
@@ -14,7 +15,8 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
-import type { RouteData } from "../models/models";
+import { AddRecordingPointsAction } from "../reducers/routes.reducer";
+import type { ApplicationState, RouteData } from "../models/models";
 
 describe("RecordedRouteService", () => {
     beforeEach(() => {
@@ -50,9 +52,9 @@ describe("RecordedRouteService", () => {
         });
         MockNgRedux.reset();
     });
-    /* This test doesn't work in CI for some reason...
-    it("Should add a valid location", inject([RecordedRouteService, LoggingService, SelectedRouteService],
-        (service: RecordedRouteService, logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
+
+    it("Should add a valid location", inject([RecordedRouteService, SelectedRouteService],
+        (service: RecordedRouteService, selectedRouteService: SelectedRouteService) => {
             service.initialize();
             let recordingRoute = {
                 id: "1",
@@ -79,7 +81,7 @@ describe("RecordedRouteService", () => {
             });
             selectedRouteService.getRecordingRoute = () => recordingRoute;
             const positionStub: Subject<GeolocationPosition> = MockNgRedux.getSelectorStub<ApplicationState, GeolocationPosition>(
-                state => state.gpsState.currentPoistion
+                (state) => state.gpsState.currentPoistion
             );
             let spy = jasmine.createSpy();
             MockNgRedux.store.dispatch = spy;
@@ -90,8 +92,9 @@ describe("RecordedRouteService", () => {
 
             expect(spy.calls.all().length).toBe(1);
             expect((spy.calls.all()[0].args[0] as AddRecordingPointsAction).payload.latlngs.length).toBe(1);
-        }));
-    */
+        }
+    ));
+
     it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService,
         LoggingService, SelectedRouteService],
         (service: RecordedRouteService, geoService: GeoLocationService,
