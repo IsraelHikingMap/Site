@@ -38,9 +38,9 @@ describe("Selected Route Service", () => {
 
     it("Should get selected route when there are routes", inject([SelectedRouteService],
         (selectedRouteService: SelectedRouteService) => {
-            const routesStub: Subject<RouteData[]> = MockNgRedux.getSelectorStub<ApplicationState, RouteData[]>(
-                (state) => state.routes.present
-            );
+            let predecator = ((state: ApplicationState) => state.routes.present).toString().split("=>")[1];
+            let selectorKey = Object.keys(MockNgRedux.getSubStore().selections).find(k => k.includes(predecator));
+            const routesStub = MockNgRedux.getSelectorStub<ApplicationState, RouteData[]>(selectorKey);
 
             routesStub.next([{} as any]);
 

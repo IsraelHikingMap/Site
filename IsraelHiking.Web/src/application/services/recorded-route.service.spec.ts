@@ -80,9 +80,9 @@ describe("RecordedRouteService", () => {
                 userState: {}
             });
             selectedRouteService.getRecordingRoute = () => recordingRoute;
-            const positionStub: Subject<GeolocationPosition> = MockNgRedux.getSelectorStub<ApplicationState, GeolocationPosition>(
-                (state) => state.gpsState.currentPoistion
-            );
+            let predecator = ((state: ApplicationState) => state.gpsState.currentPoistion).toString().split("=>")[1];
+            let selectorKey = Object.keys(MockNgRedux.getSubStore().selections).find(k => k.includes(predecator));
+            const positionStub = MockNgRedux.getSelectorStub<ApplicationState, GeolocationPosition>(selectorKey);
             let spy = jasmine.createSpy();
             MockNgRedux.store.dispatch = spy;
 
