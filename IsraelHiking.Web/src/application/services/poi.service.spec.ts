@@ -76,6 +76,7 @@ describe("Poi Service", () => {
             ]
         });
         MockNgRedux.reset();
+        MockNgRedux.store.dispatch = jasmine.createSpy();
     });
 
     it("Should initialize and sync categories from server", (inject([PoiService, HttpTestingController],
@@ -285,9 +286,6 @@ describe("Poi Service", () => {
     it("Should create simple point",
         inject([PoiService],
             async (poiService: PoiService) => {
-
-                MockNgRedux.store.dispatch = jasmine.createSpy();
-
                 let promise = poiService.addSimplePoint({ lat: 0, lng: 0}, "Tap").then(() => {
                     expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
                 });
@@ -300,8 +298,6 @@ describe("Poi Service", () => {
     it("Should create complex point",
         inject([PoiService, DatabaseService],
             async (poiService: PoiService, dbMock: DatabaseService) => {
-
-                MockNgRedux.store.dispatch = jasmine.createSpy();
                 let spy = spyOn(dbMock, "addPoiToUploadQueue");
                 let promise = poiService.addComplexPoi({
                     id: "poiId",
@@ -332,8 +328,6 @@ describe("Poi Service", () => {
     it("Should update complex point given a point with no description",
         inject([PoiService, DatabaseService],
             async (poiService: PoiService, dbMock: DatabaseService) => {
-
-                MockNgRedux.store.dispatch = jasmine.createSpy();
                 MockNgRedux.store.getState = () => ({
                         poiState: {
                             selectedPointOfInterest: {
@@ -396,8 +390,6 @@ describe("Poi Service", () => {
     it("Should not update complex point when there were no changes",
         inject([PoiService, DatabaseService],
             async (poiService: PoiService, dbMock: DatabaseService) => {
-
-                MockNgRedux.store.dispatch = jasmine.createSpy();
                 MockNgRedux.store.getState = () => ({
                         poiState: {
                             selectedPointOfInterest: {
@@ -459,7 +451,6 @@ describe("Poi Service", () => {
                 } as GeoJSON.Feature;
                 poiService.setLocation(featureInQueue, { lat: 1, lng: 2 });
                 dbMock.getPoiFromUploadQueue = () => Promise.resolve(featureInQueue);
-                MockNgRedux.store.dispatch = jasmine.createSpy();
                 MockNgRedux.store.getState = () => ({
                         poiState: {
                             selectedPointOfInterest: {
