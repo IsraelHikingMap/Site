@@ -58,7 +58,7 @@ export class OfflineFilesDownloadService {
         } catch {
             this.loggingService.info("[Offline Download] Failed to get download files list");
             if (showMessage) {
-                this.toastService.warning(this.resources.purchaseOfflineMaps);
+                this.toastService.warning(this.resources.youNeedToRenewTheOfflineMapsSubscription);
             }
         }
     }
