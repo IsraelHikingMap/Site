@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -34,6 +35,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IDataContainerConverterService _dataContainerConverterService;
         private IGpxDataContainerConverter _gpxDataContainerConverter;
         private IOfflineFilesService _offlineFilesService;
+        private IReceiptValidationGateway _receiptValidationGateway;
         
         private const string GPX_DATA = @"<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
             <gpx xmlns='http://www.topografix.com/GPX/1/1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd' version='1.1' creator='IsraelHikingMap'>
@@ -65,7 +67,8 @@ namespace IsraelHiking.API.Tests.Controllers
             optionsProvider.Value.Returns(new ConfigurationData());
             _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, _gpxDataContainerConverter, new RouteDataSplitterService(new ItmWgs84MathTransfromFactory(), optionsProvider), Array.Empty<IConverterFlowItem>());
             _offlineFilesService = Substitute.For<IOfflineFilesService>();
-            _controller = new FilesController(_elevationGateway, _remoteFileFetcherGateway, _dataContainerConverterService, _offlineFilesService);
+            _receiptValidationGateway = Substitute.For<IReceiptValidationGateway>();
+            _controller = new FilesController(_elevationGateway, _remoteFileFetcherGateway, _dataContainerConverterService, _offlineFilesService, _receiptValidationGateway, Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -144,23 +147,50 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
+        public void GetOfflineFiles_NotEntitled_ShouldGetForbid()
+        {
+            _controller.SetupIdentity();
+            _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
+
+            var results = _controller.GetOfflineFiles(DateTime.Now).Result as ForbidResult;
+            
+            Assert.IsNotNull(results);
+        }
+        
+        [TestMethod]
         public void GetOfflineFiles_ShouldGetTheList()
         {
             _controller.SetupIdentity();
             var dict = new Dictionary<string, DateTime>(); 
-            _offlineFilesService.GetUpdatedFilesList(Arg.Any<string>(), Arg.Any<DateTime>())
+            _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>())
                 .Returns(dict);
-
-            var results = _controller.GetOfflineFiles(DateTime.Now).Result;
+            _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
             
-            Assert.AreEqual(dict.Count, results.Count);
+            var results = _controller.GetOfflineFiles(DateTime.Now).Result as OkObjectResult;
+            
+            Assert.IsNotNull(results);
+            var resultDict = results.Value as Dictionary<string, DateTime>;
+            Assert.IsNotNull(resultDict);
+            Assert.AreEqual(dict.Count, resultDict.Count);
         }
 
+        [TestMethod]
+        public void GetOfflineFile_NotEntitled_ShouldNotGetIt()
+        {
+            _controller.SetupIdentity();
+            _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
+
+            var results = _controller.GetOfflineFile("file").Result as ForbidResult;
+            
+            Assert.IsNotNull(results);
+        }
+        
         [TestMethod]
         public void GetOfflineFile_ShouldGetIt()
         {
             _controller.SetupIdentity();
-            _offlineFilesService.GetFileContent(Arg.Any<string>(), "file").Returns(new MemoryStream());
+            _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
+            _offlineFilesService.GetFileContent("file").Returns(new MemoryStream());
             
             var results = _controller.GetOfflineFile("file").Result as FileResult;
             

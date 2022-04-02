@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services
 {
@@ -15,27 +14,21 @@ namespace IsraelHiking.API.Services
     {
         private readonly IFileProvider _fileProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
-        private readonly IReceiptValidationGateway _receiptValidationGateway;
-        private readonly ILogger _logger;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="fileSystemHelper"></param>
-        /// <param name="receiptValidationGateway"></param>
         /// <param name="options"></param>
         /// <param name="logger"></param>
         public OfflineFilesService(IFileSystemHelper fileSystemHelper,
-            IReceiptValidationGateway receiptValidationGateway,
             IOptions<ConfigurationData> options,
             ILogger logger)
         {
-            _logger = logger;
             _fileSystemHelper = fileSystemHelper;
-            _receiptValidationGateway = receiptValidationGateway;
             if (string.IsNullOrEmpty(options.Value.OfflineFilesFolder))
             {
-                _logger.LogWarning("offlineFilesFolder was not provided! This mean you won't be able to use this service");
+                logger.LogWarning("offlineFilesFolder was not provided! This mean you won't be able to use this service");
             }
             else
             {
@@ -44,14 +37,9 @@ namespace IsraelHiking.API.Services
         }
 
         /// <inheritdoc/>
-        public async Task<Dictionary<string, DateTime>> GetUpdatedFilesList(string userId, DateTime lastModifiedDate)
+        public Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate)
         {
-            _logger.LogInformation($"Getting the list of offline files for user: {userId}, date: {lastModifiedDate}");
             var filesDictionary = new Dictionary<string, DateTime>();
-            if (!await _receiptValidationGateway.IsEntitled(userId))
-            {
-                return new Dictionary<string, DateTime>();
-            }
             var contents = _fileProvider.GetDirectoryContents(string.Empty);
             foreach (var content in contents)
             {
@@ -72,13 +60,8 @@ namespace IsraelHiking.API.Services
         }
 
         /// <inheritdoc/>
-        public async Task<Stream> GetFileContent(string userId, string fileName)
+        public Stream GetFileContent(string fileName)
         {
-            _logger.LogInformation($"Getting offline file: {fileName} for user: {userId}");
-            if (!await _receiptValidationGateway.IsEntitled(userId))
-            {
-                return null;
-            }
             return _fileProvider.GetFileInfo(fileName).CreateReadStream();
         }
     }

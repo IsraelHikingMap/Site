@@ -37,22 +37,30 @@ export class OfflineFilesDownloadService {
             this.ngRedux.getState().userState.userInfo == null) {
                 return;
             }
-        return await this.downloadOfflineMaps();
+        // In case the user has purchased the map and never downloaded them, and now starts the app
+        return await this.downloadOfflineMaps(false);
     }
 
-    public async downloadOfflineMaps(): Promise<void> {
+    public async downloadOfflineMaps(showMessage = true): Promise<void> {
         this.loggingService.info("[Offline Download] Starting downloading offline files");
-        let fileNames = await this.getFilesToDownloadDictionary();
-        if (Object.keys(fileNames).length === 0) {
-            this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
-            return;
-        }
+        try {
+            let fileNames = await this.getFilesToDownloadDictionary();
+            if (Object.keys(fileNames).length === 0) {
+                this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
+                return;
+            }
 
-        this.toastService.progress({
-            action: (progress) => this.downloadOfflineFilesProgressAction(progress, fileNames),
-            showContinueButton: true,
-            continueText: this.resources.largeFilesUseWifi
-        });
+            this.toastService.progress({
+                action: (progress) => this.downloadOfflineFilesProgressAction(progress, fileNames),
+                showContinueButton: true,
+                continueText: this.resources.largeFilesUseWifi
+            });
+        } catch {
+            this.loggingService.info("[Offline Download] Failed to get download files list");
+            if (showMessage) {
+                this.toastService.warning(this.resources.purchaseOfflineMaps);
+            }
+        }
     }
 
     private async downloadOfflineFilesProgressAction(reportProgress: (progressValue: number) => void, fileNames: Record<string, string>):

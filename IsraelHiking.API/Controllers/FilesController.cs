@@ -5,8 +5,8 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,6 +23,8 @@ namespace IsraelHiking.API.Controllers
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IOfflineFilesService _offlineFilesService;
+        private readonly IReceiptValidationGateway _receiptValidationGateway;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Controller's constructor
@@ -31,15 +33,21 @@ namespace IsraelHiking.API.Controllers
         /// <param name="remoteFileFetcherGateway"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="offlineFilesService"></param>
+        /// <param name="receiptValidationGateway"></param>
+        /// <param name="logger"></param>
         public FilesController(IElevationGateway elevationGateway,
             IRemoteFileFetcherGateway remoteFileFetcherGateway,
             IDataContainerConverterService dataContainerConverterService,
-            IOfflineFilesService offlineFilesService)
+            IOfflineFilesService offlineFilesService, 
+            IReceiptValidationGateway receiptValidationGateway, 
+            ILogger logger)
         {
             _elevationGateway = elevationGateway;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
             _dataContainerConverterService = dataContainerConverterService;
             _offlineFilesService = offlineFilesService;
+            _receiptValidationGateway = receiptValidationGateway;
+            _logger = logger;
         }
 
         /// <summary>
@@ -112,9 +120,15 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         [Route("offline")]
         [Authorize]
-        public Task<Dictionary<string, DateTime>> GetOfflineFiles([FromQuery] DateTime lastModified)
+        public async Task<IActionResult> GetOfflineFiles([FromQuery] DateTime lastModified)
         {
-            return _offlineFilesService.GetUpdatedFilesList(User.Identity?.Name, lastModified);
+            if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
+            {
+                _logger.LogInformation($"Unable to get the list of offline files for user: {User.Identity?.Name} since the user is not entitled, date: {lastModified}");
+                return Forbid();
+            }
+            _logger.LogInformation($"Getting the list of offline files for user: {User.Identity?.Name}, date: {lastModified}");
+            return Ok(_offlineFilesService.GetUpdatedFilesList(lastModified));
         }
 
         /// <summary>
@@ -127,8 +141,14 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetOfflineFile(string id)
         {
-            var file = await _offlineFilesService.GetFileContent(User.Identity?.Name, id);
-            return File(file, "application/zip", id);
+            if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
+            {
+                _logger.LogInformation($"Unable to get the offline file for user: {User.Identity?.Name} since the user is not entitled, file: {id}");
+                return Forbid();
+            }
+            _logger.LogInformation($"Getting the offline file for user: {User.Identity?.Name}, file: {id}");
+            var file = _offlineFilesService.GetFileContent(id);
+            return File(file, id.EndsWith("json") ? "application/json": "application/zip", id);
         }
     }
 }
