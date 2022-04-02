@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services
 {
@@ -13,7 +12,6 @@ namespace IsraelHiking.API.Services
         /// <summary>
         /// Get the file's content 
         /// </summary>
-        /// <param name="userId">The user id to check against</param>
         /// <param name="fileName">The file to get</param>
         /// <returns>a read stream of the file</returns>
         Stream GetFileContent(string fileName);
