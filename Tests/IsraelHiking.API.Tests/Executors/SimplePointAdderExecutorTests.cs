@@ -3,6 +3,7 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces.Repositories;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -36,7 +37,7 @@ namespace IsraelHiking.API.Tests.Executors
             options.Value.Returns(configurationDate);
             _highwaysRepository = Substitute.For<IHighwaysRepository>();
             _osmGeoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
-            _executor = new SimplePointAdderExecutor(options, _highwaysRepository, _osmGeoJsonPreprocessorExecutor);
+            _executor = new SimplePointAdderExecutor(options, _highwaysRepository, _osmGeoJsonPreprocessorExecutor, Substitute.For<ILogger>());
         }
 
         [TestMethod]

@@ -232,6 +232,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             Assert.IsNotNull(results);
             _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("תל שלם")));
+            gateway.Received().CreateChangeset(Arg.Any<TagsCollectionBase>());
+            gateway.Received().CloseChangeset(Arg.Any<long>());
         }
 
         [TestMethod]
@@ -273,6 +275,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _adapter.UpdateFeature(feature, gateway, "en").Wait();
 
             gateway.Received().UpdateElement(Arg.Any<long>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA + ":en") && x.Tags.Contains(FeatureAttributes.WIKIPEDIA, "en:Literary Hall")));
+            gateway.Received().CreateChangeset(Arg.Any<TagsCollectionBase>());
+            gateway.Received().CloseChangeset(Arg.Any<long>());
         }
 
         [TestMethod]

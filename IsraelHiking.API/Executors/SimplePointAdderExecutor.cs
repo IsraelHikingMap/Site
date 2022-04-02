@@ -4,6 +4,7 @@ using IsraelHiking.Common.Api;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces.Repositories;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -25,6 +26,7 @@ namespace IsraelHiking.API.Executors
         private readonly IHighwaysRepository _highwaysRepository;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly ConfigurationData _options;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Constructor
@@ -32,12 +34,15 @@ namespace IsraelHiking.API.Executors
         /// <param name="options"></param>
         /// <param name="highwaysRepository"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
+        /// <param name="logger"></param>
         public SimplePointAdderExecutor(IOptions<ConfigurationData> options,
             IHighwaysRepository highwaysRepository,
-            IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor)
+            IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
+            ILogger logger)
         {
             _highwaysRepository = highwaysRepository;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
+            _logger = logger;
             _options = options.Value;
         }
 
@@ -45,9 +50,11 @@ namespace IsraelHiking.API.Executors
         public async Task Add(IAuthClient osmGateway, AddSimplePointOfInterestRequest request)
         {
             var change = await GetOsmChange(osmGateway, request);
-            var changesetId = await osmGateway.CreateChangeset($"Uploading simple POI, type: {request.PointType} using IsraelHiking.osm.org.il");
-            await osmGateway.UploadChangeset(changesetId, change);
-            await osmGateway.CloseChangeset(changesetId);
+            await osmGateway.UploadToOsmWithRetries(
+                $"Uploading simple POI, type: {request.PointType} using IsraelHiking.osm.org.il",
+                async changeSetId => await osmGateway.UploadChangeset(changeSetId, change),
+                _logger);
+
             var modifiedWay = change.Modify?.OfType<Way>().FirstOrDefault();
             if (modifiedWay != null)
             {

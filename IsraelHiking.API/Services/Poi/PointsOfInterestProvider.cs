@@ -348,9 +348,13 @@ namespace IsraelHiking.API.Services.Poi
             SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, feature.GetDescription(language), language);
             AddTagsByIcon(node.Tags, feature.Attributes[FeatureAttributes.POI_ICON].ToString());
             RemoveEmptyTags(node.Tags);
-            var changesetId = await osmGateway.CreateChangeset($"Added {feature.GetTitle(language)} using IsraelHiking.osm.org.il");
-            node.Id = await osmGateway.CreateElement(changesetId, node);
-            await osmGateway.CloseChangeset(changesetId);
+            await osmGateway.UploadToOsmWithRetries(
+                $"Added {feature.GetTitle(language)} using IsraelHiking.osm.org.il",
+                async changeSetId =>
+                {
+                    node.Id = await osmGateway.CreateElement(changeSetId, node);
+                },
+                _logger);
 
             return await UpdateElasticSearch(node);
         }
@@ -396,9 +400,15 @@ namespace IsraelHiking.API.Services.Poi
             {
                 return featureBeforeUpdate;
             }
-            var changesetId = await osmGateway.CreateChangeset($"Updated {featureBeforeUpdate.GetTitle(language)} using IsraelHiking.osm.org.il");
-            await osmGateway.UpdateElement(changesetId, completeOsmGeo);
-            await osmGateway.CloseChangeset(changesetId);
+
+            await osmGateway.UploadToOsmWithRetries(
+                $"Updated {featureBeforeUpdate.GetTitle(language)} using IsraelHiking.osm.org.il",
+                async changeSetId =>
+                {
+                    await osmGateway.UpdateElement(changeSetId, completeOsmGeo);
+                },
+                _logger
+            );
 
             return await UpdateElasticSearch(completeOsmGeo);
         }

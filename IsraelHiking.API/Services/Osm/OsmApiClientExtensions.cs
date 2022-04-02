@@ -1,4 +1,5 @@
-﻿using OsmSharp;
+﻿using Microsoft.Extensions.Logging;
+using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.IO.API;
 using OsmSharp.Tags;
@@ -47,6 +48,36 @@ namespace IsraelHiking.API.Services.Osm
                                 new Tag {Key = "created_by", Value = "IsraelHiking.osm.org.il"},
                                 new Tag {Key = "comment", Value = comment}
                             });
+        }
+
+        /// <summary>
+        /// Uploads to OSM with reties utility method
+        /// </summary>
+        /// <param name="osmGateway">The gateway</param>
+        /// <param name="message">The change set message</param>
+        /// <param name="createOrUpdate">The action to take between open and close of the change set</param>
+        /// <param name="logger">A logger</param>
+        public static async Task UploadToOsmWithRetries(this IAuthClient osmGateway, string message, Func<long, Task> createOrUpdate, ILogger logger)
+        {
+            long changeSetId = -1;
+            for (var retryIndex = 0; retryIndex < 3; retryIndex++)
+            {
+                try
+                {
+                    if (changeSetId == -1)
+                    {
+                        changeSetId = await osmGateway.CreateChangeset(message);    
+                    }
+                    await createOrUpdate(changeSetId);
+                    await osmGateway.CloseChangeset(changeSetId);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, $"Failed to upload data to OSM, retry: {retryIndex}, message: {message}");
+                    await Task.Delay(200);
+                }
+            }
         }
     }
 }
