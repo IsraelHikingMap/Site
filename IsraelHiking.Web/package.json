@@ -59,7 +59,7 @@
     "linear-interpolator": "^1.0.2",
     "lodash-es": "^4.17.21",
     "lottie-web": "^5.7.13",
-    "maplibre-gl": "^2.0.5",
+    "maplibre-gl": "^2.1.9",
     "minisearch": "^3.1.0",
     "ngx-infinite-scroll": "^10.0.1",
     "ngx-lottie": "^7.0.4",
@@ -141,6 +141,7 @@
     "karma-junit-reporter": "^2.0.1",
     "md5-file": "^5.0.0",
     "open": "^8.2.1",
+    "patch-package": "^6.4.7",
     "phonegap-plugin-mobile-accessibility": "^1.0.5",
     "po2json": "0.4.5",
     "redux-devtools-extension": "^2.13.9",
@@ -171,7 +172,8 @@
     "run-ios": "cordova run ios",
     "build-ipa": "cordova build ios --release --no-telemetry --device --buildConfig=./build-ios-parameters.json",
     "1-upload": "node extract-and-upload.js",
-    "2-download": "node download-and-compile.js"
+    "2-download": "node download-and-compile.js",
+    "postinstall": "patch-package"
   },
   "cordova": {
     "plugins": {

@@ -123,6 +123,13 @@ export class MainMapComponent extends BaseMapComponent {
             this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-right");
         });
         this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" as Unit}), "bottom-left");
+
+        this.mapComponent.mapInstance.addSource("terrain", {
+            "type": "raster-dem",
+            "url": "https://israelhiking.osm.org.il/vector/data/TerrainRGB.json",
+            "tileSize": 256
+          });
+        this.mapComponent.mapInstance.setTerrain({source: "terrain", exaggeration: 3});
     }
 
     public isMobile() {
