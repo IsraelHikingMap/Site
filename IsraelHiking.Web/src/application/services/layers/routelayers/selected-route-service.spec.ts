@@ -19,6 +19,7 @@ describe("Selected Route Service", () => {
 
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
+        toastMock.resourcesService.route = "route";
         let routerServiceMock = {};
         TestBed.configureTestingModule({
             imports: [
@@ -108,6 +109,30 @@ describe("Selected Route Service", () => {
 
             expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
             expect(selectedRoute.id).toBe("42");
+        }
+    ));
+
+    it("Should set selected route if there's no selected route", inject([SelectedRouteService],
+        (selectedRouteService: SelectedRouteService) => {
+            const selectedRouteIdSubject = getSubject((state: ApplicationState) => state.routeEditingState.selectedRouteId);
+            selectedRouteIdSubject.next(null);
+            MockNgRedux.store.dispatch = jasmine.createSpy();
+
+            selectedRouteService.setSelectedRoute("42");
+
+            expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+        }
+    ));
+
+    it("Should unselect selected route and selected the given route", inject([SelectedRouteService],
+        (selectedRouteService: SelectedRouteService) => {
+            const selectedRouteIdSubject = getSubject((state: ApplicationState) => state.routeEditingState.selectedRouteId);
+            selectedRouteIdSubject.next("1");
+            MockNgRedux.store.dispatch = jasmine.createSpy();
+
+            selectedRouteService.setSelectedRoute("42");
+
+            expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
         }
     ));
 });
