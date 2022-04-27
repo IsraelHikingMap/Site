@@ -35,9 +35,7 @@
             "styles": [
               "src/scss/common.scss"
             ],
-            "scripts": [
-              "src/google-analytics.js"
-            ],
+            "scripts": [],
             "allowedCommonJsDependencies": [
               "geojson-rbush",
               "ohauth",
@@ -144,9 +142,7 @@
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "./tsconfig.spec.json",
-            "scripts": [
-              "src/google-analytics.js"
-            ],
+            "scripts": [],
             "assets": [
               "src/content",
               "src/translations",
