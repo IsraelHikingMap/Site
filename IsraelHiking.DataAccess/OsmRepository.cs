@@ -47,12 +47,12 @@ namespace IsraelHiking.DataAccess
                 osmFileStream.Seek(0, SeekOrigin.Begin);
                 var source = new PBFOsmStreamSource(osmFileStream);
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
-                var higways = completeSource
+                var highways = completeSource
                     .OfType<CompleteWay>()
                     .Where(o => o.Tags.ContainsKey("highway") && !o.Tags.Contains("highway", "construction"))
                     .ToList();
-                _logger.LogInformation("Finished getting highways. " + higways.Count);
-                return higways;
+                _logger.LogInformation("Finished getting highways. " + highways.Count);
+                return highways;
             });
         }
 
