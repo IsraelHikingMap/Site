@@ -29,8 +29,7 @@ import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { ClipboardModule } from "@angular/cdk/clipboard";
 import { FlexLayoutModule } from "@angular/flex-layout";
-import { Angulartics2Module } from "angulartics2";
-import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
+import { Angulartics2Module, Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { NgProgressModule } from "ngx-progressbar";
 import { NgProgressHttpModule } from "ngx-progressbar/http";
 import { NgxD3Service } from "@katze/ngx-d3";
@@ -358,7 +357,7 @@ const initializeApplication = (injector: Injector) => async () => {
         bootstrap: [MainMapComponent]
     })
 export class ApplicationModule {
-    constructor(angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics) {
-        angulartics2GoogleAnalytics.startTracking();
+    constructor(angulartics: Angulartics2GoogleGlobalSiteTag) {
+        angulartics.startTracking();
     }
 }
