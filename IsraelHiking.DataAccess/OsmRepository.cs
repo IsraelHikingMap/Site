@@ -32,6 +32,7 @@ namespace IsraelHiking.DataAccess
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
                 var elements = completeSource
                     .Where(o => !o.Tags.Contains("highway", "construction"))
+                    .Where(o => !o.Tags.Contains("boundary", "disputed"))
                     .Where(o => string.IsNullOrWhiteSpace(o.Tags.GetName()) == false)
                     .ToList();
                 _logger.LogInformation("Finished extracting elements with name: " + elements.Count);
