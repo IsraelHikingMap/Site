@@ -9,11 +9,11 @@ import { RoutesFactory } from "./routes.factory";
 import { RouterService } from "application/services/router.service";
 import type { ApplicationState, RouteData } from "../../../models/models";
 
-function getSubject<T>(predecator: (state: ApplicationState) => T): Subject<T> {
+const getSubject = <T>(predecator: (state: ApplicationState) => T): Subject<T> => {
     let predecatorString = predecator.toString().split("=>")[1];
     let selectorKey = Object.keys(MockNgRedux.getSubStore().selections).find(k => k.includes(predecatorString));
     return MockNgRedux.getSelectorStub<ApplicationState, T>(selectorKey);
-}
+};
 
 describe("Selected Route Service", () => {
 
