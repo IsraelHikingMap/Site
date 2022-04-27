@@ -202,7 +202,8 @@ export class PoiService {
             this.loggingService.info(`[POIs] Uploaded successfully a${feature.properties.poiIsSimple ? " simple" : ""} ` +
                 `feature with id: ${firstItemId}, ` + "removing from upload queue");
             if (this.runningContextService.isCordova && !feature.properties.poiIsSimple) {
-                this.databaseService.storePois([poi]);
+                await this.databaseService.storePois([poi]);
+                this.rebuildPois();
             }
             this.databaseService.removePoiFromUploadQueue(firstItemId);
             this.queueIsProcessing = false;
