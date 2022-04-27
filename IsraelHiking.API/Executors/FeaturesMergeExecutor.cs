@@ -11,6 +11,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NetTopologySuite.Operation.Union;
 
 namespace IsraelHiking.API.Executors
 {
@@ -45,7 +46,8 @@ namespace IsraelHiking.API.Executors
     public class FeaturesMergeExecutor : IFeaturesMergeExecutor
     {
         private const string PLACE = "place";
-
+        private static readonly string[] EXCLUSIVE_TAGS = { "railway", PLACE, "highway", "building", "waterway" };
+        
         private readonly ConfigurationData _options;
         private readonly ILogger<FeaturesMergeExecutor> _reportLogger;
         private readonly ILogger _logger;
@@ -124,7 +126,7 @@ namespace IsraelHiking.API.Executors
             _logger.LogInformation($"Finished processing geometries, removing items.");
             var list = featureIdsToRemove.ToHashSet();
             osmFeatures = osmFeatures.Where(f => list.Contains(f.GetId()) == false).ToList();
-            _logger.LogInformation($"Finished OSM merging by name: {osmFeatures.Count()}");
+            _logger.LogInformation($"Finished OSM merging by name: {osmFeatures.Count}");
             return osmFeatures;
         }
 
@@ -299,19 +301,51 @@ namespace IsraelHiking.API.Executors
                     feature.Geometry = _geometryFactory.CreateMultiLineString(lines);
                     continue;
                 }
-                if (nonPointGeometries.All(g => g is Polygon || g is MultiPolygon))
+                if (nonPointGeometries.All(g => g is Polygon or MultiPolygon))
                 {
                     var polygons = nonPointGeometries
                         .OfType<MultiPolygon>()
                         .SelectMany(mls => mls.Geometries.OfType<Polygon>())
                         .Concat(nonPointGeometries.OfType<Polygon>())
-                        .ToArray();
-                    feature.Geometry = _geometryFactory.CreateMultiPolygon(polygons);
-                    var isValidOp = new IsValidOp(feature.Geometry);
+                        .OrderBy(p => p.Area)
+                        .ToList();
+
+                    Geometry geometry = _geometryFactory.CreateMultiPolygon(polygons.ToArray());
+                    var isValidOp = new IsValidOp(geometry);
+                    if (!isValidOp.IsValid)
+                    {
+                        for (var i = polygons.Count - 1; i >= 0; i--)
+                        {
+                            for (var j = i - 1; j >= 0; j--)
+                            {
+                                if (!polygons[i].Overlaps(polygons[j]) 
+                                    && !polygons[i].Covers(polygons[j]) &&
+                                    !polygons[i].Intersects(polygons[j]))
+                                {
+                                    continue;
+                                }
+                                var unified = UnaryUnionOp.Union(new [] { polygons[i], polygons[j] });
+                                if (unified is not Polygon polygon)
+                                {
+                                    continue;
+                                }
+                                polygons[j] = polygon;
+                                polygons.RemoveAt(i);
+                                break;
+                            }
+                        }
+
+                        geometry = polygons.Count > 1
+                            ? _geometryFactory.CreateMultiPolygon(polygons.ToArray())
+                            : polygons.First();
+                    }
+                    feature.Geometry = geometry;
+                    isValidOp = new IsValidOp(geometry);
                     if (!isValidOp.IsValid)
                     {
                         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, false);
-                        _reportLogger.LogWarning($"There was a problem merging the following feature into a multipolygon {feature.GetTitle(Languages.HEBREW)}, {GetWebsite(feature)} {isValidOp.ValidationError.Message} ({ isValidOp.ValidationError.Coordinate.X}, {isValidOp.ValidationError.Coordinate.Y})");
+                        _reportLogger.LogWarning(
+                            $"There was a problem merging {polygons.Count} polygons from the following feature into a multipolygon {feature.GetTitle(Languages.HEBREW)} ({feature.GetId()}), {GetWebsite(feature)} {isValidOp.ValidationError.Message} ({isValidOp.ValidationError.Coordinate.X}, {isValidOp.ValidationError.Coordinate.Y})");
                     }
                     continue;
                 }
@@ -454,28 +488,9 @@ namespace IsraelHiking.API.Executors
                 // different icon
                 return false;
             }
-
-            if (target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
-                target.Attributes.GetNames().Contains("railway") &&
-                !source.Attributes.GetNames().Contains("railway"))
+            
+            if (EXCLUSIVE_TAGS.Any(tagName => IsFeaturesTagsMismatched(target, source, tagName)))
             {
-                // don't merge railway with non-railway.
-                return false;
-            }
-
-            if (target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
-                target.Attributes.GetNames().Contains("place") &&
-                !source.Attributes.GetNames().Contains("place"))
-            {
-                // don't merge place with non-place.
-                return false;
-            }
-
-            if (target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
-                target.Attributes.GetNames().Contains("highway") &&
-                !source.Attributes.GetNames().Contains("highway"))
-            {
-                // don't merge highway with non-highway.
                 return false;
             }
 
@@ -483,13 +498,28 @@ namespace IsraelHiking.API.Executors
                 target.Attributes.GetNames().Contains("highway") &&
                 source.Attributes.GetNames().Contains("highway") &&
                 (source.Geometry.OgcGeometryType == OgcGeometryType.Point ||
-                target.Geometry.OgcGeometryType == OgcGeometryType.Point) &&
+                 target.Geometry.OgcGeometryType == OgcGeometryType.Point) &&
                 source.Geometry.OgcGeometryType != target.Geometry.OgcGeometryType)
             {
                 // don't merge highway points with non highway points
                 return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// Give a tagName if target and source are OSM points and the tagName does not exist on both - don't merge them
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="source"></param>
+        /// <param name="tagName"></param>
+        /// <returns></returns>
+        private bool IsFeaturesTagsMismatched(Feature target, Feature source, string tagName) {
+            return target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) && 
+                ((target.Attributes.GetNames().Contains(tagName) &&
+                !source.Attributes.GetNames().Contains(tagName)) || 
+                (!target.Attributes.GetNames().Contains(tagName) &&
+                 source.Attributes.GetNames().Contains(tagName)));
         }
 
         private List<Feature> MergeWikipediaToOsmByWikipediaTags(List<Feature> osmFeatures, List<Feature> externalFeatures)
@@ -559,6 +589,10 @@ namespace IsraelHiking.API.Executors
         private void WriteToBothLoggers(string message)
         {
             _logger.LogInformation(message);
+            if (!_options.WriteMergeReport)
+            {
+                return;
+            }
             _reportLogger.LogInformation(message + "<br/>");
         }
 
