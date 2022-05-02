@@ -45,8 +45,15 @@
 
     <config-file target="AndroidManifest.xml" parent="/manifest">
       <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-      <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     </config-file>
+    <config-file parent="/manifest" target="AndroidManifest.xml">
+      <queries>
+          <intent>
+              <action android:name="android.intent.action.SENDTO" />
+              <data android:scheme="mailto" />
+          </intent>
+      </queries>
+  </config-file>
     <config-file parent="/manifest/application/activity" target="AndroidManifest.xml">
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />
