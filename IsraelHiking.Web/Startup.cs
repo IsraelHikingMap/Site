@@ -69,6 +69,7 @@ namespace IsraelHiking.Web
                 serviceProvider.GetRequiredService<IOptions<ConfigurationData>>().Value.OsmConfiguration.BaseAddress + "/api/"));
             var geometryFactory = new GeometryFactory(new PrecisionModel(100000000));
             services.AddSingleton<GeometryFactory, GeometryFactory>(serviceProvider => geometryFactory);
+            services.AddSingleton<HomePageHelper>();
             services.AddControllers(options =>
             {
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));

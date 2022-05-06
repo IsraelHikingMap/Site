@@ -14,16 +14,20 @@ namespace IsraelHiking.API.Controllers
     public class OpenGraphController : ControllerBase
     {
         private readonly ILogger _logger;
+        private readonly HomePageHelper _pageHelper;
         private readonly IShareUrlsRepository _repository;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="repository"></param>
+        /// <param name="pageHelper"></param>
         /// <param name="logger"></param>
         public OpenGraphController(IShareUrlsRepository repository, 
+            HomePageHelper pageHelper,
             ILogger logger)
         {
+            _pageHelper = pageHelper;
             _repository = repository;
             _logger = logger;
         }
@@ -42,7 +46,7 @@ namespace IsraelHiking.API.Controllers
             var title = string.IsNullOrWhiteSpace(url.Title) ? "Israel Hiking Map Route Share" : url.Title;
             var contentResult = new ContentResult
             {
-                Content = NonApiMiddleware.GetPage(title, "https://israelhiking.osm.org.il/api/images/" + url.Id, url.Description),
+                Content = _pageHelper.Render(title, url.Description, "https://israelhiking.osm.org.il/api/images/" + url.Id),
                 ContentType = "text/html"
             };
             return contentResult;

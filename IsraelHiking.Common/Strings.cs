@@ -2,6 +2,7 @@
 {
     public static class Categories
     {
+
         public const string POINTS_OF_INTEREST = "Points of Interest";
 
         public const string WATER = "Water";
@@ -13,7 +14,9 @@
         public const string OTHER = "Other";
         public const string NONE = "None";
         public const string INATURE = "iNature";
-        public static readonly string[] Points = {
+
+        public static readonly string[] Points =
+        {
             WATER,
             VIEWPOINT,
             HISTORIC,
@@ -30,13 +33,15 @@
         public const string ROUTE_BIKE = "Bicycle";
         public const string ROUTE_4X4 = "4x4";
 
-        public static readonly string[] Routes = {
+        public static readonly string[] Routes =
+        {
             ROUTE_HIKE,
             ROUTE_BIKE,
             ROUTE_4X4
         };
     }
 
+    
     public static class FeatureAttributes
     {
         public const string ID = "identifier";
@@ -75,6 +80,12 @@
         public const string POI_REMOVED_URLS = POI_PREFIX + "RemovedUrls";
         public const string POI_ADDED_IMAGES = POI_PREFIX + "AddedImages";
         public const string POI_REMOVED_IMAGES = POI_PREFIX + "RemovedImages";
+        
+        public static readonly string[] POI_DESCRIPTION_ATTRS =
+        {
+            POI_EXTERNAL_DESCRIPTION,
+            DESCRIPTION,
+        };
 
         public const string LAT = "lat";
         public const string LON = "lon";
@@ -89,7 +100,7 @@
         public const string NAKEB = "Nakeb";
         public const string WIKIPEDIA = "Wikipedia";
         public const string INATURE = "iNature";
-        public const string COORDINATES = "Coordinates";
+        public const string COORDINATES = "Coordinates";    
     }
 
     public static class Languages
@@ -103,4 +114,22 @@
             ENGLISH
         };
     }
+
+    public static class Branding
+    {
+        public static string SiteName(string lang)
+        {
+            return lang switch
+            {
+                Languages.ENGLISH => "Israel Hiking Map",
+                _ => "מפת הטיולים הפתוחה"
+            };
+        }
+        
+        public static string DESCRIPTION =  "בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע.";
+        
+    }
+
+
+    
 }
