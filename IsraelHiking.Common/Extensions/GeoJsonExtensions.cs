@@ -173,7 +173,7 @@ namespace IsraelHiking.Common.Extensions
             string[] suffixes = {":" + language, ""};
             foreach (var suffix in suffixes)
             {
-                foreach (var prefix in FeatureAttributes.POI_DESCRIPTION_ATTRS)
+                foreach (var prefix in FeatureAttributes.POI_DESCRIPTION_KEYS)
                 {
                     var attr = prefix + suffix;
                     if (feature.Attributes.Exists(attr))

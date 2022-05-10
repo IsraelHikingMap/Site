@@ -115,15 +115,11 @@ namespace IsraelHiking.API.Services
             return context.Response.SendFileAsync(file);
         }
 
-        private Task Write(HttpContext context, string text)
-        {
-            context.Response.ContentType = "text/html";
-            return context.Response.WriteAsync(text);
-        }
-
         private Task WriteHomePage(HttpContext context, string title, string thumbnailUrl, string description, string language="")
         {
-            return Write(context, _homePageHelper.Render(title, description, thumbnailUrl,language));
+            string text = _homePageHelper.Render(title, description, thumbnailUrl,language);
+            context.Response.ContentType = "text/html";
+            return context.Response.WriteAsync(text);
         }
     }
 }

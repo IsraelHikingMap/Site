@@ -81,7 +81,7 @@
         public const string POI_ADDED_IMAGES = POI_PREFIX + "AddedImages";
         public const string POI_REMOVED_IMAGES = POI_PREFIX + "RemovedImages";
         
-        public static readonly string[] POI_DESCRIPTION_ATTRS =
+        public static readonly string[] POI_DESCRIPTION_KEYS =
         {
             POI_EXTERNAL_DESCRIPTION,
             DESCRIPTION,
