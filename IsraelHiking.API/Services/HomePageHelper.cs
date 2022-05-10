@@ -37,6 +37,9 @@ namespace IsraelHiking.API.Services
             _fileFooter = parts[2];
         }
 
+        /// <summary>
+        /// Returns the index.html FileInfo
+        /// </summary>
         public IFileInfo GetFileInfo => _fileInfo;
 
 
@@ -59,13 +62,13 @@ namespace IsraelHiking.API.Services
             var secureThumbUrl = thumbnailUrl.Replace("http://", "https://");
             
             var s = $@"
-                    <meta property='og:title' content='{title}' />
-                    <meta property='og:image' content='{thumbnailUrl}' />
-                    <meta property='og:image:url' content='{thumbnailUrl}' />
-                    <meta property='og:image:secure_url' content='{secureThumbUrl}' />
-                    <meta property='og:description' content='{description}' />
-                    <meta name='title' content='{title}' />
-                    <meta name='description' content='{description}' />
+                    <meta property=""og:title"" content=""{title}"" />
+                    <meta property=""og:image"" content=""{thumbnailUrl}"" />
+                    <meta property=""og:image:url"" content=""{thumbnailUrl}"" />
+                    <meta property=""og:image:secure_url"" content=""{secureThumbUrl}"" />
+                    <meta property=""og:description"" content=""{description}"" />
+                    <meta name=""title"" content=""{title}"" />
+                    <meta name=""description"" content=""{description}"" />
                     <title>{title}</title>
             ";
 

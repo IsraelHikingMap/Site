@@ -24,10 +24,10 @@ namespace IsraelHiking.API.Services
         private readonly IShareUrlsRepository _shareUrlsRepository;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly ConfigurationData _options;
-        private readonly HomePageHelper _homePageHelper;
+        private readonly IHomePageHelper _homePageHelper;
 
         /// <summary>
-        /// Constcutor
+        /// Constructor
         /// </summary>
         /// <param name="next"></param>
         /// <param name="environment"></param>
@@ -36,7 +36,7 @@ namespace IsraelHiking.API.Services
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="options"></param>
         public NonApiMiddleware(RequestDelegate next, IWebHostEnvironment environment,
-            HomePageHelper homePageHelper,
+            IHomePageHelper homePageHelper,
             IShareUrlsRepository shareUrlsRepository,
             IPointsOfInterestProvider pointsOfInterestProvider,
             IOptions<ConfigurationData> options)
@@ -67,7 +67,7 @@ namespace IsraelHiking.API.Services
                     return;
                 }
                 
-                var title = string.IsNullOrWhiteSpace(url.Title) ? "Israel Hiking Map Route Share" : url.Title;
+                var title = string.IsNullOrWhiteSpace(url.Title) ? Branding.ROUTE_SHARE_DEFAULT_TITLE : url.Title;
                 var thumbnailUrl = "https://israelhiking.osm.org.il/api/images/" + url.Id;
                 if (isWhatsApp)
                 {
@@ -123,7 +123,7 @@ namespace IsraelHiking.API.Services
 
         private Task WriteHomePage(HttpContext context, string title, string thumbnailUrl, string description, string language="")
         {
-            return Write(context, _homePageHelper.Render(title, description, thumbnailUrl, language));
+            return Write(context, _homePageHelper.Render(title, description, thumbnailUrl,language));
         }
     }
 }
