@@ -1,5 +1,10 @@
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
+if ($env:PASSWORD -eq $null) {
+	Write-Host "Can't build iOS without a password for the encripted files"
+	Exit
+}
+
 #Replace version in config.xml file
 $filePath = get-ChildItem config.xml | Select-Object -first 1 | select -expand FullName
 $xml = New-Object XML
