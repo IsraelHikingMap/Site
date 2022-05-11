@@ -18,9 +18,8 @@ namespace IsraelHiking.API.Tests.Services
         public void TestInitialize()
         {
             _hostingEnvironment = Substitute.For<IWebHostEnvironment>();
-            var fileProvider =
-                new PhysicalFileProvider(Path.Combine(AppContext.BaseDirectory,
-                    "../../../../../IsraelHiking.Web/wwwroot"));
+            var root = Path.Combine(AppContext.BaseDirectory, "test_files", "sample_wwwroot");
+            var fileProvider = new PhysicalFileProvider(root);
             _hostingEnvironment.WebRootFileProvider.Returns(fileProvider);
             _homePageHelper = new HomePageHelper(_hostingEnvironment);
         }
