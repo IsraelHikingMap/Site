@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using IsraelHiking.API.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
@@ -11,17 +12,20 @@ namespace IsraelHiking.API.Tests.Services
     [TestClass]
     public class HomePageHelperTests
     {
-        private IWebHostEnvironment _hostingEnvironment;
+        const string HOME_PAGE_SAMPLE_CONTENT = @"<html><!-- IHM START -->foo<!-- IHM END --></html>";
         private HomePageHelper _homePageHelper;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _hostingEnvironment = Substitute.For<IWebHostEnvironment>();
-            var root = Path.Combine(AppContext.BaseDirectory, "test_files", "sample_wwwroot");
-            var fileProvider = new PhysicalFileProvider(root);
-            _hostingEnvironment.WebRootFileProvider.Returns(fileProvider);
-            _homePageHelper = new HomePageHelper(_hostingEnvironment);
+            var hostingEnvironment = Substitute.For<IWebHostEnvironment>();
+            var rootFolder = Substitute.For<IFileProvider>();
+            var fileInfo = Substitute.For<IFileInfo>();
+            var stream = new MemoryStream(Encoding.UTF8.GetBytes(HOME_PAGE_SAMPLE_CONTENT));
+            fileInfo.CreateReadStream().Returns(stream);
+            rootFolder.GetFileInfo("/index.html").Returns(fileInfo);
+            hostingEnvironment.WebRootFileProvider.Returns(rootFolder);
+            _homePageHelper = new HomePageHelper(hostingEnvironment);
         }
 
 
@@ -36,25 +40,25 @@ namespace IsraelHiking.API.Tests.Services
             }
 
             Check("<title>@TITLE@");
-            Check( "<meta property=\"og:title\" content=\"@TITLE@");
-            Check( "<meta property=\"og:description\" content=\"@DESC@\"");
-            Check( "<meta property=\"og:image\" content=\"@THUMB@\"");
+            Check("<meta property=\"og:title\" content=\"@TITLE@");
+            Check("<meta property=\"og:description\" content=\"@DESC@\"");
+            Check("<meta property=\"og:image\" content=\"@THUMB@\"");
         }
 
         [TestMethod]
         public void TestRender_WithEscaping()
         {
             var s = _homePageHelper.Render("1<>\"2", "3<>\"4", "@THUMB@");
-            
+
             void Check(string needle)
             {
                 StringAssert.Contains(s, needle, null, null);
             }
 
             Check("<title>1&lt;&gt;&quot;2");
-            Check( "<meta property=\"og:title\" content=\"1&lt;&gt;&quot;2");
-            Check( "<meta property=\"og:description\" content=\"3&lt;&gt;&quot;4\"");
-            Check( "<meta property=\"og:image\" content=\"@THUMB@\"");
+            Check("<meta property=\"og:title\" content=\"1&lt;&gt;&quot;2");
+            Check("<meta property=\"og:description\" content=\"3&lt;&gt;&quot;4\"");
+            Check("<meta property=\"og:image\" content=\"@THUMB@\"");
         }
     }
 }
