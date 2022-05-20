@@ -7,5 +7,12 @@ Disallow: /search
 Disallow: /map
 Disallow: /url
 
+# There is no need to crawl tiles
+Disallow: /Hebrew/mtbTiles/
+Disallow: /English/mtbTiles/
+Disallow: /Hebrew/Tiles/
+Disallow: /English/Tiles/
+Disallow: /Otrho/
+
 # Sitemap files
 Sitemap: https://israelhiking.osm.org.il/sitemap.xml
