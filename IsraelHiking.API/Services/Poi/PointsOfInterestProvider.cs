@@ -524,6 +524,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
+        [Obsolete("Not in use any more 5.2022")]
         public Feature GetCoordinatesFeature(LatLng latLng, string id)
         {
             var coordinate = latLng.ToCoordinate();

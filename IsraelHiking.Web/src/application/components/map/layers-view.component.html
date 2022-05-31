@@ -21,14 +21,14 @@
 </mgl-geojson-source>
 <mgl-markers-for-clusters source="poi-cluster-source">
     <ng-template mglPoint let-feature>
-        <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="openPoi(feature.properties.poiId, $event)" (mouseover)="setHoverFeature(feature)" (mouseout)="hoverFeature = null">
+        <span class="fa-stack fa-lg cursor-pointer marker-icon" (click)="openPoi(feature.properties.poiId, $event)" (mouseover)="setHoverFeature(feature)" (mouseout)="hoverFeature = null" angulartics2On="click" angularticsCategory="POI" angularticsAction="Open POI sidebar from map">
             <span *ngIf="hasExtraData(feature)" class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
             <i class="fa icon-map-marker-rect fa-stack-2x" style="color: white; text-shadow: 3px 3px 3px #000;"></i>
             <i class="fa {{feature.properties.poiIcon}} fa-stack-1x stack-icon-top stack-icon-large" [style.color]="feature.properties.poiIconColor"></i>
         </span>
     </ng-template>
     <ng-template mglClusterPoint let-feature>
-        <div class="marker-cluster" (click)="toggleClusterPopup($event, feature, clusterSource)">
+        <div class="marker-cluster" (click)="toggleClusterPopup($event, feature, clusterSource)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Toggle POIs cluster menu">
             {{ feature.properties?.point_count }}
         </div>
     </ng-template>
@@ -36,8 +36,18 @@
 <mgl-popup *ngIf="selectedCluster" [lngLat]="selectedCluster.geometry.coordinates" (popupClose)="clearSelectedClusterPopup()" [closeOnClick]="true">
     <cluster-overlay [features]="clusterFeatures" (closed)="clearSelectedClusterPopup()"></cluster-overlay>
 </mgl-popup>
-<mgl-popup *ngIf="hoverFeature" [lngLat]="hoverFeature.geometry.coordinates" [closeButton]="false" [offset]="[0, -20]">
+<mgl-popup *ngIf="hoverFeature" [lngLat]="hoverFeature.geometry.coordinates" [closeButton]="false" [offset]="[0, -30]">
     <span [dir]="resources.getDirection(getTitle(hoverFeature))">{{getTitle(hoverFeature)}}</span>
+</mgl-popup>
+<mgl-popup *ngIf="selectedPoiFeature && selectedPoiFeature.properties.poiSource === 'Coordinates'" [lngLat]="selectedPoiFeature.geometry.coordinates" [offset]="[0, -30]">
+    <div fxLayour="row">
+        <div fxFlex>
+            <button mat-button (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Add coordinate search to route"><i class="fa icon-plus"></i></button>
+        </div>
+        <div fxFlex>
+            <button mat-button (click)="clearSelected()" matTooltip="{{resources.clear}}" matTooltipPosition="above" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear coordinate search"><i class="fa icon-eye-slash"></i></button>
+        </div>
+    </div>
 </mgl-popup>
 <mgl-marker *ngIf="selectedPoiFeature" [lngLat]="selectedPoiFeature.geometry.coordinates" anchor="bottom">
     <span class="fa-stack fa-lg cursor-pointer selected-marker-icon" (click)="openPoi(selectedPoiFeature.properties.poiId, $event)" (mouseover)="setHoverFeature(selectedPoiFeature)" (mouseout)="hoverFeature = null">

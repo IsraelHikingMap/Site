@@ -514,6 +514,9 @@ export class PoiService {
         if (itemInCache) {
             return cloneDeep(itemInCache);
         }
+        if (source === "Coordinates") {
+            return this.getFeatureFromCoordinatesId(id, language);
+        }
         try {
             let params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
             let poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
@@ -528,6 +531,36 @@ export class PoiService {
             this.poisCache.splice(0, 0, feature);
             return feature;
         }
+    }
+
+    public getIdFromLatLng(latLng: LatLngAlt): string {
+        return latLng.lat.toFixed(6) + "_" + latLng.lng.toFixed(6);
+    }
+
+    public getLatLngFromId(id: string): LatLngAlt {
+        let split = id.split("_");
+        return { lat: +split[0], lng: +split[1] };
+    }
+
+    public getFeatureFromCoordinatesId(id: string, language: string): GeoJSON.Feature {
+        let latlng = this.getLatLngFromId(id);
+        let feature = {
+            type: "Feature",
+            properties: {
+                poiId: "Coordinates_" + id,
+                identifier: id,
+                poiSource: "Coordinates",
+                poiIcon: "icon-globe",
+                poiIconColor: "black"
+            },
+            geometry: {
+                type: "Point",
+                coordinates: SpatialService.toCoordinate(latlng)
+            }
+        } as GeoJSON.Feature;
+        this.setLocation(feature, latlng);
+        this.setTitle(feature, id, language);
+        return feature;
     }
 
     private async addPointToUploadQueue(feature: GeoJSON.Feature): Promise<void> {

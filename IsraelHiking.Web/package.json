@@ -69,6 +69,7 @@
     "photoswipe": "^4.1.3",
     "piexifjs": "1.0.6",
     "platform": "^1.3.6",
+    "proj4": "^2.8.0",
     "redux": "^4.1.2",
     "redux-undo": "^1.0.1",
     "rxjs": "^7.5.2",
@@ -96,6 +97,7 @@
     "@types/pako": "^1.0.2",
     "@types/photoswipe": "^4.1.2",
     "@types/platform": "^1.3.4",
+    "@types/proj4": "^2.5.2",
     "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "5.3.0",
     "@typescript-eslint/parser": "5.3.0",
@@ -208,7 +210,8 @@
         "MOTION_USAGE_DESCRIPTION": "We need to access your motion direction in order to be able to show it on the map while navigating"
       },
       "cordova-plugin-oauth": {
-        "URL_SCHEME": "ihm"
+        "URL_SCHEME": "ihm",
+        "ANDROID_SUPPORT_CUSTOM_TABS_VERSION": "1.3.0"
       },
       "cordova-plugin-x-socialsharing": {
         "PHOTO_LIBRARY_ADD_USAGE_DESCRIPTION": "This app requires photo library access to function properly.",

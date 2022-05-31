@@ -6,6 +6,7 @@ import { SearchResultsProvider } from "./search-results.provider";
 import { GeoJsonParser } from "./geojson.parser";
 import { RunningContextService } from "./running-context.service";
 import { PoiService } from "./poi.service";
+import { CoordinatesService } from "./coordinates.service";
 import type { SearchResultsPointOfInterest } from "../models/models";
 
 describe("SearchResultsProvider", () => {
@@ -18,6 +19,7 @@ describe("SearchResultsProvider", () => {
             providers: [
                 GeoJsonParser,
                 SearchResultsProvider,
+                CoordinatesService,
                 { provide: RunningContextService, useValue: { isOnline: true } },
                 { provide: PoiService, useValue: null }
             ]

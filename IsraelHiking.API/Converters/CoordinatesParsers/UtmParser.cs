@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using System;
+using IsraelHiking.API.Executors;
 using NetTopologySuite.Geometries;
 using ProjNet.CoordinateSystems.Transformations;
 using System.Text.RegularExpressions;
@@ -8,6 +9,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
     /// <summary>
     /// This class will parse ITM and ICS coordinates
     /// </summary>
+    [Obsolete("Not in use any more 5.2022")]
     public class UtmParser : BaseCoordinatesParser
     {
         private readonly MathTransform _itmWgs84MathTransform;

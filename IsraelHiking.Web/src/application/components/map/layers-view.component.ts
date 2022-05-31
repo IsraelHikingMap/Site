@@ -9,8 +9,11 @@ import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
+import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SpatialService } from "../../services/spatial.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
-import type { ApplicationState, Overlay } from "../../models/models";
+import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
+import type { ApplicationState, LinkData, Overlay } from "../../models/models";
 
 @Component({
     selector: "layers-view",
@@ -37,6 +40,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
                 private readonly router: Router,
                 private readonly layersService: LayersService,
                 private readonly poiService: PoiService,
+                private readonly selectedRouteService: SelectedRouteService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
@@ -80,9 +84,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         e.stopPropagation();
         this.selectedCluster = null;
         let sourceAndId = this.getSourceAndId(id);
-        if (sourceAndId.source === "Coordinates" && this.ngRedux.getState().poiState.selectedPointOfInterest.id === sourceAndId.id) {
-            this.ngRedux.dispatch(new SetSelectedPoiAction({ poi: null }));
-            this.hoverFeature = null;
+        if (sourceAndId.source === "Coordinates") {
             return;
         }
         this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
@@ -131,5 +133,26 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
 
     public trackByKey(_: number, el: Overlay) {
         return el.key;
+    }
+
+    public addPointToRoute() {
+        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        let markerData = {
+            latlng: SpatialService.toLatLng(this.selectedPoiFeature.geometry.coordinates as [number, number]),
+            title: "",
+            description: "",
+            type: "star",
+            urls: [] as LinkData[]
+        };
+        this.ngRedux.dispatch(new AddPrivatePoiAction({
+            routeId: selectedRoute.id,
+            markerData
+        }));
+        this.clearSelected();
+    }
+
+    public clearSelected() {
+        this.ngRedux.dispatch(new SetSelectedPoiAction({ poi: null }));
+        this.hoverFeature = null;
     }
 }

@@ -159,7 +159,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 this.ngRedux.dispatch(new SetSelectedPoiAction({
                     poi: originalFeature
                 }));
-                if (this.runningContextSerivce.isMobile && data.source === "Coordinates") {
+                if (data.source === "Coordinates") {
                     this.close();
                 }
             }

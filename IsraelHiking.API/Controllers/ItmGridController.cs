@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using System;
+using IsraelHiking.API.Executors;
 using IsraelHiking.Common.Poi;
 using Microsoft.AspNetCore.Mvc;
 using ProjNet.CoordinateSystems.Transformations;
@@ -9,6 +10,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller facilitates for conversion between WGS84 coordinates to ITM coordinates
     /// </summary>
     [Route("api/[controller]")]
+    [Obsolete("Not in use any more 5.2022")]
     public class ItmGridController : ControllerBase
     {
         private readonly MathTransform _wgs84ItmMathTransform;

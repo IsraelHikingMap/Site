@@ -1,4 +1,5 @@
-﻿using NetTopologySuite.Geometries;
+﻿using System;
+using NetTopologySuite.Geometries;
 using System.Text.RegularExpressions;
 
 namespace IsraelHiking.API.Converters.CoordinatesParsers
@@ -6,6 +7,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
     /// <summary>
     /// This is a base class for the coordinates parser that uses regular expression.
     /// </summary>
+    [Obsolete("Not in use any more 5.2022")]
     public abstract class BaseCoordinatesParser : ICoordinatesParser
     {
         /// <summary>

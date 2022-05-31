@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Converters;
+﻿using System;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Converters.CoordinatesParsers;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -10,6 +11,7 @@ using NetTopologySuite.Geometries;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.API.Services.Poi;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -75,12 +77,14 @@ namespace IsraelHiking.API.Controllers
             return await Task.WhenAll(features.OfType<IFeature>().ToList().Select(f => ConvertFromFeature(f, language)));
         }
 
+        [Obsolete("Not in use any more 5.2022")]
         private Coordinate GetCoordinates(string term)
         {
             return _coordinatesParsers.Select(parser => parser.TryParse(term))
                 .FirstOrDefault(coordinates => coordinates != null);
         }
 
+        [Obsolete("Not in use any more 5.2022")]
         private SearchResultsPointOfInterest ConvertFromCoordinates(string name, Coordinate coordinates)
         {
             var latLng = new LatLng(coordinates.Y, coordinates.X, coordinates.Z);
@@ -89,7 +93,23 @@ namespace IsraelHiking.API.Controllers
 
         private async Task<SearchResultsPointOfInterest> ConvertFromFeature(IFeature feature, string language)
         {
-            var searchResultsPoi = SearchResultsPointOfInterestConverter.FromFeature(feature, language);
+            var title = feature.GetTitle(language);
+            var geoLocation = feature.GetLocation();
+            var latLng = new LatLng(geoLocation.Y,geoLocation.X);
+            var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
+            if (string.IsNullOrWhiteSpace(icon))
+            {
+                icon = PointsOfInterestProvider.SEARCH_ICON;
+            }
+            var searchResultsPoi = new SearchResultsPointOfInterest
+            {
+                Id = feature.Attributes[FeatureAttributes.ID].ToString(),
+                Title = title,
+                Icon = icon,
+                IconColor = feature.Attributes[FeatureAttributes.POI_ICON_COLOR].ToString(),
+                Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(),
+                Location = latLng,
+            };
             searchResultsPoi.DisplayName = await GetDisplayName(feature, language, searchResultsPoi.Title);
             return searchResultsPoi;
         }
