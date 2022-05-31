@@ -1,7 +1,7 @@
 // 3rd party
 import { NgModule, APP_INITIALIZER, Injector, ErrorHandler } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { BrowserModule, HammerModule } from "@angular/platform-browser";
+import { BrowserModule, HammerModule, Title } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { RouterModule } from "@angular/router";
@@ -75,6 +75,7 @@ import { SnappingService } from "./services/snapping.service";
 import { FitBoundsService } from "./services/fit-bounds.service";
 import { RouteStatisticsService } from "./services/route-statistics.service";
 import { ShareUrlsService } from "./services/share-urls.service";
+import { IHMTitleService } from "./services/ihm-title.service";
 import { ToastService } from "./services/toast.service";
 import { ElevationProvider } from "./services/elevation.provider";
 import { SearchResultsProvider } from "./services/search-results.provider";
@@ -244,6 +245,8 @@ const initializeApplication = (injector: Injector) => async () => {
             FitBoundsService,
             RouteStatisticsService,
             ShareUrlsService,
+            Title,
+            IHMTitleService,
             ToastService,
             ElevationProvider,
             SearchResultsProvider,
