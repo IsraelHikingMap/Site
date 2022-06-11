@@ -3,14 +3,10 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces.Repositories;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
-using Wangkanai.Detection.Models;
 using Wangkanai.Detection.Services;
 
 namespace IsraelHiking.API.Services
@@ -20,32 +16,25 @@ namespace IsraelHiking.API.Services
     /// </summary>
     public class NonApiMiddleware
     {
-        private readonly IWebHostEnvironment _environment;
         private readonly IShareUrlsRepository _shareUrlsRepository;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
-        private readonly ConfigurationData _options;
         private readonly IHomePageHelper _homePageHelper;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="next"></param>
-        /// <param name="environment"></param>
         /// <param name="homePageHelper"></param>
         /// <param name="shareUrlsRepository"></param>
         /// <param name="pointsOfInterestProvider"></param>
-        /// <param name="options"></param>
-        public NonApiMiddleware(RequestDelegate next, IWebHostEnvironment environment,
+        public NonApiMiddleware(RequestDelegate next,
             IHomePageHelper homePageHelper,
             IShareUrlsRepository shareUrlsRepository,
-            IPointsOfInterestProvider pointsOfInterestProvider,
-            IOptions<ConfigurationData> options)
+            IPointsOfInterestProvider pointsOfInterestProvider)
         {
-            _environment = environment;
             _homePageHelper = homePageHelper;
 
             _shareUrlsRepository = shareUrlsRepository;
-            _options = options.Value;
             _pointsOfInterestProvider = pointsOfInterestProvider;
         }
 
@@ -97,7 +86,7 @@ namespace IsraelHiking.API.Services
                     thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/200px-$3");
                 }
                 feature.SetTitles();
-                await WriteHomePage(context, feature.GetTitle(language), thumbnailUrl, feature.GetDescription(language), language);
+                await WriteHomePage(context, feature.GetTitle(language), thumbnailUrl, feature.GetDescriptionWithExternal(language), language);
                 return;
             }
 

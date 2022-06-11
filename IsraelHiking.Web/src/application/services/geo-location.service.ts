@@ -126,7 +126,7 @@ export class GeoLocationService {
             desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
             stationaryRadius: 10,
             distanceFilter: 5,
-            notificationTitle: this.resources.israelHikingMap,
+            notificationTitle: "Israel Hiking Map",
             notificationText: this.resources.runningInBackground,
             interval: 1000,
             fastestInterval: 1000,

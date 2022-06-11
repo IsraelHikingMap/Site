@@ -1,11 +1,9 @@
-using System;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using IsraelHiking.Common;
 using Microsoft.AspNetCore.Hosting;
-using Trace = System.Diagnostics.Trace;
 
 namespace IsraelHiking.API.Services
 {
@@ -14,10 +12,9 @@ namespace IsraelHiking.API.Services
     /// </summary>
     public class HomePageHelper : IHomePageHelper
     {
-        const string splitPattern = @"<!-- IHM \w+ -->";
+        const string SPLIT_PATTERN = @"<!-- IHM \w+ -->";
         
         private readonly IFileInfo _fileInfo;
-        private readonly string _fileContents;
         private readonly string _fileHeader;
         private readonly string _fileFooter;
 
@@ -27,12 +24,9 @@ namespace IsraelHiking.API.Services
         public HomePageHelper(IWebHostEnvironment environment)
         {
             _fileInfo = environment.WebRootFileProvider.GetFileInfo("/index.html");
-            using (var reader = new StreamReader(_fileInfo.CreateReadStream()))
-            {
-                _fileContents = reader.ReadToEnd();
-            }
-            var parts = Regex.Split(_fileContents, splitPattern);
-            Trace.Assert(parts.Length == 3, String.Format("Bad number of parts: {0}", parts.Length));
+            using var reader = new StreamReader(_fileInfo.CreateReadStream());
+            var fileContents = reader.ReadToEnd();
+            var parts = Regex.Split(fileContents, SPLIT_PATTERN);
             _fileHeader = parts[0];
             _fileFooter = parts[2];
         }
@@ -54,7 +48,7 @@ namespace IsraelHiking.API.Services
         public string Render(string title, string description, string thumbnailUrl, string language="")
         {
             title = WebUtility.HtmlEncode(title.Trim());
-            title += (string.IsNullOrWhiteSpace(title) ? "" : " | ") + Branding.SiteName(language);
+            title += (string.IsNullOrWhiteSpace(title) ? "" : " | ") + Branding.SITE_NAME;
 
             description = string.IsNullOrWhiteSpace(description) ? Branding.DESCRIPTION : description.Trim();
             description = WebUtility.HtmlEncode(description);

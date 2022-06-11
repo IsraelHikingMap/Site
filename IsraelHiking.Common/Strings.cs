@@ -117,15 +117,8 @@
 
     public static class Branding
     {
-        public static string SiteName(string lang)
-        {
-            return lang switch
-            {
-                Languages.ENGLISH => "Israel Hiking Map",
-                _ => "מפת הטיולים הפתוחה"
-            };
-        }
-        
+        public static string SITE_NAME = "Israel Hiking Map";
+
         public static string DESCRIPTION =  "בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע.";
 
         public const string ROUTE_SHARE_DEFAULT_TITLE = "Israel Hiking Map Route Share";

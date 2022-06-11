@@ -13,7 +13,6 @@ using NSubstitute;
 using System;
 using System.IO;
 using System.Text;
-using NSubstitute.Extensions;
 using Wangkanai.Detection.Services;
 
 namespace IsraelHiking.API.Tests.Services
@@ -38,8 +37,8 @@ namespace IsraelHiking.API.Tests.Services
             var config = new ConfigurationData();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(config);
-            _middleware = new NonApiMiddleware(null, _hostingEnvironment, _homePageHelper, _repository,
-                _pointsOfInterestProvider, options);
+            _middleware = new NonApiMiddleware(null, _homePageHelper, _repository,
+                _pointsOfInterestProvider);
         }
 
         private IDetectionService SetupDetectionService()
@@ -81,6 +80,39 @@ namespace IsraelHiking.API.Tests.Services
 
             var checkUrl = Arg.Is<string>(x => x.Contains("200px-"));
             _homePageHelper.Received().Render(name, desc, checkUrl, "he");
+            
+            var bodyString = Encoding.UTF8.GetString(stream.ToArray());
+            Assert.AreEqual(output, bodyString);
+        }
+        
+        [TestMethod]
+        public void TestCrawler_PoiWithExternalDescription_ShouldReturnExternal()
+        {
+            var source = "source";
+            var id = "id";
+            var context = new DefaultHttpContext();
+            var stream = new MemoryStream();
+            context.Response.Body = stream;
+            context.Request.Path = new PathString($"/poi/{source}/{id}");
+
+            var name = "Jabel Wadi";
+            var externalDescription = "This feature only has an external description";
+            var url =
+                "https://upload.wikimedia.org/wikipedia/commons/6/66/Israel_Hiking_Map_%D7%A2%D7%99%D7%9F_%D7%A0%D7%98%D7%A3.jpeg";
+            
+            _pointsOfInterestProvider.GetFeatureById(source, id).Returns(new Feature(new Point(0, 0),
+                new AttributesTable
+                {
+                    { FeatureAttributes.NAME, name },
+                    { FeatureAttributes.POI_EXTERNAL_DESCRIPTION, externalDescription },
+                    { FeatureAttributes.IMAGE_URL, url }
+                }));
+            var detectionService = SetupDetectionService();
+
+            _middleware.InvokeAsync(context, detectionService).Wait();
+
+            var checkUrl = Arg.Is<string>(x => x.Contains("200px-"));
+            _homePageHelper.Received().Render(name, externalDescription, checkUrl, "he");
             
             var bodyString = Encoding.UTF8.GetString(stream.ToArray());
             Assert.AreEqual(output, bodyString);

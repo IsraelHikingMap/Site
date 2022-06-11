@@ -170,6 +170,20 @@ namespace IsraelHiking.Common.Extensions
 
         public static string GetDescription(this IFeature feature, string language)
         {
+            if (feature.Attributes.Exists(FeatureAttributes.DESCRIPTION + ":" + language))
+            {
+                return feature.Attributes[FeatureAttributes.DESCRIPTION + ":" + language].ToString();
+            }
+            if (feature.Attributes.Exists(FeatureAttributes.DESCRIPTION))
+            {
+                return feature.Attributes[FeatureAttributes.DESCRIPTION].ToString();
+            }
+            return string.Empty;
+
+        }
+
+        public static string GetDescriptionWithExternal(this IFeature feature, string language)
+        {
             string[] suffixes = {":" + language, ""};
             foreach (var suffix in suffixes)
             {
