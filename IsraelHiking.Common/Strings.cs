@@ -2,7 +2,6 @@
 {
     public static class Categories
     {
-
         public const string POINTS_OF_INTEREST = "Points of Interest";
 
         public const string WATER = "Water";
@@ -40,7 +39,6 @@
             ROUTE_4X4
         };
     }
-
     
     public static class FeatureAttributes
     {
@@ -95,12 +93,10 @@
     public static class Sources
     {
         public const string OSM = "OSM";
-        public const string OSM_ADDRESS = "https://www.openstreetmap.org/";
-        public const string OSM_FILE_NAME = "israel-and-palestine-latest.osm.pbf";
         public const string NAKEB = "Nakeb";
         public const string WIKIPEDIA = "Wikipedia";
         public const string INATURE = "iNature";
-        public const string COORDINATES = "Coordinates";    
+        public const string COORDINATES = "Coordinates";
     }
 
     public static class Languages
@@ -122,10 +118,5 @@
         public static string DESCRIPTION =  "בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע.";
 
         public const string ROUTE_SHARE_DEFAULT_TITLE = "Israel Hiking Map Route Share";
-
-        
     }
-
-
-    
 }
