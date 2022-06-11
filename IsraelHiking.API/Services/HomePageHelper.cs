@@ -13,28 +13,27 @@ namespace IsraelHiking.API.Services
     public class HomePageHelper : IHomePageHelper
     {
         const string SPLIT_PATTERN = @"<!-- IHM \w+ -->";
-        
-        private readonly IFileInfo _fileInfo;
+
         private readonly string _fileHeader;
         private readonly string _fileFooter;
 
+        /// <summary>
+        /// Returns the index.html FileInfo
+        /// </summary>
+        public IFileInfo IndexFileInfo { get; }
+        
         /// <summary>
         /// Constructor
         /// </summary>
         public HomePageHelper(IWebHostEnvironment environment)
         {
-            _fileInfo = environment.WebRootFileProvider.GetFileInfo("/index.html");
-            using var reader = new StreamReader(_fileInfo.CreateReadStream());
+            IndexFileInfo = environment.WebRootFileProvider.GetFileInfo("/index.html");
+            using var reader = new StreamReader(IndexFileInfo.CreateReadStream());
             var fileContents = reader.ReadToEnd();
             var parts = Regex.Split(fileContents, SPLIT_PATTERN);
             _fileHeader = parts[0];
             _fileFooter = parts[2];
         }
-
-        /// <summary>
-        /// Returns the index.html FileInfo
-        /// </summary>
-        public IFileInfo GetFileInfo => _fileInfo;
 
 
         /// <summary>

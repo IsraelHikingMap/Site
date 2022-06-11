@@ -10,7 +10,7 @@ namespace IsraelHiking.API.Services
         /// <summary>
         /// Returns the home page FileInfo
         /// </summary>
-        public IFileInfo GetFileInfo { get; }
+        public IFileInfo IndexFileInfo { get; }
         
         /// <summary>
         /// Renders the home page with specified data

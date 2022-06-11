@@ -94,7 +94,7 @@ namespace IsraelHiking.API.Services
         }
 
         private async Task SendDefaultFile(HttpContext context) {
-            await SendFile(context, _homePageHelper.GetFileInfo);
+            await SendFile(context, _homePageHelper.IndexFileInfo);
         }
 
         private Task SendFile(HttpContext context, IFileInfo file)
