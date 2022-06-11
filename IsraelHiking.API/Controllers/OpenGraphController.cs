@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using IsraelHiking.Common;
-using Microsoft.VisualBasic;
 
 namespace IsraelHiking.API.Controllers
 {
