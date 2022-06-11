@@ -3,7 +3,6 @@ using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces.Repositories;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,7 +20,6 @@ namespace IsraelHiking.API.Tests.Services
     public class NonApiMiddlewareTests : HomePageHelperFixture
     {
         private NonApiMiddleware _middleware;
-        private IWebHostEnvironment _hostingEnvironment;
         private IServiceProvider _serviceProvider;
         private IShareUrlsRepository _repository;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
@@ -29,7 +27,6 @@ namespace IsraelHiking.API.Tests.Services
         [TestInitialize]
         public void TestInitialize()
         {
-            _hostingEnvironment = Substitute.For<IWebHostEnvironment>();
             _serviceProvider = Substitute.For<IServiceProvider>();
             _repository = Substitute.For<IShareUrlsRepository>();
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
@@ -58,12 +55,12 @@ namespace IsraelHiking.API.Tests.Services
             var source = "source";
             var id = "id";
             var context = new DefaultHttpContext();
-            var stream = new MemoryStream();
+            using var stream = new MemoryStream();
             context.Response.Body = stream;
             context.Request.Path = new PathString($"/poi/{source}/{id}");
 
-            var name = "Jabel Wadi";
-            var desc = "Why not put small sign yam?";
+            var name = "name";
+            var description = "description";
             var url =
                 "https://upload.wikimedia.org/wikipedia/commons/6/66/Israel_Hiking_Map_%D7%A2%D7%99%D7%9F_%D7%A0%D7%98%D7%A3.jpeg";
             
@@ -71,7 +68,7 @@ namespace IsraelHiking.API.Tests.Services
                 new AttributesTable
                 {
                     { FeatureAttributes.NAME, name },
-                    { FeatureAttributes.DESCRIPTION, desc },
+                    { FeatureAttributes.DESCRIPTION, description },
                     { FeatureAttributes.IMAGE_URL, url }
                 }));
             var detectionService = SetupDetectionService();
@@ -79,7 +76,7 @@ namespace IsraelHiking.API.Tests.Services
             _middleware.InvokeAsync(context, detectionService).Wait();
 
             var checkUrl = Arg.Is<string>(x => x.Contains("200px-"));
-            _homePageHelper.Received().Render(name, desc, checkUrl, "he");
+            _homePageHelper.Received().Render(name, description, checkUrl, "he");
             
             var bodyString = Encoding.UTF8.GetString(stream.ToArray());
             Assert.AreEqual(output, bodyString);
@@ -132,7 +129,7 @@ namespace IsraelHiking.API.Tests.Services
             context.Request.Scheme = "http";
             var shareUrl = new ShareUrl
             {
-                Id = "xyzzy",
+                Id = id,
                 Title = "title",
                 Description = "desc",
             };
