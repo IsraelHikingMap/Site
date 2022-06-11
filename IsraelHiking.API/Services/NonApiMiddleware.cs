@@ -70,7 +70,7 @@ namespace IsraelHiking.API.Services
             {
                 var split = context.Request.Path.Value.Split("/");
                 context.Request.Query.TryGetValue("language", out var languages);
-                var language = languages.FirstOrDefault() ?? "he";
+                var language = languages.FirstOrDefault() ?? Languages.HEBREW;
                 var feature = await _pointsOfInterestProvider.GetFeatureById(split[split.Length - 2], split.Last());
                 if (feature == null)
                 {
