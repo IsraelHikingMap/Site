@@ -1,9 +1,6 @@
 ﻿using System;
-using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
-using NetTopologySuite.Features;
 using System.Linq;
 
 namespace IsraelHiking.API.Converters

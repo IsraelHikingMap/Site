@@ -13,7 +13,9 @@
         public const string OTHER = "Other";
         public const string NONE = "None";
         public const string INATURE = "iNature";
-        public static readonly string[] Points = {
+
+        public static readonly string[] Points =
+        {
             WATER,
             VIEWPOINT,
             HISTORIC,
@@ -30,13 +32,14 @@
         public const string ROUTE_BIKE = "Bicycle";
         public const string ROUTE_4X4 = "4x4";
 
-        public static readonly string[] Routes = {
+        public static readonly string[] Routes =
+        {
             ROUTE_HIKE,
             ROUTE_BIKE,
             ROUTE_4X4
         };
     }
-
+    
     public static class FeatureAttributes
     {
         public const string ID = "identifier";
@@ -75,6 +78,12 @@
         public const string POI_REMOVED_URLS = POI_PREFIX + "RemovedUrls";
         public const string POI_ADDED_IMAGES = POI_PREFIX + "AddedImages";
         public const string POI_REMOVED_IMAGES = POI_PREFIX + "RemovedImages";
+        
+        public static readonly string[] POI_DESCRIPTION_KEYS =
+        {
+            POI_EXTERNAL_DESCRIPTION,
+            DESCRIPTION,
+        };
 
         public const string LAT = "lat";
         public const string LON = "lon";
@@ -84,8 +93,6 @@
     public static class Sources
     {
         public const string OSM = "OSM";
-        public const string OSM_ADDRESS = "https://www.openstreetmap.org/";
-        public const string OSM_FILE_NAME = "israel-and-palestine-latest.osm.pbf";
         public const string NAKEB = "Nakeb";
         public const string WIKIPEDIA = "Wikipedia";
         public const string INATURE = "iNature";
@@ -102,5 +109,14 @@
             HEBREW,
             ENGLISH
         };
+    }
+
+    public static class Branding
+    {
+        public static string SITE_NAME = "Israel Hiking Map";
+
+        public static string DESCRIPTION =  "בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע.";
+
+        public const string ROUTE_SHARE_DEFAULT_TITLE = "Israel Hiking Map Route Share";
     }
 }
