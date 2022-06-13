@@ -12,17 +12,19 @@ using NSubstitute;
 using System;
 using System.IO;
 using System.Text;
+using Microsoft.Extensions.FileProviders;
 using Wangkanai.Detection.Services;
 
 namespace IsraelHiking.API.Tests.Services
 {
     [TestClass]
-    public class NonApiMiddlewareTests : HomePageHelperFixture
+    public class NonApiMiddlewareTests
     {
         private NonApiMiddleware _middleware;
         private IServiceProvider _serviceProvider;
         private IShareUrlsRepository _repository;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
+        private IHomePageHelper _homePageHelper;
 
         [TestInitialize]
         public void TestInitialize()
@@ -30,7 +32,7 @@ namespace IsraelHiking.API.Tests.Services
             _serviceProvider = Substitute.For<IServiceProvider>();
             _repository = Substitute.For<IShareUrlsRepository>();
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
-            setUpHomePageHelper();
+            _homePageHelper = Substitute.For<IHomePageHelper>();
             var config = new ConfigurationData();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(config);
@@ -72,14 +74,34 @@ namespace IsraelHiking.API.Tests.Services
                     { FeatureAttributes.IMAGE_URL, url }
                 }));
             var detectionService = SetupDetectionService();
+            var checkUrl = Arg.Is<string>(x => x.Contains("200px-"));
+            _homePageHelper.Render(name, description, checkUrl, Languages.HEBREW).Returns("OUT");
 
             _middleware.InvokeAsync(context, detectionService).Wait();
 
-            var checkUrl = Arg.Is<string>(x => x.Contains("200px-"));
-            _homePageHelper.Received().Render(name, description, checkUrl, "he");
-            
             var bodyString = Encoding.UTF8.GetString(stream.ToArray());
-            Assert.AreEqual(output, bodyString);
+            Assert.AreEqual("OUT", bodyString);
+        }
+        
+        [TestMethod]
+        public void TestCrawler_NotExistingPoi_ShouldReturnDefault()
+        {
+            var source = "source";
+            var id = "id";
+            var context = new DefaultHttpContext();
+            using var stream = new MemoryStream();
+            context.Response.Body = stream;
+            context.Request.Path = new PathString($"/poi/{source}/{id}");
+            var detectionService = SetupDetectionService();
+            var fileInfo = Substitute.For<IFileInfo>();
+            fileInfo.CreateReadStream().Returns(new MemoryStream(new byte[] {1}));
+            _homePageHelper.IndexFileInfo.Returns(fileInfo);
+            
+            _middleware.InvokeAsync(context, detectionService).Wait();
+            
+            _homePageHelper.DidNotReceive().Render(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
+            
+            CollectionAssert.AreEqual(new byte[] { 1 }, stream.ToArray());
         }
         
         [TestMethod]
@@ -110,9 +132,6 @@ namespace IsraelHiking.API.Tests.Services
 
             var checkUrl = Arg.Is<string>(x => x.Contains("200px-"));
             _homePageHelper.Received().Render(name, externalDescription, checkUrl, "he");
-            
-            var bodyString = Encoding.UTF8.GetString(stream.ToArray());
-            Assert.AreEqual(output, bodyString);
         }
 
         [TestMethod]
@@ -140,10 +159,6 @@ namespace IsraelHiking.API.Tests.Services
 
             var checkUrl = Arg.Is<string>(x => x.EndsWith(shareUrl.Id + "?width=256&height=256"));
             _homePageHelper.Received().Render(shareUrl.Title, shareUrl.Description, checkUrl);
-
-            var bodyString = Encoding.UTF8.GetString(stream.ToArray());
-            Assert.AreEqual(output, bodyString);
-            
         }
     }
 }
