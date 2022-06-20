@@ -20,6 +20,6 @@ export class AudioPlayerFactory {
             let audioFilePath = await this.fileService.getLocalFileUrl(relativePath);
             return this.media.create(audioFilePath);
         }
-        return new Audio(this.fileService.getFullFilePath(relativePath));
+        return new Audio(await this.fileService.getFullFilePath(relativePath));
     }
 }

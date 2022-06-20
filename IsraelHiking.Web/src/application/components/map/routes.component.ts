@@ -254,9 +254,9 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public ngAfterViewInit(): void {
-        this.mapComponent.mapLoad.subscribe(() => {
+        this.mapComponent.mapLoad.subscribe(async () => {
             this.setInteractionAccordingToState();
-            let fullFilePath = this.fileService.getFullFilePath("content/arrow.png");
+            let fullFilePath = await this.fileService.getFullFilePath("content/arrow.png");
             this.mapComponent.mapInstance.loadImage(fullFilePath, (_: Error, image: HTMLImageElement | ImageBitmap) => {
                 this.mapComponent.mapInstance.addImage("arrow", image, { sdf: true });
             });
