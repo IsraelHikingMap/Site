@@ -44,7 +44,6 @@ import { Camera } from "@ionic-native/camera/ngx";
 import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 import { InAppBrowser } from "@ionic-native/in-app-browser/ngx";
 import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
-import { WebView } from "@ionic-native/ionic-webview/ngx";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
 import { StatusBar } from "@ionic-native/status-bar/ngx";
 import { Zip } from "@ionic-native/zip/ngx";
@@ -284,7 +283,6 @@ const initializeApplication = (injector: Injector) => async () => {
             FileSystemWrapper,
             InAppBrowser,
             InAppPurchase2,
-            WebView,
             MobileAccessibility,
             StatusBar,
             Zip,
