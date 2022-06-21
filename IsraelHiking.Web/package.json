@@ -79,7 +79,6 @@
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@ahovakimyan/cordova-plugin-wkwebviewxhrfix": "github:AraHovakimyan/cordova-plugin-wkwebviewxhrfix",
     "@angular-devkit/build-angular": "~13.1.3",
     "@angular-eslint/builder": "^13.0.1",
     "@angular-eslint/eslint-plugin": "^13.0.1",
@@ -122,6 +121,7 @@
     "cordova-plugin-screen-orientation": "^3.0.2",
     "cordova-plugin-statusbar": "^2.4.3",
     "cordova-plugin-vibration": "^3.1.1",
+    "cordova-plugin-wkwebviewxhrfix": "github:IsraelHikingMap/cordova-plugin-wkwebviewxhrfix",
     "cordova-plugin-x-socialsharing": "^6.0.3",
     "cordova-plugin-zip": "^3.1.0",
     "cordova-sqlite-ext": "^6.0.0",
