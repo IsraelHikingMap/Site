@@ -410,7 +410,7 @@ export class PoiService {
 
     public async getSerchResults(searchTerm: string): Promise<SearchResultsPointOfInterest[]> {
         let ids = this.miniSearch.search(searchTerm).map(r => r.id);
-        let results = [];
+        let results = [] as SearchResultsPointOfInterest[];
         for (let id of uniq(ids)) {
             let feature = await this.databaseService.getPoiById(id);
             let title = this.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
@@ -420,8 +420,10 @@ export class PoiService {
                 displayName: title,
                 icon: feature.properties.poiIcon,
                 iconColor: feature.properties.poiIconColor,
-                location: this.getLocation(feature)
-            } as SearchResultsPointOfInterest;
+                location: this.getLocation(feature),
+                source: feature.properties.poiSource,
+                id: feature.properties.identifier
+            };
             results.push(point);
             if (results.length === 10) {
                 return results;
