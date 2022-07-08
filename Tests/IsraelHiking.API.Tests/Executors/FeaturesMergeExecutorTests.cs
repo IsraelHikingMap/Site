@@ -11,6 +11,7 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NetTopologySuite.Operation.Valid;
 
 namespace IsraelHiking.API.Tests.Executors
 {
@@ -444,6 +445,120 @@ namespace IsraelHiking.API.Tests.Executors
             Assert.AreEqual(3, mls.Geometries.Length);
         }
 
+        [TestMethod]
+        public void MergeFeatures_PolygonWithOverlappingPolygon_ShouldMergeAndCreateASinglePolygon()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Geometry = new Polygon(
+                new LinearRing(new[]
+                {
+                    new Coordinate(0, 0),
+                    new Coordinate(1, 0),
+                    new Coordinate(1, 1),
+                    new Coordinate(0, 1),
+                    new Coordinate(0, 0)
+                })
+            );
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Geometry = new Polygon(new LinearRing(new[]
+                {
+                    new Coordinate(0.1, 0.1),
+                    new Coordinate(0.9, 0.1),
+                    new Coordinate(0.9, 1.1),
+                    new Coordinate(0.1, 1.1),
+                    new Coordinate(0.1, 0.1)
+                })
+            );
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+
+            Assert.AreEqual(1, results.Count);
+            var isValidOp = new IsValidOp(results.First().Geometry);
+            var polygon = results.First().Geometry as Polygon;
+            Assert.IsTrue(isValidOp.IsValid);
+            Assert.IsNotNull(polygon);
+        }
+        
+        [TestMethod]
+        public void MergeFeatures_PolygonWithCoveringPolygon_ShouldMergeAndCreateASinglePolygon()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Geometry = new Polygon(
+                new LinearRing(new[]
+                {
+                    new Coordinate(0, 0),
+                    new Coordinate(1, 0),
+                    new Coordinate(1, 1),
+                    new Coordinate(0, 1),
+                    new Coordinate(0, 0)
+                })
+            );
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Geometry = new Polygon(new LinearRing(new[]
+                {
+                    new Coordinate(0.1, 0.1),
+                    new Coordinate(0.9, 0.1),
+                    new Coordinate(0.9, 0.9),
+                    new Coordinate(0.1, 0.9),
+                    new Coordinate(0.1, 0.1)
+                })
+            );
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+
+            Assert.AreEqual(1, results.Count);
+            var isValidOp = new IsValidOp(results.First().Geometry);
+            var polygon = results.First().Geometry as Polygon;
+            Assert.IsTrue(isValidOp.IsValid);
+            Assert.IsNotNull(polygon);
+        }
+        
+        [TestMethod]
+        public void MergeFeatures_PolygonTouchingAnotherPolygon_ShouldMergeAndCreateASinglePolygon()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Geometry = new Polygon(
+                new LinearRing(new[]
+                {
+                    new Coordinate(0, 0),
+                    new Coordinate(1, 0),
+                    new Coordinate(1, 1),
+                    new Coordinate(0, 1),
+                    new Coordinate(0, 0)
+                })
+            );
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Geometry = new Polygon(new LinearRing(new[]
+                {
+                    new Coordinate(0, 0),
+                    new Coordinate(1, 0),
+                    new Coordinate(1, -1),
+                    new Coordinate(0, -1),
+                    new Coordinate(0, 0)
+                })
+            );
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+
+            Assert.AreEqual(1, results.Count);
+            var isValidOp = new IsValidOp(results.First().Geometry);
+            var polygon = results.First().Geometry as Polygon;
+            Assert.IsTrue(isValidOp.IsValid);
+            Assert.IsNotNull(polygon);
+        }
+        
         [TestMethod]
         public void MergeFeatures_MultiPolygonWithPoint_ShouldMergeAndCreateASingleMultiPolygon()
         {

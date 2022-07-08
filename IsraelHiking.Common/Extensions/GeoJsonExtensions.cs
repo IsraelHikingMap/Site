@@ -182,6 +182,25 @@ namespace IsraelHiking.Common.Extensions
 
         }
 
+        public static string GetDescriptionWithExternal(this IFeature feature, string language)
+        {
+            string[] suffixes = {":" + language, ""};
+            foreach (var suffix in suffixes)
+            {
+                foreach (var prefix in FeatureAttributes.POI_DESCRIPTION_KEYS)
+                {
+                    var attr = prefix + suffix;
+                    if (feature.Attributes.Exists(attr))
+                    {
+                        return feature.Attributes[attr].ToString();
+                    }
+                    
+                }
+                
+            }
+            return string.Empty;
+        }
+
         public static string[] GetTitles(this IFeature feature)
         {
             if (!(feature.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable titleByLanguage))

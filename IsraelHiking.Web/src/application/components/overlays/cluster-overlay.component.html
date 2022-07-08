@@ -1,6 +1,6 @@
 ﻿<div [dir]="resources.direction">
     <div *ngFor="let feature of features" fxLayout="row" [dir]="resources.getDirection(getTitle(feature))">
-        <button fxFill mat-button (click)="clickOnItem(feature)" [ngClass]="resources.getTextAlignment(getTitle(feature))" class="break-button-text">
+        <button fxFill mat-button (click)="clickOnItem(feature)" [ngClass]="resources.getTextAlignment(getTitle(feature))" class="break-button-text" angulartics2On="click" angularticsCategory="POI" angularticsAction="Open POI sidebar from map cluster">
             <span *ngIf="hasExtraData(feature)" class="has-extra-data" [style.background]="feature.properties.poiIconColor"></span>
             <i class="fa {{feature.properties.poiIcon}}" [style.color]="feature.properties.poiIconColor"></i> {{getTitle(feature)}}
         </button><br/>

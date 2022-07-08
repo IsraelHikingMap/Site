@@ -107,11 +107,18 @@ export class FileService {
         return filesToReturn;
     }
 
-    public getFullFilePath(relativePath: string): string {
+    public async getFullFilePath(relativePath: string): Promise<string> {
         if (!this.runningContextService.isCordova) {
             return (window.origin || window.location.origin) + "/" + relativePath;
         }
-        let path = relativePath;
+        return this.getLocalFileUrl(relativePath);
+    }
+
+    public getStyleFilePath(relativePath: string): string {
+        if (!this.runningContextService.isCordova) {
+            return (window.origin || window.location.origin) + "/" + relativePath;
+        }
+        let path: string;
         if (this.runningContextService.isIos) {
             path = this.fileSystemWrapper.applicationDirectory + "www/" + relativePath;
             path = this.webView.convertFileSrc(path);
@@ -121,20 +128,14 @@ export class FileService {
         return path;
     }
 
-    public getDataUrl(url: string): string {
-        if (!url.startsWith("https://") && this.runningContextService.isCordova) {
-
-            url = this.webView.convertFileSrc(this.fileSystemWrapper.dataDirectory + url.replace("custom://", ""));
-        }
-        return url;
-    }
-
     public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
         try {
             if (isOffline) {
-                url = last(url.split("/"));
+                let styleFileName = last(url.split("/"));
+                let styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
+                return JSON.parse(styleText) as StyleSpecification;
             }
-            return await firstValueFrom(this.httpClient.get(this.getDataUrl(url))) as StyleSpecification;
+            return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
         } catch (ex) {
             this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {

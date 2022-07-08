@@ -5,6 +5,7 @@ import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
+import { IHMTitleService } from "../../services/ihm-title.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
@@ -40,6 +41,7 @@ export class MainMapComponent extends BaseMapComponent {
     public initialStyle: StyleSpecification;
 
     constructor(resources: ResourcesService,
+                private readonly titleService: IHMTitleService,
                 public readonly imageGalleryService: ImageGalleryService,
                 private readonly mapService: MapService,
                 private readonly hashService: HashService,
@@ -90,6 +92,7 @@ export class MainMapComponent extends BaseMapComponent {
                 layout: { visibility: "none" }
             }
         ];
+        this.titleService.clear();
     }
 
     public moveEnd(e: DragEvent) {

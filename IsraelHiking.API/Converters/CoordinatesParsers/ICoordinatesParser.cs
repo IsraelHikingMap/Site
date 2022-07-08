@@ -1,10 +1,12 @@
-﻿using NetTopologySuite.Geometries;
+﻿using System;
+using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Converters.CoordinatesParsers
 {
     /// <summary>
     /// This class will parse coordinates string
     /// </summary>
+    [Obsolete("Not in use any more 5.2022")]
     public interface ICoordinatesParser
     {
         /// <summary>

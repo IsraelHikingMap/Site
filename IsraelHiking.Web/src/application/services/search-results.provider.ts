@@ -4,6 +4,8 @@ import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 
 import { PoiService } from "./poi.service";
+import { CoordinatesService } from "./coordinates.service";
+import { RouteStrings, getIdFromLatLng } from "./hash.service";
 import { Urls } from "../urls";
 import type { SearchResultsPointOfInterest } from "../models/models";
 
@@ -11,15 +13,29 @@ import type { SearchResultsPointOfInterest } from "../models/models";
 export class SearchResultsProvider {
 
     constructor(private readonly httpClient: HttpClient,
-                private readonly poiService: PoiService) {
+                private readonly poiService: PoiService,
+                private readonly coordinatesService: CoordinatesService) {
     }
 
     public async getResults(searchTerm: string, isHebrew: boolean): Promise<SearchResultsPointOfInterest[]> {
-        let params = new HttpParams();
-        let language = isHebrew ? "he" : "en";
-        params = params.set("language", language);
         let searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ");
+        let latlng = this.coordinatesService.parseCoordinates(searchWithoutBadCharacters);
+        if (latlng) {
+            let id = getIdFromLatLng(latlng);
+            return [{
+                id,
+                displayName: searchWithoutBadCharacters || id,
+                title: id,
+                source: RouteStrings.COORDINATES,
+                icon: "icon-globe",
+                iconColor: "black",
+                location: latlng,
+                description: "",
+            }];
+        }
         try {
+            let language = isHebrew ? "he" : "en";
+            let params = new HttpParams().set("language", language);
             let response = await firstValueFrom(this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
                 params
             }).pipe(timeout(3000)));

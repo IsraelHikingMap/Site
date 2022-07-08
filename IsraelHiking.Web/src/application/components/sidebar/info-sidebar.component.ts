@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { remove } from "lodash-es";
-import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
+import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { Observable } from "rxjs";
 import { select } from "@angular-redux2/store";
 
@@ -37,7 +37,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
-                private readonly angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
+                private readonly angulartics: Angulartics2GoogleGlobalSiteTag,
                 private readonly sidebarService: SidebarService,
                 private readonly layersService: LayersService,
                 private readonly runningContext: RunningContextService) {
@@ -60,7 +60,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
         if (tabIndex === 1) {
             this.initalizeLegendSections();
         }
-        this.angulartics2GoogleAnalytics.eventTrack((tabIndex === 1 ? "Legend" : "About") + " tab selected", { category: "Info" });
+        this.angulartics.eventTrack((tabIndex === 1 ? "Legend" : "About") + " tab selected", { category: "Info" });
     }
 
     public openSection(section: LegendSection) {

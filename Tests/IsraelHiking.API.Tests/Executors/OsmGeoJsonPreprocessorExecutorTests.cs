@@ -33,7 +33,6 @@ namespace IsraelHiking.API.Tests.Executors
             elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
             _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), 
                 elevationGateway, 
-                new ItmWgs84MathTransfromFactory(), 
                 new OsmGeoJsonConverter(new GeometryFactory()), new TagsHelper(optionsProvider));
         }
 

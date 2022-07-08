@@ -3,6 +3,7 @@ using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using IsraelHiking.Common;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -14,16 +15,20 @@ namespace IsraelHiking.API.Controllers
     public class OpenGraphController : ControllerBase
     {
         private readonly ILogger _logger;
+        private readonly IHomePageHelper _homePageHelper;
         private readonly IShareUrlsRepository _repository;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="repository"></param>
+        /// <param name="homePageHelper"></param>
         /// <param name="logger"></param>
         public OpenGraphController(IShareUrlsRepository repository, 
+            IHomePageHelper homePageHelper,
             ILogger logger)
         {
+            _homePageHelper = homePageHelper;
             _repository = repository;
             _logger = logger;
         }
@@ -39,10 +44,10 @@ namespace IsraelHiking.API.Controllers
         {
             _logger.LogDebug("Received a call to get html for: " + id);
             var url = await _repository.GetUrlById(id);
-            var title = string.IsNullOrWhiteSpace(url.Title) ? "Israel Hiking Map Route Share" : url.Title;
+            var title = string.IsNullOrWhiteSpace(url.Title) ? Branding.ROUTE_SHARE_DEFAULT_TITLE : url.Title;
             var contentResult = new ContentResult
             {
-                Content = NonApiMiddleware.GetPage(title, "https://israelhiking.osm.org.il/api/images/" + url.Id, url.Description),
+                Content = _homePageHelper.Render(title, url.Description ?? Branding.DESCRIPTION, "https://israelhiking.osm.org.il/api/images/" + url.Id),
                 ContentType = "text/html"
             };
             return contentResult;

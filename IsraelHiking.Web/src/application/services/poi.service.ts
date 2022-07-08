@@ -10,7 +10,7 @@ import MiniSearch from "minisearch";
 import { NgRedux, select } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
-import { HashService, PoiRouterData } from "./hash.service";
+import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService, ImageUrlAndData } from "./database.service";
 import { RunningContextService } from "./running-context.service";
@@ -202,7 +202,8 @@ export class PoiService {
             this.loggingService.info(`[POIs] Uploaded successfully a${feature.properties.poiIsSimple ? " simple" : ""} ` +
                 `feature with id: ${firstItemId}, ` + "removing from upload queue");
             if (this.runningContextService.isCordova && !feature.properties.poiIsSimple) {
-                this.databaseService.storePois([poi]);
+                await this.databaseService.storePois([poi]);
+                this.rebuildPois();
             }
             this.databaseService.removePoiFromUploadQueue(firstItemId);
             this.queueIsProcessing = false;
@@ -409,7 +410,7 @@ export class PoiService {
 
     public async getSerchResults(searchTerm: string): Promise<SearchResultsPointOfInterest[]> {
         let ids = this.miniSearch.search(searchTerm).map(r => r.id);
-        let results = [];
+        let results = [] as SearchResultsPointOfInterest[];
         for (let id of uniq(ids)) {
             let feature = await this.databaseService.getPoiById(id);
             let title = this.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
@@ -419,8 +420,10 @@ export class PoiService {
                 displayName: title,
                 icon: feature.properties.poiIcon,
                 iconColor: feature.properties.poiIconColor,
-                location: this.getLocation(feature)
-            } as SearchResultsPointOfInterest;
+                location: this.getLocation(feature),
+                source: feature.properties.poiSource,
+                id: feature.properties.identifier
+            };
             results.push(point);
             if (results.length === 10) {
                 return results;
@@ -513,6 +516,9 @@ export class PoiService {
         if (itemInCache) {
             return cloneDeep(itemInCache);
         }
+        if (source === RouteStrings.COORDINATES) {
+            return this.getFeatureFromCoordinatesId(id, language);
+        }
         try {
             let params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
             let poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
@@ -527,6 +533,32 @@ export class PoiService {
             this.poisCache.splice(0, 0, feature);
             return feature;
         }
+    }
+
+    public getLatLngFromId(id: string): LatLngAlt {
+        let split = id.split("_");
+        return { lat: +split[0], lng: +split[1] };
+    }
+
+    public getFeatureFromCoordinatesId(id: string, language: string): GeoJSON.Feature {
+        let latlng = this.getLatLngFromId(id);
+        let feature = {
+            type: "Feature",
+            properties: {
+                poiId: `${RouteStrings.COORDINATES}_${id}`,
+                identifier: id,
+                poiSource: RouteStrings.COORDINATES,
+                poiIcon: "icon-globe",
+                poiIconColor: "black"
+            },
+            geometry: {
+                type: "Point",
+                coordinates: SpatialService.toCoordinate(latlng)
+            }
+        } as GeoJSON.Feature;
+        this.setLocation(feature, latlng);
+        this.setTitle(feature, id, language);
+        return feature;
     }
 
     private async addPointToUploadQueue(feature: GeoJSON.Feature): Promise<void> {

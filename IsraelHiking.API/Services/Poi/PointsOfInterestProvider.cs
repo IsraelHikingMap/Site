@@ -117,7 +117,7 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<List<Feature>> GetAll()
         {
             _logger.LogInformation("Starting getting OSM points of interest");
-            using var stream = await _latestFileGateway.Get();
+            await using var stream = await _latestFileGateway.Get();
             var osmEntities = await _osmRepository.GetElementsWithName(stream);
             var relevantTagsDictionary = _tagsHelper.GetAllTags();
             var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(stream, relevantTagsDictionary);
@@ -514,7 +514,8 @@ namespace IsraelHiking.API.Services.Poi
             {
                 return imageUrlFromDatabase;
             }
-            using var memoryStream = new MemoryStream(file.Content);
+
+            await using var memoryStream = new MemoryStream(file.Content);
             var imageName = await _wikimediaCommonGateway.UploadImage(feature.GetTitle(language),
                     feature.GetDescription(language), userDisplayName, file.FileName, memoryStream, feature.GetLocation());
             imageUrl = await _wikimediaCommonGateway.GetImageUrl(imageName);
@@ -523,6 +524,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
+        [Obsolete("Not in use any more 5.2022")]
         public Feature GetCoordinatesFeature(LatLng latLng, string id)
         {
             var coordinate = latLng.ToCoordinate();
@@ -535,8 +537,6 @@ namespace IsraelHiking.API.Services.Poi
                     { FeatureAttributes.POI_ICON_COLOR, "black" },
                     { FeatureAttributes.POI_CATEGORY, Categories.NONE },
                     { FeatureAttributes.POI_SOURCE, Sources.COORDINATES },
-                    { FeatureAttributes.POI_ITM_EAST, east },
-                    { FeatureAttributes.POI_ITM_NORTH, north },
                     { FeatureAttributes.POI_ALT, alt }
                 });
             feature.SetTitles();

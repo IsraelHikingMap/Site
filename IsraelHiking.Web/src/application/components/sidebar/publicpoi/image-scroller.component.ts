@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { AnimationOptions } from "ngx-lottie";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -6,9 +7,7 @@ import { FileService } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
 import { ImageResizeService } from "../../../services/image-resize.service";
 import { RunningContextService } from "../../../services/running-context.service";
-
-import { AnimationItem } from "lottie-web";
-import { AnimationOptions } from "ngx-lottie";
+import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.json";
 
 @Component({
     selector: "image-scroller",
@@ -16,7 +15,7 @@ import { AnimationOptions } from "ngx-lottie";
 })
 export class ImageScrollerComponent extends BaseMapComponent {
     lottiePOI: AnimationOptions = {
-        path: "../../../../content/lottie/placeholder-scenery.json",
+        animationData: sceneryPlaceholder,
     };
 
     private currentIndex: number;

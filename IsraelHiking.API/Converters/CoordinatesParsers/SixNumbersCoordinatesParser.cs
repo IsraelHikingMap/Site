@@ -1,4 +1,5 @@
-﻿using NetTopologySuite.Geometries;
+﻿using System;
+using NetTopologySuite.Geometries;
 using System.Text.RegularExpressions;
 
 namespace IsraelHiking.API.Converters.CoordinatesParsers
@@ -6,6 +7,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
     /// <summary>
     /// This parser knows how to parse a 6 numbers degrees coordinates string assuming north-east
     /// </summary>
+    [Obsolete("Not in use any more 5.2022")]
     public class SixNumbersCoordinatesParser : BaseCoordinatesParser
     {
         private const string INTEGER_NUMBER_STRING = @"([+-]?\d+)";

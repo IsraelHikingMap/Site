@@ -1,4 +1,5 @@
-﻿using NetTopologySuite.Geometries;
+﻿using System;
+using NetTopologySuite.Geometries;
 using System.Text.RegularExpressions;
 
 namespace IsraelHiking.API.Converters.CoordinatesParsers
@@ -6,6 +7,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
     /// <summary>
     /// This class will parse DMS wgs84 coordinates string, assuming east-west and then north-south
     /// </summary>
+    [Obsolete("Not in use any more 5.2022")]
     public class ReverseDegreesMinutesSecondsLatLonParser : ICoordinatesParser
     {
         private readonly DegreesMinutesSecondsLatLonParser _coordinatesMatcherProxy;

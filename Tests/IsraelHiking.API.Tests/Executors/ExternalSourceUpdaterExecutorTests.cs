@@ -30,7 +30,6 @@ namespace IsraelHiking.API.Tests.Executors
             _executor = new ExternalSourceUpdaterExecutor(_pointsOfInterestAdapterFactory, 
                 _elevationGateway,
                 _externalSourcesRepository, 
-                new ItmWgs84MathTransfromFactory(), 
                 Substitute.For<ILogger>());
         }
 

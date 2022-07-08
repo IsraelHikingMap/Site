@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="il.org.osm.israelhiking" version="9.12.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="il.org.osm.israelhiking" version="9.13.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
   <name>Israel Hiking Map</name>
   <description>An application for outdoor navigation.</description>
   <author email="IsraelHikingMap@gmail.com" href="https://israelhiking.osm.org.il">Israel Hiking Map</author>
@@ -45,8 +45,15 @@
 
     <config-file target="AndroidManifest.xml" parent="/manifest">
       <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-      <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     </config-file>
+    <config-file parent="/manifest" target="AndroidManifest.xml">
+      <queries>
+          <intent>
+              <action android:name="android.intent.action.SENDTO" />
+              <data android:scheme="mailto" />
+          </intent>
+      </queries>
+  </config-file>
     <config-file parent="/manifest/application/activity" target="AndroidManifest.xml">
       <intent-filter>
         <action android:name="android.intent.action.VIEW" />

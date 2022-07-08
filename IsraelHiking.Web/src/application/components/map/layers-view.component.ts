@@ -9,8 +9,11 @@ import { PoiService } from "../../services/poi.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
+import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SpatialService } from "../../services/spatial.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
-import type { ApplicationState, Overlay } from "../../models/models";
+import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
+import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../models/models";
 
 @Component({
     selector: "layers-view",
@@ -26,6 +29,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     public selectedCluster: GeoJSON.Feature<GeoJSON.Point>;
     public clusterFeatures: GeoJSON.Feature<GeoJSON.Point>[];
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point>;
+    public isShowCoordinatesPopup: boolean;
 
     @select((state: ApplicationState) => state.layersState.overlays)
     public overlays: Observable<Overlay[]>;
@@ -37,11 +41,13 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
                 private readonly router: Router,
                 private readonly layersService: LayersService,
                 private readonly poiService: PoiService,
+                private readonly selectedRouteService: SelectedRouteService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
         this.selectedCluster = null;
         this.hoverFeature = null;
+        this.isShowCoordinatesPopup = false;
         this.selectedPoiFeature = null;
         this.selectedPoiGeoJson = {
             type: "FeatureCollection",
@@ -74,17 +80,20 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
             type: "FeatureCollection",
             features: poi == null ? [] : [poi]
         };
+        if (this.isCoordinatesFeature(poi)) {
+            this.isShowCoordinatesPopup = true;
+        }
     }
 
-    public openPoi(id: string, e: Event) {
+    public openPoi(feature: GeoJSON.Feature<GeoJSON.Point>, e: Event) {
         e.stopPropagation();
         this.selectedCluster = null;
-        let sourceAndId = this.getSourceAndId(id);
-        if (sourceAndId.source === "Coordinates" && this.ngRedux.getState().poiState.selectedPointOfInterest.id === sourceAndId.id) {
-            this.ngRedux.dispatch(new SetSelectedPoiAction({ poi: null }));
-            this.hoverFeature = null;
+        this.hoverFeature = null;
+        if (this.isCoordinatesFeature(feature)) {
+            this.isShowCoordinatesPopup = !this.isShowCoordinatesPopup;
             return;
         }
+        let sourceAndId = this.getSourceAndId(feature.properties.poiId);
         this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
 
@@ -129,7 +138,39 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
+    public isCoordinatesFeature(feature: GeoJSON.Feature) {
+        if (!feature) {
+            return false;
+        }
+        return feature.properties.poiSource === RouteStrings.COORDINATES;
+    }
+
     public trackByKey(_: number, el: Overlay) {
         return el.key;
+    }
+
+    public addPointToRoute() {
+        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        let markerData = {
+            latlng: this.getSelectedFeatureLatlng(),
+            title: "",
+            description: "",
+            type: "star",
+            urls: [] as LinkData[]
+        };
+        this.ngRedux.dispatch(new AddPrivatePoiAction({
+            routeId: selectedRoute.id,
+            markerData
+        }));
+        this.clearSelected();
+    }
+
+    public clearSelected() {
+        this.ngRedux.dispatch(new SetSelectedPoiAction({ poi: null }));
+        this.hoverFeature = null;
+    }
+
+    public getSelectedFeatureLatlng(): LatLngAlt {
+        return SpatialService.toLatLng(this.selectedPoiFeature.geometry.coordinates as [number, number]);
     }
 }

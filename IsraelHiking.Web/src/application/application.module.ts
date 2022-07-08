@@ -1,7 +1,7 @@
 // 3rd party
 import { NgModule, APP_INITIALIZER, Injector, ErrorHandler } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { BrowserModule, HammerModule } from "@angular/platform-browser";
+import { BrowserModule, HammerModule, Title } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { RouterModule } from "@angular/router";
@@ -29,8 +29,7 @@ import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { ClipboardModule } from "@angular/cdk/clipboard";
 import { FlexLayoutModule } from "@angular/flex-layout";
-import { Angulartics2Module } from "angulartics2";
-import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
+import { Angulartics2Module, Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { NgProgressModule } from "ngx-progressbar";
 import { NgProgressHttpModule } from "ngx-progressbar/http";
 import { NgxD3Service } from "@katze/ngx-d3";
@@ -76,6 +75,7 @@ import { SnappingService } from "./services/snapping.service";
 import { FitBoundsService } from "./services/fit-bounds.service";
 import { RouteStatisticsService } from "./services/route-statistics.service";
 import { ShareUrlsService } from "./services/share-urls.service";
+import { IHMTitleService } from "./services/ihm-title.service";
 import { ToastService } from "./services/toast.service";
 import { ElevationProvider } from "./services/elevation.provider";
 import { SearchResultsProvider } from "./services/search-results.provider";
@@ -106,6 +106,7 @@ import { RecordedRouteService } from "./services/recorded-route.service";
 import { NavigateHereService } from "./services/navigate-here.service";
 import { GpxDataContainerConverterService } from "./services/gpx-data-container-converter.service";
 import { OfflineFilesDownloadService } from "./services/offline-files-download.service";
+import { CoordinatesService } from "./services/coordinates.service";
 import { AudioPlayerFactory } from "./services/audio-player.factory";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 // interactions
@@ -244,6 +245,8 @@ const initializeApplication = (injector: Injector) => async () => {
             FitBoundsService,
             RouteStatisticsService,
             ShareUrlsService,
+            Title,
+            IHMTitleService,
             ToastService,
             ElevationProvider,
             SearchResultsProvider,
@@ -273,6 +276,7 @@ const initializeApplication = (injector: Injector) => async () => {
             RecordedRouteService,
             NavigateHereService,
             GpxDataContainerConverterService,
+            CoordinatesService,
             OfflineFilesDownloadService,
             AudioPlayerFactory,
             Brightness,
@@ -358,7 +362,7 @@ const initializeApplication = (injector: Injector) => async () => {
         bootstrap: [MainMapComponent]
     })
 export class ApplicationModule {
-    constructor(angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics) {
-        angulartics2GoogleAnalytics.startTracking();
+    constructor(angulartics: Angulartics2GoogleGlobalSiteTag) {
+        angulartics.startTracking();
     }
 }

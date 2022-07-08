@@ -7,6 +7,7 @@
     <meta property="og:site_name" content="IsraelHiking.OSM.org.il" />
     <meta property="og:url" content="https://israelhiking.osm.org.il/" />
     <meta property="og:type" content="website" />
+    <!-- IHM START -->
     <meta property="og:title" content="Israel Hiking Map" />
     <meta property="og:image" content="https://israelhiking.osm.org.il/content/favicons/android-chrome-192x192.png" />
     <meta property="og:image:url" content="https://israelhiking.osm.org.il/content/favicons/android-chrome-192x192.png" />
@@ -16,6 +17,8 @@
     <meta property="og:description" content="בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע." />
     <meta name="title" content="Israel Hiking Map" />
     <meta name="description" content="בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע." />
+    <title>Israel Hiking Map</title>
+    <!-- IHM END -->
     <meta name="keyword" content="hike,bike,outdoor,israel hiking,map,navigation,route planning,nominatim,סימון שבילים,אופניים,מפה,ניווט,שטח,טיול,מטיבי לכת,ג'יפים,רכיבה,הליכה,טבע" />
     <meta name="robot" content="index,follow" />
     <meta name="msapplication-TileColor" content="#2b5797">
@@ -23,7 +26,7 @@
     <meta name="msapplication-config" content="content/favicons/browserconfig.xml">
     <meta name="theme-color" content="#0a42bb">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>Israel Hiking Map</title>
+
     <base href="/">
     <!-- Favicons courtesy of http://realfavicongenerator.net/ -->
     <link rel="apple-touch-icon" sizes="57x57" href="content/favicons/apple-touch-icon-57x57.png">
@@ -43,6 +46,17 @@
     <link rel="mask-icon" href="content/favicons/safari-pinned-tab.svg" color="#0a42bb">
     <link rel="shortcut icon" href="content/favicons/favicon.ico" type="image/x-icon">
     <link rel="text/html" href="fonts/IsraelHikingMap.ttf">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XBWCGLDFDR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { 
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-XBWCGLDFDR');
+        gtag('config', 'UA-106188182-1');
+    </script>
     <style>
         .preloader {
             position: absolute;

@@ -9,6 +9,7 @@ import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { PoiService, PoiSocialLinks } from "../../../services/poi.service";
 import { AuthorizationService } from "../../../services/authorization.service";
+import { IHMTitleService } from "../../../services/ihm-title.service";
 import { ToastService } from "../../../services/toast.service";
 import { HashService, RouteStrings, PoiRouterData } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
@@ -63,6 +64,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     private subscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
+                private readonly titleService: IHMTitleService,
                 private readonly router: Router,
                 private readonly route: ActivatedRoute,
                 private readonly poiService: PoiService,
@@ -122,6 +124,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public ngOnDestroy() {
+        this.titleService.clear();
+
         for (let subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
@@ -159,7 +163,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 this.ngRedux.dispatch(new SetSelectedPoiAction({
                     poi: originalFeature
                 }));
-                if (this.runningContextSerivce.isMobile && data.source === "Coordinates") {
+                if (data.source === RouteStrings.COORDINATES) {
                     this.close();
                 }
             }
@@ -202,6 +206,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.shareLinks = this.poiService.getPoiSocialLinks(feature);
         this.contribution = this.poiService.getContribution(feature);
         this.info = this.poiService.getEditableDataFromFeature(feature);
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        this.titleService.set(this.poiService.getTitle(feature, language));
     }
 
     public isHideEditMode(): boolean {
@@ -248,7 +254,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public isShowSeeAlso() {
-        return this.fullFeature && this.fullFeature.properties.poiSource !== "Coordinates";
+        return this.fullFeature && this.fullFeature.properties.poiSource !== RouteStrings.COORDINATES;
     }
 
     public isRoute() {
