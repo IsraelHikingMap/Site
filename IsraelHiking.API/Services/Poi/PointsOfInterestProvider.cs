@@ -537,8 +537,6 @@ namespace IsraelHiking.API.Services.Poi
                     { FeatureAttributes.POI_ICON_COLOR, "black" },
                     { FeatureAttributes.POI_CATEGORY, Categories.NONE },
                     { FeatureAttributes.POI_SOURCE, Sources.COORDINATES },
-                    { FeatureAttributes.POI_ITM_EAST, east },
-                    { FeatureAttributes.POI_ITM_NORTH, north },
                     { FeatureAttributes.POI_ALT, alt }
                 });
             feature.SetTitles();

@@ -20,7 +20,6 @@ namespace IsraelHiking.API.Executors
         private readonly IElevationGateway _elevationGateway;
         private readonly IExternalSourcesRepository _externalSourcesRepository;
         private readonly ILogger _logger;
-        private readonly MathTransform _wgs84ItmTransform;
 
         /// <summary>
         /// Constructor
@@ -28,18 +27,15 @@ namespace IsraelHiking.API.Executors
         /// <param name="adaptersFactory"></param>
         /// <param name="elevationGateway"></param>
         /// <param name="externalSourcesRepository"></param>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="logger"></param>
         public ExternalSourceUpdaterExecutor(IPointsOfInterestAdapterFactory adaptersFactory,
             IElevationGateway elevationGateway,
             IExternalSourcesRepository externalSourcesRepository,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             ILogger logger)
         {
             _adaptersFactory = adaptersFactory;
             _elevationGateway = elevationGateway;
             _externalSourcesRepository = externalSourcesRepository;
-            _wgs84ItmTransform = itmWgs84MathTransfromFactory.CreateInverse();
             _logger = logger;
         }
 
@@ -58,7 +54,7 @@ namespace IsraelHiking.API.Executors
             }
             var features = await adapter.GetUpdates(lastModified);
             _logger.LogInformation($"Got {features.Count} points for {currentSource} that are new since last update");
-            UpdateItmAndAltitude(features);
+            UpdateAltitude(features);
             await _externalSourcesRepository.AddExternalPois(features);
             _logger.LogInformation($"Finished updating {currentSource}, indexed {features.Count} points.");
         }
@@ -70,13 +66,13 @@ namespace IsraelHiking.API.Executors
             var adapter = _adaptersFactory.GetBySource(currentSource);
             var features = await adapter.GetAll();
             _logger.LogInformation($"Got {features.Count} points for {currentSource}");
-            UpdateItmAndAltitude(features);
+            UpdateAltitude(features);
             await _externalSourcesRepository.DeleteExternalPoisBySource(currentSource);
             await _externalSourcesRepository.AddExternalPois(features);
             _logger.LogInformation($"Finished rebuilding {currentSource}, indexed {features.Count} points.");
         }
 
-        private void UpdateItmAndAltitude(List<Feature> features)
+        private void UpdateAltitude(List<Feature> features)
         {
             var coordinates = features.Select(f => f.GetLocation()).ToArray();
             var elevationValues = _elevationGateway.GetElevation(coordinates).Result;
@@ -85,9 +81,6 @@ namespace IsraelHiking.API.Executors
                 var feature = features[index];
                 var geoLocationCoordinate = feature.GetLocation();
                 feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ALT, elevationValues[index]);
-                var northEast = _wgs84ItmTransform.Transform(geoLocationCoordinate.X, geoLocationCoordinate.Y);
-                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_EAST, (int) northEast.x);
-                feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ITM_NORTH, (int) northEast.y);
             }
         }
     }
