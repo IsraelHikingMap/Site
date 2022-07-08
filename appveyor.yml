@@ -36,7 +36,7 @@ for:
         - PRODUCT: docker
     build_script:
     - pwsh: >-
-        $BuildAndPublishDocker = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishDocker.ps1"
+        $BuildAndPublishDocker = "$env:APPVEYOR_BUILD_FOLDER/Scripts/BuildAndPublishDocker.ps1"
 
         & "$BuildAndPublishDocker"
 
@@ -55,7 +55,7 @@ for:
     test: off
     after_build:
       - pwsh: >-
-            $RunTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\RunTests.ps1"
+            $RunTests = "$env:APPVEYOR_BUILD_FOLDER/Scripts/RunTests.ps1"
 
             & "$RunTests"
 
@@ -67,7 +67,7 @@ for:
       - ps: Install-Product node 16.13
     build_script:
     - pwsh: >-
-        $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
+        $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER/Scripts/BuildAndPublishAndroid.ps1"
 
         & "$BuildAndPublishAndroid"
 
@@ -80,7 +80,7 @@ for:
       - sh: nvm install 16.13
     build_script: 
     - pwsh: >-
-        $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishIOS.ps1"
+        $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER/Scripts/BuildAndPublishIOS.ps1"
 
         & "$BuildAndPublishIOS"
         
