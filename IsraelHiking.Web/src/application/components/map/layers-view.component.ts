@@ -13,7 +13,7 @@ import { SelectedRouteService } from "../../services/layers/routelayers/selected
 import { SpatialService } from "../../services/spatial.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
-import type { ApplicationState, LinkData, Overlay } from "../../models/models";
+import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../models/models";
 
 @Component({
     selector: "layers-view",
@@ -29,6 +29,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     public selectedCluster: GeoJSON.Feature<GeoJSON.Point>;
     public clusterFeatures: GeoJSON.Feature<GeoJSON.Point>[];
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point>;
+    public isShowCoordinatesPopup: boolean;
 
     @select((state: ApplicationState) => state.layersState.overlays)
     public overlays: Observable<Overlay[]>;
@@ -46,6 +47,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         super(resources);
         this.selectedCluster = null;
         this.hoverFeature = null;
+        this.isShowCoordinatesPopup = false;
         this.selectedPoiFeature = null;
         this.selectedPoiGeoJson = {
             type: "FeatureCollection",
@@ -78,15 +80,20 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
             type: "FeatureCollection",
             features: poi == null ? [] : [poi]
         };
+        if (this.isCoordinatesFeature(poi)) {
+            this.isShowCoordinatesPopup = true;
+        }
     }
 
-    public openPoi(id: string, e: Event) {
+    public openPoi(feature: GeoJSON.Feature<GeoJSON.Point>, e: Event) {
         e.stopPropagation();
         this.selectedCluster = null;
-        let sourceAndId = this.getSourceAndId(id);
-        if (sourceAndId.source === "Coordinates") {
+        this.hoverFeature = null;
+        if (this.isCoordinatesFeature(feature)) {
+            this.isShowCoordinatesPopup = !this.isShowCoordinatesPopup;
             return;
         }
+        let sourceAndId = this.getSourceAndId(feature.properties.poiId);
         this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
 
@@ -131,6 +138,13 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
+    public isCoordinatesFeature(feature: GeoJSON.Feature) {
+        if (!feature) {
+            return false;
+        }
+        return feature.properties.poiSource === RouteStrings.COORDINATES;
+    }
+
     public trackByKey(_: number, el: Overlay) {
         return el.key;
     }
@@ -138,7 +152,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     public addPointToRoute() {
         let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         let markerData = {
-            latlng: SpatialService.toLatLng(this.selectedPoiFeature.geometry.coordinates as [number, number]),
+            latlng: this.getSelectedFeatureLatlng(),
             title: "",
             description: "",
             type: "star",
@@ -154,5 +168,9 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     public clearSelected() {
         this.ngRedux.dispatch(new SetSelectedPoiAction({ poi: null }));
         this.hoverFeature = null;
+    }
+
+    public getSelectedFeatureLatlng(): LatLngAlt {
+        return SpatialService.toLatLng(this.selectedPoiFeature.geometry.coordinates as [number, number]);
     }
 }

@@ -10,7 +10,7 @@ import MiniSearch from "minisearch";
 import { NgRedux, select } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
-import { HashService, PoiRouterData } from "./hash.service";
+import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService, ImageUrlAndData } from "./database.service";
 import { RunningContextService } from "./running-context.service";
@@ -516,7 +516,7 @@ export class PoiService {
         if (itemInCache) {
             return cloneDeep(itemInCache);
         }
-        if (source === "Coordinates") {
+        if (source === RouteStrings.COORDINATES) {
             return this.getFeatureFromCoordinatesId(id, language);
         }
         try {
@@ -535,10 +535,6 @@ export class PoiService {
         }
     }
 
-    public getIdFromLatLng(latLng: LatLngAlt): string {
-        return latLng.lat.toFixed(6) + "_" + latLng.lng.toFixed(6);
-    }
-
     public getLatLngFromId(id: string): LatLngAlt {
         let split = id.split("_");
         return { lat: +split[0], lng: +split[1] };
@@ -549,9 +545,9 @@ export class PoiService {
         let feature = {
             type: "Feature",
             properties: {
-                poiId: "Coordinates_" + id,
+                poiId: `${RouteStrings.COORDINATES}_${id}`,
                 identifier: id,
-                poiSource: "Coordinates",
+                poiSource: RouteStrings.COORDINATES,
                 poiIcon: "icon-globe",
                 poiIconColor: "black"
             },

@@ -9,7 +9,8 @@ import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { ImageResizeService } from "./image-resize.service";
-import { RouteStrings } from "./hash.service";
+import { getIdFromLatLng, RouteStrings } from "./hash.service";
+import { SpatialService } from "./spatial.service";
 
 declare let universalLinks: any;
 
@@ -181,7 +182,8 @@ export class OpenWithService {
     }
 
     private moveToCoordinates(coords: string[]) {
-        this.router.navigate([RouteStrings.ROUTE_POI, "Coordinates", `${(+coords[1]).toFixed(4)}_${(+coords[2]).toFixed(4)}`],
+        let latLng = SpatialService.toLatLng([+coords[2], +coords[1]]);
+        this.router.navigate([RouteStrings.ROUTE_POI, RouteStrings.COORDINATES, getIdFromLatLng(latLng)],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
 }

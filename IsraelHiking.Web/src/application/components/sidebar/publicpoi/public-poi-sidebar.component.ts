@@ -163,7 +163,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 this.ngRedux.dispatch(new SetSelectedPoiAction({
                     poi: originalFeature
                 }));
-                if (data.source === "Coordinates") {
+                if (data.source === RouteStrings.COORDINATES) {
                     this.close();
                 }
             }
@@ -254,7 +254,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public isShowSeeAlso() {
-        return this.fullFeature && this.fullFeature.properties.poiSource !== "Coordinates";
+        return this.fullFeature && this.fullFeature.properties.poiSource !== RouteStrings.COORDINATES;
     }
 
     public isRoute() {
