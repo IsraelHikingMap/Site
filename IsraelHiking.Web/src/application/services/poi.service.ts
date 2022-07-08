@@ -10,7 +10,7 @@ import MiniSearch from "minisearch";
 import { NgRedux, select } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
-import { HashService, PoiRouterData } from "./hash.service";
+import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { DatabaseService, ImageUrlAndData } from "./database.service";
 import { RunningContextService } from "./running-context.service";
@@ -410,7 +410,7 @@ export class PoiService {
 
     public async getSerchResults(searchTerm: string): Promise<SearchResultsPointOfInterest[]> {
         let ids = this.miniSearch.search(searchTerm).map(r => r.id);
-        let results = [];
+        let results = [] as SearchResultsPointOfInterest[];
         for (let id of uniq(ids)) {
             let feature = await this.databaseService.getPoiById(id);
             let title = this.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
@@ -420,8 +420,10 @@ export class PoiService {
                 displayName: title,
                 icon: feature.properties.poiIcon,
                 iconColor: feature.properties.poiIconColor,
-                location: this.getLocation(feature)
-            } as SearchResultsPointOfInterest;
+                location: this.getLocation(feature),
+                source: feature.properties.poiSource,
+                id: feature.properties.identifier
+            };
             results.push(point);
             if (results.length === 10) {
                 return results;
@@ -514,7 +516,7 @@ export class PoiService {
         if (itemInCache) {
             return cloneDeep(itemInCache);
         }
-        if (source === "Coordinates") {
+        if (source === RouteStrings.COORDINATES) {
             return this.getFeatureFromCoordinatesId(id, language);
         }
         try {
@@ -533,10 +535,6 @@ export class PoiService {
         }
     }
 
-    public getIdFromLatLng(latLng: LatLngAlt): string {
-        return latLng.lat.toFixed(6) + "_" + latLng.lng.toFixed(6);
-    }
-
     public getLatLngFromId(id: string): LatLngAlt {
         let split = id.split("_");
         return { lat: +split[0], lng: +split[1] };
@@ -547,9 +545,9 @@ export class PoiService {
         let feature = {
             type: "Feature",
             properties: {
-                poiId: "Coordinates_" + id,
+                poiId: `${RouteStrings.COORDINATES}_${id}`,
                 identifier: id,
-                poiSource: "Coordinates",
+                poiSource: RouteStrings.COORDINATES,
                 poiIcon: "icon-globe",
                 poiIconColor: "black"
             },

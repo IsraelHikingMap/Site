@@ -44,8 +44,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _clientsFactory = Substitute.For<IClientsFactory>();
             _tagsHelper = new TagsHelper(_options);
             _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(),
-                ElevationGateway, 
-                new ItmWgs84MathTransfromFactory(),
+                ElevationGateway,
                 new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
             _osmRepository = Substitute.For<IOsmRepository>();
             _latestFileGateway = Substitute.For<IOsmLatestFileGateway>();
@@ -727,8 +726,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
             Assert.IsNotNull(feature);
             Assert.AreEqual(feature.Geometry.Coordinate.X, 32);
             Assert.AreEqual(feature.Geometry.Coordinate.Y, 35);
-            Assert.IsTrue(feature.Attributes.Exists(FeatureAttributes.POI_ITM_NORTH));
-            Assert.IsTrue(feature.Attributes.Exists(FeatureAttributes.POI_ITM_EAST));
             Assert.IsTrue(feature.Attributes.Has(FeatureAttributes.POI_ALT, alt.ToString()));
             Assert.IsTrue(feature.Attributes.Exists(FeatureAttributes.POI_ICON));
             Assert.IsTrue(feature.Attributes.Exists(FeatureAttributes.POI_SOURCE));

@@ -5,6 +5,7 @@ import { firstValueFrom } from "rxjs";
 
 import { PoiService } from "./poi.service";
 import { CoordinatesService } from "./coordinates.service";
+import { RouteStrings, getIdFromLatLng } from "./hash.service";
 import { Urls } from "../urls";
 import type { SearchResultsPointOfInterest } from "../models/models";
 
@@ -20,12 +21,12 @@ export class SearchResultsProvider {
         let searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ");
         let latlng = this.coordinatesService.parseCoordinates(searchWithoutBadCharacters);
         if (latlng) {
-            let id = this.poiService.getIdFromLatLng(latlng);
+            let id = getIdFromLatLng(latlng);
             return [{
                 id,
                 displayName: searchWithoutBadCharacters || id,
                 title: id,
-                source: "Coordinates",
+                source: RouteStrings.COORDINATES,
                 icon: "icon-globe",
                 iconColor: "black",
                 location: latlng,

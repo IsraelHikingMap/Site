@@ -12,6 +12,8 @@ export type PoiRouterData = {
     language: string;
 };
 
+export const getIdFromLatLng = (latLng: LatLngAlt): string => latLng.lat.toFixed(6) + "_" + latLng.lng.toFixed(6);
+
 export class RouteStrings {
     public static readonly MAP = "map";
     public static readonly SHARE = "share";
@@ -22,6 +24,7 @@ export class RouteStrings {
     public static readonly ROUTE_SHARE = `/${RouteStrings.SHARE}`;
     public static readonly ROUTE_URL = `/${RouteStrings.URL}`;
     public static readonly ROUTE_POI = `/${RouteStrings.POI}`;
+    public static readonly COORDINATES = "Coordinates";
 
     public static readonly LAT = "lat";
     public static readonly LON = "lon";
@@ -100,8 +103,8 @@ export class HashService {
 
     public getFullUrlFromLatLng(latlng: LatLngAlt) {
         return this.getFullUrlFromPoiId({
-            id: `${latlng.lat.toFixed(4)}_${latlng.lng.toFixed(4)}`,
-            source: "Coordinates",
+            id: getIdFromLatLng(latlng),
+            source: RouteStrings.COORDINATES,
             language: null
         });
     }

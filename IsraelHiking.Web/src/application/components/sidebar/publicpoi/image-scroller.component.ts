@@ -8,6 +8,7 @@ import { ImageGalleryService } from "../../../services/image-gallery.service";
 import { ImageResizeService } from "../../../services/image-resize.service";
 import { RunningContextService } from "../../../services/running-context.service";
 import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.json";
+
 @Component({
     selector: "image-scroller",
     templateUrl: "./image-scroller.component.html"

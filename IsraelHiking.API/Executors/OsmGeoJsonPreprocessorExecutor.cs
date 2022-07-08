@@ -20,7 +20,6 @@ namespace IsraelHiking.API.Executors
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
         private readonly IElevationGateway _elevationGateway;
-        private readonly MathTransform _wgs84ItmConverter;
         private readonly ITagsHelper _tagsHelper;
 
         /// <summary>
@@ -28,19 +27,16 @@ namespace IsraelHiking.API.Executors
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="elevationGateway"></param>
-        /// <param name="itmWgs84MathTransformFactory"></param>
         /// <param name="osmGeoJsonConverter"></param>
         /// <param name="tagsHelper"></param>
         public OsmGeoJsonPreprocessorExecutor(ILogger logger,
             IElevationGateway elevationGateway,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransformFactory,
             IOsmGeoJsonConverter osmGeoJsonConverter,
             ITagsHelper tagsHelper)
         {
             _logger = logger;
             _osmGeoJsonConverter = osmGeoJsonConverter;
             _elevationGateway = elevationGateway;
-            _wgs84ItmConverter = itmWgs84MathTransformFactory.CreateInverse();
             _tagsHelper = tagsHelper;
         }
 
@@ -166,9 +162,6 @@ namespace IsraelHiking.API.Executors
                 geoLocation = feature.Geometry.Centroid.Coordinate;
             }
             feature.Attributes.SetLocation(geoLocation);
-            var (x, y) = _wgs84ItmConverter.Transform(geoLocation.X, geoLocation.Y);
-            feature.Attributes.Add(FeatureAttributes.POI_ITM_EAST, x);
-            feature.Attributes.Add(FeatureAttributes.POI_ITM_NORTH, y);
         }
 
         private void UpdateAltitude(List<Feature> features)
