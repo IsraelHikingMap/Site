@@ -12,8 +12,8 @@ export class DefaultStyleService {
             version: 8,
             sources: {},
             layers: [],
-            glyphs: this.fileService.getFullFilePath("fonts/glyphs/{fontstack}/{range}.pbf"),
-            sprite: this.fileService.getFullFilePath("content/sprite/sprite")
+            glyphs: this.fileService.getStyleFilePath("fonts/glyphs/{fontstack}/{range}.pbf"),
+            sprite: this.fileService.getStyleFilePath("content/sprite/sprite")
         };
     }
 }

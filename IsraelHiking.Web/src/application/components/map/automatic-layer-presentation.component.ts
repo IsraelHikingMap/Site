@@ -161,8 +161,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     private async createJsonLayer() {
-        let response = await this.fileService
-            .getStyleJsonContent(this.layerData.address, this.layerData.isOfflineOn || !this.hasInternetAccess);
+        let getOfflineStyleFile = this.layerData.isOfflineAvailable && (this.layerData.isOfflineOn || !this.hasInternetAccess);
+        let response = await this.fileService.getStyleJsonContent(this.layerData.address, getOfflineStyleFile);
         let language = this.resources.getCurrentLanguageCodeSimplified();
         let styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as StyleSpecification;
         this.updateSourcesAndLayers(styleJson.sources, styleJson.layers);
