@@ -66,7 +66,7 @@ namespace IsraelHiking.API.Services
                 await WriteHomePage(context, title, thumbnailUrl, url.Description);
                 return;
             }
-            if (isCrawler && context.Request.Path.StartsWithSegments("/poi"))
+            if (context.Request.Path.StartsWithSegments("/poi"))
             {
                 var split = context.Request.Path.Value.Split("/");
                 context.Request.Query.TryGetValue("language", out var languages);
