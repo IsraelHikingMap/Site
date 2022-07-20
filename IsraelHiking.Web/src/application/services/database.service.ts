@@ -327,7 +327,7 @@ export class DatabaseService {
             arrayMerge: (destinationArray, sourceArray) => sourceArray == null ? destinationArray : sourceArray
         });
         storedState.inMemoryState = initialState.inMemoryState;
-        if (!this.runningContext.isCordova) {
+        if (!this.runningContext.isCapacitor) {
             storedState.routes = initialState.routes;
             storedState.poiState = initialState.poiState;
             storedState.gpsState = initialState.gpsState;
