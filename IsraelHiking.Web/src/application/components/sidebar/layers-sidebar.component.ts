@@ -139,18 +139,18 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public showOfflineButton(layer: EditableLayer) {
         let offlineState = this.ngRedux.getState().offlineState;
         return layer.isOfflineAvailable &&
-            this.runningContextService.isCordova &&
+            this.runningContextService.isCapacitor &&
             (offlineState.lastModifiedDate != null ||
             offlineState.isOfflineAvailable);
     }
 
     public isOfflineDownloadAvailable() {
-        return this.runningContextService.isCordova &&
+        return this.runningContextService.isCapacitor &&
             this.ngRedux.getState().offlineState.isOfflineAvailable;
     }
 
     public isPurchaseAvailable() {
-        return this.runningContextService.isCordova &&
+        return this.runningContextService.isCapacitor &&
             !this.ngRedux.getState().offlineState.isOfflineAvailable;
     }
 

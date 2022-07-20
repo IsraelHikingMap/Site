@@ -9,6 +9,7 @@ export class RunningContextService {
     public readonly isMobile: boolean;
     public readonly isIFrame: boolean;
     public readonly isCordova: boolean;
+    public readonly isCapacitor: boolean;
     public readonly isIos: boolean;
     public readonly isProduction: boolean;
     public readonly isFacebook: boolean;
@@ -19,6 +20,7 @@ export class RunningContextService {
         this.isMobile = false;
         this.isProduction = environment.production;
         this.isCordova = environment.isCordova;
+        this.isCapacitor = environment.isCapacitor;
         this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform) || (this.isCordova && this.device.platform === "iOS");
         this.isOnline = true;
         let agent: string = navigator.userAgent || navigator.vendor || (window as any).opera || "";

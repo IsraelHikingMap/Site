@@ -8,5 +8,6 @@ export const environment = {
     baseAddress: window.location.origin,
     baseApiAddress: window.location.origin + "/api/",
     baseTilesAddress: "https://israelhiking.osm.org.il",
-    isCordova: false
+    isCordova: false,
+    isCapacitor: false
 };

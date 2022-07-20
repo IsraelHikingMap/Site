@@ -7,17 +7,4 @@ if (environment.production) {
     enableProdMode();
 }
 
-// HM TODO: check if this is still relevant
-// the following is needed for AOT to work correctly: https://github.com/angular/angular-cli/issues/11218
-const bootstrapInitializationFunction = () => {
-    platformBrowserDynamic().bootstrapModule(ApplicationModule);
-};
-
-if (environment.isCordova) {
-    let onDeviceReady = () => {
-        bootstrapInitializationFunction();
-    };
-    document.addEventListener("deviceready", onDeviceReady, false);
-} else {
-    bootstrapInitializationFunction();
-}
+platformBrowserDynamic().bootstrapModule(ApplicationModule);

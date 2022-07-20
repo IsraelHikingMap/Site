@@ -21,7 +21,7 @@ export class PurchaseService {
     }
 
     public initialize() {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             return;
         }
 

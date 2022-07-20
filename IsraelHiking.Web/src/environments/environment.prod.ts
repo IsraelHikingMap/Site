@@ -3,5 +3,6 @@ export const environment = {
     baseAddress: window.location.origin,
     baseApiAddress: window.location.origin + "/api/",
     baseTilesAddress: window.location.origin,
-    isCordova: false
+    isCordova: false,
+    isCapacitor: false
 };
