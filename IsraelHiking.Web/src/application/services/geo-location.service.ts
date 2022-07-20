@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { BackgroundGeolocationPlugin, Location } from "cordova-background-geolocation-plugin";
+//import { BackgroundGeolocationPlugin, Location } from "cordova-background-geolocation-plugin";
 import { NgRedux } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
@@ -9,7 +9,7 @@ import { ToastService } from "./toast.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
 
-declare let BackgroundGeolocation: BackgroundGeolocationPlugin;
+declare let BackgroundGeolocation: any;// BackgroundGeolocationPlugin;
 
 @Injectable()
 export class GeoLocationService {
@@ -167,7 +167,7 @@ export class GeoLocationService {
             });
 
         BackgroundGeolocation.on("authorization").subscribe(
-            (status) => {
+            (status: any) => {
                 if (status === BackgroundGeolocation.NOT_AUTHORIZED) {
                     this.loggingService.error("[GeoLocation] Failed to start background tracking - unauthorized");
                     this.disable();
@@ -181,7 +181,7 @@ export class GeoLocationService {
             });
 
         BackgroundGeolocation.on("error").subscribe(
-            (error) => {
+            (error: any) => {
                 this.loggingService.error(`[GeoLocation] Failed to start background tracking ${error.message}`);
                 this.toastService.warning(this.resources.unableToFindYourLocation);
                 this.disable();
@@ -191,7 +191,7 @@ export class GeoLocationService {
 
     private async onLocationUpdate() {
         let locations = await BackgroundGeolocation.getValidLocationsAndDelete();
-        let positions = locations.map(l => this.locationToPosition(l));
+        let positions = locations.map((l: any) => this.locationToPosition(l));
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
         } else if (positions.length === 1) {
@@ -248,7 +248,7 @@ export class GeoLocationService {
         };
     }
 
-    private locationToPosition(location: Location): GeolocationPosition {
+    private locationToPosition(location: any): GeolocationPosition {
         return {
             coords: {
                 accuracy: location.accuracy,
@@ -264,7 +264,7 @@ export class GeoLocationService {
 
     public async getLog(): Promise<string> {
         let logEntries = await BackgroundGeolocation.getLogEntries(10000, 0, BackgroundGeolocation.LOG_TRACE);
-        return logEntries.map(logLine => {
+        return logEntries.map((logLine: any) => {
             let dateString = new Date(logLine.timestamp - new Date().getTimezoneOffset() * 60 * 1000)
                 .toISOString().replace(/T/, " ").replace(/\..+/, "");
             return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;
