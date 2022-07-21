@@ -106,14 +106,14 @@ export class FileService {
     }
 
     public async getFullFilePath(relativePath: string): Promise<string> {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             return (window.origin || window.location.origin) + "/" + relativePath;
         }
         return this.getLocalFileUrl(relativePath);
     }
 
     public getStyleFilePath(relativePath: string): string {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             return (window.origin || window.location.origin) + "/" + relativePath;
         }
         return this.fileSystemWrapper.applicationDirectory + "www/" + relativePath;
@@ -142,7 +142,7 @@ export class FileService {
             ? await this.gpxDataContainerConverterService.toGpx(dataContainer)
             : await firstValueFrom(this.httpClient.post(Urls.files + "?format=" + format, dataContainer)) as string;
 
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             let blobToSave = await fetch(`data:application/octet-stream;base64,${responseData}`).then(r => r.blob());
             this.nonAngularObjectsFactory.saveAsWrapper(blobToSave, fileName, { autoBom: false });
             return;

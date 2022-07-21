@@ -7,6 +7,10 @@
     <param name="onload" value="true"/>
   </feature>
 
+  <feature name="FileTransfer">
+    <param name="android-package" value="org.apache.cordova.filetransfer.FileTransfer"/>
+  </feature>
+
   <feature name="InAppBillingPlugin">
     <param name="android-package" value="cc.fovea.PurchasePlugin"/>
   </feature>
