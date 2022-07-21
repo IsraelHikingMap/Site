@@ -10,6 +10,7 @@ android {
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
 
+    implementation "androidx.webkit:webkit:1.4.0"
     implementation "com.android.billingclient:billing:4.0.0"
 }
 
