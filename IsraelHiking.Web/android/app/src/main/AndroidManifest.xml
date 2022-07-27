@@ -15,13 +15,155 @@
             android:name="il.org.osm.israelhiking.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
-            android:launchMode="singleTask">
+            android:launchMode="singleInstance">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="*" android:scheme="http" />
+                <data android:host="*" android:scheme="https" />
+                <data android:host="*" android:scheme="content" />
+                <data android:mimeType="application/gpx" />
+                <data android:mimeType="application/vnd.google-earth.kml+xml" />
+                <data android:mimeType="application/vnd.google-earth.kmz" />
+                <data android:mimeType="text/xml" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/gpx" />
+                <data android:mimeType="text/kml" />
+                <data android:mimeType="text/kmz" />
+                <data android:mimeType="text/kml+xml" />
+                <data android:mimeType="text/kmz+xml" />
+                <data android:mimeType="text/gpx+xml" />
+                <data android:mimeType="text/xml+kml" />
+                <data android:mimeType="text/xml+kmz" />
+                <data android:mimeType="text/xml+gpx" />
+                <data android:mimeType="application/gpx+xml" />
+                <data android:mimeType="application/kml" />
+                <data android:mimeType="application/kml+xml" />
+                <data android:mimeType="application/kmz" />
+                <data android:mimeType="application/kmz+xml" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/xml" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="*" android:pathPattern=".*\.gpx" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="*" android:pathPattern=".*\.gpx" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="*" android:pathPattern=".*\.kml" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="*" android:pathPattern=".*\.kml" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="*" android:pathPattern=".*\.kmz" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="*" android:pathPattern=".*\.kmz" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:mimeType="*/*" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\.gpx" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\.gpx" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.gpx" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.gpx" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\.kml" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\.kml" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.kml" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.kml" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\.kmz" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\.kmz" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.kmz" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.kmz" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\.twl" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\.twl" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\.twl" />
+                <data android:scheme="file" android:host="*" android:pathPattern=".*\..*\..*\..*\.twl" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="maps.google.com" android:scheme="http"/>
+                <data android:host="maps.google.com" android:scheme="https" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="www.google.com" android:pathPattern="/maps/place/.*" android:scheme="http" />
+                <data android:host="www.google.com" android:pathPattern="/maps/place/.*" android:scheme="https"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="geo"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="israelhiking.osm.org.il" android:scheme="https" android:pathPattern="/share/.*"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="israelhiking.osm.org.il" android:scheme="https" android:pathPattern="/poi/.*"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="israelhiking.osm.org.il" android:scheme="https" android:pathPattern="/url/.*"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="israelhiking.osm.org.il" android:scheme="https" android:pathPattern="/map/.*"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="israelhiking.osm.org.il" android:scheme="https" android:path="/"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="oauth_callback" android:scheme="ihm"/>
+            </intent-filter>
         </activity>
 
         <provider
@@ -34,6 +176,13 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
     </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
+        </intent>
+    </queries>
 
     <!-- Permissions -->
 

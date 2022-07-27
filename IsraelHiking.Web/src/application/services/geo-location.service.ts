@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-//import { BackgroundGeolocationPlugin, Location } from "cordova-background-geolocation-plugin";
+import { BackgroundGeolocationPlugin, Location } from "cordova-background-geolocation-plugin";
 import { NgRedux } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
@@ -9,7 +9,7 @@ import { ToastService } from "./toast.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
 
-declare let BackgroundGeolocation: any;// BackgroundGeolocationPlugin;
+declare let BackgroundGeolocation: BackgroundGeolocationPlugin;
 
 @Injectable()
 export class GeoLocationService {
@@ -73,7 +73,7 @@ export class GeoLocationService {
     public canRecord(): boolean {
         let gpsState = this.ngRedux.getState().gpsState;
         return gpsState.tracking === "tracking"
-            && gpsState.currentPoistion != null && this.runningContextService.isCordova;
+            && gpsState.currentPoistion != null && this.runningContextService.isCapacitor;
     }
 
     private startWatching() {
@@ -84,7 +84,7 @@ export class GeoLocationService {
                 this.handlePoistionChange(position);
             }, () => {}, { timeout: GeoLocationService.SHORT_TIME_OUT });
         }
-        if (this.runningContextService.isCordova) {
+        if (this.runningContextService.isCapacitor) {
             this.startBackgroundGeolocation();
         } else {
             this.startNavigator();
@@ -206,7 +206,7 @@ export class GeoLocationService {
     private async stopWatching() {
         this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
         this.ngRedux.dispatch(new SetCurrentPositionAction({position: null}));
-        if (this.runningContextService.isCordova) {
+        if (this.runningContextService.isCapacitor) {
             this.loggingService.debug("[GeoLocation] Stopping background tracking");
             await BackgroundGeolocation.stop();
         } else {

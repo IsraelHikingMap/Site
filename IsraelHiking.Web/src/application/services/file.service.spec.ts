@@ -3,7 +3,6 @@ import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { Device } from "@ionic-native/device/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
-import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 
 import { FileService } from "./file.service";
@@ -50,7 +49,6 @@ describe("FileService", () => {
             providers: [
                 RunningContextService,
                 Device,
-                FileSystemWrapper,
                 LoggingService,
                 // eslint-disable-next-line
                 FileTransfer,

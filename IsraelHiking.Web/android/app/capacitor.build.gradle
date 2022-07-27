@@ -10,11 +10,14 @@ android {
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
     implementation project(':capacitor-filesystem')
+    implementation "com.google.android.gms:play-services-location:11+"
+    implementation "androidx.core:core:1.1.0"
+    implementation "androidx.appcompat:appcompat:1.1.0"
     implementation "androidx.webkit:webkit:1.4.0"
     implementation "com.android.billingclient:billing:4.0.0"
     implementation "androidx.legacy:legacy-support-v4:1.0.0"
 }
-
+apply from: "../../node_modules/cordova-background-geolocation-plugin/android/dependencies.gradle"
 
 if (hasProperty('postBuildExtras')) {
   postBuildExtras()

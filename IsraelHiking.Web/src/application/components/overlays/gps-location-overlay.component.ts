@@ -79,7 +79,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     }
 
     public canShareLocation() {
-        return this.runningContextService.isCordova;
+        return this.runningContextService.isCapacitor;
     }
 
     public shareMyLocation() {

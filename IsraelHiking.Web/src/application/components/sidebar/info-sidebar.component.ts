@@ -72,7 +72,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     public isApp(): boolean {
-        return this.runningContext.isCordova;
+        return this.runningContext.isCapacitor;
     }
 
     public isMobile(): boolean {
