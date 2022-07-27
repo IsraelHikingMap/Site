@@ -14,7 +14,6 @@ Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;andro
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
-# Building android:
 Write-Host "npm ci"
 npm ci
 
@@ -26,25 +25,23 @@ if ($lastexitcode)
 	throw $lastexitcode
 }
 
-Write-Host "npm run add-android"
-npm run add-android
+Write-Host "npx cap sync"
+npx cap sync
 
-Write-Host "Replacing version in config.xml file"
-$filePath = get-ChildItem config.xml | Select-Object -first 1 | select -expand FullName
-$xml = New-Object XML
-$xml.Load($filePath)
-$xml.widget.version = $env:APPVEYOR_BUILD_VERSION
-$xml.Save($filePath)
+$versionCode = [System.Version]::Parse($env:APPVEYOR_BUILD_VERSION)
+$versionCodeString = $versionCode.Major * 10000 + $versionCode.Minor * 100 + $versionCode.Build
+Write-Host "npx capacitor-set-version $env:APPVEYOR_BUILD_VERSION $versionCodeString"
+npx capacitor-set-version -v $env:APPVEYOR_BUILD_VERSION -b $versionCodeString
 
-Write-Host "cordova build android --release --  --packageType=bundle"
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web/android"
 $aabVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.aab"
 if ($env:STORE_PASSWORD -ne $null) {
-	npx cordova build android --release -- --keystore=./signing/IHM.jks --storePassword=$env:STORE_PASSWORD --alias=ihmkey --password=$env:PASSWORD --packageType=bundle
+	./gradlew :app:bundleRelease -Pandroid.injected.signing.store.file=$env:APPVEYOR_BUILD_FOLDER/IsraelHiking.Web/signing/IHM.jks -Pandroid.injected.signing.store.password=$env:STORE_PASSWORD -Pandroid.injected.signing.key.alias=ihmkey -Pandroid.injected.signing.key.password=$env:PASSWORD
 } else {
-	npx cordova build android --release -- --packageType=bundle
+	./gradlew bundleRelease
 	$aabVersioned = "./IHM_unsigned_$env:APPVEYOR_BUILD_VERSION.aab"
 }
-$preVersionAabLocation = "./platforms/android/app/build/outputs/bundle/release/app-release.aab";
+$preVersionAabLocation = "./app/build/outputs/bundle/release/app-release.aab";
 
 if (-not (Test-Path -Path $preVersionAabLocation)) {
 	throw "Failed to create android aab file"

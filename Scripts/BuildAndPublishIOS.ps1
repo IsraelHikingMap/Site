@@ -5,13 +5,6 @@ if ($env:PASSWORD -eq $null) {
 	Exit
 }
 
-#Replace version in config.xml file
-$filePath = get-ChildItem config.xml | Select-Object -first 1 | select -expand FullName
-$xml = New-Object XML
-$xml.Load($filePath)
-$xml.widget.version = $env:APPVEYOR_BUILD_VERSION
-$xml.Save($filePath)
-
 Write-Host "Decrypting files"
 Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/appveyor.mobileprovision.enc -d -a -out ./signing/appveyor.mobileprovision"
 Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer"
@@ -55,14 +48,25 @@ if ($lastexitcode)
 {
 	throw $lastexitcode
 }
-	
-Write-Host "npm run add-ios"
-npm run add-ios
 
-Write-Host "npm run build-ipa"
-npm run build-ipa
+Write-Host "npx cap sync"
+npx cap sync
 
-$preVersionIpaLocation = "./platforms/ios/build/device/Israel Hiking Map.ipa";
+$versionCode = [System.Version]::Parse($env:APPVEYOR_BUILD_VERSION)
+$versionCodeString = $versionCode.Major * 10000 + $versionCode.Minor * 100 + $versionCode.Build
+Write-Host "npx capacitor-set-version $env:APPVEYOR_BUILD_VERSION $versionCodeString"
+npx capacitor-set-version -v $env:APPVEYOR_BUILD_VERSION -b $versionCodeString
+
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web/ios"
+
+Write-Host "Archiving..."
+xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive
+
+Write-Host "Exporting..."
+xcodebuild -exportArchive -archivePath App.xcarchive -exportPath ./ -exportOptionsPlist exportOptions.plist
+
+
+$preVersionIpaLocation = "./App.ipa";
 $ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
 Copy-Item -Path $preVersionIpaLocation -Destination $ipaVersioned
