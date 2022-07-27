@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Idle, DEFAULT_INTERRUPTSOURCES } from "@ng-idle/core";
-import { Brightness } from "@ionic-native/brightness/ngx";
+import { KeepAwake } from "@capacitor-community/keep-awake";
+import { ScreenBrightness } from "@capacitor-community/screen-brightness";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
 import { StatusBar } from "@ionic-native/status-bar/ngx";
 import { Observable } from "rxjs";
@@ -19,7 +20,6 @@ export class ScreenService {
     private originalBrightness: number;
 
     constructor(private readonly runningContextService: RunningContextService,
-                private readonly brightness: Brightness,
                 private readonly mobileAccesibility: MobileAccessibility,
                 private readonly statusBar: StatusBar,
                 private readonly ngRedux: NgRedux<ApplicationState>,
@@ -27,26 +27,27 @@ export class ScreenService {
                 private readonly logger: LoggingService) { }
 
     public async initialize() {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             return;
         }
-        if (this.runningContextService.isIos) {
-            this.statusBar.overlaysWebView(true);
-            this.statusBar.overlaysWebView(false);
-        }
-        this.mobileAccesibility.usePreferredTextZoom(false);
+        // HM TODO: bring this back if needed
+        //if (this.runningContextService.isIos) {
+        //    this.statusBar.overlaysWebView(true);
+        //    this.statusBar.overlaysWebView(false);
+        //}
+        //this.mobileAccesibility.usePreferredTextZoom(false);
         this.setKeepScreenOn();
-        this.originalBrightness = await this.brightness.getBrightness();
+        this.originalBrightness = (await ScreenBrightness.getBrightness()).brightness;
         this.logger.info(`[Screen] Original brightness is: ${this.originalBrightness}`);
         document.addEventListener("resume", () => {
             this.logger.info(`[Screen] Resume app, setting brightness to original: ${this.originalBrightness}`);
             this.setKeepScreenOn();
-            this.brightness.setBrightness(this.originalBrightness); // this is just to be on the safe side...
+            ScreenBrightness.setBrightness({ brightness: this.originalBrightness}); // this is just to be on the safe side...
             this.userIdleService.watch();
         }, false);
         document.addEventListener("resign", () => {
             this.logger.info(`[Screen] Resigning app, setting brightness to original: ${this.originalBrightness}`);
-            this.brightness.setBrightness(this.originalBrightness); // this is just to be on the safe side...
+            ScreenBrightness.setBrightness({ brightness: this.originalBrightness}); // this is just to be on the safe side...
         }, false);
         document.addEventListener("pause", () => {
             this.userIdleService.stop();
@@ -58,13 +59,13 @@ export class ScreenService {
         this.userIdleService.onIdleStart.subscribe(() => {
             if (this.ngRedux.getState().configuration.batteryOptimizationType === "dark") {
                 this.logger.info("[Screen] User is idle, setting brightness to 0.01");
-                this.brightness.setBrightness(0.01);
+                ScreenBrightness.setBrightness({ brightness: 0.01});
             }
         });
         this.userIdleService.onIdleEnd.subscribe(() => {
             if (this.ngRedux.getState().configuration.batteryOptimizationType === "dark") {
                 this.logger.info(`[Screen] User is active, setting brightness to original: ${this.originalBrightness}`);
-                this.brightness.setBrightness(this.originalBrightness);
+                ScreenBrightness.setBrightness({ brightness: this.originalBrightness}); // this is just to be on the safe side...
             }
         });
         this.userIdleService.watch();
@@ -74,6 +75,10 @@ export class ScreenService {
 
     private setKeepScreenOn() {
         this.logger.info(`[Screen] Setting mode: ${this.ngRedux.getState().configuration.batteryOptimizationType}`);
-        this.brightness.setKeepScreenOn(this.ngRedux.getState().configuration.batteryOptimizationType !== "screen-off");
+        if (this.ngRedux.getState().configuration.batteryOptimizationType !== "screen-off") {
+            KeepAwake.keepAwake();
+        } else {
+            KeepAwake.allowSleep();
+        }
     }
 }

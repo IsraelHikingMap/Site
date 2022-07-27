@@ -9,6 +9,10 @@ android {
 
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
+    implementation project(':capacitor-community-keep-awake')
+    implementation project(':capacitor-community-screen-brightness')
+    implementation project(':capacitor-app')
+    implementation project(':capacitor-device')
     implementation project(':capacitor-filesystem')
     implementation "com.google.android.gms:play-services-location:11+"
     implementation "androidx.core:core:1.1.0"

@@ -39,7 +39,6 @@ import { NgIdleModule } from "@ng-idle/core";
 import { LottieModule } from "ngx-lottie";
 import player from "lottie-web";
 // Cordova plugins
-import { Brightness } from "@ionic-native/brightness/ngx";
 import { Camera } from "@ionic-native/camera/ngx";
 import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
@@ -273,7 +272,6 @@ const initializeApplication = (injector: Injector) => async () => {
             CoordinatesService,
             OfflineFilesDownloadService,
             AudioPlayerFactory,
-            Brightness,
             Camera,
             InAppPurchase2,
             MobileAccessibility,
