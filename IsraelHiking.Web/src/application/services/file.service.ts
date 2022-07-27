@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
 import { StyleSpecification } from "maplibre-gl";
-import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
@@ -30,7 +30,6 @@ export class FileService {
     public formats: FormatViewModel[];
 
     constructor(private readonly httpClient: HttpClient,
-                private readonly fileSystemWrapper: FileSystemWrapper,
                 // eslint-disable-next-line
                 private readonly fileTransfer: FileTransfer,
                 private readonly runningContextService: RunningContextService,
@@ -105,26 +104,26 @@ export class FileService {
         return filesToReturn;
     }
 
-    public async getFullFilePath(relativePath: string): Promise<string> {
-        if (!this.runningContextService.isCapacitor) {
-            return (window.origin || window.location.origin) + "/" + relativePath;
-        }
-        return this.getLocalFileUrl(relativePath);
+    public getFullFilePath(relativePath: string): string {
+        // HM TODO: make sure iOS works with this as well...
+        return (window.origin || window.location.origin) + "/" + relativePath;
     }
 
     public getStyleFilePath(relativePath: string): string {
-        if (!this.runningContextService.isCapacitor) {
-            return (window.origin || window.location.origin) + "/" + relativePath;
-        }
-        return this.fileSystemWrapper.applicationDirectory + "www/" + relativePath;
+        // HM TODO: remove this if this is no longer needed
+        return this.getFullFilePath(relativePath);
     }
 
     public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
         try {
             if (isOffline) {
                 let styleFileName = last(url.split("/"));
-                let styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
-                return JSON.parse(styleText) as StyleSpecification;
+                let styleText = await Filesystem.readFile({
+                    path: styleFileName,
+                    directory: Directory.Data,
+                    encoding: Encoding.UTF8
+                });
+                return JSON.parse(styleText.data) as StyleSpecification;
             }
             return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
         } catch (ex) {
@@ -137,13 +136,18 @@ export class FileService {
         }
     }
 
+    private async base64StringToBlob(base64: string, type: string = "application/octet-stream"): Promise<Blob> {
+        let response = await fetch(`data:${type};base64,${base64}`);
+        return response.blob();
+    }
+
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {
         let responseData = format === "gpx"
             ? await this.gpxDataContainerConverterService.toGpx(dataContainer)
             : await firstValueFrom(this.httpClient.post(Urls.files + "?format=" + format, dataContainer)) as string;
 
         if (!this.runningContextService.isCapacitor) {
-            let blobToSave = await fetch(`data:application/octet-stream;base64,${responseData}`).then(r => r.blob());
+            let blobToSave = await this.base64StringToBlob(responseData);
             this.nonAngularObjectsFactory.saveAsWrapper(blobToSave, fileName, { autoBom: false });
             return;
         }
@@ -162,23 +166,22 @@ export class FileService {
     }
 
     public async getFileFromUrl(url: string, type?: string): Promise<File> {
-        let entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
-        let file = await new Promise((resolve, reject) => {
-            entry.file((fileContent) => {
-                let reader = new FileReader();
-                reader.onload = (event: any) => {
-                    type = type || this.getTypeFromUrl(url);
-                    let blob = new Blob([event.target.result], { type }) as any;
-                    blob.name = entry.name;
-                    if (blob.name.indexOf(".") === -1) {
-                        blob.name += this.getExtensionFromType(type);
-                    }
-                    resolve(blob);
-                };
-                reader.readAsArrayBuffer(fileContent);
-            }, reject);
-        }) as File;
-        return file;
+        let contents = await Filesystem.readFile({
+            path: url,
+        });
+        let stat = await Filesystem.stat({
+            path: url
+        });
+        stat.type
+        type = type || this.getTypeFromUrl(url);
+        let blob = await this.base64StringToBlob(contents.data, type) as any;
+        // HM TODO: get original file name - https://github.com/ionic-team/capacitor/issues/1235
+        blob.name = url.split("/").pop();
+        if (blob.name.indexOf(".") === -1) {
+            blob.name += this.getExtensionFromType(type);
+        
+        }
+        return blob;
     }
 
     private getTypeFromUrl(url: string): string {
@@ -249,8 +252,11 @@ export class FileService {
         let styles = Object.keys(zip.files).filter(name => name.startsWith("styles/") && name.endsWith(".json"));
         for (let styleFileName of styles) {
             let styleText = (await zip.file(styleFileName).async("text")).trim();
-            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName.replace("styles/", ""), styleText,
-                { append: false, replace: true, truncate: 0 });
+            await Filesystem.writeFile({
+                data: styleText,
+                path: styleFileName.replace("styles/", ""),
+                directory: Directory.Data
+            });
             this.loggingService.info(`[Files] Write style finished succefully: ${styleFileName}`);
         }
     }
@@ -264,28 +270,22 @@ export class FileService {
 
     private getDatabaseFolder() {
         return this.runningContextService.isIos
-            ? this.fileSystemWrapper.documentsDirectory
-            : this.fileSystemWrapper.applicationStorageDirectory + "/databases";
+            ? Directory.Documents
+            : Directory.Library + "/databases";
     }
 
     public async saveToDatabasesFolder(blob: Blob, fileName: string) {
-        let path = this.getDatabaseFolder();
-        await this.fileSystemWrapper.writeFile(path, fileName, blob, { append: false, replace: true, truncate: 0 });
-    }
-
-    public async getLocalFileUrl(relativePath: string): Promise<string> {
-        let fileEntry = await this.fileSystemWrapper
-            .resolveLocalFilesystemUrl(this.fileSystemWrapper.applicationDirectory + "www/" + relativePath) as FileEntry;
-        return await new Promise((resolve, reject) => {
-            fileEntry.file((file) => {
-                resolve(file.localURL);
-            }, reject);
-        });
+        // HM TODO: fix or remove this...
     }
 
     public async getCachedFile(fileName: string): Promise<string> {
         try {
-            return await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.cacheDirectory, fileName);
+            let file = await Filesystem.readFile({
+                path: fileName,
+                directory: Directory.Cache,
+                encoding: Encoding.UTF8
+            });
+            return file.data;
         } catch (ex) {
             this.loggingService.warning("[Files] Unable to get file from cache: " + (ex as Error).message);
             return null;
@@ -295,6 +295,7 @@ export class FileService {
     private getFileContent(file: File): Promise<string> {
         return new Promise((resolve, reject) => {
             let reader = new FileReader();
+            // HM TODO: maybe the following fix is needed: https://github.com/ionic-team/capacitor/issues/1564
             reader.onload = (event: any) => {
                 resolve(event.target.result);
             };
@@ -303,8 +304,11 @@ export class FileService {
     }
 
     public storeFileToCache(fileName: string, content: string) {
-        return this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, content,
-            { replace: true, append: false, truncate: 0 });
+        return Filesystem.writeFile({
+            data: content,
+            path: fileName,
+            directory: Directory.Cache
+        });
     }
 
     /**
@@ -319,42 +323,53 @@ export class FileService {
                 observe: "events",
                 responseType: "blob",
                 reportProgress: true
-            }).subscribe(event => {
-                if (event.type === HttpEventType.DownloadProgress) {
-                    progressCallback(event.loaded / event.total);
-                }
-                if (event.type === HttpEventType.Response) {
-                    if (event.ok) {
-                        resolve(event.body);
-                    } else {
-                        reject(new Error(event.statusText));
+            }).subscribe({
+                next: (event) => {
+                    if (event.type === HttpEventType.DownloadProgress) {
+                        progressCallback(event.loaded / event.total);
                     }
-                }
-            }, error => reject(error));
+                    if (event.type === HttpEventType.Response) {
+                        if (event.ok) {
+                            resolve(event.body);
+                        } else {
+                            reject(new Error(event.statusText));
+                        }
+                    }
+            }, error: (error) => reject(error)
+        });
         });
     }
 
     public async downloadFileToCache(url: string, progressCallback: (value: number) => void) {
         let fileTransferObject = this.fileTransfer.create();
-        let path = this.fileSystemWrapper.cacheDirectory + "/" + url.split("/").pop();
+        let path = await Filesystem.getUri({
+            directory: Directory.Cache,
+            path: url.split("/").pop()
+        })
         fileTransferObject.onProgress((event) => {
             progressCallback(event.loaded / event.total);
         });
-        await fileTransferObject.download(url, path, true);
+        await fileTransferObject.download(url, path.uri, true);
         return path;
     }
 
     public async getFileFromCache(url: string): Promise<Blob> {
         try {
-            let fileBuffer = await this.fileSystemWrapper.readAsArrayBuffer(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
-            return new Blob([fileBuffer]);
+            let file = await Filesystem.readFile({
+                path: url.split("/").pop(),
+                directory: Directory.Cache,
+            });
+            return this.base64StringToBlob(file.data);
         } catch {
             return null;
         }
     }
 
     public async deleteFileFromCache(url: string): Promise<void> {
-        this.fileSystemWrapper.removeFile(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
+        return Filesystem.deleteFile({
+            path: url.split("/").pop(),
+            directory: Directory.Cache
+        });
     }
 
     public async downloadDatabaseFile(url: string, tempFileName: string, token: string, progressCallback: (value: number) => void) {
@@ -363,7 +378,11 @@ export class FileService {
             progressCallback(event.loaded / event.total);
         });
         this.loggingService.info(`[Files] Starting downloading and writing database file to temporary file name ${tempFileName}`);
-        await fileTransferObject.download(url, this.fileSystemWrapper.cacheDirectory + "/" + tempFileName, true, {
+        let path = await Filesystem.getUri({
+            path: tempFileName,
+            directory: Directory.Cache
+        });
+        await fileTransferObject.download(url, path.uri, true, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -373,8 +392,22 @@ export class FileService {
 
     public async replaceTempDatabaseFile(fileName: string, tempFileName: string) {
         this.loggingService.info(`[Files] Starting moving file ${tempFileName} to ${fileName}`);
-        let dbFolder = this.getDatabaseFolder();
-        await this.fileSystemWrapper.moveFile(this.fileSystemWrapper.cacheDirectory, tempFileName, dbFolder, fileName);
+        // HM TODO: make sure this works...
+        if (this.runningContextService.isIos) {
+            await Filesystem.rename({
+                from: tempFileName,
+                to: fileName,
+                directory: Directory.Cache,
+                toDirectory: Directory.Documents
+            });    
+        } else {
+            await Filesystem.rename({
+                from: tempFileName,
+                to: "databases/" + fileName,
+                directory: Directory.Cache,
+                toDirectory: Directory.Library
+            });
+        }
         this.loggingService.info(`[Files] Finished moving file ${tempFileName} to ${fileName}`);
     }
 }

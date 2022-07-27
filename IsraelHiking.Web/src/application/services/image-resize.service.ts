@@ -48,6 +48,7 @@ export class ImageResizeService {
                                                 throwIfNoLocation = true): Promise<TReturn> {
         return new Promise<TReturn>((resolve, reject) => {
             let reader = new FileReader();
+            // HM TODO: maybe the following fix is needed: https://github.com/ionic-team/capacitor/issues/1564
             reader.onload = (event: any) => {
                 let exifData = null as any;
                 if (file.type === ImageResizeService.JPEG) {

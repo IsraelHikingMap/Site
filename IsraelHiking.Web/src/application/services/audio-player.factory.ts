@@ -15,11 +15,10 @@ export class AudioPlayerFactory {
                 private readonly media: Media) {
     }
 
-    public async create(relativePath: string): Promise<IAudioPlayer> {
-        if (this.runningContextService.isCordova) {
-            let audioFilePath = await this.fileService.getLocalFileUrl(relativePath);
-            return this.media.create(audioFilePath);
-        }
-        return new Audio(await this.fileService.getFullFilePath(relativePath));
+    public create(relativePath: string): IAudioPlayer {
+        let fullFilePath = this.fileService.getFullFilePath(relativePath);
+        return (this.runningContextService.isCordova) 
+            ? this.media.create(fullFilePath)
+            : new Audio(fullFilePath);
     }
 }
