@@ -36,7 +36,7 @@ npx capacitor-set-version -v $env:APPVEYOR_BUILD_VERSION -b $versionCodeString
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web/android"
 $aabVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.aab"
 if ($env:STORE_PASSWORD -ne $null) {
-	./gradlew :app:bundleRelease -Pandroid.injected.signing.store.file=$env:APPVEYOR_BUILD_FOLDER/IsraelHiking.Web/signing/IHM.jks -Pandroid.injected.signing.store.password=$env:STORE_PASSWORD -Pandroid.injected.signing.key.alias=ihmkey -Pandroid.injected.signing.key.password=$env:PASSWORD
+	./gradlew :app:bundleRelease -Pandroid.injected.signing.store.file="$env:APPVEYOR_BUILD_FOLDER/IsraelHiking.Web/signing/IHM.jks" -Pandroid.injected.signing.store.password=$env:STORE_PASSWORD -Pandroid.injected.signing.key.alias=ihmkey -Pandroid.injected.signing.key.password=$env:PASSWORD
 } else {
 	./gradlew bundleRelease
 	$aabVersioned = "./IHM_unsigned_$env:APPVEYOR_BUILD_VERSION.aab"

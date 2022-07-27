@@ -1,3 +1,5 @@
+sudo gem install cocoapods
+
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 if ($env:PASSWORD -eq $null) {

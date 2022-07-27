@@ -1,7 +1,6 @@
 import { TestBed, inject, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
 import { HttpClientModule, HttpRequest } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { Device } from "@ionic-native/device/ngx";
 import { SQLite } from "@ionic-native/sqlite/ngx";
 import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
 
@@ -71,7 +70,6 @@ describe("Poi Service", () => {
                 RunningContextService,
                 WhatsAppService,
                 PoiService,
-                Device,
                 SQLite
             ]
         });

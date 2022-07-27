@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Device } from "@ionic-native/device/ngx";
+import { Device } from "@capacitor/device";
 
 import { environment } from "../../environments/environment";
 import { ConnectionService } from "./connection.service";
@@ -10,18 +10,21 @@ export class RunningContextService {
     public readonly isIFrame: boolean;
     public readonly isCordova: boolean;
     public readonly isCapacitor: boolean;
-    public readonly isIos: boolean;
+    public isIos: boolean;
     public readonly isProduction: boolean;
     public readonly isFacebook: boolean;
     public isOnline: boolean;
-    constructor(private readonly connectionService: ConnectionService,
-                private readonly device: Device) {
+    constructor(private readonly connectionService: ConnectionService) {
         this.isIFrame = window.self !== window.top;
         this.isMobile = false;
         this.isProduction = environment.production;
         this.isCordova = environment.isCordova;
         this.isCapacitor = environment.isCapacitor;
-        this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform) || (this.isCordova && this.device.platform === "iOS");
+        this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform);
+        if (!this.isIos && this.isCapacitor) {
+            // HM TODO: find another way to do it?
+            Device.getInfo().then(i => { this.isIos = (i.platform === "ios") });
+        }
         this.isOnline = true;
         let agent: string = navigator.userAgent || navigator.vendor || (window as any).opera || "";
         /* eslint-disable */

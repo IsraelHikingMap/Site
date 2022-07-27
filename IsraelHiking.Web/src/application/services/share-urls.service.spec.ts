@@ -2,7 +2,6 @@ import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
-import { Device } from "@ionic-native/device/ngx";
 
 import { ShareUrlsService } from "./share-urls.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -37,7 +36,6 @@ describe("Share Urls Service", () => {
                 { provide: LoggingService, useValue: loggingService },
                 { provide: DatabaseService, useValue: databaseService },
                 RunningContextService,
-                Device,
                 WhatsAppService,
                 ShareUrlsService
             ]

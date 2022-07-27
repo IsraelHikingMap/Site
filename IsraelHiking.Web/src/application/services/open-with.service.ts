@@ -2,6 +2,7 @@ import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { WebIntent, Intent } from "@ionic-native/web-intent/ngx";
+import { App } from "@capacitor/app";
 
 import { RunningContextService } from "./running-context.service";
 import { FileService } from "./file.service";
@@ -32,6 +33,13 @@ export class OpenWithService {
                 private readonly ngZone: NgZone) { }
 
     public initialize() {
+        if (this.runningContextService.isCapacitor) {
+            // HM TODO: imporve this:
+            App.addListener("appUrlOpen", (data) => {
+                this.loggingService.info("[OpenWith] Received Url Open: " + data.url);
+            });
+            return;
+        }
         if (!this.runningContextService.isCordova) {
             return;
         }

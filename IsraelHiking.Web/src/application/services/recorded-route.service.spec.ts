@@ -1,8 +1,6 @@
 import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { TestBed, inject } from "@angular/core/testing";
 import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
-import { Device } from "@ionic-native/device/ngx";
-import { Subject } from "rxjs";
 
 import { RecordedRouteService } from "./recorded-route.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
@@ -45,7 +43,6 @@ describe("RecordedRouteService", () => {
                 GeoLocationService,
                 RunningContextService,
                 ConnectionService,
-                Device,
                 RoutesFactory,
                 RecordedRouteService
             ]

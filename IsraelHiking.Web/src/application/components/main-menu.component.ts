@@ -1,12 +1,12 @@
 import { Component, OnDestroy } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
-import { Device } from "@ionic-native/device/ngx";
-import { AppVersion } from "@ionic-native/app-version/ngx";
+import { Device } from "@capacitor/device";
+import { App } from "@capacitor/app";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
-import platform from "platform";
 import { NgRedux, select } from "@angular-redux2/store";
+import platform from "platform";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -59,8 +59,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
 
     constructor(resources: ResourcesService,
                 private readonly socialSharing: SocialSharing,
-                private readonly device: Device,
-                private readonly appVersion: AppVersion,
                 private readonly authorizationService: AuthorizationService,
                 private readonly dialog: MatDialog,
                 private readonly runningContextService: RunningContextService,
@@ -80,9 +78,9 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         this.subscriptions.push(this.searchVisible$.subscribe(v => this.searchVisible = v));
         this.subscriptions.push(this.drawingVisible$.subscribe(v => this.drawingVisible = v));
         this.subscriptions.push(this.statisticsVisible$.subscribe(v => this.statisticsVisible = v));
-        if (this.runningContextService.isCordova) {
-            this.appVersion.getVersionNumber().then((version) => {
-                this.loggingService.info(`App version: ${version}`);
+        if (this.runningContextService.isCapacitor) {
+            App.getInfo().then((info) => {
+                this.loggingService.info(`App version: ${info.version}`);
             });
         }
     }
@@ -206,12 +204,13 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 SendReportDialogComponent.openDialog(this.dialog, subject);
                 return;
             }
+            let info = await Device.getInfo();
             infoString += [
-                `Manufacture: ${this.device.manufacturer}`,
-                `Model: ${this.device.model}`,
-                `Platform: ${this.device.platform}`,
-                `OS version: ${this.device.version}`,
-                `App version: ${await this.appVersion.getVersionNumber()}`
+                `Manufacture: ${info.manufacturer}`,
+                `Model: ${info.model}`,
+                `Platform: ${info.platform}`,
+                `OS version: ${info.osVersion}`,
+                `App version: ${(await App.getInfo()).version}`
             ].join("\n");
             let logBase64zipped = await this.fileService.compressTextToBase64Zip(logs);
             logs = await this.geoLocationService.getLog();

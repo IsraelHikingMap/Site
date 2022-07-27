@@ -41,13 +41,10 @@ import player from "lottie-web";
 // Cordova plugins
 import { Brightness } from "@ionic-native/brightness/ngx";
 import { Camera } from "@ionic-native/camera/ngx";
-import { InAppBrowser } from "@ionic-native/in-app-browser/ngx";
 import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
 import { StatusBar } from "@ionic-native/status-bar/ngx";
-import { Device } from "@ionic-native/device/ngx";
 import { SQLite } from "@ionic-native/sqlite/ngx";
-import { AppVersion } from "@ionic-native/app-version/ngx";
 import { Media } from "@ionic-native/media/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
@@ -278,13 +275,10 @@ const initializeApplication = (injector: Injector) => async () => {
             AudioPlayerFactory,
             Brightness,
             Camera,
-            InAppBrowser,
             InAppPurchase2,
             MobileAccessibility,
             StatusBar,
-            Device,
             SQLite,
-            AppVersion,
             Media,
             // eslint-disable-next-line
             FileTransfer,

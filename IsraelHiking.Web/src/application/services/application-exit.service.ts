@@ -1,5 +1,6 @@
 import { Injectable, NgZone } from "@angular/core";
 import { NgRedux } from "@angular-redux2/store";
+import { App } from "@capacitor/app";
 
 import { RunningContextService } from "./running-context.service";
 import { ResourcesService } from "./resources.service";
@@ -43,11 +44,10 @@ export class ApplicationExitService {
     }
 
     public initialize() {
-        if (!this.runningContext.isCordova || !navigator.app) {
+        if (!this.runningContext.isCapacitor) {
             return;
         }
-        document.addEventListener("backbutton", async (e) => {
-            e.preventDefault();
+        App.addListener("backButton", async () => {
             await this.ngZone.run(async () => {
                 if (this.imageGalleryService.isOpen()) {
                     this.imageGalleryService.close();
@@ -87,7 +87,7 @@ export class ApplicationExitService {
                     this.toastService.info(this.resources.clickBackAgainToCloseTheApp);
                 }
             });
-        }, false);
+        });
     }
 
     private async exitApp() {
@@ -97,6 +97,6 @@ export class ApplicationExitService {
         await this.databaseService.uninitialize();
         this.loggingService.debug("Finished IHM Application Exit");
         await this.loggingService.uninitialize();
-        navigator.app.exitApp();
+        App.exitApp();
     }
 }
