@@ -10,5 +10,10 @@
     <true/>
     <key>uploadSymbols</key>
     <true/>
+    <key>provisioningProfiles</key> 
+    <dict> 
+      <key>il.org.osm.israelhiking</key> 
+      <string>164108f6-9b38-4d1c-80ec-92f9687467f0</string>
+    </dict>
   </dict>
 </plist>
