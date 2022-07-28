@@ -104,14 +104,8 @@ export class FileService {
         return filesToReturn;
     }
 
-    public getFullFilePath(relativePath: string): string {
-        // HM TODO: make sure iOS works with this as well...
+    public getFullUrl(relativePath: string): string {
         return (window.origin || window.location.origin) + "/" + relativePath;
-    }
-
-    public getStyleFilePath(relativePath: string): string {
-        // HM TODO: remove this if this is no longer needed
-        return this.getFullFilePath(relativePath);
     }
 
     public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {

@@ -16,9 +16,9 @@ export class AudioPlayerFactory {
     }
 
     public create(relativePath: string): IAudioPlayer {
-        let fullFilePath = this.fileService.getFullFilePath(relativePath);
+        let fullUrl = this.fileService.getFullUrl(relativePath);
         return (this.runningContextService.isCapacitor)
-            ? this.media.create(fullFilePath)
-            : new Audio(fullFilePath);
+            ? this.media.create(fullUrl)
+            : new Audio(fullUrl);
     }
 }
