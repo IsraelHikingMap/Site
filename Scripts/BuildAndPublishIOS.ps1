@@ -1,7 +1,7 @@
 sudo gem install cocoapods
-$env:LANG=en_US.UTF-8
-$env:LANGUAGE=en_US.UTF-8
-$env:LC_ALL=en_US.UTF-8
+$env:LANG="en_US.UTF-8"
+$env:LANGUAGE="en_US.UTF-8"
+$env:LC_ALL="en_US.UTF-8"
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
@@ -46,8 +46,8 @@ Copy-Item "./signing/appveyor.mobileprovision" -Destination "~/Library/MobileDev
 Write-Host "npm ci"
 npm ci
 
-Write-Host "npm run build:cordova -- --no-progress"
-npm run build:cordova -- --no-progress
+Write-Host "npm run build:mobile -- --no-progress"
+npm run build:mobile -- --no-progress
 
 if ($lastexitcode)
 {

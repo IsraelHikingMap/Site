@@ -11,6 +11,14 @@ interface HTMLElementInputChangeEvent {
     target: any
 }
 
+class PendingPromise {
+    constructor(private args: any) {}
+
+    execute() {
+        return new Promise(this.args);
+    }
+}
+
 @Directive({
     selector: "[imageCapture]",
 })
@@ -42,8 +50,8 @@ export class ImageCaptureDirective implements OnDestroy {
                 customDeclineText: this.resources.gallery,
                 confirmIcon: "camera",
                 declineIcon: "image",
-                confirmAction: () => this.getPictureFromCamera(),
-                declineAction: () => this.getPicturesFromGallery(),
+                confirmAction: async () => await this.getPictureFromCamera(),
+                declineAction: async () => await this.getPicturesFromGallery(),
             });
         });
     }

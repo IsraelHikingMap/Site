@@ -23,7 +23,6 @@
               "src/empty-for-oauth.html",
               "src/googlef59316cdb0845a8c.html",
               "src/robots.txt",
-              "src/cordova.js",
               "src/fonts/glyphs",
               "src/fonts/glyphs.json",
               {
@@ -72,7 +71,7 @@
                 }
               ]
             },
-            "cordova": {
+            "mobile": {
               "budgets": [
                 {
                   "type": "anyComponentStyle",
@@ -91,11 +90,11 @@
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.cordova.ts"
+                  "with": "src/environments/environment.mobile.ts"
                 }
               ]
             },
-            "cordova-debug": {
+            "mobile-debug": {
               "budgets": [
                 {
                   "type": "anyComponentStyle",
@@ -111,7 +110,7 @@
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.cordova-debug.ts"
+                  "with": "src/environments/environment.mobile-debug.ts"
                 }
               ]
             }

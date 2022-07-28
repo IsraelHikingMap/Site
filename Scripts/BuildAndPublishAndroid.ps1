@@ -17,8 +17,8 @@ Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 Write-Host "npm ci"
 npm ci
 
-Write-Host "npm run build:cordova -- --no-progress"
-npm run build:cordova -- --no-progress
+Write-Host "npm run build:mobile -- --no-progress"
+npm run build:mobile -- --no-progress
 
 if ($lastexitcode)
 {
