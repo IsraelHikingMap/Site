@@ -93,7 +93,7 @@ export class DatabaseService {
             storedState = this.initialStateUpgrade(dbState.state);
         } else {
             // initial load ever:
-            if (this.runningContext.isCordova) {
+            if (this.runningContext.isCapacitor) {
                 initialState.gpsState.tracking = "tracking";
             }
             this.updateState(initialState);

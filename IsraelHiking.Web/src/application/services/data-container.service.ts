@@ -91,7 +91,7 @@ export class DataContainerService {
                 baseLayer
             }));
             data.baseLayer = this.stringToBaseLayer(baseLayer);
-            this.setData(data, this.runningContextService.isCordova);
+            this.setData(data, this.runningContextService.isCapacitor);
         } catch (ex) {
             this.toastService.warning(this.resources.unableToLoadFromUrl);
         }
@@ -104,7 +104,7 @@ export class DataContainerService {
         }
         try {
             shareUrl = await this.shareUrlsService.setShareUrlById(shareId);
-            this.setData(shareUrl.dataContainer, this.runningContextService.isCordova);
+            this.setData(shareUrl.dataContainer, this.runningContextService.isCapacitor);
             if (!this.runningContextService.isIFrame) {
                 this.toastService.info(shareUrl.description, shareUrl.title);
             }

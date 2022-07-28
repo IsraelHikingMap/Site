@@ -111,7 +111,7 @@ describe("Poi Service", () => {
                         poisLastModifiedDate: null
                     }
                 });
-                (runningContextService as any).isCordova = true;
+                (runningContextService as any).isCapacitor = true;
                 let zip = new JSZip();
                 zip.folder("pois");
                 zip.file("pois/001.geojson", JSON.stringify({ features: [{
@@ -150,7 +150,7 @@ describe("Poi Service", () => {
                         poisLastModifiedDate: Date.now()
                     }
                 });
-                (runningContextService as any).isCordova = true;
+                (runningContextService as any).isCapacitor = true;
                 poiService.initialize().then(() => {
                     expect(poiService.poiGeojsonFiltered.features.length).toBe(0);
                     expect(databaseService.storePois).toHaveBeenCalled();

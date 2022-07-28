@@ -82,7 +82,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     }
 
     public isApp(): boolean {
-        return this.runningContextService.isCordova;
+        return this.runningContextService.isCapacitor;
     }
 
     public share() {

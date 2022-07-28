@@ -79,7 +79,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public isApp(): boolean {
-        return this.runningContextService.isCordova;
+        return this.runningContextService.isCapacitor;
     }
 
     public share() {

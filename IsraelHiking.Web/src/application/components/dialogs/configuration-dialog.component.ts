@@ -36,7 +36,7 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
     }
 
     public isApp() {
-        return this.runningContextService.isCordova;
+        return this.runningContextService.isCapacitor;
     }
 
     public toggleBatteryOprimization() {

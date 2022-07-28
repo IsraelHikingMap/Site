@@ -2,8 +2,7 @@ import { Injectable } from "@angular/core";
 import { Idle, DEFAULT_INTERRUPTSOURCES } from "@ng-idle/core";
 import { KeepAwake } from "@capacitor-community/keep-awake";
 import { ScreenBrightness } from "@capacitor-community/screen-brightness";
-import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
-import { StatusBar } from "@ionic-native/status-bar/ngx";
+import { App } from "@capacitor/app";
 import { Observable } from "rxjs";
 import { NgRedux, select } from "@angular-redux2/store";
 
@@ -20,8 +19,6 @@ export class ScreenService {
     private originalBrightness: number;
 
     constructor(private readonly runningContextService: RunningContextService,
-                private readonly mobileAccesibility: MobileAccessibility,
-                private readonly statusBar: StatusBar,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 private readonly userIdleService: Idle,
                 private readonly logger: LoggingService) { }
@@ -39,20 +36,17 @@ export class ScreenService {
         this.setKeepScreenOn();
         this.originalBrightness = (await ScreenBrightness.getBrightness()).brightness;
         this.logger.info(`[Screen] Original brightness is: ${this.originalBrightness}`);
-        document.addEventListener("resume", () => {
-            this.logger.info(`[Screen] Resume app, setting brightness to original: ${this.originalBrightness}`);
-            this.setKeepScreenOn();
+        App.addListener("appStateChange", (state) => {
             ScreenBrightness.setBrightness({ brightness: this.originalBrightness}); // this is just to be on the safe side...
-            this.userIdleService.watch();
-        }, false);
-        document.addEventListener("resign", () => {
-            this.logger.info(`[Screen] Resigning app, setting brightness to original: ${this.originalBrightness}`);
-            ScreenBrightness.setBrightness({ brightness: this.originalBrightness}); // this is just to be on the safe side...
-        }, false);
-        document.addEventListener("pause", () => {
-            this.userIdleService.stop();
-            this.logger.info("[Screen] Pausing app, stopping user idle service");
-        }, false);
+            if (state.isActive) {
+                this.logger.info("[Screen] App is active, watching idle and setting screen mode");
+                this.setKeepScreenOn();
+                this.userIdleService.watch();
+            } else {
+                this.logger.info(`[Screen] App is inactive, stop watching idle setting brightness to original: ${this.originalBrightness}`);
+                this.userIdleService.stop();
+            }
+        });
         this.userIdleService.setInterrupts(DEFAULT_INTERRUPTSOURCES);
         this.userIdleService.setIdle(30);
         this.userIdleService.setTimeout(false);

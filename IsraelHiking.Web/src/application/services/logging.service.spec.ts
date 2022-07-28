@@ -6,7 +6,7 @@ describe("LoggingService", () => {
 
     beforeEach(() => {
         let runningContextServiceMock = {
-            isCordova: false
+            isCapacitor: false
         };
 
         TestBed.configureTestingModule({

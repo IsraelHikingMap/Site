@@ -3,6 +3,5 @@ export const environment = {
     baseAddress: "https://israelhiking.osm.org.il",
     baseApiAddress: "https://israelhiking.osm.org.il/api/",
     baseTilesAddress: "https://israelhiking.osm.org.il",
-    isCordova: false,
     isCapacitor: true
 };

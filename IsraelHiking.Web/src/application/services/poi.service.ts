@@ -159,7 +159,7 @@ export class PoiService {
                 });
             });
 
-        if (this.runningContextService.isCordova) {
+        if (this.runningContextService.isCapacitor) {
             await this.updateOfflinePois();
         }
         this.uploadPoiQueue$.subscribe((items: string[]) => this.handleUploadQueueChanges(items));
@@ -201,7 +201,7 @@ export class PoiService {
             let poi = await firstValueFrom(poi$) as GeoJSON.Feature;
             this.loggingService.info(`[POIs] Uploaded successfully a${feature.properties.poiIsSimple ? " simple" : ""} ` +
                 `feature with id: ${firstItemId}, ` + "removing from upload queue");
-            if (this.runningContextService.isCordova && !feature.properties.poiIsSimple) {
+            if (this.runningContextService.isCapacitor && !feature.properties.poiIsSimple) {
                 await this.databaseService.storePois([poi]);
                 this.rebuildPois();
             }

@@ -132,7 +132,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public isApp(): boolean {
-        return this.runningContextSerivce.isCordova;
+        return this.runningContextSerivce.isCapacitor;
     }
 
     private async fillUiWithData(data: PoiRouterData) {

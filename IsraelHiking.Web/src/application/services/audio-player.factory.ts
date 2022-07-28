@@ -17,7 +17,7 @@ export class AudioPlayerFactory {
 
     public create(relativePath: string): IAudioPlayer {
         let fullFilePath = this.fileService.getFullFilePath(relativePath);
-        return (this.runningContextService.isCordova) 
+        return (this.runningContextService.isCapacitor)
             ? this.media.create(fullFilePath)
             : new Audio(fullFilePath);
     }

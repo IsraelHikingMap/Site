@@ -205,7 +205,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public canShareLocation() {
-        return this.runningContextService.isCordova;
+        return this.runningContextService.isCapacitor;
     }
 
     public shareLocation() {

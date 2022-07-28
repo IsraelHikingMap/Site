@@ -41,12 +41,10 @@ import player from "lottie-web";
 // Cordova plugins
 import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
-import { StatusBar } from "@ionic-native/status-bar/ngx";
 import { SQLite } from "@ionic-native/sqlite/ngx";
 import { Media } from "@ionic-native/media/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
-import { WebIntent } from "@ionic-native/web-intent/ngx";
 import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
 import { NgReduxModule } from "@angular-redux2/store";
 // services
@@ -273,13 +271,11 @@ const initializeApplication = (injector: Injector) => async () => {
             AudioPlayerFactory,
             InAppPurchase2,
             MobileAccessibility,
-            StatusBar,
             SQLite,
             Media,
             // eslint-disable-next-line
             FileTransfer,
             SocialSharing,
-            WebIntent,
             DeviceOrientation,
             RouteEditPoiInteraction,
             RouteEditRouteInteraction
