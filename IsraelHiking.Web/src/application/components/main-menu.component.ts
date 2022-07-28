@@ -100,7 +100,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public isApp() {
-        return this.runningContextService.isCordova;
+        return this.runningContextService.isCapacitor;
     }
 
     public isIFrame() {
@@ -193,7 +193,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         ].join("\n");
         let subject = "Issue reported by " + userInfo.displayName;
         try {
-            if (!this.runningContextService.isCordova) {
+            if (!this.runningContextService.isCapacitor) {
 
                 infoString += [
                     `Browser: ${platform.name} ${platform.version}`,
@@ -240,7 +240,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public isShowEditOsmButton() {
-        return !this.runningContextService.isCordova &&
+        return !this.runningContextService.isCapacitor &&
             !this.runningContextService.isMobile &&
             !this.runningContextService.isIFrame;
     }

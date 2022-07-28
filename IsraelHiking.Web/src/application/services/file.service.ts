@@ -169,14 +169,10 @@ export class FileService {
         let contents = await Filesystem.readFile({
             path: url,
         });
-        let stat = await Filesystem.stat({
-            path: url
-        });
-        stat.type
         type = type || this.getTypeFromUrl(url);
         let blob = await this.base64StringToBlob(contents.data, type) as any;
         // HM TODO: get original file name - https://github.com/ionic-team/capacitor/issues/1235
-        blob.name = url.split("/").pop();
+        blob.name = decodeURI(url.split("/").pop());
         if (blob.name.indexOf(".") === -1) {
             blob.name += this.getExtensionFromType(type);
         
