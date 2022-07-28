@@ -40,4 +40,5 @@
   </feature>
 
   
+  <preference name="OAuthScheme" value="ihm" />
 </widget>

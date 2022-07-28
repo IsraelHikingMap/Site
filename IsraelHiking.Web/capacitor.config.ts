@@ -4,7 +4,12 @@ const config: CapacitorConfig = {
   appId: 'il.org.osm.israelhiking',
   appName: 'Israel Hiking Map',
   webDir: 'www',
-  bundledWebRuntime: false
+  bundledWebRuntime: false,
+  cordova: {
+    preferences: {
+      "OAuthScheme": "ihm"
+    }
+  }
 };
 
 export default config;
