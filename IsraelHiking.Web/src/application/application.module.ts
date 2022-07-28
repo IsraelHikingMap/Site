@@ -39,7 +39,6 @@ import { NgIdleModule } from "@ng-idle/core";
 import { LottieModule } from "ngx-lottie";
 import player from "lottie-web";
 // Cordova plugins
-import { Camera } from "@ionic-native/camera/ngx";
 import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
 import { StatusBar } from "@ionic-native/status-bar/ngx";

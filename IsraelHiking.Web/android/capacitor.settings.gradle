@@ -11,6 +11,9 @@ project(':capacitor-community-screen-brightness').projectDir = new File('../node
 include ':capacitor-app'
 project(':capacitor-app').projectDir = new File('../node_modules/@capacitor/app/android')
 
+include ':capacitor-camera'
+project(':capacitor-camera').projectDir = new File('../node_modules/@capacitor/camera/android')
+
 include ':capacitor-device'
 project(':capacitor-device').projectDir = new File('../node_modules/@capacitor/device/android')
 

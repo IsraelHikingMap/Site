@@ -12,6 +12,7 @@ dependencies {
     implementation project(':capacitor-community-keep-awake')
     implementation project(':capacitor-community-screen-brightness')
     implementation project(':capacitor-app')
+    implementation project(':capacitor-camera')
     implementation project(':capacitor-device')
     implementation project(':capacitor-filesystem')
     implementation "com.google.android.gms:play-services-location:11+"
