@@ -271,7 +271,6 @@ const initializeApplication = (injector: Injector) => async () => {
             CoordinatesService,
             OfflineFilesDownloadService,
             AudioPlayerFactory,
-            Camera,
             InAppPurchase2,
             MobileAccessibility,
             StatusBar,
