@@ -8,6 +8,10 @@
 		"classpath": "com.elylucas.capscreenbrightness.ScreenBrightnessPlugin"
 	},
 	{
+		"pkg": "@capacitor-community/sqlite",
+		"classpath": "com.getcapacitor.community.database.sqlite.CapacitorSQLitePlugin"
+	},
+	{
 		"pkg": "@capacitor/app",
 		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
 	},

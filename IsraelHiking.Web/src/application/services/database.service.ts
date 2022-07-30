@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core";
 import { NgRedux } from "@angular-redux2/store";
 import { debounceTime } from "rxjs/operators";
-import { SQLite, SQLiteDatabaseConfig, SQLiteObject } from "@ionic-native/sqlite/ngx";
-//import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection} from '@capacitor-community/sqlite';
+import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection} from '@capacitor-community/sqlite';
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
 import maplibregl from "maplibre-gl";
@@ -45,21 +44,17 @@ export class DatabaseService {
     private imagesDatabase: Dexie;
     private shareUrlsDatabase: Dexie;
     private tracesDatabase: Dexie;
-    private sourceDatabases: Map<string, SQLiteObject>;
-    // HM TODO: bring this back
-    //private sourceDatabases: Map<string, SQLiteDBConnection>;
+    private sourceDatabases: Map<string, Promise<SQLiteDBConnection>>;
     private updating: boolean;
-    //private sqlite: SQLiteConnection;
+    private sqlite: SQLiteConnection;
 
     constructor(private readonly loggingService: LoggingService,
                 private readonly runningContext: RunningContextService,
-                private readonly sqlite: SQLite,
                 private readonly toastService: ToastService,
                 private readonly resources: ResourcesService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.updating = false;
-        //this.sourceDatabases = new Map<string, SQLiteDBConnection>();
-        this.sourceDatabases = new Map<string, SQLiteObject>();
+        this.sourceDatabases = new Map<string, Promise<SQLiteDBConnection>>();
     }
 
     public async initialize() {
@@ -67,9 +62,9 @@ export class DatabaseService {
         this.stateDatabase.version(1).stores({
             state: "id"
         });
-        //if (this.runningContext.isCapacitor) {
-        //    this.sqlite = new SQLiteConnection(CapacitorSQLite);
-        //}
+        if (this.runningContext.isCapacitor) {
+            this.sqlite = new SQLiteConnection(CapacitorSQLite);
+        }
         this.poisDatabase = new Dexie(DatabaseService.POIS_DB_NAME);
         this.poisDatabase.version(1).stores({
             pois: DatabaseService.POIS_ID_COLUMN + "," + DatabaseService.POIS_LOCATION_COLUMN,
@@ -151,7 +146,7 @@ export class DatabaseService {
 
     public async closeDatabase(dbKey: string) {
         this.loggingService.info("[Database] Closing database: " + dbKey);
-        let db = this.sourceDatabases.get(dbKey);
+        let db = await this.sourceDatabases.get(dbKey);
         if (db != null) {
             await db.close();
             this.sourceDatabases.delete(dbKey);
@@ -193,60 +188,7 @@ export class DatabaseService {
 
     private async getTileFromDatabase(dbName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
         let db = await this.getDatabase(dbName);
-        let params = [
-            z,
-            x,
-            Math.pow(2, z) - y - 1
-        ];
-        return new Promise<ArrayBuffer>((resolve, reject) => {
-            db.transaction((tx) => {
-                tx.executeSql("SELECT HEX(tile_data) as tile_data_hex FROM tiles " +
-                    "WHERE zoom_level = ? AND tile_column = ? AND tile_row = ? limit 1",
-                    params,
-                    (_: any, res: any) => {
-                        if (res.rows.length !== 1) {
-                            reject(new Error("No tile..."));
-                            return;
-                        }
-                        const hexData = res.rows.item(0).tile_data_hex;
-                        let binData = new Uint8Array(hexData.match(/.{1,2}/g).map((byte: string) => parseInt(byte, 16)));
-                        let isGzipped = binData[0] === 0x1f && binData[1] === 0x8b;
-                        if (isGzipped) {
-                            binData = pako.inflate(binData);
-                        }
-                        resolve(binData.buffer);
-                    },
-                    (error: Error) => {
-                        reject(error);
-                    }
-                );
-            });
-        });
-    }
-
-    private async getDatabase(dbName: string): Promise<SQLiteObject> {
-        if (!this.sourceDatabases.has(dbName)) {
-            let config: SQLiteDatabaseConfig = {
-                createFromLocation: 1,
-                name: dbName + ".mbtiles"
-            };
-            if (this.runningContext.isIos) {
-                config.iosDatabaseLocation = "Documents";
-            } else {
-                config.location = "default";
-                (config as any).androidDatabaseProvider = "system";
-            }
-            let db = await this.sqlite.create(config);
-            this.sourceDatabases.set(dbName, db);
-        }
-        return this.sourceDatabases.get(dbName);
-    }
-
-    /*
-    private async getTileFromDatabase(dbName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
-        let db = await this.getDatabase(dbName);
-        let res = db.query("SELECT name FROM sqlite_schema WHERE type ='table' AND name NOT LIKE 'sqlite_%'");
-        this.loggingService.info(JSON.stringify(res));
+        
         let params = [z, x, Math.pow(2, z) - y - 1];
         let queryresults = await db.query("SELECT HEX(tile_data) as tile_data_hex FROM tiles " +
                 "WHERE zoom_level = ? AND tile_column = ? AND tile_row = ? limit 1",
@@ -265,24 +207,29 @@ export class DatabaseService {
 
     private async getDatabase(dbName: string): Promise<SQLiteDBConnection> {
         if (!this.sourceDatabases.has(dbName)) {
-            let databses = await this.sqlite.getDatabaseList();
-            this.loggingService.info(`[Database] creating connection to ${dbName} available databases: ${databses.values}`);
-            let db = await this.sqlite.createConnection(dbName + ".db", false, "no-encryption", 1);
-            await db.open();
-            this.sourceDatabases.set(dbName, db);
+            this.loggingService.info(`[Database] creating connection to ${dbName}`);
+            this.sourceDatabases.set(dbName, new Promise(async (resolve, reject) => {
+                try {
+                    let dbPromise = this.sqlite.createConnection(dbName + ".db", false, "no-encryption", 1);
+                    let db = await dbPromise;
+                    await db.open();
+                    resolve(db);
+                } catch (ex) {
+                    reject(ex);
+                }
+            }));
         }
         return this.sourceDatabases.get(dbName);
     }
 
     public async moveDownloadedDatabaseFile(dbFileName: string) {
         await this.closeDatabase(dbFileName.replace(".db", ""));
-        this.loggingService.info(`[Database] Starting moving file ${dbFileName}`);
+        this.loggingService.info(`[Database] Starting copying file ${dbFileName}`);
         await this.sqlite.addSQLiteSuffix("cache", [dbFileName]);
         this.loggingService.info(`[Database] Finished copying file ${dbFileName}`);
         await this.sqlite.deleteOldDatabases("cache", [dbFileName]);
         this.loggingService.info(`[Database] Finished deleting file ${dbFileName}`);
     }
-    */
 
     public storePois(pois: GeoJSON.Feature[]): Promise<any> {
         return this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).bulkPut(pois);

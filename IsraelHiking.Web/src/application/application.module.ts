@@ -42,7 +42,6 @@ import player from "lottie-web";
 // Cordova plugins
 import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
-import { SQLite } from "@ionic-native/sqlite/ngx";
 import { Media } from "@ionic-native/media/ngx";
 import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
@@ -282,7 +281,6 @@ const initializeApplication = (injector: Injector) => async () => {
             AudioPlayerFactory,
             InAppPurchase2,
             MobileAccessibility,
-            SQLite,
             Media,
             FileSystemWrapper,
             // eslint-disable-next-line
