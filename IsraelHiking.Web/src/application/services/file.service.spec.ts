@@ -1,6 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 
@@ -48,6 +49,7 @@ describe("FileService", () => {
             providers: [
                 RunningContextService,
                 LoggingService,
+                FileSystemWrapper,
                 // eslint-disable-next-line
                 FileTransfer,
                 SocialSharing,
