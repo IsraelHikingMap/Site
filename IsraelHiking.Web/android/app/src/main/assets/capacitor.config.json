@@ -7,5 +7,10 @@
 		"preferences": {
 			"OAuthScheme": "ihm"
 		}
+	},
+	"plugins": {
+		"CapacitorSQLite": {
+			"iosDatabaseLocation": "Library/CapacitorDatabase"
+		}
 	}
 }

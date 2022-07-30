@@ -2,6 +2,9 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
+    //packagingOptions {
+    //    exclude 'build-data.properties'
+    //}
     defaultConfig {
         applicationId "il.org.osm.israelhiking"
         minSdkVersion rootProject.ext.minSdkVersion
