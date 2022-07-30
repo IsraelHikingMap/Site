@@ -37,16 +37,17 @@ import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { NgIdleModule } from "@ng-idle/core";
 import { LottieModule } from "ngx-lottie";
+import { NgReduxModule } from "@angular-redux2/store";
 import player from "lottie-web";
 // Cordova plugins
 import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
 import { SQLite } from "@ionic-native/sqlite/ngx";
 import { Media } from "@ionic-native/media/ngx";
+import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
 import { FileTransfer } from "@ionic-native/file-transfer/ngx";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
-import { NgReduxModule } from "@angular-redux2/store";
 // services
 import { ScrollToModule } from "./infra/scroll-to/scroll-to.module";
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
@@ -168,6 +169,16 @@ import { BackgroundTextComponent } from "./components/background-text.component"
 // variables and functions
 import { routes } from "./routes";
 
+export class FileReaderFixForCapacitor extends FileReader {
+	constructor() {
+		super();
+		const zoneOriginalInstance = (this as any)['__zone_symbol__originalInstance'];
+		return zoneOriginalInstance || this;
+	}
+}
+
+window.FileReader = FileReaderFixForCapacitor;
+
 const initializeApplication = (injector: Injector) => async () => {
         await injector.get<ApplicationInitializeService>(ApplicationInitializeService).initialize();
     };
@@ -273,6 +284,7 @@ const initializeApplication = (injector: Injector) => async () => {
             MobileAccessibility,
             SQLite,
             Media,
+            FileSystemWrapper,
             // eslint-disable-next-line
             FileTransfer,
             SocialSharing,

@@ -47,7 +47,7 @@ export class ImageResizeService {
                                                 convertMethod: (data: string, name: string, geoLocation: LatLngAlt) => TReturn,
                                                 throwIfNoLocation = true): Promise<TReturn> {
         return new Promise<TReturn>((resolve, reject) => {
-            let reader = this.getFileReader();
+            let reader = new FileReader();
             reader.onload = (event: any) => {
                 let exifData = null as any;
                 if (file.type === ImageResizeService.JPEG) {
@@ -67,13 +67,6 @@ export class ImageResizeService {
             };
             reader.readAsDataURL(file);
         });
-    }
-
-    private getFileReader(): FileReader {
-        // https://github.com/ionic-team/capacitor/issues/1564
-        const fileReader = new FileReader();
-        const zoneOriginalInstance = (fileReader as any)["__zone_symbol__originalInstance"];
-        return zoneOriginalInstance || fileReader;
     }
 
     private getGeoLocation(exifData: any): LatLngAlt {

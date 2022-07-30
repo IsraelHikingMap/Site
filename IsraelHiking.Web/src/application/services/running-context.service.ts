@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { Capacitor } from '@capacitor/core';
 import { Device } from "@capacitor/device";
 
 import { environment } from "../../environments/environment";
@@ -9,7 +10,7 @@ export class RunningContextService {
     public readonly isMobile: boolean;
     public readonly isIFrame: boolean;
     public readonly isCapacitor: boolean;
-    public isIos: boolean;
+    public readonly isIos: boolean;
     public readonly isProduction: boolean;
     public readonly isFacebook: boolean;
     public isOnline: boolean;
@@ -20,8 +21,7 @@ export class RunningContextService {
         this.isCapacitor = environment.isCapacitor;
         this.isIos = /^(iPhone|iPad|iPod)/.test(navigator.platform);
         if (!this.isIos && this.isCapacitor) {
-            // HM TODO: find another way to do it?
-            Device.getInfo().then(i => { this.isIos = (i.platform === "ios") });
+            this.isIos = Capacitor.getPlatform() === "ios";
         }
         this.isOnline = true;
         let agent: string = navigator.userAgent || navigator.vendor || (window as any).opera || "";

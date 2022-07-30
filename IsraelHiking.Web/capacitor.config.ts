@@ -9,6 +9,11 @@ const config: CapacitorConfig = {
     preferences: {
       "OAuthScheme": "ihm"
     }
+  },
+  plugins: {
+    CapacitorSQLite: {
+      "iosDatabaseLocation": "Library/CapacitorDatabase"
+    }
   }
 };
 
