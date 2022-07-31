@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { FormControl } from "@angular/forms";
+import { UntypedFormControl } from "@angular/forms";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
 import { Observable, Subscription } from "rxjs";
@@ -28,7 +28,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     public shareUrlIdInEditMode: string;
     public selectedShareUrlId: string;
     public loadingShareUrls: boolean;
-    public searchTerm: FormControl;
+    public searchTerm: UntypedFormControl;
 
     @select((state: ApplicationState) => state.shareUrlsState.shareUrls)
     public shareUrls$: Observable<ShareUrl[]>;
@@ -56,7 +56,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         this.selectedShareUrlId = null;
         this.page = 1;
         this.subscriptions = [];
-        this.searchTerm = new FormControl();
+        this.searchTerm = new UntypedFormControl();
         this.subscriptions.push(this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
         }));

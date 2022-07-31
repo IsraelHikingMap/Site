@@ -9,7 +9,7 @@ import {
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
-import { FormControl } from "@angular/forms";
+import { UntypedFormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
 import { remove } from "lodash-es";
 import { PointLike } from "maplibre-gl";
@@ -61,8 +61,8 @@ export class SearchComponent extends BaseMapComponent {
     public fromContext: SearchContext;
     public toContext: SearchContext;
     public routingType: RoutingType;
-    public searchFrom: FormControl;
-    public searchTo: FormControl;
+    public searchFrom: UntypedFormControl;
+    public searchTo: UntypedFormControl;
     public hasFocus: boolean;
     public hideCoordinates: boolean;
     public directional: DirectionalContext;
@@ -111,8 +111,8 @@ export class SearchComponent extends BaseMapComponent {
             searchResults: [],
             selectedSearchResults: null
         } as SearchContext;
-        this.searchFrom = new FormControl();
-        this.searchTo = new FormControl();
+        this.searchFrom = new UntypedFormControl();
+        this.searchTo = new UntypedFormControl();
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
 
@@ -126,7 +126,7 @@ export class SearchComponent extends BaseMapComponent {
         });
     }
 
-    private configureInputFormControl(input: FormControl, context: SearchContext) {
+    private configureInputFormControl(input: UntypedFormControl, context: SearchContext) {
         input.valueChanges.pipe(
             tap(x => {
                 if (typeof x !== "string") {
