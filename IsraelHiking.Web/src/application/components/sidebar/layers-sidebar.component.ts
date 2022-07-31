@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { Observable } from "rxjs";
-import { select, NgRedux } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
@@ -12,9 +12,9 @@ import { OverlayEditDialogComponent } from "../dialogs/layers/overlay-edit-dialo
 import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
-import { LayersService } from "../../services/layers/layers.service";
+import { LayersService } from "../../services/layers.service";
 import { SidebarService } from "../../services/sidebar.service";
-import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
@@ -32,19 +32,19 @@ import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGro
 })
 export class LayersSidebarComponent extends BaseMapComponent {
 
-    @select((state: ApplicationState) => state.layersState.baseLayers)
+    @Select((state: ApplicationState) => state.layersState.baseLayers)
     public baseLayers: Observable<EditableLayer[]>;
 
-    @select((state: ApplicationState) => state.layersState.overlays)
+    @Select((state: ApplicationState) => state.layersState.overlays)
     public overlays: Observable<Overlay[]>;
 
-    @select((state: ApplicationState) => state.layersState.categoriesGroups)
+    @Select((state: ApplicationState) => state.layersState.categoriesGroups)
     public categoriesGroups: Observable<CategoriesGroup>;
 
-    @select((state: ApplicationState) => state.routes.present)
+    @Select((state: ApplicationState) => state.routes.present)
     public routes: Observable<RouteData[]>;
 
-    @select((state: ApplicationState) => state.offlineState.lastModifiedDate)
+    @Select((state: ApplicationState) => state.offlineState.lastModifiedDate)
     public lastModified: Observable<Date>;
 
     constructor(resources: ResourcesService,

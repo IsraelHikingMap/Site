@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable } from "rxjs";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
 import { NonAngularObjectsFactory, IOhAuth, OAuthResponse, IOAuthParams } from "./non-angular-objects.factory";
@@ -31,7 +31,7 @@ export class AuthorizationService {
     private options: AuthorizationServiceOptions;
     private ohauth: IOhAuth;
 
-    @select((state: ApplicationState) => state.userState)
+    @Select((state: ApplicationState) => state.userState)
     private userState$: Observable<UserState>;
 
     private userState: UserState;

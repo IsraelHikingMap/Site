@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
 import { Observable } from "rxjs";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -11,7 +11,7 @@ import type { ApplicationState, UserInfo } from "../models/models";
 @Injectable()
 export class PurchaseService {
 
-    @select((state: ApplicationState) => state.userState.userInfo)
+    @Select((state: ApplicationState) => state.userState.userInfo)
     private userInfo$: Observable<UserInfo>;
 
     constructor(private readonly store: InAppPurchase2,

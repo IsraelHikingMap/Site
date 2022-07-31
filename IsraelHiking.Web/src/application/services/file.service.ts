@@ -11,7 +11,7 @@ import JSZip from "jszip";
 import { ImageResizeService } from "./image-resize.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { RunningContextService } from "./running-context.service";
-import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "./selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";

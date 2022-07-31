@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter } from "@angular/core";
 import { Observable } from "rxjs";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { HashService } from "./hash.service";
 import { SetSidebarAction } from "../reducers/poi.reducer";
@@ -15,7 +15,7 @@ export class SidebarService {
     public isVisible: boolean;
     public sideBarStateChanged: EventEmitter<void>;
 
-    @select((state: ApplicationState) => state.poiState.isSidebarOpen)
+    @Select((state: ApplicationState) => state.poiState.isSidebarOpen)
     private isPoiSidebarOpen$: Observable<boolean>;
 
     private isPoiSidebarOpen: boolean;

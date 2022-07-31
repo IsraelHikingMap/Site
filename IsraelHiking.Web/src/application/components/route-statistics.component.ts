@@ -4,10 +4,10 @@ import { Subscription, Observable, interval } from "rxjs";
 import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "@katze/ngx-d3";
 import { regressionLoess } from "d3-regression";
 import { LineLayerSpecification } from "maplibre-gl";
-import { select, NgRedux } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
-import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../services/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "../services/route-statistics.service";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
@@ -97,22 +97,22 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     @ViewChild("lineChartContainer")
     public lineChartContainer: ElementRef;
 
-    @select((state: ApplicationState) => state.routes.present)
+    @Select((state: ApplicationState) => state.routes.present)
     private routes$: Observable<RouteData[]>;
 
-    @select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
+    @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     private selectedRouteId$: Observable<string>;
 
-    @select((state: ApplicationState) => state.location.zoom)
+    @Select((state: ApplicationState) => state.location.zoom)
     private zoom$: Observable<number>;
 
-    @select((state: ApplicationState) => state.gpsState.currentPoistion)
+    @Select((state: ApplicationState) => state.gpsState.currentPoistion)
     private currentPoistion$: Observable<GeolocationPosition>;
 
-    @select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
+    @Select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
     public statisticsVisible$: Observable<boolean>;
 
-    @select((state: ApplicationState) => state.configuration.language)
+    @Select((state: ApplicationState) => state.configuration.language)
     public language$: Observable<Language>;
 
     private statistics: RouteStatistics;

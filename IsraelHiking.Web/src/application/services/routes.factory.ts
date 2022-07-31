@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { NgRedux } from "@angular-redux2/store";
 
-import type { RouteData, ApplicationState } from "../../../models/models";
+import type { RouteData, ApplicationState } from "../models/models";
 
 @Injectable()
 export class RoutesFactory {

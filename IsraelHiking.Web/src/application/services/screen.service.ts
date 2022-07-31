@@ -4,7 +4,7 @@ import { KeepAwake } from "@capacitor-community/keep-awake";
 import { ScreenBrightness } from "@capacitor-community/screen-brightness";
 import { App } from "@capacitor/app";
 import { Observable } from "rxjs";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -13,7 +13,7 @@ import type { ApplicationState, BatteryOptimizationType } from "../models/models
 @Injectable()
 export class ScreenService {
 
-    @select((state: ApplicationState) => state.configuration.batteryOptimizationType)
+    @Select((state: ApplicationState) => state.configuration.batteryOptimizationType)
     public batteryOptimizationType$: Observable<BatteryOptimizationType>;
 
     private originalBrightness: number;

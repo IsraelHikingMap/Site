@@ -3,14 +3,14 @@ import { MatDialog } from "@angular/material/dialog";
 import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { Observable } from "rxjs";
-import { select } from "@angular-redux2/store";
+import { Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
 import { ILegendItem } from "./legend-item.component";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
-import { LayersService } from "../../services/layers/layers.service";
+import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducers/initial-state";
 import type { ApplicationState, Language } from "../../models/models";
@@ -32,7 +32,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     public selectedTabIndex: number;
     private selectedSection: LegendSection;
 
-    @select((state: ApplicationState) => state.configuration.language)
+    @Select((state: ApplicationState) => state.configuration.language)
     private language$: Observable<Language>;
 
     constructor(resources: ResourcesService,

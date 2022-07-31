@@ -4,7 +4,7 @@ import { UntypedFormControl } from "@angular/forms";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
 import { Observable, Subscription } from "rxjs";
-import { select, NgRedux } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
@@ -30,10 +30,10 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     public loadingShareUrls: boolean;
     public searchTerm: UntypedFormControl;
 
-    @select((state: ApplicationState) => state.shareUrlsState.shareUrls)
+    @Select((state: ApplicationState) => state.shareUrlsState.shareUrls)
     public shareUrls$: Observable<ShareUrl[]>;
 
-    @select((state: ApplicationState) => state.inMemoryState.shareUrl)
+    @Select((state: ApplicationState) => state.inMemoryState.shareUrl)
     public shownShareUrl$: Observable<ShareUrl>;
 
     private sessionSearchTerm = "";

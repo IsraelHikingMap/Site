@@ -2,11 +2,11 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable } from "rxjs";
 import { timeout } from "rxjs/operators";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
-import { ResourcesService } from "../resources.service";
-import { AuthorizationService } from "../authorization.service";
-import { ToastService } from "../toast.service";
+import { ResourcesService } from "./resources.service";
+import { AuthorizationService } from "./authorization.service";
+import { ToastService } from "./toast.service";
 import {
     ISRAEL_HIKING_MAP,
     ISRAEL_MTB_MAP,
@@ -14,7 +14,7 @@ import {
     ESRI,
     HIKING_TRAILS,
     BICYCLE_TRAILS
-} from "../../reducers/initial-state";
+} from "../reducers/initial-state";
 import {
     AddBaseLayerAction,
     UpdateBaseLayerAction,
@@ -24,7 +24,7 @@ import {
     RemoveBaseLayerAction,
     AddOverlayAction,
     ToggleOfflineAction,
-} from "../../reducers/layers.reducer";
+} from "../reducers/layers.reducer";
 import type {
     DataContainer,
     LayerData,
@@ -32,10 +32,10 @@ import type {
     Overlay,
     ApplicationState,
     UserInfo
-} from "../../models/models";
-import { Urls } from "../../urls";
+} from "../models/models";
+import { Urls } from "../urls";
 
-import { LoggingService } from "../logging.service";
+import { LoggingService } from "./logging.service";
 
 interface IUserLayer extends LayerData {
     isOverlay: boolean;
@@ -54,16 +54,16 @@ export class LayersService {
     private overlays: Overlay[];
     private selectedBaseLayerKey: string;
 
-    @select((state: ApplicationState) => state.layersState.baseLayers)
+    @Select((state: ApplicationState) => state.layersState.baseLayers)
     public baseLayers$: Observable<EditableLayer[]>;
 
-    @select((state: ApplicationState) => state.layersState.overlays)
+    @Select((state: ApplicationState) => state.layersState.overlays)
     public overlays$: Observable<Overlay[]>;
 
-    @select((state: ApplicationState) => state.layersState.selectedBaseLayerKey)
+    @Select((state: ApplicationState) => state.layersState.selectedBaseLayerKey)
     public selectedBaseLayerKey$: Observable<string>;
 
-    @select((state: ApplicationState) => state.userState.userInfo)
+    @Select((state: ApplicationState) => state.userState.userInfo)
     public userInfo$: Observable<UserInfo>;
 
     constructor(private readonly resources: ResourcesService,

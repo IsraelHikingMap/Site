@@ -1,14 +1,14 @@
 import { Injectable, EventEmitter } from "@angular/core";
 import { Observable } from "rxjs";
 import { some } from "lodash-es";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { RoutesFactory } from "./routes.factory";
-import { ResourcesService } from "../../resources.service";
-import { SpatialService } from "../../spatial.service";
-import { RouterService } from "../../router.service";
-import { MINIMAL_ANGLE, MINIMAL_DISTANCE } from "../../route-statistics.service";
-import { SetSelectedRouteAction } from "../../../reducers/route-editing-state.reducer";
+import { ResourcesService } from "./resources.service";
+import { SpatialService } from "./spatial.service";
+import { RouterService } from "./router.service";
+import { MINIMAL_ANGLE, MINIMAL_DISTANCE } from "./route-statistics.service";
+import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
 import {
     AddRouteAction,
     SplitRouteAction,
@@ -19,14 +19,14 @@ import {
     ReplaceSegmentsAction,
     AddPrivatePoiAction,
     ChangeEditStateAction
-} from "../../../reducers/routes.reducer";
+} from "../reducers/routes.reducer";
 import type {
     RouteData,
     ApplicationState,
     RouteSegmentData,
     LatLngAltTime,
     LatLngAlt,
-} from "../../../models/models";
+} from "../models/models";
 
 @Injectable()
 export class SelectedRouteService {
@@ -38,13 +38,13 @@ export class SelectedRouteService {
     private selectedRouteId: string;
     private recordingRouteId: string;
 
-    @select((state: ApplicationState) => state.routes.present)
+    @Select((state: ApplicationState) => state.routes.present)
     private routes$: Observable<RouteData[]>;
 
-    @select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
+    @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     private selectedRouteId$: Observable<string>;
 
-    @select((state: ApplicationState) => state.routeEditingState.recordingRouteId)
+    @Select((state: ApplicationState) => state.routeEditingState.recordingRouteId)
     private recordingRouteId$: Observable<string>;
 
     public selectedRouteHover: EventEmitter<LatLngAlt>;

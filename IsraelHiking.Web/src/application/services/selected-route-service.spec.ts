@@ -3,15 +3,15 @@ import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
 import { Subject } from "rxjs";
 
 import { SelectedRouteService } from "./selected-route.service";
-import { ResourcesService } from "../../../services/resources.service";
-import { ToastServiceMockCreator } from "../../../services/toast.service.spec";
+import { ResourcesService } from "./resources.service";
+import { ToastServiceMockCreator } from "./toast.service.spec";
+import { RouterService } from "./router.service";
 import { RoutesFactory } from "./routes.factory";
-import { RouterService } from "application/services/router.service";
-import type { ApplicationState, RouteData } from "../../../models/models";
+import type { ApplicationState } from "../models/models";
 
-const getSubject = <T>(predecator: (state: ApplicationState) => T): Subject<T> => {
+export const getSubject = <T>(predecator: (state: ApplicationState) => T): Subject<T> => {
     let predecatorString = predecator.toString().split("=>")[1];
-    let selectorKey = Object.keys(MockNgRedux.getSubStore().selections).find(k => k.includes(predecatorString));
+    let selectorKey = Object.keys((MockNgRedux.getSubStore() as MockNgRedux).selections).find(k => k.includes(predecatorString));
     return MockNgRedux.getSelectorStub<ApplicationState, T>(selectorKey);
 };
 

@@ -3,7 +3,7 @@ import { Router, ActivatedRoute, ParamMap } from "@angular/router";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { Subscription, Observable } from "rxjs";
 import { cloneDeep } from "lodash-es";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -12,8 +12,8 @@ import { AuthorizationService } from "../../../services/authorization.service";
 import { IHMTitleService } from "../../../services/ihm-title.service";
 import { ToastService } from "../../../services/toast.service";
 import { HashService, RouteStrings, PoiRouterData } from "../../../services/hash.service";
-import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
-import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
+import { SelectedRouteService } from "../../../services/selected-route.service";
+import { RoutesFactory } from "../../../services/routes.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { SpatialService } from "../../../services/spatial.service";
 import { RunningContextService } from "../../../services/running-context.service";
@@ -56,7 +56,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public shareLinks: PoiSocialLinks;
     public contribution: Contribution;
 
-    @select((state: ApplicationState) => state.poiState.isSidebarOpen)
+    @Select((state: ApplicationState) => state.poiState.isSidebarOpen)
     public isOpen: Observable<boolean>;
 
     private editMode: boolean;

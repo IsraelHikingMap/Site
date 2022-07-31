@@ -34,7 +34,6 @@
             "styles": [
               "src/scss/common.scss"
             ],
-            "stylePreprocessorOptions": { "includePaths": [ "src/scss" ] },
             "scripts": [],
             "allowedCommonJsDependencies": [
               "geojson-rbush",

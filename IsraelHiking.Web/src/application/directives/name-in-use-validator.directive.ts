@@ -1,7 +1,7 @@
 import { Directive, Input, AfterViewInit } from "@angular/core";
 import { Validator, AbstractControl, NG_VALIDATORS } from "@angular/forms";
 
-import { LayersService } from "../services/layers/layers.service";
+import { LayersService } from "../services/layers.service";
 
 @Directive({
     selector: "[nameInUse]",

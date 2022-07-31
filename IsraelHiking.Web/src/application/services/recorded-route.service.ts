@@ -1,14 +1,14 @@
 import { Injectable } from "@angular/core";
 import { last } from "lodash-es";
 import { Observable } from "rxjs";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
-import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "./selected-route.service";
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoLocationService } from "./geo-location.service";
-import { RoutesFactory } from "./layers/routelayers/routes.factory";
+import { RoutesFactory } from "./routes.factory";
 import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
 import { StopRecordingAction, StartRecordingAction } from "../reducers/route-editing-state.reducer";
@@ -24,7 +24,7 @@ export class RecordedRouteService {
 
     private rejectedPosition: LatLngAltTime;
 
-    @select((state: ApplicationState )=> state.gpsState.currentPoistion)
+    @Select((state: ApplicationState )=> state.gpsState.currentPoistion)
     private currentPosition$: Observable<GeolocationPosition>;
 
     constructor(private readonly resources: ResourcesService,

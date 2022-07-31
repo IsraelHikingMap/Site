@@ -2,13 +2,13 @@ import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { AddSimplePoiDialogComponent } from "../dialogs/add-simple-poi-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
-import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
@@ -27,7 +27,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     @Output()
     public closed = new EventEmitter();
 
-    @select((state: ApplicationState) => state.inMemoryState.distance)
+    @Select((state: ApplicationState) => state.inMemoryState.distance)
     public distance$: Observable<boolean>;
 
     public hideCoordinates: boolean;

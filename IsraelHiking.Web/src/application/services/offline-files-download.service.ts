@@ -4,7 +4,7 @@ import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { NgRedux } from "@angular-redux2/store";
 
-import { LayersService } from "./layers/layers.service";
+import { LayersService } from "./layers.service";
 import { SidebarService } from "./sidebar.service";
 import { DatabaseService } from "./database.service";
 import { FileService } from "./file.service";

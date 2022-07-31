@@ -1,11 +1,11 @@
 import { Component } from "@angular/core";
 import { Observable } from "rxjs";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
-import { RoutesFactory } from "../../services/layers/routelayers/routes.factory";
+import { RoutesFactory } from "../../services/routes.factory";
 import { TracesService } from "../../services/traces.service";
 import { AddRouteAction } from "../../reducers/routes.reducer";
 import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
@@ -26,10 +26,10 @@ export class TracesComponent extends BaseMapComponent {
     public selectedFeatureSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public isConfigOpen: boolean;
 
-    @select((state: ApplicationState) => state.tracesState.visibleTraceId)
+    @Select((state: ApplicationState) => state.tracesState.visibleTraceId)
     private visibleTraceId$: Observable<string>;
 
-    @select((state: ApplicationState) => state.tracesState.missingParts)
+    @Select((state: ApplicationState) => state.tracesState.missingParts)
     private missingParts$: Observable<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
 
     constructor(resources: ResourcesService,

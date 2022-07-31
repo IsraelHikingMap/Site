@@ -8,7 +8,7 @@ import {
     LayerSpecification
 } from "maplibre-gl";
 import { Observable, Subscription } from "rxjs";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -47,7 +47,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private hasInternetAccess: boolean;
     private mapLoadedPromise: Promise<void>;
 
-    @select((state: ApplicationState) => state.configuration.language)
+    @Select((state: ApplicationState) => state.configuration.language)
     private language$: Observable<Language>;
 
     constructor(resources: ResourcesService,

@@ -7,7 +7,7 @@ import { timeout, throttleTime, skip, filter } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import JSZip from "jszip";
 import MiniSearch from "minisearch";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
@@ -75,13 +75,13 @@ export class PoiService {
     public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public poisChanged: EventEmitter<void>;
 
-    @select((state: ApplicationState) => state.layersState.categoriesGroups)
+    @Select((state: ApplicationState) => state.layersState.categoriesGroups)
     private categoriesGroups: Observable<CategoriesGroup[]>;
 
-    @select((state: ApplicationState) => state.configuration.language)
+    @Select((state: ApplicationState) => state.configuration.language)
     private language$: Observable<Language>;
 
-    @select((state: ApplicationState) => state.offlineState.uploadPoiQueue)
+    @Select((state: ApplicationState) => state.offlineState.uploadPoiQueue)
     private uploadPoiQueue$: Observable<string[]>;
 
     constructor(private readonly resources: ResourcesService,

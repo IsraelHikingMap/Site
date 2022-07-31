@@ -5,7 +5,7 @@ import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
 import { SocialSharing } from "@ionic-native/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 import platform from "platform";
 
 import { BaseMapComponent } from "./base-map.component";
@@ -16,7 +16,7 @@ import { GeoLocationService } from "../services/geo-location.service";
 import { LoggingService } from "../services/logging.service";
 import { ToastService } from "../services/toast.service";
 import { FileService } from "../services/file.service";
-import { LayersService } from "../services/layers/layers.service";
+import { LayersService } from "../services/layers.service";
 import { SidebarService } from "../services/sidebar.service";
 import { HashService } from "../services/hash.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
@@ -45,16 +45,16 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     public statisticsVisible: boolean;
     public isShowMore: boolean;
 
-    @select((state: ApplicationState) => state.userState.userInfo)
+    @Select((state: ApplicationState) => state.userState.userInfo)
     public userInfo$: Observable<UserInfo>;
 
-    @select((state: ApplicationState) => state.uiComponentsState.searchVisible)
+    @Select((state: ApplicationState) => state.uiComponentsState.searchVisible)
     public searchVisible$: Observable<boolean>;
 
-    @select((state: ApplicationState) => state.uiComponentsState.drawingVisible)
+    @Select((state: ApplicationState) => state.uiComponentsState.drawingVisible)
     public drawingVisible$: Observable<boolean>;
 
-    @select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
+    @Select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
     public statisticsVisible$: Observable<boolean>;
 
     constructor(resources: ResourcesService,
