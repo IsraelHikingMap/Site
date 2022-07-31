@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { NgRedux } from "@angular-redux2/store";
 import { debounceTime } from "rxjs/operators";
-import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection} from '@capacitor-community/sqlite';
+import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection} from "@capacitor-community/sqlite";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
 import maplibregl from "maplibre-gl";
@@ -188,7 +188,7 @@ export class DatabaseService {
 
     private async getTileFromDatabase(dbName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
         let db = await this.getDatabase(dbName);
-        
+
         let params = [z, x, Math.pow(2, z) - y - 1];
         let queryresults = await db.query("SELECT HEX(tile_data) as tile_data_hex FROM tiles " +
                 "WHERE zoom_level = ? AND tile_column = ? AND tile_row = ? limit 1",

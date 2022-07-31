@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Capacitor } from '@capacitor/core';
-import { Device } from "@capacitor/device";
+import { Capacitor } from "@capacitor/core";
 
 import { environment } from "../../environments/environment";
 import { ConnectionService } from "./connection.service";

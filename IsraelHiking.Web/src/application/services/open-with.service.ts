@@ -60,14 +60,14 @@ export class OpenWithService {
             let sourceAndId = pathname.replace("/poi/", "");
             let source = sourceAndId.split("/")[0];
             let id = sourceAndId.split("/")[1];
-            let language = new URLSearchParams(url.search).get('language');
+            let language = new URLSearchParams(url.search).get("language");
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_POI, source, id],
                     { queryParams: { language } });
             });
         } else if (pathname.startsWith("/url")) {
             let urlData = pathname.replace("/url/", "");
-            let baseLayer = new URLSearchParams(url.search).get('baselayer');;
+            let baseLayer = new URLSearchParams(url.search).get("baselayer");;
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_URL, urlData],
                     { queryParams: { baseLayer } });

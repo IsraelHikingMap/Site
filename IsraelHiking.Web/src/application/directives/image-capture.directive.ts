@@ -7,8 +7,8 @@ import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
 
 interface HTMLElementInputChangeEvent {
-    dataTransfer: { files: File[] },
-    target: any
+    dataTransfer: { files: File[] };
+    target: any;
 }
 
 class PendingPromise {
@@ -73,7 +73,7 @@ export class ImageCaptureDirective implements OnDestroy {
         let response = await Camera.pickImages({
             correctOrientation: true,
         });
-        let files = []
+        let files = [];
         for (let photo of response.photos) {
             files.push(await this.fileService.getFileFromUrl(photo.path));
         }

@@ -171,7 +171,8 @@ import { routes } from "./routes";
 export class FileReaderFixForCapacitor extends FileReader {
 	constructor() {
 		super();
-		const zoneOriginalInstance = (this as any)['__zone_symbol__originalInstance'];
+        // eslint-disable-next-line
+		const zoneOriginalInstance = (this as any).__zone_symbol__originalInstance;
 		return zoneOriginalInstance || this;
 	}
 }
