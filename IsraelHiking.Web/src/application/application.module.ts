@@ -168,6 +168,7 @@ import { BackgroundTextComponent } from "./components/background-text.component"
 // variables and functions
 import { routes } from "./routes";
 
+// See https://github.com/ionic-team/capacitor/issues/1564
 export class FileReaderFixForCapacitor extends FileReader {
 	constructor() {
 		super();

@@ -257,10 +257,6 @@ export class FileService {
         return data;
     }
 
-    public async saveToDatabasesFolder(blob: Blob, fileName: string) {
-        // HM TODO: fix or remove this...
-    }
-
     public async getCachedFile(fileName: string): Promise<string> {
         try {
             return await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.cacheDirectory, fileName);
@@ -271,9 +267,8 @@ export class FileService {
     }
 
     private getFileContent(file: File): Promise<string> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _) => {
             let reader = new FileReader();
-            // HM TODO: maybe the following fix is needed: https://github.com/ionic-team/capacitor/issues/1564
             reader.onload = (event: any) => {
                 resolve(event.target.result);
             };
@@ -281,7 +276,7 @@ export class FileService {
         });
     }
 
-    public storeFileToCache(fileName: string, content: string) {
+    public storeFileToCache(fileName: string, content: string | Blob) {
         return this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, content,
             { replace: true, append: false, truncate: 0 });
     }

@@ -58,8 +58,9 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         }
         if (file.name.endsWith(".mbtiles") && this.ngRedux.getState().offlineState.isOfflineAvailable) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
-            await this.databaseService.closeDatabase(file.name.replace(".mbtiles", ""));
-            await this.fileService.saveToDatabasesFolder(file, file.name);
+            let dbFileName = file.name.replace(".mbtiles", ".db");
+            await this.fileService.storeFileToCache(dbFileName, file);
+            await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: new Date(file.lastModified) }));
             return;
