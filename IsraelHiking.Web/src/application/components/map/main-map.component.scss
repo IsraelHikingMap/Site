@@ -1,4 +1,4 @@
-﻿@import "~scss/_variables.scss";
+﻿$app-left-z-index: 1030;
 
 .maplibregl-ctrl-top-left {
     z-index: $app-left-z-index !important;

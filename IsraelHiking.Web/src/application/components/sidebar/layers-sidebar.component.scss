@@ -1,7 +1,4 @@
-﻿@use "~@angular/material" as mat;
-@import "~scss/_variables.scss";
-
-.row-hover {
+﻿﻿.row-hover {
     padding: 0 10px;
     transition: background .2s ease;
 }
@@ -9,7 +6,7 @@
 .row-hover:hover {
     text-decoration: none;
     color: black;
-    background: mat.get-color-from-palette($app-background, hover, 0.12);
+    background: rgba(0, 0, 0, 0.12);
 }
 
 .short-button {

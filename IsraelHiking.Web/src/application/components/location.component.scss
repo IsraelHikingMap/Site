@@ -1,5 +1,6 @@
-﻿@use "~@angular/material" as mat;
-@import "~scss/_variables.scss";
+﻿﻿@use "@angular/material" as mat;
+
+$app-primary: mat.define-palette(mat.$green-palette, 600);
 
 .spinner-container {
     padding: 3px;
