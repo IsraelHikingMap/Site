@@ -1,4 +1,4 @@
-$app-button-size: 36px;
+@use "variables" as v;
 
 .table {
     display: table
@@ -14,7 +14,7 @@ $app-button-size: 36px;
 }
 
 .button-height {
-    height: $app-button-size;
+    height: v.$app-button-size;
 }
 
 .margin-top {

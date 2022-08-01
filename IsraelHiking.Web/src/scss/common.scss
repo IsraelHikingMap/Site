@@ -1,4 +1,6 @@
 ﻿﻿@use "@angular/material" as mat;
+@use "variables" as v;
+@use "dialogs";
 @import "../fonts/icons.css";
 @import "font-awesome/css/font-awesome.css";
 @import "~maplibre-gl/dist/maplibre-gl.css";
@@ -9,12 +11,6 @@ $app-warm: mat.define-palette(mat.$red-palette);
 $app-theme: mat.define-light-theme($app-primary, $app-accent, $app-warm);
 $app-background: map-get($app-theme, background);
 
-$app-sidebar-width: 400px;
-$app-left-z-index: 1030;
-
-$app-button-size: 36px;
-$app-button-background: white;
-
 @include mat.core();
 @include mat.all-component-themes($app-theme);
 
@@ -24,14 +20,14 @@ $app-button-background: white;
     top: 0;
     bottom: 0;
     left: 0;
-    width: $app-sidebar-width;
+    width: v.$app-sidebar-width;
     line-height: 24px;
     overflow-x: hidden;
     overflow-y: auto;
     color: black;
     direction: ltr;
     background: mat.get-color-from-palette($app-background, card);
-    z-index: $app-left-z-index + 5;
+    z-index: v.$app-left-z-index + 5;
 }
 
 
@@ -39,62 +35,6 @@ $app-button-background: white;
     .sidebar-wrapper {
         width: 100vw;
         box-sizing: border-box;
-    }
-}
-
-[matDialogTitle] {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: top;
-}
-
-[matDialogTitle] [matDialogClose] {
-    min-width: 0;
-    min-height: 0;
-    line-height: initial;
-    padding: 5px;
-}
-
-[matDialogTitle] [matDialogClose] i {
-    display: block;
-}
-
-.close-wrapper {
-    float: left;
-}
-
-.dialog-small {
-    max-width: 480px;
-}
-
-.dialog-xs {
-    max-width: 360px;
-}
-
-.item {
-    padding: 5px;
-}
-
-.item:nth-child(odd) {
-    background: #f1f1f1;
-}
-
-.item-image {
-    padding: 5px;
-    border: 1px solid #b7b7b7;
-    border-radius: 5px;
-    width: 64px;
-    height: 64px;
-}
-
-@media (max-width:767px) {
-    .mat-dialog-container {
-        margin: 0 auto;
-        max-height: 90vh;
-    }
-
-    .mat-dialog-container .mat-button {
-        white-space: normal;
     }
 }
 
@@ -117,7 +57,7 @@ body {
     position: relative;
     padding: 2px;
     clear: both;
-    background-color: $app-button-background;
+    background-color: white;
     margin: 0 !important;
     border: 2px solid rgba(0,0,0,.2);
 }
@@ -126,8 +66,8 @@ body {
     min-width: unset !important;
     padding: 0 !important;
     display: block;
-    width: $app-button-size;
-    height: $app-button-size;
+    width: v.$app-button-size;
+    height: v.$app-button-size;
 }
 
 .input-wrapper-spacer {
@@ -207,7 +147,7 @@ overlay.overlay-shown {
 .control-container-item {
     display: table-cell;
     vertical-align: middle;
-    height: $app-button-size;
+    height: v.$app-button-size;
 }
 
 .control-container-item.gutters {

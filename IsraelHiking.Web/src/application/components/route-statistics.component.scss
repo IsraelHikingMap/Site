@@ -1,4 +1,4 @@
-﻿$app-sidebar-width: 400px;
+@use "variables" as v;
 
 $control-border: 4px;
 $container-height-small-screen: 130px;
@@ -18,7 +18,7 @@ $buttons-margin: 5px;
 }
 
 .chart-control-container.sidebar.expanded {
-    width: calc(100vw - #{$app-sidebar-width} - 10px - #{$control-border});
+    width: calc(100vw - #{v.$app-sidebar-width} - 10px - #{$control-border});
 }
 
 .chart-container {
