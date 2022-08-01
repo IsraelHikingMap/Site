@@ -129,10 +129,10 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public hideAllOverlays(event: Event) {
+        event.stopPropagation();
         if (this.isAllOverlaysHidden()) {
             return;
         }
-        event.stopPropagation();
         this.layersService.hideAllOverlays();
     }
 
@@ -235,5 +235,9 @@ export class LayersSidebarComponent extends BaseMapComponent {
         let currentRoutes = [...this.ngRedux.getState().routes.present];
         moveItemInArray(currentRoutes, event.previousIndex, event.currentIndex);
         this.ngRedux.dispatch(new BulkReplaceRoutesAction({ routesData: currentRoutes }));
+    }
+
+    public trackByGroupType(_: number, group: CategoriesGroup) {
+        return group.type;
     }
 }

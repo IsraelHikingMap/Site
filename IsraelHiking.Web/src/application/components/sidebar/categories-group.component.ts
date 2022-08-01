@@ -45,7 +45,8 @@ export class CategoriesGroupComponent extends BaseMapComponent {
         }));
     }
 
-    public toggleVisibility() {
+    public toggleVisibility(event: Event) {
+        event.stopPropagation();
         this.ngRedux.dispatch(new SetCategoriesGroupVisibilityAction({
             groupType: this.categoriesGroup.type,
             visible: !this.categoriesGroup.visible
