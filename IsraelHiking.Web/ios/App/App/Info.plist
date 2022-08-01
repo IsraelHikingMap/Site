@@ -77,11 +77,6 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<false/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>We need the camera in order to take a picture</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
