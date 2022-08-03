@@ -54,8 +54,8 @@ if ($lastexitcode)
 	throw $lastexitcode
 }
 
-Write-Host "npx cap sync"
-npx cap sync
+Write-Host "npx cap sync --prod"
+npx cap sync --prod
 
 $versionCode = [System.Version]::Parse($env:APPVEYOR_BUILD_VERSION)
 $versionCodeString = $versionCode.Major * 10000 + $versionCode.Minor * 100 + $versionCode.Build
