@@ -1,0 +1,67 @@
+diff --git a/node_modules/@capacitor-community/sqlite/android/src/main/java/com/getcapacitor/community/database/sqlite/SQLite/UtilsMigrate.java b/node_modules/@capacitor-community/sqlite/android/src/main/java/com/getcapacitor/community/database/sqlite/SQLite/UtilsMigrate.java
+index 351ee39..cdef5d0 100644
+--- a/node_modules/@capacitor-community/sqlite/android/src/main/java/com/getcapacitor/community/database/sqlite/SQLite/UtilsMigrate.java
++++ b/node_modules/@capacitor-community/sqlite/android/src/main/java/com/getcapacitor/community/database/sqlite/SQLite/UtilsMigrate.java
+@@ -74,7 +74,11 @@ public class UtilsMigrate {
+     public String getFolder(Context context, String folderPath) throws Exception {
+         String pathFiles = context.getFilesDir().getAbsolutePath();
+         String pathDB = new File(context.getFilesDir().getParentFile(), "databases").getAbsolutePath();
+-        if (!folderPath.equals("default")) {
++        if (folderPath.equals("default")) {
++            pathFiles = pathDB;
++        } else if (folderPath.equalsIgnoreCase("cache")) {
++            pathFiles = context.getCacheDir().getAbsolutePath();
++        } else {
+             String[] arr = folderPath.split("/", 2);
+             if (arr.length == 2) {
+                 if (arr[0].equals("files")) {
+@@ -85,8 +89,6 @@ public class UtilsMigrate {
+                     throw new Exception("Folder " + folderPath + " not allowed");
+                 }
+             }
+-        } else {
+-            pathFiles = pathDB;
+         }
+         return pathFiles;
+     }
+diff --git a/node_modules/@capacitor-community/sqlite/ios/Plugin/Utils/UtilsFile.swift b/node_modules/@capacitor-community/sqlite/ios/Plugin/Utils/UtilsFile.swift
+index 5be33a1..113af44 100644
+--- a/node_modules/@capacitor-community/sqlite/ios/Plugin/Utils/UtilsFile.swift
++++ b/node_modules/@capacitor-community/sqlite/ios/Plugin/Utils/UtilsFile.swift
+@@ -20,6 +20,7 @@ enum UtilsFileError: Error {
+     case getDatabasesURLFailed
+     case getApplicationPathFailed
+     case getApplicationURLFailed
++    case getCacheURLFailed
+     case getLibraryPathFailed
+     case getLibraryURLFailed
+     case getFileListFailed
+@@ -148,6 +149,8 @@ class UtilsFile {
+                 dbPathURL = try UtilsFile.getApplicationURL().absoluteURL
+             } else if first[0] == "Library" {
+                 dbPathURL = try UtilsFile.getLibraryURL().absoluteURL
++            }  else if first[0].caseInsensitiveCompare("cache") == .orderedSame {
++                dbPathURL = try UtilsFile.getCacheURL().absoluteURL
+             } else if first[0] == "Documents" || first[0] == "default" {
+                 dbPathURL = databaseURL
+             } else {
+@@ -239,6 +242,19 @@ class UtilsFile {
+         }
+     }
+     
++    // MARK: - getCacheURL
++
++    class func getCacheURL() throws -> URL {
++        if let path: String = NSSearchPathForDirectoriesInDomains(
++            .cachesDirectory, .userDomainMask, true
++        ).first {
++            return NSURL(fileURLWithPath: path) as URL
++        } else {
++            print("Error: getCacheURL did not find the cache folder")
++            throw UtilsFileError.getCacheURLFailed
++        }
++    }
++
+     // MARK: - getLibraryURL
+ 
+     class func getLibraryURL() throws -> URL {
