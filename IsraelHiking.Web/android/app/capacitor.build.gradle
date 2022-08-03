@@ -15,6 +15,7 @@ dependencies {
     implementation project(':capacitor-app')
     implementation project(':capacitor-camera')
     implementation project(':capacitor-device')
+    implementation project(':capacitor-text-zoom')
     implementation "com.google.android.gms:play-services-location:11+"
     implementation "androidx.core:core:1.1.0"
     implementation "androidx.appcompat:appcompat:1.1.0"

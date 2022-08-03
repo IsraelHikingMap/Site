@@ -14,6 +14,9 @@ const config: CapacitorConfig = {
     CapacitorSQLite: {
       "iosDatabaseLocation": "Library/CapacitorDatabase"
     }
+  },
+  ios: {
+    preferredContentMode: "mobile"
   }
 };
 

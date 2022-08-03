@@ -57,9 +57,6 @@ export class ImageCaptureDirective implements OnDestroy {
     }
 
     private async getPictureFromCamera() {
-        // HM TODO: check if this is needed
-        //this.statusBar.overlaysWebView(true);
-        //this.statusBar.overlaysWebView(false);
         let data = await Camera.getPhoto({
             correctOrientation: true,
             saveToGallery: true,

@@ -12,5 +12,8 @@
 		"CapacitorSQLite": {
 			"iosDatabaseLocation": "Library/CapacitorDatabase"
 		}
+	},
+	"ios": {
+		"preferredContentMode": "mobile"
 	}
 }

@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Idle, DEFAULT_INTERRUPTSOURCES } from "@ng-idle/core";
+import { TextZoom } from "@capacitor/text-zoom"
 import { KeepAwake } from "@capacitor-community/keep-awake";
 import { ScreenBrightness } from "@capacitor-community/screen-brightness";
 import { App } from "@capacitor/app";
@@ -27,12 +28,8 @@ export class ScreenService {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-        // HM TODO: bring this back if needed
-        //if (this.runningContextService.isIos) {
-        //    this.statusBar.overlaysWebView(true);
-        //    this.statusBar.overlaysWebView(false);
-        //}
-        //this.mobileAccesibility.usePreferredTextZoom(false);
+
+        TextZoom.set({ value: 1.0 });
         this.setKeepScreenOn();
         this.originalBrightness = (await ScreenBrightness.getBrightness()).brightness;
         this.logger.info(`[Screen] Original brightness is: ${this.originalBrightness}`);

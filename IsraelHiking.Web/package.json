@@ -21,6 +21,7 @@
     "@capacitor/core": "^4.0.1",
     "@capacitor/device": "^4.0.1",
     "@capacitor/ios": "^4.0.1",
+    "@capacitor/text-zoom": "^4.0.1",
     "@ionic-native/core": "^5.36.0",
     "@ionic-native/device-orientation": "^5.36.0",
     "@ionic-native/file": "^5.36.0",
