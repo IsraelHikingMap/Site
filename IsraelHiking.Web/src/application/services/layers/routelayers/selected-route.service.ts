@@ -81,6 +81,10 @@ export class SelectedRouteService {
         }
     }
 
+    public areRoutesEmpty(): boolean {
+        return this.routes.length > 0;
+    }
+
     public getRouteById(id: string): RouteData {
         return this.routes.find((r) => r.id === id);
     }

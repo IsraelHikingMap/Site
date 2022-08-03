@@ -14,6 +14,7 @@ import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { RecordedRouteService } from "../../services/recorded-route.service";
+import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import type { ApplicationState, ShareUrl } from "../../models/models";
 
 @Component({
@@ -48,6 +49,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
                 private readonly socialSharing: SocialSharing,
                 private readonly runningContextService: RunningContextService,
                 private readonly recordedRouteService: RecordedRouteService,
+                private readonly selectedRouteService: SelectedRouteService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
@@ -156,20 +158,25 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
 
     public async showShareUrl() {
         if (!this.recordedRouteService.isRecording()) {
-            this.showDeleteAllRoutesConfirmation();
+            await this.showDeleteAllRoutesConfirmationIfNeededAndClearRoutes();
             return;
         }
         this.toastService.confirm({
             message: this.resources.areYouSureYouWantToStopRecording,
-            confirmAction: () => {
+            confirmAction: async () => {
                 this.recordedRouteService.stopRecording();
-                this.showDeleteAllRoutesConfirmation();
+                await this.showDeleteAllRoutesConfirmationIfNeededAndClearRoutes();
             },
             type: "YesNo"
         });
     }
 
-    private showDeleteAllRoutesConfirmation() {
+    private async showDeleteAllRoutesConfirmationIfNeededAndClearRoutes() {
+        if (this.selectedRouteService.areRoutesEmpty()) {
+            let share = await this.shareUrlsService.setShareUrlById(this.selectedShareUrlId);
+            this.dataContainerService.setData(share.dataContainer, false);
+            return;
+        }
         this.toastService.confirm({
             message: this.resources.thisWillDeteleAllCurrentRoutesAreYouSure,
             confirmAction: async () => {
