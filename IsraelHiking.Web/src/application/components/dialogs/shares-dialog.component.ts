@@ -14,7 +14,7 @@ import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { RecordedRouteService } from "../../services/recorded-route.service";
-import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import type { ApplicationState, ShareUrl } from "../../models/models";
 
 @Component({
