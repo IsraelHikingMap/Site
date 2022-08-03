@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";

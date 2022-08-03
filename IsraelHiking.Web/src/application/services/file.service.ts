@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
 import { StyleSpecification } from "maplibre-gl";
-import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
-import { FileTransfer } from "@ionic-native/file-transfer/ngx";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/file/ngx";
+import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
 import JSZip from "jszip";

@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { UntypedFormControl } from "@angular/forms";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
 import { Observable, Subscription } from "rxjs";
 import { NgRedux, Select } from "@angular-redux2/store";

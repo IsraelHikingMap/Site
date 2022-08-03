@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
+import { InAppPurchase2 } from "@awesome-cordova-plugins/in-app-purchase-2/ngx";
 import { Observable } from "rxjs";
 import { NgRedux, Select } from "@angular-redux2/store";
 

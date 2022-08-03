@@ -1,6 +1,6 @@
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute, ParamMap } from "@angular/router";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { Subscription, Observable } from "rxjs";
 import { cloneDeep } from "lodash-es";
 import { NgRedux, Select } from "@angular-redux2/store";

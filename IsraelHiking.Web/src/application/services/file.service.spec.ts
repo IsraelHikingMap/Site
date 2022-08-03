@@ -1,9 +1,9 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
-import { FileTransfer } from "@ionic-native/file-transfer/ngx";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
+import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 
 import { FileService } from "./file.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";

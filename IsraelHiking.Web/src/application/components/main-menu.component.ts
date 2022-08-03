@@ -3,7 +3,7 @@ import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
 import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
 import { NgRedux, Select } from "@angular-redux2/store";
 import platform from "platform";

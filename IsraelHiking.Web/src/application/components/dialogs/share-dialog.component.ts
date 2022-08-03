@@ -1,6 +1,6 @@
 import { Component, AfterViewInit } from "@angular/core";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";

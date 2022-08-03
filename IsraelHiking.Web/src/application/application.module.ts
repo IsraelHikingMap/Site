@@ -40,13 +40,11 @@ import { LottieModule } from "ngx-lottie";
 import { NgReduxModule } from "@angular-redux2/store";
 import player from "lottie-web";
 // Cordova plugins
-import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
-import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
-import { Media } from "@ionic-native/media/ngx";
-import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
-import { FileTransfer } from "@ionic-native/file-transfer/ngx";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
-import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
+import { InAppPurchase2 } from "@awesome-cordova-plugins/in-app-purchase-2/ngx";
+import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
+import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
+import { DeviceOrientation } from "@awesome-cordova-plugins/device-orientation/ngx";
 // services
 import { ScrollToModule } from "./infra/scroll-to/scroll-to.module";
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
@@ -282,8 +280,6 @@ const initializeApplication = (injector: Injector) => async () => {
             OfflineFilesDownloadService,
             AudioPlayerFactory,
             InAppPurchase2,
-            MobileAccessibility,
-            Media,
             FileSystemWrapper,
             // eslint-disable-next-line
             FileTransfer,
