@@ -99,7 +99,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         if (this.traceIdInEditMode === this.selectedTraceId) {
             this.traceIdInEditMode = null;
         }
-        let message = `${this.resources.deletionOf} ${this.getSelectedTrace().name}, ${this.resources.areYouSure}`;
+        let message = `${this.resources.deletionOf} ${this.getTraceDisplayName(this.getSelectedTrace())}, ${this.resources.areYouSure}`;
         this.toastService.confirm({
             message,
             type: "YesNo",
