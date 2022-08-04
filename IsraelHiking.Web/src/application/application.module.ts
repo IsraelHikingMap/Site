@@ -32,7 +32,6 @@ import { FlexLayoutModule } from "@angular/flex-layout";
 import { Angulartics2Module, Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { NgProgressModule } from "ngx-progressbar";
 import { NgProgressHttpModule } from "ngx-progressbar/http";
-import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { NgIdleModule } from "@ng-idle/core";
@@ -230,7 +229,6 @@ const initializeApplication = (injector: Injector) => async () => {
             { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
             { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [Injector], multi: true },
             { provide: ErrorHandler, useClass: GlobalErrorHandler },
-            NgxD3Service,
             GetTextCatalogService,
             MapService,
             ResourcesService,
