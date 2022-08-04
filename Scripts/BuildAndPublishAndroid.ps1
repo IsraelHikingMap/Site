@@ -40,6 +40,8 @@ $filePath = get-ChildItem build.gradle -Path app | Select-Object -first 1 | sele
 	-replace 'versionName "([0-9.]+)"',"versionName ""$env:APPVEYOR_BUILD_VERSION""" `
 	| Set-Content -Path $filePath
 
+(Get-Content -path $filePath -Raw) | Write-Host
+
 $aabVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.aab"
 if ($env:STORE_PASSWORD -ne $null) {
 	./gradlew :app:bundleRelease "-Pandroid.injected.signing.store.file=$env:APPVEYOR_BUILD_FOLDER/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$env:STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$env:PASSWORD"

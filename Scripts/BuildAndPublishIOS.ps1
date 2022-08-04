@@ -73,6 +73,8 @@ Select-Xml -xml $fileXml -XPath "//dict/key[. = 'CFBundleVersion']/following-sib
 	}
 $fileXml.Save($filePath)
 
+(Get-Content -path $filePath -Raw) | Write-Host
+
 Write-Host "Archiving..."
 xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive
 
