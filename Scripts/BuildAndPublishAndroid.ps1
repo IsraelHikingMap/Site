@@ -25,15 +25,21 @@ if ($lastexitcode)
 	throw $lastexitcode
 }
 
-Write-Host "npx cap sync --prod"
-npx cap sync --prod
+Write-Host "npx cap sync"
+npx cap sync
+
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web/android"
 
 $versionCode = [System.Version]::Parse($env:APPVEYOR_BUILD_VERSION)
 $versionCodeString = $versionCode.Major * 10000 + $versionCode.Minor * 100 + $versionCode.Build
-Write-Host "npx capacitor-set-version $env:APPVEYOR_BUILD_VERSION $versionCodeString"
-npx capacitor-set-version -v $env:APPVEYOR_BUILD_VERSION -b $versionCodeString
 
-Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web/android"
+Write-Host "Replace version in gradle file to $env:APPVEYOR_BUILD_VERSION $versionCodeString"
+$filePath = get-ChildItem build.gradle -Path app | Select-Object -first 1 | select -expand FullName
+(Get-Content -path $filePath -Raw) `
+	-replace 'versionCode (\d+)',"versionCode $versionCode" `
+	-replace 'versionName "([0-9.]+)"',"versionName ""$env:APPVEYOR_BUILD_VERSION""" `
+	| Set-Content -Path $filePath
+
 $aabVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.aab"
 if ($env:STORE_PASSWORD -ne $null) {
 	./gradlew :app:bundleRelease "-Pandroid.injected.signing.store.file=$env:APPVEYOR_BUILD_FOLDER/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$env:STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$env:PASSWORD"

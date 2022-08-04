@@ -54,15 +54,24 @@ if ($lastexitcode)
 	throw $lastexitcode
 }
 
-Write-Host "npx cap sync --prod"
-npx cap sync --prod
-
-$versionCode = [System.Version]::Parse($env:APPVEYOR_BUILD_VERSION)
-$versionCodeString = $versionCode.Major * 10000 + $versionCode.Minor * 100 + $versionCode.Build
-Write-Host "npx capacitor-set-version $env:APPVEYOR_BUILD_VERSION $versionCodeString"
-npx capacitor-set-version -v $env:APPVEYOR_BUILD_VERSION -b $versionCodeString
+Write-Host "npx cap sync"
+npx cap sync
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web/ios"
+
+Write-Host "Replace version in plist file to $env:APPVEYOR_BUILD_VERSION"
+$filePath = get-ChildItem Info.plist -Path App/App | Select-Object -first 1 | select -expand FullName
+$fileXml = [xml](Get-Content $filePath)
+Select-Xml -xml $fileXml -XPath "//dict/key[. = 'CFBundleShortVersionString']/following-sibling::string[1]" |
+	%{ 	
+		$_.Node.InnerXml = $env:APPVEYOR_BUILD_VERSION
+	}
+								
+Select-Xml -xml $fileXml -XPath "//dict/key[. = 'CFBundleVersion']/following-sibling::string[1]" |
+	%{ 	
+		$_.Node.InnerXml = $env:APPVEYOR_BUILD_VERSION
+	}
+$fileXml.Save($filePath)
 
 Write-Host "Archiving..."
 xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive
