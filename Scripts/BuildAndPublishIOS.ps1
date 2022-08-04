@@ -72,8 +72,8 @@ Select-Xml -xml $fileXml -XPath "//dict/key[. = 'CFBundleVersion']/following-sib
 		$_.Node.InnerXml = $env:APPVEYOR_BUILD_VERSION
 	}
 $fileXml.Save($filePath)
-
-(Get-Content -path $filePath -Raw) | Write-Host
+# fix issue with plist and c# xml save: https://stackoverflow.com/questions/18615749/how-to-modify-a-plist-file-using-c
+(Get-Content -path $filePath -Raw) -replace '"[]>', '">' | Set-Content -Path $filePath
 
 Write-Host "Archiving..."
 xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive

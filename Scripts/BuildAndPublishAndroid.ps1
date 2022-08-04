@@ -36,11 +36,9 @@ $versionCodeString = $versionCode.Major * 10000 + $versionCode.Minor * 100 + $ve
 Write-Host "Replace version in gradle file to $env:APPVEYOR_BUILD_VERSION $versionCodeString"
 $filePath = get-ChildItem build.gradle -Path app | Select-Object -first 1 | select -expand FullName
 (Get-Content -path $filePath -Raw) `
-	-replace 'versionCode (\d+)',"versionCode $versionCode" `
+	-replace 'versionCode (\d+)',"versionCode $versionCodeString" `
 	-replace 'versionName "([0-9.]+)"',"versionName ""$env:APPVEYOR_BUILD_VERSION""" `
 	| Set-Content -Path $filePath
-
-(Get-Content -path $filePath -Raw) | Write-Host
 
 $aabVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.aab"
 if ($env:STORE_PASSWORD -ne $null) {
