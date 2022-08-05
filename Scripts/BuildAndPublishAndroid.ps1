@@ -1,17 +1,3 @@
-#choco install gradle --version 7.4.2 --no-progress
-
-#refreshenv
-
-#$env:PATH += ";$env:ANDROID_HOME/tools/bin/"
-
-#for($i=0;$i -lt 30;$i++) { $response += "y`n"};
-
-#Invoke-Expression """$response"" | sdkmanager.bat --licenses | out-null"
-
-#Invoke-Expression """$response"" | sdkmanager.bat --update | out-null"
-
-#Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-30"" ""build-tools;30.0.3"" ""extras;google;m2repository"" | out-null"
-
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 Write-Host "npm ci"
