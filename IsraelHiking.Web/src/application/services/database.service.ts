@@ -100,15 +100,6 @@ export class DatabaseService {
             }
             this.updateState(initialState);
         }
-        if (storedState.offlineState.lastModifiedDate !== null) {
-            if (await Dexie.exists("IHM")) {
-                await Dexie.delete("IHM");
-                await Dexie.delete("Contour");
-                await Dexie.delete("TerrainRGB");
-                storedState.offlineState.lastModifiedDate = null;
-                this.toastService.confirm({ type: "Ok", message: this.resources.databaseUpgrade });
-            }
-        }
 
         this.ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
         this.ngRedux.select().pipe(debounceTime(2000)).subscribe((state: any) => {
@@ -224,11 +215,9 @@ export class DatabaseService {
 
     public async moveDownloadedDatabaseFile(dbFileName: string) {
         await this.closeDatabase(dbFileName.replace(".db", ""));
-        this.loggingService.info(`[Database] Starting copying file ${dbFileName}`);
-        await this.sqlite.addSQLiteSuffix("cache", [dbFileName]);
-        this.loggingService.info(`[Database] Finished copying file ${dbFileName}`);
-        await this.sqlite.deleteOldDatabases("cache", [dbFileName]);
-        this.loggingService.info(`[Database] Finished deleting file ${dbFileName}`);
+        this.loggingService.info(`[Database] Starting moving file ${dbFileName}`);
+        await this.sqlite.moveDatabasesAndAddSuffix("cache", [dbFileName]);
+        this.loggingService.info(`[Database] Finished moving file ${dbFileName}`);
     }
 
     public storePois(pois: GeoJSON.Feature[]): Promise<any> {
@@ -329,5 +318,12 @@ export class DatabaseService {
             storedState.gpsState = initialState.gpsState;
         }
         return storedState;
+    }
+
+    public async migrateDatabasesIfNeeded(): Promise<void> {
+        this.loggingService.info("[Database] Starting migrating old databases using sqlite plugin");
+        await this.sqlite.moveDatabasesAndAddSuffix("default", ["Contours.db", "IHM.db", "TerrainRGB.db"]);
+        let databases = await this.sqlite.getDatabaseList();
+        this.loggingService.info("[Database] Finished migrating old databases using sqlite plugin, " + JSON.stringify(databases.values));
     }
 }

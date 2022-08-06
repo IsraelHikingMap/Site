@@ -346,4 +346,26 @@ export class FileService {
         });
         this.loggingService.info(`[Files] Finished downloading and writing database file to temporary file name ${dbFileName}`);
     }
+
+    public async renameOldDatabases(): Promise<boolean> {
+        if (!this.runningContextService.isCapacitor) {
+            return false;
+        }
+        let filesExist = false;
+        let filePrefix = this.runningContextService.isIos ? "" : "databases/";
+        let originFolder = this.runningContextService.isIos
+            ? this.fileSystemWrapper.documentsDirectory
+            : this.fileSystemWrapper.applicationDirectory;
+        for (let fileName of ["Contours.mbtiles", "IHM.mbtiles", "TerrainRGB.mbtiles"]) {
+            let fullFileName = filePrefix + fileName;
+            this.loggingService.info(`[Files] Checking if database file exists: ${originFolder} ${fullFileName}`);
+            if (await this.fileSystemWrapper.checkFile(originFolder, fullFileName)) {
+                this.loggingService.info(`[Files] Statring renaming database: ${fullFileName}`);
+                await this.fileSystemWrapper.moveFile(originFolder, fullFileName, originFolder, fullFileName.replace(".mbtiles", ".db"));
+                this.loggingService.info(`[Files] Finished renaming database: ${fullFileName}`);
+                filesExist = true;
+            }
+        }
+        return filesExist;
+    }
 }

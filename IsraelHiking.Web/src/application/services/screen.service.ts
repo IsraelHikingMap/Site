@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Idle, DEFAULT_INTERRUPTSOURCES } from "@ng-idle/core";
-import { TextZoom } from "@capacitor/text-zoom"
+import { TextZoom } from "@capacitor/text-zoom";
 import { KeepAwake } from "@capacitor-community/keep-awake";
 import { ScreenBrightness } from "@capacitor-community/screen-brightness";
 import { App } from "@capacitor/app";
