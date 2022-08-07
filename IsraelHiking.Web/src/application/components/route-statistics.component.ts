@@ -239,7 +239,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         return str;
     }
 
-    public ngOnInit() {
+    public async ngOnInit() {
         this.componentSubscriptions.push(this.routes$.subscribe(() => {
             this.routeChanged();
         }));
@@ -259,7 +259,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 this.updateDurationString((new Date().getTime() - recordingRoute.segments[0].latlngs[0].timestamp.getTime()) / 1000);
             }
         }));
-        this.audioPlayer = this.audioPlayerFactory.create("content/uh-oh.mp3");
+        this.audioPlayer = await this.audioPlayerFactory.create();
     }
 
     public ngOnDestroy() {
