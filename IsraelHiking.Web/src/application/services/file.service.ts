@@ -356,9 +356,9 @@ export class FileService {
         let originFolder = this.runningContextService.isIos
             ? this.fileSystemWrapper.documentsDirectory
             : this.fileSystemWrapper.applicationDirectory;
-        for (let fileName of ["Contours.mbtiles", "IHM.mbtiles", "TerrainRGB.mbtiles"]) {
+        for (let fileName of ["Contour.mbtiles", "IHM.mbtiles", "TerrainRGB.mbtiles"]) {
             let fullFileName = filePrefix + fileName;
-            this.loggingService.info(`[Files] Checking if database file exists: ${originFolder} ${fullFileName}`);
+            this.loggingService.info(`[Files] Checking if database file exists: ${originFolder}/${fullFileName}`);
             if (await this.fileSystemWrapper.checkFile(originFolder, fullFileName)) {
                 this.loggingService.info(`[Files] Statring renaming database: ${fullFileName}`);
                 await this.fileSystemWrapper.moveFile(originFolder, fullFileName, originFolder, fullFileName.replace(".mbtiles", ".db"));

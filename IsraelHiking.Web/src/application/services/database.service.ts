@@ -322,7 +322,7 @@ export class DatabaseService {
 
     public async migrateDatabasesIfNeeded(): Promise<void> {
         this.loggingService.info("[Database] Starting migrating old databases using sqlite plugin");
-        await this.sqlite.moveDatabasesAndAddSuffix("default", ["Contours.db", "IHM.db", "TerrainRGB.db"]);
+        await this.sqlite.moveDatabasesAndAddSuffix("default", ["Contour.db", "IHM.db", "TerrainRGB.db"]);
         let databases = await this.sqlite.getDatabaseList();
         this.loggingService.info("[Database] Finished migrating old databases using sqlite plugin, " + JSON.stringify(databases.values));
     }
