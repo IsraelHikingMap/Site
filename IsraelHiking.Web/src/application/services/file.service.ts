@@ -359,12 +359,14 @@ export class FileService {
         for (let fileName of ["Contour.mbtiles", "IHM.mbtiles", "TerrainRGB.mbtiles"]) {
             let fullFileName = filePrefix + fileName;
             this.loggingService.info(`[Files] Checking if database file exists: ${originFolder}/${fullFileName}`);
-            if (await this.fileSystemWrapper.checkFile(originFolder, fullFileName)) {
+            try {
+                let fileExists = await this.fileSystemWrapper.checkFile(originFolder, fullFileName);
+                if (!fileExists) { continue; }
                 this.loggingService.info(`[Files] Statring renaming database: ${fullFileName}`);
                 await this.fileSystemWrapper.moveFile(originFolder, fullFileName, originFolder, fullFileName.replace(".mbtiles", ".db"));
                 this.loggingService.info(`[Files] Finished renaming database: ${fullFileName}`);
                 filesExist = true;
-            }
+            } catch { }
         }
         return filesExist;
     }
