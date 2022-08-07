@@ -43,7 +43,10 @@
               "ohauth",
               "redux-undo",
               "photoswipe",
-              "photoswipe-ui-default"
+              "photoswipe-ui-default",
+              "invert-color",
+              "lottie-web",
+              "detect-node"
             ],
             "vendorChunk": true,
             "extractLicenses": false,
