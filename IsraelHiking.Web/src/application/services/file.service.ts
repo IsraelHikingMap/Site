@@ -355,10 +355,10 @@ export class FileService {
         let filePrefix = this.runningContextService.isIos ? "" : "databases/";
         let originFolder = this.runningContextService.isIos
             ? this.fileSystemWrapper.documentsDirectory
-            : this.fileSystemWrapper.applicationDirectory;
+            : this.fileSystemWrapper.applicationStorageDirectory;
         for (let fileName of ["Contour.mbtiles", "IHM.mbtiles", "TerrainRGB.mbtiles"]) {
             let fullFileName = filePrefix + fileName;
-            this.loggingService.info(`[Files] Checking if database file exists: ${originFolder}/${fullFileName}`);
+            this.loggingService.info(`[Files] Checking if database file exists: ${fullFileName}`);
             try {
                 let fileExists = await this.fileSystemWrapper.checkFile(originFolder, fullFileName);
                 if (!fileExists) { continue; }
