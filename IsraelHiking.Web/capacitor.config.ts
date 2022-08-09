@@ -5,6 +5,9 @@ const config: CapacitorConfig = {
   appName: 'Israel Hiking Map',
   webDir: 'www',
   bundledWebRuntime: false,
+  server: {
+    iosScheme: "ionic"
+  },
   cordova: {
     preferences: {
       "OAuthScheme": "ihm"
