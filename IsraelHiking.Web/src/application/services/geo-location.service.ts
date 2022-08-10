@@ -167,7 +167,7 @@ export class GeoLocationService {
             });
 
         BackgroundGeolocation.on("authorization").subscribe(
-            (status: any) => {
+            (status) => {
                 if (status === BackgroundGeolocation.NOT_AUTHORIZED) {
                     this.loggingService.error("[GeoLocation] Failed to start background tracking - unauthorized");
                     this.disable();
@@ -181,7 +181,7 @@ export class GeoLocationService {
             });
 
         BackgroundGeolocation.on("error").subscribe(
-            (error: any) => {
+            (error) => {
                 this.loggingService.error(`[GeoLocation] Failed to start background tracking ${error.message}`);
                 this.toastService.warning(this.resources.unableToFindYourLocation);
                 this.disable();
@@ -191,7 +191,7 @@ export class GeoLocationService {
 
     private async onLocationUpdate() {
         let locations = await BackgroundGeolocation.getValidLocationsAndDelete();
-        let positions = locations.map((l: any) => this.locationToPosition(l));
+        let positions = locations.map((l) => this.locationToPosition(l));
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
         } else if (positions.length === 1) {
@@ -248,7 +248,7 @@ export class GeoLocationService {
         };
     }
 
-    private locationToPosition(location: any): GeolocationPosition {
+    private locationToPosition(location: Location): GeolocationPosition {
         return {
             coords: {
                 accuracy: location.accuracy,
@@ -264,7 +264,7 @@ export class GeoLocationService {
 
     public async getLog(): Promise<string> {
         let logEntries = await BackgroundGeolocation.getLogEntries(10000, 0, BackgroundGeolocation.LOG_TRACE);
-        return logEntries.map((logLine: any) => {
+        return logEntries.map((logLine) => {
             let dateString = new Date(logLine.timestamp - new Date().getTimezoneOffset() * 60 * 1000)
                 .toISOString().replace(/T/, " ").replace(/\..+/, "");
             return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;

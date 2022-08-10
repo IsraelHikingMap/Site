@@ -9,8 +9,8 @@ import {
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
-import { UntypedFormControl } from "@angular/forms";
-import { debounceTime, filter, tap } from "rxjs/operators";
+import { FormControl } from "@angular/forms";
+import { debounceTime, filter, tap, map } from "rxjs/operators";
 import { remove } from "lodash-es";
 import { PointLike } from "maplibre-gl";
 import { Observable } from "rxjs";
@@ -61,8 +61,8 @@ export class SearchComponent extends BaseMapComponent {
     public fromContext: SearchContext;
     public toContext: SearchContext;
     public routingType: RoutingType;
-    public searchFrom: UntypedFormControl;
-    public searchTo: UntypedFormControl;
+    public searchFrom: FormControl<string | SearchResultsPointOfInterest>;
+    public searchTo: FormControl<string | SearchResultsPointOfInterest>;
     public hasFocus: boolean;
     public hideCoordinates: boolean;
     public directional: DirectionalContext;
@@ -111,8 +111,8 @@ export class SearchComponent extends BaseMapComponent {
             searchResults: [],
             selectedSearchResults: null
         } as SearchContext;
-        this.searchFrom = new UntypedFormControl();
-        this.searchTo = new UntypedFormControl();
+        this.searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
+        this.searchTo = new FormControl<string | SearchResultsPointOfInterest>("");
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
 
@@ -126,7 +126,7 @@ export class SearchComponent extends BaseMapComponent {
         });
     }
 
-    private configureInputFormControl(input: UntypedFormControl, context: SearchContext) {
+    private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>, context: SearchContext) {
         input.valueChanges.pipe(
             tap(x => {
                 if (typeof x !== "string") {
@@ -136,6 +136,7 @@ export class SearchComponent extends BaseMapComponent {
                 }
             }),
             filter(x => typeof x === "string"),
+            map(x => x as string),
             debounceTime(500))
             .subscribe((x: string) => {
                 context.searchTerm = x;

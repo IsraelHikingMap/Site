@@ -11,14 +11,6 @@ interface HTMLElementInputChangeEvent {
     target: any;
 }
 
-class PendingPromise {
-    constructor(private args: any) {}
-
-    execute() {
-        return new Promise(this.args);
-    }
-}
-
 @Directive({
     selector: "[imageCapture]",
 })

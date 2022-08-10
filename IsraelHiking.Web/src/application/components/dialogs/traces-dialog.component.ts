@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation } from "@angular/core";
-import { UntypedFormControl } from "@angular/forms";
+import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash-es";
@@ -33,7 +33,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public traceIdInEditMode: string;
     public file: File;
     public loadingTraces: boolean;
-    public searchTerm: UntypedFormControl;
+    public searchTerm: FormControl<string>;
 
     @Select((state: ApplicationState) => state.tracesState.traces)
     public traces$: Observable<Trace[]>;
@@ -60,7 +60,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.selectedTraceId = null;
         this.traceIdInEditMode = null;
         this.page = 1;
-        this.searchTerm = new UntypedFormControl();
+        this.searchTerm = new FormControl<string>("");
 
         this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
