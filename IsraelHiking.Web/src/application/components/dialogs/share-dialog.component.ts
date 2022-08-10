@@ -72,7 +72,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 this.description = selectedRoute.description;
             }
         }
-        this.showUnhide = this.dataContainerService.getData().routes.find(r => r.state === "Hidden") != null;
+        this.showUnhide = this.dataContainerService.getData(true).routes.find(r => r.state === "Hidden") != null;
     }
 
     public async ngAfterViewInit(): Promise<void> {
@@ -118,14 +118,11 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
 
     private getDataFiltered(): DataContainer {
         // clone:
-        let filteredData = JSON.parse(JSON.stringify(this.dataContainerService.getData())) as DataContainer;
+        let filteredData = JSON.parse(JSON.stringify(this.dataContainerService.getData(this.unhideRoutes))) as DataContainer;
         for (let routeIndex = filteredData.routes.length - 1; routeIndex >= 0; routeIndex--) {
             let route = filteredData.routes[routeIndex];
-            if (route.state === "Hidden" && this.unhideRoutes) {
+            if (route.state === "Hidden") {
                 route.state = "ReadOnly";
-            }
-            if (route.segments.length === 0 && route.markers.length === 0 || route.state === "Hidden") {
-                filteredData.routes.splice(routeIndex, 1);
             }
         }
         if (!this.shareOverlays) {

@@ -58,13 +58,15 @@ export class DataContainerService {
         }
     }
 
-    public getData(): DataContainer {
+    public getData(withHidden: boolean): DataContainer {
         let layersContainer = this.layersService.getData();
 
         let bounds = SpatialService.getMapBounds(this.mapService.map);
-
+        let routes = this.ngRedux.getState().routes.present
+            .filter(r => r.state !== "Hidden" || withHidden)
+            .filter(r => r.segments.length > 0 || r.markers.length > 0);
         let container = {
-            routes: this.ngRedux.getState().routes.present,
+            routes,
             baseLayer: layersContainer.baseLayer,
             overlays: layersContainer.overlays,
             northEast: bounds.northEast,
@@ -76,7 +78,7 @@ export class DataContainerService {
     public getDataForFileExport(): DataContainer {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
-            return this.getData();
+            return this.getData(false);
         }
         return {
             routes: [selectedRoute]

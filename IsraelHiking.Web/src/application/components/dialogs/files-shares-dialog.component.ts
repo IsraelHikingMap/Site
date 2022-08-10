@@ -76,7 +76,6 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
     public async save() {
         let data = this.dataContainerService.getDataForFileExport();
         if (!this.isDataSaveable(data)) {
-            this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
         try {
@@ -91,10 +90,9 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         let data = this.dataContainerService.getDataForFileExport();
         if (outputFormat === "all_gpx_single_track") {
             outputFormat = "gpx_single_track";
-            data = this.dataContainerService.getData();
+            data = this.dataContainerService.getData(false);
         }
         if (!this.isDataSaveable(data)) {
-            this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
         let name = this.getName(data);
