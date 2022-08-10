@@ -1,4 +1,4 @@
-@import "~scss/_variables.scss";
+@use "variables" as v;
 
 .table {
     display: table
@@ -14,7 +14,7 @@
 }
 
 .button-height {
-    height: $app-button-size;
+    height: v.$app-button-size;
 }
 
 .margin-top {

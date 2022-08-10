@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>method</key>
+    <string>app-store</string>
+    <key>teamID</key>
+    <string>2KT88923M5</string>
+    <key>uploadBitcode</key>
+    <true/>
+    <key>uploadSymbols</key>
+    <true/>
+    <key>provisioningProfiles</key> 
+    <dict> 
+      <key>il.org.osm.israelhiking</key> 
+      <string>164108f6-9b38-4d1c-80ec-92f9687467f0</string>
+    </dict>
+  </dict>
+</plist>

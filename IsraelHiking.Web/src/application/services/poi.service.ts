@@ -7,7 +7,7 @@ import { timeout, throttleTime, skip, filter } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import JSZip from "jszip";
 import MiniSearch from "minisearch";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
@@ -75,13 +75,13 @@ export class PoiService {
     public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public poisChanged: EventEmitter<void>;
 
-    @select((state: ApplicationState) => state.layersState.categoriesGroups)
+    @Select((state: ApplicationState) => state.layersState.categoriesGroups)
     private categoriesGroups: Observable<CategoriesGroup[]>;
 
-    @select((state: ApplicationState) => state.configuration.language)
+    @Select((state: ApplicationState) => state.configuration.language)
     private language$: Observable<Language>;
 
-    @select((state: ApplicationState) => state.offlineState.uploadPoiQueue)
+    @Select((state: ApplicationState) => state.offlineState.uploadPoiQueue)
     private uploadPoiQueue$: Observable<string[]>;
 
     constructor(private readonly resources: ResourcesService,
@@ -159,7 +159,7 @@ export class PoiService {
                 });
             });
 
-        if (this.runningContextService.isCordova) {
+        if (this.runningContextService.isCapacitor) {
             await this.updateOfflinePois();
         }
         this.uploadPoiQueue$.subscribe((items: string[]) => this.handleUploadQueueChanges(items));
@@ -201,7 +201,7 @@ export class PoiService {
             let poi = await firstValueFrom(poi$) as GeoJSON.Feature;
             this.loggingService.info(`[POIs] Uploaded successfully a${feature.properties.poiIsSimple ? " simple" : ""} ` +
                 `feature with id: ${firstItemId}, ` + "removing from upload queue");
-            if (this.runningContextService.isCordova && !feature.properties.poiIsSimple) {
+            if (this.runningContextService.isCapacitor && !feature.properties.poiIsSimple) {
                 await this.databaseService.storePois([poi]);
                 this.rebuildPois();
             }

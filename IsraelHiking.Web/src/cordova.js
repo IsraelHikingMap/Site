@@ -1,1 +1,0 @@
-﻿// This is an empty file to avoid console error when using outside Cordova environment.

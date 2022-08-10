@@ -1,6 +1,5 @@
 import { Component, ElementRef, ViewChild, AfterViewInit, InjectionToken, Inject, ViewEncapsulation, EventEmitter } from "@angular/core";
-import * as PhotoSwipe from "photoswipe";
-import * as PhotoSwipeUI_Default from "photoswipe/dist/photoswipe-ui-default";
+import PhotoSwipe from "photoswipe";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -36,27 +35,23 @@ export class PhotoSwpieComponent extends BaseMapComponent implements AfterViewIn
     public ngAfterViewInit(): void {
         let pswpElement = this.photoswipe.nativeElement;
 
-        let items = this.data.imageUrls.map(i => ({
+        let dataSource = this.data.imageUrls.map(i => ({
             src: i,
             w: window.innerWidth,
             h: window.innerHeight
         }));
 
-        let options = {
+        let pswp = new PhotoSwipe({
+            appendToEl: pswpElement,
+            dataSource,
             index: this.data.index,
-            closeOnScroll: false,
+            closeOnVerticalDrag: false,
             pinchToClose: false,
-            history: false,
-            captionEl: false,
-            fullscreenEl: false,
-            shareEl: false,
-            zoomEl: false,
-            maxSpreadZoom: 8
-        };
+            maxZoomLevel: 8,
 
-        // Initializes and opens PhotoSwipe
-        let pswp = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
-        pswp.listen("destroy", () => this.closed.emit());
+        });
+            //pswpElement, PhotoSwipeUI_Default, items, options);
+        pswp.on("destroy", () => this.closed.emit());
         pswp.init();
     }
 }

@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { Observable } from "rxjs";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -13,13 +13,13 @@ import type { ApplicationState, Language } from "../models/models";
 })
 export class BackgroundTextComponent extends BaseMapComponent {
 
-    @select((state: ApplicationState) => state.offlineState.isOfflineAvailable)
+    @Select((state: ApplicationState) => state.offlineState.isOfflineAvailable)
     public isOfflineAvailable$: Observable<boolean>;
 
-    @select((state: ApplicationState) => state.offlineState.lastModifiedDate)
+    @Select((state: ApplicationState) => state.offlineState.lastModifiedDate)
     public lastModifiedDate$: Observable<boolean>;
 
-    @select((state: ApplicationState) => state.configuration.language)
+    @Select((state: ApplicationState) => state.configuration.language)
     public language$: Observable<Language>;
 
     public text: string;

@@ -1,0 +1,22 @@
+{
+	"appId": "il.org.osm.israelhiking",
+	"appName": "Israel Hiking Map",
+	"webDir": "www",
+	"bundledWebRuntime": false,
+	"server": {
+		"iosScheme": "ionic"
+	},
+	"cordova": {
+		"preferences": {
+			"OAuthScheme": "ihm"
+		}
+	},
+	"plugins": {
+		"CapacitorSQLite": {
+			"iosDatabaseLocation": "Library/CapacitorDatabase"
+		}
+	},
+	"ios": {
+		"preferredContentMode": "mobile"
+	}
+}

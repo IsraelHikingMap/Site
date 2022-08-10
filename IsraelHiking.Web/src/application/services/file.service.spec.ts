@@ -1,17 +1,15 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { Device } from "@ionic-native/device/ngx";
-import { WebView } from "@ionic-native/ionic-webview/ngx";
-import { FileTransfer } from "@ionic-native/file-transfer/ngx";
-import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
+import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 
 import { FileService } from "./file.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { ImageResizeService } from "./image-resize.service";
 import { RunningContextService } from "./running-context.service";
-import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "./selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { LoggingService } from "./logging.service";
@@ -50,10 +48,8 @@ describe("FileService", () => {
             ],
             providers: [
                 RunningContextService,
-                Device,
-                FileSystemWrapper,
-                WebView,
                 LoggingService,
+                FileSystemWrapper,
                 // eslint-disable-next-line
                 FileTransfer,
                 SocialSharing,

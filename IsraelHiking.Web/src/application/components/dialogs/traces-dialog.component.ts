@@ -3,7 +3,7 @@ import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash-es";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -11,7 +11,7 @@ import { FileService } from "../../services/file.service";
 import { AuthorizationService } from "../../services/authorization.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
 import { ToastService } from "../../services/toast.service";
-import { LayersService } from "../../services/layers/layers.service";
+import { LayersService } from "../../services/layers.service";
 import { TracesService } from "../../services/traces.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SpatialService } from "../../services/spatial.service";
@@ -33,9 +33,9 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public traceIdInEditMode: string;
     public file: File;
     public loadingTraces: boolean;
-    public searchTerm: FormControl;
+    public searchTerm: FormControl<string>;
 
-    @select((state: ApplicationState) => state.tracesState.traces)
+    @Select((state: ApplicationState) => state.tracesState.traces)
     public traces$: Observable<Trace[]>;
 
     private sessionSearchTerm = "";
@@ -60,7 +60,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.selectedTraceId = null;
         this.traceIdInEditMode = null;
         this.page = 1;
-        this.searchTerm = new FormControl();
+        this.searchTerm = new FormControl<string>("");
 
         this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);

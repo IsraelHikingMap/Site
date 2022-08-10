@@ -1,16 +1,16 @@
 import { Injectable } from "@angular/core";
 import { NgRedux } from "@angular-redux2/store";
 
-import { LayersService } from "./layers/layers.service";
+import { LayersService } from "./layers.service";
 import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { SpatialService } from "./spatial.service";
 import { FitBoundsService } from "./fit-bounds.service";
-import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "./selected-route.service";
 import { MapService } from "./map.service";
-import { RoutesFactory } from "./layers/routelayers/routes.factory";
+import { RoutesFactory } from "./routes.factory";
 import { RunningContextService } from "./running-context.service";
 import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
@@ -91,7 +91,7 @@ export class DataContainerService {
                 baseLayer
             }));
             data.baseLayer = this.stringToBaseLayer(baseLayer);
-            this.setData(data, this.runningContextService.isCordova);
+            this.setData(data, this.runningContextService.isCapacitor);
         } catch (ex) {
             this.toastService.warning(this.resources.unableToLoadFromUrl);
         }
@@ -104,7 +104,7 @@ export class DataContainerService {
         }
         try {
             shareUrl = await this.shareUrlsService.setShareUrlById(shareId);
-            this.setData(shareUrl.dataContainer, this.runningContextService.isCordova);
+            this.setData(shareUrl.dataContainer, this.runningContextService.isCapacitor);
             if (!this.runningContextService.isIFrame) {
                 this.toastService.info(shareUrl.description, shareUrl.title);
             }

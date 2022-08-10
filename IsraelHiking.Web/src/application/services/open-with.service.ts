@@ -1,23 +1,15 @@
 import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
-import { WebIntent, Intent } from "@ionic-native/web-intent/ngx";
+import { App } from "@capacitor/app";
 
 import { RunningContextService } from "./running-context.service";
 import { FileService } from "./file.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
-import { ImageResizeService } from "./image-resize.service";
 import { getIdFromLatLng, RouteStrings } from "./hash.service";
 import { SpatialService } from "./spatial.service";
-
-declare let universalLinks: any;
-
-interface UniversalLinkEvent {
-    path: string;
-    params: any;
-}
 
 @Injectable()
 export class OpenWithService {
@@ -28,157 +20,112 @@ export class OpenWithService {
                 private readonly matDialog: MatDialog,
                 private readonly router: Router,
                 private readonly loggingService: LoggingService,
-                private readonly webIntent: WebIntent,
                 private readonly ngZone: NgZone) { }
 
     public initialize() {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             return;
         }
-        this.loggingService.info("[OpenWith] subscribing to universal link events");
-        universalLinks.subscribe("share", (event: UniversalLinkEvent) => {
-            this.loggingService.info("[OpenWith] Opening a share: " + event.path);
-            if (this.matDialog.openDialogs.length > 0) {
-                this.matDialog.closeAll();
+        App.addListener("appUrlOpen", (data) => {
+            if (!data || !data.url) {
+                return;
             }
-            let shareId = event.path.replace("/share/", "");
+            if (data.url.startsWith("ihm://")) {
+                // no need to do anything as this is part of the login flow
+                return;
+            }
+            if (data.url.startsWith("geo")) {
+                let coordsRegExp = /:(-?\d+\.\d+),(-?\d+\.\d+)/;
+                let coords = coordsRegExp.exec(data.url);
+                this.moveToCoordinates(coords);
+                return;
+            }
+            if (data.url.startsWith("http")) {
+                this.handleHttpUrl(data.url);
+            } else {
+                this.handleFileUrl(data.url);
+            }
+        });
+    }
+
+    private handleIHMUrl(url: URL) {
+        this.logAndCloseDialogs(url);
+        let pathname = url.pathname;
+        if (pathname.startsWith("/share")) {
+            let shareId = pathname.replace("/share/", "");
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_SHARE, shareId]);
             });
-        });
-        universalLinks.subscribe("poi", (event: UniversalLinkEvent) => {
-            this.logAndCloseDialogs(event);
-            let sourceAndId = event.path.replace("/poi/", "");
+        } else if (pathname.startsWith("/poi")) {
+            let sourceAndId = pathname.replace("/poi/", "");
             let source = sourceAndId.split("/")[0];
             let id = sourceAndId.split("/")[1];
-            let language = event.params.language;
+            let language = new URLSearchParams(url.search).get("language");
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_POI, source, id],
                     { queryParams: { language } });
             });
-        });
-        universalLinks.subscribe("url", (event: UniversalLinkEvent) => {
-            this.logAndCloseDialogs(event);
-            let url = event.path.replace("/url/", "");
-            let baseLayer = event.params.baselayer;
+        } else if (pathname.startsWith("/url")) {
+            let urlData = pathname.replace("/url/", "");
+            let baseLayer = new URLSearchParams(url.search).get("baselayer");;
             this.ngZone.run(() => {
-                this.router.navigate([RouteStrings.ROUTE_URL, url],
+                this.router.navigate([RouteStrings.ROUTE_URL, urlData],
                     { queryParams: { baseLayer } });
             });
-        });
-        universalLinks.subscribe("map", (event: UniversalLinkEvent) => {
-            this.logAndCloseDialogs(event);
-            let mapLocation = event.path.replace("/map/", "");
+        } else if (pathname.startsWith("/map")) {
+            let mapLocation = pathname.replace("/map/", "");
             let zoom = mapLocation.split("/")[0];
             let lat = mapLocation.split("/")[1];
             let lng = mapLocation.split("/")[2];
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_MAP, zoom, lat, lng]);
             });
-        });
-        universalLinks.subscribe(null, (event: UniversalLinkEvent) => {
-            this.logAndCloseDialogs(event);
+        } else {
             this.ngZone.run(() => {
                 this.router.navigate(["/"]);
             });
-        });
-
-        if ((window as any).externalUrl) {
-            this.handleUrl((window as any).externalUrl);
-            delete (window as any).externalUrl;
-        }
-        (window as any).handleExternalUrl = (url: string) => this.handleUrl(url);
-
-        this.webIntent.getIntent().then(intent => this.handleIntent(intent));
-
-        this.webIntent.onIntent().subscribe((intent) => {
-            this.handleIntent(intent);
-        });
+        };
     }
 
-    private logAndCloseDialogs(event: UniversalLinkEvent) {
-        this.loggingService.info("[OpenWith] Opening: " + event.path);
-        if (this.matDialog.openDialogs.length > 0) {
-            this.matDialog.closeAll();
-        }
-    }
-
-    private handleUrl(url: string) {
-        if (url.startsWith("ihm://")) {
-            // no need to do anything as this is part of the login flow
-            return;
-        }
+    private handleFileUrl(url: string) {
         this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
         setTimeout(async () => {
-                try {
-                    let file = await this.fileService.getFileFromUrl(url);
-                    this.fileService.addRoutesFromFile(file);
-                } catch (ex) {
-                    this.toastService.error(ex, this.resources.unableToLoadFromFile);
-                }
-            }, 0);
-    }
-
-    private handleIntent(intent: Intent) {
-        this.ngZone.run(async () => {
             try {
-                let data = (intent as any).data as string;
-                if (!data && !intent.clipItems) {
-                    if (!intent.action.endsWith("MAIN")) {
-                        this.loggingService.warning("[OpenWith] Could not extract data from intent: " + JSON.stringify(intent));
-                    }
-                    return;
-                }
-                if (intent.clipItems && intent.clipItems.length > 0) {
-                    data = intent.clipItems[0].uri;
-                }
-                if (data.startsWith("ihm://")) {
-                    // no need to do anything as this is part of the login flow
-                    return;
-                }
-                if (data.startsWith("http") || data.startsWith("geo")) {
-                    this.handleExternalUrl(data);
-                } else {
-                    this.loggingService.info("[OpenWith] Opening an intent with data: " + data + " type: " + intent.type);
-                    if (intent.type && intent.type.startsWith("image/")) {
-                        // this is hacking, but there's no good way to get the real file name when an image is shared...
-                        intent.type = ImageResizeService.JPEG;
-                    }
-                    let file = await this.fileService.getFileFromUrl(data, intent.type);
-                    this.loggingService.info("[OpenWith] Translated the data to a file: " + file.name + " " + file.type);
-                    await this.fileService.addRoutesFromFile(file);
-                }
+                let file = await this.fileService.getFileFromUrl(url);
+                this.fileService.addRoutesFromFile(file);
             } catch (ex) {
                 this.toastService.error(ex, this.resources.unableToLoadFromFile);
             }
-        });
+        }, 0);
     }
 
-    private handleExternalUrl(uri: string) {
-        if (uri.toLocaleLowerCase().indexOf("israelhiking.osm.org.il") !== -1) {
-            // handled by deep links plugin
+    private handleHttpUrl(href: string) {
+        let url = new URL(href);
+        if (url.host.toLocaleLowerCase() === "israelhiking.osm.org.il") {
+            this.handleIHMUrl(url);
             return;
         }
-        this.loggingService.info("[OpenWith] Opening a url: " + uri);
-        if (uri.indexOf("maps?q=") !== -1) {
+        this.loggingService.info("[OpenWith] Opening an external url: " + href);
+        if (url.href.indexOf("maps?q=") !== -1) {
             let coordsRegExp = /q=(\d+\.\d+),(\d+\.\d+)&z=/;
-            let coords = coordsRegExp.exec(decodeURIComponent(uri));
+            let coords = coordsRegExp.exec(decodeURIComponent(href));
             this.moveToCoordinates(coords);
             return;
         }
-        if (uri.indexOf("maps/place") !== -1) {
+        if (url.href.indexOf("maps/place") !== -1) {
             let coordsRegExp = /\@(\d+\.\d+),(\d+\.\d+),/;
-            let coords = coordsRegExp.exec(uri);
+            let coords = coordsRegExp.exec(href);
             this.moveToCoordinates(coords);
             return;
         }
-        if (uri.indexOf("geo:") !== -1) {
-            let coordsRegExp = /:(-?\d+\.\d+),(-?\d+\.\d+)/;
-            let coords = coordsRegExp.exec(uri);
-            this.moveToCoordinates(coords);
-            return;
+        this.router.navigate([RouteStrings.ROUTE_URL, href]);
+    }
+
+    private logAndCloseDialogs(url: URL) {
+        this.loggingService.info("[OpenWith] Opening: " + url.href);
+        if (this.matDialog.openDialogs.length > 0) {
+            this.matDialog.closeAll();
         }
-        this.router.navigate([RouteStrings.ROUTE_URL, uri]);
     }
 
     private moveToCoordinates(coords: string[]) {

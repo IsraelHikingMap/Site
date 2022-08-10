@@ -1,13 +1,42 @@
-﻿@use "~@angular/material" as mat;
+﻿﻿@use "@angular/material" as mat;
+@use "variables" as v;
+@use "dialogs";
 @import "../fonts/icons.css";
 @import "font-awesome/css/font-awesome.css";
 @import "~maplibre-gl/dist/maplibre-gl.css";
-@import "./dialogs.scss";
-@import "./sidebar.scss";
-@import "./_variables.scss";
+
+$app-primary: mat.define-palette(mat.$green-palette, 600);
+$app-accent: mat.define-palette(mat.$yellow-palette);
+$app-warm: mat.define-palette(mat.$red-palette);
+$app-theme: mat.define-light-theme($app-primary, $app-accent, $app-warm);
+$app-background: map-get($app-theme, background);
 
 @include mat.core();
 @include mat.all-component-themes($app-theme);
+
+/* added direction to fix issue with scroll bar and legend maps */
+.sidebar-wrapper {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: v.$app-sidebar-width;
+    line-height: 24px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    color: black;
+    direction: ltr;
+    background: mat.get-color-from-palette($app-background, card);
+    z-index: v.$app-left-z-index + 5;
+}
+
+
+@media (max-width:500px) {
+    .sidebar-wrapper {
+        width: 100vw;
+        box-sizing: border-box;
+    }
+}
 
 html {
     height: 100%;
@@ -28,7 +57,7 @@ body {
     position: relative;
     padding: 2px;
     clear: both;
-    background-color: $app-button-background;
+    background-color: white;
     margin: 0 !important;
     border: 2px solid rgba(0,0,0,.2);
 }
@@ -37,8 +66,8 @@ body {
     min-width: unset !important;
     padding: 0 !important;
     display: block;
-    width: $app-button-size;
-    height: $app-button-size;
+    width: v.$app-button-size;
+    height: v.$app-button-size;
 }
 
 .input-wrapper-spacer {
@@ -75,10 +104,6 @@ overlay.overlay-shown {
 
 .cursor-zoom-in {
     cursor: zoom-in;
-}
-
-.cursor-move {
-    cursor: move;
 }
 
 .stack-icon-top {
@@ -118,7 +143,7 @@ overlay.overlay-shown {
 .control-container-item {
     display: table-cell;
     vertical-align: middle;
-    height: $app-button-size;
+    height: v.$app-button-size;
 }
 
 .control-container-item.gutters {

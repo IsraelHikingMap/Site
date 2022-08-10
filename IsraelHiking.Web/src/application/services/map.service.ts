@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Map } from "maplibre-gl";
 import { Observable } from "rxjs";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
@@ -18,7 +18,7 @@ export class MapService {
 
     private missingImagesArray: string[];
 
-    @select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
+    @Select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
     public pannedTimestamp$: Observable<Date>;
 
     constructor(private readonly cancelableTimeoutService: CancelableTimeoutService,

@@ -137,7 +137,7 @@ export class MainMapComponent extends BaseMapComponent {
     }
 
     public isApp() {
-        return this.runningContextService.isCordova;
+        return this.runningContextService.isCapacitor;
     }
 
 }

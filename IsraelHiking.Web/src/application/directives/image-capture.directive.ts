@@ -1,10 +1,15 @@
 import { Directive, Output, ElementRef, Renderer2, OnDestroy, EventEmitter, NgZone } from "@angular/core";
-import { Camera } from "@ionic-native/camera/ngx";
-import { StatusBar } from "@ionic-native/status-bar/ngx";
+import { Camera, CameraResultType } from "@capacitor/camera";
+import { FileService } from "application/services/file.service";
 
 import { environment } from "../../environments/environment";
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
+
+interface HTMLElementInputChangeEvent {
+    dataTransfer: { files: File[] };
+    target: any;
+}
 
 @Directive({
     selector: "[imageCapture]",
@@ -12,21 +17,20 @@ import { ToastService } from "../services/toast.service";
 export class ImageCaptureDirective implements OnDestroy {
 
     @Output()
-    public changed: EventEmitter<any>;
+    public changed: EventEmitter<HTMLElementInputChangeEvent>;
 
     private listenFunction: () => void;
 
     constructor(elementRef: ElementRef,
-                private readonly camera: Camera,
-                private readonly statusBar: StatusBar,
                 private readonly renderer: Renderer2,
                 private readonly ngZone: NgZone,
                 private readonly resources: ResourcesService,
-                private readonly toastService: ToastService) {
+                private readonly toastService: ToastService,
+                private readonly fileService: FileService) {
 
         this.changed = new EventEmitter();
         this.listenFunction = this.renderer.listen(elementRef.nativeElement, "click", (event) => {
-            if (!environment.isCordova) {
+            if (!environment.isCapacitor) {
                 return;
             }
             event.preventDefault();
@@ -38,26 +42,36 @@ export class ImageCaptureDirective implements OnDestroy {
                 customDeclineText: this.resources.gallery,
                 confirmIcon: "camera",
                 declineIcon: "image",
-                confirmAction: () => this.getPicture(this.camera.PictureSourceType.CAMERA, true),
-                declineAction: () => this.getPicture(this.camera.PictureSourceType.PHOTOLIBRARY, false),
+                confirmAction: async () => await this.getPictureFromCamera(),
+                declineAction: async () => await this.getPicturesFromGallery(),
             });
         });
     }
 
-    private async getPicture(sourceType: number, saveToPhotoAlbum: boolean) {
-        let base64ImageData = await this.camera.getPicture({
-            destinationType: this.camera.DestinationType.DATA_URL,
-            sourceType,
-            saveToPhotoAlbum,
-            correctOrientation: true
+    private async getPictureFromCamera() {
+        let data = await Camera.getPhoto({
+            correctOrientation: true,
+            saveToGallery: true,
+            resultType: CameraResultType.Base64
         });
-        this.statusBar.overlaysWebView(true);
-        this.statusBar.overlaysWebView(false);
-        let blob = await fetch(`data:image/jpeg;base64,${base64ImageData}`).then(r => r.blob());
+        let blob = await fetch(`data:image/jpeg;base64,${data.base64String}`).then(r => r.blob()) as File;
+        this.raiseChangedEvent([blob]);
+    }
+
+    private async getPicturesFromGallery() {
+        let response = await Camera.pickImages({
+            correctOrientation: true,
+        });
+        let files = [];
+        for (let photo of response.photos) {
+            files.push(await this.fileService.getFileFromUrl(photo.path));
+        }
+        this.raiseChangedEvent(files);
+    }
+
+    private raiseChangedEvent(files: File[]) {
         let changeEvent = {
-            dataTransfer: {
-                files: [blob]
-            },
+            dataTransfer: { files },
             target: {}
         };
         this.ngZone.run(() => this.changed.next(changeEvent));

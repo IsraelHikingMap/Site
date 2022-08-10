@@ -73,7 +73,7 @@ export class GeoLocationService {
     public canRecord(): boolean {
         let gpsState = this.ngRedux.getState().gpsState;
         return gpsState.tracking === "tracking"
-            && gpsState.currentPoistion != null && this.runningContextService.isCordova;
+            && gpsState.currentPoistion != null && this.runningContextService.isCapacitor;
     }
 
     private startWatching() {
@@ -84,7 +84,7 @@ export class GeoLocationService {
                 this.handlePoistionChange(position);
             }, () => {}, { timeout: GeoLocationService.SHORT_TIME_OUT });
         }
-        if (this.runningContextService.isCordova) {
+        if (this.runningContextService.isCapacitor) {
             this.startBackgroundGeolocation();
         } else {
             this.startNavigator();
@@ -132,8 +132,8 @@ export class GeoLocationService {
             fastestInterval: 1000,
             activitiesInterval: 10000,
             startForeground: true,
-            notificationIconLarge: "screen",
-            notificationIconSmall: "screen",
+            notificationIconLarge: "bg_notification",
+            notificationIconSmall: "bg_notification",
         });
 
         BackgroundGeolocation.on("location").subscribe(async (_: Location) => {
@@ -191,7 +191,7 @@ export class GeoLocationService {
 
     private async onLocationUpdate() {
         let locations = await BackgroundGeolocation.getValidLocationsAndDelete();
-        let positions = locations.map(l => this.locationToPosition(l));
+        let positions = locations.map((l) => this.locationToPosition(l));
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
         } else if (positions.length === 1) {
@@ -206,7 +206,7 @@ export class GeoLocationService {
     private async stopWatching() {
         this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
         this.ngRedux.dispatch(new SetCurrentPositionAction({position: null}));
-        if (this.runningContextService.isCordova) {
+        if (this.runningContextService.isCapacitor) {
             this.loggingService.debug("[GeoLocation] Stopping background tracking");
             await BackgroundGeolocation.stop();
         } else {
@@ -264,7 +264,7 @@ export class GeoLocationService {
 
     public async getLog(): Promise<string> {
         let logEntries = await BackgroundGeolocation.getLogEntries(10000, 0, BackgroundGeolocation.LOG_TRACE);
-        return logEntries.map(logLine => {
+        return logEntries.map((logLine) => {
             let dateString = new Date(logLine.timestamp - new Date().getTimezoneOffset() * 60 * 1000)
                 .toISOString().replace(/T/, " ").replace(/\..+/, "");
             return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;

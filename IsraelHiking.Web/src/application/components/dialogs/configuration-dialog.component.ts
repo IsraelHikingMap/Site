@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Observable } from "rxjs";
-import { select, NgRedux } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -17,13 +17,13 @@ import type { ApplicationState, BatteryOptimizationType } from "../../models/mod
 })
 export class ConfigurationDialogComponent extends BaseMapComponent {
 
-    @select((state: ApplicationState) => state.configuration.batteryOptimizationType)
+    @Select((state: ApplicationState) => state.configuration.batteryOptimizationType)
     public batteryOptimizationType: Observable<BatteryOptimizationType>;
 
-    @select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload)
+    @Select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload)
     public isAutomaticRecordingUpload: Observable<boolean>;
 
-    @select((state: ApplicationState) => state.configuration.isGotLostWarnings)
+    @Select((state: ApplicationState) => state.configuration.isGotLostWarnings)
     public isGotLostWarnings: Observable<boolean>;
 
     constructor(resources: ResourcesService,
@@ -36,7 +36,7 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
     }
 
     public isApp() {
-        return this.runningContextService.isCordova;
+        return this.runningContextService.isCapacitor;
     }
 
     public toggleBatteryOprimization() {

@@ -1,8 +1,6 @@
 import { TestBed, inject, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
 import { HttpClientModule, HttpRequest } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { Device } from "@ionic-native/device/ngx";
-import { SQLite } from "@ionic-native/sqlite/ngx";
 import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
 
 import { ToastServiceMockCreator } from "./toast.service.spec";
@@ -70,9 +68,7 @@ describe("Poi Service", () => {
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,
-                PoiService,
-                Device,
-                SQLite
+                PoiService
             ]
         });
         MockNgRedux.reset();
@@ -113,7 +109,7 @@ describe("Poi Service", () => {
                         poisLastModifiedDate: null
                     }
                 });
-                (runningContextService as any).isCordova = true;
+                (runningContextService as any).isCapacitor = true;
                 let zip = new JSZip();
                 zip.folder("pois");
                 zip.file("pois/001.geojson", JSON.stringify({ features: [{
@@ -152,7 +148,7 @@ describe("Poi Service", () => {
                         poisLastModifiedDate: Date.now()
                     }
                 });
-                (runningContextService as any).isCordova = true;
+                (runningContextService as any).isCapacitor = true;
                 poiService.initialize().then(() => {
                     expect(poiService.poiGeojsonFiltered.features.length).toBe(0);
                     expect(databaseService.storePois).toHaveBeenCalled();

@@ -1,16 +1,14 @@
+sudo gem install cocoapods
+$env:LANG="en_US.UTF-8"
+$env:LANGUAGE="en_US.UTF-8"
+$env:LC_ALL="en_US.UTF-8"
+
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
 if ($env:PASSWORD -eq $null) {
 	Write-Host "Can't build iOS without a password for the encripted files"
 	Exit
 }
-
-#Replace version in config.xml file
-$filePath = get-ChildItem config.xml | Select-Object -first 1 | select -expand FullName
-$xml = New-Object XML
-$xml.Load($filePath)
-$xml.widget.version = $env:APPVEYOR_BUILD_VERSION
-$xml.Save($filePath)
 
 Write-Host "Decrypting files"
 Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/appveyor.mobileprovision.enc -d -a -out ./signing/appveyor.mobileprovision"
@@ -48,21 +46,43 @@ Copy-Item "./signing/appveyor.mobileprovision" -Destination "~/Library/MobileDev
 Write-Host "npm ci"
 npm ci
 
-Write-Host "npm run build:cordova -- --no-progress"
-npm run build:cordova -- --no-progress
+Write-Host "npm run build:mobile -- --no-progress"
+npm run build:mobile -- --no-progress
 
 if ($lastexitcode)
 {
 	throw $lastexitcode
 }
-	
-Write-Host "npm run add-ios"
-npm run add-ios
 
-Write-Host "npm run build-ipa"
-npm run build-ipa
+Write-Host "npx cap sync"
+npx cap sync
 
-$preVersionIpaLocation = "./platforms/ios/build/device/Israel Hiking Map.ipa";
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web/ios"
+
+Write-Host "Replace version in plist file to $env:APPVEYOR_BUILD_VERSION"
+$filePath = get-ChildItem Info.plist -Path App/App | Select-Object -first 1 | select -expand FullName
+$fileXml = [xml](Get-Content $filePath)
+Select-Xml -xml $fileXml -XPath "//dict/key[. = 'CFBundleShortVersionString']/following-sibling::string[1]" |
+	%{ 	
+		$_.Node.InnerXml = $env:APPVEYOR_BUILD_VERSION
+	}
+								
+Select-Xml -xml $fileXml -XPath "//dict/key[. = 'CFBundleVersion']/following-sibling::string[1]" |
+	%{ 	
+		$_.Node.InnerXml = $env:APPVEYOR_BUILD_VERSION
+	}
+$fileXml.Save($filePath)
+# fix issue with plist and c# xml save: https://stackoverflow.com/questions/18615749/how-to-modify-a-plist-file-using-c
+(Get-Content -path $filePath -Raw) -replace '"\[\]>', '">' | Set-Content -Path $filePath
+
+Write-Host "Archiving..."
+xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive
+
+Write-Host "Exporting..."
+xcodebuild -exportArchive -archivePath App.xcarchive -exportPath ./ -exportOptionsPlist exportOptions.plist
+
+
+$preVersionIpaLocation = "./App.ipa";
 $ipaVersioned = "./IHM_signed_$env:APPVEYOR_BUILD_VERSION.ipa"
 
 Copy-Item -Path $preVersionIpaLocation -Destination $ipaVersioned

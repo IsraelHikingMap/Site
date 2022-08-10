@@ -2,14 +2,14 @@ import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
-import { select, NgRedux } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PoiService } from "../../services/poi.service";
-import { LayersService } from "../../services/layers/layers.service";
+import { LayersService } from "../../services/layers.service";
 import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
-import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
@@ -31,10 +31,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point>;
     public isShowCoordinatesPopup: boolean;
 
-    @select((state: ApplicationState) => state.layersState.overlays)
+    @Select((state: ApplicationState) => state.layersState.overlays)
     public overlays: Observable<Overlay[]>;
 
-    @select((state: ApplicationState) => state.poiState.selectedPointOfInterest)
+    @Select((state: ApplicationState) => state.poiState.selectedPointOfInterest)
     public selectedPoi$: Observable<GeoJSON.Feature>;
 
     constructor(resources: ResourcesService,

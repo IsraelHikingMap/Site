@@ -1,11 +1,11 @@
 import { Component, HostListener } from "@angular/core";
 import { Observable } from "rxjs";
 import { ActionCreators } from "redux-undo";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
-import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../services/selected-route.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { ToastService } from "../services/toast.service";
 import {
@@ -25,7 +25,7 @@ import type { RoutingType, ApplicationState } from "../models/models";
 })
 export class DrawingComponent extends BaseMapComponent {
 
-    @select((state: ApplicationState) => state.routes.past.length)
+    @Select((state: ApplicationState) => state.routes.past.length)
     public undoQueueLength: Observable<number>;
 
     constructor(resources: ResourcesService,

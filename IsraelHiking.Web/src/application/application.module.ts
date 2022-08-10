@@ -32,31 +32,18 @@ import { FlexLayoutModule } from "@angular/flex-layout";
 import { Angulartics2Module, Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { NgProgressModule } from "ngx-progressbar";
 import { NgProgressHttpModule } from "ngx-progressbar/http";
-import { NgxD3Service } from "@katze/ngx-d3";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { NgIdleModule } from "@ng-idle/core";
 import { LottieModule } from "ngx-lottie";
+import { NgReduxModule } from "@angular-redux2/store";
 import player from "lottie-web";
 // Cordova plugins
-import { Brightness } from "@ionic-native/brightness/ngx";
-import { Camera } from "@ionic-native/camera/ngx";
-import { File as FileSystemWrapper } from "@ionic-native/file/ngx";
-import { InAppBrowser } from "@ionic-native/in-app-browser/ngx";
-import { InAppPurchase2 } from "@ionic-native/in-app-purchase-2/ngx";
-import { WebView } from "@ionic-native/ionic-webview/ngx";
-import { MobileAccessibility } from "@ionic-native/mobile-accessibility/ngx";
-import { StatusBar } from "@ionic-native/status-bar/ngx";
-import { Zip } from "@ionic-native/zip/ngx";
-import { Device } from "@ionic-native/device/ngx";
-import { SQLite } from "@ionic-native/sqlite/ngx";
-import { AppVersion } from "@ionic-native/app-version/ngx";
-import { Media } from "@ionic-native/media/ngx";
-import { FileTransfer } from "@ionic-native/file-transfer/ngx";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
-import { WebIntent } from "@ionic-native/web-intent/ngx";
-import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
-import { NgReduxModule } from "@angular-redux2/store";
+import { InAppPurchase2 } from "@awesome-cordova-plugins/in-app-purchase-2/ngx";
+import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
+import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
+import { DeviceOrientation } from "@awesome-cordova-plugins/device-orientation/ngx";
 // services
 import { ScrollToModule } from "./infra/scroll-to/scroll-to.module";
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
@@ -67,9 +54,9 @@ import { ResourcesService } from "./services/resources.service";
 import { FileService } from "./services/file.service";
 import { SidebarService } from "./services/sidebar.service";
 import { HashService } from "./services/hash.service";
-import { LayersService } from "./services/layers/layers.service";
+import { LayersService } from "./services/layers.service";
 import { DataContainerService } from "./services/data-container.service";
-import { RoutesFactory } from "./services/layers/routelayers/routes.factory";
+import { RoutesFactory } from "./services/routes.factory";
 import { RouterService } from "./services/router.service";
 import { SnappingService } from "./services/snapping.service";
 import { FitBoundsService } from "./services/fit-bounds.service";
@@ -89,7 +76,7 @@ import { WhatsAppService } from "./services/whatsapp.service";
 import { ImageResizeService } from "./services/image-resize.service";
 import { NonAngularObjectsFactory } from "./services/non-angular-objects.factory";
 import { PrivatePoiUploaderService } from "./services/private-poi-uploader.service";
-import { SelectedRouteService } from "./services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "./services/selected-route.service";
 import { RunningContextService } from "./services/running-context.service";
 import { TracesService } from "./services/traces.service";
 import { OpenWithService } from "./services/open-with.service";
@@ -178,6 +165,18 @@ import { BackgroundTextComponent } from "./components/background-text.component"
 // variables and functions
 import { routes } from "./routes";
 
+// See https://github.com/ionic-team/capacitor/issues/1564
+export class FileReaderFixForCapacitor extends FileReader {
+	constructor() {
+		super();
+        // eslint-disable-next-line
+		const zoneOriginalInstance = (this as any).__zone_symbol__originalInstance;
+		return zoneOriginalInstance || this;
+	}
+}
+
+window.FileReader = FileReaderFixForCapacitor;
+
 const initializeApplication = (injector: Injector) => async () => {
         await injector.get<ApplicationInitializeService>(ApplicationInitializeService).initialize();
     };
@@ -230,7 +229,6 @@ const initializeApplication = (injector: Injector) => async () => {
             { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
             { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [Injector], multi: true },
             { provide: ErrorHandler, useClass: GlobalErrorHandler },
-            NgxD3Service,
             GetTextCatalogService,
             MapService,
             ResourcesService,
@@ -279,23 +277,11 @@ const initializeApplication = (injector: Injector) => async () => {
             CoordinatesService,
             OfflineFilesDownloadService,
             AudioPlayerFactory,
-            Brightness,
-            Camera,
-            FileSystemWrapper,
-            InAppBrowser,
             InAppPurchase2,
-            WebView,
-            MobileAccessibility,
-            StatusBar,
-            Zip,
-            Device,
-            SQLite,
-            AppVersion,
-            Media,
+            FileSystemWrapper,
             // eslint-disable-next-line
             FileTransfer,
             SocialSharing,
-            WebIntent,
             DeviceOrientation,
             RouteEditPoiInteraction,
             RouteEditRouteInteraction

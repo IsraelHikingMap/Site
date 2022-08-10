@@ -3,10 +3,10 @@ import { Observable } from "rxjs";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { MapLayerMouseEvent } from "maplibre-gl";
 import invert from "invert-color";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
-import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
@@ -32,13 +32,13 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     private static readonly START_COLOR = "#43a047";
     private static readonly END_COLOR = "red";
 
-    @select((state: ApplicationState) => state.routes.present)
+    @Select((state: ApplicationState) => state.routes.present)
     public routes$: Observable<RouteData[]>;
 
-    @select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
+    @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     public selectedRouteId$: Observable<RouteData[]>;
 
-    @select((state: ApplicationState) => state.routeEditingState.recordingRouteId)
+    @Select((state: ApplicationState) => state.routeEditingState.recordingRouteId)
     public routeRecordingId$: Observable<string>;
 
     public routePointPopupData: RoutePointViewData;
@@ -256,8 +256,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     public ngAfterViewInit(): void {
         this.mapComponent.mapLoad.subscribe(async () => {
             this.setInteractionAccordingToState();
-            let fullFilePath = await this.fileService.getFullFilePath("content/arrow.png");
-            this.mapComponent.mapInstance.loadImage(fullFilePath, (_: Error, image: HTMLImageElement | ImageBitmap) => {
+            let fullUrl = this.fileService.getFullUrl("content/arrow.png");
+            this.mapComponent.mapInstance.loadImage(fullUrl, (_: Error, image: HTMLImageElement | ImageBitmap) => {
                 this.mapComponent.mapInstance.addImage("arrow", image, { sdf: true });
             });
         });

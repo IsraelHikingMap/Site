@@ -3,7 +3,7 @@ import { MapMouseEvent, Map } from "maplibre-gl";
 import { NgRedux } from "@angular-redux2/store";
 import type Point from "@mapbox/point-geometry";
 
-import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RouterService } from "../../services/router.service";
 import { ElevationProvider } from "../../services/elevation.provider";

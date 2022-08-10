@@ -1,12 +1,13 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { Subscription } from "rxjs";
 import { throttleTime } from "rxjs/operators";
-import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
+import { DeviceOrientation } from "@awesome-cordova-plugins/device-orientation/ngx";
 import { NgRedux } from "@angular-redux2/store";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import type { ApplicationState } from "../models/models";
+import { App } from "@capacitor/app";
 
 @Injectable()
 export class DeviceOrientationService {
@@ -28,17 +29,11 @@ export class DeviceOrientationService {
     }
 
     public initialize() {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             return;
         }
-        document.addEventListener("resume", () => {
-            this.isBackground = false;
-        });
-        document.addEventListener("resign", () => {
-            this.isBackground = true;
-        });
-        document.addEventListener("pause", () => {
-            this.isBackground = true;
+        App.addListener("appStateChange", (state) => {
+            this.isBackground = !state.isActive;
         });
         if (this.ngRedux.getState().gpsState.tracking !== "disabled") {
             this.enable();
@@ -69,7 +64,7 @@ export class DeviceOrientationService {
     }
 
     public enable() {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             return;
         }
         if (this.subscription != null) {
@@ -83,7 +78,7 @@ export class DeviceOrientationService {
     }
 
     public disable() {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             return;
         }
         if (this.subscription != null) {
