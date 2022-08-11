@@ -72,7 +72,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 this.description = selectedRoute.description;
             }
         }
-        this.showUnhide = this.dataContainerService.getData(true).routes.find(r => r.state === "Hidden") != null;
+        this.showUnhide = this.dataContainerService.hasHiddenRoutes();
     }
 
     public async ngAfterViewInit(): Promise<void> {

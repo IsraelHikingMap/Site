@@ -131,4 +131,8 @@ export class DataContainerService {
             address: ""
         } as LayerData;
     }
+
+    public hasHiddenRoutes(): boolean {
+        return this.ngRedux.getState().routes.present.filter(r => r.state === "Hidden").length > 0;
+    }
 }
