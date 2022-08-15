@@ -93,10 +93,9 @@ describe("Recorded Route Service", () => {
         }
     ));
 
-    it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService,
+    it("Should invalidate multiple locations", inject([RecordedRouteService,
         LoggingService, SelectedRouteService],
-        (service: RecordedRouteService, geoService: GeoLocationService,
-         logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
+        (service: RecordedRouteService, logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
             service.initialize();
             let recordingRoute = {
                 id: "1",
@@ -120,29 +119,28 @@ describe("Recorded Route Service", () => {
             } as RouteData;
             selectedRouteService.getRecordingRoute = () => recordingRoute;
             let spy = spyOn(logginService, "debug");
-
-            geoService.bulkPositionChanged.next([
-                {
-                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(1).getTime()
-                },
-                {
-                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(150000).getTime()
-                },
-                {
-                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(151000).getTime()
-                },
-                {
-                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(152000).getTime()
-                }
-            ]);
-
-            expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy(spy.calls.all()[0].args[0]);
-            expect(spy.calls.all()[1].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy(spy.calls.all()[1].args[0]);
-            expect(spy.calls.all()[2].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy(spy.calls.all()[2].args[0]);
-            expect(spy.calls.all()[3].args[0].startsWith("[Record] Valid position")).toBeTruthy(spy.calls.all()[3].args[0]);
+            MockNgRedux.store.dispatch = jasmine.createSpy().and.callFake((p) => recordingRoute.segments[0].latlngs.push(...p.payload.latlngs));;
+            
+            const positionStub = getSubject((state: ApplicationState) => state.gpsState.currentPoistion);
+            positionStub.next({
+                coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
+                timestamp: new Date(1).getTime()
+            });
+            positionStub.next({
+                coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
+                timestamp: new Date(150000).getTime()
+            });
+            positionStub.next({
+                coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
+                timestamp: new Date(151000).getTime()
+            });
+            positionStub.next({
+                coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
+                timestamp: new Date(152000).getTime()
+            });
+            expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy();
+            expect(spy.calls.all()[1].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
+            expect(spy.calls.all()[2].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy();
+            expect(spy.calls.all()[3].args[0].startsWith("[Record] Valid position")).toBeTruthy();
         }));
 });

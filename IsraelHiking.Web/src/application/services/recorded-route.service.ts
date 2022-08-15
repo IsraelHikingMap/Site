@@ -60,7 +60,7 @@ export class RecordedRouteService {
         this.currentPosition$.subscribe(
             (position: GeolocationPosition) => {
                 if (position != null) {
-                    this.updateRecordingRoute([position]);
+                    this.updateRecordingRoute(position);
                 }
             });
     }
@@ -143,27 +143,19 @@ export class RecordedRouteService {
         }
     }
 
-    private updateRecordingRoute(positions: GeolocationPosition[]) {
+    private updateRecordingRoute(position: GeolocationPosition) {
         let recordingRoute = this.selectedRouteService.getRecordingRoute();
         if (recordingRoute == null) {
             return;
         }
 
         let lastValidLocation = last(last(this.selectedRouteService.getRecordingRoute().segments).latlngs);
-        let validPositions = [];
-        for (let position of positions) {
-            if (this.validateRecordingAndUpdateState(position, lastValidLocation)) {
-                validPositions.push(position);
-                lastValidLocation = this.geoLocationService.positionToLatLngTime(position);
-            }
-        }
-        if (validPositions.length === 0) {
+        if (!this.validateRecordingAndUpdateState(position, lastValidLocation)) {
             return;
         }
-        let locations = validPositions.map(p => this.geoLocationService.positionToLatLngTime(p));
         this.ngRedux.dispatch(new AddRecordingPointsAction({
             routeId: recordingRoute.id,
-            latlngs: locations
+            latlngs: [this.geoLocationService.positionToLatLngTime(position)]
         }));
     }
 
