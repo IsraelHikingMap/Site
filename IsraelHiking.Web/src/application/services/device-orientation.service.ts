@@ -1,19 +1,20 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { Subscription } from "rxjs";
 import { throttleTime } from "rxjs/operators";
+import { App } from "@capacitor/app";
 import { DeviceOrientation } from "@awesome-cordova-plugins/device-orientation/ngx";
 import { NgRedux } from "@angular-redux2/store";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import type { ApplicationState } from "../models/models";
-import { App } from "@capacitor/app";
 
 @Injectable()
 export class DeviceOrientationService {
     private static readonly THROTTLE_TIME = 500; // in milliseconds
 
     public orientationChanged: EventEmitter<number>;
+    public backToForeground: EventEmitter<void>;
 
     private subscription: Subscription;
     private isBackground: boolean;
@@ -24,6 +25,7 @@ export class DeviceOrientationService {
                 private readonly runningContextService: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.orientationChanged = new EventEmitter();
+        this.backToForeground = new EventEmitter();
         this.isBackground = false;
         this.subscription = null;
     }
@@ -33,7 +35,11 @@ export class DeviceOrientationService {
             return;
         }
         App.addListener("appStateChange", (state) => {
+            let isBackgroundBefore = this.isBackground;
             this.isBackground = !state.isActive;
+            if (isBackgroundBefore != this.isBackground && !this.isBackground) {
+                this.backToForeground.next();
+            }
         });
         if (this.ngRedux.getState().gpsState.tracking !== "disabled") {
             this.enable();
