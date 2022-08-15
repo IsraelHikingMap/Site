@@ -53,6 +53,10 @@ describe("Recorded Route Service", () => {
         MockNgRedux.reset();
     });
 
+    afterEach(() => {
+        MockNgRedux.store.dispatch = jasmine.createSpy();
+    });
+
     it("Should add a valid location", inject([RecordedRouteService, SelectedRouteService],
         (service: RecordedRouteService, selectedRouteService: SelectedRouteService) => {
             service.initialize();
