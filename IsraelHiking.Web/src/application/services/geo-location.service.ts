@@ -130,7 +130,7 @@ export class GeoLocationService {
     private async stopWatching() {
         this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
         this.ngRedux.dispatch(new SetCurrentPositionAction({position: null}));
-        if (this.runningContextService.isCapacitor) {
+        if (this.runningContextService.isCapacitor && this.bgWatcherId) {
             this.loggingService.debug("[GeoLocation] Stopping background tracking");
             await BackgroundGeolocation.removeWatcher({id: this.bgWatcherId});
             this.bgWatcherId = "";
