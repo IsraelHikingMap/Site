@@ -43,15 +43,17 @@ export class GeoLocationService {
             this.enable();
         }
 
-        App.addListener("appStateChange", async state => {
+        App.addListener("appStateChange", (state) => {
             if (this.ngRedux.getState().gpsState.tracking === "disabled") {
                 return;
             }
-            let oldBackground = this.isBackground;
             this.isBackground = !state.isActive;
-            if (oldBackground != this.isBackground && state.isActive) {
-                await this.onLocationUpdate();
-                this.backToForeground.next();
+            this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
+            if (state.isActive) {
+                this.ngZone.run(async () => {
+                    await this.onLocationUpdate();
+                    this.backToForeground.next();
+                });
             }
         });
     }
@@ -217,8 +219,8 @@ export class GeoLocationService {
     }
 
     private handlePoistionChange(position: GeolocationPosition): void {
+        this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
         this.ngZone.run(() => {
-            this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
             if (this.ngRedux.getState().gpsState.tracking === "searching") {
                 this.ngRedux.dispatch(new SetTrackingStateAction({ state: "tracking"}));
             }

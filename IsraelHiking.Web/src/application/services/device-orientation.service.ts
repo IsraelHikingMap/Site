@@ -80,18 +80,18 @@ export class DeviceOrientationService {
     }
 
     private startListening() {
-        if (this.watchId != -1) {
+        if (this.watchId !== -1) {
             navigator.compass.clearWatch(this.watchId);
         }
         this.loggingService.info("[Orientation] Starting to listen to device orientation events");
         this.watchId = navigator.compass.watchHeading((d) => {
             this.fireOrientationChange(d.magneticHeading);
-        }, () => {}, { frequency: DeviceOrientationService.THROTTLE_TIME})
+        }, () => {}, { frequency: DeviceOrientationService.THROTTLE_TIME});
     }
 
     private stopListeining() {
         this.loggingService.info("[Orientation] Stop listening to device orientation events");
-        if (this.watchId != -1) {
+        if (this.watchId !== -1) {
             navigator.compass.clearWatch(this.watchId);
             this.watchId = -1;
         }

@@ -113,7 +113,7 @@ export class LocationComponent extends BaseMapComponent {
                 if (this.isFollowingLocation()) {
                     this.moveMapToGpsPosition();
                 }
-            })
+            });
         });
     }
 
