@@ -14,10 +14,9 @@ export class DeviceOrientationService {
     private static readonly THROTTLE_TIME = 500; // in milliseconds
 
     public orientationChanged: EventEmitter<number>;
-    public backToForeground: EventEmitter<void>;
 
     private subscription: Subscription;
-    private isBackground: boolean;
+    private isEnabled: boolean;
 
     constructor(private readonly ngZone: NgZone,
                 private readonly loggingService: LoggingService,
@@ -25,8 +24,7 @@ export class DeviceOrientationService {
                 private readonly runningContextService: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.orientationChanged = new EventEmitter();
-        this.backToForeground = new EventEmitter();
-        this.isBackground = false;
+        this.isEnabled = false;
         this.subscription = null;
     }
 
@@ -35,10 +33,13 @@ export class DeviceOrientationService {
             return;
         }
         App.addListener("appStateChange", (state) => {
-            let isBackgroundBefore = this.isBackground;
-            this.isBackground = !state.isActive;
-            if (isBackgroundBefore != this.isBackground && !this.isBackground) {
-                this.backToForeground.next();
+            if (!this.isEnabled) {
+                return;
+            }
+            if (state.isActive) {
+                this.startListening();
+            } else {
+                this.stopListeining();
             }
         });
         if (this.ngRedux.getState().gpsState.tracking !== "disabled") {
@@ -47,9 +48,6 @@ export class DeviceOrientationService {
     }
 
     private fireOrientationChange(heading: number) {
-        if (this.isBackground) {
-            return;
-        }
         this.ngZone.run(() => {
             if (heading < 0) {
                 heading += 360;
@@ -73,24 +71,36 @@ export class DeviceOrientationService {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-        if (this.subscription != null) {
-            this.disable();
-        }
+        this.isEnabled = true;
         this.loggingService.info("[Orientation] Enabling device orientation service");
-        this.subscription = this.deviceOrientation.watchHeading().pipe(
-            throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })).subscribe(d => {
-            this.fireOrientationChange(d.magneticHeading);
-        });
+        this.startListening();
     }
 
     public disable() {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-        if (this.subscription != null) {
-            this.loggingService.info("[Orientation] Disabling device orientation service");
-            this.subscription.unsubscribe();
-        }
+        this.isEnabled = false;
+        this.loggingService.info("[Orientation] Disabling device orientation service");
+        this.stopListeining();
     }
 
+    private startListening() {
+        if (this.subscription != null) {
+            this.subscription.unsubscribe();
+        }
+        this.loggingService.info("[Orientation] Starting to listen to device orientation events");
+        this.subscription = this.deviceOrientation.watchHeading().pipe(
+            throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })).subscribe(d => {
+            this.fireOrientationChange(d.magneticHeading);
+        });
+    }
+
+    private stopListeining() {
+        this.loggingService.info("[Orientation] Stop listening to device orientation events");
+        if (this.subscription != null) {
+            this.subscription.unsubscribe();
+            this.subscription = null;
+        }
+    }
 }
