@@ -1,4 +1,5 @@
-import { Injectable, NgZone } from "@angular/core";
+import { Injectable, EventEmitter, NgZone } from "@angular/core";
+import { App } from "@capacitor/app";
 import { BackgroundGeolocationPlugin, Location } from "@capacitor-community/background-geolocation";
 import { NgRedux } from "@angular-redux2/store";
 import { registerPlugin } from "@capacitor/core";
@@ -20,6 +21,11 @@ export class GeoLocationService {
 
     private watchNumber: number;
     private bgWatcherId: string;
+    private isBackground: boolean;
+    // HM TODO: this is a naive implementation - in memory only...
+    private bgPositions: GeolocationPosition[];
+
+    public bulkPositionChanged: EventEmitter<GeolocationPosition[]>;
 
     constructor(private readonly resources: ResourcesService,
                 private readonly runningContextService: RunningContextService,
@@ -29,6 +35,9 @@ export class GeoLocationService {
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.watchNumber = -1;
         this.bgWatcherId = null;
+        this.bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
+        this.isBackground = false;
+        this.bgPositions = [];
     }
 
     public initialize() {
@@ -36,6 +45,15 @@ export class GeoLocationService {
             this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
             this.enable();
         }
+        App.addListener("appStateChange", (state) => {
+            this.isBackground = !state.isActive;
+            this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? 'back' : 'fore'}ground`);
+            if (state.isActive) {
+                let positions = this.getPositionsAndClear();
+                this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
+                this.ngRedux.dispatch(new SetCurrentPositionAction({position: positions[0]}));
+            }
+        });
     }
 
     public async uninitialize() {
@@ -149,8 +167,12 @@ export class GeoLocationService {
     }
 
     private handlePoistionChange(position: GeolocationPosition): void {
+        this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
+        if (this.isBackground) {
+            this.storePositionForLater(position);
+            return;
+        }
         this.ngZone.run(() => {
-            this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
             if (this.ngRedux.getState().gpsState.tracking === "searching") {
                 this.ngRedux.dispatch(new SetTrackingStateAction({ state: "tracking"}));
             }
@@ -185,5 +207,13 @@ export class GeoLocationService {
             },
             timestamp: location.time
         } as GeolocationPosition;
+    }
+
+    private storePositionForLater(position: GeolocationPosition) {
+        this.bgPositions.push(position);
+    }
+
+    private getPositionsAndClear(): GeolocationPosition[] {
+        return this.bgPositions.splice(0);
     }
 }
