@@ -54,10 +54,12 @@ export class GeoLocationService {
             this.isBackground = !state.isActive;
             this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
             if (state.isActive) {
-                let positions = this.getPositionsAndClear();
-                this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
-                this.ngRedux.dispatch(new SetCurrentPositionAction({position: positions[0]}));
-                this.backToForeground.next();
+                this.ngZone.run(() => {
+                    let positions = this.getPositionsAndClear();
+                    this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
+                    this.ngRedux.dispatch(new SetCurrentPositionAction({position: positions[0]}));
+                    this.backToForeground.next();
+                });
             }
         });
     }
@@ -174,7 +176,7 @@ export class GeoLocationService {
 
     private handlePoistionChange(position: GeolocationPosition): void {
         this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
-        if (this.isBackground) {
+        if (this.isBackground || !this.isPositionStorageEmpty()) {
             this.storePositionForLater(position);
             return;
         }
@@ -217,6 +219,10 @@ export class GeoLocationService {
 
     private storePositionForLater(position: GeolocationPosition) {
         this.bgPositions.push(position);
+    }
+
+    private isPositionStorageEmpty(): boolean {
+        return this.bgPositions.length > 0;
     }
 
     private getPositionsAndClear(): GeolocationPosition[] {
