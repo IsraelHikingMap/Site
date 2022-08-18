@@ -43,7 +43,6 @@ import { InAppPurchase2 } from "@awesome-cordova-plugins/in-app-purchase-2/ngx";
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
-import { DeviceOrientation } from "@awesome-cordova-plugins/device-orientation/ngx";
 // services
 import { ScrollToModule } from "./infra/scroll-to/scroll-to.module";
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
@@ -282,7 +281,6 @@ const initializeApplication = (injector: Injector) => async () => {
             // eslint-disable-next-line
             FileTransfer,
             SocialSharing,
-            DeviceOrientation,
             RouteEditPoiInteraction,
             RouteEditRouteInteraction
         ],

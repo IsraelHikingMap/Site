@@ -109,7 +109,7 @@ export class LocationComponent extends BaseMapComponent {
                 }
             });
 
-            this.deviceOrientationService.backToForeground.subscribe(() => {
+            this.geoLocationService.backToForeground.subscribe(() => {
                 if (this.isFollowingLocation()) {
                     this.moveMapToGpsPosition();
                 }

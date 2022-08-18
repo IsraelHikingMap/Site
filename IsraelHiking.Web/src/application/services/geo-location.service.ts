@@ -26,6 +26,7 @@ export class GeoLocationService {
     private bgPositions: GeolocationPosition[];
 
     public bulkPositionChanged: EventEmitter<GeolocationPosition[]>;
+    public backToForeground: EventEmitter<void>;
 
     constructor(private readonly resources: ResourcesService,
                 private readonly runningContextService: RunningContextService,
@@ -35,6 +36,7 @@ export class GeoLocationService {
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.watchNumber = -1;
         this.bgWatcherId = null;
+        this.backToForeground = new EventEmitter();
         this.bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
         this.isBackground = false;
         this.bgPositions = [];
@@ -46,12 +48,16 @@ export class GeoLocationService {
             this.enable();
         }
         App.addListener("appStateChange", (state) => {
+            if (this.ngRedux.getState().gpsState.tracking === "disabled") {
+                return;
+            }
             this.isBackground = !state.isActive;
-            this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? 'back' : 'fore'}ground`);
+            this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
             if (state.isActive) {
                 let positions = this.getPositionsAndClear();
                 this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
                 this.ngRedux.dispatch(new SetCurrentPositionAction({position: positions[0]}));
+                this.backToForeground.next();
             }
         });
     }

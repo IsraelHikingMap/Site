@@ -95,7 +95,7 @@ describe("Recorded Route Service", () => {
 
     it("Should invalidate multiple locations", inject([RecordedRouteService, GeoLocationService,
         LoggingService, SelectedRouteService],
-        (service: RecordedRouteService, geoService: GeoLocationService, 
+        (service: RecordedRouteService, geoService: GeoLocationService,
          logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
             service.initialize();
             let recordingRoute = {
@@ -120,7 +120,7 @@ describe("Recorded Route Service", () => {
             } as RouteData;
             selectedRouteService.getRecordingRoute = () => recordingRoute;
             let spy = spyOn(logginService, "debug");
-            
+
             geoService.bulkPositionChanged.next([
                 {
                     coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
