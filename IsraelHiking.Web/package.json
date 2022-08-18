@@ -13,7 +13,6 @@
     "@angular/platform-browser-dynamic": "14.1.3",
     "@angular/router": "14.1.3",
     "@awesome-cordova-plugins/core": "^5.44.0",
-    "@awesome-cordova-plugins/device-orientation": "^5.44.0",
     "@awesome-cordova-plugins/file": "^5.44.0",
     "@awesome-cordova-plugins/file-transfer": "^5.44.0",
     "@awesome-cordova-plugins/in-app-purchase-2": "^5.44.0",
