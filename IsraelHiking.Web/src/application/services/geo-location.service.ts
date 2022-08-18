@@ -47,6 +47,7 @@ export class GeoLocationService {
             this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
             this.enable();
         }
+
         App.addListener("appStateChange", (state) => {
             if (this.ngRedux.getState().gpsState.tracking === "disabled") {
                 return;
