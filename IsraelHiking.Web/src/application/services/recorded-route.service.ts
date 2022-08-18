@@ -63,7 +63,6 @@ export class RecordedRouteService {
                     this.updateRecordingRoute([position]);
                 }
             });
-
         this.geoLocationService.bulkPositionChanged.subscribe(
             (positions: GeolocationPosition[]) => {
                 this.updateRecordingRoute(positions);
