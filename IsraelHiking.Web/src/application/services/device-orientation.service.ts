@@ -16,7 +16,6 @@ export class DeviceOrientationService {
     public orientationChanged: EventEmitter<number>;
 
     private subscription: Subscription;
-    private isEnabled: boolean;
 
     constructor(private readonly ngZone: NgZone,
                 private readonly loggingService: LoggingService,
@@ -24,7 +23,6 @@ export class DeviceOrientationService {
                 private readonly runningContextService: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.orientationChanged = new EventEmitter();
-        this.isEnabled = false;
         this.subscription = null;
     }
 
@@ -33,7 +31,7 @@ export class DeviceOrientationService {
             return;
         }
         App.addListener("appStateChange", (state) => {
-            if (!this.isEnabled) {
+            if (this.ngRedux.getState().gpsState.tracking === "disabled") {
                 return;
             }
             if (state.isActive) {
@@ -71,7 +69,6 @@ export class DeviceOrientationService {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-        this.isEnabled = true;
         this.loggingService.info("[Orientation] Enabling device orientation service");
         this.startListening();
     }
@@ -80,7 +77,6 @@ export class DeviceOrientationService {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-        this.isEnabled = false;
         this.loggingService.info("[Orientation] Disabling device orientation service");
         this.stopListeining();
     }
