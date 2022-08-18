@@ -1,5 +1,6 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { BackgroundGeolocationPlugin, Location } from "cordova-background-geolocation-plugin";
+import { App } from "@capacitor/app";
 import { NgRedux } from "@angular-redux2/store";
 
 import { ResourcesService } from "./resources.service";
@@ -21,6 +22,7 @@ export class GeoLocationService {
     private wasInitialized: boolean;
 
     public bulkPositionChanged: EventEmitter<GeolocationPosition[]>;
+    public backToForeground: EventEmitter<void>;
 
     constructor(private readonly resources: ResourcesService,
                 private readonly runningContextService: RunningContextService,
@@ -29,6 +31,7 @@ export class GeoLocationService {
                 private readonly ngZone: NgZone,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.watchNumber = -1;
+        this.backToForeground = new EventEmitter();
         this.bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
         this.isBackground = false;
         this.wasInitialized = false;
@@ -39,6 +42,18 @@ export class GeoLocationService {
             this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
             this.enable();
         }
+
+        App.addListener("appStateChange", async state => {
+            if (this.ngRedux.getState().gpsState.tracking === "disabled") {
+                return;
+            }
+            let oldBackground = this.isBackground;
+            this.isBackground = !state.isActive;
+            if (oldBackground != this.isBackground && state.isActive) {
+                await this.onLocationUpdate();
+                this.backToForeground.next();
+            }
+        });
     }
 
     public async uninitialize() {
@@ -143,28 +158,6 @@ export class GeoLocationService {
             await this.onLocationUpdate();
         });
 
-        BackgroundGeolocation.on("start").subscribe(
-            () => {
-                this.loggingService.debug("[GeoLocation] Start service");
-            });
-
-        BackgroundGeolocation.on("stop").subscribe(
-            () => {
-                this.loggingService.debug("[GeoLocation] Stop service");
-            });
-
-        BackgroundGeolocation.on("background").subscribe(
-            () => {
-                this.isBackground = true;
-                this.loggingService.debug("[GeoLocation] Now in background");
-            });
-
-        BackgroundGeolocation.on("foreground").subscribe(
-            async () => {
-                this.loggingService.debug("[GeoLocation] Now in foreground");
-                this.isBackground = false;
-                await this.onLocationUpdate();
-            });
 
         BackgroundGeolocation.on("authorization").subscribe(
             (status) => {
