@@ -23,7 +23,7 @@ export class GeoLocationService {
     private bgWatcherId: string;
     private isBackground: boolean;
     // HM TODO: this is a naive implementation - in memory only...
-    private bgPositions: GeolocationPosition[];
+    private bgLocations: Location[];
 
     public bulkPositionChanged: EventEmitter<GeolocationPosition[]>;
     public backToForeground: EventEmitter<void>;
@@ -39,7 +39,7 @@ export class GeoLocationService {
         this.backToForeground = new EventEmitter();
         this.bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
         this.isBackground = false;
-        this.bgPositions = [];
+        this.bgLocations = [];
     }
 
     public initialize() {
@@ -56,9 +56,7 @@ export class GeoLocationService {
             this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
             if (state.isActive) {
                 this.ngZone.run(() => {
-                    let positions = this.getPositionsAndClear();
-                    this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
-                    this.ngRedux.dispatch(new SetCurrentPositionAction({position: positions[0]}));
+                    this.onLocationUpdate();
                     this.backToForeground.next();
                 });
             }
@@ -148,10 +146,27 @@ export class GeoLocationService {
             backgroundMessage: this.resources.runningInBackground,
             distanceFilter: 5
         },
-        (location) => this.handlePoistionChange(this.locationToPosition(location)))
+        (location) => {
+            this.storeLocationForLater(location);
+            this.onLocationUpdate();
+        })
         .then((watcherId) => {
             this.bgWatcherId = watcherId;
         });
+    }
+
+    private onLocationUpdate() {
+        let locations = this.getValidLocationsAndDelete();
+        let positions = locations.map((l) => this.locationToPosition(l));
+        if (positions.length === 0) {
+            this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
+        } else if (positions.length === 1) {
+            this.handlePoistionChange(positions[positions.length - 1]);
+        } else {
+            this.loggingService.debug(`[GeoLocation] Sending bulk location update: ${positions.length}`);
+            this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
+            this.handlePoistionChange(positions[0]);
+        }
     }
 
     private async stopWatching() {
@@ -177,8 +192,7 @@ export class GeoLocationService {
 
     private handlePoistionChange(position: GeolocationPosition): void {
         this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
-        if (this.isBackground || !this.isPositionStorageEmpty()) {
-            this.storePositionForLater(position);
+        if (this.isBackground) {
             return;
         }
         this.ngZone.run(() => {
@@ -218,15 +232,11 @@ export class GeoLocationService {
         } as GeolocationPosition;
     }
 
-    private storePositionForLater(position: GeolocationPosition) {
-        this.bgPositions.push(position);
+    private storeLocationForLater(location: Location) {
+        this.bgLocations.push(location);
     }
 
-    private isPositionStorageEmpty(): boolean {
-        return this.bgPositions.length > 0;
-    }
-
-    private getPositionsAndClear(): GeolocationPosition[] {
-        return this.bgPositions.splice(0);
+    private getValidLocationsAndDelete(): Location[] {
+        return this.bgLocations.splice(0);
     }
 }
