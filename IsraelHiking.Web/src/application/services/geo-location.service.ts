@@ -148,8 +148,6 @@ export class GeoLocationService {
         (location) => {
             this.storeLocationForLater(this.locationToPosition(location));
             if (this.isBackground) {
-                // HM TODO: remove this once the issue is fixed
-                this.loggingService.debug("[GeoLocation] Received location in background (" + this.bgLocations.length + "): " + JSON.stringify(this.locationToPosition(location)));
                 return;
             }
             this.ngZone.run(() => {
