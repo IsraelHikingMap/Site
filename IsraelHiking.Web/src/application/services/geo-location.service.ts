@@ -21,8 +21,8 @@ export class GeoLocationService {
     private watchNumber: number;
     private bgWatcherId: string;
     private isBackground: boolean;
-    // HM TODO: this is a naive implementation - in memory only...
-    private bgLocations: GeolocationPosition[];
+    // HM TODO: this is a naive implementation - in memory only, will not withstand app crash...
+    private bgPositions: GeolocationPosition[];
 
     public bulkPositionChanged: EventEmitter<GeolocationPosition[]>;
     public backToForeground: EventEmitter<void>;
@@ -38,7 +38,7 @@ export class GeoLocationService {
         this.backToForeground = new EventEmitter();
         this.bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
         this.isBackground = false;
-        this.bgLocations = [];
+        this.bgPositions = [];
     }
 
     public initialize() {
@@ -156,7 +156,7 @@ export class GeoLocationService {
     }
 
     private onLocationUpdate() {
-        let positions = this.getValidLocationsAndDelete();
+        let positions = this.getValidPositionsAndDelete();
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
         } else if (positions.length === 1) {
@@ -228,11 +228,11 @@ export class GeoLocationService {
         } as GeolocationPosition;
     }
 
-    private storeLocationForLater(location: GeolocationPosition) {
-        this.bgLocations.push(location);
+    private storeLocationForLater(position: GeolocationPosition) {
+        this.bgPositions.push(position);
     }
 
-    private getValidLocationsAndDelete(): GeolocationPosition[] {
-        return this.bgLocations.splice(0);
+    private getValidPositionsAndDelete(): GeolocationPosition[] {
+        return this.bgPositions.splice(0);
     }
 }
