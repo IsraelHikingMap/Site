@@ -1,9 +1,8 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { App } from "@capacitor/app";
 import { BackgroundGeolocationPlugin, Location } from "@capacitor-community/background-geolocation";
+import { App } from "@capacitor/app";
 import { NgRedux } from "@angular-redux2/store";
 import { registerPlugin } from "@capacitor/core";
-
 
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
@@ -151,7 +150,9 @@ export class GeoLocationService {
             if (this.isBackground) {
                 return;
             }
-            this.onLocationUpdate();
+            this.ngZone.run(() => {
+                this.onLocationUpdate();
+            });
         })
         .then((watcherId) => {
             this.bgWatcherId = watcherId;
