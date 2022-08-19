@@ -93,7 +93,7 @@ describe("Recorded Route Service", () => {
         }
     ));
 
-    it("Should invalidate multiple locations", inject([RecordedRouteService, GeoLocationService,
+    it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService,
         LoggingService, SelectedRouteService],
         (service: RecordedRouteService, geoService: GeoLocationService,
          logginService: LoggingService, selectedRouteService: SelectedRouteService) => {
