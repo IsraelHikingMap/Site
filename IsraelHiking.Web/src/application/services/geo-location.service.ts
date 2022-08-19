@@ -148,6 +148,9 @@ export class GeoLocationService {
         },
         (location) => {
             this.storeLocationForLater(location);
+            if (this.isBackground) {
+                return;
+            }
             this.onLocationUpdate();
         })
         .then((watcherId) => {
@@ -192,9 +195,6 @@ export class GeoLocationService {
 
     private handlePoistionChange(position: GeolocationPosition): void {
         this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
-        if (this.isBackground) {
-            return;
-        }
         this.ngZone.run(() => {
             if (this.ngRedux.getState().gpsState.tracking === "searching") {
                 this.ngRedux.dispatch(new SetTrackingStateAction({ state: "tracking"}));
