@@ -22,7 +22,7 @@ export class GeoLocationService {
     private bgWatcherId: string;
     private isBackground: boolean;
     // HM TODO: this is a naive implementation - in memory only...
-    private bgLocations: Location[];
+    private bgLocations: GeolocationPosition[];
 
     public bulkPositionChanged: EventEmitter<GeolocationPosition[]>;
     public backToForeground: EventEmitter<void>;
@@ -146,8 +146,9 @@ export class GeoLocationService {
             distanceFilter: 5
         },
         (location) => {
-            this.storeLocationForLater(location);
+            this.storeLocationForLater(this.locationToPosition(location));
             if (this.isBackground) {
+                // HM TODO: remove this once the issue is fixed
                 this.loggingService.debug("[GeoLocation] Received location in background (" + this.bgLocations.length + "): " + JSON.stringify(this.locationToPosition(location)));
                 return;
             }
@@ -161,8 +162,7 @@ export class GeoLocationService {
     }
 
     private onLocationUpdate() {
-        let locations = this.getValidLocationsAndDelete();
-        let positions = locations.map((l) => this.locationToPosition(l));
+        let positions = this.getValidLocationsAndDelete();
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
         } else if (positions.length === 1) {
@@ -234,11 +234,11 @@ export class GeoLocationService {
         } as GeolocationPosition;
     }
 
-    private storeLocationForLater(location: Location) {
+    private storeLocationForLater(location: GeolocationPosition) {
         this.bgLocations.push(location);
     }
 
-    private getValidLocationsAndDelete(): Location[] {
+    private getValidLocationsAndDelete(): GeolocationPosition[] {
         return this.bgLocations.splice(0);
     }
 }
