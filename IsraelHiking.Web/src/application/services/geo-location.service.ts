@@ -140,12 +140,11 @@ export class GeoLocationService {
             return;
         }
         this.loggingService.info("[GeoLocation] Starting background tracking");
-        BackgroundGeolocation.addWatcher({
+        this.bgWatcherId = await BackgroundGeolocation.addWatcher({
             backgroundTitle: "Israel Hiking Map",
             backgroundMessage: this.resources.runningInBackground,
             distanceFilter: 5
-        },
-        (location) => {
+        }, (location) => {
             this.storeLocationForLater(this.locationToPosition(location));
             if (this.isBackground) {
                 return;
@@ -153,9 +152,6 @@ export class GeoLocationService {
             this.ngZone.run(() => {
                 this.onLocationUpdate();
             });
-        })
-        .then((watcherId) => {
-            this.bgWatcherId = watcherId;
         });
     }
 
