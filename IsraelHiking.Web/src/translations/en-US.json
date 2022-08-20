@@ -350,6 +350,7 @@
     "This will delete all current routes. Are you sure?": "This will delete all current routes. Are you sure?",
     "Title": "Title",
     "Toilettes": "Toilettes",
+    "Traces are only saved locally. You can change that in the configuration settings": "Traces are only saved locally. You can change that in the advanced settings screen.",
     "Trails": "Tracks and Paths",
     "Transportation": "Transportation",
     "Tree": "Tree",

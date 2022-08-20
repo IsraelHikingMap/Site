@@ -124,6 +124,7 @@
     "md5-file": "^5.0.0",
     "open": "^8.2.1",
     "po2json": "0.4.5",
+    "request": "^2.88.2",
     "shelljs": "^0.8.5",
     "typescript": "4.7.4"
   },

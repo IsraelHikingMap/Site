@@ -297,6 +297,7 @@ export class ResourcesService {
     public pleaseFillReport: string;
     public hiddenRoutesWillNotBeSaved: string;
     public noLocationPermissionOpenAppSettings: string;
+    public tracesAreOnlySavedLocally: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -472,7 +473,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1660241602425");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1661017507064");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -771,6 +772,8 @@ export class ResourcesService {
         this.hiddenRoutesWillNotBeSaved = this.gettextCatalog.getString("Hidden routes will not be saved...");
         this.noLocationPermissionOpenAppSettings = this.gettextCatalog.getString("There's no permission to use your location. " +
             "Would you like to open the app settings?");
+        this.tracesAreOnlySavedLocally = this.gettextCatalog.getString("Traces are only saved locally. " +
+            "You can change that in the configuration settings");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

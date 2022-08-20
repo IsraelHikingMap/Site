@@ -140,10 +140,13 @@ export class RecordedRouteService {
 
         this.ngRedux.dispatch(new AddTraceAction({ trace }));
         await this.tracesService.uploadLocalTracesIfNeeded();
-        this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
 
         if (this.ngRedux.getState().userState.userInfo == null) {
             this.toastService.warning(this.resources.youNeedToLoginToSeeYourTraces);
+        } else if (!this.ngRedux.getState().configuration.isAutomaticRecordingUpload) {
+            this.toastService.warning(this.resources.tracesAreOnlySavedLocally);
+        } else {
+            this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
         }
     }
 
