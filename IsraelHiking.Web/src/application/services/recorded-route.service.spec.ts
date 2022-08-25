@@ -1,7 +1,6 @@
 import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { TestBed, inject } from "@angular/core/testing";
 import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
-import { Subject } from "rxjs";
 
 import { RecordedRouteService } from "./recorded-route.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
@@ -53,7 +52,8 @@ describe("Recorded Route Service", () => {
         MockNgRedux.reset();
     });
 
-    it("Should add a valid location", inject([RecordedRouteService, SelectedRouteService],
+    it("Should add a valid location", done => 
+        inject([RecordedRouteService, SelectedRouteService],
         (service: RecordedRouteService, selectedRouteService: SelectedRouteService) => {
             service.initialize();
             let recordingRoute = {
@@ -87,11 +87,13 @@ describe("Recorded Route Service", () => {
             positionStub.next(
                 { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime()}
             );
-
-            expect(spy.calls.all().length).toBe(1);
-            expect((spy.calls.all()[0].args[0] as AddRecordingPointsAction).payload.latlngs.length).toBe(1);
+            setTimeout(() => {
+                expect(spy.calls.all().length).toBe(1);
+                expect((spy.calls.all()[0].args[0] as AddRecordingPointsAction).payload.latlngs.length).toBe(1);
+                done();
+            }, 10);
         }
-    ));
+    )());
 
     it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService,
         LoggingService, SelectedRouteService],
