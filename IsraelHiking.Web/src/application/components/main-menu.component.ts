@@ -12,7 +12,6 @@ import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { RunningContextService } from "../services/running-context.service";
-import { GeoLocationService } from "../services/geo-location.service";
 import { LoggingService } from "../services/logging.service";
 import { ToastService } from "../services/toast.service";
 import { FileService } from "../services/file.service";
@@ -64,7 +63,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 private readonly runningContextService: RunningContextService,
                 private readonly toastService: ToastService,
                 private readonly fileService: FileService,
-                private readonly geoLocationService: GeoLocationService,
                 private readonly layersService: LayersService,
                 private readonly sidebarService: SidebarService,
                 private readonly loggingService: LoggingService,
