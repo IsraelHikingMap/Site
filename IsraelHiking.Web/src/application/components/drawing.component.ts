@@ -15,7 +15,7 @@ import {
     ClearPoisAndRouteAction,
     DeleteAllRoutesAction
 } from "../reducers/routes.reducer";
-import { SetRouteEditingStateAction } from "../reducers/route-editing-state.reducer";
+import { SetRouteEditingStateAction, SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { RoutingType, ApplicationState } from "../models/models";
 
@@ -192,6 +192,7 @@ export class DrawingComponent extends BaseMapComponent {
             type: "YesNo",
             confirmAction: () => {
                 this.ngRedux.dispatch(new SetShareUrlAction({ shareUrl: null }));
+                this.ngRedux.dispatch(new SetSelectedRouteAction({routeId: null}));
                 this.ngRedux.dispatch(new DeleteAllRoutesAction());
                 this.ngRedux.dispatch(ActionCreators.clearHistory());
             }

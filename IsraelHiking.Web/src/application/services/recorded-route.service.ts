@@ -168,10 +168,14 @@ export class RecordedRouteService {
             return;
         }
         let locations = validPositions.map(p => this.geoLocationService.positionToLatLngTime(p));
-        this.ngRedux.dispatch(new AddRecordingPointsAction({
-            routeId: recordingRoute.id,
-            latlngs: locations
-        }));
+        setTimeout(() => {
+            // This is needed when dispatching an action within a @Select subscription event
+            this.ngRedux.dispatch(new AddRecordingPointsAction({
+                routeId: recordingRoute.id,
+                latlngs: locations
+            }));
+        }, 0);
+        
     }
 
     private validateRecordingAndUpdateState(position: GeolocationPosition, lastValidLocation: LatLngAltTime): boolean {

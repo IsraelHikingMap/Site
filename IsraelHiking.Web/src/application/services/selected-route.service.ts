@@ -68,9 +68,6 @@ export class SelectedRouteService {
 
     public getSelectedRoute(): RouteData {
         let route = this.getRouteById(this.selectedRouteId);
-        if (route == null && this.selectedRouteId != null) {
-            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: null }));
-        }
         return route;
     }
 
