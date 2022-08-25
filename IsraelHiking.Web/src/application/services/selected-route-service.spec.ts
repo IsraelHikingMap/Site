@@ -55,21 +55,6 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should clear selected route if this route no longer exists", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            MockNgRedux.store.dispatch = jasmine.createSpy();
-            const routesStub = getSubject((state: ApplicationState) => state.routes.present);
-            const selectedRouteIdSubject = getSubject((state: ApplicationState) => state.routeEditingState.selectedRouteId);
-            routesStub.next([{} as any]);
-            selectedRouteIdSubject.next("42");
-
-            let selectedRoute = selectedRouteService.getSelectedRoute();
-
-            expect(selectedRoute).toBeUndefined();
-            expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
-        }
-    ));
-
     it("Should sync selected route with editing route", inject([SelectedRouteService],
         (selectedRouteService: SelectedRouteService) => {
             MockNgRedux.store.dispatch = jasmine.createSpy();
