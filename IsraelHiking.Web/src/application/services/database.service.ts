@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { NgRedux } from "@angular-redux2/store";
+import { AnyAction, Dispatch, MiddlewareAPI } from "redux";
 import { debounceTime } from "rxjs/operators";
 import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection} from "@capacitor-community/sqlite";
 import Dexie from "dexie";
@@ -9,8 +10,6 @@ import * as pako from "pako";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import { ToastService } from "./toast.service";
-import { ResourcesService } from "./resources.service";
 import { initialState } from "../reducers/initial-state";
 import { rootReducer } from "../reducers/root.reducer";
 import type { ApplicationState, ShareUrl, Trace } from "../models/models";
@@ -20,7 +19,10 @@ export type ImageUrlAndData = {
     data: string;
 };
 
-const classToActionMiddleware = (state: any) => (next: any) => (action: any) => next({ ...action });
+const classToActionMiddleware = (_: MiddlewareAPI<Dispatch<AnyAction>, any>) =>
+    (next: (action: AnyAction) => void) =>
+        (action: AnyAction) =>
+            next({ ...action });
 
 @Injectable()
 export class DatabaseService {
@@ -50,8 +52,6 @@ export class DatabaseService {
 
     constructor(private readonly loggingService: LoggingService,
                 private readonly runningContext: RunningContextService,
-                private readonly toastService: ToastService,
-                private readonly resources: ResourcesService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.updating = false;
         this.sourceDatabases = new Map<string, Promise<SQLiteDBConnection>>();
