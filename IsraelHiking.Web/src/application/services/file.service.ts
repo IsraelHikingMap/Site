@@ -1,10 +1,9 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
 import { StyleSpecification } from "maplibre-gl";
-import { File as FileSystemWrapper, FileEntry } from "@ionic-native/file/ngx";
-import { WebView } from "@ionic-native/ionic-webview/ngx";
-import { FileTransfer } from "@ionic-native/file-transfer/ngx";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/file/ngx";
+import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
 import JSZip from "jszip";
@@ -12,7 +11,7 @@ import JSZip from "jszip";
 import { ImageResizeService } from "./image-resize.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { RunningContextService } from "./running-context.service";
-import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "./selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { SpatialService } from "./spatial.service";
 import { LoggingService } from "./logging.service";
@@ -32,7 +31,6 @@ export class FileService {
 
     constructor(private readonly httpClient: HttpClient,
                 private readonly fileSystemWrapper: FileSystemWrapper,
-                private readonly webView: WebView,
                 // eslint-disable-next-line
                 private readonly fileTransfer: FileTransfer,
                 private readonly runningContextService: RunningContextService,
@@ -107,25 +105,8 @@ export class FileService {
         return filesToReturn;
     }
 
-    public async getFullFilePath(relativePath: string): Promise<string> {
-        if (!this.runningContextService.isCordova) {
-            return (window.origin || window.location.origin) + "/" + relativePath;
-        }
-        return this.getLocalFileUrl(relativePath);
-    }
-
-    public getStyleFilePath(relativePath: string): string {
-        if (!this.runningContextService.isCordova) {
-            return (window.origin || window.location.origin) + "/" + relativePath;
-        }
-        let path: string;
-        if (this.runningContextService.isIos) {
-            path = this.fileSystemWrapper.applicationDirectory + "www/" + relativePath;
-            path = this.webView.convertFileSrc(path);
-        } else {
-            path = "http://localhost/" + relativePath;
-        }
-        return path;
+    public getFullUrl(relativePath: string): string {
+        return (window.origin || window.location.origin) + "/" + relativePath;
     }
 
     public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
@@ -146,13 +127,18 @@ export class FileService {
         }
     }
 
+    private async base64StringToBlob(base64: string, type: string = "application/octet-stream"): Promise<Blob> {
+        let response = await fetch(`data:${type};base64,${base64}`);
+        return response.blob();
+    }
+
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {
         let responseData = format === "gpx"
             ? await this.gpxDataContainerConverterService.toGpx(dataContainer)
             : await firstValueFrom(this.httpClient.post(Urls.files + "?format=" + format, dataContainer)) as string;
 
-        if (!this.runningContextService.isCordova) {
-            let blobToSave = await fetch(`data:application/octet-stream;base64,${responseData}`).then(r => r.blob());
+        if (!this.runningContextService.isCapacitor) {
+            let blobToSave = await this.base64StringToBlob(responseData);
             this.nonAngularObjectsFactory.saveAsWrapper(blobToSave, fileName, { autoBom: false });
             return;
         }
@@ -271,27 +257,6 @@ export class FileService {
         return data;
     }
 
-    private getDatabaseFolder() {
-        return this.runningContextService.isIos
-            ? this.fileSystemWrapper.documentsDirectory
-            : this.fileSystemWrapper.applicationStorageDirectory + "/databases";
-    }
-
-    public async saveToDatabasesFolder(blob: Blob, fileName: string) {
-        let path = this.getDatabaseFolder();
-        await this.fileSystemWrapper.writeFile(path, fileName, blob, { append: false, replace: true, truncate: 0 });
-    }
-
-    public async getLocalFileUrl(relativePath: string): Promise<string> {
-        let fileEntry = await this.fileSystemWrapper
-            .resolveLocalFilesystemUrl(this.fileSystemWrapper.applicationDirectory + "www/" + relativePath) as FileEntry;
-        return await new Promise((resolve, reject) => {
-            fileEntry.file((file) => {
-                resolve(file.localURL);
-            }, reject);
-        });
-    }
-
     public async getCachedFile(fileName: string): Promise<string> {
         try {
             return await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.cacheDirectory, fileName);
@@ -302,7 +267,7 @@ export class FileService {
     }
 
     private getFileContent(file: File): Promise<string> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _) => {
             let reader = new FileReader();
             reader.onload = (event: any) => {
                 resolve(event.target.result);
@@ -311,7 +276,7 @@ export class FileService {
         });
     }
 
-    public storeFileToCache(fileName: string, content: string) {
+    public storeFileToCache(fileName: string, content: string | Blob) {
         return this.fileSystemWrapper.writeFile(this.fileSystemWrapper.cacheDirectory, fileName, content,
             { replace: true, append: false, truncate: 0 });
     }
@@ -328,24 +293,26 @@ export class FileService {
                 observe: "events",
                 responseType: "blob",
                 reportProgress: true
-            }).subscribe(event => {
-                if (event.type === HttpEventType.DownloadProgress) {
-                    progressCallback(event.loaded / event.total);
-                }
-                if (event.type === HttpEventType.Response) {
-                    if (event.ok) {
-                        resolve(event.body);
-                    } else {
-                        reject(new Error(event.statusText));
+            }).subscribe({
+                next: (event) => {
+                    if (event.type === HttpEventType.DownloadProgress) {
+                        progressCallback(event.loaded / event.total);
                     }
-                }
-            }, error => reject(error));
+                    if (event.type === HttpEventType.Response) {
+                        if (event.ok) {
+                            resolve(event.body);
+                        } else {
+                            reject(new Error(event.statusText));
+                        }
+                    }
+            }, error: (error) => reject(error)
+        });
         });
     }
 
     public async downloadFileToCache(url: string, progressCallback: (value: number) => void) {
         let fileTransferObject = this.fileTransfer.create();
-        let path = this.fileSystemWrapper.cacheDirectory + "/" + url.split("/").pop();
+        let path = this.fileSystemWrapper.cacheDirectory + url.split("/").pop();
         fileTransferObject.onProgress((event) => {
             progressCallback(event.loaded / event.total);
         });
@@ -366,24 +333,41 @@ export class FileService {
         this.fileSystemWrapper.removeFile(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
     }
 
-    public async downloadDatabaseFile(url: string, tempFileName: string, token: string, progressCallback: (value: number) => void) {
+    public async downloadDatabaseFile(url: string, dbFileName: string, token: string, progressCallback: (value: number) => void) {
         let fileTransferObject = this.fileTransfer.create();
         fileTransferObject.onProgress((event) => {
             progressCallback(event.loaded / event.total);
         });
-        this.loggingService.info(`[Files] Starting downloading and writing database file to temporary file name ${tempFileName}`);
-        await fileTransferObject.download(url, this.fileSystemWrapper.cacheDirectory + "/" + tempFileName, true, {
+        this.loggingService.info(`[Files] Starting downloading and writing database file to temporary file name ${dbFileName}`);
+        await fileTransferObject.download(url, this.fileSystemWrapper.cacheDirectory + dbFileName, true, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        this.loggingService.info(`[Files] Finished downloading and writing database file to temporary file name ${tempFileName}`);
+        this.loggingService.info(`[Files] Finished downloading and writing database file to temporary file name ${dbFileName}`);
     }
 
-    public async replaceTempDatabaseFile(fileName: string, tempFileName: string) {
-        this.loggingService.info(`[Files] Starting moving file ${tempFileName} to ${fileName}`);
-        let dbFolder = this.getDatabaseFolder();
-        await this.fileSystemWrapper.moveFile(this.fileSystemWrapper.cacheDirectory, tempFileName, dbFolder, fileName);
-        this.loggingService.info(`[Files] Finished moving file ${tempFileName} to ${fileName}`);
+    public async renameOldDatabases(): Promise<boolean> {
+        if (!this.runningContextService.isCapacitor) {
+            return false;
+        }
+        let filesExist = false;
+        let filePrefix = this.runningContextService.isIos ? "" : "databases/";
+        let originFolder = this.runningContextService.isIos
+            ? this.fileSystemWrapper.documentsDirectory
+            : this.fileSystemWrapper.applicationStorageDirectory;
+        for (let fileName of ["Contour.mbtiles", "IHM.mbtiles", "TerrainRGB.mbtiles"]) {
+            let fullFileName = filePrefix + fileName;
+            this.loggingService.info(`[Files] Checking if database file exists: ${fullFileName}`);
+            try {
+                let fileExists = await this.fileSystemWrapper.checkFile(originFolder, fullFileName);
+                if (!fileExists) { continue; }
+                this.loggingService.info(`[Files] Statring renaming database: ${fullFileName}`);
+                await this.fileSystemWrapper.moveFile(originFolder, fullFileName, originFolder, fullFileName.replace(".mbtiles", ".db"));
+                this.loggingService.info(`[Files] Finished renaming database: ${fullFileName}`);
+                filesExist = true;
+            } catch { }
+        }
+        return filesExist;
     }
 }

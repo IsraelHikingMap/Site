@@ -3,9 +3,9 @@ import { NgRedux } from "@angular-redux2/store";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { ToastService } from "../../../services/toast.service";
-import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
+import { RoutesFactory } from "../../../services/routes.factory";
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
-import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../../services/selected-route.service";
 import { AddRouteAction } from "../../../reducers/routes.reducer";
 import type { ApplicationState } from "../../../models/models";
 

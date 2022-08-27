@@ -4,7 +4,7 @@ import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { NgRedux } from "@angular-redux2/store";
 
-import { LayersService } from "./layers/layers.service";
+import { LayersService } from "./layers.service";
 import { SidebarService } from "./sidebar.service";
 import { DatabaseService } from "./database.service";
 import { FileService } from "./file.service";
@@ -31,14 +31,27 @@ export class OfflineFilesDownloadService {
 
     public async initialize(): Promise<void> {
         let offlineState = this.ngRedux.getState().offlineState;
-        if (offlineState.isOfflineAvailable === false ||
-            offlineState.lastModifiedDate != null ||
-            offlineState.poisLastModifiedDate == null ||
-            this.ngRedux.getState().userState.userInfo == null) {
-                return;
+        if (offlineState.isOfflineAvailable === true &&
+            offlineState.lastModifiedDate == null &&
+            this.ngRedux.getState().userState.userInfo != null) {
+            // In case the user has purchased the map and never downloaded them, and now starts the app
+            return await this.downloadOfflineMaps(false);
+        }
+        if (offlineState.isOfflineAvailable === true &&
+            offlineState.lastModifiedDate != null &&
+            this.ngRedux.getState().userState.userInfo != null) {
+            // Check and migrate old databases if needed
+            try {
+                let needToMigrate = await this.fileService.renameOldDatabases();
+                if (needToMigrate) {
+                    await this.databaseService.migrateDatabasesIfNeeded();
+                }
+            } catch (ex) {
+                this.loggingService.error("[Offline Download] Failed to migrate: " + (ex as Error).message);
             }
-        // In case the user has purchased the map and never downloaded them, and now starts the app
-        return await this.downloadOfflineMaps(false);
+
+        }
+
     }
 
     public async downloadOfflineMaps(showMessage = true): Promise<void> {
@@ -82,11 +95,10 @@ export class OfflineFilesDownloadService {
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
                 let token = this.ngRedux.getState().userState.token;
                 if (fileName.endsWith(".mbtiles")) {
-                    let tempFileName = `temp_${fileName}`;
-                    await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`, tempFileName, token,
+                    let dbFileName = fileName.replace(".mbtiles", ".db");
+                    await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`, dbFileName, token,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
-                    await this.databaseService.closeDatabase(fileName.replace(".mbtiles", ""));
-                    await this.fileService.replaceTempDatabaseFile(fileName, tempFileName);
+                        await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
                 } else {
                     let fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));

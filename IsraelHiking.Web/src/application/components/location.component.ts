@@ -1,14 +1,14 @@
 import { Component } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Observable } from "rxjs";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToastService } from "../services/toast.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
-import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../services/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
@@ -23,13 +23,13 @@ import type { LatLngAlt, ApplicationState } from "../models/models";
 })
 export class LocationComponent extends BaseMapComponent {
 
-    @select((state: ApplicationState) => state.inMemoryState.distance)
+    @Select((state: ApplicationState) => state.inMemoryState.distance)
     public distance$: Observable<boolean>;
 
-    @select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
+    @Select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
     public pannedTimestamp$: Observable<Date>;
 
-    @select((state: ApplicationState) => state.gpsState.currentPoistion)
+    @Select((state: ApplicationState) => state.gpsState.currentPoistion)
     private currentPoistion$: Observable<GeolocationPosition>;
 
     private lastSpeed: number;
@@ -105,6 +105,12 @@ export class LocationComponent extends BaseMapComponent {
                 let radius = this.getRadiusFromLocationFeatureCollection();
                 this.updateLocationFeatureCollection(center, radius, bearing);
                 if (!this.mapComponent.mapInstance.isMoving() && this.isFollowingLocation()) {
+                    this.moveMapToGpsPosition();
+                }
+            });
+
+            this.geoLocationService.backToForeground.subscribe(() => {
+                if (this.isFollowingLocation()) {
                     this.moveMapToGpsPosition();
                 }
             });

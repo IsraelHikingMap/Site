@@ -2,7 +2,7 @@ import { Component, Input, HostListener, OnChanges, Output, EventEmitter } from 
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import type { LatLngAlt } from "../../models/models";
 
 @Component({

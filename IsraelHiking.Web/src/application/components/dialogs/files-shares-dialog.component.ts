@@ -10,7 +10,6 @@ import { DatabaseService } from "../../services/database.service";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
-import { LoggingService } from "../../services/logging.service";
 import { SetOfflineLastModifiedAction } from "../../reducers/offline.reducer";
 import type { ApplicationState, DataContainer } from "../../models/models";
 
@@ -21,6 +20,7 @@ import type { ApplicationState, DataContainer } from "../../models/models";
 export class FilesSharesDialogComponent extends BaseMapComponent {
 
     public isSaveAsOpen: boolean;
+    public showHiddenWarning: boolean;
     public formats: FormatViewModel[];
 
     constructor(resources: ResourcesService,
@@ -30,11 +30,11 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
                 private readonly fileService: FileService,
                 private readonly toastService: ToastService,
                 private readonly databaseService: DatabaseService,
-                private readonly loggingService: LoggingService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.isSaveAsOpen = false;
         this.formats = this.fileService.formats;
+        this.showHiddenWarning = this.dataContainerService.hasHiddenRoutes();
     }
 
     public toggleSaveAs() {
@@ -58,8 +58,9 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         }
         if (file.name.endsWith(".mbtiles") && this.ngRedux.getState().offlineState.isOfflineAvailable) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
-            await this.databaseService.closeDatabase(file.name.replace(".mbtiles", ""));
-            await this.fileService.saveToDatabasesFolder(file, file.name);
+            let dbFileName = file.name.replace(".mbtiles", ".db");
+            await this.fileService.storeFileToCache(dbFileName, file);
+            await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: new Date(file.lastModified) }));
             return;
@@ -75,7 +76,6 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
     public async save() {
         let data = this.dataContainerService.getDataForFileExport();
         if (!this.isDataSaveable(data)) {
-            this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
         try {
@@ -90,10 +90,9 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         let data = this.dataContainerService.getDataForFileExport();
         if (outputFormat === "all_gpx_single_track") {
             outputFormat = "gpx_single_track";
-            data = this.dataContainerService.getData();
+            data = this.dataContainerService.getData(false);
         }
         if (!this.isDataSaveable(data)) {
-            this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
         let name = this.getName(data);

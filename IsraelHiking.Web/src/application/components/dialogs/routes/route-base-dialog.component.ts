@@ -4,8 +4,8 @@ import { NgRedux } from "@angular-redux2/store";
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { ToastService } from "../../../services/toast.service";
-import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
-import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
+import { RoutesFactory } from "../../../services/routes.factory";
+import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SetOpacityAndWeightAction } from "../../../reducers/route-editing-state.reducer";
 import type { ApplicationState, RouteData } from "../../../models/models";
 

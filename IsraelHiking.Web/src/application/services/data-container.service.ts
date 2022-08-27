@@ -1,16 +1,16 @@
 import { Injectable } from "@angular/core";
 import { NgRedux } from "@angular-redux2/store";
 
-import { LayersService } from "./layers/layers.service";
+import { LayersService } from "./layers.service";
 import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { SpatialService } from "./spatial.service";
 import { FitBoundsService } from "./fit-bounds.service";
-import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "./selected-route.service";
 import { MapService } from "./map.service";
-import { RoutesFactory } from "./layers/routelayers/routes.factory";
+import { RoutesFactory } from "./routes.factory";
 import { RunningContextService } from "./running-context.service";
 import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
@@ -58,13 +58,15 @@ export class DataContainerService {
         }
     }
 
-    public getData(): DataContainer {
+    public getData(withHidden: boolean): DataContainer {
         let layersContainer = this.layersService.getData();
 
         let bounds = SpatialService.getMapBounds(this.mapService.map);
-
+        let routes = this.ngRedux.getState().routes.present
+            .filter(r => r.state !== "Hidden" || withHidden)
+            .filter(r => r.segments.length > 0 || r.markers.length > 0);
         let container = {
-            routes: this.ngRedux.getState().routes.present,
+            routes,
             baseLayer: layersContainer.baseLayer,
             overlays: layersContainer.overlays,
             northEast: bounds.northEast,
@@ -76,7 +78,7 @@ export class DataContainerService {
     public getDataForFileExport(): DataContainer {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
-            return this.getData();
+            return this.getData(false);
         }
         return {
             routes: [selectedRoute]
@@ -91,7 +93,7 @@ export class DataContainerService {
                 baseLayer
             }));
             data.baseLayer = this.stringToBaseLayer(baseLayer);
-            this.setData(data, this.runningContextService.isCordova);
+            this.setData(data, this.runningContextService.isCapacitor);
         } catch (ex) {
             this.toastService.warning(this.resources.unableToLoadFromUrl);
         }
@@ -104,7 +106,7 @@ export class DataContainerService {
         }
         try {
             shareUrl = await this.shareUrlsService.setShareUrlById(shareId);
-            this.setData(shareUrl.dataContainer, this.runningContextService.isCordova);
+            this.setData(shareUrl.dataContainer, this.runningContextService.isCapacitor);
             if (!this.runningContextService.isIFrame) {
                 this.toastService.info(shareUrl.description, shareUrl.title);
             }
@@ -128,5 +130,9 @@ export class DataContainerService {
             key: addressOrKey.split("_").join(" "),
             address: ""
         } as LayerData;
+    }
+
+    public hasHiddenRoutes(): boolean {
+        return this.ngRedux.getState().routes.present.filter(r => r.state === "Hidden").length > 0;
     }
 }

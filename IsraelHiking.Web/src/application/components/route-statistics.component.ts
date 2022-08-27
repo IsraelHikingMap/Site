@@ -1,13 +1,14 @@
 import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
 import { Subscription, Observable, interval } from "rxjs";
-import { NgxD3Service, Selection, BaseType, ScaleContinuousNumeric } from "@katze/ngx-d3";
 import { regressionLoess } from "d3-regression";
 import { LineLayerSpecification } from "maplibre-gl";
-import { select, NgRedux } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
+import * as d3 from "d3";
+import type { Selection, ScaleContinuousNumeric } from "d3";
 
 import { BaseMapComponent } from "./base-map.component";
-import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../services/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStatisticsService, RouteStatistics, RouteStatisticsPoint } from "../services/route-statistics.service";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
@@ -97,22 +98,22 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     @ViewChild("lineChartContainer")
     public lineChartContainer: ElementRef;
 
-    @select((state: ApplicationState) => state.routes.present)
+    @Select((state: ApplicationState) => state.routes.present)
     private routes$: Observable<RouteData[]>;
 
-    @select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
+    @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     private selectedRouteId$: Observable<string>;
 
-    @select((state: ApplicationState) => state.location.zoom)
+    @Select((state: ApplicationState) => state.location.zoom)
     private zoom$: Observable<number>;
 
-    @select((state: ApplicationState) => state.gpsState.currentPoistion)
+    @Select((state: ApplicationState) => state.gpsState.currentPoistion)
     private currentPoistion$: Observable<GeolocationPosition>;
 
-    @select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
+    @Select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
     public statisticsVisible$: Observable<boolean>;
 
-    @select((state: ApplicationState) => state.configuration.language)
+    @Select((state: ApplicationState) => state.configuration.language)
     public language$: Observable<Language>;
 
     private statistics: RouteStatistics;
@@ -125,7 +126,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     constructor(resources: ResourcesService,
                 private readonly changeDetectorRef: ChangeDetectorRef,
-                private readonly d3Service: NgxD3Service,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly routeStatisticsService: RouteStatisticsService,
                 private readonly cancelableTimeoutService: CancelableTimeoutService,
@@ -259,7 +259,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 this.updateDurationString((new Date().getTime() - recordingRoute.segments[0].latlngs[0].timestamp.getTime()) / 1000);
             }
         }));
-        this.audioPlayer = await this.audioPlayerFactory.create("content/uh-oh.mp3");
+        this.audioPlayer = await this.audioPlayerFactory.create();
     }
 
     public ngOnDestroy() {
@@ -395,19 +395,17 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         };
     }
 
-    private onMouseDown = () => {
+    private onMouseDown = (e: Event) => {
         this.chartElements.dragState = "start";
-        let d3 = this.d3Service.getD3();
         this.subRouteRange = {
-            xStart: this.chartElements.xScale.invert(d3.mouse(this.chartElements.chartArea.node())[0]),
+            xStart: this.chartElements.xScale.invert(d3.pointer(e)[0]),
             xEnd: null
         };
     };
 
-    private onMouseMove = () => {
-        let d3 = this.d3Service.getD3();
-        d3.event.stopPropagation();
-        let chartXCoordinate = d3.mouse(this.chartElements.chartArea.node())[0];
+    private onMouseMove = (e: Event) => {
+        e.stopPropagation();
+        let chartXCoordinate = d3.pointer(e)[0];
         let xPosition = this.chartElements.xScale.invert(chartXCoordinate);
         let point = this.routeStatisticsService.interpolateStatistics(this.statistics, xPosition);
         if (this.chartElements.dragState === "none") {
@@ -445,7 +443,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private initChart() {
-        let d3 = this.d3Service.getD3();
         this.chartElements.margin.right = this.isSlopeOn ? 30 : 10;
         this.chartElements.svg = d3.select(this.lineChartContainer.nativeElement).select("svg");
         this.chartElements.svg.html("");
@@ -466,7 +463,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private createChartAxis() {
-        let d3 = this.d3Service.getD3();
         this.chartElements.chartArea.append("g")
             .attr("class", "x-axis")
             .attr("transform", `translate(0,${this.chartElements.height})`)
@@ -617,11 +613,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .style("stroke", "none")
             .style("-moz-user-select", "none")
             .style("pointer-events", "all")
-            .on("touchstart mousedown", () => {
-                this.onMouseDown();
+            .on("touchstart mousedown", (e) => {
+                this.onMouseDown(e);
             })
-            .on("mousemove touchmove", () => {
-                this.onMouseMove();
+            .on("mousemove touchmove", (e) => {
+                this.onMouseMove(e);
             })
             .on("mouseup touchend", () => {
                 this.onMouseUp();
@@ -680,7 +676,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (!this.isOpen) {
             return;
         }
-        let d3 = this.d3Service.getD3();
         let duration = 1000;
         let chartTransition = this.chartElements.chartArea.transition();
         this.chartElements.xScale.domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]);

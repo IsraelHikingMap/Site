@@ -1,0 +1,34 @@
+[
+	{
+		"pkg": "@capacitor-community/keep-awake",
+		"classpath": "com.getcapacitor.community.keepawake.KeepAwakePlugin"
+	},
+	{
+		"pkg": "@capacitor-community/native-audio",
+		"classpath": "com.getcapacitor.community.audio.NativeAudio"
+	},
+	{
+		"pkg": "@capacitor-community/screen-brightness",
+		"classpath": "com.elylucas.capscreenbrightness.ScreenBrightnessPlugin"
+	},
+	{
+		"pkg": "@capacitor-community/sqlite",
+		"classpath": "com.getcapacitor.community.database.sqlite.CapacitorSQLitePlugin"
+	},
+	{
+		"pkg": "@capacitor/app",
+		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
+	},
+	{
+		"pkg": "@capacitor/camera",
+		"classpath": "com.capacitorjs.plugins.camera.CameraPlugin"
+	},
+	{
+		"pkg": "@capacitor/device",
+		"classpath": "com.capacitorjs.plugins.device.DevicePlugin"
+	},
+	{
+		"pkg": "@capacitor/text-zoom",
+		"classpath": "com.capacitorjs.plugins.textzoom.TextZoomPlugin"
+	}
+]

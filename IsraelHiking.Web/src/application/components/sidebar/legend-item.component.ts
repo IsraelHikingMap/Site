@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 
-import { LayersService } from "../../services/layers/layers.service";
+import { LayersService } from "../../services/layers.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";

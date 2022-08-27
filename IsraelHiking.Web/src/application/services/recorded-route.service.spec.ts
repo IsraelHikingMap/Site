@@ -1,16 +1,14 @@
 import { HttpClientTestingModule } from "@angular/common/http/testing";
 import { TestBed, inject } from "@angular/core/testing";
 import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
-import { Device } from "@ionic-native/device/ngx";
-import { Subject } from "rxjs";
 
 import { RecordedRouteService } from "./recorded-route.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { GeoLocationService } from "./geo-location.service";
 import { ResourcesService } from "./resources.service";
 import { TracesService } from "./traces.service";
-import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
-import { RoutesFactory } from "./layers/routelayers/routes.factory";
+import { SelectedRouteService } from "./selected-route.service";
+import { RoutesFactory } from "./routes.factory";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { RunningContextService } from "./running-context.service";
@@ -18,7 +16,9 @@ import { ConnectionService } from "./connection.service";
 import { AddRecordingPointsAction } from "../reducers/routes.reducer";
 import type { ApplicationState, RouteData } from "../models/models";
 
-describe("RecordedRouteService", () => {
+import { getSubject } from "./selected-route-service.spec";
+
+describe("Recorded Route Service", () => {
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
         let loggingServiceMock = {
@@ -45,7 +45,6 @@ describe("RecordedRouteService", () => {
                 GeoLocationService,
                 RunningContextService,
                 ConnectionService,
-                Device,
                 RoutesFactory,
                 RecordedRouteService
             ]
@@ -53,7 +52,8 @@ describe("RecordedRouteService", () => {
         MockNgRedux.reset();
     });
 
-    it("Should add a valid location", inject([RecordedRouteService, SelectedRouteService],
+    it("Should add a valid location", done => 
+        inject([RecordedRouteService, SelectedRouteService],
         (service: RecordedRouteService, selectedRouteService: SelectedRouteService) => {
             service.initialize();
             let recordingRoute = {
@@ -80,20 +80,20 @@ describe("RecordedRouteService", () => {
                 userState: {}
             });
             selectedRouteService.getRecordingRoute = () => recordingRoute;
-            let predecator = ((state: ApplicationState) => state.gpsState.currentPoistion).toString().split("=>")[1];
-            let selectorKey = Object.keys(MockNgRedux.getSubStore().selections).find(k => k.includes(predecator));
-            const positionStub = MockNgRedux.getSelectorStub<ApplicationState, GeolocationPosition>(selectorKey);
+            const positionStub = getSubject((state: ApplicationState) => state.gpsState.currentPoistion);
             let spy = jasmine.createSpy();
             MockNgRedux.store.dispatch = spy;
 
             positionStub.next(
                 { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime()}
             );
-
-            expect(spy.calls.all().length).toBe(1);
-            expect((spy.calls.all()[0].args[0] as AddRecordingPointsAction).payload.latlngs.length).toBe(1);
+            setTimeout(() => {
+                expect(spy.calls.all().length).toBe(1);
+                expect((spy.calls.all()[0].args[0] as AddRecordingPointsAction).payload.latlngs.length).toBe(1);
+                done();
+            }, 10);
         }
-    ));
+    )());
 
     it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService,
         LoggingService, SelectedRouteService],
@@ -142,9 +142,9 @@ describe("RecordedRouteService", () => {
                 }
             ]);
 
-            expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy(spy.calls.all()[0].args[0]);
-            expect(spy.calls.all()[1].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy(spy.calls.all()[1].args[0]);
-            expect(spy.calls.all()[2].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy(spy.calls.all()[2].args[0]);
-            expect(spy.calls.all()[3].args[0].startsWith("[Record] Valid position")).toBeTruthy(spy.calls.all()[3].args[0]);
+            expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy();
+            expect(spy.calls.all()[1].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
+            expect(spy.calls.all()[2].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy();
+            expect(spy.calls.all()[3].args[0].startsWith("[Record] Valid position")).toBeTruthy();
         }));
 });

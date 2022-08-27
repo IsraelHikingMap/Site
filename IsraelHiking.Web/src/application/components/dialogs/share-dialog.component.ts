@@ -1,12 +1,12 @@
 import { Component, AfterViewInit } from "@angular/core";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { BaseMapComponent } from "../base-map.component";
-import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import { AuthorizationService } from "../../services/authorization.service";
 import { ShareUrlsService } from "../../services/share-urls.service";
 import { RunningContextService } from "../../services/running-context.service";
@@ -72,7 +72,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 this.description = selectedRoute.description;
             }
         }
-        this.showUnhide = this.dataContainerService.getData().routes.find(r => r.state === "Hidden") != null;
+        this.showUnhide = this.dataContainerService.hasHiddenRoutes();
     }
 
     public async ngAfterViewInit(): Promise<void> {
@@ -82,7 +82,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     }
 
     public isApp(): boolean {
-        return this.runningContextService.isCordova;
+        return this.runningContextService.isCapacitor;
     }
 
     public share() {
@@ -118,14 +118,11 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
 
     private getDataFiltered(): DataContainer {
         // clone:
-        let filteredData = JSON.parse(JSON.stringify(this.dataContainerService.getData())) as DataContainer;
+        let filteredData = JSON.parse(JSON.stringify(this.dataContainerService.getData(this.unhideRoutes))) as DataContainer;
         for (let routeIndex = filteredData.routes.length - 1; routeIndex >= 0; routeIndex--) {
             let route = filteredData.routes[routeIndex];
-            if (route.state === "Hidden" && this.unhideRoutes) {
+            if (route.state === "Hidden") {
                 route.state = "ReadOnly";
-            }
-            if (route.segments.length === 0 && route.markers.length === 0 || route.state === "Hidden") {
-                filteredData.routes.splice(routeIndex, 1);
             }
         }
         if (!this.shareOverlays) {

@@ -5,7 +5,7 @@ import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
-import { LayersService } from "../../../services/layers/layers.service";
+import { LayersService } from "../../../services/layers.service";
 import type { LayerData } from "../../../models/models";
 
 @Component({

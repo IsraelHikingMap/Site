@@ -31,6 +31,9 @@
                 <span><i class="fa icon-external-link fa-lg mat-icon"></i> {{resources.exportAs}}</span>
             </button>
         </div>
+        <div *ngIf="showHiddenWarning" fxLayout="row">
+            <mat-hint class="text-small">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
+        </div>
         <div *ngIf="isSaveAsOpen">
             <div fxLayout="row" *ngFor="let format of formats">
                 <button mat-button (click)="saveAs(format)" matDialogClose angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as format {{format.label}}">

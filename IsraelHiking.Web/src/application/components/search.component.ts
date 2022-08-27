@@ -10,12 +10,12 @@ import {
 import { Router } from "@angular/router";
 import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
 import { FormControl } from "@angular/forms";
-import { debounceTime, filter, tap } from "rxjs/operators";
+import { debounceTime, filter, tap, map } from "rxjs/operators";
 import { remove } from "lodash-es";
 import { PointLike } from "maplibre-gl";
 import { Observable } from "rxjs";
 import { skip } from "rxjs/operators";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -24,7 +24,7 @@ import { RouterService } from "../services/router.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
-import { RoutesFactory } from "../services/layers/routelayers/routes.factory";
+import { RoutesFactory } from "../services/routes.factory";
 import { SpatialService } from "../services/spatial.service";
 import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
@@ -61,8 +61,8 @@ export class SearchComponent extends BaseMapComponent {
     public fromContext: SearchContext;
     public toContext: SearchContext;
     public routingType: RoutingType;
-    public searchFrom: FormControl;
-    public searchTo: FormControl;
+    public searchFrom: FormControl<string | SearchResultsPointOfInterest>;
+    public searchTo: FormControl<string | SearchResultsPointOfInterest>;
     public hasFocus: boolean;
     public hideCoordinates: boolean;
     public directional: DirectionalContext;
@@ -76,7 +76,7 @@ export class SearchComponent extends BaseMapComponent {
     @ViewChildren(MatAutocompleteTrigger)
     public matAutocompleteTriggers: QueryList<MatAutocompleteTrigger>;
 
-    @select((state: ApplicationState) => state.uiComponentsState.searchVisible)
+    @Select((state: ApplicationState) => state.uiComponentsState.searchVisible)
     public searchVisible$: Observable<boolean>;
 
     constructor(resources: ResourcesService,
@@ -111,8 +111,8 @@ export class SearchComponent extends BaseMapComponent {
             searchResults: [],
             selectedSearchResults: null
         } as SearchContext;
-        this.searchFrom = new FormControl();
-        this.searchTo = new FormControl();
+        this.searchFrom = new FormControl<string | SearchResultsPointOfInterest>("");
+        this.searchTo = new FormControl<string | SearchResultsPointOfInterest>("");
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
 
@@ -126,7 +126,7 @@ export class SearchComponent extends BaseMapComponent {
         });
     }
 
-    private configureInputFormControl(input: FormControl, context: SearchContext) {
+    private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>, context: SearchContext) {
         input.valueChanges.pipe(
             tap(x => {
                 if (typeof x !== "string") {
@@ -136,6 +136,7 @@ export class SearchComponent extends BaseMapComponent {
                 }
             }),
             filter(x => typeof x === "string"),
+            map(x => x as string),
             debounceTime(500))
             .subscribe((x: string) => {
                 context.searchTerm = x;

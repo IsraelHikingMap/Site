@@ -3,7 +3,7 @@ import { MapMouseEvent, Map } from "maplibre-gl";
 import { MatDialog } from "@angular/material/dialog";
 import { NgRedux } from "@angular-redux2/store";
 
-import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { SnappingService, SnappingPointResponse } from "../../services/snapping.service";

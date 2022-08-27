@@ -7,7 +7,7 @@ import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
 import { PrivatePoiEditDialogComponent } from "./private-poi-edit-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
-import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import type { ApplicationState, MarkerData, LinkData } from "../../models/models";
 

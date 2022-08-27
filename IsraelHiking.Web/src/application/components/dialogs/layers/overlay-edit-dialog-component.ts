@@ -4,7 +4,7 @@ import { HttpClient } from "@angular/common/http";
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
-import { LayersService } from "../../../services/layers/layers.service";
+import { LayersService } from "../../../services/layers.service";
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
 import type { LayerData, Overlay } from "../../../models/models";
 

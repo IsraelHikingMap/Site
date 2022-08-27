@@ -7,10 +7,11 @@ import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { ToastService } from "../../../services/toast.service";
-import { RoutesFactory } from "../../../services/layers/routelayers/routes.factory";
-import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
+import { RoutesFactory } from "../../../services/routes.factory";
+import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
 import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducers/routes.reducer";
+import { SetSelectedRouteAction } from "application/reducers/route-editing-state.reducer";
 import type { DataContainer, RouteData, ApplicationState, LatLngAlt } from "../../../models/models";
 
 @Component({
@@ -52,6 +53,10 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     public deleteRoute() {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute && selectedRoute.id === this.routeData.id) {
+            this.ngRedux.dispatch(new SetSelectedRouteAction({routeId: null}));
+        }
         this.ngRedux.dispatch(new DeleteRouteAction({
             routeId: this.routeData.id
         }));

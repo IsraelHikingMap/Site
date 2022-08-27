@@ -1,7 +1,7 @@
+/// <reference types="cordova-plugin-device-orientation" />
+
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { Subscription } from "rxjs";
-import { throttleTime } from "rxjs/operators";
-import { DeviceOrientation } from "@ionic-native/device-orientation/ngx";
+import { App } from "@capacitor/app";
 import { NgRedux } from "@angular-redux2/store";
 
 import { LoggingService } from "./logging.service";
@@ -14,31 +14,29 @@ export class DeviceOrientationService {
 
     public orientationChanged: EventEmitter<number>;
 
-    private subscription: Subscription;
-    private isBackground: boolean;
+    private watchId: number;
 
     constructor(private readonly ngZone: NgZone,
                 private readonly loggingService: LoggingService,
-                private readonly deviceOrientation: DeviceOrientation,
                 private readonly runningContextService: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.orientationChanged = new EventEmitter();
-        this.isBackground = false;
-        this.subscription = null;
+        this.watchId = -1;
     }
 
     public initialize() {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             return;
         }
-        document.addEventListener("resume", () => {
-            this.isBackground = false;
-        });
-        document.addEventListener("resign", () => {
-            this.isBackground = true;
-        });
-        document.addEventListener("pause", () => {
-            this.isBackground = true;
+        App.addListener("appStateChange", (state) => {
+            if (this.ngRedux.getState().gpsState.tracking === "disabled") {
+                return;
+            }
+            if (state.isActive) {
+                this.startListening();
+            } else {
+                this.stopListeining();
+            }
         });
         if (this.ngRedux.getState().gpsState.tracking !== "disabled") {
             this.enable();
@@ -46,9 +44,6 @@ export class DeviceOrientationService {
     }
 
     private fireOrientationChange(heading: number) {
-        if (this.isBackground) {
-            return;
-        }
         this.ngZone.run(() => {
             if (heading < 0) {
                 heading += 360;
@@ -69,27 +64,36 @@ export class DeviceOrientationService {
     }
 
     public enable() {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             return;
         }
-        if (this.subscription != null) {
-            this.disable();
-        }
         this.loggingService.info("[Orientation] Enabling device orientation service");
-        this.subscription = this.deviceOrientation.watchHeading().pipe(
-            throttleTime(DeviceOrientationService.THROTTLE_TIME, undefined, { trailing: true })).subscribe(d => {
-            this.fireOrientationChange(d.magneticHeading);
-        });
+        this.startListening();
     }
 
     public disable() {
-        if (!this.runningContextService.isCordova) {
+        if (!this.runningContextService.isCapacitor) {
             return;
         }
-        if (this.subscription != null) {
-            this.loggingService.info("[Orientation] Disabling device orientation service");
-            this.subscription.unsubscribe();
-        }
+        this.loggingService.info("[Orientation] Disabling device orientation service");
+        this.stopListeining();
     }
 
+    private startListening() {
+        if (this.watchId !== -1) {
+            navigator.compass.clearWatch(this.watchId);
+        }
+        this.loggingService.info("[Orientation] Starting to listen to device orientation events");
+        this.watchId = navigator.compass.watchHeading((d) => {
+            this.fireOrientationChange(d.magneticHeading);
+        }, () => {}, { frequency: DeviceOrientationService.THROTTLE_TIME});
+    }
+
+    private stopListeining() {
+        this.loggingService.info("[Orientation] Stop listening to device orientation events");
+        if (this.watchId !== -1) {
+            navigator.compass.clearWatch(this.watchId);
+            this.watchId = -1;
+        }
+    }
 }

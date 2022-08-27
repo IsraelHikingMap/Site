@@ -60,7 +60,7 @@ export class ApplicationInitializeService {
             this.geoLocationService.initialize();
             this.dragAndDropService.initialize();
             if (this.runningContextService.isMobile
-                && !this.runningContextService.isCordova
+                && !this.runningContextService.isCapacitor
                 && !this.runningContextService.isIFrame) {
                     if (this.runningContextService.isFacebook) {
                         FacebookWarningDialogComponent.openDialog(this.dialog);

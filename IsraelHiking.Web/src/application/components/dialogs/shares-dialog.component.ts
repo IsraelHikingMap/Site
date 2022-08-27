@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
-import { SocialSharing } from "@ionic-native/social-sharing/ngx";
+import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
 import { Observable, Subscription } from "rxjs";
-import { select, NgRedux } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
@@ -14,6 +14,7 @@ import { ShareUrlsService } from "../../services/share-urls.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { RecordedRouteService } from "../../services/recorded-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import type { ApplicationState, ShareUrl } from "../../models/models";
 
 @Component({
@@ -28,12 +29,12 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     public shareUrlIdInEditMode: string;
     public selectedShareUrlId: string;
     public loadingShareUrls: boolean;
-    public searchTerm: FormControl;
+    public searchTerm: FormControl<string>;
 
-    @select((state: ApplicationState) => state.shareUrlsState.shareUrls)
+    @Select((state: ApplicationState) => state.shareUrlsState.shareUrls)
     public shareUrls$: Observable<ShareUrl[]>;
 
-    @select((state: ApplicationState) => state.inMemoryState.shareUrl)
+    @Select((state: ApplicationState) => state.inMemoryState.shareUrl)
     public shownShareUrl$: Observable<ShareUrl>;
 
     private sessionSearchTerm = "";
@@ -48,6 +49,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
                 private readonly socialSharing: SocialSharing,
                 private readonly runningContextService: RunningContextService,
                 private readonly recordedRouteService: RecordedRouteService,
+                private readonly selectedRouteService: SelectedRouteService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
@@ -56,7 +58,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         this.selectedShareUrlId = null;
         this.page = 1;
         this.subscriptions = [];
-        this.searchTerm = new FormControl();
+        this.searchTerm = new FormControl<string>("");
         this.subscriptions.push(this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
         }));
@@ -79,7 +81,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public isApp(): boolean {
-        return this.runningContextService.isCordova;
+        return this.runningContextService.isCapacitor;
     }
 
     public share() {
@@ -156,20 +158,25 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
 
     public async showShareUrl() {
         if (!this.recordedRouteService.isRecording()) {
-            this.showDeleteAllRoutesConfirmation();
+            await this.showDeleteAllRoutesConfirmationIfNeededAndClearRoutes();
             return;
         }
         this.toastService.confirm({
             message: this.resources.areYouSureYouWantToStopRecording,
-            confirmAction: () => {
+            confirmAction: async () => {
                 this.recordedRouteService.stopRecording();
-                this.showDeleteAllRoutesConfirmation();
+                await this.showDeleteAllRoutesConfirmationIfNeededAndClearRoutes();
             },
             type: "YesNo"
         });
     }
 
-    private showDeleteAllRoutesConfirmation() {
+    private async showDeleteAllRoutesConfirmationIfNeededAndClearRoutes() {
+        if (this.selectedRouteService.areRoutesEmpty()) {
+            let share = await this.shareUrlsService.setShareUrlById(this.selectedShareUrlId);
+            this.dataContainerService.setData(share.dataContainer, false);
+            return;
+        }
         this.toastService.confirm({
             message: this.resources.thisWillDeteleAllCurrentRoutesAreYouSure,
             confirmAction: async () => {

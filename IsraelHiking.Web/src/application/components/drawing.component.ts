@@ -1,11 +1,11 @@
 import { Component, HostListener } from "@angular/core";
 import { Observable } from "rxjs";
 import { ActionCreators } from "redux-undo";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
-import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../services/selected-route.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { ToastService } from "../services/toast.service";
 import {
@@ -15,7 +15,7 @@ import {
     ClearPoisAndRouteAction,
     DeleteAllRoutesAction
 } from "../reducers/routes.reducer";
-import { SetRouteEditingStateAction } from "../reducers/route-editing-state.reducer";
+import { SetRouteEditingStateAction, SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { RoutingType, ApplicationState } from "../models/models";
 
@@ -25,7 +25,7 @@ import type { RoutingType, ApplicationState } from "../models/models";
 })
 export class DrawingComponent extends BaseMapComponent {
 
-    @select((state: ApplicationState) => state.routes.past.length)
+    @Select((state: ApplicationState) => state.routes.past.length)
     public undoQueueLength: Observable<number>;
 
     constructor(resources: ResourcesService,
@@ -192,6 +192,7 @@ export class DrawingComponent extends BaseMapComponent {
             type: "YesNo",
             confirmAction: () => {
                 this.ngRedux.dispatch(new SetShareUrlAction({ shareUrl: null }));
+                this.ngRedux.dispatch(new SetSelectedRouteAction({routeId: null}));
                 this.ngRedux.dispatch(new DeleteAllRoutesAction());
                 this.ngRedux.dispatch(ActionCreators.clearHistory());
             }

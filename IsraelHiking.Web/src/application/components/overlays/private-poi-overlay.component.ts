@@ -5,7 +5,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
-import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SelectedRouteService } from "../../services/selected-route.service";
 import type { MarkerData, LinkData } from "../../models/models";
 
 @Component({

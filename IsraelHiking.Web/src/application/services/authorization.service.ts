@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable } from "rxjs";
-import { NgRedux, select } from "@angular-redux2/store";
+import { NgRedux, Select } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
 import { NonAngularObjectsFactory, IOhAuth, OAuthResponse, IOAuthParams } from "./non-angular-objects.factory";
@@ -31,7 +31,7 @@ export class AuthorizationService {
     private options: AuthorizationServiceOptions;
     private ohauth: IOhAuth;
 
-    @select((state: ApplicationState) => state.userState)
+    @Select((state: ApplicationState) => state.userState)
     private userState$: Observable<UserState>;
 
     private userState: UserState;
@@ -75,9 +75,9 @@ export class AuthorizationService {
         this.setOptions({
             oauthConsumerKey: data.consumerKey,
             oauthSecret: data.consumerSecret,
-            landing: this.runningContextService.isCordova ? "ihm://oauth_callback/" : Urls.emptyHtml,
+            landing: this.runningContextService.isCapacitor ? "ihm://oauth_callback/" : Urls.emptyHtml,
             url: data.baseAddress
-        } as AuthorizationServiceOptions);
+        });
 
         let requestTokenResponse = await this.getRequestToken();
         let authorizeUrl = this.options.url + "/oauth/authorize?" + this.ohauth.qsString({
@@ -160,7 +160,7 @@ export class AuthorizationService {
     }
 
     private openWindow(): Window {
-        if (this.runningContextService.isCordova) {
+        if (this.runningContextService.isCapacitor) {
             return null;
         }
         // Create a 600x550 popup window in the center of the screen
@@ -177,7 +177,7 @@ export class AuthorizationService {
 
     private getTokenFromWindow(popup: Window, authorizeUrl: string): Promise<string> {
         return new Promise((resolve, reject) => {
-            if (!this.runningContextService.isCordova) {
+            if (!this.runningContextService.isCapacitor) {
                 popup.location.href = authorizeUrl;
                 if (typeof popup.focus === "function") {
                     popup.focus();

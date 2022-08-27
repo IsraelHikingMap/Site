@@ -1,8 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Media } from "@ionic-native/media/ngx";
-
-import { RunningContextService } from "./running-context.service";
-import { FileService } from "./file.service";
+import { NativeAudio } from "@capacitor-community/native-audio";
 
 export interface IAudioPlayer {
     play(): void;
@@ -10,16 +7,22 @@ export interface IAudioPlayer {
 
 @Injectable()
 export class AudioPlayerFactory {
-    constructor(private readonly runningContextService: RunningContextService,
-                private readonly fileService: FileService,
-                private readonly media: Media) {
-    }
+    constructor() { }
 
-    public async create(relativePath: string): Promise<IAudioPlayer> {
-        if (this.runningContextService.isCordova) {
-            let audioFilePath = await this.fileService.getLocalFileUrl(relativePath);
-            return this.media.create(audioFilePath);
-        }
-        return new Audio(await this.fileService.getFullFilePath(relativePath));
+    public async create(): Promise<IAudioPlayer> {
+        await NativeAudio.preload({
+            assetId: "uh-oh",
+            assetPath: "public/content/uh-oh.mp3",
+            audioChannelNum: 1,
+            isUrl: false
+        });
+        return {
+            play: () => {
+                NativeAudio.play({
+                    assetId: "uh-oh",
+                    time: 0
+                });
+            }
+        };
     }
 }

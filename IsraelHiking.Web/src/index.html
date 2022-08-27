@@ -147,15 +147,5 @@
         <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
     </div>
     <main-map></main-map>
-    <script>
-        window.handleOpenURL = (url) => {
-            if (typeof(window.handleExternalUrl) === "function") {
-                window.handleExternalUrl(url);
-            } else {
-                window.externalUrl = url;
-            }
-        }
-    </script>
-    <script type="text/javascript" src="cordova.js"></script>
 </body>
 </html>
