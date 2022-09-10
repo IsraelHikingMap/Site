@@ -17,7 +17,7 @@
     "@awesome-cordova-plugins/file-transfer": "^5.44.0",
     "@awesome-cordova-plugins/in-app-purchase-2": "^5.44.0",
     "@awesome-cordova-plugins/social-sharing": "^5.44.0",
-    "@capacitor-community/background-geolocation": "^1.2.3",
+    "@capacitor-community/background-geolocation": "^1.2.4",
     "@capacitor-community/keep-awake": "^3.0.0",
     "@capacitor-community/native-audio": "^3.0.4",
     "@capacitor-community/screen-brightness": "^1.0.1",
