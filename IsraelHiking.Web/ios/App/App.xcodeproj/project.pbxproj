@@ -374,7 +374,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = il.org.osm.israelhiking;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "53f2d46c-2ffa-4b60-ba42-43ba9b1103fe";
+				PROVISIONING_PROFILE = "abdea8f6-f4b1-4084-bc2a-2a72f97e5f2c";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
