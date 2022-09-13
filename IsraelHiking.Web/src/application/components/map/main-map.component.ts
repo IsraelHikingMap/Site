@@ -1,6 +1,6 @@
 import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import mapliregl, { StyleSpecification, ScaleControl, Unit } from "maplibre-gl";
+import mapliregl, { StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification } from "maplibre-gl";
 import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -39,6 +39,7 @@ export class MainMapComponent extends BaseMapComponent {
 
     public location: Location;
     public initialStyle: StyleSpecification;
+    private isTerrainOn: boolean;
 
     constructor(resources: ResourcesService,
                 private readonly titleService: IHMTitleService,
@@ -52,6 +53,7 @@ export class MainMapComponent extends BaseMapComponent {
     ) {
         super(resources);
         this.location = this.ngRedux.getState().location;
+        this.isTerrainOn = false;
         this.initialStyle = { ...this.defaultStyleService.style };
         this.initialStyle.sources = {
             dummy: {
@@ -106,6 +108,7 @@ export class MainMapComponent extends BaseMapComponent {
             zoom: this.mapComponent.mapInstance.getZoom()
         }));
         this.hashService.resetAddressbar();
+        this.updateTerrainIfNeeded();
     }
 
     public mapLoaded() {
@@ -126,13 +129,6 @@ export class MainMapComponent extends BaseMapComponent {
             this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-right");
         });
         this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" as Unit}), "bottom-left");
-
-        this.mapComponent.mapInstance.addSource("terrain", {
-            "type": "raster-dem",
-            "url": "https://israelhiking.osm.org.il/vector/data/TerrainRGB.json",
-            "tileSize": 256
-          });
-        this.mapComponent.mapInstance.setTerrain({source: "terrain", exaggeration: 3});
     }
 
     public isMobile() {
@@ -145,6 +141,44 @@ export class MainMapComponent extends BaseMapComponent {
 
     public isApp() {
         return this.runningContextService.isCapacitor;
+    }
+
+    private updateTerrainIfNeeded() {
+        let pitch = this.mapComponent.mapInstance.getPitch();
+        if (pitch <= 10 && !this.isTerrainOn) {
+            // Terrain is off and pitch is low, nothing to do.
+            return;
+        }
+
+        if (pitch > 10 && this.isTerrainOn) {
+            // Terrain is on and pitch is high, nothing to do.
+            return;
+        }
+
+        if (pitch <= 10 && this.isTerrainOn) {
+            // Terrain is on and pitch is low, turning off.
+            this.isTerrainOn = false;
+            this.mapComponent.mapInstance.setTerrain(null);
+        }
+
+        // Terrain is off and pitch is high, turning on.
+        this.isTerrainOn = true;
+        let source: RasterDEMSourceSpecification = {
+            "type": "raster-dem",
+            "url": "https://israelhiking.osm.org.il/vector/data/TerrainRGB.json",
+            "tileSize": 256
+        }
+        if (this.ngRedux.getState().offlineState.lastModifiedDate != null) {
+            // Using offline source
+            source = {
+                "type": "raster-dem",
+                "tiles":["custom://TerrainRGB/{z}/{x}/{y}.png"],
+                "maxzoom":12,
+                "minzoom":7
+            };
+        }
+        this.mapComponent.mapInstance.addSource("terrain", source);
+        this.mapComponent.mapInstance.setTerrain({source: "terrain", exaggeration: 3});
     }
 
 }
