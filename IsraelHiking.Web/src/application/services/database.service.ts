@@ -201,7 +201,7 @@ export class DatabaseService {
             this.loggingService.info(`[Database] creating connection to ${dbName}`);
             this.sourceDatabases.set(dbName, new Promise(async (resolve, reject) => {
                 try {
-                    let dbPromise = this.sqlite.createConnection(dbName + ".db", false, "no-encryption", 1);
+                    let dbPromise = this.sqlite.createConnection(dbName + ".db", false, "no-encryption", 1, true);
                     let db = await dbPromise;
                     await db.open();
                     resolve(db);
