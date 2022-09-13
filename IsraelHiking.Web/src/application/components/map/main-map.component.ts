@@ -159,6 +159,7 @@ export class MainMapComponent extends BaseMapComponent {
             // Terrain is on and pitch is low, turning off.
             this.isTerrainOn = false;
             this.mapComponent.mapInstance.setTerrain(null);
+            return;
         }
 
         // Terrain is off and pitch is high, turning on.
@@ -177,7 +178,13 @@ export class MainMapComponent extends BaseMapComponent {
                 "minzoom":7
             };
         }
-        this.mapComponent.mapInstance.addSource("terrain", source);
+        let currentSourceTerrain = this.mapComponent.mapInstance.getSource("terrain");
+        if (!currentSourceTerrain) {
+            this.mapComponent.mapInstance.addSource("terrain", source);
+        } else if (currentSourceTerrain && currentSourceTerrain.serialize().url != source.url) {
+            this.mapComponent.mapInstance.removeSource("terrain");
+            this.mapComponent.mapInstance.addSource("terrain", source);
+        }
         this.mapComponent.mapInstance.setTerrain({source: "terrain", exaggeration: 3});
     }
 
