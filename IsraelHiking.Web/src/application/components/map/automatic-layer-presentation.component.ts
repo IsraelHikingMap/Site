@@ -119,7 +119,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     private isRaster(address: string) {
-        return !address.endsWith("json");
+        return address.match(/\.json(\?.+)?$/i) == null;
     }
 
     private createRasterLayer() {
