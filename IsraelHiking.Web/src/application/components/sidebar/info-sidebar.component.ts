@@ -154,7 +154,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendPlayground);
 
         this.removeItemInSection(this.resources.legendAreas, this.resources.legendVineyard);
-        this.removeItemInSection(this.resources.legendAreas, this.resources.legendCemetery);
         this.removeItemInSection(this.resources.legendAreas, this.resources.legendConstructionSite);
     }
 
