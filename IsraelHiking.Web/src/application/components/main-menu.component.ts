@@ -12,7 +12,6 @@ import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { RunningContextService } from "../services/running-context.service";
-import { GeoLocationService } from "../services/geo-location.service";
 import { LoggingService } from "../services/logging.service";
 import { ToastService } from "../services/toast.service";
 import { FileService } from "../services/file.service";
@@ -64,7 +63,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 private readonly runningContextService: RunningContextService,
                 private readonly toastService: ToastService,
                 private readonly fileService: FileService,
-                private readonly geoLocationService: GeoLocationService,
                 private readonly layersService: LayersService,
                 private readonly sidebarService: SidebarService,
                 private readonly loggingService: LoggingService,
@@ -213,8 +211,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 `App version: ${(await App.getInfo()).version}`
             ].join("\n");
             let logBase64zipped = await this.fileService.compressTextToBase64Zip(logs);
-            logs = await this.geoLocationService.getLog();
-            let logBase64zippedGeoLocation = await this.fileService.compressTextToBase64Zip(logs);
             let infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
             this.socialSharing.shareViaEmail(
@@ -225,7 +221,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 null,
                 [
                     `df:log.zip;data:application/zip;base64,${logBase64zipped}`,
-                    `df:geolocation-log.zip;data:application/zip;base64,${logBase64zippedGeoLocation}`,
                     `df:info-${userInfo.id}.txt;data:text/plain;base64,${infoBase64}`
                 ]
             );

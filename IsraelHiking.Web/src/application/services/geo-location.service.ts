@@ -1,7 +1,8 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { BackgroundGeolocationPlugin, Location } from "cordova-background-geolocation-plugin";
+import { BackgroundGeolocationPlugin, Location } from "@capacitor-community/background-geolocation";
 import { App } from "@capacitor/app";
 import { NgRedux } from "@angular-redux2/store";
+import { registerPlugin } from "@capacitor/core";
 
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
@@ -10,7 +11,7 @@ import { ToastService } from "./toast.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
 
-declare let BackgroundGeolocation: BackgroundGeolocationPlugin;
+const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>("BackgroundGeolocation");
 
 @Injectable()
 export class GeoLocationService {
@@ -18,8 +19,10 @@ export class GeoLocationService {
     private static readonly SHORT_TIME_OUT = 10000; // Only for first position for good UX
 
     private watchNumber: number;
+    private bgWatcherId: string;
     private isBackground: boolean;
-    private wasInitialized: boolean;
+    // HM TODO: this is a naive implementation - in memory only, will not withstand app crash...
+    private bgPositions: GeolocationPosition[];
 
     public bulkPositionChanged: EventEmitter<GeolocationPosition[]>;
     public backToForeground: EventEmitter<void>;
@@ -31,10 +34,11 @@ export class GeoLocationService {
                 private readonly ngZone: NgZone,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.watchNumber = -1;
+        this.bgWatcherId = null;
         this.backToForeground = new EventEmitter();
         this.bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
         this.isBackground = false;
-        this.wasInitialized = false;
+        this.bgPositions = [];
     }
 
     public initialize() {
@@ -50,8 +54,8 @@ export class GeoLocationService {
             this.isBackground = !state.isActive;
             this.loggingService.debug(`[GeoLocation] Now in ${this.isBackground ? "back" : "fore"}ground`);
             if (state.isActive) {
-                this.ngZone.run(async () => {
-                    await this.onLocationUpdate();
+                this.ngZone.run(() => {
+                    this.onLocationUpdate();
                     this.backToForeground.next();
                 });
             }
@@ -131,62 +135,28 @@ export class GeoLocationService {
             });
     }
 
-    private startBackgroundGeolocation() {
-        if (this.wasInitialized) {
-            BackgroundGeolocation.start();
+    private async startBackgroundGeolocation() {
+        if (this.bgWatcherId) {
             return;
         }
         this.loggingService.info("[GeoLocation] Starting background tracking");
-        this.wasInitialized = true;
-        BackgroundGeolocation.configure({
-            locationProvider: BackgroundGeolocation.RAW_PROVIDER,
-            desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
-            stationaryRadius: 10,
-            distanceFilter: 5,
-            notificationTitle: "Israel Hiking Map",
-            notificationText: this.resources.runningInBackground,
-            interval: 1000,
-            fastestInterval: 1000,
-            activitiesInterval: 10000,
-            startForeground: true,
-            notificationIconLarge: "bg_notification",
-            notificationIconSmall: "bg_notification",
-        });
-
-        BackgroundGeolocation.on("location").subscribe(async (_: Location) => {
+        this.bgWatcherId = await BackgroundGeolocation.addWatcher({
+            backgroundTitle: "Israel Hiking Map",
+            backgroundMessage: this.resources.runningInBackground,
+            distanceFilter: 5
+        }, (location) => {
+            this.storeLocationForLater(this.locationToPosition(location));
             if (this.isBackground) {
                 return;
             }
-            await this.onLocationUpdate();
+            this.ngZone.run(() => {
+                this.onLocationUpdate();
+            });
         });
-
-
-        BackgroundGeolocation.on("authorization").subscribe(
-            (status) => {
-                if (status === BackgroundGeolocation.NOT_AUTHORIZED) {
-                    this.loggingService.error("[GeoLocation] Failed to start background tracking - unauthorized");
-                    this.disable();
-                    this.toastService.confirm({
-                        message: this.resources.noLocationPermissionOpenAppSettings,
-                        type: "OkCancel",
-                        confirmAction: () => BackgroundGeolocation.showAppSettings(),
-                        declineAction: () => { }
-                    });
-                }
-            });
-
-        BackgroundGeolocation.on("error").subscribe(
-            (error) => {
-                this.loggingService.error(`[GeoLocation] Failed to start background tracking ${error.message}`);
-                this.toastService.warning(this.resources.unableToFindYourLocation);
-                this.disable();
-            });
-        BackgroundGeolocation.start();
     }
 
-    private async onLocationUpdate() {
-        let locations = await BackgroundGeolocation.getValidLocationsAndDelete();
-        let positions = locations.map((l) => this.locationToPosition(l));
+    private onLocationUpdate() {
+        let positions = this.getValidPositionsAndDelete();
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
         } else if (positions.length === 1) {
@@ -201,9 +171,10 @@ export class GeoLocationService {
     private async stopWatching() {
         this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
         this.ngRedux.dispatch(new SetCurrentPositionAction({position: null}));
-        if (this.runningContextService.isCapacitor) {
+        if (this.runningContextService.isCapacitor && this.bgWatcherId) {
             this.loggingService.debug("[GeoLocation] Stopping background tracking");
-            await BackgroundGeolocation.stop();
+            await BackgroundGeolocation.removeWatcher({id: this.bgWatcherId});
+            this.bgWatcherId = "";
         } else {
             this.loggingService.debug("[GeoLocation] Stopping browser tracking: " + this.watchNumber);
             this.stopNavigator();
@@ -255,12 +226,11 @@ export class GeoLocationService {
         } as GeolocationPosition;
     }
 
-    public async getLog(): Promise<string> {
-        let logEntries = await BackgroundGeolocation.getLogEntries(10000, 0, BackgroundGeolocation.LOG_TRACE);
-        return logEntries.map((logLine) => {
-            let dateString = new Date(logLine.timestamp - new Date().getTimezoneOffset() * 60 * 1000)
-                .toISOString().replace(/T/, " ").replace(/\..+/, "");
-            return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;
-        }).join("\n");
+    private storeLocationForLater(position: GeolocationPosition) {
+        this.bgPositions.push(position);
+    }
+
+    private getValidPositionsAndDelete(): GeolocationPosition[] {
+        return this.bgPositions.splice(0);
     }
 }
