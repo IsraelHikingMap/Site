@@ -8,6 +8,7 @@
                  [style]="initialStyle"
                  (moveEnd)="moveEnd($event)"
                  (mapLoad)="mapLoaded()"
+                 (pitchEvt)="pitchChanged()"
                  [doubleClickZoom]="false"
                  [attributionControl]="false">
             <layers-view></layers-view>
