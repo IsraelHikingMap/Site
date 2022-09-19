@@ -108,7 +108,6 @@ export class MainMapComponent extends BaseMapComponent {
             zoom: this.mapComponent.mapInstance.getZoom()
         }));
         this.hashService.resetAddressbar();
-        this.updateTerrainIfNeeded();
     }
 
     public mapLoaded() {
@@ -143,7 +142,7 @@ export class MainMapComponent extends BaseMapComponent {
         return this.runningContextService.isCapacitor;
     }
 
-    private updateTerrainIfNeeded() {
+    public pitchChanged() {
         let pitch = this.mapComponent.mapInstance.getPitch();
         if (pitch <= 10 && !this.isTerrainOn) {
             // Terrain is off and pitch is low, nothing to do.
