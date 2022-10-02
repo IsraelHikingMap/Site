@@ -167,23 +167,23 @@ export class MainMapComponent extends BaseMapComponent {
         // Terrain is off and pitch is high, turning on.
         this.isTerrainOn = true;
         let source: RasterDEMSourceSpecification = {
-            "type": "raster-dem",
-            "url": "https://israelhiking.osm.org.il/vector/data/TerrainRGB.json",
-            "tileSize": 256
-        }
+            type: "raster-dem",
+            url: "https://israelhiking.osm.org.il/vector/data/TerrainRGB.json",
+            tileSize: 256
+        };
         if (this.ngRedux.getState().offlineState.lastModifiedDate != null) {
             // Using offline source
             source = {
-                "type": "raster-dem",
-                "tiles":["custom://TerrainRGB/{z}/{x}/{y}.png"],
-                "maxzoom":12,
-                "minzoom":7
+                type: "raster-dem",
+                tiles:["custom://TerrainRGB/{z}/{x}/{y}.png"],
+                maxzoom:12,
+                minzoom:7
             };
         }
         let currentSourceTerrain = this.mapComponent.mapInstance.getSource("terrain");
         if (!currentSourceTerrain) {
             this.mapComponent.mapInstance.addSource("terrain", source);
-        } else if (currentSourceTerrain && currentSourceTerrain.serialize().url != source.url) {
+        } else if (currentSourceTerrain && currentSourceTerrain.serialize().url !== source.url) {
             this.mapComponent.mapInstance.removeSource("terrain");
             this.mapComponent.mapInstance.addSource("terrain", source);
         }

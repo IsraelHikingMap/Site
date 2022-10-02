@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { NgRedux } from "@angular-redux2/store";
@@ -68,10 +68,22 @@ export class OfflineFilesDownloadService {
                 showContinueButton: true,
                 continueText: this.resources.largeFilesUseWifi
             });
-        } catch {
-            this.loggingService.info("[Offline Download] Failed to get download files list");
+        } catch (ex) {
+            let serverSideError = false;
+            if ((ex as Error).name === "TimeoutError") {
+                this.loggingService.error("[Offline Download] Failed to get download files list due to timeout");
+            } else if ((ex as HttpErrorResponse).error && (ex as HttpErrorResponse).error.constructor.name === "ProgressEvent") {
+                this.loggingService.error("[Offline Download] Failed to get download files list due to client side error: " +
+                    (ex as Error).message);
+            } else {
+                serverSideError = true;
+                this.loggingService.error("[Offline Download] Failed to get download files list due to server side error: " +
+                (ex as Error).message);
+            }
             if (showMessage) {
-                this.toastService.warning(this.resources.youNeedToRenewTheOfflineMapsSubscription);
+                this.toastService.warning(serverSideError
+                    ? this.resources.youNeedToRenewTheOfflineMapsSubscription
+                    : this.resources.unableToSaveData);
             }
         }
     }

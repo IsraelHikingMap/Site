@@ -175,7 +175,6 @@ export class RecordedRouteService {
                 latlngs: locations
             }));
         }, 0);
-        
     }
 
     private validateRecordingAndUpdateState(position: GeolocationPosition, lastValidLocation: LatLngAltTime): boolean {

@@ -52,7 +52,7 @@ describe("Recorded Route Service", () => {
         MockNgRedux.reset();
     });
 
-    it("Should add a valid location", done => 
+    it("Should add a valid location", done =>
         inject([RecordedRouteService, SelectedRouteService],
         (service: RecordedRouteService, selectedRouteService: SelectedRouteService) => {
             service.initialize();
