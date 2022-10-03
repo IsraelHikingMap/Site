@@ -70,15 +70,19 @@ export class OfflineFilesDownloadService {
             });
         } catch (ex) {
             let serverSideError = false;
-            if ((ex as Error).name === "TimeoutError") {
-                this.loggingService.error("[Offline Download] Failed to get download files list due to timeout");
-            } else if ((ex as HttpErrorResponse).error && (ex as HttpErrorResponse).error.constructor.name === "ProgressEvent") {
-                this.loggingService.error("[Offline Download] Failed to get download files list due to client side error: " +
-                    (ex as Error).message);
-            } else {
-                serverSideError = true;
-                this.loggingService.error("[Offline Download] Failed to get download files list due to server side error: " +
-                (ex as Error).message);
+            let typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
+            switch (typeAndMessage.type) {
+                case "timeout":
+                    this.loggingService.error("[Offline Download] Failed to get download files list due to timeout");
+                    break;
+                case "client":
+                    this.loggingService.error("[Offline Download] Failed to get download files list due to client side error: " +
+                        typeAndMessage.message);
+                    break;
+                default:
+                    serverSideError = true;
+                    this.loggingService.error("[Offline Download] Failed to get download files list due to server side error: " +
+                        typeAndMessage.message);
             }
             if (showMessage) {
                 this.toastService.warning(serverSideError
@@ -139,5 +143,18 @@ export class OfflineFilesDownloadService {
         this.loggingService.info(
             `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
         return fileNames as Record<string, string>;
+    }
+
+    public async isAvailable(): Promise<boolean> {
+        try {
+            await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
+                params: { lastModified: null }
+            }).pipe(timeout(5000)));
+            return true;
+        } catch (ex) {
+            let typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
+            return typeAndMessage.type === "server" ? false : undefined;
+        }
+
     }
 }

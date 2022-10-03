@@ -6,6 +6,7 @@ import { NgRedux, Select } from "@angular-redux2/store";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
+import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import type { ApplicationState, UserInfo } from "../models/models";
 
 @Injectable()
@@ -17,6 +18,7 @@ export class PurchaseService {
     constructor(private readonly store: InAppPurchase2,
                 private readonly runningContextService: RunningContextService,
                 private readonly loggingService: LoggingService,
+                private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
     }
 
@@ -66,6 +68,14 @@ export class PurchaseService {
                 this.loggingService.info("[Store] logged in: " + ui.id);
                 this.store.applicationUsername = ui.id;
                 this.store.refresh();
+                this.offlineFilesDownloadService.isAvailable().then((isAvailble) => {
+                    if (isAvailble !== undefined) {
+                        this.loggingService.debug("[Store] Product is available from server: " + isAvailble);
+                        this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble }));
+                    } else {
+                        this.loggingService.debug("[Store] Unable to determine product availibility from server...");
+                    }
+                });
             }
         });
     }

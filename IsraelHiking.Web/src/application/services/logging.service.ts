@@ -1,9 +1,17 @@
+import { HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import Dexie from "dexie";
 
 import { RunningContextService } from "./running-context.service";
 
 type LogLevel = "debug" | "info" | "error" | "warn";
+
+export type ErrorType = "timeout" | "client" | "server";
+
+export type ErrorTypeAndMessage = {
+    type: ErrorType;
+    message: string;
+};
 
 interface LogLine {
     date: Date;
@@ -130,5 +138,18 @@ export class LoggingService {
         let dateString = new Date(logLine.date.getTime() - (logLine.date.getTimezoneOffset() * 60 * 1000))
             .toISOString().replace(/T/, " ").replace(/\..+/, "");
         return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;
+    }
+
+    public getErrorTypeAndMessage(ex: any): ErrorTypeAndMessage {
+        let typeAndMessage = {
+            type: "server" as ErrorType,
+            message: (ex as Error).message
+        };
+        if ((ex as Error).name === "TimeoutError") {
+            typeAndMessage.type = "timeout";
+        } else if ((ex as HttpErrorResponse).error && (ex as HttpErrorResponse).error.constructor.name === "ProgressEvent") {
+            typeAndMessage.type = "client";
+        }
+        return typeAndMessage;
     }
 }
