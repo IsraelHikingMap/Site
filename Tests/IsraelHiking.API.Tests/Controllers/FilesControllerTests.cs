@@ -21,6 +21,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using NSubstitute.ExceptionExtensions;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -155,6 +156,15 @@ namespace IsraelHiking.API.Tests.Controllers
             var results = _controller.GetOfflineFiles(DateTime.Now).Result as ForbidResult;
             
             Assert.IsNotNull(results);
+        }
+        
+        [TestMethod]
+        public void GetOfflineFiles_CommunicationIssue_ShouldGetServerError()
+        {
+            _controller.SetupIdentity();
+            _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Throws(new Exception("some text"));
+
+            Assert.ThrowsException<AggregateException>(() => _controller.GetOfflineFiles(DateTime.Now).Result);
         }
         
         [TestMethod]

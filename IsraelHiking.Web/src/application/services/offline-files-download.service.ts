@@ -69,7 +69,6 @@ export class OfflineFilesDownloadService {
                 continueText: this.resources.largeFilesUseWifi
             });
         } catch (ex) {
-            let serverSideError = false;
             let typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
             switch (typeAndMessage.type) {
                 case "timeout":
@@ -80,14 +79,11 @@ export class OfflineFilesDownloadService {
                         typeAndMessage.message);
                     break;
                 default:
-                    serverSideError = true;
                     this.loggingService.error("[Offline Download] Failed to get download files list due to server side error: " +
                         typeAndMessage.message);
             }
             if (showMessage) {
-                this.toastService.warning(serverSideError
-                    ? this.resources.youNeedToRenewTheOfflineMapsSubscription
-                    : this.resources.unableToSaveData);
+                this.toastService.warning(this.resources.unexpectedErrorPleaseTryAgainLater);
             }
         }
     }
@@ -145,7 +141,7 @@ export class OfflineFilesDownloadService {
         return fileNames as Record<string, string>;
     }
 
-    public async isAvailable(): Promise<boolean> {
+    public async isAvailable(): Promise<boolean | undefined> {
         try {
             await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
                 params: { lastModified: null }
@@ -153,7 +149,7 @@ export class OfflineFilesDownloadService {
             return true;
         } catch (ex) {
             let typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
-            return typeAndMessage.type === "server" ? false : undefined;
+            return typeAndMessage.type === "server" && typeAndMessage.statusCode === 403 ? false : undefined;
         }
 
     }

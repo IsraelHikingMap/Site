@@ -63,20 +63,21 @@ export class PurchaseService {
             product.finish();
         });
 
-        this.userInfo$.subscribe(ui => {
-            if (ui != null) {
-                this.loggingService.info("[Store] logged in: " + ui.id);
-                this.store.applicationUsername = ui.id;
-                this.store.refresh();
-                this.offlineFilesDownloadService.isAvailable().then((isAvailble) => {
-                    if (isAvailble !== undefined) {
-                        this.loggingService.debug("[Store] Product is available from server: " + isAvailble);
-                        this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble }));
-                    } else {
-                        this.loggingService.debug("[Store] Unable to determine product availibility from server...");
-                    }
-                });
+        this.userInfo$.subscribe(userInfo => {
+            if (userInfo == null) {
+                return;
             }
+            this.loggingService.info("[Store] logged in: " + userInfo.id);
+            this.store.applicationUsername = userInfo.id;
+            this.store.refresh();
+            this.offlineFilesDownloadService.isAvailable().then((isAvailble) => {
+                if (isAvailble !== undefined) {
+                    this.loggingService.debug("[Store] Product is available from server: " + isAvailble);
+                    this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble }));
+                } else {
+                    this.loggingService.debug("[Store] Unable to determine product availibility from server...");
+                }
+            });
         });
     }
 

@@ -1,4 +1,6 @@
-﻿using IsraelHiking.Common.Configuration;
+﻿using System;
+using System.Net;
+using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -28,8 +30,13 @@ namespace IsraelHiking.DataAccess
         {
             var client = _httpClientFactory.CreateClient();
             // Docs: https://billing.fovea.cc/documentation/api/customer-purchases/
-            var respone = await client.GetAsync(FOVEA_PURCHASES_API + userId + "/purchases?appName=il.org.osm.israelhiking&apiKey=" + _options.FoveaApiKey);
-            var responseStr = await respone.Content.ReadAsStringAsync();
+            var response = await client.GetAsync(FOVEA_PURCHASES_API + userId + "/purchases?appName=il.org.osm.israelhiking&apiKey=" + _options.FoveaApiKey);
+            var responseStr = await response.Content.ReadAsStringAsync();
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new Exception("There was a problem communicating with the receipt validation server, code: " 
+                                    + response.StatusCode + ", " + responseStr);
+            }
             var returnValue = responseStr.Contains("\"isExpired\":false");
             _logger.LogInformation("Is entitled for user: " + userId + " is: " + returnValue);
             return returnValue;

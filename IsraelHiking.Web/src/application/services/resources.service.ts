@@ -298,6 +298,7 @@ export class ResourcesService {
     public hiddenRoutesWillNotBeSaved: string;
     public noLocationPermissionOpenAppSettings: string;
     public tracesAreOnlySavedLocally: string;
+    public unexpectedErrorPleaseTryAgainLater: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -473,7 +474,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1664967815319");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1664973021415");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -774,6 +775,7 @@ export class ResourcesService {
             "Would you like to open the app settings?");
         this.tracesAreOnlySavedLocally = this.gettextCatalog.getString("Traces are only saved locally. " +
             "You can change that in the configuration settings");
+        this.unexpectedErrorPleaseTryAgainLater = this.gettextCatalog.getString("Oops, something went wrong. Please try again later");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

@@ -11,6 +11,7 @@ export type ErrorType = "timeout" | "client" | "server";
 export type ErrorTypeAndMessage = {
     type: ErrorType;
     message: string;
+    statusCode?: number
 };
 
 interface LogLine {
@@ -142,13 +143,15 @@ export class LoggingService {
 
     public getErrorTypeAndMessage(ex: any): ErrorTypeAndMessage {
         let typeAndMessage = {
-            type: "server" as ErrorType,
+            type: "server",
             message: (ex as Error).message
-        };
+        } as ErrorTypeAndMessage;
         if ((ex as Error).name === "TimeoutError") {
             typeAndMessage.type = "timeout";
         } else if ((ex as HttpErrorResponse).error && (ex as HttpErrorResponse).error.constructor.name === "ProgressEvent") {
             typeAndMessage.type = "client";
+        } else {
+            typeAndMessage.statusCode = (ex as HttpErrorResponse).status;
         }
         return typeAndMessage;
     }
