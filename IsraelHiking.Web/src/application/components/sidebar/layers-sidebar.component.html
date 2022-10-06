@@ -92,5 +92,8 @@
     <div fxLayout="row" *ngIf="isOfflineDownloadAvailable() && (lastModified | async)">
         <div fxFill class="margin-10">{{resources.lastUpdatedOn}} {{lastModified | async | date:'dd/MM/yyyy'}}</div>
     </div>
-    <p class="margin-10" *ngIf="isOfflineDownloadAvailable()">{{resources.offlinePurchaseGraditude}}</p>
+    <p class="margin-10" *ngIf="isOfflineDownloadAvailable()">
+        {{resources.offlinePurchaseGraditude}}<br/>
+        <a [href]="manageSubscriptions" target="_blank" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Manage subscriptions">{{resources.manageSubscriptions}}</a>
+    </p>
 </div>

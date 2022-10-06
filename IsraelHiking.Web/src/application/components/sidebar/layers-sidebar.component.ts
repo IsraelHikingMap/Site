@@ -47,6 +47,8 @@ export class LayersSidebarComponent extends BaseMapComponent {
     @Select((state: ApplicationState) => state.offlineState.lastModifiedDate)
     public lastModified: Observable<Date>;
 
+    public manageSubscriptions: string;
+
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
                 private readonly purchaseService: PurchaseService,
@@ -58,6 +60,9 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
+        this.manageSubscriptions = this.runningContextService.isIos 
+            ? "https://apps.apple.com/account/subscriptions"
+            : "https://play.google.com/store/account/subscriptions"
     }
 
     public closeSidebar() {

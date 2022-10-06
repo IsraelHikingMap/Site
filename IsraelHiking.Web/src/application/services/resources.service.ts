@@ -240,6 +240,7 @@ export class ResourcesService {
     public youNeedToDownloadOfflineMaps: string;
     public youNeedToToggleOfflineMaps: string;
     public deleteAccount: string;
+    public manageSubscriptions: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -474,7 +475,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1665080091648");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1665081825819");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -699,6 +700,7 @@ export class ResourcesService {
         this.youNeedToToggleOfflineMaps = this.gettextCatalog.getString("Background text: You need to toggle offline maps");
         this.youNeedToPurchaseOfflineMaps = this.gettextCatalog.getString("Background text: You need to purchase offline maps");
         this.deleteAccount = this.gettextCatalog.getString("Delete Account");
+        this.manageSubscriptions = this.gettextCatalog.getString("Manage subscriptions");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
