@@ -8,7 +8,6 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Valid;
 using OsmSharp.Complete;
-using ProjNet.CoordinateSystems.Transformations;
 using System.Collections.Generic;
 using System.Linq;
 

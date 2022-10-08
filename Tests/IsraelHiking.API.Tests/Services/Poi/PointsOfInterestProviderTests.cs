@@ -715,20 +715,5 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 o.Tags.All(t => t.Key != "image1") && o.Tags.All(t => t.Value != "image-to-remove")
             ));
         }
-
-        [TestMethod]
-        public void CreateFeatureFromCoordinates_ShouldCreate()
-        {
-            const int alt = 10;
-            ElevationGateway.GetElevation(Arg.Any<Coordinate>()).Returns(alt);
-            var feature = _adapter.GetCoordinatesFeature(new LatLng(35, 32), "32_35");
-
-            Assert.IsNotNull(feature);
-            Assert.AreEqual(feature.Geometry.Coordinate.X, 32);
-            Assert.AreEqual(feature.Geometry.Coordinate.Y, 35);
-            Assert.IsTrue(feature.Attributes.Has(FeatureAttributes.POI_ALT, alt.ToString()));
-            Assert.IsTrue(feature.Attributes.Exists(FeatureAttributes.POI_ICON));
-            Assert.IsTrue(feature.Attributes.Exists(FeatureAttributes.POI_SOURCE));
-        }
     }
 }

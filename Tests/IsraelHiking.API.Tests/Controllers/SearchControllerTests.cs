@@ -1,5 +1,4 @@
 ﻿using IsraelHiking.API.Controllers;
-using IsraelHiking.API.Converters.CoordinatesParsers;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces.Repositories;
@@ -22,7 +21,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void TestInitialize()
         {
             _searchRepository = Substitute.For<ISearchRepository>();
-            _controller = new SearchController(_searchRepository, new List<ICoordinatesParser> { new DecimalLatLonParser() });
+            _controller = new SearchController(_searchRepository);
         }
 
         [TestMethod]
@@ -255,14 +254,6 @@ namespace IsraelHiking.API.Tests.Controllers
 
             Assert.IsNotNull(results);
             Assert.IsTrue(results.First().DisplayName.Contains(place));
-        }
-
-        [TestMethod]
-        public void GetSearchResultsForSingleNumber_ShouldReturnCoordinatesPoi()
-        {
-            var results = _controller.GetSearchResults("+32, 35", Languages.HEBREW).Result;
-            Assert.IsNotNull(results);
-            Assert.AreEqual(Sources.COORDINATES, results.First().Source);
         }
     }
 }

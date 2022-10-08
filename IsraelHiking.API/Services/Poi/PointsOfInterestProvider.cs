@@ -522,26 +522,5 @@ namespace IsraelHiking.API.Services.Poi
             await _imageUrlStoreExecutor.StoreImage(md5, file.Content, imageUrl);
             return imageUrl;
         }
-
-        /// <inheritdoc/>
-        [Obsolete("Not in use any more 5.2022")]
-        public Feature GetCoordinatesFeature(LatLng latLng, string id)
-        {
-            var coordinate = latLng.ToCoordinate();
-            var (east, north) = _wgs84ItmMathTransform.Transform(coordinate.X, coordinate.Y);
-            var alt = _elevationGateway.GetElevation(coordinate).Result;
-            var feature = new Feature(new Point(coordinate), new AttributesTable
-                {
-                    { FeatureAttributes.NAME, id },
-                    { FeatureAttributes.POI_ICON, SEARCH_ICON },
-                    { FeatureAttributes.POI_ICON_COLOR, "black" },
-                    { FeatureAttributes.POI_CATEGORY, Categories.NONE },
-                    { FeatureAttributes.POI_SOURCE, Sources.COORDINATES },
-                    { FeatureAttributes.POI_ALT, alt }
-                });
-            feature.SetTitles();
-            feature.SetLocation(coordinate);
-            return feature;
-        }
     }
 }

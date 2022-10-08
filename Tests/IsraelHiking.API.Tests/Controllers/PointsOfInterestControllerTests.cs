@@ -94,20 +94,6 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetPointOfInterestCoordinates_BySourceAndId_ShouldReturnIt()
-        {
-            var id = "32_35";
-            var source = Sources.COORDINATES;
-            _pointsOfInterestProvider.GetCoordinatesFeature(Arg.Any<LatLng>(), id).Returns(new Feature());
-
-            var result = _controller.GetPointOfInterest(source, id).Result as OkObjectResult;
-
-            Assert.IsNotNull(result);
-            var poi = result.Value as Feature;
-            Assert.IsNotNull(poi);
-        }
-
-        [TestMethod]
         public void GetPointOfInterest_BySourceAndId_ShouldReturnIt()
         {
             var id = "way_1";

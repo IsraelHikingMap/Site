@@ -1,7 +1,4 @@
-﻿using System;
-using IsraelHiking.API.Converters;
-using IsraelHiking.API.Converters.CoordinatesParsers;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces.Repositories;
@@ -22,18 +19,14 @@ namespace IsraelHiking.API.Controllers
     public class SearchController : ControllerBase
     {
         private readonly ISearchRepository _searchRepository;
-        private readonly IEnumerable<ICoordinatesParser> _coordinatesParsers;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="searchRepository"></param>
-        /// <param name="coordinatesParsers"></param>
-        public SearchController(ISearchRepository searchRepository,
-            IEnumerable<ICoordinatesParser> coordinatesParsers)
+        public SearchController(ISearchRepository searchRepository)
         {
             _searchRepository = searchRepository;
-            _coordinatesParsers = coordinatesParsers;
         }
 
         /// <summary>
@@ -47,12 +40,6 @@ namespace IsraelHiking.API.Controllers
         [Route("{term}")]
         public async Task<IEnumerable<SearchResultsPointOfInterest>> GetSearchResults(string term, string language)
         {
-            var coordinates = GetCoordinates(term.Trim());
-            if (coordinates != null)
-            {
-                return new[] {ConvertFromCoordinates(term, coordinates)};
-            }
-
             if ((term.StartsWith("\"") || term.StartsWith("״")) && 
                 (term.EndsWith("\"") || term.StartsWith("״")))
             {
@@ -75,20 +62,6 @@ namespace IsraelHiking.API.Controllers
             }
             var features = await _searchRepository.Search(term, language);
             return await Task.WhenAll(features.OfType<IFeature>().ToList().Select(f => ConvertFromFeature(f, language)));
-        }
-
-        [Obsolete("Not in use any more 5.2022")]
-        private Coordinate GetCoordinates(string term)
-        {
-            return _coordinatesParsers.Select(parser => parser.TryParse(term))
-                .FirstOrDefault(coordinates => coordinates != null);
-        }
-
-        [Obsolete("Not in use any more 5.2022")]
-        private SearchResultsPointOfInterest ConvertFromCoordinates(string name, Coordinate coordinates)
-        {
-            var latLng = new LatLng(coordinates.Y, coordinates.X, coordinates.Z);
-            return SearchResultsPointOfInterestConverter.FromLatlng(latLng, name);
         }
 
         private async Task<SearchResultsPointOfInterest> ConvertFromFeature(IFeature feature, string language)

@@ -1,5 +1,4 @@
-﻿using System;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.Common.Poi;
 using Microsoft.AspNetCore.Mvc;
 using ProjNet.CoordinateSystems.Transformations;
@@ -8,9 +7,9 @@ namespace IsraelHiking.API.Controllers
 {
     /// <summary>
     /// This controller facilitates for conversion between WGS84 coordinates to ITM coordinates
+    /// The client doesn't use it, but I'm keeping it for external usage if anyone needs this
     /// </summary>
     [Route("api/[controller]")]
-    [Obsolete("Not in use any more 5.2022")]
     public class ItmGridController : ControllerBase
     {
         private readonly MathTransform _wgs84ItmMathTransform;
@@ -18,10 +17,10 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
-        public ItmGridController(IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory)
+        /// <param name="itmWgs84MathTransformFactory"></param>
+        public ItmGridController(IItmWgs84MathTransfromFactory itmWgs84MathTransformFactory)
         {
-            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
+            _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
         }
 
         /// <summary>
@@ -34,8 +33,8 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public NorthEast GetItmCoordinates(double lat, double lon)
         {
-            var coordiante = _wgs84ItmMathTransform.Transform(lon, lat);
-            return new NorthEast { East = (int)coordiante.x, North = (int)coordiante.y };
+            var coordinate = _wgs84ItmMathTransform.Transform(lon, lat);
+            return new NorthEast { East = (int)coordinate.x, North = (int)coordinate.y };
         }
     }
 }

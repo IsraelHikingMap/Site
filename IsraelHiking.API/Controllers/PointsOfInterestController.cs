@@ -1,5 +1,4 @@
-﻿using IsraelHiking.API.Converters;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -110,12 +109,6 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPointOfInterest(string source, string id)
         {
-            if (source.Equals(Sources.COORDINATES, StringComparison.InvariantCultureIgnoreCase))
-            {
-                var latLng = SearchResultsPointOfInterestConverter.GetLatLngFromId(id);
-                var feature = _pointsOfInterestProvider.GetCoordinatesFeature(latLng, id);
-                return Ok(feature);
-            }
             var poiItem = await _pointsOfInterestProvider.GetFeatureById(source, id);
             if (poiItem == null)
             {
