@@ -612,7 +612,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .style("stroke", "none")
             .style("-moz-user-select", "none")
             .style("pointer-events", "all")
-            .on("touchstart mousedown", (e) => {
+            .on("mousedown touchstart", (e) => {
                 this.onMouseDown(e);
             })
             .on("mousemove touchmove", (e) => {
@@ -1024,7 +1024,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private getMouseOrTouchChartXPosition(e: Event): number {
-        let expectedEvent = (window.TouchEvent && e instanceof TouchEvent) ? e.touches[0] : e
-        return this.chartElements.xScale.invert(d3.pointer(expectedEvent)[0]);
+        return this.chartElements.xScale.invert(d3.pointers(e)[0][0]);
     }
 }
