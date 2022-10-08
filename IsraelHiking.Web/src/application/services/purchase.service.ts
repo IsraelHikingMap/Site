@@ -70,12 +70,10 @@ export class PurchaseService {
             this.loggingService.info("[Store] logged in: " + userInfo.id);
             this.store.applicationUsername = userInfo.id;
             this.store.refresh();
-            this.offlineFilesDownloadService.isAvailable().then((isAvailble) => {
-                if (isAvailble !== undefined) {
-                    this.loggingService.debug("[Store] Product is available from server: " + isAvailble);
-                    this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble }));
-                } else {
-                    this.loggingService.debug("[Store] Unable to determine product availibility from server...");
+            this.offlineFilesDownloadService.isExpired().then((isExpired) => {
+                if (isExpired) {
+                    this.loggingService.debug("[Store] Product is expired from server");
+                    this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: false }));
                 }
             });
         });

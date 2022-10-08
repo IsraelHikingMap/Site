@@ -141,15 +141,15 @@ export class OfflineFilesDownloadService {
         return fileNames as Record<string, string>;
     }
 
-    public async isAvailable(): Promise<boolean | undefined> {
+    public async isExpired(): Promise<boolean> {
         try {
             await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
                 params: { lastModified: null }
             }).pipe(timeout(5000)));
-            return true;
+            return false;
         } catch (ex) {
             let typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
-            return typeAndMessage.type === "server" && typeAndMessage.statusCode === 403 ? false : undefined;
+            return typeAndMessage.type === "server" && typeAndMessage.statusCode === 403;
         }
 
     }
