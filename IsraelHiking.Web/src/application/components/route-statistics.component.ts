@@ -398,15 +398,14 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     private onMouseDown = (e: Event) => {
         this.chartElements.dragState = "start";
         this.subRouteRange = {
-            xStart: this.chartElements.xScale.invert(d3.pointer(e)[0]),
+            xStart: this.getMouseOrTouchChartXPosition(e),
             xEnd: null
         };
     };
 
     private onMouseMove = (e: Event) => {
         e.stopPropagation();
-        let chartXCoordinate = d3.pointer(e)[0];
-        let xPosition = this.chartElements.xScale.invert(chartXCoordinate);
+        let xPosition = this.getMouseOrTouchChartXPosition(e);
         let point = this.routeStatisticsService.interpolateStatistics(this.statistics, xPosition);
         if (this.chartElements.dragState === "none") {
             this.showChartHover(point);
@@ -1022,5 +1021,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         // eslint-disable-next-line
         return  "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    private getMouseOrTouchChartXPosition(e: Event): number {
+        let expectedEvent = (window.TouchEvent && e instanceof TouchEvent) ? e.touches[0] : e
+        return this.chartElements.xScale.invert(d3.pointer(expectedEvent)[0]);
     }
 }

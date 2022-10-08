@@ -402,6 +402,6 @@ export class RouteEditRouteInteraction {
     }
 
     private isTouchesBiggerThan(event: Event, touches: number): boolean {
-        return (window as any).TouchEvent && event instanceof TouchEvent && event.touches.length > touches;
+        return window.TouchEvent && event instanceof TouchEvent && event.touches.length > touches;
     }
 }
