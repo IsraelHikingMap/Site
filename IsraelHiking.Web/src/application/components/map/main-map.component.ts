@@ -143,9 +143,6 @@ export class MainMapComponent extends BaseMapComponent {
     }
 
     public pitchChanged() {
-        if (this.runningContextService.isIos) {
-            return;
-        }
         let pitch = this.mapComponent.mapInstance.getPitch();
         if (pitch <= 10 && !this.isTerrainOn) {
             // Terrain is off and pitch is low, nothing to do.
