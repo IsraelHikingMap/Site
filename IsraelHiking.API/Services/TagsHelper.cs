@@ -23,7 +23,7 @@ namespace IsraelHiking.API.Services
             _categories = new List<Category>();
             _options = optionsProvider.Value;
 
-            // ORDER IS IMPORTNAT FOR UI //
+            // ORDER IS IMPORTANT FOR UI //
             _categories.Add(CreateWaterCategory());
             _categories.Add(CreateHistoricCategory());
             _categories.Add(CreateViewpointCategory());
@@ -55,8 +55,8 @@ namespace IsraelHiking.API.Services
             };
             waterCategory.Items.Add(new IconAndTags(springIcon, new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("natural", "spring"),
-                new KeyValuePair<string, string>("water", "pond")
+                new("natural", "spring"),
+                new("water", "pond")
             }));
             var waterfallIcon = new IconColorCategory
             {
@@ -114,7 +114,7 @@ namespace IsraelHiking.API.Services
                 Category = Categories.HISTORIC,
                 Color = "#666666",
                 Icon = "icon-archaeological",
-                Label = "Archeological Site"
+                Label = "Archaeological Site"
             };
             historicCategory.Items.Add(new IconAndTags(archaeologicalSiteIcon, "historic", "archaeological_site"));
             var memorialIcon = new IconColorCategory
@@ -126,8 +126,8 @@ namespace IsraelHiking.API.Services
             };
             historicCategory.Items.Add(new IconAndTags(memorialIcon, new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("historic", "memorial"),
-                new KeyValuePair<string, string>("historic", "monument"),
+                new("historic", "memorial"),
+                new("historic", "monument"),
             }));
             return historicCategory;
         }
@@ -163,9 +163,9 @@ namespace IsraelHiking.API.Services
             };
             campingCategory.Items.Add(new IconAndTags(iconPicnic, new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("tourism", "picnic_site"),
-                new KeyValuePair<string, string>("leisure", "picnic"),
-                new KeyValuePair<string, string>("leisure", "picnic_table"),
+                new("tourism", "picnic_site"),
+                new("leisure", "picnic"),
+                new("leisure", "picnic_table"),
             }));
             var campsiteIcon = new IconColorCategory("icon-campsite", Categories.CAMPING, "#734a08", "Campsite");
             campingCategory.Items.Add(new IconAndTags(campsiteIcon, "tourism", "camp_site"));
@@ -183,8 +183,8 @@ namespace IsraelHiking.API.Services
             var caveIcon = new IconColorCategory("icon-cave", Categories.NATURAL, "black", "Cave");
             naturalCategory.Items.Add(new IconAndTags(caveIcon, new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("natural", "cave_entrance"),
-                new KeyValuePair<string, string>("historic", "tomb")
+                new("natural", "cave_entrance"),
+                new("historic", "tomb")
             }));
 
             var treeIcon = new IconColorCategory("icon-tree", Categories.NATURAL, "#008000", "Tree");
@@ -217,9 +217,9 @@ namespace IsraelHiking.API.Services
             otherCategory.Items.Add(new IconAndTags(natureReserveIcon,
                 new List<KeyValuePair<string, string>>
                 {
-                    new KeyValuePair<string, string>("boundary", "protected_area"),
-                    new KeyValuePair<string, string>("leisure", "nature_reserve"),
-                    new KeyValuePair<string, string>("boundary", "national_park")
+                    new("boundary", "protected_area"),
+                    new("leisure", "nature_reserve"),
+                    new("boundary", "national_park")
                 }));
 
             return otherCategory;
@@ -264,10 +264,10 @@ namespace IsraelHiking.API.Services
 
             noneCategory.Items.Add(new IconAndTags(new IconColorCategory(), new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("landuse", "farmyard"),
-                new KeyValuePair<string, string>("waterway", "stream"),
-                new KeyValuePair<string, string>("waterway", "river"),
-                new KeyValuePair<string, string>("waterway", "wadi")
+                new("landuse", "farmyard"),
+                new("waterway", "stream"),
+                new("waterway", "river"),
+                new("waterway", "wadi")
             }));
             return noneCategory;
         }
@@ -283,7 +283,7 @@ namespace IsraelHiking.API.Services
             var hikeIcon = new IconColorCategory("icon-hike", Categories.ROUTE_HIKE);
             hikeCategory.Items.Add(new IconAndTags(hikeIcon, new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("route", "hiking")
+                new("route", "hiking")
             }));
             var bikeCategory = new Category
             {
@@ -294,8 +294,8 @@ namespace IsraelHiking.API.Services
             var bikeIcon = new IconColorCategory("icon-bike", Categories.ROUTE_BIKE);
             bikeCategory.Items.Add(new IconAndTags(bikeIcon, new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("route", "bicycle"),
-                new KeyValuePair<string, string>("route", "mtb")
+                new("route", "bicycle"),
+                new("route", "mtb")
             }));
             var fourWheelDriveCategory = new Category
             {

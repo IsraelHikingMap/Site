@@ -377,7 +377,7 @@ export class ResourcesService {
     public legendViewpoint: string;
     public legendPeak: string;
     public legendRuins: string;
-    public legendArcheologicalSite: string;
+    public legendArchaeologicalSite: string;
     public legendCave: string;
     public legendAttraction: string;
     public legendTree: string;
@@ -860,7 +860,7 @@ export class ResourcesService {
         this.legendViewpoint = this.gettextCatalog.getString("Viewpoint");
         this.legendPeak = this.gettextCatalog.getString("Peak");
         this.legendRuins = this.gettextCatalog.getString("Ruins");
-        this.legendArcheologicalSite = this.gettextCatalog.getString("Archeological Site");
+        this.legendArchaeologicalSite = this.gettextCatalog.getString("Archaeological Site");
         this.legendCave = this.gettextCatalog.getString("Cave");
         this.legendAttraction = this.gettextCatalog.getString("Attraction");
         this.legendTree = this.gettextCatalog.getString("Tree");

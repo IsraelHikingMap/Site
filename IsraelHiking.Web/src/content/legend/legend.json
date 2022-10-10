@@ -632,7 +632,7 @@
         "link": "osm-tag-link"
       },
       {
-        "key": "legendArcheologicalSite",
+        "key": "legendArchaeologicalSite",
         "latlng": {
           "lat": 30.7880108,
           "lng": 34.734390
