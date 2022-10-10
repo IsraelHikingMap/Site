@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess
 {
@@ -12,6 +13,7 @@ namespace IsraelHiking.DataAccess
     public class OsmLatestFileGateway : IOsmLatestFileGateway
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger _logger;
         private readonly ConfigurationData _options;
 
         /// <summary>
@@ -19,10 +21,13 @@ namespace IsraelHiking.DataAccess
         /// </summary>
         /// <param name="options"></param>
         /// <param name="httpClientFactory"></param>
+        /// <param name="logger"></param>
         public OsmLatestFileGateway(IOptions<ConfigurationData> options, 
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            ILogger logger)
         {
             _httpClientFactory = httpClientFactory;
+            _logger = logger;
             _options = options.Value;
         }
         
@@ -31,8 +36,10 @@ namespace IsraelHiking.DataAccess
         public async Task<Stream> Get()
         {
             var client = _httpClientFactory.CreateClient();
+            _logger.LogInformation($"Starting to fetch OSM file from {_options.OsmFileAddress}");
             client.Timeout = TimeSpan.FromMinutes(20);
             var response = await client.GetAsync(_options.OsmFileAddress);
+            _logger.LogInformation($"Finished fetching OSM file from {_options.OsmFileAddress}");
             return await response.Content.ReadAsStreamAsync();
         }
     }
