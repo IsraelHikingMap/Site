@@ -11,11 +11,7 @@
         {
         }
 
-        public IconColorCategory(string icon) : this(icon, Categories.NONE)
-        {
-        }
-
-        public IconColorCategory(string icon, string category) : this(icon, category, "black", string.Empty)
+        public IconColorCategory(string icon, string category = Categories.NONE) : this(icon, category, "black", string.Empty)
         {
         }
 

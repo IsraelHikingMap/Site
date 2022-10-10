@@ -332,6 +332,10 @@ namespace IsraelHiking.API.Services
             {
                 return (1, new IconColorCategory("icon-wikipedia-w", Categories.WIKIPEDIA));
             }
+            if (attributesTable.GetNames().Any(k => k == "mtb:name"))
+            {
+                return (1, new IconColorCategory("icon-bike"));
+            }
             if (attributesTable.GetNames().Any(k => k == "highway"))
             {
                 var icon = attributesTable["highway"].ToString() == "bus_stop"

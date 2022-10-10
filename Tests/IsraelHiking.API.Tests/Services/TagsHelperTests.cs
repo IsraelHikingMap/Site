@@ -26,7 +26,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void RegularPlace_ShouldReturnHomeIconNoneCategory()
         {
-            (var factor, var iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
             {
                 {"place", "place"}
             });
@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void PlaceWithWikipediaTag_ShouldReturnHomeIconWikipediaCategory()
         {
-            (var factor, var iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
             {
                 {"place", "place"},
                 {"wikipedia", "wiki title" }
@@ -53,7 +53,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void Spring_ShouldReturnTintIconWaterCategory()
         {
-            (var factor, var iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
             {
                 {"natural", "spring"},
                 {"wikipedia", "wiki title" }
@@ -67,7 +67,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void WikipediaOnly_ShouldReturnWikipediaIconWikipediaCategory()
         {
-            (var factor, var iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
             {
                 {"wikipedia", "wiki title" }
             });
@@ -80,7 +80,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void BusStop_ShouldReturnBusStopIconNoneCategory()
         {
-            (var factor, var iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
             {
                 {"highway", "bus_stop"}
             });
@@ -91,9 +91,9 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
-        public void Street_ShouldReturnSignesIconNoneCategory()
+        public void Street_ShouldReturnSignsIconNoneCategory()
         {
-            (var factor, var iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
             {
                 {"highway", "residential"}
             });
@@ -106,10 +106,23 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void Nothing_ShouldReturnEmptyIconNoneCategory()
         {
-            (var factor, var iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable());
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable());
 
             Assert.AreEqual(_configuration.SearchFactor, factor);
             Assert.AreEqual(string.Empty, iconColorCategory.Icon);
+            Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
+        }
+
+        [TestMethod]
+        public void AWayWithMtbName_ShouldReturnBikeIconWithFactorOne()
+        {
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            {
+                {"mtb:name", "some-name"}
+            });
+
+            Assert.AreEqual(1, factor);
+            Assert.AreEqual("icon-bike", iconColorCategory.Icon);
             Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
         }
     }

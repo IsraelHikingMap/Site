@@ -188,14 +188,19 @@ namespace IsraelHiking.DataAccess
                 s.Index(OSM_POIS_ALIAS)
                 .Size(100)
                 .Query(q => 
-                    q.Match(mm => 
+                    q.MatchPhrase(mm => 
                         mm.Query(searchTerm)
                         .Field($"{PROPERTIES}.{FeatureAttributes.NAME}")
                     ) 
                     ||
-                    q.Match(mm => 
+                    q.MatchPhrase(mm => 
                         mm.Query(searchTerm)
                             .Field($"{PROPERTIES}.{FeatureAttributes.NAME}:{language}")
+                    )
+                    ||
+                    q.MatchPhrase(mm => 
+                        mm.Query(searchTerm)
+                            .Field($"{PROPERTIES}.{FeatureAttributes.POI_NAMES}.{Languages.ALL}")
                     )
                 )
             );
