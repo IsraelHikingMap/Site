@@ -75,6 +75,14 @@ export class TracesService {
                 } else {
                     this.ngRedux.dispatch(new AddTraceAction({ trace: traceJson }));
                 }
+                if (traceJson.visibility === "private") {
+                    traceJson.visibility = "trackable";
+                    this.updateTrace(traceJson);
+                }
+                if (traceJson.visibility === "public") {
+                    traceJson.visibility = "identifiable";
+                    this.updateTrace(traceJson);
+                }
             }
             for (let trace of existingTraces.filter(t => t.visibility !== "local")) {
                 if (traces.find(t => t.id === trace.id) == null) {
