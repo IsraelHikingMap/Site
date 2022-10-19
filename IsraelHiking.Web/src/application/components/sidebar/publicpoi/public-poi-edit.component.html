@@ -1,11 +1,11 @@
 ﻿<div [dir]="resources.direction">
-    <mat-card-header *ngIf="!isPoint()">
+    <mat-card-header *ngIf="!info.canEditTitle">
         <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
             <span class="text-large" [dir]="resources.getDirection(info.title)">{{info.title}}</span>
         </mat-card-title>
     </mat-card-header>
     <div fxLayout="row">
-        <mat-form-field fxFill *ngIf="isPoint()">
+        <mat-form-field fxFill *ngIf="info.canEditTitle">
             <input matInput type="text" [dir]="resources.getDirection(info.title)" [(ngModel)]="info.title" placeholder="{{resources.nameInLanguage}}" fxFill />
         </mat-form-field>
     </div>

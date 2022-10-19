@@ -630,6 +630,12 @@ export class PoiService {
         if (feature.properties.name) {
             return feature.properties.name;
         }
+        if (feature.properties["mtb:name:"+ language]) {
+            return feature.properties["mtb:name:"+ language];
+        }
+        if (feature.properties["mtb:name"]) {
+            return feature.properties["mtb:name"];
+        }
         return "";
     }
 
@@ -803,6 +809,7 @@ export class PoiService {
             imagesUrls: Object.keys(feature.properties).filter(k => k.startsWith("image")).map(k => feature.properties[k]),
             urls: Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => feature.properties[k]),
             isPoint: feature.geometry.type === "Point" || feature.geometry.type === "MultiPoint",
+            canEditTitle: !feature.properties.poiMerged && !feature.properties["mtb:name"],
             lengthInKm: (feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString")
                 ? SpatialService.getLengthInMetersForGeometry(feature.geometry) / 1000.0
                 : null

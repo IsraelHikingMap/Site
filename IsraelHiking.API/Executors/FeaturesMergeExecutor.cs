@@ -426,8 +426,9 @@ namespace IsraelHiking.API.Executors
                 featureToMergeTo.Attributes[FeatureAttributes.POI_ICON_COLOR] =
                     feature.Attributes[FeatureAttributes.POI_ICON_COLOR];
             }
-
-            // adding names of merged feature
+            
+            featureToMergeTo.Attributes.AddOrUpdate(FeatureAttributes.POI_MERGED, true);
+            // adding attributes of merged feature
             MergeGeometry(featureToMergeTo, feature);
             MergeTitles(featureToMergeTo, feature);
             MergeDescriptionAndAuthor(featureToMergeTo, feature);

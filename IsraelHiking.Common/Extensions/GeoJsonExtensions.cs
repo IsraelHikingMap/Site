@@ -245,10 +245,11 @@ namespace IsraelHiking.Common.Extensions
                    feature.HasExtraData(language);
         }
 
-        public static bool HasExtraData(this IFeature feature, string language)
+        private static bool HasExtraData(this IFeature feature, string language)
         {
             return feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language) != string.Empty ||
-                   feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL));
+                   feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL)) ||
+                   feature.Attributes.GetNames().Any(n => n.Contains("mtb:name"));
         }
 
         public static long GetOsmId(this IFeature feature)
