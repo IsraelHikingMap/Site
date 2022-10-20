@@ -141,7 +141,7 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest("There are not enough points in the route");
             }
-            var bytes = await  _dataContainerConverterService.ToAnyFormat(new DataContainerPoco { Routes = new List<RouteData> { routeData } }, FlowFormats.GPX);
+            var bytes = await  _dataContainerConverterService.ToAnyFormat(new DataContainerPoco { Routes = new List<RouteData> { routeData } }, FlowFormats.GPX_SINGLE_TRACK);
             await using var memoryStream = new MemoryStream(bytes);
             var gateway = CreateClient();
             var description = routeData.Name;
