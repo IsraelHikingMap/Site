@@ -4,11 +4,10 @@ export type { LatLngAlt, LatLngAltTime } from "./lat-lng";
 export type { LayerData, EditableLayer, Overlay } from "./layer-data";
 export type { LinkData } from "./link-data";
 export type { MarkerData } from "./marker-data";
-export type { RouteData, RouteStateName } from "./route-data";
+export type { RouteData, RouteEditStateType } from "./route-data";
 export type { RouteSegmentData, RoutingType } from "./route-segment-data";
 export type { ShareUrl } from "./share-url";
 export type { Location } from "./location";
-export type { RouteEditingState } from "./route-editing-state";
 export type { Trace, TraceVisibility } from "./trace";
 export type { OsmUserDetails } from "./osm-user-details";
 export type { UserInfo } from "./user-info";
@@ -16,6 +15,7 @@ export type { Contribution, SearchResultsPointOfInterest, EditablePublicPointDat
 export type { NorthEast } from "./north-east";
 export type { CategoriesGroup, Category, IconColorLabel, CategoriesGroupType } from "./categories-group";
 export type { Language, LanguageCode } from "./language";
+export type { RecordedRoute } from "./recorded-route";
 // states:
 export type { ApplicationState } from "./state/application-state";
 export type { Configuration, BatteryOptimizationType } from "./state/configuration";
@@ -28,3 +28,5 @@ export type { InMemoryState } from "./state/in-memory-state";
 export type { OfflineState } from "./state/offline-state";
 export type { UICompoentsState } from "./state/ui-components-state";
 export type { GpsState, TrackingStateType } from "./state/gps-state";
+export type { RouteEditingState } from "./state/route-editing-state";
+export type { RecordedRouteState } from "./state/recorded-route-state";

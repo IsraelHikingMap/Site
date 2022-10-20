@@ -9,13 +9,12 @@ import { SelectedRouteService } from "../services/selected-route.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { ToastService } from "../services/toast.service";
 import {
-    ChangeEditStateAction,
     ReplaceSegmentsAction,
     ClearPoisAction,
     ClearPoisAndRouteAction,
     DeleteAllRoutesAction
 } from "../reducers/routes.reducer";
-import { SetRouteEditingStateAction, SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
+import { SetRouteEditingStateAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { RoutingType, ApplicationState } from "../models/models";
 
@@ -100,13 +99,6 @@ export class DrawingComponent extends BaseMapComponent {
         return this.isPoiEditActive() || this.isRouteEditActive();
     }
 
-    public isRouteEditDisabled() {
-        let recordingRoute = this.selectedRouteService.getRecordingRoute();
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        return recordingRoute != null && selectedRoute != null &&
-            recordingRoute.id === selectedRoute.id;
-    }
-
     public isRecording() {
         return this.recordedRouteService.isRecording();
     }
@@ -115,10 +107,10 @@ export class DrawingComponent extends BaseMapComponent {
         let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         switch (selectedRoute.state) {
             case "Route":
-                this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "ReadOnly" }));
+                this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
                 break;
             default:
-                this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "Route" }));
+                this.selectedRouteService.changeRouteEditState(selectedRoute.id, "Route");
                 break;
         }
     }
@@ -127,10 +119,10 @@ export class DrawingComponent extends BaseMapComponent {
         let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         switch (selectedRoute.state) {
             case "Poi":
-                this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "ReadOnly" }));
+                this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
                 break;
             default:
-                this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "Poi" }));
+                this.selectedRouteService.changeRouteEditState(selectedRoute.id, "Poi");
                 break;
         }
     }
@@ -145,14 +137,12 @@ export class DrawingComponent extends BaseMapComponent {
     public undo() {
         this.ngRedux.dispatch(ActionCreators.undo());
         // Undo can change the route editing state but doesn't affect the selected route...
-        // HM TODO: should selected route be part of the routes undo object?
         this.selectedRouteService.syncSelectedRouteWithEditingRoute();
     }
 
     private redo() {
         this.ngRedux.dispatch(ActionCreators.redo());
         // Undo can change the route editing state but doesn't affect the selected route...
-        // HM TODO: should selected route be part of the routes undo object?
         this.selectedRouteService.syncSelectedRouteWithEditingRoute();
     }
 

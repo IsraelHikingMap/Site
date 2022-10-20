@@ -22,18 +22,18 @@ interface Link {
 
 interface Wpt {
     $: { lat: string; lon: string };
-    name?: string;
-    ele: string;
-    time?: string;
-    desc?: string;
-    type?: string;
-    link?: Link[];
+    name?: string;
+    ele: string;
+    time?: string;
+    desc?: string;
+    type?: string;
+    link?: Link[];
 }
 
 interface Rte {
-   name: string;
-   desc: string;
-   rtept: Wpt[];
+    name: string;
+    desc: string;
+    rtept: Wpt[];
 }
 
 interface TrkSegExtension {
@@ -41,8 +41,8 @@ interface TrkSegExtension {
 }
 
 interface TrkSeg {
-   trkpt: Wpt[];
-   extensions?: TrkSegExtension;
+    trkpt: Wpt[];
+    extensions?: TrkSegExtension;
 }
 
 interface TrkExtension {
@@ -52,10 +52,10 @@ interface TrkExtension {
 }
 
 interface Trk {
-   name: string;
-   desc: string;
-   trkseg: TrkSeg[];
-   extensions?: TrkExtension;
+    name: string;
+    desc: string;
+    trkseg: TrkSeg[];
+    extensions?: TrkExtension;
 }
 
 interface Bounds {
@@ -67,16 +67,16 @@ interface Metadata {
 }
 
 interface Gpx {
-   trk: Trk[];
-   rte: Rte[];
-   wpt: Wpt[];
+    trk: Trk[];
+    rte: Rte[];
+    wpt: Wpt[];
     metadata: Metadata;
     $: { version: string; creator: string; xmlns: string };
 }
 
 @Injectable()
 export class GpxDataContainerConverterService {
-    public static SplitRouteSegments(routeData: RouteData): void {
+    public static splitRouteSegments(routeData: RouteData): void {
         if (routeData.segments.length > 2) {
             return;
         }
@@ -243,26 +243,26 @@ export class GpxDataContainerConverterService {
         });
         this.convertToArrays(gpxJsonObject);
         this.updateBoundingBox(gpxJsonObject);
-        let dataContainer = {
-            overlays: [],
-            baseLayer: null,
-            routes: this.convertRoutesToRoutesData(gpxJsonObject.rte)
-        } as DataContainer;
-        dataContainer.routes = dataContainer.routes.concat(this.convertTracksToRouteData(gpxJsonObject.trk));
-        let markers = gpxJsonObject.wpt.map(p => ({
-            description: typeof p.desc === "string" ? p.desc : JSON.stringify(p.desc),
-            latlng: { lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele },
-            title: p.name,
-            type: p.type || "",
-            urls: p.link.map(l => ({ mimeType: l.type || "text/html", text: l.text, url: l.$.href } as LinkData))
-        } as MarkerData));
-        if (markers.length > 0) {
-            if (dataContainer.routes.length === 0) {
-                let name = (markers.length === 1 ? markers[0].title : "Markers") || "Markers";
-                dataContainer.routes.push({ name, description: markers[0].description, segments: [] } as RouteData);
-            }
-            dataContainer.routes[0].markers = markers;
-        }
+        let dataContainer = {
+            overlays: [],
+            baseLayer: null,
+            routes: this.convertRoutesToRoutesData(gpxJsonObject.rte)
+        } as DataContainer;
+        dataContainer.routes = dataContainer.routes.concat(this.convertTracksToRouteData(gpxJsonObject.trk));
+        let markers = gpxJsonObject.wpt.map(p => ({
+        description: typeof p.desc === "string" ? p.desc : JSON.stringify(p.desc),
+        latlng: { lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele },
+        title: p.name,
+        type: p.type || "",
+            urls: p.link.map(l => ({ mimeType: l.type || "text/html", text: l.text, url: l.$.href } as LinkData))
+        } as MarkerData));
+        if (markers.length > 0) {
+        if (dataContainer.routes.length === 0) {
+            let name = (markers.length === 1 ? markers[0].title : "Markers") || "Markers";
+            dataContainer.routes.push({ name, description: markers[0].description, segments: [] } as RouteData);
+        }
+        dataContainer.routes[0].markers = markers;
+        }
 
         dataContainer.northEast = { lat: +gpxJsonObject.metadata.bounds.$.maxlat, lng: +gpxJsonObject.metadata.bounds.$.maxlon };
         dataContainer.southWest = { lat: +gpxJsonObject.metadata.bounds.$.minlat, lng: +gpxJsonObject.metadata.bounds.$.minlon };
@@ -280,93 +280,93 @@ export class GpxDataContainerConverterService {
                 routePoint: firstLatlng as LatLngAlt,
                 routingType: "Hike"
             } as RouteSegmentData);
-            GpxDataContainerConverterService.SplitRouteSegments(route);
+            GpxDataContainerConverterService.splitRouteSegments(route);
         }
 
-        return dataContainer;
-    }
+        return dataContainer;
+    }
 
-    private convertToArrays(gpx: Gpx) {
-        if (!gpx.rte) {
-            gpx.rte = [];
-        }
-        if (!Array.isArray(gpx.rte)) {
-            gpx.rte = [gpx.rte];
-        }
-        for (let rte of gpx.rte) {
-            if (rte.rtept && !Array.isArray(rte.rtept)) {
-                rte.rtept = [rte.rtept];
-            }
-        }
-        if (!gpx.wpt) {
-            gpx.wpt = [];
-        }
-        if (!Array.isArray(gpx.wpt)) {
-            gpx.wpt = [gpx.wpt];
-        }
-        for (let wpt of gpx.wpt) {
-            if (!wpt.link) {
-                wpt.link = [];
-            }
-            if (!Array.isArray(wpt.link)) {
-                wpt.link = [wpt.link];
-            }
-        }
-        if (!gpx.trk) {
-            gpx.trk = [];
-        }
-        if (!Array.isArray(gpx.trk)) {
-            gpx.trk = [gpx.trk];
-        }
-        for (let trk of gpx.trk) {
-            if (trk.trkseg && !Array.isArray(trk.trkseg)) {
-                trk.trkseg = [trk.trkseg];
-            }
-        }
-    }
+    private convertToArrays(gpx: Gpx) {
+        if (!gpx.rte) {
+            gpx.rte = [];
+        }
+        if (!Array.isArray(gpx.rte)) {
+            gpx.rte = [gpx.rte];
+        }
+        for (let rte of gpx.rte) {
+            if (rte.rtept && !Array.isArray(rte.rtept)) {
+                rte.rtept = [rte.rtept];
+            }
+        }
+        if (!gpx.wpt) {
+            gpx.wpt = [];
+        }
+        if (!Array.isArray(gpx.wpt)) {
+            gpx.wpt = [gpx.wpt];
+        }
+        for (let wpt of gpx.wpt) {
+            if (!wpt.link) {
+                wpt.link = [];
+            }
+            if (!Array.isArray(wpt.link)) {
+                wpt.link = [wpt.link];
+            }
+        }
+        if (!gpx.trk) {
+            gpx.trk = [];
+        }
+        if (!Array.isArray(gpx.trk)) {
+            gpx.trk = [gpx.trk];
+        }
+        for (let trk of gpx.trk) {
+            if (trk.trkseg && !Array.isArray(trk.trkseg)) {
+                trk.trkseg = [trk.trkseg];
+            }
+        }
+    }
 
-    private updateBoundingBox(gpx: Gpx): void {
-        if (gpx.metadata != null && gpx.metadata.bounds != null &&
-            +gpx.metadata.bounds.$.minlat !== 0.0 &&
-            +gpx.metadata.bounds.$.maxlat !== 0.0 &&
-            +gpx.metadata.bounds.$.minlon !== 0.0 &&
-            +gpx.metadata.bounds.$.maxlon !== 0.0) {
-            return;
-        }
-        let points = flatten((gpx.rte || []).filter(r => r.rtept != null).map(r => r.rtept));
-        points = points.concat(gpx.wpt || []);
-        points = points.concat(
-            flatten(flatten((gpx.trk || []).filter(t => t != null && t.trkseg != null).map(t => t.trkseg)).map(s => s.trkpt))
-        );
-        if (points.length === 0) {
-            return;
-        }
-        if (gpx.metadata == null || gpx.metadata.bounds == null) {
-            gpx.metadata = {
-                bounds: {} as Bounds
-            };
-        }
-        gpx.metadata.bounds = {
+    private updateBoundingBox(gpx: Gpx): void {
+        if (gpx.metadata != null && gpx.metadata.bounds != null &&
+            +gpx.metadata.bounds.$.minlat !== 0.0 &&
+            +gpx.metadata.bounds.$.maxlat !== 0.0 &&
+            +gpx.metadata.bounds.$.minlon !== 0.0 &&
+            +gpx.metadata.bounds.$.maxlon !== 0.0) {
+            return;
+        }
+        let points = flatten((gpx.rte || []).filter(r => r.rtept != null).map(r => r.rtept));
+        points = points.concat(gpx.wpt || []);
+        points = points.concat(
+            flatten(flatten((gpx.trk || []).filter(t => t != null && t.trkseg != null).map(t => t.trkseg)).map(s => s.trkpt))
+        );
+        if (points.length === 0) {
+            return;
+        }
+        if (gpx.metadata == null || gpx.metadata.bounds == null) {
+            gpx.metadata = {
+                bounds: {} as Bounds
+            };
+        }
+        gpx.metadata.bounds = {
             $: {
                 maxlat: maxBy(points, p => + p.$.lat).$.lat.toString(),
                 maxlon: maxBy(points, p => +p.$.lon).$.lon.toString(),
                 minlat: minBy(points, p => +p.$.lat).$.lat.toString(),
                 minlon: minBy(points, p => +p.$.lon).$.lon.toString()
             }
-        };
-    }
+        };
+    }
 
-    private convertRoutesToRoutesData(routes: Rte[]): RouteData[] {
-        return routes.filter(r => r.rtept != null && r.rtept.length > 0).map(r => ({
-            name: r.name,
-            description: r.desc,
-            segments: [{
-                latlngs: r.rtept.map(p => ({ lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele })),
-                routePoint: last(r.rtept.map(p => ({ lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele })))
+    private convertRoutesToRoutesData(routes: Rte[]): RouteData[] {
+        return routes.filter(r => r.rtept != null && r.rtept.length > 0).map(r => ({
+            name: r.name,
+            description: r.desc,
+            segments: [{
+                latlngs: r.rtept.map(p => ({ lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele })),
+                routePoint: last(r.rtept.map(p => ({ lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele })))
             }],
             markers: []
-        } as RouteData));
-    }
+        } as RouteData));
+    }
 
     private convertTracksToRouteData(trks: Trk[]): RouteData[] {
         return trks.filter(t => t.trkseg != null && t.trkseg.length > 0).map(t => {

@@ -1,12 +1,13 @@
 import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
+import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import type { MarkerData, LinkData } from "../../models/models";
+import type { MarkerData, LinkData, ApplicationState } from "../../models/models";
 
 @Component({
     selector: "private-poi-overlay",
@@ -20,7 +21,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
     public marker: MarkerData;
 
     @Input()
-    public routeId: string;
+    public routeId?: string;
 
     @Input()
     public index: number;
@@ -32,7 +33,8 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
 
     constructor(resources: ResourcesService,
                 private readonly matDialog: MatDialog,
-                private readonly selectedRouteService: SelectedRouteService) {
+                private readonly selectedRouteService: SelectedRouteService,
+                private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
     }
 
@@ -42,6 +44,12 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
 
     public overlayClick(event: Event) {
         event.stopPropagation();
+
+        if (!this.routeId) {
+            PrivatePoiEditDialogComponent.openDialogRecording(this.matDialog, this.ngRedux, this.marker, this.index);
+            return;
+        }
+
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
             return;
@@ -54,7 +62,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
             return;
         }
         if (selectedRoute.state === "Poi") {
-            PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker, this.routeId, this.index);
+            PrivatePoiEditDialogComponent.openDialogPrivatePoi(this.matDialog, this.ngRedux, this.marker, this.routeId, this.index);
         }
     }
 }

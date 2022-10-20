@@ -5,6 +5,7 @@ import type {
     Configuration,
     Location,
     RouteEditingState,
+    RecordedRouteState,
     TracesState,
     LayersState,
     ShareUrlsState,
@@ -21,6 +22,7 @@ export type ApplicationState = {
     location: Location;
     routes: StateWithHistory<RouteData[]>;
     routeEditingState: RouteEditingState;
+    recordedRouteState: RecordedRouteState;
     tracesState: TracesState;
     layersState: LayersState;
     shareUrlsState: ShareUrlsState;

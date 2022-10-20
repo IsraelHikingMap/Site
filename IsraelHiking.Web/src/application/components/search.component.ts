@@ -26,7 +26,7 @@ import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
 import { RoutesFactory } from "../services/routes.factory";
 import { SpatialService } from "../services/spatial.service";
-import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
+import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import type { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt, SearchResultsPointOfInterest } from "../models/models";
 

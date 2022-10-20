@@ -10,6 +10,9 @@
         <i *ngIf="!isRecording()" class="fa fa-lg icon-circle recording-button"></i>
         <i *ngIf="isRecording()" class="fa fa-lg icon-square"></i>
     </button>
+    <button mat-button *ngIf="isRecording()" (click)="toggleAddRecordingPoi()" [class.active]="isAddingRecordingPoi()" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle add recording POI">
+        <i class="fa fa-lg icon-map-marker" [style.color]="resources.recordedRouteColor"></i>
+    </button>
 </div>
 
 <mgl-geojson-source id="location-source" [data]="locationFeatures"></mgl-geojson-source>

@@ -16,7 +16,7 @@ import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
-import type { LatLngAlt, RouteData, ApplicationState, Language } from "../models/models";
+import type { LatLngAlt, RouteData, ApplicationState, Language, LatLngAltTime } from "../models/models";
 
 declare type DragState = "start" | "drag" | "none";
 
@@ -254,9 +254,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }));
         this.routeChanged();
         this.componentSubscriptions.push(interval(1000).subscribe(() => {
-            let recordingRoute = this.selectedRouteService.getRecordingRoute();
-            if (recordingRoute) {
-                this.updateDurationString((new Date().getTime() - recordingRoute.segments[0].latlngs[0].timestamp.getTime()) / 1000);
+            if (this.ngRedux.getState().recordedRouteState.isRecording) {
+                let recordingStartTime = this.ngRedux.getState().recordedRouteState.route.latlngs[0].timestamp.getTime();
+                this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
             }
         }));
         this.audioPlayer = await this.audioPlayerFactory.create();
@@ -553,7 +553,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("r", 5)
             .attr("fill", "none")
             .attr("stroke-width", 3)
-            .attr("stroke", SelectedRouteService.RECORDING_ROUTE_COLOR);
+            .attr("stroke", this.resources.recordedRouteColor);
 
         this.chartElements.locationGroup.append("line")
             .attr("class", "location-line")
@@ -561,7 +561,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("x1", 0)
             .attr("x2", 0)
             .attr("y2", this.chartElements.height)
-            .attr("stroke", SelectedRouteService.RECORDING_ROUTE_COLOR)
+            .attr("stroke", this.resources.recordedRouteColor)
             .attr("stroke-width", 2);
     }
 
@@ -739,11 +739,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (this.isKmMarkersOn === false) {
             return;
         }
-        if (route.segments.length <= 0) {
+        if (route.latlngs.length <= 0) {
             return;
         }
 
-        let points = this.getKmPoints(route);
+        let points = this.getKmPoints(route.latlngs);
         let features = [] as GeoJSON.Feature<GeoJSON.Point>[];
         for (let i = 0; i < points.length; i++) {
             features.push({
@@ -761,34 +761,31 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         };
     }
 
-    private getKmPoints(routeData: RouteData): LatLngAlt[] {
-
+    private getKmPoints(latlngs: LatLngAlt[]): LatLngAlt[] {
         let length = 0;
         let markersDistance = this.getMarkerDistance() * 1000;
-        let start = routeData.segments[0].routePoint;
+        let start = latlngs[0];
         let results = [start];
         let previousPoint = start;
-        for (let segment of routeData.segments) {
-            for (let latlng of segment.latlngs) {
-                let currentDistance = SpatialService.getDistanceInMeters(previousPoint, latlng);
-                length += currentDistance;
-                if (length < markersDistance) {
-                    previousPoint = latlng;
-                    continue;
-                }
-                let markersToAdd = -1;
-                while (length > markersDistance) {
-                    length -= markersDistance;
-                    markersToAdd++;
-                }
-                let ratio = (currentDistance - length - markersDistance * markersToAdd) / currentDistance;
-                results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, ratio));
-                for (let i = 1; i <= markersToAdd; i++) {
-                    let currentRatio = (i * markersDistance) / currentDistance + ratio;
-                    results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, currentRatio));
-                }
+        for (let latlng of latlngs) {
+            let currentDistance = SpatialService.getDistanceInMeters(previousPoint, latlng);
+            length += currentDistance;
+            if (length < markersDistance) {
                 previousPoint = latlng;
+                continue;
             }
+            let markersToAdd = -1;
+            while (length > markersDistance) {
+                length -= markersDistance;
+                markersToAdd++;
+            }
+            let ratio = (currentDistance - length - markersDistance * markersToAdd) / currentDistance;
+            results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, ratio));
+            for (let i = 1; i <= markersToAdd; i++) {
+                let currentRatio = (i * markersDistance) / currentDistance + ratio;
+                results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, currentRatio));
+            }
+            previousPoint = latlng;
         }
         return results;
     }
@@ -827,7 +824,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
         let start = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xStart));
         let end = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xEnd));
-        let statistics = this.routeStatisticsService.getStatisticsByRange(this.getRouteForChart(), start, end);
+        let latlngs = this.getRouteForChart() ? this.getRouteForChart().latlngs : [];
+        let statistics = this.routeStatisticsService.getStatisticsByRange(latlngs, start, end);
         this.setViewStatisticsValues(statistics);
     }
 
@@ -907,24 +905,43 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
         let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation,
             this.heading);
-        let routeIsRecording = this.selectedRouteService.getRecordingRoute() != null &&
-            this.selectedRouteService.getRecordingRoute().id === route.id;
         this.statistics = this.routeStatisticsService.getStatistics(
-            route,
-            closestRouteToGps,
+            route.latlngs,
+            this.selectedRouteService.getLatlngs(closestRouteToGps),
             currentLocation,
             this.heading,
-            routeIsRecording);
+            this.ngRedux.getState().recordedRouteState.isRecording);
         this.routeColor = closestRouteToGps ? closestRouteToGps.color : route.color;
         this.updateIsFollowing();
         this.setViewStatisticsValues(this.statistics);
     }
 
-    private getRouteForChart() {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+    private getRouteForChart(): { latlngs: LatLngAltTime[]; color: string; weight: number} | null {
         let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
         let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
-        return selectedRoute || closestRouteToGps;
+        if (closestRouteToGps) {
+            return {
+                latlngs: this.selectedRouteService.getLatlngs(closestRouteToGps),
+                color: closestRouteToGps.color,
+                weight: closestRouteToGps.weight
+            };
+        }
+        if (this.ngRedux.getState().recordedRouteState.isRecording) {
+            return {
+                latlngs: this.ngRedux.getState().recordedRouteState.route.latlngs,
+                color: this.resources.recordedRouteColor,
+                weight: 6
+            };
+        }
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute) {
+            return {
+                latlngs: this.selectedRouteService.getLatlngs(selectedRoute),
+                color: selectedRoute.color,
+                weight: selectedRoute.weight
+            };
+        }
+        return null;
     }
 
     private getDataFromStatistics(): [number, number][] {
@@ -959,7 +976,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.slopeRoutePaint = {};
         if (!this.isSlopeOn ||
             route == null ||
-            route.segments.length === 0 ||
+            route.latlngs.length === 0 ||
             this.statistics == null ||
             this.statistics.points.length < 2) {
             return;

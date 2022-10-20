@@ -156,7 +156,7 @@ describe("GpxDataContainerConverterService", () => {
                 }
             ]
         } as RouteData;
-        GpxDataContainerConverterService.SplitRouteSegments(routeData);
+        GpxDataContainerConverterService.splitRouteSegments(routeData);
         expect(routeData.segments.length).toBe(2);
     });
 });

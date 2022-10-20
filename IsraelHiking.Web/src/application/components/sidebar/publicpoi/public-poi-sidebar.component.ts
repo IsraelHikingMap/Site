@@ -297,7 +297,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             newRoute.description = this.info.description;
             newRoute.segments = routeData.segments;
             newRoute.markers = routeData.markers;
-            GpxDataContainerConverterService.SplitRouteSegments(newRoute);
+            GpxDataContainerConverterService.splitRouteSegments(newRoute);
             this.ngRedux.dispatch(new AddRouteAction({
                 routeData: newRoute
             }));

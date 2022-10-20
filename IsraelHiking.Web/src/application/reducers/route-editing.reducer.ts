@@ -1,4 +1,3 @@
-import { Action } from "redux";
 import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
 
 import { initialState, BaseAction } from "./initial-state";
@@ -6,8 +5,6 @@ import type { RoutingType, RouteEditingState } from "../models/models";
 
 const SET_ROUTING_TYPE = "SET_ROUTING_TYPE";
 const SET_SELECTED_ROUTE = "SET_SELECTED_ROUTE";
-const START_RECORDING = "START_RECORDING";
-const STOP_RECORDING = "STOP_RECORDING";
 const SET_OPACITY_AND_WEIGHT = "SET_OPACITY_AND_WEIGHT";
 
 export type RoutePayload = {
@@ -35,23 +32,13 @@ export class SetSelectedRouteAction extends BaseAction<RoutePayload> {
     }
 }
 
-export class StartRecordingAction extends BaseAction<RoutePayload> {
-    constructor(payload: RoutePayload) {
-        super(START_RECORDING, payload);
-    }
-}
-
-export class StopRecordingAction implements Action {
-    constructor(public type = STOP_RECORDING) {}
-}
-
 export class SetOpacityAndWeightAction extends BaseAction<SetOpacityAndWeightPayload> {
     constructor(payload: SetOpacityAndWeightPayload) {
         super(SET_OPACITY_AND_WEIGHT, payload);
     }
 }
 
-class RouteEditingStateReducer {
+class RouteEditingReducer {
     @ReduxAction(SET_ROUTING_TYPE)
     public setRoutingType(lastState: RouteEditingState, action: SetRouteEditingStateAction): RouteEditingState {
         return {
@@ -68,22 +55,6 @@ class RouteEditingStateReducer {
         };
     }
 
-    @ReduxAction(START_RECORDING)
-    public startRecording(lastState: RouteEditingState, action: StartRecordingAction): RouteEditingState {
-        return {
-            ...lastState,
-            recordingRouteId: action.payload.routeId
-        };
-    }
-
-    @ReduxAction(STOP_RECORDING)
-    public stopRecording(lastState: RouteEditingState, _: StopRecordingAction): RouteEditingState {
-        return {
-            ...lastState,
-            recordingRouteId: null
-        };
-    }
-
     @ReduxAction(SET_OPACITY_AND_WEIGHT)
     public setOpacityAndWeight(lastState: RouteEditingState, action: SetOpacityAndWeightAction): RouteEditingState {
         return {
@@ -94,4 +65,4 @@ class RouteEditingStateReducer {
     }
 }
 
-export const routeEditingReducer = createReducerFromClass(RouteEditingStateReducer, initialState.routeEditingState);
+export const routeEditingReducer = createReducerFromClass(RouteEditingReducer, initialState.routeEditingState);

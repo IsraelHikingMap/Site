@@ -2,8 +2,8 @@ import { Component, AfterViewInit, ViewEncapsulation } from "@angular/core";
 import { Observable } from "rxjs";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { MapLayerMouseEvent } from "maplibre-gl";
-import invert from "invert-color";
 import { NgRedux, Select } from "@angular-redux2/store";
+import invert from "invert-color";
 
 import { BaseMapComponent } from "../base-map.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
@@ -13,8 +13,17 @@ import { FileService } from "../../services/file.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
 import { Urls } from "../../urls";
-import { ChangeEditStateAction } from "../../reducers/routes.reducer";
-import type { LatLngAlt, ApplicationState, RouteData } from "../../models/models";
+import type { LatLngAlt, ApplicationState, RouteData, RecordedRoute } from "../../models/models";
+
+type RouteViewProperties = {
+    color: string;
+    iconColor: string;
+    iconSize: number;
+    weight: number;
+    opacity: number;
+    name?: string;
+    id?: string;
+};
 
 interface RoutePointViewData {
     latlng: LatLngAlt;
@@ -38,8 +47,11 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     public selectedRouteId$: Observable<RouteData[]>;
 
-    @Select((state: ApplicationState) => state.routeEditingState.recordingRouteId)
-    public routeRecordingId$: Observable<string>;
+    @Select((state: ApplicationState) => state.recordedRouteState.route)
+    public recordedRoute$: Observable<RecordedRoute>;
+
+    @Select((state: ApplicationState) => state.recordedRouteState.isAddingPoi)
+    public isAddingPoi$: Observable<boolean>;
 
     public routePointPopupData: RoutePointViewData;
     public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string};
@@ -70,7 +82,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routeEditRouteInteraction.onRoutePointClick.subscribe(this.handleRoutePointClick);
         this.routes$.subscribe(this.handleRoutesChanges);
         this.selectedRouteId$.subscribe(() => this.handleRoutesChanges(this.routes));
-        this.routeRecordingId$.subscribe(this.buildFeatureCollections);
+        this.recordedRoute$.subscribe(this.buildFeatureCollections);
+        this.isAddingPoi$.subscribe(() => this.setInteractionAccordingToState());
     }
 
     private handleRoutesChanges = (routes: RouteData[]) => {
@@ -90,7 +103,19 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 editingFeatures = this.createFeaturesForEditingRoute(route);
                 continue;
             }
-            features = features.concat(this.createFeaturesForRoute(route));
+            let latlngs = this.selectedRouteService.getLatlngs(route);
+            features = features.concat(this.createFeaturesForRoute(latlngs, this.routeToProperties(route), false));
+        }
+        if (this.ngRedux.getState().recordedRouteState.isRecording) {
+            let latlngs = this.ngRedux.getState().recordedRouteState.route.latlngs;
+            let properties = {
+                color: this.resources.recordedRouteColor,
+                iconColor: invert(this.resources.recordedRouteColor, true),
+                opacity: 1.0,
+                weight: 6,
+                iconSize: 0.5
+            } as RouteViewProperties;
+            features = features.concat(this.createFeaturesForRoute(latlngs, properties, true));
         }
         this.routesGeoJson = {
             type: "FeatureCollection",
@@ -157,27 +182,29 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         return features;
     }
 
-    private createFeaturesForRoute(route: RouteData): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
+    private createFeaturesForRoute(
+        latlngs: LatLngAlt[],
+        routeProperties: RouteViewProperties,
+        isRecordingRoute: boolean): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
         let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];;
-        let coordinatesArray = route.segments.map(s => s.latlngs.map(l => SpatialService.toCoordinate(l)));
-        let routeCoordinates = [].concat.apply([], coordinatesArray as any); // flatten
+        let routeCoordinates = latlngs.map(l => SpatialService.toCoordinate(l));
         if (routeCoordinates.length < 2) {
             return features;
         }
-        let properties = this.routeToProperties(route);
+        let properties = {...routeProperties};
         features.push(
             {
                 type: "Feature",
-                id: route.id,
+                id: routeProperties.id,
                 properties,
                 geometry: {
                     type: "LineString",
                     coordinates: routeCoordinates
                 }
             });
-        properties = this.routeToProperties(route);
+        properties = {...routeProperties};
         properties.color = RoutesComponent.START_COLOR;
-        properties.id = route.id + "_start";
+        properties.id = routeProperties.id + "_start";
         features.push(
             {
                 type: "Feature",
@@ -188,12 +215,12 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                     coordinates: routeCoordinates[0]
                 }
             });
-        if (this.isRouteRecording(route)) {
+        if (isRecordingRoute) {
             return features;
         }
-        properties = this.routeToProperties(route);
+        properties = {...routeProperties};
         properties.color = RoutesComponent.END_COLOR;
-        properties.id = route.id + "_end";
+        properties.id = routeProperties.id + "_end";
         features.push(
             {
                 type: "Feature",
@@ -207,21 +234,16 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         return features;
     }
 
-    private routeToProperties(route: RouteData) {
+    private routeToProperties(route: RouteData): RouteViewProperties {
         let color = route.color;
         let opacity = route.opacity || 1.0;
         let width = route.weight;
-        if (this.isRouteRecording(route)) {
-            color = SelectedRouteService.RECORDING_ROUTE_COLOR;
-            opacity = 1.0;
-            width = 6;
-        }
-        let iconcolor = opacity > 0.5 ? invert(color, true) : color;
-        let iconsize = width < 10 ? 0.5 : 0.5 * width / 10.0;
+        let iconColor = opacity > 0.5 ? invert(color, true) : color;
+        let iconSize = width < 10 ? 0.5 : 0.5 * width / 10.0;
         return {
             color,
-            iconcolor,
-            iconsize,
+            iconColor,
+            iconSize,
             weight: width,
             opacity,
             name: route.name,
@@ -237,13 +259,11 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routeEditRouteInteraction.setActive(false, this.mapComponent.mapInstance);
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.mapComponent.mapInstance.getCanvas().style.cursor = "";
-        if (selectedRoute == null) {
-            return;
-        }
-        if (selectedRoute.state === "Poi") {
+        if (this.ngRedux.getState().recordedRouteState.isAddingPoi ||
+            (selectedRoute && selectedRoute.state === "Poi")) {
             this.routeEditPoiInteraction.setActive(true, this.mapComponent.mapInstance);
             this.mapComponent.mapInstance.getCanvas().style.cursor = "pointer";
-        } else if (selectedRoute.state === "Route") {
+        } else if (selectedRoute && selectedRoute.state === "Route") {
             this.routeEditRouteInteraction.setActive(true, this.mapComponent.mapInstance);
             this.mapComponent.mapInstance.getCanvas().style.cursor = "pointer";
         }
@@ -266,11 +286,6 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     private isEditMode(): boolean {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route");
-    }
-
-    public isRouteRecording(route: RouteData) {
-        let recordingRoute = this.selectedRouteService.getRecordingRoute();
-        return recordingRoute != null && recordingRoute.id === route.id;
     }
 
     public isLast(segmentIndex: number, routeData: RouteData) {
@@ -335,7 +350,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
 
     public switchToEditMode(routeId: string) {
         this.selectedRouteService.setSelectedRoute(routeId);
-        this.ngRedux.dispatch(new ChangeEditStateAction({ routeId, state: "Route" }));
+        this.selectedRouteService.changeRouteEditState(routeId, "Route");
         this.nonEditRoutePointPopupData = null;
     }
 }
