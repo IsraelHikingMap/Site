@@ -49,11 +49,11 @@ namespace IsraelHiking.API.Services
                 FlowFormats.TWL_BABEL_FORMAT,
                 FlowFormats.CSV_BABEL_FORMAT
             };
-            foreach (var supportedGpsBabelInputFromat in supportedGpsBabelFormats)
+            foreach (var supportedGpsBabelInputFormat in supportedGpsBabelFormats)
             {
-                foreach (var supportedGpsBabelOutputFormat in supportedGpsBabelFormats.Where(t => t != supportedGpsBabelInputFromat))
+                foreach (var supportedGpsBabelOutputFormat in supportedGpsBabelFormats.Where(t => t != supportedGpsBabelInputFormat))
                 {
-                    _converterFlowItems.Add(new GpsBabelConverterFlow(_gpsBabelGateway, supportedGpsBabelInputFromat, supportedGpsBabelOutputFormat));
+                    _converterFlowItems.Add(new GpsBabelConverterFlow(_gpsBabelGateway, supportedGpsBabelInputFormat, supportedGpsBabelOutputFormat));
                 }
             }
         }
@@ -63,7 +63,7 @@ namespace IsraelHiking.API.Services
         {
             var gpx = _gpxDataContainerConverter.ToGpx(dataContainer);
             return Convert(gpx.ToBytes(), GPX, format);
-            }
+        }
 
         ///<inheritdoc />
         public async Task<DataContainerPoco> ToDataContainer(byte[] content, string fileName)
