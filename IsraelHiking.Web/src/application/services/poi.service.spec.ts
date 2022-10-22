@@ -612,6 +612,16 @@ describe("Poi Service", () => {
         expect(results).toBe("desc");
     }));
 
+    it("should get title when there's mtb name with language", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getTitle({properties: { "mtb:name:he": "name"}} as any as GeoJSON.Feature, "he");
+        expect(results).toBe("name");
+    }));
+
+    it("should get title when there's mtb name without language", inject([PoiService], (poiService: PoiService) => {
+        let results = poiService.getTitle({properties: { "mtb:name": "name"}} as any as GeoJSON.Feature, "he");
+        expect(results).toBe("name");
+    }));
+
     it("should get title even when there's no title for language description", inject([PoiService], (poiService: PoiService) => {
         let results = poiService.getTitle({properties: { name: "name"}} as any as GeoJSON.Feature, "he");
         expect(results).toBe("name");
