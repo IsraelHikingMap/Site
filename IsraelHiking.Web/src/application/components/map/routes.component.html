@@ -27,12 +27,12 @@
                 'symbol-placement': 'line',
                 'symbol-spacing': 40,
                 'icon-image': 'arrow',
-                'icon-size': ['get', 'iconsize'],
+                'icon-size': ['get', 'iconSize'],
                 'icon-allow-overlap': true,
                 'icon-ignore-placement': true
            }"
            [paint]="{
-                'icon-color': ['get', 'iconcolor']
+                'icon-color': ['get', 'iconColor']
             }">
 </mgl-layer>
 <mgl-layer id="route-points"
@@ -107,3 +107,15 @@
         </div>
     </div>
 </div>
+
+<div *ngIf="(recordedRoute$ | async)">
+    <div *ngFor="let marker of (recordedRoute$ | async).markers; let idx = index">
+        <mgl-marker anchor="bottom"
+                    [draggable]="isAddingPoi$ | async"
+                    [lngLat]="[marker.latlng.lng, marker.latlng.lat]"
+                    (markerDragEnd)="markerDragEnd(idx, $event)">
+            <private-poi-overlay [marker]="marker" [index]="idx" [color]="resources.recordedRouteColor"></private-poi-overlay>
+        </mgl-marker>
+    </div>
+</div>
+

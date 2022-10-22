@@ -14,6 +14,8 @@ import { DeviceOrientationService } from "../services/device-orientation.service
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { ToggleDistanceAction, SetPannedAction } from "../reducers/in-memory.reducer";
 import { ConfigurationActions } from "../reducers/configuration.reducer";
+import { ChangeEditStateAction } from "../reducers/routes.reducer";
+import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import type { LatLngAlt, ApplicationState } from "../models/models";
 
 @Component({
@@ -220,6 +222,18 @@ export class LocationComponent extends BaseMapComponent {
 
     public isLoading() {
         return this.ngRedux.getState().gpsState.tracking === "searching";
+    }
+
+    public isAddingRecordingPoi() {
+        return this.ngRedux.getState().recordedRouteState.isAddingPoi;
+    }
+
+    public toggleAddRecordingPoi() {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
+            this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "ReadOnly" }));
+        }
+        this.ngRedux.dispatch(new ToggleAddRecordingPoiAction());
     }
 
     private handlePositionChange(position: GeolocationPosition) {

@@ -14,7 +14,7 @@ import { RoutesFactory } from "./routes.factory";
 import { RunningContextService } from "./running-context.service";
 import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
-import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
+import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import type { DataContainer, ApplicationState, LayerData } from "../models/models";
 
 @Injectable()

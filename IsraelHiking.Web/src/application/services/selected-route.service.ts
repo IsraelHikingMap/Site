@@ -8,7 +8,8 @@ import { ResourcesService } from "./resources.service";
 import { SpatialService } from "./spatial.service";
 import { RouterService } from "./router.service";
 import { MINIMAL_ANGLE, MINIMAL_DISTANCE } from "./route-statistics.service";
-import { SetSelectedRouteAction } from "../reducers/route-editing-state.reducer";
+import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
+import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import {
     AddRouteAction,
     SplitRouteAction,
@@ -26,26 +27,21 @@ import type {
     RouteSegmentData,
     LatLngAltTime,
     LatLngAlt,
+    RouteEditStateType
 } from "../models/models";
 
 @Injectable()
 export class SelectedRouteService {
-    public static readonly RECORDING_ROUTE_COLOR = "#FF6600";
-
     private static MERGE_THRESHOLD = 50; // meter.
 
     private routes: RouteData[];
     private selectedRouteId: string;
-    private recordingRouteId: string;
 
     @Select((state: ApplicationState) => state.routes.present)
     private routes$: Observable<RouteData[]>;
 
     @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     private selectedRouteId$: Observable<string>;
-
-    @Select((state: ApplicationState) => state.routeEditingState.recordingRouteId)
-    private recordingRouteId$: Observable<string>;
 
     public selectedRouteHover: EventEmitter<LatLngAlt>;
 
@@ -60,9 +56,6 @@ export class SelectedRouteService {
         });
         this.selectedRouteId$.subscribe((id) => {
             this.selectedRouteId = id;
-        });
-        this.recordingRouteId$.subscribe((id) => {
-            this.recordingRouteId = id;
         });
     }
 
@@ -84,10 +77,6 @@ export class SelectedRouteService {
 
     public getRouteById(id: string): RouteData {
         return this.routes.find((r) => r.id === id);
-    }
-
-    public getRecordingRoute(): RouteData {
-        return this.getRouteById(this.recordingRouteId);
     }
 
     public getOrCreateSelectedRoute(): RouteData {
@@ -116,6 +105,13 @@ export class SelectedRouteService {
 
             this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId }));
         }
+    }
+
+    public changeRouteEditState(routeId: string, state: RouteEditStateType) {
+        if (this.ngRedux.getState().recordedRouteState.isAddingPoi) {
+            this.ngRedux.dispatch(new ToggleAddRecordingPoiAction());
+        }
+        this.ngRedux.dispatch(new ChangeEditStateAction({ routeId, state }));
     }
 
     public createRouteName(routeName: string = this.resources.route): string {
@@ -181,7 +177,7 @@ export class SelectedRouteService {
             minimalWeight += MINIMAL_ANGLE;
         }
         for (let routeData of this.routes) {
-            if (routeData.id === this.recordingRouteId || routeData.segments.length <= 0 || routeData.state === "Hidden") {
+            if (routeData.segments.length <= 0 || routeData.state === "Hidden") {
                 continue;
             }
             let previousLatLng = routeData.segments[0].latlngs[0];
@@ -403,5 +399,9 @@ export class SelectedRouteService {
 
     public raiseHoverSelectedRoute(latLng: LatLngAlt) {
         this.selectedRouteHover.emit(latLng);
+    }
+
+    public getLatlngs(route: RouteData): LatLngAltTime[] {
+        return route ? [].concat.apply([], route.segments.map(s => s.latlngs) as any) : null;// flatten
     }
 }

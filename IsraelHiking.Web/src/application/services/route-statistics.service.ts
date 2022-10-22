@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
-import { last } from "lodash-es";
 import linearInterpolator from "linear-interpolator";
+
 import { SpatialService } from "./spatial.service";
-import type { LatLngAlt, RouteData, LatLngAltTime } from "../models/models";
+import type { LatLngAlt, LatLngAltTime } from "../models/models";
 
 export const MINIMAL_DISTANCE = 50;
 export const MINIMAL_ANGLE = 30;
@@ -46,7 +46,7 @@ export type RouteStatistics = {
 
 @Injectable()
 export class RouteStatisticsService {
-    public getStatisticsByRange(route: RouteData, start: RouteStatisticsPoint, end: RouteStatisticsPoint): RouteStatistics {
+    public getStatisticsByRange(latlngs: LatLngAltTime[], start: RouteStatisticsPoint, end: RouteStatisticsPoint): RouteStatistics {
         let routeStatistics = {
             points: [] as RouteStatisticsPoint[],
             length: 0,
@@ -56,27 +56,25 @@ export class RouteStatisticsService {
             duration: null,
             averageSpeed: null
         } as RouteStatistics;
-        if (route.segments.length <= 0) {
+        if (latlngs.length <= 0) {
             return routeStatistics;
         }
 
         // convert to route statistic points
-        let previousLatlng = route.segments[0].latlngs[0];
+        let previousLatlng = latlngs[0];
         routeStatistics.points.push(start || { coordinate: [0, previousLatlng.alt], latlng: previousLatlng, slope: 0 });
-        for (let segment of route.segments) {
-            for (let latlng of segment.latlngs) {
-                let distance = SpatialService.getDistanceInMeters(previousLatlng, latlng);
-                routeStatistics.length += distance;
-                let point = {
-                    coordinate: [(routeStatistics.length / 1000), latlng.alt],
-                    latlng,
-                    slope: 0
-                } as RouteStatisticsPoint;
-                if (start == null || (point.coordinate[0] > start.coordinate[0] && point.coordinate[0] < end.coordinate[0])) {
-                    routeStatistics.points.push(point);
-                }
-                previousLatlng = latlng;
+        for (let latlng of latlngs) {
+            let distance = SpatialService.getDistanceInMeters(previousLatlng, latlng);
+            routeStatistics.length += distance;
+            let point = {
+                coordinate: [(routeStatistics.length / 1000), latlng.alt],
+                latlng,
+                slope: 0
+            } as RouteStatisticsPoint;
+            if (start == null || (point.coordinate[0] > start.coordinate[0] && point.coordinate[0] < end.coordinate[0])) {
+                routeStatistics.points.push(point);
             }
+            previousLatlng = latlng;
         }
         if (start != null && end != null) {
             routeStatistics.points.push(end);
@@ -165,35 +163,37 @@ export class RouteStatisticsService {
         }
     }
 
-    public getStatistics(route: RouteData,
-                         closestRouteToRecording: RouteData,
+    public getStatistics(latlngs: LatLngAltTime[],
+                         closestRouteToRecordingLatlngs: LatLngAltTime[],
                          latLng: LatLngAltTime,
                          heading: number,
                          routeIsRecording: boolean): RouteStatistics {
-        let routeStatistics = this.getStatisticsByRange(route, null, null);
-        let closestRouteStatistics = closestRouteToRecording ? this.getStatisticsByRange(closestRouteToRecording, null, null) : null;
+        let routeStatistics = this.getStatisticsByRange(latlngs, null, null);
+        let closestRouteStatistics = closestRouteToRecordingLatlngs
+            ? this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null)
+            : null;
         if (closestRouteStatistics == null) {
-            this.addDurationAndAverageSpeed(route, routeStatistics.length, routeStatistics);
+            this.addDurationAndAverageSpeed(latlngs, routeStatistics.length, routeStatistics);
             return routeStatistics;
         }
         closestRouteStatistics.remainingDistance =
             closestRouteStatistics.length - (this.findDistanceForLatLngInKM(closestRouteStatistics, latLng, heading) * 1000);
         if (routeIsRecording) {
-            this.addDurationAndAverageSpeed(route, routeStatistics.length, closestRouteStatistics);
+            this.addDurationAndAverageSpeed(latlngs, routeStatistics.length, closestRouteStatistics);
             closestRouteStatistics.length = routeStatistics.length;
         } else {
-            this.addDurationAndAverageSpeed(closestRouteToRecording, closestRouteStatistics.length, closestRouteStatistics);
+            this.addDurationAndAverageSpeed(closestRouteToRecordingLatlngs, closestRouteStatistics.length, closestRouteStatistics);
             closestRouteStatistics.length = closestRouteStatistics.length - closestRouteStatistics.remainingDistance;
         }
         return closestRouteStatistics;
     }
 
-    private addDurationAndAverageSpeed(route: RouteData, length: number, fullStatistics: RouteStatistics) {
-        if (route.segments.length === 0) {
+    private addDurationAndAverageSpeed(latlngs: LatLngAltTime[], length: number, fullStatistics: RouteStatistics) {
+        if (latlngs.length === 0) {
             return;
         }
-        let start = route.segments[0].latlngs[0];
-        let end = last(last(route.segments).latlngs);
+        let start = latlngs[0];
+        let end = latlngs[latlngs.length - 1];
         if (start.timestamp != null && end.timestamp != null) {
             fullStatistics.duration = (new Date(end.timestamp).getTime() - new Date(start.timestamp).getTime()) / 1000;
             fullStatistics.averageSpeed = length / fullStatistics.duration * 3.6; // convert m/sec to km/hr

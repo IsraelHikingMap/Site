@@ -11,7 +11,7 @@ export type ErrorType = "timeout" | "client" | "server";
 export type ErrorTypeAndMessage = {
     type: ErrorType;
     message: string;
-    statusCode?: number
+    statusCode?: number;
 };
 
 interface LogLine {

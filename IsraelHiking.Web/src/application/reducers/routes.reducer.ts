@@ -1,9 +1,9 @@
 import { Action } from "redux";
-import undoable, { UndoableOptions, includeAction, groupByActionTypes } from "redux-undo";
+import undoable, { UndoableOptions } from "redux-undo";
 import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
 
 import { initialState, BaseAction } from "./initial-state";
-import type { RouteData, MarkerData, RouteSegmentData, RouteStateName, LatLngAltTime } from "../models/models";
+import type { RouteData, MarkerData, RouteSegmentData, RouteEditStateType } from "../models/models";
 
 const ADD_ROUTE = "ADD_ROUTE";
 const DELETE_ROUTE = "DELETE_ROUTE";
@@ -20,7 +20,6 @@ const CHANGE_VISIBILITY = "CHANGE_VISIBILITY";
 const REVERSE_ROUTE = "REVERSE_ROUTE";
 const SPLIT_ROUTE = "SPLIT_ROUTE";
 const MERGE_ROUTES = "MERGE_ROUTES";
-const ADD_RECORDING_POINTS = "ADD_RECORDING_POINTS";
 const CLEAR_POIS = "CLEAR_POIS";
 const CLEAR_POIS_AND_ROUTE = "CLEAR_POIS_AND_ROUTE";
 const DELETE_ALL_ROUTES = "DELETE_ALL_ROUTES";
@@ -74,7 +73,7 @@ export type ChangeVisibilityPayload = RoutePayload & {
 };
 
 export type ChangeEditStatePayload = RoutePayload & {
-    state: RouteStateName;
+    state: RouteEditStateType;
 };
 
 export type ReverseRoutePayload = RoutePayload & {
@@ -89,10 +88,6 @@ export type SplitRoutePayload = RoutePayload & {
 export type MergeRoutesPayload = RoutePayload & {
     secondaryRouteId: string;
     mergedRouteData: RouteData;
-};
-
-export type AddRecordingPointsPayload = RoutePayload & {
-    latlngs: LatLngAltTime[];
 };
 
 export type BulkReplaceRoutesPayload = {
@@ -186,12 +181,6 @@ export class SplitRouteAction extends BaseAction<SplitRoutePayload> {
 export class MergeRoutesAction extends BaseAction<MergeRoutesPayload> {
     constructor(payload: MergeRoutesPayload) {
         super(MERGE_ROUTES, payload);
-    }
-}
-
-export class AddRecordingPointsAction extends BaseAction<AddRecordingPointsPayload> {
-    constructor(payload: AddRecordingPointsPayload) {
-        super(ADD_RECORDING_POINTS, payload);
     }
 }
 
@@ -401,23 +390,6 @@ class RoutesReducer {
         return routes;
     }
 
-    @ReduxAction(ADD_RECORDING_POINTS)
-    public addRecordingPoint(lastState: RouteData[], action: AddRecordingPointsAction): RouteData[] {
-        return this.doForRoute(lastState,
-            action.payload.routeId,
-            (route) => {
-                let segments = [...route.segments];
-                let lastSegment = { ...segments[segments.length - 1] };
-                lastSegment.latlngs = [...lastSegment.latlngs, ...action.payload.latlngs];
-                lastSegment.routePoint = action.payload.latlngs[action.payload.latlngs.length - 1];
-                segments.splice(segments.length - 1, 1, lastSegment);
-                return {
-                    ...route,
-                    segments
-                };
-            });
-    }
-
     @ReduxAction(CLEAR_POIS)
     public clearPois(lastState: RouteData[], action: ClearPoisAction): RouteData[] {
         return this.doForRoute(lastState,
@@ -462,27 +434,5 @@ class RoutesReducer {
 
 export const routesReducer = undoable(createReducerFromClass(RoutesReducer, initialState.routes.present),
     {
-        filter: includeAction([
-            ADD_ROUTE,
-            DELETE_ROUTE,
-            CHANGE_PROPERTIES,
-            ADD_POI,
-            UPDATE_POI,
-            DELETE_POI,
-            ADD_SEGMENT,
-            UPDATE_SEGMENTS,
-            REPLACE_SEGMENTS,
-            DELETE_SEGMENT,
-            CHANGE_VISIBILITY,
-            REVERSE_ROUTE,
-            SPLIT_ROUTE,
-            MERGE_ROUTES,
-            CLEAR_POIS,
-            CLEAR_POIS_AND_ROUTE,
-            DELETE_ALL_ROUTES,
-            ADD_RECORDING_POINTS,
-            BULK_REPLACE_ROUTES
-        ]),
-        groupBy: groupByActionTypes(ADD_RECORDING_POINTS),
         limit: 20
     } as UndoableOptions);

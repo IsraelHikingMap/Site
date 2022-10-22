@@ -6,7 +6,7 @@ import { ResourcesService } from "../../../services/resources.service";
 import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { SelectedRouteService } from "../../../services/selected-route.service";
-import { SetOpacityAndWeightAction } from "../../../reducers/route-editing-state.reducer";
+import { SetOpacityAndWeightAction } from "../../../reducers/route-editing.reducer";
 import type { ApplicationState, RouteData } from "../../../models/models";
 
 export abstract class RouteBaseDialogComponent extends BaseMapComponent {

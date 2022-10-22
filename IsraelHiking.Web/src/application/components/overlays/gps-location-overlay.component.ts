@@ -13,6 +13,7 @@ import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { ToggleDistanceAction } from "../../reducers/in-memory.reducer";
+import { AddRecordingPoiAction } from "../../reducers/recorded-route.reducer";
 import type { ApplicationState, LatLngAlt, LinkData } from "../../models/models";
 
 @Component({
@@ -44,8 +45,6 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     }
 
     public addPointToRoute() {
-        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
-        let markerIndex = selectedRoute.markers.length;
         let markerData = {
             latlng: { ...this.latlng },
             title: "",
@@ -53,12 +52,22 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
             type: "star",
             urls: [] as LinkData[]
         };
-        this.ngRedux.dispatch(new AddPrivatePoiAction({
-            routeId: selectedRoute.id,
-            markerData
-        }));
-        PrivatePoiEditDialogComponent.openDialog(
-            this.matDialog, markerData, selectedRoute.id, markerIndex);
+        if (this.ngRedux.getState().recordedRouteState.isRecording) {
+            this.ngRedux.dispatch(new AddRecordingPoiAction({
+                markerData
+            }));
+            let markerIndex = this.ngRedux.getState().recordedRouteState.route.markers.length - 1;
+            PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, markerIndex);
+        } else {
+            let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+            let markerIndex = selectedRoute.markers.length;
+            this.ngRedux.dispatch(new AddPrivatePoiAction({
+                routeId: selectedRoute.id,
+                markerData
+            }));
+            PrivatePoiEditDialogComponent.openDialog(
+                this.matDialog, markerData, markerIndex, selectedRoute.id);
+        }
         this.closed.emit();
     }
 

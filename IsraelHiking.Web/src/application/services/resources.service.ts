@@ -14,7 +14,6 @@ export class ResourcesService {
     public start: string;
     public end: string;
     public availableLanguages: Language[];
-    private iconsCache: Map<string, string> = new Map();
     public endOfBaseLayer = "end-of-base-layer";
     public endOfOverlays = "end-of-overlays";
     public endOfClusters = "end-of-clusters";
@@ -22,7 +21,7 @@ export class ResourcesService {
     public editRoutePoints = "editing-route-layer-points";
     public editRouteLines = "editing-route-layer-lines";
     public locationIcon = "location-icon-layer";
-
+    public readonly recordedRouteColor = "#FF6600";
     // All the text in the app //
     /////////////////////////////
     public about: string;
@@ -1001,20 +1000,5 @@ export class ResourcesService {
             return "l";
         }
         return "";
-    }
-
-    public getCharacterForIcon(icon: string) {
-        let character = this.iconsCache.get(icon);
-        if (character) {
-            return character;
-        }
-        let i = document.createElement("i");
-        i.classList.add(`${icon}`);
-        document.body.appendChild(i);
-        let style = getComputedStyle(i, ":before");
-        character = String.fromCharCode(style.content.toString().replace(/"/g, "").charCodeAt(0));
-        document.body.removeChild(i);
-        this.iconsCache.set(icon, character);
-        return character;
     }
 }

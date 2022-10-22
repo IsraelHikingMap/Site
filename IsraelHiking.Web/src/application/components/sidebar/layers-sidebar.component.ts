@@ -21,7 +21,7 @@ import { PurchaseService } from "../../services/purchase.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
 import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
 import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
-import { SetSelectedRouteAction } from "../../reducers/route-editing-state.reducer";
+import { SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
 import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
 
 @Component({
@@ -60,9 +60,9 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
-        this.manageSubscriptions = this.runningContextService.isIos 
+        this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
-            : "https://play.google.com/store/account/subscriptions"
+            : "https://play.google.com/store/account/subscriptions";
     }
 
     public closeSidebar() {

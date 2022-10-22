@@ -20,7 +20,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
     public marker: MarkerData;
 
     @Input()
-    public routeId: string;
+    public routeId?: string;
 
     @Input()
     public index: number;
@@ -42,6 +42,12 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
 
     public overlayClick(event: Event) {
         event.stopPropagation();
+
+        if (!this.routeId) {
+            PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker, this.index);
+            return;
+        }
+
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
             return;
@@ -54,7 +60,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
             return;
         }
         if (selectedRoute.state === "Poi") {
-            PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker, this.routeId, this.index);
+            PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker,this.index,  this.routeId);
         }
     }
 }

@@ -11,7 +11,7 @@ import { RoutesFactory } from "../../../services/routes.factory";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
 import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducers/routes.reducer";
-import { SetSelectedRouteAction } from "application/reducers/route-editing-state.reducer";
+import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
 import type { DataContainer, RouteData, ApplicationState, LatLngAlt } from "../../../models/models";
 
 @Component({

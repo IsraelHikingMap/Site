@@ -69,19 +69,6 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should get recorded route by id", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            const routesStub = getSubject((state: ApplicationState) => state.routes.present);
-            const recordedRouteIdSubject = getSubject((state: ApplicationState) => state.routeEditingState.recordingRouteId);
-            routesStub.next([{ id: "42", state: "Poi" } as any]);
-            recordedRouteIdSubject.next("42");
-
-            const recodingRoute = selectedRouteService.getRecordingRoute();
-
-            expect(recodingRoute).toBeDefined();
-        }
-    ));
-
     it("Should select the first route if selected route it null and there are routes", inject([SelectedRouteService],
         (selectedRouteService: SelectedRouteService) => {
             const routesStub = getSubject((state: ApplicationState) => state.routes.present);

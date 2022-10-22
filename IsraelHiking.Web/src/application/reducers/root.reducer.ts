@@ -3,7 +3,7 @@ import { Action, combineReducers, ReducersMapObject } from "redux";
 import { configurationReducer } from "./configuration.reducer";
 import { locationReducer } from "./location.reducer";
 import { routesReducer } from "./routes.reducer";
-import { routeEditingReducer } from "./route-editing-state.reducer";
+import { routeEditingReducer } from "./route-editing.reducer";
 import { tracesReducer } from "./traces.reducer";
 import { layersReducer } from "./layers.reducer";
 import { shareUrlsReducer } from "./share-urls.reducer";
@@ -13,6 +13,7 @@ import { inMemoryReducer } from "./in-memory.reducer";
 import { gpsReducer } from "./gps.reducer";
 import { offlineReducer } from "./offline.reducer";
 import { uiComponentsReducer } from "./ui-components.reducer";
+import { recordedRouteReducer } from "./recorded-route.reducer";
 import { initialState } from "./initial-state";
 import type { ApplicationState } from "../models/models";
 
@@ -21,6 +22,7 @@ const appReducer = combineReducers<ApplicationState>({
     location: locationReducer,
     routes: routesReducer,
     routeEditingState: routeEditingReducer,
+    recordedRouteState: recordedRouteReducer,
     tracesState: tracesReducer,
     layersState: layersReducer,
     shareUrlsState: shareUrlsReducer,

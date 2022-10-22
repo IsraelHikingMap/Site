@@ -10,6 +10,7 @@ import { SnappingService, SnappingPointResponse } from "../../services/snapping.
 import { PoiService } from "../../services/poi.service";
 import { ResourcesService } from "../../services/resources.service";
 import { AddPrivatePoiAction, UpdatePrivatePoiAction } from "../../reducers/routes.reducer";
+import { AddRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
 import type { ApplicationState, MarkerData, LatLngAlt } from "../../models/models";
 
 @Injectable()
@@ -43,30 +44,33 @@ export class RouteEditPoiInteraction {
                     layers: [this.resources.locationIcon],
                 });
             if (gpsMarker.length !== 0) {
+                // do not continue the flow in case we click on the gps marker
                 return;
             }
         }
         this.ngZone.run(() => {
-            let selectedRoute = this.selectedRouteService.getSelectedRoute();
-            if (selectedRoute == null) {
-                return;
-            }
-            if (selectedRoute.state !== "Poi") {
-                return;
-            }
             this.addPrivatePoi(event.lngLat);
         });
     };
 
     public handleDragEnd(latlng: LatLngAlt, index: number) {
-        let routeData = this.selectedRouteService.getSelectedRoute();
-        let markerData = { ...routeData.markers[index] } as MarkerData;
-        markerData.latlng = latlng;
-        this.ngRedux.dispatch(new UpdatePrivatePoiAction({
-            routeId: routeData.id,
-            index,
-            markerData
-        }));
+        if (this.ngRedux.getState().recordedRouteState.isAddingPoi) {
+            let markerData = { ...this.ngRedux.getState().recordedRouteState.route.markers[index] };
+            markerData.latlng = latlng;
+            this.ngRedux.dispatch(new UpdateRecordingPoiAction({
+                index,
+                markerData
+            }));
+        } else {
+            let routeData = this.selectedRouteService.getSelectedRoute();
+            let markerData = { ...routeData.markers[index] } as MarkerData;
+            markerData.latlng = latlng;
+            this.ngRedux.dispatch(new UpdatePrivatePoiAction({
+                routeId: routeData.id,
+                index,
+                markerData
+            }));
+        }
     }
 
     private async addPrivatePoi(latlng: LatLngAlt) {
@@ -80,13 +84,36 @@ export class RouteEditPoiInteraction {
                 description: "",
                 type: "star"
             };
+        if (this.ngRedux.getState().recordedRouteState.isAddingPoi) {
+            this.addToRecording(markerData);
+        } else {
+            this.addToSelectedRoute(markerData);
+        }
+    }
+
+    private addToSelectedRoute(markerData: MarkerData) {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute == null) {
+            return;
+        }
+        if (selectedRoute.state !== "Poi") {
+            return;
+        }
         this.ngRedux.dispatch(new AddPrivatePoiAction({
-            routeId: this.selectedRouteService.getSelectedRoute().id,
+            routeId: selectedRoute.id,
             markerData
         }));
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        selectedRoute = this.selectedRouteService.getSelectedRoute();
         let index = selectedRoute.markers.length - 1;
-        PrivatePoiEditDialogComponent.openDialog(this.matDialog, selectedRoute.markers[index], selectedRoute.id, index);
+        PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index, selectedRoute.id);
+    }
+
+    private addToRecording(markerData: MarkerData) {
+        this.ngRedux.dispatch(new AddRecordingPoiAction({
+            markerData
+        }));
+        let index = this.ngRedux.getState().recordedRouteState.route.markers.length - 1;
+        PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index);
     }
 
     private async getSnappingForPoint(latlng: LatLngAlt): Promise<SnappingPointResponse> {
