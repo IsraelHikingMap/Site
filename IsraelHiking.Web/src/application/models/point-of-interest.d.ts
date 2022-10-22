@@ -26,5 +26,6 @@ export type EditablePublicPointData = {
     urls: string[];
     category: string;
     isPoint: boolean;
+    canEditTitle: boolean;
     lengthInKm?: number;
 };
