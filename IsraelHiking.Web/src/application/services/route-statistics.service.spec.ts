@@ -31,7 +31,7 @@ describe("RouteStatisticsService", () => {
     });
 
     it("Should get statistics on route when first point alt is NaN", () => {
-        let latlngs = [{ lat: 10, lng: 10, alt: NaN }, { lat: 20, lng: 20, alt: NaN }, 
+        let latlngs = [{ lat: 10, lng: 10, alt: NaN }, { lat: 20, lng: 20, alt: NaN },
             { lat: 20, lng: 20, alt: 20 }, { lat: 30, lng: 30, alt: 30 },
             { lat: 30, lng: 30, alt: 30 }, { lat: 10, lng: 10, alt: 10 }];
 
@@ -46,7 +46,7 @@ describe("RouteStatisticsService", () => {
     it("Should get correct statistics on route when there are null altitudes", () => {
         let latlngs = [{ lat: 10, lng: 10, alt: 10 }, { lat: 20, lng: 20, alt: 20 },
             { lat: 20, lng: 20, alt: 20 }, { lat: 30, lng: 30, alt: null },
-            { lat: 30, lng: 30, alt: null }, { lat: 40, lng: 40, alt: 40 }, 
+            { lat: 30, lng: 30, alt: null }, { lat: 40, lng: 40, alt: 40 },
             { lat: 40, lng: 40, alt: 40 }, { lat: 10, lng: 10, alt: 10 }];
 
         let statistics = service.getStatistics(latlngs as any, null, null, null, false);
@@ -134,7 +134,7 @@ describe("RouteStatisticsService", () => {
     });
 
     it("Should get statistics on part of route", () => {
-        let routeData = [{ lat: 0, lng: 0, alt: 0 }, 
+        let routeData = [{ lat: 0, lng: 0, alt: 0 },
             { lat: 0, lng: 0.01, alt: 2 }, { lat: 0, lng: 0.02, alt: 1 }] as any as LatLngAltTime[];
         let statistics = service.getStatistics(routeData, null, null, null, false);
         let start = service.interpolateStatistics(statistics, 0.5);

@@ -47,7 +47,6 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     public description: string;
     public iconsGroups: IIconsGroup[];
 
-
     @ViewChild("titleInput")
     public titleInput: ElementRef;
 
@@ -92,7 +91,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     /**
-     * 
+     * Opens an edit marker dialog for both private routes and recording route
      * @param matDialog dialog service
      * @param marker the makrer data to edit
      * @param index the index of the marker in the markers' array
