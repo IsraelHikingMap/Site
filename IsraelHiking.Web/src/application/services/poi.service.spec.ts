@@ -304,7 +304,8 @@ describe("Poi Service", () => {
                     description: "description",
                     imagesUrls: ["some-image-url"],
                     title: "title",
-                    urls: ["some-url"]
+                    urls: ["some-url"],
+                    canEditTitle: true
                 }, { lat: 0, lng: 0}).then(() => {
                     expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
                     expect(spy.calls.mostRecent().args[0].properties.poiId).not.toBeNull();
@@ -354,7 +355,8 @@ describe("Poi Service", () => {
                     description: "description",
                     imagesUrls: ["some-new-image-url"],
                     title: "title",
-                    urls: ["some-new-url"]
+                    urls: ["some-new-url"],
+                    canEditTitle: true
                 }, { lat: 1, lng: 2}).then(() => {
                     expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
                     let feature = spy.calls.mostRecent().args[0];
@@ -421,7 +423,8 @@ describe("Poi Service", () => {
                     description: "description",
                     imagesUrls: ["some-image-url"],
                     title: "title",
-                    urls: ["some-url"]
+                    urls: ["some-url"],
+                    canEditTitle: true
                 }).then(() => {
                     expect(spy).not.toHaveBeenCalled();
                 });
@@ -477,7 +480,8 @@ describe("Poi Service", () => {
                     description: "description",
                     imagesUrls: ["some-image-url"],
                     title: "title",
-                    urls: ["some-url"]
+                    urls: ["some-url"],
+                    canEditTitle: true
                 }).then(() => {
                     expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
                     let feature = spy.calls.mostRecent().args[0];
