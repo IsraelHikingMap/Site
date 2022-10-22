@@ -22,8 +22,8 @@ interface IIconsGroup {
 
 interface PrivatePoiEditDialogData {
     marker: MarkerData;
-    index: number;
     routeId?: string;
+    index: number;
 }
 
 @Component({
@@ -32,6 +32,9 @@ interface PrivatePoiEditDialogData {
 })
 export class PrivatePoiEditDialogComponent extends BaseMapComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;
+
+    private routeId?: string;
+    private markerIndex: number;
 
     public marker: MarkerData;
     public url: LinkData;
@@ -44,8 +47,6 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     public description: string;
     public iconsGroups: IIconsGroup[];
 
-    private routeId?: string;
-    private index: number;
 
     @ViewChild("titleInput")
     public titleInput: ElementRef;
@@ -80,7 +81,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
             });
         }
         this.routeId = data.routeId;
-        this.index = data.index;
+        this.markerIndex = data.index;
         this.marker = {...data}.marker;
         this.markerType = this.marker.type;
         this.title = this.marker.title;
@@ -151,13 +152,13 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
 
         if (this.routeId) {
             this.ngRedux.dispatch(new UpdatePrivatePoiAction({
-                index: this.index,
+                index: this.markerIndex,
                 routeId: this.routeId,
                 markerData: updatedMarker
             }));
         } else {
             this.ngRedux.dispatch(new UpdateRecordingPoiAction({
-                index: this.index,
+                index: this.markerIndex,
                 markerData: updatedMarker
             }));
         }
@@ -190,12 +191,12 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     public remove() {
         if (this.routeId) {
             this.ngRedux.dispatch(new DeletePrivatePoiAction({
-                index: this.index,
+                index: this.markerIndex,
                 routeId: this.routeId
             }));
         } else {
             this.ngRedux.dispatch(new DeleteRecordingPoiAction({
-                index: this.index
+                index: this.markerIndex
             }));
         }
     }
