@@ -123,7 +123,7 @@ namespace IsraelHiking.API.Tests.Services
 
             Assert.AreEqual(1, factor);
             Assert.AreEqual("icon-bike", iconColorCategory.Icon);
-            Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
+            Assert.AreEqual(Categories.ROUTE_BIKE, iconColorCategory.Category);
         }
     }
 }
