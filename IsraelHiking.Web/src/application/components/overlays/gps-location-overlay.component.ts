@@ -57,8 +57,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
                 markerData
             }));
             let markerIndex = this.ngRedux.getState().recordedRouteState.route.markers.length - 1;
-            PrivatePoiEditDialogComponent.openDialogRecording(
-                this.matDialog, this.ngRedux, markerData, markerIndex);
+            PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, markerIndex);
         } else {
             let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
             let markerIndex = selectedRoute.markers.length;
@@ -66,8 +65,8 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
                 routeId: selectedRoute.id,
                 markerData
             }));
-            PrivatePoiEditDialogComponent.openDialogPrivatePoi(
-                this.matDialog, this.ngRedux, markerData, selectedRoute.id, markerIndex);
+            PrivatePoiEditDialogComponent.openDialog(
+                this.matDialog, markerData, markerIndex, selectedRoute.id);
         }
         this.closed.emit();
     }

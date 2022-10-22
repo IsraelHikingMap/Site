@@ -105,7 +105,7 @@ export class RouteEditPoiInteraction {
         }));
         selectedRoute = this.selectedRouteService.getSelectedRoute();
         let index = selectedRoute.markers.length - 1;
-        PrivatePoiEditDialogComponent.openDialogPrivatePoi(this.matDialog, this.ngRedux, markerData, selectedRoute.id, index);
+        PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index, selectedRoute.id);
     }
 
     private addToRecording(markerData: MarkerData) {
@@ -113,7 +113,7 @@ export class RouteEditPoiInteraction {
             markerData
         }));
         let index = this.ngRedux.getState().recordedRouteState.route.markers.length - 1;
-        PrivatePoiEditDialogComponent.openDialogRecording(this.matDialog, this.ngRedux, markerData, index);
+        PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index);
     }
 
     private async getSnappingForPoint(latlng: LatLngAlt): Promise<SnappingPointResponse> {

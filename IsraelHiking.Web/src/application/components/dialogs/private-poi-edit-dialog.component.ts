@@ -22,8 +22,8 @@ interface IIconsGroup {
 
 interface PrivatePoiEditDialogData {
     marker: MarkerData;
-    updateAction: (markerData: MarkerData) => void;
-    deleteAction: () => void;
+    index: number;
+    routeId?: string;
 }
 
 @Component({
@@ -32,9 +32,6 @@ interface PrivatePoiEditDialogData {
 })
 export class PrivatePoiEditDialogComponent extends BaseMapComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;
-
-    private updateAction: (markerData: MarkerData) => void;
-    private deleteAction: () => void;
 
     public marker: MarkerData;
     public url: LinkData;
@@ -46,6 +43,9 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     public markerType: string;
     public description: string;
     public iconsGroups: IIconsGroup[];
+
+    private routeId?: string;
+    private index: number;
 
     @ViewChild("titleInput")
     public titleInput: ElementRef;
@@ -79,66 +79,36 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                 icons: icons.splice(0, PrivatePoiEditDialogComponent.NUMBER_OF_ICONS_PER_ROW)
             });
         }
-        this.updateAction = data.updateAction;
-        this.deleteAction = data.deleteAction;
-        this.initialize({...data.marker});
+        this.routeId = data.routeId;
+        this.index = data.index;
+        this.marker = {...data}.marker;
+        this.markerType = this.marker.type;
+        this.title = this.marker.title;
+        this.description = this.marker.description;
+        this.imageLink = this.marker.urls.find(u => u.mimeType.startsWith("image"));
+        this.url = this.marker.urls.find(u => !u.mimeType.startsWith("image"));
+        this.showUrl = this.url != null;
     }
 
-    public static openDialogPrivatePoi(
-        matDialog: MatDialog,
-        ngRedux: NgRedux<ApplicationState>,
-        marker: MarkerData,
-        routeId: string,
-        index: number) {
+    /**
+     * 
+     * @param matDialog dialog service
+     * @param marker the makrer data to edit
+     * @param index the index of the marker in the markers' array
+     * @param routeId [optinal] - in case of null this dialog will edit recorded route markers, otherwise the id of the planned route
+     */
+    public static openDialog(matDialog: MatDialog, marker: MarkerData, index: number, routeId?: string) {
         setTimeout(() => {
-                // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
-                matDialog.open(PrivatePoiEditDialogComponent,
-                    {
-                        maxWidth: "378px",
-                        data: {
-                            marker,
-                            updateAction: (updatedMarker: MarkerData) => {
-                                ngRedux.dispatch(new UpdatePrivatePoiAction({
-                                    index,
-                                    routeId,
-                                    markerData: updatedMarker
-                                }));
-                            },
-                            deleteAction: () => {
-                                ngRedux.dispatch(new DeletePrivatePoiAction({
-                                    routeId,
-                                    index
-                                }));
-                            }
-                        } as PrivatePoiEditDialogData
-                    });
-            },
-            100);
-    }
-
-    public static openDialogRecording(matDialog: MatDialog, ngRedux: NgRedux<ApplicationState>, marker: MarkerData, index: number) {
-        setTimeout(() => {
-                // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
-                matDialog.open(PrivatePoiEditDialogComponent,
-                    {
-                        maxWidth: "378px",
-                        data: {
-                            marker,
-                            updateAction: (updatedMarker: MarkerData) => {
-                                ngRedux.dispatch(new UpdateRecordingPoiAction({
-                                    index,
-                                    markerData: updatedMarker
-                                }));
-                            },
-                            deleteAction: () => {
-                                ngRedux.dispatch(new DeleteRecordingPoiAction({
-                                    index
-                                }));
-                            }
-                        } as PrivatePoiEditDialogData
-                    });
-            },
-            100);
+            // for some reason, in android, the click event gets called on the dialog, this is in order to prevent it.
+            matDialog.open(PrivatePoiEditDialogComponent, {
+                maxWidth: "378px",
+                data: {
+                    marker,
+                    index,
+                    routeId
+                } as PrivatePoiEditDialogData
+            });
+        }, 100);
     }
 
     public ngAfterViewInit(): void {
@@ -156,16 +126,6 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         if (this.titleInput && this.titleInput.nativeElement) {
             this.titleInput.nativeElement.focus();
         }
-    }
-
-    private initialize(marker: MarkerData) {
-        this.marker = marker;
-        this.markerType = marker.type;
-        this.title = marker.title;
-        this.description = marker.description;
-        this.imageLink = marker.urls.find(u => u.mimeType.startsWith("image"));
-        this.url = marker.urls.find(u => !u.mimeType.startsWith("image"));
-        this.showUrl = this.url != null;
     }
 
     public setMarkerType(markerType: string): void {
@@ -189,7 +149,18 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
             urls,
         };
 
-        this.updateAction(updatedMarker);
+        if (this.routeId) {
+            this.ngRedux.dispatch(new UpdatePrivatePoiAction({
+                index: this.index,
+                routeId: this.routeId,
+                markerData: updatedMarker
+            }));
+        } else {
+            this.ngRedux.dispatch(new UpdateRecordingPoiAction({
+                index: this.index,
+                markerData: updatedMarker
+            }));
+        }
     }
 
     public async addImage(e: any) {
@@ -217,7 +188,16 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public remove() {
-        this.deleteAction();
+        if (this.routeId) {
+            this.ngRedux.dispatch(new DeletePrivatePoiAction({
+                index: this.index,
+                routeId: this.routeId
+            }));
+        } else {
+            this.ngRedux.dispatch(new DeleteRecordingPoiAction({
+                index: this.index
+            }));
+        }
     }
 
     public addUrl() {

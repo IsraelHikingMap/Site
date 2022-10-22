@@ -1,13 +1,12 @@
 import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 import { PrivatePoiShowDialogComponent } from "../dialogs/private-poi-show-dialog.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import type { MarkerData, LinkData, ApplicationState } from "../../models/models";
+import type { MarkerData, LinkData } from "../../models/models";
 
 @Component({
     selector: "private-poi-overlay",
@@ -33,8 +32,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
 
     constructor(resources: ResourcesService,
                 private readonly matDialog: MatDialog,
-                private readonly selectedRouteService: SelectedRouteService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly selectedRouteService: SelectedRouteService) {
         super(resources);
     }
 
@@ -46,7 +44,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
         event.stopPropagation();
 
         if (!this.routeId) {
-            PrivatePoiEditDialogComponent.openDialogRecording(this.matDialog, this.ngRedux, this.marker, this.index);
+            PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker, this.index);
             return;
         }
 
@@ -62,7 +60,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
             return;
         }
         if (selectedRoute.state === "Poi") {
-            PrivatePoiEditDialogComponent.openDialogPrivatePoi(this.matDialog, this.ngRedux, this.marker, this.routeId, this.index);
+            PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker,this.index,  this.routeId);
         }
     }
 }

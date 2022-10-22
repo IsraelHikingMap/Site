@@ -76,7 +76,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
 
     public edit() {
         this.dialogRef.close();
-        PrivatePoiEditDialogComponent.openDialogPrivatePoi(this.matDialog, this.ngRedux, this.marker, this.routeId, this.index);
+        PrivatePoiEditDialogComponent.openDialog(this.matDialog, this.marker, this.index, this.routeId);
     }
 
     public async uploadPoint() {
