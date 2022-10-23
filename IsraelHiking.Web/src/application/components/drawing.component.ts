@@ -6,7 +6,6 @@ import { NgRedux, Select } from "@angular-redux2/store";
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
-import { RecordedRouteService } from "../services/recorded-route.service";
 import { ToastService } from "../services/toast.service";
 import {
     ReplaceSegmentsAction,
@@ -29,7 +28,6 @@ export class DrawingComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
                 private readonly selectedRouteService: SelectedRouteService,
-                private readonly recordedRouteService: RecordedRouteService,
                 private readonly toastService: ToastService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
@@ -99,10 +97,6 @@ export class DrawingComponent extends BaseMapComponent {
         return this.isPoiEditActive() || this.isRouteEditActive();
     }
 
-    public isRecording() {
-        return this.recordedRouteService.isRecording();
-    }
-
     public toggleEditRoute() {
         let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         switch (selectedRoute.state) {
@@ -162,21 +156,6 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public deleteAllRoutes() {
-        if (!this.recordedRouteService.isRecording()) {
-            this.showDeleteAllRoutesConfirmation();
-            return;
-        }
-        this.toastService.confirm({
-            message: this.resources.areYouSureYouWantToStopRecording,
-            confirmAction: () => {
-                this.recordedRouteService.stopRecording();
-                this.showDeleteAllRoutesConfirmation();
-            },
-            type: "YesNo"
-        });
-    }
-
-    private showDeleteAllRoutesConfirmation() {
         this.toastService.confirm({
             message: this.resources.areYouSureYouWantToDeleteAllRoutes,
             type: "YesNo",
