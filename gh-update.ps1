@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 1. Run the container, import graphhopper data to a temporay directory (new-gh)
-docker-compose run --rm --entrypoint /bin/bash graphhopper -c "wget https://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf -O /data/input.osm.pbf && java -Ddw.graphhopper.datareader.file=/data/input.osm.pbf -Ddw.graphhopper.graph.location=/data/new-gh/ -Xmx2g -Xms2g -jar *.jar import /data/gh-config.yml"
+docker-compose run --rm -e "JAVA_OPTS=-Xmx2g -Xms2g" --entrypoint ./graphhopper.sh graphhopper --import --url https://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf -o /data/new-gh/ -c /data/gh-config.yml
 # 2. Delete the default cache (default-gh)
 docker-compose run --rm --entrypoint /bin/bash graphhopper -c "rm -rf /data/default-gh/"
 # 3. Move the temporary cache to the default location.
