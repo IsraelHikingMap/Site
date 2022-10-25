@@ -31,8 +31,20 @@ graphhopper:
   # profiles (see below). Or at least limit the number of `routing.max_visited_nodes`.
   profiles:
     - name: car4wd
-      vehicle: car4wd
-      weighting: short_fastest
+      vehicle: roads
+      weighting: custom
+      custom_model:
+        distance_influence: 1
+        speed:
+          - if: "track_type == GRADE4 || track_type == GRADE5"
+            limit_to: 5
+          - else: ""
+            limit_to: "car_average_speed"
+        priority:
+          - if: "track_type != GRADE4 && track_type != GRADE5 && car_access == false"
+            multiply_by: "0"
+          - if: "road_class == TRACK"
+            multiply_by: "20"
     - name: hike
       vehicle: hike
       weighting: short_fastest
@@ -68,7 +80,7 @@ graphhopper:
   # The vehicle defines the base for how the routing of a profile behaves. It can be fine tuned using the options:
   # name=mycustomvehicle,block_private=true,turn_costs=true,transportation_mode=MOTOR_VEHICLE (only for the roads vehicle)
   # Still, it is recommended to avoid changing the vehicle settings and change the custom model instead.
-  graph.flag_encoders: car4wd|block_fords=false|block_barriers=false,hike|block_fords=false,mtb|block_fords=false|block_barriers=false
+  graph.flag_encoders: car|block_fords=false|block_barriers=false,hike|block_fords=false,mtb|block_fords=false|block_barriers=false
   # Other standard vehicles: foot,bike,mtb,racingbike,motorcycle,wheelchair
 
 
