@@ -5,9 +5,14 @@ import { initialState, BaseAction } from "./initial-state";
 import type { ShareUrl, InMemoryState } from "../models/models";
 
 const TOGGLE_DISTNACE = "TOGGLE_DISTNACE";
+const SET_FOLLOWING = "SET_FOLLOWING";
 const SET_PANNED = "SET_PANNED";
 const SET_SHARE_URL = "SET_SHARE_URL";
 const SET_FILE_URL_AND_BASE_LAYER = "SET_FILE_URL_AND_BASE_LAYER";
+
+export type SetFollowingPayload = {
+    following: boolean;
+};
 
 export type SetPannedPayload = {
     pannedTimestamp: Date;
@@ -23,15 +28,18 @@ export type SetFileUrlAndBaseLayerPayload = {
 };
 
 export class ToggleDistanceAction implements Action {
-    public type: string;
-    constructor() {
-        this.type = TOGGLE_DISTNACE;
-    }
+    constructor(public type: string = TOGGLE_DISTNACE) {}
 }
 
 export class SetPannedAction extends BaseAction<SetPannedPayload> {
     constructor(payload: SetPannedPayload) {
         super(SET_PANNED, payload);
+    }
+}
+
+export class SetFollowingAction extends BaseAction<SetFollowingPayload> {
+    constructor(payload: SetFollowingPayload) {
+        super(SET_FOLLOWING, payload);
     }
 }
 
@@ -49,10 +57,18 @@ export class SetFileUrlAndBaseLayerAction extends BaseAction<SetFileUrlAndBaseLa
 
 export class InMemoryReducer {
     @ReduxAction(TOGGLE_DISTNACE)
-    public toggleDistance(lastState: InMemoryState, action: ToggleDistanceAction): InMemoryState {
+    public toggleDistance(lastState: InMemoryState, _: ToggleDistanceAction): InMemoryState {
         return {
             ...lastState,
             distance: !lastState.distance
+        };
+    }
+
+    @ReduxAction(SET_FOLLOWING)
+    public setFollowing(lastState: InMemoryState, action: SetFollowingAction): InMemoryState {
+        return {
+            ...lastState,
+            following: action.payload.following
         };
     }
 

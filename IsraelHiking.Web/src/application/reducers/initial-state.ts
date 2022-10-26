@@ -134,6 +134,7 @@ export const initialState =
         },
         inMemoryState: {
             distance: false,
+            following: true,
             pannedTimestamp: null,
             shareUrl: null,
             fileUrl: null,

@@ -6,6 +6,7 @@
 export type InMemoryState = {
     distance: boolean;
     pannedTimestamp: Date;
+    following: boolean;
     baseLayer: string;
     fileUrl: string;
     shareUrl: ShareUrl;

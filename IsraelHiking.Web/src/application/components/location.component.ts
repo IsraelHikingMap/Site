@@ -12,7 +12,7 @@ import { SelectedRouteService } from "../services/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
-import { ToggleDistanceAction, SetPannedAction } from "../reducers/in-memory.reducer";
+import { ToggleDistanceAction, SetPannedAction, SetFollowingAction } from "../reducers/in-memory.reducer";
 import { ConfigurationActions } from "../reducers/configuration.reducer";
 import { ChangeEditStateAction } from "../reducers/routes.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
@@ -40,7 +40,6 @@ export class LocationComponent extends BaseMapComponent {
 
     public locationFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     public distanceFeatures: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
-    public isFollowing: boolean;
     public isKeepNorthUp: boolean;
     public locationLatLng: LatLngAlt;
     public showDistance: boolean;
@@ -56,7 +55,6 @@ export class LocationComponent extends BaseMapComponent {
                 private readonly mapComponent: MapComponent) {
         super(resources);
 
-        this.isFollowing = true;
         this.isKeepNorthUp = false;
         this.locationLatLng = null;
         this.lastSpeed = null;
@@ -120,7 +118,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public isFollowingLocation(): boolean {
-        return this.isFollowing && !this.isPanned;
+        return this.ngRedux.getState().inMemoryState.following && !this.isPanned;
     }
 
     public openLocationPopup() {
@@ -159,8 +157,8 @@ export class LocationComponent extends BaseMapComponent {
             return;
         }
         // is active must be true
-        if (!this.isFollowing || this.isPanned) {
-            this.isFollowing = true;
+        if (!this.isFollowingLocation()) {
+            this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
             this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: null }));
             if (this.showDistance) {
                 this.ngRedux.dispatch(new ToggleDistanceAction());
@@ -170,7 +168,7 @@ export class LocationComponent extends BaseMapComponent {
         }
         // following and not panned
         if (this.isRecording()) {
-            this.isFollowing = false;
+            this.ngRedux.dispatch(new SetFollowingAction({ following: false }));
             return;
         }
         if (!this.isRecording()) {
@@ -193,6 +191,7 @@ export class LocationComponent extends BaseMapComponent {
                 message: this.resources.areYouSureYouWantToStopRecording,
                 type: "YesNo",
                 confirmAction: () => {
+                    this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
                     this.recordedRouteService.stopRecording();
                 }
             });
@@ -238,7 +237,7 @@ export class LocationComponent extends BaseMapComponent {
 
     private handlePositionChange(position: GeolocationPosition) {
         if (this.locationFeatures.features.length === 0) {
-            this.isFollowing = true;
+            this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
         }
         let validHeading = !isNaN(position.coords.heading) && position.coords.speed !== 0;
         if (validHeading) {
@@ -265,7 +264,7 @@ export class LocationComponent extends BaseMapComponent {
     private enableLocation() {
         this.geoLocationService.enable();
         this.deviceOrientationService.enable();
-        this.isFollowing = true;
+        this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
         this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: null }));
     }
 

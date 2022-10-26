@@ -21,7 +21,7 @@ export class CenterMeComponent extends BaseMapComponent {
     public showButton() {
         let inMemeoryState = this.ngRedux.getState().inMemoryState;
         let tracking = this.ngRedux.getState().gpsState.tracking;
-        return inMemeoryState.pannedTimestamp != null && tracking === "tracking";
+        return inMemeoryState.pannedTimestamp != null && inMemeoryState.following && tracking === "tracking";
     }
 
     public centerMe() {
