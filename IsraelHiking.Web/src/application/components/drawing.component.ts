@@ -167,4 +167,8 @@ export class DrawingComponent extends BaseMapComponent {
             }
         });
     }
+
+    public canDeleteAllRoutes() {
+        return this.ngRedux.getState().routes.present.length > 0;
+    }
 }
