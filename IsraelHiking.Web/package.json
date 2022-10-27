@@ -19,7 +19,7 @@
     "@awesome-cordova-plugins/social-sharing": "^5.45.0",
     "@capacitor-community/background-geolocation": "^1.2.4",
     "@capacitor-community/keep-awake": "^3.0.0",
-    "@capacitor-community/native-audio": "^3.0.4",
+    "@capacitor-community/native-audio": "^4.0.0-0",
     "@capacitor-community/screen-brightness": "^1.0.1",
     "@capacitor-community/sqlite": "^4.1.0-7",
     "@capacitor/android": "^4.2.0",

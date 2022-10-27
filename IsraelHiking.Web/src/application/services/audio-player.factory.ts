@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { NativeAudio } from "@capacitor-community/native-audio";
 
 import { RunningContextService } from "./running-context.service";
+import { LoggingService } from "./logging.service";
 
 export interface IAudioPlayer {
     play(): void;
@@ -9,12 +10,17 @@ export interface IAudioPlayer {
 
 @Injectable()
 export class AudioPlayerFactory {
-    constructor(private readonly runningContext: RunningContextService) { }
+    constructor(private readonly runningContext: RunningContextService,
+        private readonly loggingService: LoggingService) { }
 
     public async create(): Promise<IAudioPlayer> {
         if (!this.runningContext.isCapacitor) {
             return new Audio("content/uh-oh.mp3");
         }
+
+        this.loggingService.info("[Audio] Initializing audio file");
+
+        NativeAudio.configure({focus: false});
 
         await NativeAudio.preload({
             assetId: "uh-oh",
