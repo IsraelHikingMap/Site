@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { NativeAudio } from "capacitor-native-audio";
+import { NativeAudio } from "@forgr/native-audio";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
