@@ -72,13 +72,15 @@ describe("RouteStatisticsService", () => {
 
         let statistics = service.getStatisticsForRecordedRouteWithPlannedRoute(recordingRouteData, closestRouteData, lastLatLng, null);
         let statisticsOfCloseRoute = service.getStatisticsForStandAloneRoute(closestRouteData);
+        let recodringStatisctics = service.getStatisticsForStandAloneRoute(recordingRouteData);
 
         expect(statistics.gain).toBeCloseTo(20,2);
         expect(statistics.loss).toBe(0);
-        expect(statistics.length).not.toBe(statisticsOfCloseRoute.length);
+        expect(statistics.traveledDistance).not.toBe(statisticsOfCloseRoute.length);
         expect(statistics.points.length).toBe(3);
-        expect(statistics.averageSpeed).toBe(statistics.length * 3.6);
-        expect(statistics.remainingDistance).toBe(statisticsOfCloseRoute.length - statistics.length);
+        expect(statistics.averageSpeed).toBe(statistics.traveledDistance * 3.6);
+        expect(statistics.remainingDistance).toBeCloseTo(statisticsOfCloseRoute.length / 2, -2);
+        expect(statistics.traveledDistance).toBe(recodringStatisctics.length);
     });
 
     it("Should get statistics on route when gps is close by", () => {
@@ -95,7 +97,7 @@ describe("RouteStatisticsService", () => {
         expect(statistics.length).not.toBe(0);
         expect(statistics.points.length).toBe(3);
         expect(statistics.averageSpeed).toBeNull();
-        expect(statistics.remainingDistance).toBeCloseTo(statistics.length, -2);
+        expect(statistics.remainingDistance).toBeCloseTo(statistics.traveledDistance, -2);
         expect(statistics.remainingDistance).toBeCloseTo(statisticsOfFullRoute.length / 2, -2);
     });
 
