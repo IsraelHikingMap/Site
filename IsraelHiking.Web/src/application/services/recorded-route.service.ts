@@ -96,6 +96,7 @@ export class RecordedRouteService {
         let routeData = this.routesFactory.createRouteData(name);
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
         let firstLatlng = route.latlngs[0];
+        routeData.markers = route.markers;
         routeData.segments.push({
             latlngs: [firstLatlng, firstLatlng],
             routePoint: firstLatlng,

@@ -13,7 +13,7 @@ import { ToastService } from "./toast.service";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
 import { AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
-import type { ApplicationState } from "../models/models";
+import type { ApplicationState, MarkerData } from "../models/models";
 
 import { getSubject } from "./selected-route-service.spec";
 
@@ -132,4 +132,38 @@ describe("Recorded Route Service", () => {
             expect(spy.calls.all()[2].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy();
             expect(spy.calls.all()[3].args[0].startsWith("[Record] Valid position")).toBeTruthy();
         }));
+
+    it("should stop recording and send data to traces upload mechanism including one marker", inject([RecordedRouteService], (service: RecordedRouteService) => {
+        MockNgRedux.store.getState = () => ({
+            recordedRouteState: {
+                isRecording: false
+            }
+        });
+        service.initialize();
+        MockNgRedux.store.getState = () => ({
+            recordedRouteState: {
+                route: {
+                    latlngs: [{
+                        lat: 1,
+                        lng: 2,
+                        alt: 10,
+                        timestamp: new Date(0)
+                    }],
+                    markers: [{ description: "desc", title: "mock-marker"} as MarkerData]
+                },
+                isRecording: true
+            },
+            routeEditingState: {
+                routingType: "hike"
+            },
+            userState: {
+                userInfo: null
+            }
+        });
+        let spy = jasmine.createSpy();
+        MockNgRedux.store.dispatch = spy;
+        service.stopRecording();
+
+        expect(spy.calls.all().some(c => c.args[0].payload?.trace && c.args[0].payload.trace.dataContainer.routes[0].markers.length > 0)).toBeTruthy();
+    }));
 });
