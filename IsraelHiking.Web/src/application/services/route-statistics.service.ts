@@ -42,6 +42,10 @@ export type RouteStatistics = {
      * The distnace in meters left to the end of the planned route
      */
     remainingDistance: number;
+    /**
+     * The distnace in meters traveled
+     */
+     traveledDistance: number;
 };
 
 @Injectable()
@@ -163,28 +167,30 @@ export class RouteStatisticsService {
         }
     }
 
-    public getStatistics(latlngs: LatLngAltTime[],
-                         closestRouteToRecordingLatlngs: LatLngAltTime[],
-                         latLng: LatLngAltTime,
-                         heading: number,
-                         routeIsRecording: boolean): RouteStatistics {
+    public getStatisticsForStandAloneRoute(latlngs: LatLngAltTime[]): RouteStatistics {
         let routeStatistics = this.getStatisticsByRange(latlngs, null, null);
-        let closestRouteStatistics = closestRouteToRecordingLatlngs
-            ? this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null)
-            : null;
-        if (closestRouteStatistics == null) {
-            this.addDurationAndAverageSpeed(latlngs, routeStatistics.length, routeStatistics);
-            return routeStatistics;
-        }
+        this.addDurationAndAverageSpeed(latlngs, routeStatistics.length, routeStatistics);
+        return routeStatistics;
+    }
+
+    public getStatisticsForRouteWithLocation(closestRouteToRecordingLatlngs: LatLngAltTime[], currentLatlng: LatLngAltTime, heading: number): RouteStatistics {
+        let closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
+        closestRouteStatistics.traveledDistance = (this.findDistanceForLatLngInKM(closestRouteStatistics, currentLatlng, heading) * 1000);
+        closestRouteStatistics.remainingDistance = closestRouteStatistics.length - closestRouteStatistics.traveledDistance;
+        this.addDurationAndAverageSpeed(closestRouteToRecordingLatlngs, closestRouteStatistics.length, closestRouteStatistics);
+        return closestRouteStatistics;
+    }
+
+    public getStatisticsForRecordedRouteWithPlannedRoute(recordedRouteLatlngs: LatLngAltTime[],
+        closestRouteToRecordingLatlngs: LatLngAltTime[],
+        currentLatlng: LatLngAltTime,
+        heading: number) {
+        let recordedRouteStatistics = this.getStatisticsByRange(recordedRouteLatlngs, null, null);
+        let closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
         closestRouteStatistics.remainingDistance =
-            closestRouteStatistics.length - (this.findDistanceForLatLngInKM(closestRouteStatistics, latLng, heading) * 1000);
-        if (routeIsRecording) {
-            this.addDurationAndAverageSpeed(latlngs, routeStatistics.length, closestRouteStatistics);
-            closestRouteStatistics.length = routeStatistics.length;
-        } else {
-            this.addDurationAndAverageSpeed(closestRouteToRecordingLatlngs, closestRouteStatistics.length, closestRouteStatistics);
-            closestRouteStatistics.length = closestRouteStatistics.length - closestRouteStatistics.remainingDistance;
-        }
+            closestRouteStatistics.length - (this.findDistanceForLatLngInKM(closestRouteStatistics, currentLatlng, heading) * 1000);
+        this.addDurationAndAverageSpeed(recordedRouteLatlngs, recordedRouteStatistics.length, closestRouteStatistics);
+        closestRouteStatistics.traveledDistance = recordedRouteStatistics.length;
         return closestRouteStatistics;
     }
 

@@ -82,6 +82,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public averageSpeed: number;
     public currentSpeed: number;
     public remainingDistance: number;
+    public traveledDistance: number;
     public ETA: string;
     public isKmMarkersOn: boolean;
     public isSlopeOn: boolean;
@@ -179,6 +180,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.gain = 0;
             this.loss = 0;
             this.remainingDistance = 0;
+            this.traveledDistance = 0;
             this.averageSpeed = null;
             this.updateDurationString(null);
             this.ETA = "--:--";
@@ -188,6 +190,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.loss = statistics.loss;
             this.remainingDistance = statistics.remainingDistance;
             this.averageSpeed = statistics.averageSpeed;
+            this.traveledDistance = statistics.traveledDistance;
             this.updateDurationString(statistics.duration);
             this.updateETAString();
         }
@@ -903,14 +906,23 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             return;
         }
         let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
-        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation,
-            this.heading);
-        this.statistics = this.routeStatisticsService.getStatistics(
-            route.latlngs,
-            this.selectedRouteService.getLatlngs(closestRouteToGps),
-            currentLocation,
-            this.heading,
-            this.ngRedux.getState().recordedRouteState.isRecording);
+        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
+        
+        if (this.ngRedux.getState().recordedRouteState.isRecording && closestRouteToGps) {
+            this.statistics = this.routeStatisticsService.getStatisticsForRecordedRouteWithPlannedRoute(
+                this.ngRedux.getState().recordedRouteState.route.latlngs,
+                this.selectedRouteService.getLatlngs(closestRouteToGps),
+                currentLocation,
+                this.heading);
+        } else if (closestRouteToGps) {
+            this.statistics = this.routeStatisticsService.getStatisticsForRouteWithLocation(
+                this.selectedRouteService.getLatlngs(closestRouteToGps),
+                currentLocation,
+                this.heading);
+        } else {
+            this.statistics = this.routeStatisticsService.getStatisticsForStandAloneRoute(route.latlngs);
+        }
+
         this.routeColor = closestRouteToGps ? closestRouteToGps.color : route.color;
         this.updateIsFollowing();
         this.setViewStatisticsValues(this.statistics);

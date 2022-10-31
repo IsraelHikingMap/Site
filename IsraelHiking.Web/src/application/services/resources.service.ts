@@ -202,6 +202,7 @@ export class ResourcesService {
     public purchaseOfflineMaps: string;
     public lastUpdatedOn: string;
     public remainingDistance: string;
+    public traveledDistance: string;
     public longPressHint: string;
     public continue: string;
     public navigateHere: string;
@@ -474,7 +475,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1665081825819");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1667199636002");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -662,6 +663,7 @@ export class ResourcesService {
         this.purchaseOfflineMaps = this.gettextCatalog.getString("Purchase maps for offline use");
         this.lastUpdatedOn = this.gettextCatalog.getString("Last updated on");
         this.remainingDistance = this.gettextCatalog.getString("Remaining distance");
+        this.traveledDistance = this.gettextCatalog.getString("Traveled distance");
         this.longPressHint = this.gettextCatalog.getString("Long press on any button will shows its usage");
         this.continue = this.gettextCatalog.getString("Continue");
         this.navigateHere = this.gettextCatalog.getString("Navigate Here");
