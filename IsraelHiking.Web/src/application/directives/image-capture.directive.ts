@@ -52,9 +52,9 @@ export class ImageCaptureDirective implements OnDestroy {
         let data = await Camera.getPhoto({
             correctOrientation: true,
             saveToGallery: true,
-            resultType: CameraResultType.Base64
+            resultType: CameraResultType.DataUrl
         });
-        let blob = await fetch(`data:image/jpeg;base64,${data.base64String}`).then(r => r.blob()) as File;
+        let blob = await fetch(data.dataUrl).then(r => r.blob()) as File;
         this.raiseChangedEvent([blob]);
     }
 
