@@ -1,5 +1,5 @@
 import { Directive, Output, ElementRef, Renderer2, OnDestroy, EventEmitter, NgZone } from "@angular/core";
-import { Camera, CameraResultType } from "@capacitor/camera";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { FileService } from "application/services/file.service";
 
 import { environment } from "../../environments/environment";
@@ -52,7 +52,8 @@ export class ImageCaptureDirective implements OnDestroy {
         let data = await Camera.getPhoto({
             correctOrientation: true,
             saveToGallery: true,
-            resultType: CameraResultType.DataUrl
+            resultType: CameraResultType.DataUrl,
+            source: CameraSource.Camera
         });
         let blob = await fetch(data.dataUrl).then(r => r.blob()) as File;
         this.raiseChangedEvent([blob]);
