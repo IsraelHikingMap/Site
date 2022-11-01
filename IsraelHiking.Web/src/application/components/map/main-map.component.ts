@@ -184,7 +184,7 @@ export class MainMapComponent extends BaseMapComponent {
             this.mapComponent.mapInstance.removeSource("terrain");
             this.mapComponent.mapInstance.addSource("terrain", source);
         }
-        this.mapComponent.mapInstance.setTerrain({source: "terrain", exaggeration: 3});
+        this.mapComponent.mapInstance.setTerrain({source: "terrain", exaggeration: 2});
     }
 
 }
