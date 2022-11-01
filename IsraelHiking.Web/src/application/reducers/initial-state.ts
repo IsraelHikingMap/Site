@@ -23,7 +23,7 @@ export const initialState =
             isGotLostWarnings: false,
             isShowBatteryConfirmation: true,
             isShowIntro: true,
-            version: "9.14",
+            version: "9.15",
             language: {
                 code: "he",
                 rtl: true
