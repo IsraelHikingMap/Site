@@ -26,5 +26,5 @@ project(':capacitor-device').projectDir = new File('../node_modules/@capacitor/d
 include ':capacitor-text-zoom'
 project(':capacitor-text-zoom').projectDir = new File('../node_modules/@capacitor/text-zoom/android')
 
-include ':forgr-native-audio'
-project(':forgr-native-audio').projectDir = new File('../node_modules/@forgr/native-audio/android')
+include ':capgo-native-audio'
+project(':capgo-native-audio').projectDir = new File('../node_modules/@capgo/native-audio/android')

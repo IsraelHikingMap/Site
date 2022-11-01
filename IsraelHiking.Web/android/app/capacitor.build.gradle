@@ -17,7 +17,7 @@ dependencies {
     implementation project(':capacitor-camera')
     implementation project(':capacitor-device')
     implementation project(':capacitor-text-zoom')
-    implementation project(':forgr-native-audio')
+    implementation project(':capgo-native-audio')
     implementation "androidx.webkit:webkit:1.4.0"
     implementation "androidx.browser:browser:1.3.0"
     implementation "com.android.billingclient:billing:4.0.0"
