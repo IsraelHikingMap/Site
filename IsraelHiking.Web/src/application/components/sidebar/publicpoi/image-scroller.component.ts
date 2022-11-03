@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from "@angular/core";
 import { AnimationOptions } from "ngx-lottie";
 
 import { BaseMapComponent } from "../../base-map.component";
@@ -13,7 +13,7 @@ import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.j
     selector: "image-scroller",
     templateUrl: "./image-scroller.component.html"
 })
-export class ImageScrollerComponent extends BaseMapComponent {
+export class ImageScrollerComponent extends BaseMapComponent implements OnChanges {
     lottiePOI: AnimationOptions = {
         animationData: sceneryPlaceholder,
     };
@@ -37,6 +37,12 @@ export class ImageScrollerComponent extends BaseMapComponent {
         super(resources);
         this.currentIndex = 0;
         this.currentImageChanged = new EventEmitter();
+    }
+    
+    public ngOnChanges(changes: SimpleChanges): void {
+        if (changes.images) {
+            this.currentIndex = 0;
+        }
     }
 
     public next() {
@@ -108,5 +114,9 @@ export class ImageScrollerComponent extends BaseMapComponent {
             imagesUrls.push(imageUrlToPush);
         }
         this.imageGalleryService.open(imagesUrls, this.currentIndex);
+    }
+
+    public getIndexString() {
+        return `${this.currentIndex + 1} / ${this.images.length}`;
     }
 }

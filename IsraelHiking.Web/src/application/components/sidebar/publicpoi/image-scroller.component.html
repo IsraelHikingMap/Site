@@ -27,6 +27,9 @@
     <div fxFlex *ngIf="canEdit">
         <button mat-button (click)="remove()" fxFill><i class="fa icon-trash"></i></button>
     </div>
+    <div fxFlex *ngIf="!canEdit" >
+        <div class="text-center" dir="ltr" fxFill>{{getIndexString()}}</div>
+    </div>
     <div fxFlex>
         <button mat-button (click)="next()" [disabled]="!hasNext()" fxFill><i class="fa icon-chevron-{{resources.end}}"></i></button>
     </div>
