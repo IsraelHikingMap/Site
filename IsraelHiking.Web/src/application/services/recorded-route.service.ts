@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { last } from "lodash-es";
 import { Observable } from "rxjs";
 import { NgRedux, Select } from "@angular-redux2/store";
 
@@ -24,6 +23,7 @@ export class RecordedRouteService {
     private static readonly MIN_ACCURACY = 100; // meters
 
     private rejectedPosition: LatLngAltTime;
+    private lastValidLocation: LatLngAltTime;
 
     @Select((state: ApplicationState) => state.gpsState.currentPoistion)
     private currentPosition$: Observable<GeolocationPosition>;
@@ -36,6 +36,7 @@ export class RecordedRouteService {
                 private readonly toastService: ToastService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.rejectedPosition = null;
+        this.lastValidLocation = null;
     }
 
     public initialize() {
@@ -71,6 +72,7 @@ export class RecordedRouteService {
         this.loggingService.info("[Record] Starting recording");
         this.rejectedPosition = null;
         let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+        this.lastValidLocation = currentLocation;
         this.ngRedux.dispatch(new StartRecordingAction());
         this.ngRedux.dispatch(new AddRecordingRoutePointsAction({
             latlngs: [currentLocation]
@@ -161,12 +163,11 @@ export class RecordedRouteService {
         if (!this.ngRedux.getState().recordedRouteState.isRecording) {
             return;
         }
-        let lastValidLocation = last(this.ngRedux.getState().recordedRouteState.route.latlngs);
         let validPositions = [];
         for (let position of positions) {
-            if (this.validateRecordingAndUpdateState(position, lastValidLocation)) {
+            if (this.validateRecordingAndUpdateState(position)) {
                 validPositions.push(position);
-                lastValidLocation = this.geoLocationService.positionToLatLngTime(position);
+                this.lastValidLocation = this.geoLocationService.positionToLatLngTime(position);
             }
         }
         if (validPositions.length === 0) {
@@ -181,8 +182,8 @@ export class RecordedRouteService {
         }, 0);
     }
 
-    private validateRecordingAndUpdateState(position: GeolocationPosition, lastValidLocation: LatLngAltTime): boolean {
-        let nonValidReason = this.isValid(lastValidLocation, position);
+    private validateRecordingAndUpdateState(position: GeolocationPosition): boolean {
+        let nonValidReason = this.isValid(this.lastValidLocation, position);
         if (nonValidReason === "") {
             this.loggingService.debug("[Record] Valid position, updating. coord: " +
                 `(${position.coords.latitude}, ${position.coords.longitude}), time: ${new Date(position.timestamp).toISOString()}`);

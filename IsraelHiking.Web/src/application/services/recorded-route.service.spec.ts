@@ -46,6 +46,50 @@ describe("Recorded Route Service", () => {
         });
         MockNgRedux.reset();
     });
+    
+    it("Should get recording from state", inject([RecordedRouteService],
+        (service: RecordedRouteService) => {
+            MockNgRedux.store.getState = () => ({
+                recordedRouteState: {
+                    isRecording: false
+                }
+            });
+            expect(service.isRecording()).toBeFalse();
+        }
+    ));
+
+    it("Should initialize after a recording stopped in the middle and bring up a dialog", inject([RecordedRouteService, ToastService],
+        (service: RecordedRouteService, toastService: ToastService) => {
+            MockNgRedux.store.getState = () => ({
+                recordedRouteState: {
+                    isRecording: true
+                }
+            });
+            let spy = jasmine.createSpy();
+            toastService.confirm = spy;
+            service.initialize();
+            expect(spy).toHaveBeenCalled();
+        }
+    ));
+
+    it("Should not do anything when not recording and a new position is received", inject([RecordedRouteService],
+        (service: RecordedRouteService) => {
+            MockNgRedux.store.getState = () => ({
+                recordedRouteState: {
+                    isRecording: false
+                }
+            });
+            service.initialize();
+            const positionStub = getSubject((state: ApplicationState) => state.gpsState.currentPoistion);
+            let spy = jasmine.createSpy();
+            MockNgRedux.store.dispatch = spy;
+
+            positionStub.next(
+                { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime()}
+            );
+            expect(spy).not.toHaveBeenCalled();
+        }
+    ));
 
     it("Should add a valid location", done => inject([RecordedRouteService],
         (service: RecordedRouteService) => {
@@ -55,6 +99,19 @@ describe("Recorded Route Service", () => {
                 }
             });
             service.initialize();
+            MockNgRedux.store.getState = () => ({
+                gpsState: {
+                    currentPoistion: {
+                        coords: {
+                            latitude: 1,
+                            loggitude: 2,
+                            altitude: 10,
+                        },
+                        timestamp: new Date(0).getTime()
+                    }
+                }
+            });
+            service.startRecording();
             MockNgRedux.store.getState = () => ({
                 userState: {},
                 recordedRouteState: {
@@ -83,6 +140,75 @@ describe("Recorded Route Service", () => {
             }, 10);
         }
     )());
+    
+    it("Should add a valid locations when returning from background", done => inject([RecordedRouteService, GeoLocationService],
+        (service: RecordedRouteService, geoService: GeoLocationService) => {
+            MockNgRedux.store.getState = () => ({
+                recordedRouteState: {
+                    isRecording: false
+                }
+            });
+            service.initialize();
+            MockNgRedux.store.getState = () => ({
+                gpsState: {
+                    currentPoistion: {
+                        coords: {
+                            latitude: 1,
+                            loggitude: 2,
+                            altitude: 10,
+                        },
+                        timestamp: new Date(0).getTime()
+                    }
+                }
+            });
+            service.startRecording();
+            MockNgRedux.store.getState = () => ({
+                userState: {},
+                recordedRouteState: {
+                    route: {
+                        latlngs: [{
+                            lat: 1,
+                            lng: 2,
+                            alt: 10,
+                            timestamp: new Date(0)
+                        }]
+                    },
+                    isRecording: true
+                }
+            });
+            const positionStub = getSubject((state: ApplicationState) => state.gpsState.currentPoistion);
+            let spy = jasmine.createSpy();
+            MockNgRedux.store.dispatch = spy;
+
+            geoService.bulkPositionChanged.next([
+                {
+                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
+                    timestamp: new Date(1).getTime()
+                },
+                {
+                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
+                    timestamp: new Date(60000).getTime()
+                },
+                {
+                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
+                    timestamp: new Date(120000).getTime()
+                },
+                {
+                    coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
+                    timestamp: new Date(180000).getTime()
+                }
+            ]);
+            positionStub.next(
+                { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(240000).getTime()}
+            );
+            setTimeout(() => {
+                expect(spy.calls.all().length).toBe(2);
+                expect((spy.calls.all()[0].args[0] as AddRecordingRoutePointsAction).payload.latlngs.length).toBe(4);
+                expect((spy.calls.all()[1].args[0] as AddRecordingRoutePointsAction).payload.latlngs.length).toBe(1);
+                done();
+            }, 10);
+        }
+    )());
 
     it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService, LoggingService],
         (service: RecordedRouteService, geoService: GeoLocationService,
@@ -93,6 +219,20 @@ describe("Recorded Route Service", () => {
                 }
             });
             service.initialize();
+            MockNgRedux.store.getState = () => ({
+                gpsState: {
+                    currentPoistion: {
+                        coords: {
+                            latitude: 1,
+                            loggitude: 2,
+                            altitude: 10,
+                        },
+                        timestamp: new Date(0).getTime()
+                    }
+                }
+            });
+            let spy = spyOn(logginService, "debug");
+            service.startRecording();
             MockNgRedux.store.getState = () => ({
                 recordedRouteState: {
                     route: {
@@ -106,7 +246,6 @@ describe("Recorded Route Service", () => {
                     isRecording: true
                 }
             });
-            let spy = spyOn(logginService, "debug");
 
             geoService.bulkPositionChanged.next([
                 {
@@ -124,13 +263,27 @@ describe("Recorded Route Service", () => {
                 {
                     coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(152000).getTime()
+                },
+                {
+                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
+                    timestamp: new Date(152000).getTime()
+                },
+                {
+                    coords: { longitude: 1, latitude: 2, accuracy: 1000 } as GeolocationCoordinates,
+                    timestamp: new Date(153000).getTime()
+                },
+                {
+                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
+                    timestamp: new Date(10000000).getTime()
                 }
             ]);
-
             expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy();
             expect(spy.calls.all()[1].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
             expect(spy.calls.all()[2].args[0].startsWith("[Record] Validating a rejected position")).toBeTruthy();
             expect(spy.calls.all()[3].args[0].startsWith("[Record] Valid position")).toBeTruthy();
+            expect(spy.calls.all()[4].args[0].startsWith("[Record] Rejecting position,")).toBeTruthy();
+            expect(spy.calls.all()[5].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
+            expect(spy.calls.all()[6].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
         }));
 
     it("should stop recording and send data to traces upload mechanism including one marker", inject([RecordedRouteService], (service: RecordedRouteService) => {
