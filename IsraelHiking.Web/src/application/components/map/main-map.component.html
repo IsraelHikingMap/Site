@@ -14,7 +14,7 @@
             <layers-view></layers-view>
             <routes></routes>
             <traces></traces>
-            <zoom *ngIf="!isMobile() && !isApp()" #topLeftControl></zoom>
+            <zoom fxShow.sm="false" fxShow.xs="false" #topLeftControl></zoom>
             <location #topLeftControl *ngIf="isMobile() || !isIFrame()"></location>
             <main-menu #topRightControl></main-menu>
             <search #topRightControl *ngIf="!isIFrame()"></search>
