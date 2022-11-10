@@ -62,7 +62,7 @@ In order to be able to build this site you'll need some tools:
 * Install [node.js](https://nodejs.org/en/) (16.13+).
 * Run from command line `dotnet restore` and after that `dotnet build`
 * Go to `IsraelHiking.Web` and run from command line: 
-  * `npm install` to install all npm packages for the client side code
+  * `npm install --legacy-peer-deps` to install all npm packages for the client side code
   * `npm run build` to generate the Angular UI client. It should create `wwwroot` folder on a successful run
 * Run `docker compose up graphhopper` - it should fail for the first time
 * Run `gh-update.ps1` (set chmod +x if needed) to generate the graphhopper routing data
