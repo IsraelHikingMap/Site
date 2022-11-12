@@ -15,6 +15,8 @@ const EXPAND_GROUP = "EXPAND_GROUP";
 const COLLAPSE_GROUP = "COLLAPSE_GROUP";
 const SET_CATEGORIES_GROUP_VISIBILITY = "SET_CATEGORIES_GROUP_VISIBILITY";
 const ADD_CATEGORY = "ADD_CATEGORY";
+const UPDATE_CATEGORY = "UPDATE_CATEGORY";
+const REMOVE_CATEGORY = "REMOVE_CATEGORY";
 const SET_CATEGORY_VISIBILITY = "SET_CATEGORY_VISIBILITY";
 const TOGGLE_OFFLINE = "TOGGLE_OFFLINE";
 
@@ -56,6 +58,16 @@ export type SetCategoriesGroupVisibilityPayload = {
 export type AddCategoryPayload = {
     groupType: CategoriesGroupType;
     category: Category;
+};
+
+export type UpdateCategoryPayload = {
+    groupType: CategoriesGroupType;
+    category: Category;
+};
+
+export type RemoveCategoryPayload = {
+    groupType: CategoriesGroupType;
+    categoryName: string;
 };
 
 export type SetCategoryVisibilityPayload = {
@@ -132,6 +144,18 @@ export class SetCategoriesGroupVisibilityAction extends BaseAction<SetCategories
 export class AddCategoryAction extends BaseAction<AddCategoryPayload> {
     constructor(payload: AddCategoryPayload) {
         super(ADD_CATEGORY, payload);
+    }
+}
+
+export class UpdateCategoryAction extends BaseAction<UpdateCategoryPayload> {
+    constructor(payload: UpdateCategoryPayload) {
+        super(UPDATE_CATEGORY, payload);
+    }
+}
+
+export class RemoveCategoryAction extends BaseAction<RemoveCategoryPayload> {
+    constructor(payload: RemoveCategoryPayload) {
+        super(REMOVE_CATEGORY, payload);
     }
 }
 
@@ -252,6 +276,42 @@ class LayersReducer {
         let group = groups.find(g => g.type === action.payload.groupType);
         let categories = [...group.categories];
         categories.push(action.payload.category);
+        let newGroup = {
+            ...group,
+            categories
+        };
+        groups.splice(groups.indexOf(group), 1, newGroup);
+        return {
+            ...lastState,
+            categoriesGroups: groups
+        };
+    }
+
+    @ReduxAction(UPDATE_CATEGORY)
+    public updateCategory(lastState: LayersState, action: UpdateCategoryAction): LayersState {
+        let groups = [...lastState.categoriesGroups];
+        let group = groups.find(g => g.type === action.payload.groupType);
+        let categories = [...group.categories];
+        let categoryIndex = categories.indexOf(categories.find(c => c.name === action.payload.category.name));
+        categories.splice(categoryIndex, 1, action.payload.category);
+        let newGroup = {
+            ...group,
+            categories
+        };
+        groups.splice(groups.indexOf(group), 1, newGroup);
+        return {
+            ...lastState,
+            categoriesGroups: groups
+        };
+    }
+
+    @ReduxAction(REMOVE_CATEGORY)
+    public removeCategory(lastState: LayersState, action: RemoveCategoryAction): LayersState {
+        let groups = [...lastState.categoriesGroups];
+        let group = groups.find(g => g.type === action.payload.groupType);
+        let categories = [...group.categories];
+        let categoryIndex = categories.indexOf(categories.find(c => c.name === action.payload.categoryName));
+        categories.splice(categoryIndex, 1);
         let newGroup = {
             ...group,
             categories

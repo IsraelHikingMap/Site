@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { HttpClient, HttpErrorResponse, HttpParams } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { NgProgress } from "ngx-progressbar";
-import { uniq, cloneDeep } from "lodash-es";
+import { uniq, cloneDeep, isEqual } from "lodash-es";
 import { Observable, fromEvent, Subscription, firstValueFrom } from "rxjs";
 import { timeout, throttleTime, skip, filter } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
@@ -21,7 +21,7 @@ import { MapService } from "./map.service";
 import { FileService } from "./file.service";
 import { ConnectionService } from "./connection.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
-import { SetCategoriesGroupVisibilityAction, AddCategoryAction } from "../reducers/layers.reducer";
+import { SetCategoriesGroupVisibilityAction, AddCategoryAction, UpdateCategoryAction, RemoveCategoryAction } from "../reducers/layers.reducer";
 import { Urls } from "../urls";
 import type {
     MarkerData,
@@ -479,11 +479,25 @@ export class PoiService {
                     visibility = false;
                 }
                 for (let category of categories) {
-                    if (categoriesGroup.categories.find(c => c.name === category.name) == null) {
-                        category.visible = visibility;
+                    category.visible = visibility;
+                    let exsitingCategory = categoriesGroup.categories.find(c => c.name === category.name);
+                    if (exsitingCategory == null) {
                         this.ngRedux.dispatch(new AddCategoryAction({
                             groupType: categoriesGroup.type,
                             category
+                        }));
+                    } else if (!isEqual(category, exsitingCategory)) {
+                        this.ngRedux.dispatch(new UpdateCategoryAction({
+                            groupType: categoriesGroup.type,
+                            category: category
+                        }));
+                    }
+                }
+                for (let exsitingCategory of categoriesGroup.categories) {
+                    if (categories.find(c => c.name === exsitingCategory.name) == null) {
+                        this.ngRedux.dispatch(new RemoveCategoryAction({
+                            groupType: categoriesGroup.type,
+                            categoryName: exsitingCategory.name
                         }));
                     }
                 }

@@ -16,7 +16,7 @@ import { ToastService } from "./toast.service";
 import { MapService } from "./map.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
-import type { ApplicationState, MarkerData } from "../models/models";
+import type { ApplicationState, Category, MarkerData } from "../models/models";
 import JSZip from "jszip";
 
 describe("Poi Service", () => {
@@ -633,4 +633,145 @@ describe("Poi Service", () => {
         expect(results.facebook.includes(Urls.facebook)).toBeTruthy();
         expect(results.waze.includes(Urls.waze)).toBeTruthy();
     }));
+
+    it("should sync categories when no categories exist", (inject([PoiService, HttpTestingController, RunningContextService],
+        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+            MockNgRedux.store.getState = () => ({
+                layersState: {
+                    categoriesGroups: [{
+                        type: "my-type",
+                        visible: true,
+                        categories: []
+                    }]                
+                }
+            });
+            (runningContextService as any).isIFrame = false;
+
+            let promise = poiService.syncCategories();
+
+            mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([{
+                color: "color", 
+                icon: "icon",
+                name: "name",
+                visible: false,
+                items: [{iconColorCategory: {
+                    color: "color",
+                    icon: "icon",
+                    label: "label"
+                }}]
+            }] as Category[]));
+
+            await promise;
+            let calls = (MockNgRedux.store.dispatch as jasmine.Spy<jasmine.Func>).calls;
+            expect(MockNgRedux.store.dispatch).toHaveBeenCalledTimes(1);
+            expect(calls.first().args[0].payload.category.name).toBe("name");
+    })));
+
+    it("should sync categories and hide on iFrame", (inject([PoiService, HttpTestingController, RunningContextService],
+        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+            MockNgRedux.store.getState = () => ({
+                layersState: {
+                    categoriesGroups: [{
+                        type: "my-type",
+                        visible: true,
+                        categories: []
+                    }]                
+                }
+            });
+            (runningContextService as any).isIFrame = true;
+            let promise = poiService.syncCategories();
+
+            mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([{
+                color: "color", 
+                icon: "icon",
+                name: "name",
+                visible: false,
+                items: [{iconColorCategory: {
+                    color: "color",
+                    icon: "icon",
+                    label: "label"
+                }}]
+            }] as Category[]));
+
+            await promise;
+            let calls = (MockNgRedux.store.dispatch as jasmine.Spy<jasmine.Func>).calls;
+            expect(MockNgRedux.store.dispatch).toHaveBeenCalledTimes(2);
+            expect(calls.first().args[0].payload.visible).toBeFalsy();
+    })));
+
+    it("should sync categories when categories are not the same", (inject([PoiService, HttpTestingController, RunningContextService],
+        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+            MockNgRedux.store.getState = () => ({
+                layersState: {
+                    categoriesGroups: [{
+                        type: "my-type",
+                        visible: true,
+                        categories: [{
+                            color: "color", 
+                            icon: "icon",
+                            name: "name",
+                            visible: false,
+                            items: [{iconColorCategory: {
+                                color: "color",
+                                icon: "icon",
+                                label: "label"
+                            }}]
+                        }]
+                    }]                
+                }
+            });
+            (runningContextService as any).isIFrame = false;
+
+            let promise = poiService.syncCategories();
+
+            mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([{
+                color: "color", 
+                icon: "icon",
+                name: "name",
+                visible: false,
+                items: [{iconColorCategory: {
+                    color: "color",
+                    icon: "icon",
+                    label: "label2"
+                }}]
+            }] as Category[]));
+
+            await promise;
+            let calls = (MockNgRedux.store.dispatch as jasmine.Spy<jasmine.Func>).calls;
+            expect(MockNgRedux.store.dispatch).toHaveBeenCalledTimes(1);
+            expect(calls.first().args[0].payload.category.items[0].iconColorCategory.label).toBe("label2");
+    })));
+
+    it("should sync categories when need to remove a category", (inject([PoiService, HttpTestingController, RunningContextService],
+        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+            MockNgRedux.store.getState = () => ({
+                layersState: {
+                    categoriesGroups: [{
+                        type: "my-type",
+                        visible: true,
+                        categories: [{
+                            color: "color", 
+                            icon: "icon",
+                            name: "name",
+                            visible: false,
+                            items: [{iconColorCategory: {
+                                color: "color",
+                                icon: "icon",
+                                label: "label"
+                            }}]
+                        }]
+                    }]                
+                }
+            });
+            (runningContextService as any).isIFrame = false;
+
+            let promise = poiService.syncCategories();
+
+            mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([]));
+
+            await promise;
+            let calls = (MockNgRedux.store.dispatch as jasmine.Spy<jasmine.Func>).calls;
+            expect(MockNgRedux.store.dispatch).toHaveBeenCalledTimes(1);
+            expect(calls.first().args[0].payload.categoryName).toBe("name");
+    })));
 });
