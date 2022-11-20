@@ -42,18 +42,8 @@ export class RecordedRouteService {
     public initialize() {
         if (this.ngRedux.getState().recordedRouteState.isRecording) {
             this.loggingService.info("[Record] Recording was interrupted");
-            this.toastService.confirm({
-                message: this.resources.continueRecording,
-                type: "YesNo",
-                confirmAction: () => {
-                    this.loggingService.info("[Record] User choose to continue recording");
-                    this.geoLocationService.enable();
-                },
-                declineAction: () => {
-                    this.loggingService.info("[Record] User choose to stop recording");
-                    this.stopRecording();
-                },
-            });
+            this.stopRecording(false);
+            this.toastService.warning(this.resources.lastRecordingDidNotEndWell);
         }
 
         this.currentPosition$.subscribe(
@@ -83,11 +73,21 @@ export class RecordedRouteService {
         return this.ngRedux.getState().recordedRouteState.isRecording;
     }
 
-    public stopRecording() {
+    public stopRecording(withToast = true) {
         this.loggingService.info("[Record] Stop recording");
         let recordedRoute = this.ngRedux.getState().recordedRouteState.route;
         this.ngRedux.dispatch(new StopRecordingAction());
         this.addRecordingToTraces(recordedRoute);
+        if (withToast = false) {
+            return;
+        }
+        if (this.ngRedux.getState().userState.userInfo == null) {
+            this.toastService.warning(this.resources.youNeedToLoginToSeeYourTraces);
+        } else if (!this.ngRedux.getState().configuration.isAutomaticRecordingUpload) {
+            this.toastService.warning(this.resources.tracesAreOnlySavedLocally);
+        } else {
+            this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
+        }
     }
 
     private recordedRouteToRouteData(route: RecordedRoute): RouteData {
@@ -149,14 +149,6 @@ export class RecordedRouteService {
 
         this.ngRedux.dispatch(new AddTraceAction({ trace }));
         await this.tracesService.uploadLocalTracesIfNeeded();
-
-        if (this.ngRedux.getState().userState.userInfo == null) {
-            this.toastService.warning(this.resources.youNeedToLoginToSeeYourTraces);
-        } else if (!this.ngRedux.getState().configuration.isAutomaticRecordingUpload) {
-            this.toastService.warning(this.resources.tracesAreOnlySavedLocally);
-        } else {
-            this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
-        }
     }
 
     private updateRecordingRoute(positions: GeolocationPosition[]) {
@@ -204,7 +196,7 @@ export class RecordedRouteService {
             return true;
         }
         this.rejectedPosition = this.geoLocationService.positionToLatLngTime(position);
-        this.loggingService.debug("[Record] Rejecting position for rejected: " + JSON.stringify(position) + " reason: " + nonValidReason);
+        this.loggingService.debug("[Record] Rejecting position for rejected: " + JSON.stringify(this.rejectedPosition) + " reason: " + nonValidReason);
         return false;
     }
 

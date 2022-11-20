@@ -274,7 +274,7 @@ export class ResourcesService {
     public unableToFindPoi: string;
     public wouldYouLikeToUpdate: string;
     public wouldYouLikeToUpdateThePointWithoutTheTitle: string;
-    public continueRecording: string;
+    public lastRecordingDidNotEndWell: string;
     public makeSureBatteryOptimizationIsOff: string;
     public dontShowThisMessageAgain: string;
     public areYouSureYouWantToDeleteAllRoutes: string;
@@ -475,7 +475,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1667199636002");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1668932437125");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -743,7 +743,7 @@ export class ResourcesService {
         this.wouldYouLikeToUpdate = this.gettextCatalog.getString("Would you like to update:");
         this.wouldYouLikeToUpdateThePointWithoutTheTitle = this.gettextCatalog
             .getString("Would you like to update the point without the title?");
-        this.continueRecording = this.gettextCatalog.getString("Last recording did not end well, would you like to continue it?");
+        this.lastRecordingDidNotEndWell = this.gettextCatalog.getString("Last recording did not end well. Feel free to start a new one.");
         this.makeSureBatteryOptimizationIsOff = this.gettextCatalog.getString(
             "Please make sure the battery optimization is turned off for this application. Go to application setting to do so."
         );
