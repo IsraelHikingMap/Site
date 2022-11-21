@@ -76,7 +76,16 @@ namespace IsraelHiking.API.Executors
         {
             AddAlternativeTitleToNatureReserves(osmFeatures);
             externalFeatures = MergeWikipediaToOsmByWikipediaTags(osmFeatures, externalFeatures);
-            osmFeatures = MergeOsmElementsByName(osmFeatures);
+            _logger.LogInformation($"Starting to sort features by importance: {osmFeatures.Count}");
+            osmFeatures = osmFeatures.OrderBy(f => f, new FeatureComparer()).ToList();
+            _logger.LogInformation($"Finished sorting features by importance: {osmFeatures.Count}");
+            osmFeatures = MergePlaceNodes(osmFeatures);
+            var namesAttributes = new List<string> {FeatureAttributes.NAME, FeatureAttributes.MTB_NAME};
+            namesAttributes.AddRange(Languages.Array.Select(language => FeatureAttributes.NAME + ":" + language));
+            foreach (var nameAttribute in namesAttributes)
+            {
+                osmFeatures = MergeOsmElementsByName(osmFeatures, nameAttribute);
+            }
             externalFeatures = MergeExternalFeaturesToOsm(osmFeatures, externalFeatures);
             externalFeatures = externalFeatures.Where(f => !f.GetLocation().X.Equals(FeatureAttributes.INVALID_LOCATION)).ToList();
             var all = osmFeatures.Concat(externalFeatures).ToList();
@@ -84,16 +93,13 @@ namespace IsraelHiking.API.Executors
             return all;
         }
 
-        private List<Feature> MergeOsmElementsByName(List<Feature> osmFeatures)
+        private List<Feature> MergeOsmElementsByName(List<Feature> orderedOsmFeatures, string nameAttribute)
         {
-            _logger.LogInformation("Starting OSM merging by name.");
+            _logger.LogInformation($"Starting OSM merging by {nameAttribute}.");
             var featureIdsToRemove = new ConcurrentBag<string>();
-            osmFeatures = osmFeatures.OrderBy(f => f, new FeatureComparer()).ToList();
-            _logger.LogInformation($"Sorted features by importance: {osmFeatures.Count}");
-            osmFeatures = MergePlaceNodes(osmFeatures);
-            var groupedByName = osmFeatures.Where(f => f.Attributes.Exists(FeatureAttributes.NAME))
-                .GroupBy(f => f.Attributes[FeatureAttributes.NAME].ToString()).ToList();
-            _logger.LogInformation($"Finished grouping by name: {groupedByName.Count}, staring to merge on {Environment.ProcessorCount / 2} processors");
+            var groupedByName = orderedOsmFeatures.Where(f => f.Attributes.Exists(nameAttribute))
+                .GroupBy(f => f.Attributes[nameAttribute].ToString()).ToList();
+            _logger.LogInformation($"Finished grouping by {nameAttribute} - {groupedByName.Count}, staring to merge on {Environment.ProcessorCount / 2} processors");
             Parallel.For(0, groupedByName.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount / 2 }, (groupIndex) =>
             {
                 var features = groupedByName[groupIndex].ToList();
@@ -106,14 +112,15 @@ namespace IsraelHiking.API.Executors
                         for (int index = 1; index < features.Count; index++)
                         {
                             var feature = features.ElementAt(index);
-                            if (CanMerge(featureToMergeTo, feature))
+                            if (!CanMerge(featureToMergeTo, feature))
                             {
-                                MergeFeatures(featureToMergeTo, feature);
-                                featureIdsToRemove.Add(feature.GetId());
-                                features.Remove(feature);
-                                merged = true;
-                                break;
+                                continue;
                             }
+                            MergeFeatures(featureToMergeTo, feature);
+                            featureIdsToRemove.Add(feature.GetId());
+                            features.Remove(feature);
+                            merged = true;
+                            break;
                         }
                         if (!merged)
                         {
@@ -125,9 +132,9 @@ namespace IsraelHiking.API.Executors
             });
             _logger.LogInformation($"Finished processing geometries, removing items.");
             var list = featureIdsToRemove.ToHashSet();
-            osmFeatures = osmFeatures.Where(f => list.Contains(f.GetId()) == false).ToList();
-            _logger.LogInformation($"Finished OSM merging by name: {osmFeatures.Count}");
-            return osmFeatures;
+            orderedOsmFeatures = orderedOsmFeatures.Where(f => list.Contains(f.GetId()) == false).ToList();
+            _logger.LogInformation($"Finished OSM merging by name: {orderedOsmFeatures.Count}");
+            return orderedOsmFeatures;
         }
 
         private List<Feature> MergeExternalFeaturesToOsm(List<Feature> osmFeatures, List<Feature> externalFeatures)
@@ -150,22 +157,18 @@ namespace IsraelHiking.API.Executors
                 }
             }
             _logger.LogInformation("Finished preparing titles mapping, starting processing.");
-            for (int externalFeatureIndex = 0; externalFeatureIndex < externalFeatures.Count; externalFeatureIndex++)
+            foreach (var externalFeature in externalFeatures)
             {
-                Feature externalFeature = externalFeatures[externalFeatureIndex];
                 var name = externalFeature.Attributes[FeatureAttributes.NAME].ToString();
                 if (!titlesDictionary.ContainsKey(name))
                 {
                     continue;
                 }
-                foreach (var osmFeature in titlesDictionary[name])
+                foreach (var osmFeature in titlesDictionary[name].Where(osmFeature => CanMerge(osmFeature, externalFeature)))
                 {
-                    if (CanMerge(osmFeature, externalFeature))
-                    {
-                        MergeFeatures(osmFeature, externalFeature);
-                        featureIdsToRemove.Add(externalFeature.GetId());
-                        break;
-                    }
+                    MergeFeatures(osmFeature, externalFeature);
+                    featureIdsToRemove.Add(externalFeature.GetId());
+                    break;
                 }
             }
             externalFeatures = externalFeatures.Where(f => featureIdsToRemove.Contains(f.GetId()) == false).ToList();
@@ -271,7 +274,7 @@ namespace IsraelHiking.API.Executors
         {
             foreach (var feature in results)
             {
-                if (!(feature.Geometry is GeometryCollection geometryCollection))
+                if (feature.Geometry is not GeometryCollection geometryCollection)
                 {
                     continue;
                 }
@@ -426,10 +429,15 @@ namespace IsraelHiking.API.Executors
                 featureToMergeTo.Attributes[FeatureAttributes.POI_ICON_COLOR] =
                     feature.Attributes[FeatureAttributes.POI_ICON_COLOR];
             }
+            if (featureToMergeTo.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
+                feature.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM))
+            {
+                // only merge geometry between OSM features
+                featureToMergeTo.MergeGeometriesFrom(feature, _geometryFactory);
+            }
             
             featureToMergeTo.Attributes.AddOrUpdate(FeatureAttributes.POI_MERGED, true);
             // adding attributes of merged feature
-            MergeGeometry(featureToMergeTo, feature);
             MergeTitles(featureToMergeTo, feature);
             MergeDescriptionAndAuthor(featureToMergeTo, feature);
             MergeDates(featureToMergeTo, feature);
@@ -445,20 +453,11 @@ namespace IsraelHiking.API.Executors
             {
                 return false;
             }
-            bool geometryContains;
-            if (target.Geometry is GeometryCollection geometryCollection)
-            {
-                geometryContains = geometryCollection.Geometries.Any(g => source.Geometry.Contains(g));
-            }
-            else
-            {
-                geometryContains = source.Geometry.Contains(target.Geometry);
-            }
             var threshold = source.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
-                target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM)
+                            target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM)
                 ? _options.MergePointsOfInterestThreshold
                 : _options.MergeExternalPointsOfInterestThreshold;
-            if (!geometryContains && source.Geometry.Distance(target.Geometry) > threshold)
+            if (!source.GeometryContains(target) && source.Geometry.Distance(target.Geometry) > threshold)
             {
                 // too far away to be merged
                 return false;
@@ -517,10 +516,10 @@ namespace IsraelHiking.API.Executors
         /// <returns></returns>
         private bool IsFeaturesTagsMismatched(Feature target, Feature source, string tagName) {
             return target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) && 
-                ((target.Attributes.GetNames().Contains(tagName) &&
-                !source.Attributes.GetNames().Contains(tagName)) || 
-                (!target.Attributes.GetNames().Contains(tagName) &&
-                 source.Attributes.GetNames().Contains(tagName)));
+                (target.Attributes.GetNames().Contains(tagName) &&
+                 !source.Attributes.GetNames().Contains(tagName) || 
+                !target.Attributes.GetNames().Contains(tagName) &&
+                source.Attributes.GetNames().Contains(tagName));
         }
 
         private List<Feature> MergeWikipediaToOsmByWikipediaTags(List<Feature> osmFeatures, List<Feature> externalFeatures)
@@ -689,32 +688,6 @@ namespace IsraelHiking.API.Executors
                 {
                     target.Attributes.AddOrUpdate(targetImageUrlKey, source.Attributes[sourceImageUrlKey]);
                 }
-            }
-        }
-
-        private void MergeGeometry(Feature target, Feature source)
-        {
-            if (!target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) ||
-                !source.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM))
-            {
-                // only merge geometry between OSM features
-                return;
-            }
-
-            if (target.Geometry is GeometryCollection geometryCollection)
-            {
-                if (source.Geometry is GeometryCollection geometryCollectionSource)
-                {
-                    target.Geometry = _geometryFactory.CreateGeometryCollection(geometryCollection.Geometries.Concat(geometryCollectionSource.Geometries).ToArray());
-                }
-                else
-                {
-                    target.Geometry = _geometryFactory.CreateGeometryCollection(geometryCollection.Geometries.Concat(new[] { source.Geometry }).ToArray());
-                }
-            }
-            else
-            {
-                target.Geometry = _geometryFactory.CreateGeometryCollection(new[] { target.Geometry, source.Geometry });
             }
         }
 

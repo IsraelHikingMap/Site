@@ -249,7 +249,7 @@ namespace IsraelHiking.Common.Extensions
         {
             return feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language) != string.Empty ||
                    feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL)) ||
-                   feature.Attributes.GetNames().Any(n => n.Contains("mtb:name"));
+                   feature.Attributes.GetNames().Any(n => n.Contains(FeatureAttributes.MTB_NAME));
         }
 
         public static long GetOsmId(this IFeature feature)
@@ -320,6 +320,52 @@ namespace IsraelHiking.Common.Extensions
                     {FeatureAttributes.LON, geoLocation.X}
                 };
             table.AddOrUpdate(FeatureAttributes.POI_GEOLOCATION, geoLocationTable);
+        }
+
+        public static bool GeometryContains(this IFeature feature, IFeature otherFeature)
+        {
+            if (otherFeature.Geometry is GeometryCollection geometryCollectionOther)
+            {
+                if (feature.Geometry is GeometryCollection geometryCollection)
+                {
+                    return geometryCollectionOther.Geometries.Any(og => geometryCollection.Geometries.Any(gc => gc.Contains(og)));    
+                }
+                return geometryCollectionOther.Geometries.Any(og => feature.Geometry.Contains(og));
+            }
+            else
+            {
+                if (feature.Geometry is GeometryCollection geometryCollection)
+                {
+                    return geometryCollection.Geometries.Any(gcs => gcs.Contains(otherFeature.Geometry));
+                }
+                return feature.Geometry.Contains(otherFeature.Geometry);
+            }
+        }
+
+        public static void MergeGeometriesFrom(this IFeature target, IFeature source, GeometryFactory geometryFactory)
+        {
+            if (target.Geometry is GeometryCollection geometryCollection)
+            {
+                if (source.Geometry is GeometryCollection geometryCollectionSource)
+                {
+                    target.Geometry = geometryFactory.CreateGeometryCollection(geometryCollection.Geometries.Concat(geometryCollectionSource.Geometries).ToArray());
+                }
+                else
+                {
+                    target.Geometry = geometryFactory.CreateGeometryCollection(geometryCollection.Geometries.Concat(new[] { source.Geometry }).ToArray());
+                }
+            }
+            else
+            {
+                if (source.Geometry is GeometryCollection geometryCollectionSource)
+                {
+                    target.Geometry = geometryFactory.CreateGeometryCollection(new[] { target.Geometry }.Concat(geometryCollectionSource.Geometries).ToArray());
+                }
+                else
+                {
+                    target.Geometry = geometryFactory.CreateGeometryCollection(new[] { target.Geometry, source.Geometry });    
+                }
+            }
         }
     }
 }

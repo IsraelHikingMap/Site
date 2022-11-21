@@ -64,6 +64,21 @@ namespace IsraelHiking.API.Tests.Executors
 
             Assert.AreEqual(1, results.Count);
         }
+        
+        [TestMethod]
+        public void MergeFeatures_HasSameMtbName_ShouldMerge()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.MTB_NAME, "1");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.MTB_NAME, "1");
+            feature2.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+
+            Assert.AreEqual(1, results.Count);
+        }
 
         [TestMethod]
         public void MergeFeatures_HasSameTitleAndSameImagesAndWebsite_ShouldMergeWithoutLink()
@@ -338,7 +353,7 @@ namespace IsraelHiking.API.Tests.Executors
                 new Coordinate(0, 0)
             }));
             feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
-            feature1.Attributes.AddOrUpdate("highway", "residental");
+            feature1.Attributes.AddOrUpdate("highway", "residential");
             feature1.SetTitles();
             var feature2 = CreateFeature("2", 0, 0);
             feature2.Geometry = new LineString(new[]
@@ -349,7 +364,7 @@ namespace IsraelHiking.API.Tests.Executors
                 new Coordinate(0.5, 0)
             });
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
-            feature2.Attributes.AddOrUpdate("highway", "residental");
+            feature2.Attributes.AddOrUpdate("highway", "residential");
             feature2.SetTitles();
 
             var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
@@ -695,7 +710,7 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
-        public void MergeFeatures_MultiplteMerges_ShouldMergeGeometriesRight()
+        public void MergeFeatures_MultipleMerges_ShouldMergeGeometriesRight()
         {
             var node1 = CreateFeature("node_1", -0.0008, 0);
             node1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
@@ -760,7 +775,7 @@ namespace IsraelHiking.API.Tests.Executors
 
 
         [TestMethod]
-        public void MergePlaceNodeWithInPlaceWithinBondary_ShouldMergeAndRemove()
+        public void MergePlaceNodeWithInPlaceWithinBoundary_ShouldMergeAndRemove()
         {
             var placeNode = CreateFeature("1", 0.5, 0.6);
             placeNode.Attributes.AddOrUpdate("place", "any");
@@ -803,7 +818,7 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
-        public void MergePlaceNodeWithInPlaceWithinBondary_NodeIsInsideBoundaryButNotInsidePlace_ShouldMergeAndRemove()
+        public void MergePlaceNodeWithInPlaceWithinBoundary_NodeIsInsideBoundaryButNotInsidePlace_ShouldMergeAndRemove()
         {
             var placeNode = CreateFeature("1", -0.0001, -0.0001);
             placeNode.Attributes.AddOrUpdate("place", "any");
@@ -964,6 +979,90 @@ namespace IsraelHiking.API.Tests.Executors
             Assert.AreEqual(1, results.Count);
             Assert.IsFalse(results.First().Attributes.Exists(FeatureAttributes.DESCRIPTION));
             Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_EXTERNAL_DESCRIPTION));
+        }
+
+        [TestMethod]
+        public void GeometryContains_ShouldBeExtendedToGeometryCollection()
+        {
+            var polygonGeometry = new Polygon(new LinearRing(new Coordinate[]
+            {
+                new(0, 0),
+                new(0, 1),
+                new(1, 1),
+                new(1, 0),
+                new(0, 0)
+            }));
+            var pointGeometry = new Point(0.5, 0.5);
+            var polygonFeature = new Feature(polygonGeometry, new AttributesTable());
+            var polygonCollection = new Feature(new GeometryCollection(new Geometry[] {polygonGeometry}),
+                new AttributesTable());
+            var pointFeature = new Feature(pointGeometry, new AttributesTable());
+            var pointCollection = new Feature(new GeometryCollection(new Geometry[] {pointGeometry}),
+                new AttributesTable());
+            Assert.IsTrue(polygonCollection.GeometryContains(pointFeature));
+            Assert.IsTrue(polygonCollection.GeometryContains(pointCollection));
+            Assert.IsTrue(polygonFeature.GeometryContains(pointFeature));
+            Assert.IsTrue(polygonFeature.GeometryContains(pointCollection));
+        }
+        
+        [TestMethod]
+        public void MergeGeometryCollectionToRegular_ShouldCreateASingleGeometryCollection()
+        {
+            var pointGeometry = new Point(0.5, 0.5);
+            var pointFeature = new Feature(pointGeometry, new AttributesTable());
+            var pointCollection = new Feature(new GeometryCollection(new Geometry[] {pointGeometry}),
+                new AttributesTable());
+
+            pointFeature.MergeGeometriesFrom(pointCollection, new GeometryFactory());
+            
+            Assert.IsTrue(pointFeature.Geometry is GeometryCollection);
+            Assert.AreEqual(2, ((GeometryCollection) pointFeature.Geometry).Geometries.Length);
+            Assert.IsTrue(((GeometryCollection) pointFeature.Geometry).Geometries.All(g => g.OgcGeometryType != OgcGeometryType.GeometryCollection));
+        }
+        
+        [TestMethod]
+        public void MergeGeometryCollectionToCollection_ShouldCreateASingleGeometryCollection()
+        {
+            var pointGeometry = new Point(0.5, 0.5);
+            var pointCollection = new Feature(new GeometryCollection(new Geometry[] {pointGeometry}),
+                new AttributesTable());
+            var pointCollection2 = new Feature(new GeometryCollection(new Geometry[] {pointGeometry}),
+                new AttributesTable());
+
+            pointCollection.MergeGeometriesFrom(pointCollection2, new GeometryFactory());
+            
+            Assert.IsTrue(pointCollection.Geometry is GeometryCollection);
+            Assert.AreEqual(2, ((GeometryCollection) pointCollection.Geometry).Geometries.Length);
+            Assert.IsTrue(((GeometryCollection) pointCollection.Geometry).Geometries.All(g => g.OgcGeometryType != OgcGeometryType.GeometryCollection));
+        }
+        
+        [TestMethod]
+        public void MergeGeometryRegularToCollection_ShouldCreateASingleGeometryCollection()
+        {
+            var pointGeometry = new Point(0.5, 0.5);
+            var pointFeature = new Feature(pointGeometry, new AttributesTable());
+            var pointCollection = new Feature(new GeometryCollection(new Geometry[] {pointGeometry}),
+                new AttributesTable());
+
+            pointCollection.MergeGeometriesFrom(pointFeature, new GeometryFactory());
+            
+            Assert.IsTrue(pointCollection.Geometry is GeometryCollection);
+            Assert.AreEqual(2, ((GeometryCollection) pointCollection.Geometry).Geometries.Length);
+            Assert.IsTrue(((GeometryCollection) pointCollection.Geometry).Geometries.All(g => g.OgcGeometryType != OgcGeometryType.GeometryCollection));
+        }
+        
+        [TestMethod]
+        public void MergeGeometryRegularToRegular_ShouldCreateASingleGeometryCollection()
+        {
+            var pointGeometry = new Point(0.5, 0.5);
+            var pointFeature = new Feature(pointGeometry, new AttributesTable());
+            var pointFeature2 = new Feature(pointGeometry, new AttributesTable());
+
+            pointFeature.MergeGeometriesFrom(pointFeature2, new GeometryFactory());
+            
+            Assert.IsTrue(pointFeature.Geometry is GeometryCollection);
+            Assert.AreEqual(2, ((GeometryCollection) pointFeature.Geometry).Geometries.Length);
+            Assert.IsTrue(((GeometryCollection) pointFeature.Geometry).Geometries.All(g => g.OgcGeometryType != OgcGeometryType.GeometryCollection));
         }
     }
 }
