@@ -118,7 +118,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
             {
-                {"mtb:name", "some-name"}
+                {FeatureAttributes.MTB_NAME, "some-name"}
             });
 
             Assert.AreEqual(1, factor);
