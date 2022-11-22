@@ -46,7 +46,6 @@ namespace IsraelHiking.API.Executors
             osmEntities = RemoveDuplicateWaysThatExistInRelations(osmEntities);
             var featuresToReturn = osmEntities.Select(ConvertToFeature).Where(f => f != null).ToList();
             UpdateAltitude(featuresToReturn);
-            ChangeLwnHikingRoutesToNoneCategory(featuresToReturn);
             _logger.LogInformation("Finished GeoJson conversion: " + featuresToReturn.Count);
             return featuresToReturn;
         }
@@ -118,15 +117,6 @@ namespace IsraelHiking.API.Executors
             feature.SetId();
             UpdateLocation(feature);
             return feature;
-        }
-
-        private void ChangeLwnHikingRoutesToNoneCategory(List<Feature> features)
-        {
-            foreach (var feature in features.Where(feature => feature.Attributes.Has("network", "lwn") &&
-                                                              feature.Attributes.Has("route", "hiking")))
-            {
-                feature.Attributes[FeatureAttributes.POI_CATEGORY] = Categories.NONE;
-            }
         }
 
         /// <inheritdoc />
