@@ -21,6 +21,7 @@ import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
+import { OverpassTurboService } from "./overpass-turbo.service";
 import type { ApplicationState } from "../models/models";
 
 @Injectable()
@@ -42,6 +43,7 @@ export class ApplicationInitializeService {
                 private readonly shareUrlsService: ShareUrlsService,
                 private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
                 private readonly geoLocationService: GeoLocationService,
+                private readonly overpassTurboService: OverpassTurboService,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
     }
@@ -52,6 +54,7 @@ export class ApplicationInitializeService {
             await this.loggingService.info("---------------------------------------");
             await this.loggingService.info("Starting IHM Application Initialization");
             await this.databaseService.initialize();
+            this.overpassTurboService.initialize();
             this.screenService.initialize();
             await this.resources.initialize();
             this.applicationExitService.initialize();
