@@ -15,7 +15,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
 import { MapService } from "../../services/map.service";
-import type { ApplicationState, EditableLayer, Language } from "../../models/models";
+import type { ApplicationState, EditableLayer, Language, LanguageCode } from "../../models/models";
 
 @Component({
     selector: "auto-layer",
@@ -46,6 +46,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private jsonLayersIds: string[];
     private hasInternetAccess: boolean;
     private mapLoadedPromise: Promise<void>;
+    private currentLanguageCode: LanguageCode;
 
     @Select((state: ApplicationState) => state.configuration.language)
     private language$: Observable<Language>;
@@ -76,11 +77,13 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         await (this.isMainMap ? this.mapService.initializationPromise : this.mapLoadedPromise);
         await this.createLayer();
         this.sourceAdded = true;
-        this.subscriptions.push(this.language$.subscribe(async () => {
-            if (this.sourceAdded) {
+        this.currentLanguageCode = this.ngRedux.getState().configuration.language.code;
+        this.subscriptions.push(this.language$.subscribe(async (language) => {
+            if (this.sourceAdded && this.currentLanguageCode !== language.code) {
                 this.removeLayer(this.layerData.address);
                 await this.createLayer();
             }
+            this.currentLanguageCode = language.code;
         }));
         this.subscriptions.push(this.connectionSerive.monitor(true).subscribe(async (state) => {
             if (state.hasInternetAccess === this.hasInternetAccess) {
