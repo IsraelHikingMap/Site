@@ -67,7 +67,12 @@
         "type": "Way",
         "osmTags": [ "Relation \"שביל ישראל\"" ],
         "link": "https://www.openstreetmap.org/relation/282071"
-      },
+      }
+    ]
+  },
+  {
+    "key": "legendRegionalTrails",
+    "items": [
       {
         "key": "legendPurpleRegionalTrail",
         "latlng": {
@@ -82,19 +87,14 @@
       {
         "key": "legendOrangeRegionalTrail",
         "latlng": {
-          "lat": 32.7993,
-          "lng": 35.4523
+          "lat": 32.76007,
+          "lng": 35.3873
         },
-        "zoom": 17,
+        "zoom": 15.5,
         "type": "Way",
         "osmTags": ["network=rwn", "osmc:symbol=orange:white:orange_stripe relation"],
         "link": "osm-tag-link"
-      }
-    ]
-  },
-  {
-    "key": "legendRegionalTrails",
-    "items": [
+      },
       {
         "key": "legendJerusalemTrail",
         "latlng": {
@@ -355,8 +355,8 @@
       {
         "key": "legendSpringPond",
         "latlng": {
-          "lat": 31.780383,
-          "lng": 35.057466
+          "lat": 30.8206614,
+          "lng": 35.2056856
         },
         "zoom": 16,
         "type": "POI",
@@ -388,8 +388,8 @@
       {
         "key": "legendCistern",
         "latlng": {
-          "lat": 30.5711209,
-          "lng": 35.011185
+          "lat": 30.6645396,
+          "lng": 34.6969474
         },
         "zoom": 16,
         "type": "POI",
@@ -623,10 +623,10 @@
       {
         "key": "legendRuins",
         "latlng": {
-          "lat": 32.9499110,
-          "lng": 35.600000
+          "lat": 30.7159994,
+          "lng": 34.5808157
         },
-        "zoom": 16,
+        "zoom": 17,
         "type": "POI",
         "osmTags": [ "historic=ruins" ],
         "link": "osm-tag-link"
@@ -634,8 +634,8 @@
       {
         "key": "legendArchaeologicalSite",
         "latlng": {
-          "lat": 30.7880108,
-          "lng": 34.734390
+          "lat": 30.6539603,
+          "lng": 34.6238525
         },
         "zoom": 16,
         "type": "POI",
@@ -711,10 +711,10 @@
       {
         "key": "legendMosque",
         "latlng": {
-          "lat": 32.5397514,
-          "lng": 34.9137149
+          "lat": 32.0100,
+          "lng": 35.1892
         },
-        "zoom": 16,
+        "zoom": 17,
         "type": "POI",
         "osmTags": [ "amenity=place_of_worship", "religion=muslim" ],
         "link": "osm-tag-link"
@@ -722,8 +722,8 @@
       {
         "key": "legendHolyPlace",
         "latlng": {
-          "lat": 32.697452,
-          "lng": 35.016088
+          "lat": 32.7191018,
+          "lng": 35.0626732
         },
         "zoom": 16,
         "type": "POI",
@@ -733,8 +733,8 @@
       {
         "key": "legendMemorial",
         "latlng": {
-          "lat": 30.9181904,
-          "lng": 35.1389056
+          "lat": 30.5286169,
+          "lng": 34.9204900
         },
         "zoom": 17,
         "type": "POI",
