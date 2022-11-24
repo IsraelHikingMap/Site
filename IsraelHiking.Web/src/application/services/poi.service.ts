@@ -21,11 +21,11 @@ import { MapService } from "./map.service";
 import { FileService } from "./file.service";
 import { ConnectionService } from "./connection.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
-import { 
-    SetCategoriesGroupVisibilityAction, 
-    AddCategoryAction, 
-    UpdateCategoryAction, 
-    RemoveCategoryAction 
+import {
+    SetCategoriesGroupVisibilityAction,
+    AddCategoryAction,
+    UpdateCategoryAction,
+    RemoveCategoryAction
 } from "../reducers/layers.reducer";
 import { Urls } from "../urls";
 import type {

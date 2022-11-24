@@ -174,8 +174,8 @@ export class RouteStatisticsService {
     }
 
     public getStatisticsForRouteWithLocation(
-        closestRouteToRecordingLatlngs: LatLngAltTime[], 
-        currentLatlng: LatLngAltTime, 
+        closestRouteToRecordingLatlngs: LatLngAltTime[],
+        currentLatlng: LatLngAltTime,
         heading: number
         ): RouteStatistics {
         let closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);

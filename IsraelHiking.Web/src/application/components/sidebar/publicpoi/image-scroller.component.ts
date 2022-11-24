@@ -38,7 +38,7 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
         this.currentIndex = 0;
         this.currentImageChanged = new EventEmitter();
     }
-    
+
     public ngOnChanges(changes: SimpleChanges): void {
         if (changes.images) {
             this.currentIndex = 0;

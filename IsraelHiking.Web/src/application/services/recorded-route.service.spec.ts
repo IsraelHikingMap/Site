@@ -59,7 +59,7 @@ describe("Recorded Route Service", () => {
         }
     ));
 
-    it("Should initialize after a recording stopped in the middle and stop the recording gracefully", 
+    it("Should initialize after a recording stopped in the middle and stop the recording gracefully",
         inject([RecordedRouteService, ToastService],
         (service: RecordedRouteService, toastService: ToastService) => {
             MockNgRedux.store.getState = () => ({
@@ -304,7 +304,7 @@ describe("Recorded Route Service", () => {
             expect(spy.calls.all()[6].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
         }));
 
-    it("should stop recording and send data to traces upload mechanism including one marker", 
+    it("should stop recording and send data to traces upload mechanism including one marker",
         inject([RecordedRouteService], (service: RecordedRouteService) => {
         MockNgRedux.store.getState = () => ({
             recordedRouteState: {
@@ -336,7 +336,7 @@ describe("Recorded Route Service", () => {
         MockNgRedux.store.dispatch = spy;
         service.stopRecording();
 
-        expect(spy.calls.all().some(c => c.args[0].payload?.trace && 
+        expect(spy.calls.all().some(c => c.args[0].payload?.trace &&
             c.args[0].payload.trace.dataContainer.routes[0].markers.length > 0)).toBeTruthy();
     }));
 });

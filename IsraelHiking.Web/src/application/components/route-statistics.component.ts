@@ -907,7 +907,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
         let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
-        
+
         if (this.ngRedux.getState().recordedRouteState.isRecording && closestRouteToGps) {
             this.statistics = this.routeStatisticsService.getStatisticsForRecordedRouteWithPlannedRoute(
                 this.ngRedux.getState().recordedRouteState.route.latlngs,
