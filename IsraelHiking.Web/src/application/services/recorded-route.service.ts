@@ -78,7 +78,7 @@ export class RecordedRouteService {
         let recordedRoute = this.ngRedux.getState().recordedRouteState.route;
         this.ngRedux.dispatch(new StopRecordingAction());
         this.addRecordingToTraces(recordedRoute);
-        if (withToast = false) {
+        if (withToast == false) {
             return;
         }
         if (this.ngRedux.getState().userState.userInfo == null) {
@@ -196,7 +196,8 @@ export class RecordedRouteService {
             return true;
         }
         this.rejectedPosition = this.geoLocationService.positionToLatLngTime(position);
-        this.loggingService.debug("[Record] Rejecting position for rejected: " + JSON.stringify(this.rejectedPosition) + " reason: " + nonValidReason);
+        this.loggingService.debug("[Record] Rejecting position for rejected: " + 
+            JSON.stringify(this.rejectedPosition) + " reason: " + nonValidReason);
         return false;
     }
 

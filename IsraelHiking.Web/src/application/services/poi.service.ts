@@ -21,7 +21,12 @@ import { MapService } from "./map.service";
 import { FileService } from "./file.service";
 import { ConnectionService } from "./connection.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
-import { SetCategoriesGroupVisibilityAction, AddCategoryAction, UpdateCategoryAction, RemoveCategoryAction } from "../reducers/layers.reducer";
+import { 
+    SetCategoriesGroupVisibilityAction, 
+    AddCategoryAction, 
+    UpdateCategoryAction, 
+    RemoveCategoryAction 
+} from "../reducers/layers.reducer";
 import { Urls } from "../urls";
 import type {
     MarkerData,
@@ -489,7 +494,7 @@ export class PoiService {
                     } else if (!isEqual(category, exsitingCategory)) {
                         this.ngRedux.dispatch(new UpdateCategoryAction({
                             groupType: categoriesGroup.type,
-                            category: category
+                            category
                         }));
                     }
                 }

@@ -642,7 +642,7 @@ describe("Poi Service", () => {
                         type: "my-type",
                         visible: true,
                         categories: []
-                    }]                
+                    }]
                 }
             });
             (runningContextService as any).isIFrame = false;
@@ -650,7 +650,7 @@ describe("Poi Service", () => {
             let promise = poiService.syncCategories();
 
             mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([{
-                color: "color", 
+                color: "color",
                 icon: "icon",
                 name: "name",
                 visible: false,
@@ -675,14 +675,14 @@ describe("Poi Service", () => {
                         type: "my-type",
                         visible: true,
                         categories: []
-                    }]                
+                    }]
                 }
             });
             (runningContextService as any).isIFrame = true;
             let promise = poiService.syncCategories();
 
             mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([{
-                color: "color", 
+                color: "color",
                 icon: "icon",
                 name: "name",
                 visible: false,
@@ -707,7 +707,7 @@ describe("Poi Service", () => {
                         type: "my-type",
                         visible: true,
                         categories: [{
-                            color: "color", 
+                            color: "color",
                             icon: "icon",
                             name: "name",
                             visible: false,
@@ -717,7 +717,7 @@ describe("Poi Service", () => {
                                 label: "label"
                             }}]
                         }]
-                    }]                
+                    }]
                 }
             });
             (runningContextService as any).isIFrame = false;
@@ -725,7 +725,7 @@ describe("Poi Service", () => {
             let promise = poiService.syncCategories();
 
             mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([{
-                color: "color", 
+                color: "color",
                 icon: "icon",
                 name: "name",
                 visible: false,
@@ -750,7 +750,7 @@ describe("Poi Service", () => {
                         type: "my-type",
                         visible: true,
                         categories: [{
-                            color: "color", 
+                            color: "color",
                             icon: "icon",
                             name: "name",
                             visible: false,
@@ -760,7 +760,7 @@ describe("Poi Service", () => {
                                 label: "label"
                             }}]
                         }]
-                    }]                
+                    }]
                 }
             });
             (runningContextService as any).isIFrame = false;

@@ -47,7 +47,7 @@ describe("Recorded Route Service", () => {
         });
         MockNgRedux.reset();
     });
-    
+
     it("Should get recording from state", inject([RecordedRouteService],
         (service: RecordedRouteService) => {
             MockNgRedux.store.getState = () => ({
@@ -59,7 +59,8 @@ describe("Recorded Route Service", () => {
         }
     ));
 
-    it("Should initialize after a recording stopped in the middle and stop the recording gracefully", inject([RecordedRouteService, ToastService],
+    it("Should initialize after a recording stopped in the middle and stop the recording gracefully", 
+        inject([RecordedRouteService, ToastService],
         (service: RecordedRouteService, toastService: ToastService) => {
             MockNgRedux.store.getState = () => ({
                 recordedRouteState: {
@@ -157,7 +158,7 @@ describe("Recorded Route Service", () => {
             }, 10);
         }
     )());
-    
+
     it("Should add a valid locations when returning from background", done => inject([RecordedRouteService, GeoLocationService],
         (service: RecordedRouteService, geoService: GeoLocationService) => {
             MockNgRedux.store.getState = () => ({
@@ -303,7 +304,8 @@ describe("Recorded Route Service", () => {
             expect(spy.calls.all()[6].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
         }));
 
-    it("should stop recording and send data to traces upload mechanism including one marker", inject([RecordedRouteService], (service: RecordedRouteService) => {
+    it("should stop recording and send data to traces upload mechanism including one marker", 
+        inject([RecordedRouteService], (service: RecordedRouteService) => {
         MockNgRedux.store.getState = () => ({
             recordedRouteState: {
                 isRecording: false
@@ -334,6 +336,7 @@ describe("Recorded Route Service", () => {
         MockNgRedux.store.dispatch = spy;
         service.stopRecording();
 
-        expect(spy.calls.all().some(c => c.args[0].payload?.trace && c.args[0].payload.trace.dataContainer.routes[0].markers.length > 0)).toBeTruthy();
+        expect(spy.calls.all().some(c => c.args[0].payload?.trace && 
+            c.args[0].payload.trace.dataContainer.routes[0].markers.length > 0)).toBeTruthy();
     }));
 });

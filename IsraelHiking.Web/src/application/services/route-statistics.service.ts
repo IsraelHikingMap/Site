@@ -173,7 +173,11 @@ export class RouteStatisticsService {
         return routeStatistics;
     }
 
-    public getStatisticsForRouteWithLocation(closestRouteToRecordingLatlngs: LatLngAltTime[], currentLatlng: LatLngAltTime, heading: number): RouteStatistics {
+    public getStatisticsForRouteWithLocation(
+        closestRouteToRecordingLatlngs: LatLngAltTime[], 
+        currentLatlng: LatLngAltTime, 
+        heading: number
+        ): RouteStatistics {
         let closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
         closestRouteStatistics.traveledDistance = (this.findDistanceForLatLngInKM(closestRouteStatistics, currentLatlng, heading) * 1000);
         closestRouteStatistics.remainingDistance = closestRouteStatistics.length - closestRouteStatistics.traveledDistance;
