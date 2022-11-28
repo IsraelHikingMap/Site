@@ -28,7 +28,7 @@
     <PackageReference Include="NetTopologySuite" Version="2.5.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="3.0.0" />
     <PackageReference Include="NetTopologySuite.IO.GPX" Version="1.1.1" />
-    <PackageReference Include="OsmApiClient" Version="0.0.7" />
+    <PackageReference Include="OsmApiClient" Version="0.0.8" />
     <PackageReference Include="ProjNet" Version="2.0.0" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
