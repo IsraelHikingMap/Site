@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using IsraelHiking.Common;
 using NetTopologySuite.Geometries;
+using OsmSharp.IO.API;
 
 namespace IsraelHiking.API.Services.Osm
 {
@@ -15,8 +16,8 @@ namespace IsraelHiking.API.Services.Osm
         /// </summary>
         /// <param name="line">The line to add</param>
         /// <param name="tags">The tags to add to the line</param>
-        /// <param name="tokenAndSecret">Used as OSM credentials</param>
+        /// <param name="osmGateway">OSM Gateway for OSM manipulations</param>
         /// <returns></returns>
-        Task Add(LineString line, Dictionary<string, string> tags, TokenAndSecret tokenAndSecret);
+        Task Add(LineString line, Dictionary<string, string> tags, IAuthClient osmGateway);
     }
 }

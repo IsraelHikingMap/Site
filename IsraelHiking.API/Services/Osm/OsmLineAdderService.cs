@@ -24,7 +24,6 @@ namespace IsraelHiking.API.Services.Osm
         private readonly MathTransform _itmWgs84MathTransform;
         private readonly MathTransform _wgs84ItmMathTransform;
         private readonly IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
-        private readonly IClientsFactory _osmApiClientsFactory;
         private readonly GeometryFactory _geometryFactory;
         private readonly ConfigurationData _options;
 
@@ -34,31 +33,28 @@ namespace IsraelHiking.API.Services.Osm
         /// Constructor
         /// </summary>
         /// <param name="highwaysRepository"></param>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="itmWgs84MathTransformFactory"></param>
         /// <param name="options"></param>
         /// <param name="geoJsonPreprocessorExecutor"></param>
-        /// <param name="osmApiClientsFactory"></param>
         /// <param name="geometryFactory"></param>
         public OsmLineAdderService(IHighwaysRepository highwaysRepository,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            IItmWgs84MathTransfromFactory itmWgs84MathTransformFactory,
             IOptions<ConfigurationData> options,
             IOsmGeoJsonPreprocessorExecutor geoJsonPreprocessorExecutor,
-            IClientsFactory osmApiClientsFactory,
             GeometryFactory geometryFactory)
         {
             _highwaysRepository = highwaysRepository;
-            _itmWgs84MathTransform = itmWgs84MathTransfromFactory.Create();
-            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
+            _itmWgs84MathTransform = itmWgs84MathTransformFactory.Create();
+            _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
             _options = options.Value;
             _geoJsonPreprocessorExecutor = geoJsonPreprocessorExecutor;
-            _osmApiClientsFactory = osmApiClientsFactory;
             _geometryFactory = geometryFactory;
         }
 
         /// <inheritdoc/>
-        public async Task Add(LineString line, Dictionary<string, string> tags, TokenAndSecret tokenAndSecret)
+        public async Task Add(LineString line, Dictionary<string, string> tags, IAuthClient osmGateway)
         {
-            _osmGateway = _osmApiClientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
+            _osmGateway = osmGateway;
             var createdElements = new List<OsmGeo>();
             var modifiedElement = new List<OsmGeo>();
             int generatedId = -1;

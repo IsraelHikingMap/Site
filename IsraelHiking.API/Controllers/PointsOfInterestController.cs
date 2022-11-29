@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.API.Services.Osm;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -158,7 +159,7 @@ namespace IsraelHiking.API.Controllers
             }
             _persistantCache.SetString(feature.GetId(), "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             
-            var osmGateway = CreateOsmGateway();
+            var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             var newFeature = await _pointsOfInterestProvider.AddFeature(feature, osmGateway, language);
             _persistantCache.SetString(feature.GetId(), newFeature.Attributes[FeatureAttributes.ID].ToString(), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             return Ok(newFeature);
@@ -188,7 +189,7 @@ namespace IsraelHiking.API.Controllers
                 return BadRequest("Feature ID and supplied id do not match...");
             }
             
-            var osmGateway = CreateOsmGateway();
+            var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             return Ok(await _pointsOfInterestProvider.UpdateFeature(feature, osmGateway, language));
         }
 
@@ -272,15 +273,8 @@ namespace IsraelHiking.API.Controllers
             }
             _persistantCache.SetString(request.Guid, "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             _logger.LogInformation($"Adding a simple POI of type {request.PointType} at {request.LatLng.Lat}, {request.LatLng.Lng}");
-            var osmGateway = CreateOsmGateway();
+            var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             await _simplePointAdderExecutor.Add(osmGateway, request);
-        }
-
-        private IAuthClient CreateOsmGateway()
-        {
-            var tokenAndSecretString = User.Claims.FirstOrDefault(c => c.Type == TokenAndSecret.CLAIM_KEY)?.Value;
-            var tokenAndSecret = TokenAndSecret.FromString(tokenAndSecretString);
-            return _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
         }
     }
 }

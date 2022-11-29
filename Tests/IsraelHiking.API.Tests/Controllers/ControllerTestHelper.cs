@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using IsraelHiking.API.Services;
+using IsraelHiking.API.Services.Osm;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -11,7 +13,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[] {
                 new Claim(ClaimTypes.Name, osmUserId),
-                new Claim(TokenAndSecret.CLAIM_KEY, "a;b")
+                new Claim(OsmAuthFactoryWrapper.CLAIM_KEY, "a;b")
             }));
             controller.ControllerContext = new ControllerContext
             {

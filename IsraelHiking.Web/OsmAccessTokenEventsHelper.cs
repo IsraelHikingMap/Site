@@ -6,6 +6,8 @@ using OsmSharp.IO.API;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using IsraelHiking.API.Services;
+using IsraelHiking.API.Services.Osm;
 using LazyCache;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
@@ -58,9 +60,7 @@ namespace IsraelHiking.Web
 
                 var userIdFromCache = await _appCache.GetOrAdd(context.Token, async () =>
                 {
-                    var tokenAndSecret = TokenAndSecret.FromString(context.Token);
-                    var osmGateway = _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey,
-                        _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
+                    var osmGateway = OsmAuthFactoryWrapper.ClientFromToken(context.Token, _clientsFactory, _options);
                     var user = await osmGateway.GetUserDetails();
                     var userId = user.Id.ToString();
                     _logger.LogInformation($"User {userId} had just logged in");
@@ -70,7 +70,7 @@ namespace IsraelHiking.Web
                 var identity = new ClaimsIdentity("Osm");
                 identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userIdFromCache));
                 identity.AddClaim(new Claim(ClaimTypes.Name, userIdFromCache));
-                identity.AddClaim(new Claim(TokenAndSecret.CLAIM_KEY, context.Token));
+                identity.AddClaim(new Claim(OsmAuthFactoryWrapper.CLAIM_KEY, context.Token));
                 context.Principal = new ClaimsPrincipal(identity);
                 context.Success();
             }

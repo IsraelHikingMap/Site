@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.API.Services.Osm;
 using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Controllers
@@ -63,7 +64,7 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public async Task<Trace[]> GetTraces()
         {
-            var gateway = CreateClient();
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             var gpxFiles = await gateway.GetTraces();
             return gpxFiles.Select(GpxFileToTrace).ToArray();
         }
@@ -77,7 +78,7 @@ namespace IsraelHiking.API.Controllers
         [HttpGet("{id}")]
         public async Task<DataContainerPoco> GetTraceById(int id)
         {
-            var gateway = CreateClient();
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             var file = await gateway.GetTraceData(id);
             await using var memoryStream = new MemoryStream();
             await file.Stream.CopyToAsync(memoryStream);
@@ -116,7 +117,7 @@ namespace IsraelHiking.API.Controllers
 
             await using var memoryStream = new MemoryStream();
             await file.CopyToAsync(memoryStream);
-            var gateway = CreateClient();
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             memoryStream.Seek(0, SeekOrigin.Begin);
             await gateway.CreateTrace(new GpxFile
             {
@@ -143,7 +144,7 @@ namespace IsraelHiking.API.Controllers
             }
             var bytes = await  _dataContainerConverterService.ToAnyFormat(new DataContainerPoco { Routes = new List<RouteData> { routeData } }, FlowFormats.GPX_SINGLE_TRACK);
             await using var memoryStream = new MemoryStream(bytes);
-            var gateway = CreateClient();
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             var description = routeData.Name;
             if (isDefaultName)
             {
@@ -198,7 +199,7 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest("trace id and url id do not match");
             }
-            var gateway = CreateClient();
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             await gateway.UpdateTrace(TraceToGpxFile(trace));
             return Ok(trace);
         }
@@ -213,16 +214,9 @@ namespace IsraelHiking.API.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteGpsTrace(long id)
         {
-            var gateway = CreateClient();
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             await gateway.DeleteTrace(id);
             return Ok();
-        }
-
-        private IAuthClient CreateClient()
-        {
-            var tokenAndSecretString = User.Claims.FirstOrDefault(c => c.Type == TokenAndSecret.CLAIM_KEY)?.Value;
-            var tokenAndSecret = TokenAndSecret.FromString(tokenAndSecretString);
-            return _clientsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, tokenAndSecret.Token, tokenAndSecret.TokenSecret);
         }
 
         private Trace GpxFileToTrace(GpxFile gpxFile)

@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
             
-            _service = new OsmLineAdderService(_highwaysRepository, new ItmWgs84MathTransfromFactory(), optionsProvider, geoJsonPreProcessor, _clientsFactory, new GeometryFactory());
+            _service = new OsmLineAdderService(_highwaysRepository, new ItmWgs84MathTransfromFactory(), optionsProvider, geoJsonPreProcessor, new GeometryFactory());
         }
 
         private IAuthClient SetupOsmGateway(long changesetId)
@@ -81,7 +81,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 {"colour", "blue"}
             };
 
-            _service.Add(new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)}), tags, new TokenAndSecret("", "")).Wait();
+            _service.Add(new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)}), tags, osmGateway).Wait();
 
             osmGateway.Received(1).CreateChangeset(Arg.Any<TagsCollection>());
             osmGateway.Received(1).CloseChangeset(changesetId);
@@ -96,7 +96,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             SetupHighway(42, new[] { new Coordinate(0.0000001, 0), new Coordinate(-1, 0) }, osmGateway);
             osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
-            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 2));
         }
@@ -108,7 +108,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             SetupHighway(42, new[] { new Coordinate(-1, 0), new Coordinate(0.000007, 0), new Coordinate(1, 0) }, osmGateway);
             osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
-            _service.Add(new LineString(new[] { new Coordinate(0, -0.000007), new Coordinate(0, 1), new Coordinate(0, 2) }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            _service.Add(new LineString(new[] { new Coordinate(0, -0.000007), new Coordinate(0, 1), new Coordinate(0, 2) }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 3 &&
                                                                                              x.Modify.OfType<Way>().First().Nodes.Length == 4));
@@ -121,7 +121,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             SetupHighway(42, new[] { new Coordinate(-0.1, 0), new Coordinate(1, 0) }, osmGateway);
             osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
-            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 0.00000001), new Coordinate(0, 0.0000002), new Coordinate(0, 1) }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 0.00000001), new Coordinate(0, 0.0000002), new Coordinate(0, 1) }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4 &&
                                                                                              x.Modify.OfType<Way>().Count() == 1));
@@ -134,7 +134,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             SetupHighway(42, new[] { new Coordinate(0, 1.0000001), new Coordinate(0, 2) }, osmGateway);
             osmGateway.UploadChangeset(Arg.Any<long>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
 
-            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 2));
         }
@@ -157,7 +157,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(-0.1, 0.001),
                 new Coordinate(-0.0001, 0),
                 new Coordinate(0.1, 0.001)
-            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4));
         }
@@ -180,7 +180,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(-0.0001, 0),
                 new Coordinate(0.0001, 0),
                 new Coordinate(0.1, 0.01)
-            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 5));
         }
@@ -212,7 +212,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(0.9999, 0),
                 new Coordinate(1.0001, 0),
                 new Coordinate(1.0001, 1),
-            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 9));
         }
@@ -236,7 +236,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             {
                 new Coordinate(0.5, 1),
                 new Coordinate(0.5, 0),
-            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 2 &&
                                                                                              x.Create.OfType<Node>().Count() == 2 &&
@@ -262,7 +262,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(34.8352167, 30.8754542),
                 new Coordinate(34.8353618,30.8757884),
                 new Coordinate(34.7352248,30.8760586)
-            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4));
         }
@@ -289,7 +289,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(-1, 0),
                 new Coordinate(1, 0),
                 new Coordinate(-1, 0.00001),
-            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4 &&
                                                                                              x.Create.OfType<Node>().Count() == 3));
@@ -320,7 +320,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(2, 0),
                 new Coordinate(1, 0),
                 new Coordinate(0, 0),
-            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 7 &&
                                                                                              x.Create.OfType<Node>().Count() == 5 &&
@@ -352,7 +352,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(2, 0),
                 new Coordinate(1.500001, 0),
                 new Coordinate(0, 0),
-            }), new Dictionary<string, string>(), new TokenAndSecret("", "")).Wait();
+            }), new Dictionary<string, string>(), osmGateway).Wait();
 
             osmGateway.Received(1).UploadChangeset(Arg.Any<long>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 7 &&
                                                                                              x.Create.OfType<Node>().Count() == 5 &&

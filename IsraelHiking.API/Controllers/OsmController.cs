@@ -28,7 +28,7 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class OsmController : ControllerBase
     {
-        private readonly IClientsFactory _clentsFactory;
+        private readonly IClientsFactory _clientsFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
         private readonly IOsmLineAdderService _osmLineAdderService;
@@ -40,14 +40,14 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="clentsFactory"></param>
+        /// <param name="clientsFactory"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="addibleGpxLinesFinderService"></param>
         /// <param name="osmLineAdderService"></param>
         /// <param name="options"></param>
         /// <param name="geometryFactory"></param>
-        public OsmController(IClientsFactory clentsFactory,
+        public OsmController(IClientsFactory clientsFactory,
             IDataContainerConverterService dataContainerConverterService,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IAddibleGpxLinesFinderService addibleGpxLinesFinderService,
@@ -55,7 +55,7 @@ namespace IsraelHiking.API.Controllers
             IOptions<ConfigurationData> options,
             GeometryFactory geometryFactory)
         {
-            _clentsFactory = clentsFactory;
+            _clientsFactory = clientsFactory;
             _dataContainerConverterService = dataContainerConverterService;
             _itmWgs84MathTransform = itmWgs84MathTransfromFactory.Create();
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
@@ -84,7 +84,7 @@ namespace IsraelHiking.API.Controllers
         [Route("details")]
         public Task<User> GetUserDetails()
         {
-            var gateway = CreateOsmGateway();
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             return gateway.GetUserDetails();
         }
 
@@ -98,8 +98,8 @@ namespace IsraelHiking.API.Controllers
         public async Task PutAddUnmappedPartIntoOsm([FromBody]Feature feature)
         {
             var tags = feature.Attributes.GetNames().ToDictionary(n => n, n => feature.Attributes[n].ToString());
-            var tokenAndSecret = User.Claims.FirstOrDefault(c => c.Type == TokenAndSecret.CLAIM_KEY)?.Value;
-            await _osmLineAdderService.Add(feature.Geometry as LineString, tags, TokenAndSecret.FromString(tokenAndSecret));
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            await _osmLineAdderService.Add(feature.Geometry as LineString, tags, gateway);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace IsraelHiking.API.Controllers
         [ProducesResponseType(typeof(FeatureCollection), 200)]
         public async Task<IActionResult> PostFindUnmappedPartsFromGpsTrace([FromQuery]int traceId)
         {
-            var file = await CreateOsmGateway().GetTraceData(traceId);
+            var file = await OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options).GetTraceData(traceId);
             if (file == null)
             {
                 return BadRequest("Invalid trace id: " + traceId);
@@ -214,13 +214,6 @@ namespace IsraelHiking.API.Controllers
                     .Select(ToItmLineString))
                 .Where(l => l.Coordinates.Any())
                 .ToList();
-        }
-
-        private IAuthClient CreateOsmGateway()
-        {
-            var tokenAndSecret = User.Claims.FirstOrDefault(c => c.Type == TokenAndSecret.CLAIM_KEY)?.Value;
-            var token = TokenAndSecret.FromString(tokenAndSecret);
-            return _clentsFactory.CreateOAuthClient(_options.OsmConfiguration.ConsumerKey, _options.OsmConfiguration.ConsumerSecret, token.Token, token.TokenSecret);
         }
     }
 }

@@ -85,7 +85,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             _controller.PutAddUnmappedPartIntoOsm(feature).Wait();
 
-            _osmLineAdderService.Received(1).Add(Arg.Any<LineString>(), Arg.Any<Dictionary<string, string>>(), Arg.Any<TokenAndSecret>());
+            _osmLineAdderService.Received(1).Add(Arg.Any<LineString>(), Arg.Any<Dictionary<string, string>>(), Arg.Any<IAuthClient>());
         }
 
         [TestMethod]
