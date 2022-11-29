@@ -525,10 +525,10 @@
       {
         "key": "legendTunnel",
         "latlng": {
-          "lat": 31.78985,
-          "lng": 35.2486
+          "lat": 31.7209,
+          "lng": 34.8205
         },
-        "zoom": 17.7,
+        "zoom": 18,
         "type": "Way",
         "osmTags": [ "tunnel=yes", "highway=..." ],
         "link": "osm-key-link"
