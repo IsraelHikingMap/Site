@@ -7,6 +7,7 @@ import { ResourcesService } from "./resources.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { RouterService } from "./router.service";
 import { RoutesFactory } from "./routes.factory";
+import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import type { ApplicationState } from "../models/models";
 
 export const getSubject = <T>(predecator: (state: ApplicationState) => T): Subject<T> => {
@@ -40,18 +41,6 @@ describe("Selected Route Service", () => {
             let selectedRoute = selectedRouteService.getSelectedRoute();
 
             expect(selectedRoute).toBeUndefined();
-        }
-    ));
-
-    it("Should get selected route when there are routes", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            const routesStub = getSubject((state: ApplicationState) => state.routes.present);
-
-            routesStub.next([{} as any]);
-
-            let selectedRoute = selectedRouteService.getSelectedRoute();
-
-            expect(selectedRoute).not.toBeUndefined();
         }
     ));
 
@@ -100,11 +89,12 @@ describe("Selected Route Service", () => {
         (selectedRouteService: SelectedRouteService) => {
             const selectedRouteIdSubject = getSubject((state: ApplicationState) => state.routeEditingState.selectedRouteId);
             selectedRouteIdSubject.next("1");
-            MockNgRedux.store.dispatch = jasmine.createSpy();
-
+            let spy = jasmine.createSpy();
+            MockNgRedux.store.dispatch = spy;
             selectedRouteService.setSelectedRoute("42");
 
-            expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+            expect(spy).toHaveBeenCalled();
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SetSelectedRouteAction);
         }
     ));
 });
