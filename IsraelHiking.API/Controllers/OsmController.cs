@@ -71,6 +71,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>The OSM server configurations</returns>
         [HttpGet]
         [Route("configuration")]
+        [Obsolete("This is not is use any more since 12.2022")]
         public OsmConfiguraionData GetConfigurations()
         {
             return _options.OsmConfiguration;
