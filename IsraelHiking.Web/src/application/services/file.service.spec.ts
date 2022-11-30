@@ -5,8 +5,7 @@ import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 
-import { FileService } from "./file.service";
-import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
+import { FileService, SaveAsFactory } from "./file.service";
 import { ImageResizeService } from "./image-resize.service";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./selected-route.service";
@@ -19,11 +18,12 @@ import type { DataContainer, MarkerData, RouteData } from "../models/models";
 describe("FileService", () => {
 
     let imageResizeService: ImageResizeService;
-    let nonAngularObjectsFactory: NonAngularObjectsFactory;
     let selectedRouteService: SelectedRouteService;
     let fitBoundsService: FitBoundsService;
+    let saveAsSpy: jasmine.Spy;
 
     beforeEach(() => {
+        saveAsSpy = jasmine.createSpy();
         imageResizeService = {
             resizeImageAndConvert: () => Promise.resolve({
                 northEast: { lat: 0, lng: 0 },
@@ -31,10 +31,6 @@ describe("FileService", () => {
                 routes: [{ markers: [{} as MarkerData] }] as RouteData[]
             } as DataContainer)
         } as any as ImageResizeService;
-        nonAngularObjectsFactory = {
-            saveAsWrapper: jasmine.createSpy("saveAsWrapper"),
-            b64ToBlob: jasmine.createSpy("b64ToBlob"),
-        } as any as NonAngularObjectsFactory;
         selectedRouteService = {
             addRoutes: jasmine.createSpy("addRoutes")
         } as any as SelectedRouteService;
@@ -56,8 +52,8 @@ describe("FileService", () => {
                 GpxDataContainerConverterService,
                 { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: SelectedRouteService, useValue: selectedRouteService },
-                { provide: NonAngularObjectsFactory, useValue: nonAngularObjectsFactory },
                 { provide: ImageResizeService, useValue: imageResizeService },
+                { provide: SaveAsFactory, useFactory: () => saveAsSpy },
                 FileService
             ]
         });
@@ -67,7 +63,7 @@ describe("FileService", () => {
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
             let promise = fileService.saveToFile("file.name", "format", {} as DataContainer).then(() => {
-                expect(nonAngularObjectsFactory.saveAsWrapper).toHaveBeenCalled();
+                expect(saveAsSpy).toHaveBeenCalled();
             });
 
             mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
