@@ -77,6 +77,8 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<false/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>We need the camera in order to take a picture</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
