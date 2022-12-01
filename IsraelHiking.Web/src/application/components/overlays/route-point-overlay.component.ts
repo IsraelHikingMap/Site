@@ -38,7 +38,7 @@ export class RoutePointOverlayComponent extends BaseMapComponent implements OnCh
             this.canMerge = false;
             return;
         }
-        this.canMerge = this.selectedRouteService.getClosestRoute(this.isFirst()) != null;
+        this.canMerge = this.selectedRouteService.getClosestRouteToSelected(this.isFirst()) != null;
     }
 
     public split(): void {

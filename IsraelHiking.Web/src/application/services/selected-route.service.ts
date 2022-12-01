@@ -146,10 +146,10 @@ export class SelectedRouteService {
     /**
      * This method is used to find the closest route in order to merge between routes.
      *
-     * @param isFirst use to signal the method if to check against the beginning or the end of the selected route.
+     * @param checkAgainstHead use to signal the method if to check against the beginning or the end of the selected route.
      */
-    public getClosestRoute(isFirst: boolean) {
-        let latLngToCheck = isFirst
+    public getClosestRouteToSelected(checkAgainstHead: boolean): RouteData {
+        let latLngToCheck = checkAgainstHead
             ? this.getSelectedRoute().segments[0].latlngs[0]
             : this.getLastLatLng(this.getSelectedRoute());
         for (let routeData of this.routes) {
@@ -201,11 +201,11 @@ export class SelectedRouteService {
         return routeToReturn;
     }
 
-    public getLastSegment(routeData: RouteData): RouteSegmentData {
+    private getLastSegment(routeData: RouteData): RouteSegmentData {
         return routeData.segments[routeData.segments.length - 1];
     }
 
-    public getLastLatLng(routeData: RouteData): LatLngAltTime {
+    private getLastLatLng(routeData: RouteData): LatLngAltTime {
         let lastSegmentLatLngs = this.getLastSegment(routeData).latlngs;
         return lastSegmentLatLngs[lastSegmentLatLngs.length - 1];
     }
@@ -241,7 +241,7 @@ export class SelectedRouteService {
     }
 
     public mergeRoutes(isSelectedRouteSecond: boolean) {
-        let closestRoute = this.getClosestRoute(isSelectedRouteSecond);
+        let closestRoute = this.getClosestRouteToSelected(isSelectedRouteSecond);
         let selectedRoute = this.getSelectedRoute();
         let mergedRoute = {
             ...selectedRoute,
