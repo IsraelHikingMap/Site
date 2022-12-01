@@ -320,8 +320,7 @@ export class SelectedRouteService {
             if (segmentIndex !== 0) {
                 let startLatLng = selectedRoute.segments[segmentIndex].latlngs[0];
                 let endLatLng = selectedRoute.segments[segmentIndex + 1].routePoint;
-                let data = await this.routerService.getRoute(startLatLng, endLatLng, selectedRoute.segments[segmentIndex + 1].routingType);
-                latlngs = data[data.length - 1].latlngs;
+                latlngs = await this.routerService.getRoute(startLatLng, endLatLng, selectedRoute.segments[segmentIndex + 1].routingType);
             }
             let updatedSegment = {
                 ...selectedRoute.segments[segmentIndex + 1],

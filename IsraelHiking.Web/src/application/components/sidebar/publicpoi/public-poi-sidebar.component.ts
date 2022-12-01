@@ -29,7 +29,8 @@ import type {
     LatLngAlt,
     ApplicationState,
     EditablePublicPointData,
-    Contribution
+    Contribution,
+    LatLngAltTime
 } from "../../../models/models";
 
 export type SourceImageUrlPair = {
@@ -287,17 +288,12 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public convertToRoute() {
-        let routesCopy = this.geoJsonParser.toDataContainer({
-            type: "FeatureCollection",
-            features: [this.fullFeature]
-        }).routes;
-        for (let routeData of routesCopy) {
-            let name = this.selectedRouteService.createRouteName(routeData.name);
+        let routes = this.geoJsonParser.toRoutes(this.fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
+        for (let route of routes) {
+            let name = this.selectedRouteService.createRouteName(route.name);
             let newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
             newRoute.description = this.info.description;
-            newRoute.segments = routeData.segments;
-            newRoute.markers = routeData.markers;
-            GpxDataContainerConverterService.splitRouteSegments(newRoute);
+            newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
             this.ngRedux.dispatch(new AddRouteAction({
                 routeData: newRoute
             }));

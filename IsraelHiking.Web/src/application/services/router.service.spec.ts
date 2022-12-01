@@ -28,8 +28,7 @@ describe("Router Service", () => {
     it("Should route between two points", (inject([RouterService, HttpTestingController],
         async (router: RouterService, mockBackend: HttpTestingController) => {
             let promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
-                expect(data.length).toBe(2);
-                expect(data[1].latlngs.length).toBe(3);
+                expect(data.length).toBe(3);
             }, fail);
 
             mockBackend.expectOne(() => true).flush(
@@ -55,8 +54,7 @@ describe("Router Service", () => {
         async (router: RouterService, mockBackend: HttpTestingController) => {
 
             let promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
-                expect(data.length).toBe(1);
-                expect(data[0].latlngs.length).toBe(2);
+                expect(data.length).toBe(2);
             }, fail);
 
             mockBackend.expectOne(() => true).flush({});
@@ -67,8 +65,7 @@ describe("Router Service", () => {
         async (router: RouterService, mockBackend: HttpTestingController) => {
 
             let promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
-                expect(data.length).toBe(1);
-                expect(data[0].latlngs.length).toBe(2);
+                expect(data.length).toBe(2);
             }, fail);
 
             mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });

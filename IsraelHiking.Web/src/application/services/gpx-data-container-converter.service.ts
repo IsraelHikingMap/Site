@@ -11,7 +11,8 @@ import type {
     LatLngAltTime,
     MarkerData,
     LinkData,
-    LatLngAlt
+    LatLngAlt,
+    RoutingType
 } from "../models/models";
 
 interface Link {
@@ -76,12 +77,28 @@ interface Gpx {
 
 @Injectable()
 export class GpxDataContainerConverterService {
-    public static splitRouteSegments(routeData: RouteData): void {
-        if (routeData.segments.length > 2) {
-            return;
+    public static getSegmentsFromLatlngs(latlngs: LatLngAltTime[], routingType: RoutingType): RouteSegmentData[] {
+        let segments = [];
+        let firstLatlng = latlngs[0];
+        segments.push({
+            latlngs: [firstLatlng, firstLatlng],
+            routePoint: firstLatlng,
+            routingType
+        });
+        segments.push({
+            latlngs: [...latlngs],
+            routePoint: latlngs[latlngs.length - 1],
+            routingType
+        });
+        return GpxDataContainerConverterService.splitRouteSegments(segments);
+    }
+
+    private static splitRouteSegments(segments: RouteSegmentData[]): RouteSegmentData[] {
+        if (segments.length > 2) {
+            return segments;
         }
         let newSegments = [];
-        for (let segment of routeData.segments) {
+        for (let segment of segments) {
             if (segment.latlngs.length < 3) {
                 newSegments.push(segment);
                 continue;
@@ -98,12 +115,12 @@ export class GpxDataContainerConverterService {
                 let routeSegment = {
                     routePoint: segmentEndLatLng,
                     latlngs: start,
-                    routingType: routeData.segments[0].routingType
+                    routingType: segments[0].routingType
                 };
                 newSegments.push(routeSegment);
             }
         }
-        routeData.segments = newSegments;
+        return newSegments;
     }
 
     public canConvert(gpxXmlString: string) {
@@ -280,7 +297,7 @@ export class GpxDataContainerConverterService {
                 routePoint: firstLatlng as LatLngAlt,
                 routingType: "Hike"
             } as RouteSegmentData);
-            GpxDataContainerConverterService.splitRouteSegments(route);
+            route.segments = GpxDataContainerConverterService.splitRouteSegments(route.segments);
         }
 
         return dataContainer;

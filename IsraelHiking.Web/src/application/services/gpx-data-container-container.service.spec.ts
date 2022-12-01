@@ -133,30 +133,14 @@ describe("GpxDataContainerConverterService", () => {
     }));
 
     it("Should split a short route", () => {
-        let routeData = {
-            name: "name",
-            description: "desc",
-            segments: [
-                {
-                    latlngs: [
-                        {lat: 0, lng: 0, timestamp: new Date(0)},
-                        {lat: 1, lng: 1, timestamp: new Date(1)}
-                    ],
-                    routePoint: {lat: 1, lng: 1},
-                    routingType: "Hike"
-                },
-                {
-                    latlngs: [
-                        {lat: 1, lng: 1, timestamp: new Date(1)},
-                        {lat: 2, lng: 2, timestamp: new Date(2)},
-                        {lat: 3, lng: 3, timestamp: new Date(3)}
-                    ],
-                    routePoint: {lat: 3, lng: 3},
-                    routingType: "Hike"
-                }
-            ]
-        } as RouteData;
-        GpxDataContainerConverterService.splitRouteSegments(routeData);
-        expect(routeData.segments.length).toBe(2);
+        let latlngs = [
+            {lat: 1, lng: 1, timestamp: new Date(1)},
+            {lat: 2, lng: 2, timestamp: new Date(2)},
+            {lat: 3, lng: 3, timestamp: new Date(3)}
+        ];
+        let segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(latlngs, "Hike");
+        expect(segments.length).toBe(2);
+        expect(segments[0].latlngs.length).toBe(2);
+        expect(segments[1].latlngs.length).toBe(3);
     });
 });

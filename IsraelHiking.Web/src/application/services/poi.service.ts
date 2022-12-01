@@ -694,26 +694,21 @@ export class PoiService {
     }
 
     public async getClosestPoint(location: LatLngAlt, source?: string, language?: string): Promise<MarkerData> {
-        let params = new HttpParams()
-            .set("location", location.lat + "," + location.lng)
-            .set("source", source)
-            .set("language", language);
         let feature = null;
         try {
-            let feature$ = this.httpClient.get(Urls.poiClosest, { params }).pipe(timeout(1000));
-            feature = await firstValueFrom(feature$) as GeoJSON.Feature;
+            let feature$ = this.httpClient.get(Urls.poiClosest, { params: {
+                location: location.lat + "," + location.lng,
+                source,
+                language
+            }}).pipe(timeout(1000));
+            feature = await firstValueFrom(feature$) as GeoJSON.Feature<GeoJSON.Point>;
         } catch (ex) {
             this.loggingService.warning(`[POIs] Unable to get closest POI: ${(ex as Error).message}`);
         }
         if (feature == null) {
             return null;
         }
-        let dataContainer = this.geoJsonParser.toDataContainer({
-            features: [feature],
-            type: "FeatureCollection"
-        }, this.resources.getCurrentLanguageCodeSimplified());
-        let markerData = dataContainer.routes[0].markers[0];
-        return markerData;
+        return this.geoJsonParser.toMarkerData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
     public addSimplePoint(latlng: LatLngAlt, pointType: SimplePointType): Promise<any> {
