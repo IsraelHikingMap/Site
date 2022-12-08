@@ -207,7 +207,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             let imageUrl = feature.properties[k.replace("website", "poiSourceImageUrl")] as string;
             if (!imageUrl) {
                 if (url.includes("kkl.org.il")) {
-                    imageUrl = "https://www.kkl.org.il/files/general/kkl_logo.png";
+                    imageUrl = "https://www.kkl.org.il/education/files/about/symbols/kkl_logo440.jpg";
                 } else if (url.includes("inature.info")) {
                     imageUrl = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
                 }
