@@ -330,16 +330,16 @@ namespace IsraelHiking.API.Tests.Converters
             Assert.IsNotNull(multiLineString);
             Assert.AreEqual(8, multiLineString.Coordinates.Length);
             var lineString = multiLineString.Geometries.First();
-            Assert.AreEqual(3, lineString.Coordinates.Length);
+            Assert.AreEqual(5, lineString.Coordinates.Length);
             var lineString2 = multiLineString.Geometries.Last();
-            Assert.AreEqual(5, lineString2.Coordinates.Length);
-            Assert.AreEqual(lineString2.Coordinates.First(), lineString2.Coordinates.Last());
+            Assert.AreEqual(3, lineString2.Coordinates.Length);
+            Assert.AreEqual(lineString.Coordinates.First(), lineString.Coordinates.Last());
 
         }
 
 
         [TestMethod]
-        public void ToGeoJson_MultiPolygonWithHole_ShouldReturnMultiPlygonWithSinglePolygon()
+        public void ToGeoJson_MultiPolygonWithHole_ShouldReturnMultiPolygonWithSinglePolygon()
         {
             var node1 = CreateNode(1, 0, 0);
             var node2 = CreateNode(2, 1, 0);
@@ -380,7 +380,7 @@ namespace IsraelHiking.API.Tests.Converters
         }
 
         [TestMethod]
-        public void ToGeoJson_MultiPolygonWithTwoHoles_ShouldReturnMultiPlygonWithSinglePolygon()
+        public void ToGeoJson_MultiPolygonWithTwoHoles_ShouldReturnMultiPolygonWithSinglePolygon()
         {
             var id = 1;
             var node1 = CreateNode(id++, 0, 0);
@@ -433,7 +433,7 @@ namespace IsraelHiking.API.Tests.Converters
         }
 
         [TestMethod]
-        public void ToGeoJson_MultiPolygonWithTwoTouchingHoles_ShouldReturnMultiPlygonWithSinglePolygon()
+        public void ToGeoJson_MultiPolygonWithTwoTouchingHoles_ShouldReturnMultiPolygonWithSinglePolygon()
         {
             var id = 1;
             var node1 = CreateNode(id++, 0, 0);
@@ -642,6 +642,35 @@ namespace IsraelHiking.API.Tests.Converters
             Assert.IsNotNull(multiLineString);
             var isValidOp = new IsValidOp(multiLineString);
             Assert.IsTrue(isValidOp.IsValid);
+        }
+        
+        [TestMethod]
+        public void ToGeoJson_ConvertQRoute_ShouldCreateValidMultiLine()
+        {
+            int id = 1;
+            var node1 = CreateNode(id++);
+            var node2 = CreateNode(id++);
+            var node3 = CreateNode(id++);
+            var node4 = CreateNode(id++);
+            var node5 = CreateNode(id++);
+
+            var way1 = new CompleteWay { Id = id++, Nodes = new[] { node1, node5 } };
+            var way2 = new CompleteWay { Id = id++, Nodes = new[] { node1, node2, node3, node4, node1 } };
+
+            var relation = new CompleteRelation { Id = id++, Tags = new TagsCollection() };
+            relation.Tags.Add(NAME, NAME);
+            relation.Members = new[] {
+                new CompleteRelationMember { Member = way1, Role = "outer" },
+                new CompleteRelationMember { Member = way2, Role = "outer" }            
+            };
+
+            var feature = _converter.ToGeoJson(relation);
+            var multiLineString = feature.Geometry as MultiLineString;
+
+            Assert.IsNotNull(multiLineString);
+            var isValidOp = new IsValidOp(multiLineString);
+            Assert.IsTrue(isValidOp.IsValid);
+            Assert.AreEqual(1, multiLineString.Geometries.Length);
         }
     }
 }
