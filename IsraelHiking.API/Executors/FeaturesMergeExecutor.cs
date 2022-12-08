@@ -347,7 +347,7 @@ namespace IsraelHiking.API.Executors
                     if (!isValidOp.IsValid)
                     {
                         feature.Attributes.AddOrUpdate(FeatureAttributes.POI_CONTAINER, false);
-                        _reportLogger.LogWarning(
+                        _logger.LogWarning(
                             $"There was a problem merging {polygons.Count} polygons from the following feature into a multipolygon {feature.GetTitle(Languages.HEBREW)} ({feature.GetId()}), {GetWebsite(feature)} {isValidOp.ValidationError.Message} ({isValidOp.ValidationError.Coordinate.X}, {isValidOp.ValidationError.Coordinate.Y})");
                     }
                     continue;
@@ -361,7 +361,7 @@ namespace IsraelHiking.API.Executors
                     feature.Geometry = _geometryFactory.CreateMultiLineString(lineStrings);
                     continue;
                 }
-                _reportLogger.LogWarning($"The following merge created a weird geometry: {feature.GetTitle(Languages.HEBREW)} {GetWebsite(feature)} {string.Join(", ", geometryCollection.Geometries.Select(g => g.GeometryType))}");
+                _logger.LogWarning($"The following merge created a weird geometry: {feature.GetTitle(Languages.HEBREW)} {GetWebsite(feature)} {string.Join(", ", geometryCollection.Geometries.Select(g => g.GeometryType))}");
                 feature.Geometry = nonPointGeometries.FirstOrDefault();
             }
         }
@@ -557,7 +557,6 @@ namespace IsraelHiking.API.Executors
             WriteToBothLoggers($"Processing {natureReserveFeatures.Count} nature reserves");
             foreach (var natureReserveFeature in natureReserveFeatures)
             {
-                _reportLogger.LogInformation(string.Join(",", natureReserveFeature.GetTitles()));
                 var titles = natureReserveFeature.GetTitles().Where(t => t.StartsWith("שמורת")).ToList();
                 if (!titles.Any())
                 {
