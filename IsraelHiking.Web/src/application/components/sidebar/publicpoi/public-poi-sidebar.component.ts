@@ -193,9 +193,25 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     private initFromFeature(feature: GeoJSON.Feature) {
         this.fullFeature = feature;
         this.latlng = this.poiService.getLocation(feature);
-        this.sourceImageUrls = Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => {
-            let url = feature.properties[k];
+        this.sourceImageUrls = this.getSourceImageUrls(feature);
+        this.shareLinks = this.poiService.getPoiSocialLinks(feature);
+        this.contribution = this.poiService.getContribution(feature);
+        this.info = this.poiService.getEditableDataFromFeature(feature);
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        this.titleService.set(this.poiService.getTitle(feature, language));
+    }
+
+    private getSourceImageUrls(feature: GeoJSON.Feature): SourceImageUrlPair[] {
+        return Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => {
+            let url = feature.properties[k] as string;
             let imageUrl = feature.properties[k.replace("website", "poiSourceImageUrl")] as string;
+            if (!imageUrl) {
+                if (url.includes("kkl.org.il")) {
+                    imageUrl = "https://www.kkl.org.il/files/general/kkl_logo.png";
+                } else if (url.includes("inature.info")) {
+                    imageUrl = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
+                }
+            }
             if (this.isBadWikipediaUrl(url)) {
                 url = null;
             }
@@ -204,11 +220,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 url
             } as SourceImageUrlPair;
         }).filter(iup => iup.url != null);
-        this.shareLinks = this.poiService.getPoiSocialLinks(feature);
-        this.contribution = this.poiService.getContribution(feature);
-        this.info = this.poiService.getEditableDataFromFeature(feature);
-        const language = this.resources.getCurrentLanguageCodeSimplified();
-        this.titleService.set(this.poiService.getTitle(feature, language));
     }
 
     public isHideEditMode(): boolean {
