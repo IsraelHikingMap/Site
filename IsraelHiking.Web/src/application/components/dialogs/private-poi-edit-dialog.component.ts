@@ -11,8 +11,8 @@ import { ImageResizeService } from "../../services/image-resize.service";
 import { NavigateHereService } from "../../services/navigate-here.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
-import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducers/routes.reducer";
-import { DeleteRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
+import { RoutesReducer } from "../../reducers/routes.reducer";
+import { RecordedRouteReducer } from "../../reducers/recorded-route.reducer";
 import { Urls } from "../../urls";
 import type { LinkData, MarkerData, ApplicationState } from "../../models/models";
 
@@ -151,13 +151,13 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         };
 
         if (this.routeId) {
-            this.ngRedux.dispatch(new UpdatePrivatePoiAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.updatePoi({
                 index: this.markerIndex,
                 routeId: this.routeId,
                 markerData: updatedMarker
             }));
         } else {
-            this.ngRedux.dispatch(new UpdateRecordingPoiAction({
+            this.ngRedux.dispatch(RecordedRouteReducer.actions.updateRecordingPoi({
                 index: this.markerIndex,
                 markerData: updatedMarker
             }));
@@ -190,12 +190,12 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
 
     public remove() {
         if (this.routeId) {
-            this.ngRedux.dispatch(new DeletePrivatePoiAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.deletePoi({
                 index: this.markerIndex,
                 routeId: this.routeId
             }));
         } else {
-            this.ngRedux.dispatch(new DeleteRecordingPoiAction({
+            this.ngRedux.dispatch(RecordedRouteReducer.actions.deleteRecordingPoi({
                 index: this.markerIndex
             }));
         }

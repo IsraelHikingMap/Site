@@ -11,8 +11,8 @@ import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
-import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
-import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
+import { PointsOfInterestReducer } from "../../reducers/poi.reducer";
+import { RoutesReducer } from "../../reducers/routes.reducer";
 import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../models/models";
 
 @Component({
@@ -158,7 +158,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
             type: "star",
             urls: [] as LinkData[]
         };
-        this.ngRedux.dispatch(new AddPrivatePoiAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.addPoi({
             routeId: selectedRoute.id,
             markerData
         }));
@@ -166,7 +166,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     }
 
     public clearSelected() {
-        this.ngRedux.dispatch(new SetSelectedPoiAction({ poi: null }));
+        this.ngRedux.dispatch(PointsOfInterestReducer.actions.setSelectedPoi({ poi: null }));
         this.hoverFeature = null;
     }
 

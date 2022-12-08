@@ -8,7 +8,7 @@ import { PrivatePoiEditDialogComponent } from "./private-poi-edit-dialog.compone
 import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
-import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
+import { RoutesReducer } from "../../reducers/routes.reducer";
 import type { ApplicationState, MarkerData, LinkData } from "../../models/models";
 
 interface IPrivatePoiShowDialogData {
@@ -92,7 +92,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     }
 
     public addToActiveRoute() {
-        this.ngRedux.dispatch(new AddPrivatePoiAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.addPoi({
             routeId: this.selectedRouteService.getSelectedRoute().id,
             markerData: JSON.parse(JSON.stringify(this.marker))
         }));

@@ -19,9 +19,9 @@ import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
-import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
-import { ChangeRoutePropertiesAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
-import { SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
+import { LayersReducer } from "../../reducers/layers.reducer";
+import { RoutesReducer } from "../../reducers/routes.reducer";
+import { RouteEditingReducer } from "../../reducers/route-editing.reducer";
 import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
 
 @Component({
@@ -81,11 +81,11 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public expand(group: string) {
-        this.ngRedux.dispatch(new ExpandGroupAction({ name: group }));
+        this.ngRedux.dispatch(LayersReducer.actions.expandGroup({ name: group }));
     }
 
     public collapse(group: string) {
-        this.ngRedux.dispatch(new CollapseGroupAction({ name: group }));
+        this.ngRedux.dispatch(LayersReducer.actions.collapseGroup({ name: group }));
     }
 
     public getExpandState(group: string): boolean {
@@ -190,9 +190,9 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public toggleRoute(routeData: RouteData) {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null && routeData.id === selectedRoute.id && routeData.state !== "Hidden") {
-            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: null }));
+            this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({ routeId: null }));
             routeData.state = "Hidden";
-            this.ngRedux.dispatch(new ChangeRoutePropertiesAction(
+            this.ngRedux.dispatch(RoutesReducer.actions.changeProperties(
                 {
                     routeId: routeData.id,
                     routeData
@@ -201,7 +201,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
         }
         if (routeData.state === "Hidden") {
             routeData.state = "ReadOnly";
-            this.ngRedux.dispatch(new ChangeRoutePropertiesAction(
+            this.ngRedux.dispatch(RoutesReducer.actions.changeProperties(
                 {
                     routeId: routeData.id,
                     routeData
@@ -212,7 +212,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public toggleAllRoutes(event: Event) {
         event.stopPropagation();
-        this.ngRedux.dispatch(new ToggleAllRoutesAction());
+        this.ngRedux.dispatch(RoutesReducer.actions.toggleAllRoutes());
     }
 
     public isAllRoutesHidden(): boolean {
@@ -239,7 +239,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public dropRoute(event: CdkDragDrop<RouteData[]>) {
         let currentRoutes = [...this.ngRedux.getState().routes.present];
         moveItemInArray(currentRoutes, event.previousIndex, event.currentIndex);
-        this.ngRedux.dispatch(new BulkReplaceRoutesAction({ routesData: currentRoutes }));
+        this.ngRedux.dispatch(RoutesReducer.actions.replaceRoutes({ routesData: currentRoutes }));
     }
 
     public trackByGroupType(_: number, group: CategoriesGroup) {

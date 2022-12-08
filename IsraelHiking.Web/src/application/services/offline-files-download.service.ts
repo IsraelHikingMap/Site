@@ -11,8 +11,8 @@ import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { ToggleOfflineAction } from "../reducers/layers.reducer";
-import { SetOfflineLastModifiedAction } from "../reducers/offline.reducer";
+import { LayersReducer } from "../reducers/layers.reducer";
+import { OfflineReducer } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models/models";
 
@@ -95,7 +95,9 @@ export class OfflineFilesDownloadService {
         this.sidebarService.hide();
         let setBackToOffline = false;
         if (this.layersService.getSelectedBaseLayer().isOfflineOn) {
-            this.ngRedux.dispatch(new ToggleOfflineAction({ key: this.layersService.getSelectedBaseLayer().key, isOverlay: false }));
+            this.ngRedux.dispatch(LayersReducer.actions.toggleOffline({
+                key: this.layersService.getSelectedBaseLayer().key, isOverlay: false
+            }));
             setBackToOffline = true;
         }
         try {
@@ -120,12 +122,14 @@ export class OfflineFilesDownloadService {
             }
             this.loggingService.info("[Offline Download] Finished downloading offline files, update date to: "
                 + newestFileDate.toUTCString());
-            this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: newestFileDate }));
+            this.ngRedux.dispatch(OfflineReducer.actions.setLastModifed({ lastModifiedDate: newestFileDate }));
             this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
             this.sidebarService.show("layers");
         } finally {
             if (setBackToOffline) {
-                this.ngRedux.dispatch(new ToggleOfflineAction({ key: this.layersService.getSelectedBaseLayer().key, isOverlay: false }));
+                this.ngRedux.dispatch(LayersReducer.actions.toggleOffline({
+                    key: this.layersService.getSelectedBaseLayer().key, isOverlay: false
+                }));
             }
         }
     }

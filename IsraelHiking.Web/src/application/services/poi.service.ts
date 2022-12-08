@@ -20,13 +20,8 @@ import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
 import { FileService } from "./file.service";
 import { ConnectionService } from "./connection.service";
-import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
-import {
-    SetCategoriesGroupVisibilityAction,
-    AddCategoryAction,
-    UpdateCategoryAction,
-    RemoveCategoryAction
-} from "../reducers/layers.reducer";
+import { OfflineReducer } from "../reducers/offline.reducer";
+import { LayersReducer } from "../reducers/layers.reducer";
 import { Urls } from "../urls";
 import type {
     MarkerData,
@@ -194,7 +189,7 @@ export class PoiService {
         if (feature == null) {
             this.loggingService.info(`[POIs] Upload queue has element which is not in the database, removing item: ${firstItemId}`);
             this.queueIsProcessing = false;
-            this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
+            this.ngRedux.dispatch(OfflineReducer.actions.removeFromPoiQueue({featureId: firstItemId}));
             return;
         }
         try {
@@ -212,7 +207,7 @@ export class PoiService {
             }
             this.databaseService.removePoiFromUploadQueue(firstItemId);
             this.queueIsProcessing = false;
-            this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
+            this.ngRedux.dispatch(OfflineReducer.actions.removeFromPoiQueue({featureId: firstItemId}));
         } catch (ex) {
             this.queueIsProcessing = false;
             let typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
@@ -229,7 +224,7 @@ export class PoiService {
                     this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, removing from queue due to ` +
                         `server side error: ${typeAndMessage.message}`);
                     // No timeout and not a client side error - i.e. error from server - need to remove this feature from queue
-                    this.ngRedux.dispatch(new RemoveFromPoiQueueAction({featureId: firstItemId}));
+                    this.ngRedux.dispatch(OfflineReducer.actions.removeFromPoiQueue({featureId: firstItemId}));
             }
         }
     }
@@ -328,7 +323,7 @@ export class PoiService {
         this.loggingService.info("[POIs] Opening pois file");
         let lastModified = await this.openPoisFile(poisFile, progressCallback);
         this.loggingService.info(`[POIs] Updating last modified to: ${lastModified}`);
-        this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: lastModified }));
+        this.ngRedux.dispatch(OfflineReducer.actions.setPoisLastModifed({ lastModifiedDate: lastModified }));
         this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
         await this.fileService.deleteFileFromCache(Urls.poisOfflineFile);
         this.loggingService.info("[POIs] Finished deleting offline pois cached file");
@@ -355,7 +350,7 @@ export class PoiService {
             this.databaseService.storeImages(imageAndData);
             let minDate = new Date(Math.min(new Date(updates.lastModified).getTime(), modifiedUntil.getTime()));
             this.loggingService.info(`[POIs] Updating last modified to: ${minDate}`);
-            this.ngRedux.dispatch(new SetOfflinePoisLastModifiedDateAction({ lastModifiedDate: minDate }));
+            this.ngRedux.dispatch(OfflineReducer.actions.setPoisLastModifed({ lastModifiedDate: minDate }));
         } while (modifiedUntil < new Date());
     }
 
@@ -477,7 +472,7 @@ export class PoiService {
                 let categories = await firstValueFrom(categories$) as Category[];
                 let visibility = categoriesGroup.visible;
                 if (this.runningContextService.isIFrame) {
-                    this.ngRedux.dispatch(new SetCategoriesGroupVisibilityAction({
+                    this.ngRedux.dispatch(LayersReducer.actions.setCategoriesGroupVisibility({
                         groupType: categoriesGroup.type,
                         visible: false
                     }));
@@ -487,12 +482,12 @@ export class PoiService {
                     category.visible = visibility;
                     let exsitingCategory = categoriesGroup.categories.find(c => c.name === category.name);
                     if (exsitingCategory == null) {
-                        this.ngRedux.dispatch(new AddCategoryAction({
+                        this.ngRedux.dispatch(LayersReducer.actions.addCategory({
                             groupType: categoriesGroup.type,
                             category
                         }));
                     } else if (!isEqual(category, exsitingCategory)) {
-                        this.ngRedux.dispatch(new UpdateCategoryAction({
+                        this.ngRedux.dispatch(LayersReducer.actions.updateCategory({
                             groupType: categoriesGroup.type,
                             category
                         }));
@@ -500,7 +495,7 @@ export class PoiService {
                 }
                 for (let exsitingCategory of categoriesGroup.categories) {
                     if (categories.find(c => c.name === exsitingCategory.name) == null) {
-                        this.ngRedux.dispatch(new RemoveCategoryAction({
+                        this.ngRedux.dispatch(LayersReducer.actions.removeCategory({
                             groupType: categoriesGroup.type,
                             categoryName: exsitingCategory.name
                         }));
@@ -588,7 +583,7 @@ export class PoiService {
         this.poisCache = [];
         this.loggingService.info(`[POIs] adding POI with id ${feature.properties.poiId} to queue`);
         await this.databaseService.addPoiToUploadQueue(feature);
-        this.ngRedux.dispatch(new AddToPoiQueueAction({featureId: feature.properties.poiId}));
+        this.ngRedux.dispatch(OfflineReducer.actions.addToPoiQueue({featureId: feature.properties.poiId}));
     }
 
     public getPoiSocialLinks(feature: GeoJSON.Feature): PoiSocialLinks {

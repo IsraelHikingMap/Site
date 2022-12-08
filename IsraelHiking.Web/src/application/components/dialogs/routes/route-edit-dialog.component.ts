@@ -10,8 +10,8 @@ import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
-import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducers/routes.reducer";
-import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
+import { RoutesReducer } from "../../../reducers/routes.reducer";
+import { RouteEditingReducer } from "../../../reducers/route-editing.reducer";
 import type { DataContainer, RouteData, ApplicationState, LatLngAlt } from "../../../models/models";
 
 @Component({
@@ -41,7 +41,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     protected saveImplementation() {
-        this.ngRedux.dispatch(new ChangeRoutePropertiesAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.changeProperties({
             routeId: this.routeData.id,
             routeData: this.routeData
         }));
@@ -55,9 +55,9 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     public deleteRoute() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute && selectedRoute.id === this.routeData.id) {
-            this.ngRedux.dispatch(new SetSelectedRouteAction({routeId: null}));
+            this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({routeId: null}));
         }
-        this.ngRedux.dispatch(new DeleteRouteAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.deleteRoute({
             routeId: this.routeData.id
         }));
     }

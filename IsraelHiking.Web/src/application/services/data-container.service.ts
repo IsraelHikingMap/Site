@@ -12,9 +12,9 @@ import { SelectedRouteService } from "./selected-route.service";
 import { MapService } from "./map.service";
 import { RoutesFactory } from "./routes.factory";
 import { RunningContextService } from "./running-context.service";
-import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
-import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
-import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
+import { RoutesReducer } from "../reducers/routes.reducer";
+import { InMemoryReducer } from "../reducers/in-memory.reducer";
+import { RouteEditingReducer } from "../reducers/route-editing.reducer";
 import type { DataContainer, ApplicationState, LayerData } from "../models/models";
 
 @Injectable()
@@ -42,11 +42,11 @@ export class DataContainerService {
         if (keepCurrentRoutes) {
             routesData = [...this.ngRedux.getState().routes.present, ...routesData];
         }
-        this.ngRedux.dispatch(new BulkReplaceRoutesAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.replaceRoutes({
             routesData
         }));
         if (routesData.length > 0 && this.selectedRouteService.getSelectedRoute() == null) {
-            this.ngRedux.dispatch(new SetSelectedRouteAction({
+            this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({
                 routeId: routesData[0].id
             }));
         }
@@ -88,7 +88,7 @@ export class DataContainerService {
     public async setFileUrlAfterNavigation(url: string, baseLayer: string) {
         try {
             let data = await this.fileService.openFromUrl(url);
-            this.ngRedux.dispatch(new SetFileUrlAndBaseLayerAction({
+            this.ngRedux.dispatch(InMemoryReducer.actions.setFileUrlAndBaseLayer({
                 fileUrl: url,
                 baseLayer
             }));

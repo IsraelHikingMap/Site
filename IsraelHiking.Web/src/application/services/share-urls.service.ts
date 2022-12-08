@@ -9,9 +9,9 @@ import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
-import { SetShareUrlAction } from "../reducers/in-memory.reducer";
-import { UpdateShareUrlAction, AddShareUrlAction, RemoveShareUrlAction } from "../reducers/share-urls.reducer";
-import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
+import { InMemoryReducer } from "../reducers/in-memory.reducer";
+import { ShareUrlsReducer } from "../reducers/share-urls.reducer";
+import { OfflineReducer } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ShareUrl, DataContainer, ApplicationState } from "../models/models";
 
@@ -107,9 +107,9 @@ export class ShareUrlsService {
             for (let shareUrl of shareUrls) {
                 shareUrl.lastModifiedDate = new Date(shareUrl.lastModifiedDate);
                 if (exitingShareUrls.find(s => s.id === shareUrl.id) != null) {
-                    this.ngRedux.dispatch(new UpdateShareUrlAction({ shareUrl }));
+                    this.ngRedux.dispatch(ShareUrlsReducer.actions.updateShareUrl({ shareUrl }));
                 } else {
-                    this.ngRedux.dispatch(new AddShareUrlAction({ shareUrl }));
+                    this.ngRedux.dispatch(ShareUrlsReducer.actions.addShareUrl({ shareUrl }));
                 }
                 if (sharesLastSuccessfullSync == null || shareUrl.lastModifiedDate > sharesLastSuccessfullSync) {
                     sharesToGetFromServer.push(shareUrl);
@@ -117,16 +117,16 @@ export class ShareUrlsService {
             }
             for (let shareUrl of exitingShareUrls) {
                 if (shareUrls.find(s => s.id === shareUrl.id) == null) {
-                    this.ngRedux.dispatch(new RemoveShareUrlAction({ shareUrl }));
+                    this.ngRedux.dispatch(ShareUrlsReducer.actions.removeShareUrl({ shareUrl }));
                     await this.databaseService.deleteShareUrlById(shareUrl.id);
                 }
             }
             sharesToGetFromServer = orderBy(sharesToGetFromServer, s => s.lastModifiedDate, "asc");
             for (let shareToGet of sharesToGetFromServer) {
                 await this.getShareFromServerAndCacheIt(shareToGet.id);
-                this.ngRedux.dispatch(new SetShareUrlsLastModifiedDateAction({lastModifiedDate: shareToGet.lastModifiedDate}));
+                this.ngRedux.dispatch(OfflineReducer.actions.setShareUrlsLastModified({lastModifiedDate: shareToGet.lastModifiedDate}));
             }
-            this.ngRedux.dispatch(new SetShareUrlsLastModifiedDateAction({lastModifiedDate: operationStartTimeStamp}));
+            this.ngRedux.dispatch(OfflineReducer.actions.setShareUrlsLastModified({lastModifiedDate: operationStartTimeStamp}));
             this.loggingService.info(`[Shares] Finished shares sync, last modified: ${operationStartTimeStamp.toUTCString()}`);
         } catch (ex) {
             this.loggingService.error("[Shares] Unable to sync shares: " + (ex as Error).message);
@@ -138,7 +138,7 @@ export class ShareUrlsService {
     public async createShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Creating share with title: ${shareUrl.title}`);
         let createdShareUrl = await firstValueFrom(this.httpClient.post(Urls.urls, shareUrl)) ;
-        this.ngRedux.dispatch(new AddShareUrlAction({ shareUrl: createdShareUrl as ShareUrl}));
+        this.ngRedux.dispatch(ShareUrlsReducer.actions.addShareUrl({ shareUrl: createdShareUrl as ShareUrl}));
         return createdShareUrl as ShareUrl;
     }
 
@@ -150,7 +150,7 @@ export class ShareUrlsService {
     public async deleteShareUrl(shareUrl: ShareUrl): Promise<void> {
         this.loggingService.info(`[Shares] Deleting share with id: ${shareUrl.id}`);
         await firstValueFrom(this.httpClient.delete(Urls.urls + shareUrl.id));
-        this.ngRedux.dispatch(new RemoveShareUrlAction({ shareUrl }));
+        this.ngRedux.dispatch(ShareUrlsReducer.actions.removeShareUrl({ shareUrl }));
         await this.databaseService.deleteShareUrlById(shareUrl.id);
     }
 
@@ -168,7 +168,7 @@ export class ShareUrlsService {
     }
 
     public setShareUrl(shareUrl: ShareUrl) {
-        this.ngRedux.dispatch(new SetShareUrlAction({
+        this.ngRedux.dispatch(InMemoryReducer.actions.setShareUrl({
             shareUrl
         }));
     }

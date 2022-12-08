@@ -11,7 +11,7 @@ import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
-import { SetLocationAction } from "../../reducers/location.reducer";
+import { LocationReducer } from "../../reducers/location.reducer";
 import type { ApplicationState, Location } from "../../models/models";
 
 @Component({
@@ -102,7 +102,7 @@ export class MainMapComponent extends BaseMapComponent {
             return;
         }
         let centerLatLon = this.mapComponent.mapInstance.getCenter();
-        this.ngRedux.dispatch(new SetLocationAction({
+        this.ngRedux.dispatch(LocationReducer.actions.setLocation({
             longitude: centerLatLon.lng,
             latitude: centerLatLon.lat,
             zoom: this.mapComponent.mapInstance.getZoom()

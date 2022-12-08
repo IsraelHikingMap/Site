@@ -3,7 +3,7 @@ import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
-import { SetPannedAction } from "../reducers/in-memory.reducer";
+import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models/models";
 
 @Component({
@@ -25,6 +25,6 @@ export class CenterMeComponent extends BaseMapComponent {
     }
 
     public centerMe() {
-        this.ngRedux.dispatch(new SetPannedAction({pannedTimestamp: null}));
+        this.ngRedux.dispatch(InMemoryReducer.actions.setPanned({pannedTimestamp: null}));
     }
 }

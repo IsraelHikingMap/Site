@@ -8,7 +8,7 @@ import { RouteStrings } from "../services/hash.service";
 import { SidebarService } from "../services/sidebar.service";
 import { DataContainerService } from "../services/data-container.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
-import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
+import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models/models";
 
 @Component({
@@ -41,8 +41,8 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
                 this.dataContainerService.setFileUrlAfterNavigation(params[RouteStrings.ID],
                     this.route.snapshot.queryParamMap.get(RouteStrings.BASE_LAYER));
             } else if (this.router.url === RouteStrings.ROUTE_ROOT) {
-                this.ngRedux.dispatch(new SetFileUrlAndBaseLayerAction({ fileUrl: null, baseLayer: null }));
-                this.ngRedux.dispatch(new SetShareUrlAction({ shareUrl: null }));
+                this.ngRedux.dispatch(InMemoryReducer.actions.setFileUrlAndBaseLayer({ fileUrl: null, baseLayer: null }));
+                this.ngRedux.dispatch(InMemoryReducer.actions.setShareUrl({ shareUrl: null }));
                 this.sidebarService.hideWithoutChangingAddressbar();
             }
         });

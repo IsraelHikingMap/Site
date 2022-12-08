@@ -1,9 +1,6 @@
-import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
+import { Action, AbstractReducer, AnyAction, ActionPayload } from "@angular-redux2/store";
 
-import { initialState, BaseAction } from "./initial-state";
 import type { Location } from "../models/models";
-
-const SET_LOCATION = "SET_LOCATION";
 
 export type SetLocationPayload = {
     longitude: number;
@@ -11,15 +8,12 @@ export type SetLocationPayload = {
     zoom?: number;
 };
 
-export class SetLocationAction extends BaseAction<SetLocationPayload> {
-    constructor(payload: SetLocationPayload) {
-        super(SET_LOCATION, payload);
-    }
-}
-
-export class LocationReducer {
-    @ReduxAction(SET_LOCATION)
-    public setLocation(lastState: Location, action: SetLocationAction) {
+export class LocationReducer extends AbstractReducer {
+    static actions: {
+        setLocation: ActionPayload<SetLocationPayload>;
+    };
+    @Action
+    public setLocation(lastState: Location, action: AnyAction<SetLocationPayload>) {
         return {
             zoom: action.payload.zoom || lastState.zoom,
             longitude: action.payload.longitude || lastState.longitude,
@@ -27,5 +21,3 @@ export class LocationReducer {
         };
     }
 }
-
-export const locationReducer = createReducerFromClass(LocationReducer, initialState.location);

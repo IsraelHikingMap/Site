@@ -10,7 +10,7 @@ import { ElevationProvider } from "../../services/elevation.provider";
 import { SnappingService } from "../../services/snapping.service";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { ResourcesService } from "../../services/resources.service";
-import { AddSegmentAction, UpdateSegmentsAction } from "../../reducers/routes.reducer";
+import { RoutesReducer } from "../../reducers/routes.reducer";
 import type {
     ApplicationState,
     RouteData,
@@ -271,7 +271,7 @@ export class RouteEditRouteInteraction {
             let startLatLng = selectedRoute.segments[endPointSegmentIndex].routePoint;
             await this.runRouting(startLatLng, newSegment);
         }
-        this.ngRedux.dispatch(new AddSegmentAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.addSegment({
             routeId: selectedRoute.id,
             segmentData: newSegment
         }));
@@ -307,7 +307,7 @@ export class RouteEditRouteInteraction {
             segment.routePoint = snappedLatLng;
             segment.routingType = routingType;
 
-            this.ngRedux.dispatch(new UpdateSegmentsAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.updateSegments({
                 routeId: routeData.id,
                 indices: [index, index + 1],
                 segmentsData: [segment, nextSegment]
@@ -317,7 +317,7 @@ export class RouteEditRouteInteraction {
             segment.routingType = routingType;
             let previousSegment = { ...routeData.segments[index - 1] };
             await this.runRouting(previousSegment.routePoint, segment);
-            this.ngRedux.dispatch(new UpdateSegmentsAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.updateSegments({
                 routeId: routeData.id,
                 indices: [index],
                 segmentsData: [segment]
@@ -329,7 +329,7 @@ export class RouteEditRouteInteraction {
             await this.runRouting(previousSegment.routePoint, segment);
             let nextSegment = { ...routeData.segments[index + 1] };
             await this.runRouting(segment.routePoint, nextSegment);
-            this.ngRedux.dispatch(new UpdateSegmentsAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.updateSegments({
                 routeId: routeData.id,
                 indices: [index, index + 1],
                 segmentsData: [segment, nextSegment]
@@ -345,7 +345,7 @@ export class RouteEditRouteInteraction {
         await this.runRouting(segment.latlngs[0], middleSegment);
         await this.runRouting(middleSegment.routePoint, segment);
 
-        this.ngRedux.dispatch(new UpdateSegmentsAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.updateSegments({
             routeId: routeData.id,
             indices: [index],
             segmentsData: [middleSegment, segment]
@@ -359,7 +359,7 @@ export class RouteEditRouteInteraction {
         let newLatlngs = SpatialService.splitLine(latlng, segment.latlngs);
         segment.latlngs = newLatlngs.end as LatLngAltTime[];
         let middleSegment = this.createRouteSegment(latlng, newLatlngs.start);
-        this.ngRedux.dispatch(new UpdateSegmentsAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.updateSegments({
             routeId: routeData.id,
             indices: [index],
             segmentsData: [middleSegment, segment]

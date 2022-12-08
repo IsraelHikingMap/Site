@@ -4,7 +4,7 @@ import { Observable } from "rxjs";
 import { NgRedux, Select } from "@angular-redux2/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
-import { SetPannedAction } from "../reducers/in-memory.reducer";
+import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models/models";
 
 @Injectable()
@@ -34,13 +34,13 @@ export class MapService {
             this.cancelableTimeoutService.clearTimeoutByGroup("panned");
             if (pannedTimestamp) {
                 this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                    this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: null }));
+                    this.ngRedux.dispatch(InMemoryReducer.actions.setPanned({ pannedTimestamp: null }));
                 }, MapService.NOT_FOLLOWING_TIMEOUT, "panned");
             }
         });
 
         this.map.on("dragstart", () => {
-            this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: new Date() }));
+            this.ngRedux.dispatch(InMemoryReducer.actions.setPanned({ pannedTimestamp: new Date() }));
         });
 
         this.map.on("styleimagemissing", (e: {id: string}) => {

@@ -22,8 +22,8 @@ import { NavigateHereService } from "../../../services/navigate-here.service";
 import { GpxDataContainerConverterService } from "../../../services/gpx-data-container-converter.service";
 import { GeoJsonParser } from "../../../services/geojson.parser";
 import { sidebarAnimate } from "../sidebar.component";
-import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
-import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducers/poi.reducer";
+import { RoutesReducer } from "../../../reducers/routes.reducer";
+import { PointsOfInterestReducer } from "../../../reducers/poi.reducer";
 import type {
     LinkData,
     LatLngAlt,
@@ -138,7 +138,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     private async fillUiWithData(data: PoiRouterData) {
         try {
-            this.ngRedux.dispatch(new SetSidebarAction({
+            this.ngRedux.dispatch(PointsOfInterestReducer.actions.setSidebar({
                 isOpen: true
             }));
             if (data.source === "new") {
@@ -161,7 +161,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 this.mergeDataIfNeededData(feature);
                 let bounds = SpatialService.getBoundsForFeature(feature);
                 this.fitBoundsService.fitBounds(bounds);
-                this.ngRedux.dispatch(new SetSelectedPoiAction({
+                this.ngRedux.dispatch(PointsOfInterestReducer.actions.setSelectedPoi({
                     poi: originalFeature
                 }));
                 if (data.source === RouteStrings.COORDINATES) {
@@ -180,7 +180,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         let uploadMarkerData = this.ngRedux.getState().poiState.uploadMarkerData;
         if (uploadMarkerData != null) {
             this.poiService.mergeWithPoi(feature, uploadMarkerData);
-            this.ngRedux.dispatch(new SetUploadMarkerDataAction({
+            this.ngRedux.dispatch(PointsOfInterestReducer.actions.setUploadMarkerData({
                 markerData: null
             }));
             if (feature.properties.poiId && feature.geometry.type === "Point") {
@@ -305,7 +305,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             let newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
             newRoute.description = this.info.description;
             newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
-            this.ngRedux.dispatch(new AddRouteAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.addRoute({
                 routeData: newRoute
             }));
             this.selectedRouteService.setSelectedRoute(newRoute.id);
@@ -322,7 +322,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             id = this.fullFeature.properties.identifier;
         }
         let urls = this.getUrls();
-        this.ngRedux.dispatch(new AddPrivatePoiAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.addPoi({
             routeId: selectedRoute.id,
             markerData: {
                 latlng: this.latlng,
@@ -344,7 +344,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     public clear() {
         if (this.fullFeature) {
-            this.ngRedux.dispatch(new SetSelectedPoiAction({
+            this.ngRedux.dispatch(PointsOfInterestReducer.actions.setSelectedPoi({
                 poi: null
             }));
         }
@@ -377,7 +377,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public close() {
-        this.ngRedux.dispatch(new SetSidebarAction({
+        this.ngRedux.dispatch(PointsOfInterestReducer.actions.setSidebar({
             isOpen: false
         }));
         // reset address bar only after animation ends.

@@ -8,7 +8,7 @@ import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
-import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
+import { GpsReducer } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
 
 const BackgroundGeolocation = registerPlugin<BackgroundGeolocationPlugin>("BackgroundGeolocation");
@@ -43,7 +43,7 @@ export class GeoLocationService {
 
     public initialize() {
         if (this.ngRedux.getState().gpsState.tracking !== "disabled") {
-            this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
+            this.ngRedux.dispatch(GpsReducer.actions.setTrackingState({ state: "disabled"}));
             this.enable();
         }
 
@@ -65,7 +65,7 @@ export class GeoLocationService {
     public async uninitialize() {
         let stateBefore = this.ngRedux.getState().gpsState.tracking;
         await this.disable();
-        this.ngRedux.dispatch(new SetTrackingStateAction({ state: stateBefore}));
+        this.ngRedux.dispatch(GpsReducer.actions.setTrackingState({ state: stateBefore}));
     }
 
     public enable() {
@@ -98,7 +98,7 @@ export class GeoLocationService {
     }
 
     private startWatching() {
-        this.ngRedux.dispatch(new SetTrackingStateAction({ state: "searching"}));
+        this.ngRedux.dispatch(GpsReducer.actions.setTrackingState({ state: "searching"}));
         if (window.navigator && window.navigator.geolocation) {
             // Upon starting location watching get the current position as fast as we can, even if not accurate.
             window.navigator.geolocation.getCurrentPosition((position: GeolocationPosition) => {
@@ -169,8 +169,8 @@ export class GeoLocationService {
     }
 
     private async stopWatching() {
-        this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
-        this.ngRedux.dispatch(new SetCurrentPositionAction({position: null}));
+        this.ngRedux.dispatch(GpsReducer.actions.setTrackingState({ state: "disabled"}));
+        this.ngRedux.dispatch(GpsReducer.actions.setCurrentPosition({position: null}));
         if (this.runningContextService.isCapacitor && this.bgWatcherId) {
             this.loggingService.debug("[GeoLocation] Stopping background tracking");
             await BackgroundGeolocation.removeWatcher({id: this.bgWatcherId});
@@ -192,12 +192,12 @@ export class GeoLocationService {
     private handlePoistionChange(position: GeolocationPosition): void {
         this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
         if (this.ngRedux.getState().gpsState.tracking === "searching") {
-            this.ngRedux.dispatch(new SetTrackingStateAction({ state: "tracking"}));
+            this.ngRedux.dispatch(GpsReducer.actions.setTrackingState({ state: "tracking"}));
         }
         if (this.ngRedux.getState().gpsState.tracking !== "tracking") {
             return;
         }
-        this.ngRedux.dispatch(new SetCurrentPositionAction({position}));
+        this.ngRedux.dispatch(GpsReducer.actions.setCurrentPosition({position}));
     }
 
     public positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {

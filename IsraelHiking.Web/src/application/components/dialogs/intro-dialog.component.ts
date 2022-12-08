@@ -5,7 +5,7 @@ import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { ConfigurationActions } from "../../reducers/configuration.reducer";
+import { ConfigurationReducer } from "../../reducers/configuration.reducer";
 import { RunningContextService } from "../../services/running-context.service";
 import type { ApplicationState } from "../../models/models";
 import languageAnimationData from "../../../content/lottie/dialog-language.json";
@@ -54,7 +54,7 @@ export class IntroDialogComponent extends BaseMapComponent {
     }
 
     public close() {
-        this.ngRedux.dispatch(ConfigurationActions.stopShowIntroAction);
+        this.ngRedux.dispatch(ConfigurationReducer.actions.stopShowingIntro());
         this.dialogRef.close();
     }
 

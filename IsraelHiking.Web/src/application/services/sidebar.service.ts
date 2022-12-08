@@ -3,7 +3,7 @@ import { Observable } from "rxjs";
 import { NgRedux, Select } from "@angular-redux2/store";
 
 import { HashService } from "./hash.service";
-import { SetSidebarAction } from "../reducers/poi.reducer";
+import { PointsOfInterestReducer } from "../reducers/poi.reducer";
 import type { ApplicationState } from "../models/models";
 
 export type SidebarView = "info" | "layers" | "public-poi" | "";
@@ -42,7 +42,7 @@ export class SidebarService {
     public show(viewName: SidebarView) {
         this.isVisible = true;
         this.viewName = viewName;
-        this.ngRedux.dispatch(new SetSidebarAction({
+        this.ngRedux.dispatch(PointsOfInterestReducer.actions.setSidebar({
             isOpen: false
         }));
         this.hashService.resetAddressbar();

@@ -12,11 +12,9 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
-import { AddRecordingRoutePointsAction, StopRecordingAction } from "../reducers/recorded-route.reducer";
-import { AddRouteAction } from "../reducers/routes.reducer";
+import { RecordedRouteReducer, AddRecordingPointsPayload } from "../reducers/recorded-route.reducer";
+import { RoutesReducer } from "../reducers/routes.reducer";
 import type { ApplicationState, MarkerData } from "../models/models";
-
-import { getSubject } from "./selected-route-service.spec";
 
 describe("Recorded Route Service", () => {
     beforeEach(() => {
@@ -85,8 +83,8 @@ describe("Recorded Route Service", () => {
             let spy = jasmine.createSpy();
             MockNgRedux.store.dispatch = spy;
             service.initialize();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(StopRecordingAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(AddRouteAction);
+            expect(spy.calls.all()[0].args[0].type).toBe(RecordedRouteReducer.actions.stopRecording().type);
+            expect(spy.calls.all()[1].args[0].type).toBe(RoutesReducer.actions.addRoute().type);
         }
     ));
 
@@ -98,7 +96,7 @@ describe("Recorded Route Service", () => {
                 }
             });
             service.initialize();
-            const positionStub = getSubject((state: ApplicationState) => state.gpsState.currentPoistion);
+            const positionStub = MockNgRedux.getSelectorStub((state: ApplicationState) => state.gpsState.currentPoistion);
             let spy = jasmine.createSpy();
             MockNgRedux.store.dispatch = spy;
 
@@ -144,7 +142,7 @@ describe("Recorded Route Service", () => {
                     isRecording: true
                 }
             });
-            const positionStub = getSubject((state: ApplicationState) => state.gpsState.currentPoistion);
+            const positionStub = MockNgRedux.getSelectorStub((state: ApplicationState) => state.gpsState.currentPoistion);
             let spy = jasmine.createSpy();
             MockNgRedux.store.dispatch = spy;
 
@@ -153,7 +151,7 @@ describe("Recorded Route Service", () => {
             );
             setTimeout(() => {
                 expect(spy.calls.all().length).toBe(1);
-                expect((spy.calls.all()[0].args[0] as AddRecordingRoutePointsAction).payload.latlngs.length).toBe(1);
+                expect((spy.calls.all()[0].args[0].payload as AddRecordingPointsPayload).latlngs.length).toBe(1);
                 done();
             }, 10);
         }
@@ -194,7 +192,7 @@ describe("Recorded Route Service", () => {
                     isRecording: true
                 }
             });
-            const positionStub = getSubject((state: ApplicationState) => state.gpsState.currentPoistion);
+            const positionStub = MockNgRedux.getSelectorStub((state: ApplicationState) => state.gpsState.currentPoistion);
             let spy = jasmine.createSpy();
             MockNgRedux.store.dispatch = spy;
 
@@ -221,8 +219,8 @@ describe("Recorded Route Service", () => {
             );
             setTimeout(() => {
                 expect(spy.calls.all().length).toBe(2);
-                expect((spy.calls.all()[0].args[0] as AddRecordingRoutePointsAction).payload.latlngs.length).toBe(4);
-                expect((spy.calls.all()[1].args[0] as AddRecordingRoutePointsAction).payload.latlngs.length).toBe(1);
+                expect((spy.calls.all()[0].args[0].payload as AddRecordingPointsPayload).latlngs.length).toBe(4);
+                expect((spy.calls.all()[1].args[0].payload as AddRecordingPointsPayload).latlngs.length).toBe(1);
                 done();
             }, 10);
         }

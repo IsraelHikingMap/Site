@@ -25,8 +25,8 @@ import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.com
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
-import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
-import { SetAgreeToTermsAction } from "../reducers/user.reducer";
+import { UIComponentsReducer } from "../reducers/ui-components.reducer";
+import { UserInfoReducer } from "../reducers/user.reducer";
 import type { UserInfo, ApplicationState } from "../models/models";
 
 @Component({
@@ -124,7 +124,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             let component = this.dialog.open(TermsOfServiceDialogComponent);
             component.afterClosed().subscribe((results: string) => {
                 if (results === "true") {
-                    this.ngRedux.dispatch(new SetAgreeToTermsAction({agree: true}));
+                    this.ngRedux.dispatch(UserInfoReducer.actions.setAgreeToTerms({agree: true}));
                 }
             });
         } else {
@@ -139,21 +139,21 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public selectSearch() {
-        this.ngRedux.dispatch(new SetUIComponentVisibilityAction({
+        this.ngRedux.dispatch(UIComponentsReducer.actions.setVisibility({
             component: "search",
             isVisible: !this.ngRedux.getState().uiComponentsState.searchVisible
         }));
     }
 
     public selectDrawing() {
-        this.ngRedux.dispatch(new SetUIComponentVisibilityAction({
+        this.ngRedux.dispatch(UIComponentsReducer.actions.setVisibility({
             component: "drawing",
             isVisible: !this.ngRedux.getState().uiComponentsState.drawingVisible
         }));
     }
 
     public selectStatistics() {
-        this.ngRedux.dispatch(new SetUIComponentVisibilityAction({
+        this.ngRedux.dispatch(UIComponentsReducer.actions.setVisibility({
             component: "statistics",
             isVisible: !this.ngRedux.getState().uiComponentsState.statisticsVisible
         }));

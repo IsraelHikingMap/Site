@@ -1,4 +1,5 @@
 import { Injectable, NgZone } from "@angular/core";
+import { MatDialog } from "@angular/material/dialog";
 import { NgRedux } from "@angular-redux2/store";
 import { App } from "@capacitor/app";
 
@@ -7,12 +8,11 @@ import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { ToastService } from "./toast.service";
-import { MatDialog } from "@angular/material/dialog";
 import { SidebarService } from "./sidebar.service";
-import { SetSidebarAction } from "../reducers/poi.reducer";
 import { GeoLocationService } from "./geo-location.service";
 import { RecordedRouteService } from "./recorded-route.service";
 import { ImageGalleryService } from "./image-gallery.service";
+import { PointsOfInterestReducer } from "../reducers/poi.reducer";
 import type { ApplicationState } from "../models/models";
 
 declare let navigator: Navigator;
@@ -62,7 +62,7 @@ export class ApplicationExitService {
                     return;
                 }
                 if (this.ngRedux.getState().poiState.isSidebarOpen) {
-                    this.ngRedux.dispatch(new SetSidebarAction({
+                    this.ngRedux.dispatch(PointsOfInterestReducer.actions.setSidebar({
                         isOpen: false
                     }));
                     return;

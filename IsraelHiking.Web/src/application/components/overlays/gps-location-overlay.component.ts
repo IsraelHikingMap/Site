@@ -11,9 +11,9 @@ import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
-import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
-import { ToggleDistanceAction } from "../../reducers/in-memory.reducer";
-import { AddRecordingPoiAction } from "../../reducers/recorded-route.reducer";
+import { RoutesReducer } from "../../reducers/routes.reducer";
+import { InMemoryReducer } from "../../reducers/in-memory.reducer";
+import { RecordedRouteReducer } from "../../reducers/recorded-route.reducer";
 import type { ApplicationState, LatLngAlt, LinkData } from "../../models/models";
 
 @Component({
@@ -53,7 +53,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
             urls: [] as LinkData[]
         };
         if (this.ngRedux.getState().recordedRouteState.isRecording) {
-            this.ngRedux.dispatch(new AddRecordingPoiAction({
+            this.ngRedux.dispatch(RecordedRouteReducer.actions.addRecordingPoi({
                 markerData
             }));
             let markerIndex = this.ngRedux.getState().recordedRouteState.route.markers.length - 1;
@@ -61,7 +61,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
         } else {
             let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
             let markerIndex = selectedRoute.markers.length;
-            this.ngRedux.dispatch(new AddPrivatePoiAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.addPoi({
                 routeId: selectedRoute.id,
                 markerData
             }));
@@ -83,7 +83,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     }
 
     public toggleDistance() {
-        this.ngRedux.dispatch(new ToggleDistanceAction());
+        this.ngRedux.dispatch(InMemoryReducer.actions.toggleDistance());
         this.closed.emit();
     }
 

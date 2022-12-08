@@ -7,8 +7,8 @@ import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RoutesFactory } from "../../services/routes.factory";
 import { TracesService } from "../../services/traces.service";
-import { AddRouteAction } from "../../reducers/routes.reducer";
-import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
+import { RoutesReducer } from "../../reducers/routes.reducer";
+import { TracesReducer } from "../../reducers/traces.reducer";
 import type { ApplicationState, LatLngAlt } from "../../models/models";
 
 @Component({
@@ -113,7 +113,7 @@ export class TracesComponent extends BaseMapComponent {
     }
 
     public removeMissingPart() {
-        this.ngRedux.dispatch(new RemoveMissingPartAction({
+        this.ngRedux.dispatch(TracesReducer.actions.removeMissingPart({
             missingPartIndex: this.missingParts.features.indexOf(this.selectedFeature)
         }));
         this.clearSelection();
@@ -129,10 +129,10 @@ export class TracesComponent extends BaseMapComponent {
     }
 
     public clearTrace() {
-        this.ngRedux.dispatch(new SetMissingPartsAction({
+        this.ngRedux.dispatch(TracesReducer.actions.setMissingPart({
             missingParts: null
         }));
-        this.ngRedux.dispatch(new SetVisibleTraceAction({
+        this.ngRedux.dispatch(TracesReducer.actions.setVisibleTrace({
             traceId: null
         }));
     }
@@ -144,7 +144,7 @@ export class TracesComponent extends BaseMapComponent {
             let routeToAdd = this.routesFactory.createRouteData(route.name);
             routeToAdd.segments = route.segments;
             routeToAdd.markers = route.markers;
-            this.ngRedux.dispatch(new AddRouteAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.addRoute({
                 routeData: routeToAdd
             }));
         }

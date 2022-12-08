@@ -3,7 +3,7 @@ import { Direction } from "@angular/cdk/bidi";
 import { NgRedux } from "@angular-redux2/store";
 
 import { GetTextCatalogService } from "./gettext-catalog.service";
-import { SetLanguageAction } from "../reducers/configuration.reducer";
+import { ConfigurationReducer } from "../reducers/configuration.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, Language, LanguageCode } from "../models/models";
 
@@ -931,7 +931,7 @@ export class ResourcesService {
 
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        this.ngRedux.dispatch(new SetLanguageAction({language}));
+        this.ngRedux.dispatch(ConfigurationReducer.actions.setLanguage({language}));
     }
 
     public async setLanguage(code: LanguageCode) {

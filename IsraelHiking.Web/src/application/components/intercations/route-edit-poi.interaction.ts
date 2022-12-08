@@ -9,8 +9,8 @@ import { GeoLocationService } from "../../services/geo-location.service";
 import { SnappingService, SnappingPointResponse } from "../../services/snapping.service";
 import { PoiService } from "../../services/poi.service";
 import { ResourcesService } from "../../services/resources.service";
-import { AddPrivatePoiAction, UpdatePrivatePoiAction } from "../../reducers/routes.reducer";
-import { AddRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
+import { RoutesReducer } from "../../reducers/routes.reducer";
+import { RecordedRouteReducer } from "../../reducers/recorded-route.reducer";
 import type { ApplicationState, MarkerData, LatLngAlt } from "../../models/models";
 
 @Injectable()
@@ -57,7 +57,7 @@ export class RouteEditPoiInteraction {
         if (this.ngRedux.getState().recordedRouteState.isAddingPoi) {
             let markerData = { ...this.ngRedux.getState().recordedRouteState.route.markers[index] };
             markerData.latlng = latlng;
-            this.ngRedux.dispatch(new UpdateRecordingPoiAction({
+            this.ngRedux.dispatch(RecordedRouteReducer.actions.updateRecordingPoi({
                 index,
                 markerData
             }));
@@ -65,7 +65,7 @@ export class RouteEditPoiInteraction {
             let routeData = this.selectedRouteService.getSelectedRoute();
             let markerData = { ...routeData.markers[index] } as MarkerData;
             markerData.latlng = latlng;
-            this.ngRedux.dispatch(new UpdatePrivatePoiAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.updatePoi({
                 routeId: routeData.id,
                 index,
                 markerData
@@ -99,7 +99,7 @@ export class RouteEditPoiInteraction {
         if (selectedRoute.state !== "Poi") {
             return;
         }
-        this.ngRedux.dispatch(new AddPrivatePoiAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.addPoi({
             routeId: selectedRoute.id,
             markerData
         }));
@@ -109,7 +109,7 @@ export class RouteEditPoiInteraction {
     }
 
     private addToRecording(markerData: MarkerData) {
-        this.ngRedux.dispatch(new AddRecordingPoiAction({
+        this.ngRedux.dispatch(RecordedRouteReducer.actions.addRecordingPoi({
             markerData
         }));
         let index = this.ngRedux.getState().recordedRouteState.route.markers.length - 1;

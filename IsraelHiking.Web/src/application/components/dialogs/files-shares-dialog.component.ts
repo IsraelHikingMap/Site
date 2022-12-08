@@ -10,7 +10,7 @@ import { DatabaseService } from "../../services/database.service";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
-import { SetOfflineLastModifiedAction } from "../../reducers/offline.reducer";
+import { OfflineReducer } from "../../reducers/offline.reducer";
 import type { ApplicationState, DataContainer } from "../../models/models";
 
 @Component({
@@ -62,7 +62,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             await this.fileService.storeFileToCache(dbFileName, file);
             await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
-            this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: new Date(file.lastModified) }));
+            this.ngRedux.dispatch(OfflineReducer.actions.setLastModifed({ lastModifiedDate: new Date(file.lastModified) }));
             return;
         }
         try {

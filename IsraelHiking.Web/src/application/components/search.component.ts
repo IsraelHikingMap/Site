@@ -26,8 +26,8 @@ import { SearchResultsProvider } from "../services/search-results.provider";
 import { RoutesFactory } from "../services/routes.factory";
 import { SpatialService } from "../services/spatial.service";
 import { GpxDataContainerConverterService } from "application/services/gpx-data-container-converter.service";
-import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import { AddRouteAction } from "../reducers/routes.reducer";
+import { RouteEditingReducer } from "../reducers/route-editing.reducer";
+import { RoutesReducer } from "../reducers/routes.reducer";
 import type { RoutingType, ApplicationState, LatLngAlt, SearchResultsPointOfInterest, LatLngAltTime } from "../models/models";
 
 export type SearchContext = {
@@ -232,10 +232,10 @@ export class SearchComponent extends BaseMapComponent {
         let route = this.routesFactory.createRouteData(this.directional.routeTitle);
         let latlngs = this.directional.routeCoordinates.map((c) => SpatialService.toLatLng(c) as LatLngAltTime);
         route.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(latlngs, this.routingType);
-        this.ngRedux.dispatch(new AddRouteAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.addRoute({
             routeData: route
         }));
-        this.ngRedux.dispatch(new SetSelectedRouteAction({
+        this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({
             routeId: route.id
         }));
         this.clearDirectionalRoute();

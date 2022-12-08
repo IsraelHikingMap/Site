@@ -1,66 +1,34 @@
-import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
+import { Action, AbstractReducer, AnyAction, ActionPayload } from "@angular-redux2/store";
 
-import { initialState, BaseAction } from "./initial-state";
 import type { ShareUrl, ShareUrlsState } from "../models/models";
 
-const ADD_SHARE_URL = "ADD_SHARE_URL";
-const REMOVE_SHARE_URL = "REMOVED_SHARE_URL";
-const UPDATE_SHARE_URL = "UPDATE_SHARE_URL";
-
-export class AddShareUrlPayload {
+export class ShareUrlPayload {
     shareUrl: ShareUrl;
 }
 
-export class RemoveShareUrlPayload {
-    shareUrl: ShareUrl;
-}
+export class ShareUrlsReducer extends AbstractReducer {
+    static actions: {
+        addShareUrl: ActionPayload<ShareUrlPayload>;
+        removeShareUrl: ActionPayload<ShareUrlPayload>;
+        updateShareUrl: ActionPayload<ShareUrlPayload>;
+    };
 
-export class UpdateShareUrlPayload {
-    shareUrl: ShareUrl;
-}
-
-export class AddShareUrlAction extends BaseAction<AddShareUrlPayload> {
-    constructor(payload: AddShareUrlPayload) {
-        super(ADD_SHARE_URL, payload);
-    }
-}
-
-export class RemoveShareUrlAction extends BaseAction<RemoveShareUrlPayload> {
-    constructor(payload: RemoveShareUrlPayload) {
-        super(REMOVE_SHARE_URL, payload);
-    }
-}
-
-export class UpdateShareUrlAction extends BaseAction<UpdateShareUrlPayload> {
-    constructor(payload: UpdateShareUrlPayload) {
-        super(UPDATE_SHARE_URL, payload);
-    }
-}
-
-export class ShareUrlsReducer {
-    @ReduxAction(ADD_SHARE_URL)
-    public addShareUrl(lastState: ShareUrlsState, action: AddShareUrlAction): ShareUrlsState {
-        return {
-            shareUrls: [...lastState.shareUrls, action.payload.shareUrl]
-        };
+    @Action
+    public addShareUrl(lastState: ShareUrlsState, action: AnyAction<ShareUrlPayload>): ShareUrlsState {
+        lastState.shareUrls.push(action.payload.shareUrl);
+        return lastState;
     }
 
-    @ReduxAction(REMOVE_SHARE_URL)
-    public removeShareUrl(lastState: ShareUrlsState, action: RemoveShareUrlAction): ShareUrlsState {
-        return {
-            shareUrls: lastState.shareUrls.filter(s => s.id !== action.payload.shareUrl.id)
-        };
+    @Action
+    public removeShareUrl(lastState: ShareUrlsState, action: AnyAction<ShareUrlPayload>): ShareUrlsState {
+        lastState.shareUrls = lastState.shareUrls.filter(s => s.id !== action.payload.shareUrl.id);
+        return lastState;
     }
 
-    @ReduxAction(UPDATE_SHARE_URL)
-    public updateShareUrl(lastState: ShareUrlsState, action: UpdateShareUrlAction): ShareUrlsState {
+    @Action
+    public updateShareUrl(lastState: ShareUrlsState, action: AnyAction<ShareUrlPayload>): ShareUrlsState {
         let shareUrlIndex = lastState.shareUrls.findIndex(s => s.id === action.payload.shareUrl.id);
-        let shareUrls = [...lastState.shareUrls];
-        shareUrls.splice(shareUrlIndex, 1, action.payload.shareUrl);
-        return {
-            shareUrls
-        };
+        lastState.shareUrls.splice(shareUrlIndex, 1, action.payload.shareUrl);
+        return lastState;
     }
 }
-
-export const shareUrlsReducer = createReducerFromClass(ShareUrlsReducer, initialState.shareUrlsState);

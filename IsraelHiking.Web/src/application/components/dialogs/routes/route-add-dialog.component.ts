@@ -6,7 +6,7 @@ import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
 import { SelectedRouteService } from "../../../services/selected-route.service";
-import { AddRouteAction } from "../../../reducers/routes.reducer";
+import { RoutesReducer } from "../../../reducers/routes.reducer";
 import type { ApplicationState } from "../../../models/models";
 
 @Component({
@@ -30,7 +30,7 @@ export class RouteAddDialogComponent extends RouteBaseDialogComponent {
     }
 
     protected saveImplementation() {
-        this.ngRedux.dispatch(new AddRouteAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.addRoute({
             routeData: this.routeData
         }));
         this.selectedRouteService.setSelectedRoute(this.routeData.id);

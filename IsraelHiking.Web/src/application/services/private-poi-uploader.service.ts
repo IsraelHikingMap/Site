@@ -7,7 +7,7 @@ import { ResourcesService } from "./resources.service";
 import { PoiService } from "./poi.service";
 import { ToastService } from "./toast.service";
 import { RouteStrings } from "./hash.service";
-import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
+import { PointsOfInterestReducer } from "../reducers/poi.reducer";
 import type { LinkData, LatLngAlt, MarkerData, ApplicationState } from "../models/models";
 
 @Injectable()
@@ -39,7 +39,7 @@ export class PrivatePoiUploaderService {
             urls
         } as MarkerData;
 
-        this.ngRedux.dispatch(new SetUploadMarkerDataAction({
+        this.ngRedux.dispatch(PointsOfInterestReducer.actions.setUploadMarkerData({
             markerData
         }));
 

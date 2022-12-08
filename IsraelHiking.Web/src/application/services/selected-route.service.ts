@@ -8,19 +8,9 @@ import { ResourcesService } from "./resources.service";
 import { SpatialService } from "./spatial.service";
 import { RouterService } from "./router.service";
 import { MINIMAL_ANGLE, MINIMAL_DISTANCE } from "./route-statistics.service";
-import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
-import {
-    AddRouteAction,
-    SplitRouteAction,
-    ReverseRouteAction,
-    MergeRoutesAction,
-    UpdateSegmentsAction,
-    DeleteSegmentAction,
-    ReplaceSegmentsAction,
-    AddPrivatePoiAction,
-    ChangeEditStateAction
-} from "../reducers/routes.reducer";
+import { RouteEditingReducer } from "../reducers/route-editing.reducer";
+import { RecordedRouteReducer } from "../reducers/recorded-route.reducer";
+import { RoutesReducer } from "../reducers/routes.reducer";
 import type {
     RouteData,
     ApplicationState,
@@ -67,7 +57,7 @@ export class SelectedRouteService {
     public syncSelectedRouteWithEditingRoute() {
         let editingRoute = this.routes.find(r => r.state === "Poi" || r.state === "Route");
         if (editingRoute != null && editingRoute.id !== this.selectedRouteId) {
-            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: editingRoute.id }));
+            this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({ routeId: editingRoute.id }));
         }
     }
 
@@ -81,11 +71,11 @@ export class SelectedRouteService {
 
     public getOrCreateSelectedRoute(): RouteData {
         if (this.selectedRouteId === null && this.routes.length > 0) {
-            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: this.routes[0].id }));
+            this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({ routeId: this.routes[0].id }));
         }
         if (this.routes.length === 0) {
             let data = this.routesFactory.createRouteData(this.createRouteName(), this.getLeastUsedColor());
-            this.ngRedux.dispatch(new AddRouteAction({ routeData: data }));
+            this.ngRedux.dispatch(RoutesReducer.actions.addRoute({ routeData: data }));
             this.setSelectedRoute(data.id);
         }
         return this.getSelectedRoute();
@@ -93,25 +83,25 @@ export class SelectedRouteService {
 
     public setSelectedRoute(routeId: string) {
         if (this.selectedRouteId == null) {
-            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId }));
+            this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({ routeId }));
         } else {
             let selectedRoute = this.getSelectedRoute();
             if (selectedRoute != null && selectedRoute.state !== "Hidden") {
-                this.ngRedux.dispatch(new ChangeEditStateAction({
+                this.ngRedux.dispatch(RoutesReducer.actions.changeEditState({
                     routeId: this.selectedRouteId,
                     state: "ReadOnly"
                 }));
             }
 
-            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId }));
+            this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({ routeId }));
         }
     }
 
     public changeRouteEditState(routeId: string, state: RouteEditStateType) {
         if (this.ngRedux.getState().recordedRouteState.isAddingPoi) {
-            this.ngRedux.dispatch(new ToggleAddRecordingPoiAction());
+            this.ngRedux.dispatch(RecordedRouteReducer.actions.toggleAddingPoi());
         }
-        this.ngRedux.dispatch(new ChangeEditStateAction({ routeId, state }));
+        this.ngRedux.dispatch(RoutesReducer.actions.changeEditState({ routeId, state }));
     }
 
     public createRouteName(routeName: string = this.resources.route): string {
@@ -233,7 +223,7 @@ export class SelectedRouteService {
             ...selectedRoute,
             segments
         };
-        this.ngRedux.dispatch(new SplitRouteAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.splitRoute({
             routeId: selectedRoute.id,
             routeData,
             splitRouteData
@@ -269,7 +259,7 @@ export class SelectedRouteService {
             segments.splice(0, 0, ...selectedRoute.segments);
             mergedRoute.segments = segments;
         }
-        this.ngRedux.dispatch(new MergeRoutesAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.mergeRoutes({
             routeId: selectedRoute.id,
             secondaryRouteId: closestRoute.id,
             mergedRouteData: mergedRoute
@@ -299,7 +289,7 @@ export class SelectedRouteService {
     public reverseRoute(routeId?: string) {
         let route = routeId ? this.getRouteById(routeId) : this.getSelectedRoute();
         let revered = this.reverseRouteInternal(route);
-        this.ngRedux.dispatch(new ReverseRouteAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.replaceRoute({
             routeId: revered.id,
             routeData: revered
         }));
@@ -308,7 +298,7 @@ export class SelectedRouteService {
     public async removeSegment(segmentIndex: number) {
         let selectedRoute = this.getSelectedRoute();
         if (selectedRoute.segments.length - 1 === segmentIndex) {
-            this.ngRedux.dispatch(new DeleteSegmentAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.deleteSegment({
                 routeId: selectedRoute.id,
                 index: selectedRoute.segments.length - 1
             }));
@@ -326,7 +316,7 @@ export class SelectedRouteService {
                 ...selectedRoute.segments[segmentIndex + 1],
                 latlngs
             } as RouteSegmentData;
-            this.ngRedux.dispatch(new UpdateSegmentsAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.updateSegments({
                 routeId: selectedRoute.id,
                 indices: [segmentIndex, segmentIndex + 1],
                 segmentsData: [updatedSegment]
@@ -357,7 +347,7 @@ export class SelectedRouteService {
                 previousPoint = latLng;
             }
         }
-        this.ngRedux.dispatch(new ReplaceSegmentsAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.replaceSegments({
             routeId,
             segmentsData: segments
         }));
@@ -370,13 +360,13 @@ export class SelectedRouteService {
         if (routes.length === 1 && routes[0].segments.length === 0 && this.routes.length > 0) {
             // this is the case when the layer has markers only
             for (let marker of routes[0].markers) {
-                this.ngRedux.dispatch(new AddPrivatePoiAction({
+                this.ngRedux.dispatch(RoutesReducer.actions.addPoi({
                     routeId: this.selectedRouteId || this.routes[0].id,
                     markerData: marker
                 }));
             }
             if (this.selectedRouteId == null) {
-                this.ngRedux.dispatch(new SetSelectedRouteAction({
+                this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({
                     routeId: this.routes[0].id
                 }));
             }
@@ -387,7 +377,7 @@ export class SelectedRouteService {
                 routeData.name = this.createRouteName(routeData.name);
             }
             let routeToAdd = this.routesFactory.createRouteDataAddMissingFields(routeData, this.getLeastUsedColor());
-            this.ngRedux.dispatch(new AddRouteAction({
+            this.ngRedux.dispatch(RoutesReducer.actions.addRoute({
                 routeData: routeToAdd
             }));
             if (routes.indexOf(routeData) === 0) {

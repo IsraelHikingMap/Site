@@ -10,10 +10,10 @@ import { RoutesFactory } from "./routes.factory";
 import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
-import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
-import { AddTraceAction } from "../reducers/traces.reducer";
-import { AddRouteAction } from "../reducers/routes.reducer";
-import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
+import { RecordedRouteReducer } from "../reducers/recorded-route.reducer";
+import { TracesReducer } from "../reducers/traces.reducer";
+import { RoutesReducer } from "../reducers/routes.reducer";
+import { RouteEditingReducer } from "../reducers/route-editing.reducer";
 import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime, RecordedRoute } from "../models/models";
 
 @Injectable()
@@ -63,8 +63,8 @@ export class RecordedRouteService {
         this.rejectedPosition = null;
         let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
         this.lastValidLocation = currentLocation;
-        this.ngRedux.dispatch(new StartRecordingAction());
-        this.ngRedux.dispatch(new AddRecordingRoutePointsAction({
+        this.ngRedux.dispatch(RecordedRouteReducer.actions.startRecording());
+        this.ngRedux.dispatch(RecordedRouteReducer.actions.addRecordingPoints({
             latlngs: [currentLocation]
         }));
     }
@@ -76,7 +76,7 @@ export class RecordedRouteService {
     public stopRecording(withToast = true) {
         this.loggingService.info("[Record] Stop recording");
         let recordedRoute = this.ngRedux.getState().recordedRouteState.route;
-        this.ngRedux.dispatch(new StopRecordingAction());
+        this.ngRedux.dispatch(RecordedRouteReducer.actions.stopRecording());
         this.addRecordingToTraces(recordedRoute);
         if (withToast === false) {
             return;
@@ -129,14 +129,14 @@ export class RecordedRouteService {
             user: ""
         };
 
-        this.ngRedux.dispatch(new AddRouteAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.addRoute({
             routeData
         }));
-        this.ngRedux.dispatch(new SetSelectedRouteAction({
+        this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({
             routeId: routeData.id
         }));
 
-        this.ngRedux.dispatch(new AddTraceAction({ trace }));
+        this.ngRedux.dispatch(TracesReducer.actions.add({ trace }));
         await this.tracesService.uploadLocalTracesIfNeeded();
     }
 
@@ -157,7 +157,7 @@ export class RecordedRouteService {
         let locations = validPositions.map(p => this.geoLocationService.positionToLatLngTime(p));
         setTimeout(() => {
             // This is needed when dispatching an action within a @Select subscription event
-            this.ngRedux.dispatch(new AddRecordingRoutePointsAction({
+            this.ngRedux.dispatch(RecordedRouteReducer.actions.addRecordingPoints({
                 latlngs: locations
             }));
         }, 0);

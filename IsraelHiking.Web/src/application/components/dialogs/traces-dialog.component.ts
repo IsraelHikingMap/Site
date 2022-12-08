@@ -17,7 +17,7 @@ import { RunningContextService } from "../../services/running-context.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RecordedRouteService } from "../../services/recorded-route.service";
 import { DataContainerService } from "../../services/data-container.service";
-import { SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
+import { TracesReducer } from "../../reducers/traces.reducer";
 import type { ApplicationState, Trace, TraceVisibility } from "../../models/models";
 
 @Component({
@@ -122,8 +122,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                 return;
             }
             let trace = await this.tracesService.getTraceById(this.selectedTraceId);
-            this.ngRedux.dispatch(new SetVisibleTraceAction({ traceId: trace.id }));
-            this.ngRedux.dispatch(new SetMissingPartsAction({ missingParts: geoJson }));
+            this.ngRedux.dispatch(TracesReducer.actions.setVisibleTrace({ traceId: trace.id }));
+            this.ngRedux.dispatch(TracesReducer.actions.setMissingPart({ missingParts: geoJson }));
             let bounds = SpatialService.getGeoJsonBounds(geoJson);
             this.fitBoundsService.fitBounds(bounds);
             this.matDialogRef.close();

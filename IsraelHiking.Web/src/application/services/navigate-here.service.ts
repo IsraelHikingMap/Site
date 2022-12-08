@@ -8,7 +8,7 @@ import { ToastService } from "./toast.service";
 import { RouterService } from "./router.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { RoutesFactory } from "./routes.factory";
-import { AddRouteAction } from "../reducers/routes.reducer";
+import { RoutesReducer } from "../reducers/routes.reducer";
 import type { ApplicationState, LatLngAlt, LatLngAltTime } from "../models/models";
 
 @Injectable()
@@ -36,7 +36,7 @@ export class NavigateHereService {
         }
         let data = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
         data.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(latlngs as LatLngAltTime[], routingType);
-        this.ngRedux.dispatch(new AddRouteAction({ routeData: data }));
+        this.ngRedux.dispatch(RoutesReducer.actions.addRoute({ routeData: data }));
 
         if (this.selectedRouteService.getSelectedRoute() == null) {
             this.selectedRouteService.setSelectedRoute(data.id);

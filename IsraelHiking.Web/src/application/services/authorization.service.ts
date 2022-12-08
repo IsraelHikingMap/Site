@@ -5,7 +5,7 @@ import { NgRedux, Select } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { SetTokenAction, SetUserInfoAction } from "../reducers/user.reducer";
+import { UserInfoReducer } from "../reducers/user.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, OsmUserDetails, UserState, UserInfo } from "../models/models";
 
@@ -42,8 +42,8 @@ export class AuthorizationService {
     }
 
     public logout() {
-        this.ngRedux.dispatch(new SetUserInfoAction({ userInfo: null }));
-        this.ngRedux.dispatch(new SetTokenAction({ token: null }));
+        this.ngRedux.dispatch(UserInfoReducer.actions.setUserInfo({ userInfo: null }));
+        this.ngRedux.dispatch(UserInfoReducer.actions.setToken({ token: null }));
     }
 
     public async login(): Promise<void> {
@@ -62,7 +62,7 @@ export class AuthorizationService {
         });
         let oauthCode = await this.getCodeFromWindow(popup, Urls.osmAuth + "/authorize?" + params.toString());
         let accessToken = await this.getAccessToken(oauthCode);
-        this.ngRedux.dispatch(new SetTokenAction({
+        this.ngRedux.dispatch(UserInfoReducer.actions.setToken({
             token: accessToken
         }));
         await this.updateUserDetails();
@@ -90,7 +90,7 @@ export class AuthorizationService {
             changeSets: detailJson.changeSetCount,
             imageUrl: detailJson.image
         };
-        this.ngRedux.dispatch(new SetUserInfoAction({
+        this.ngRedux.dispatch(UserInfoReducer.actions.setUserInfo({
             userInfo
         }));
         this.loggingService.info(`[Authorization] User ${userInfo.displayName} logged-in successfully`);

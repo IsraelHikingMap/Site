@@ -12,10 +12,10 @@ import { SelectedRouteService } from "../services/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
-import { ToggleDistanceAction, SetPannedAction, SetFollowingAction } from "../reducers/in-memory.reducer";
-import { ConfigurationActions } from "../reducers/configuration.reducer";
-import { ChangeEditStateAction } from "../reducers/routes.reducer";
-import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
+import { InMemoryReducer } from "../reducers/in-memory.reducer";
+import { ConfigurationReducer } from "../reducers/configuration.reducer";
+import { RoutesReducer } from "../reducers/routes.reducer";
+import { RecordedRouteReducer } from "../reducers/recorded-route.reducer";
 import type { LatLngAlt, ApplicationState } from "../models/models";
 
 @Component({
@@ -75,7 +75,7 @@ export class LocationComponent extends BaseMapComponent {
                 return;
             }
             if (this.showDistance) {
-                this.ngRedux.dispatch(new ToggleDistanceAction());
+                this.ngRedux.dispatch(InMemoryReducer.actions.toggleDistance());
             }
             if (this.isFollowingLocation()) {
                 this.moveMapToGpsPosition();
@@ -158,17 +158,17 @@ export class LocationComponent extends BaseMapComponent {
         }
         // is active must be true
         if (!this.isFollowingLocation()) {
-            this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
-            this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: null }));
+            this.ngRedux.dispatch(InMemoryReducer.actions.setFollowing({ following: true }));
+            this.ngRedux.dispatch(InMemoryReducer.actions.setPanned({ pannedTimestamp: null }));
             if (this.showDistance) {
-                this.ngRedux.dispatch(new ToggleDistanceAction());
+                this.ngRedux.dispatch(InMemoryReducer.actions.toggleDistance());
             }
             this.moveMapToGpsPosition();
             return;
         }
         // following and not panned
         if (this.isRecording()) {
-            this.ngRedux.dispatch(new SetFollowingAction({ following: false }));
+            this.ngRedux.dispatch(InMemoryReducer.actions.setFollowing({ following: false }));
             return;
         }
         if (!this.isRecording()) {
@@ -191,7 +191,7 @@ export class LocationComponent extends BaseMapComponent {
                 message: this.resources.areYouSureYouWantToStopRecording,
                 type: "YesNo",
                 confirmAction: () => {
-                    this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
+                    this.ngRedux.dispatch(InMemoryReducer.actions.setFollowing({ following: true }));
                     this.recordedRouteService.stopRecording();
                 }
             });
@@ -201,7 +201,7 @@ export class LocationComponent extends BaseMapComponent {
                     message: this.resources.makeSureBatteryOptimizationIsOff,
                     type: "Custom",
                     declineAction: () => {
-                        this.ngRedux.dispatch(ConfigurationActions.stopShowBatteryConfirmationAction);
+                        this.ngRedux.dispatch(ConfigurationReducer.actions.stopShowingBatteryConfirmation());
                     },
                     customConfirmText: this.resources.ok,
                     customDeclineText: this.resources.dontShowThisMessageAgain
@@ -230,14 +230,14 @@ export class LocationComponent extends BaseMapComponent {
     public toggleAddRecordingPoi() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
-            this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "ReadOnly" }));
+            this.ngRedux.dispatch(RoutesReducer.actions.changeEditState({ routeId: selectedRoute.id, state: "ReadOnly" }));
         }
-        this.ngRedux.dispatch(new ToggleAddRecordingPoiAction());
+        this.ngRedux.dispatch(RecordedRouteReducer.actions.toggleAddingPoi());
     }
 
     private handlePositionChange(position: GeolocationPosition) {
         if (this.locationFeatures.features.length === 0) {
-            this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
+            this.ngRedux.dispatch(InMemoryReducer.actions.setFollowing({ following: true }));
         }
         let validHeading = !isNaN(position.coords.heading) && position.coords.speed !== 0;
         if (validHeading) {
@@ -264,8 +264,8 @@ export class LocationComponent extends BaseMapComponent {
     private enableLocation() {
         this.geoLocationService.enable();
         this.deviceOrientationService.enable();
-        this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
-        this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: null }));
+        this.ngRedux.dispatch(InMemoryReducer.actions.setFollowing({ following: true }));
+        this.ngRedux.dispatch(InMemoryReducer.actions.setPanned({ pannedTimestamp: null }));
     }
 
     private moveMapToGpsPosition() {

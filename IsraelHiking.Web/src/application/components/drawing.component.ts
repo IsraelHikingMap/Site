@@ -7,14 +7,9 @@ import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ToastService } from "../services/toast.service";
-import {
-    ReplaceSegmentsAction,
-    ClearPoisAction,
-    ClearPoisAndRouteAction,
-    DeleteAllRoutesAction
-} from "../reducers/routes.reducer";
-import { SetRouteEditingStateAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import { SetShareUrlAction } from "../reducers/in-memory.reducer";
+import { RoutesReducer } from "../reducers/routes.reducer";
+import { RouteEditingReducer } from "../reducers/route-editing.reducer";
+import { InMemoryReducer } from "../reducers/in-memory.reducer";
 import type { RoutingType, ApplicationState } from "../models/models";
 
 @Component({
@@ -63,7 +58,7 @@ export class DrawingComponent extends BaseMapComponent {
 
     public clearRoute() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        this.ngRedux.dispatch(new ReplaceSegmentsAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.replaceSegments({
             routeId: selectedRoute.id,
             segmentsData: []
         }));
@@ -71,14 +66,14 @@ export class DrawingComponent extends BaseMapComponent {
 
     public clearPois() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        this.ngRedux.dispatch(new ClearPoisAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.clearPois({
             routeId: selectedRoute.id
         }));
     }
 
     public clearBoth() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        this.ngRedux.dispatch(new ClearPoisAndRouteAction({
+        this.ngRedux.dispatch(RoutesReducer.actions.clearPoisAndRoute({
             routeId: selectedRoute.id
         }));
     }
@@ -125,7 +120,7 @@ export class DrawingComponent extends BaseMapComponent {
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return;
         }
-        this.ngRedux.dispatch(new SetRouteEditingStateAction({ routingType }));
+        this.ngRedux.dispatch(RouteEditingReducer.actions.setRoutingType({ routingType }));
     }
 
     public undo() {
@@ -160,9 +155,9 @@ export class DrawingComponent extends BaseMapComponent {
             message: this.resources.areYouSureYouWantToDeleteAllRoutes,
             type: "YesNo",
             confirmAction: () => {
-                this.ngRedux.dispatch(new SetShareUrlAction({ shareUrl: null }));
-                this.ngRedux.dispatch(new SetSelectedRouteAction({routeId: null}));
-                this.ngRedux.dispatch(new DeleteAllRoutesAction());
+                this.ngRedux.dispatch(InMemoryReducer.actions.setShareUrl({ shareUrl: null }));
+                this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({routeId: null}));
+                this.ngRedux.dispatch(RoutesReducer.actions.deleteAllRoutes());
                 this.ngRedux.dispatch(ActionCreators.clearHistory());
             }
         });

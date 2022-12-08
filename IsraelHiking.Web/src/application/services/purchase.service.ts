@@ -5,8 +5,8 @@ import { NgRedux, Select } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
 import { OfflineFilesDownloadService } from "./offline-files-download.service";
+import { OfflineReducer } from "../reducers/offline.reducer";
 import type { ApplicationState, UserInfo } from "../models/models";
 
 @Injectable()
@@ -46,12 +46,12 @@ export class PurchaseService {
         });
         this.store.when("offline_map").owned(() => {
             this.loggingService.debug("[Store] Product owned! Last modified: " + this.ngRedux.getState().offlineState.lastModifiedDate);
-            this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: true }));
+            this.ngRedux.dispatch(OfflineReducer.actions.setOfflineAvailable({ isAvailble: true }));
             return;
         });
         this.store.when("offline_map").expired(() => {
             this.loggingService.debug("[Store] Product expired...");
-            this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: false }));
+            this.ngRedux.dispatch(OfflineReducer.actions.setOfflineAvailable({ isAvailble: false }));
             return;
         });
         this.store.when("product").approved((product: any) => {
@@ -73,7 +73,7 @@ export class PurchaseService {
             this.offlineFilesDownloadService.isExpired().then((isExpired) => {
                 if (isExpired) {
                     this.loggingService.debug("[Store] Product is expired from server");
-                    this.ngRedux.dispatch(new SetOfflineAvailableAction({ isAvailble: false }));
+                    this.ngRedux.dispatch(OfflineReducer.actions.setOfflineAvailable({ isAvailble: false }));
                 }
             });
         });

@@ -8,7 +8,7 @@ import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
-import { RemoveTraceAction, UpdateTraceAction, AddTraceAction } from "../reducers/traces.reducer";
+import { TracesReducer } from "../reducers/traces.reducer";
 import { Urls } from "../urls";
 import type { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
 
@@ -71,9 +71,9 @@ export class TracesService {
                 traceJson.timeStamp = new Date(traceJson.timeStamp);
                 let existingTrace = existingTraces.find(t => t.id === traceJson.id);
                 if (existingTrace != null) {
-                    this.ngRedux.dispatch(new UpdateTraceAction({ traceId: traceJson.id, trace: traceJson }));
+                    this.ngRedux.dispatch(TracesReducer.actions.update({ traceId: traceJson.id, trace: traceJson }));
                 } else {
-                    this.ngRedux.dispatch(new AddTraceAction({ trace: traceJson }));
+                    this.ngRedux.dispatch(TracesReducer.actions.add({ trace: traceJson }));
                 }
                 if (traceJson.visibility === "private") {
                     traceJson.visibility = "trackable";
@@ -86,7 +86,7 @@ export class TracesService {
             }
             for (let trace of existingTraces.filter(t => t.visibility !== "local")) {
                 if (traces.find(t => t.id === trace.id) == null) {
-                    this.ngRedux.dispatch(new RemoveTraceAction({ traceId: trace.id }));
+                    this.ngRedux.dispatch(TracesReducer.actions.remove({ traceId: trace.id }));
                     await this.databaseService.deleteTraceById(trace.id);
                 }
             }
@@ -139,7 +139,7 @@ export class TracesService {
     public async updateTrace(trace: Trace): Promise<void> {
         this.loggingService.info(`[Traces] Updating a trace with id ${trace.id}`);
         await firstValueFrom(this.httpClient.put(Urls.osmTrace + trace.id, trace));
-        this.ngRedux.dispatch(new UpdateTraceAction({ traceId: trace.id, trace }));
+        this.ngRedux.dispatch(TracesReducer.actions.update({ traceId: trace.id, trace }));
     }
 
     public async deleteTrace(trace: Trace): Promise<void> {
@@ -147,7 +147,7 @@ export class TracesService {
         if (trace.visibility !== "local") {
             await firstValueFrom(this.httpClient.delete(Urls.osmTrace + trace.id));
         }
-        this.ngRedux.dispatch(new RemoveTraceAction({ traceId: trace.id }));
+        this.ngRedux.dispatch(TracesReducer.actions.remove({ traceId: trace.id }));
         await this.databaseService.deleteTraceById(trace.id);
     }
 }

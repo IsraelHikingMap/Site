@@ -3,12 +3,7 @@ import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import {
-    ExpandGroupAction,
-    CollapseGroupAction,
-    SetCategoryVisibilityAction,
-    SetCategoriesGroupVisibilityAction
-} from "../../reducers/layers.reducer";
+import { LayersReducer } from "../../reducers/layers.reducer";
 import type { ApplicationState, CategoriesGroup, Category } from "../../models/models";
 
 @Component({
@@ -26,11 +21,11 @@ export class CategoriesGroupComponent extends BaseMapComponent {
     }
 
     public expand() {
-        this.ngRedux.dispatch(new ExpandGroupAction({ name: this.categoriesGroup.type }));
+        this.ngRedux.dispatch(LayersReducer.actions.expandGroup({ name: this.categoriesGroup.type }));
     }
 
     public collapse() {
-        this.ngRedux.dispatch(new CollapseGroupAction({ name: this.categoriesGroup.type }));
+        this.ngRedux.dispatch(LayersReducer.actions.collapseGroup({ name: this.categoriesGroup.type }));
     }
 
     public getExpandState(): boolean {
@@ -38,7 +33,7 @@ export class CategoriesGroupComponent extends BaseMapComponent {
     }
 
     public toggleCategory(category: Category) {
-        this.ngRedux.dispatch(new SetCategoryVisibilityAction({
+        this.ngRedux.dispatch(LayersReducer.actions.setCategoryVisibility({
             groupType: this.categoriesGroup.type,
             name: category.name,
             visible: !category.visible
@@ -47,7 +42,7 @@ export class CategoriesGroupComponent extends BaseMapComponent {
 
     public toggleVisibility(event: Event) {
         event.stopPropagation();
-        this.ngRedux.dispatch(new SetCategoriesGroupVisibilityAction({
+        this.ngRedux.dispatch(LayersReducer.actions.setCategoriesGroupVisibility({
             groupType: this.categoriesGroup.type,
             visible: !this.categoriesGroup.visible
         }));

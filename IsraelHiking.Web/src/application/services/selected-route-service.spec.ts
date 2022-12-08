@@ -7,26 +7,21 @@ import { ResourcesService } from "./resources.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { RouterService } from "./router.service";
 import { RoutesFactory } from "./routes.factory";
-import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
-import { AddRouteAction, ChangeEditStateAction } from "../reducers/routes.reducer";
+import { RouteEditingReducer } from "../reducers/route-editing.reducer";
+import { RecordedRouteReducer } from "../reducers/recorded-route.reducer";
+import { RoutesReducer } from "../reducers/routes.reducer";
 import type { ApplicationState, RouteData } from "../models/models";
 
-export const getSubject = <T>(predecator: (state: ApplicationState) => T): Subject<T> => {
-    let predecatorString = predecator.toString().split("=>")[1];
-    let selectorKey = Object.keys((MockNgRedux.getSubStore() as MockNgRedux).selections).find(k => k.includes(predecatorString));
-    return MockNgRedux.getSelectorStub<ApplicationState, T>(selectorKey);
-};
 
 describe("Selected Route Service", () => {
     const setupRoutes = (routes: RouteData[]) => {
-        const routesStub = getSubject((state: ApplicationState) => state.routes.present);
+        const routesStub = MockNgRedux.getSelectorStub((state: ApplicationState) => state.routes.present);
         routesStub.next(routes);
         return routesStub;
     };
 
     const setupSelectedRoute = (id: string) => {
-        const selectedRouteIdSubject = getSubject((state: ApplicationState) => state.routeEditingState.selectedRouteId);
+        const selectedRouteIdSubject = MockNgRedux.getSelectorStub((state: ApplicationState) => state.routeEditingState.selectedRouteId);
         selectedRouteIdSubject.next(id);
         return selectedRouteIdSubject;
     };
@@ -84,7 +79,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.getOrCreateSelectedRoute();
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
+            expect(spy.calls.all()[0].args[0].type).toBe(RoutesReducer.actions.addRoute().type);
         }
     ));
 
@@ -120,7 +115,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.setSelectedRoute("42");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SetSelectedRouteAction);
+            expect(spy.calls.all()[0].args[0].type).toBe(RouteEditingReducer.actions.setSelectedRoute().type);
         }
     ));
 
@@ -151,7 +146,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ChangeEditStateAction);
+            expect(spy.calls.all()[0].args[0].type).toBe(RoutesReducer.actions.changeEditState().type);
         }
     ));
 
@@ -168,8 +163,8 @@ describe("Selected Route Service", () => {
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ToggleAddRecordingPoiAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(ChangeEditStateAction);
+            expect(spy.calls.all()[0].args[0].type).toBe(RecordedRouteReducer.actions.toggleAddingPoi().type);
+            expect(spy.calls.all()[1].args[0].type).toBe(RoutesReducer.actions.changeEditState().type);
         }
     ));
 
