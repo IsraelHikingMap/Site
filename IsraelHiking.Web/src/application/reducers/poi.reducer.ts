@@ -1,6 +1,7 @@
-import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer } from "@angular-redux2/store";
 
 import type { PointsOfInterestState, MarkerData } from "../models/models";
+import type { ReducerActions } from "./initial-state";
 
 
 export type SetSelectedPoiPayload = {
@@ -16,11 +17,7 @@ export type SetSidebarPayload = {
 };
 
 export class PointsOfInterestReducer extends AbstractReducer {
-    static actions: {
-        setSelectedPoi: ActionPayload<SetSelectedPoiPayload>;
-        setUploadMarkerData: ActionPayload<SetUploadMarkerDataPayload>;
-        setSidebar: ActionPayload<SetSidebarPayload>;
-    };
+    static actions: ReducerActions<PointsOfInterestReducer>;
 
     @Action
     public setSelectedPoi(lastState: PointsOfInterestState, payload: SetSelectedPoiPayload): PointsOfInterestState {

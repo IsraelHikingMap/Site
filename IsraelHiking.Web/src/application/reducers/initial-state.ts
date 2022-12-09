@@ -2,12 +2,16 @@
 
 import { Urls } from "../urls";
 import type { ApplicationState, RouteData } from "../models/models";
+import { ActionPayload } from "@angular-redux2/store";
 
 export const ISRAEL_HIKING_MAP = "Israel Hiking Map";
 export const ISRAEL_MTB_MAP = "Israel MTB Map";
 export const SATELLITE = "Satellite Imagery";
 export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
+
+type Args<T> = T extends (...args: infer X) => any ? X : never;
+export type ReducerActions<T> = {[K in keyof T]: ActionPayload<Args<T[K]>[1]>};
 
 export const initialState =
     {

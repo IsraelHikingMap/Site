@@ -1,7 +1,7 @@
 import { orderBy, remove } from "lodash-es";
-import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer } from "@angular-redux2/store";
 
-import { ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS } from "./initial-state";
+import { ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS, ReducerActions } from "./initial-state";
 import type { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models/models";
 
 export type AddBaseLayerPayload = {
@@ -66,24 +66,7 @@ export type ToggleOfflinePayload = {
 };
 
 export class LayersReducer extends AbstractReducer {
-    static actions: {
-        addBaseLayer: ActionPayload<AddBaseLayerPayload>;
-        addOverlay: ActionPayload<AddOverlayPayload>;
-        removeBaseLayer: ActionPayload<RemoveLayerPayload>;
-        removeOverlay: ActionPayload<RemoveLayerPayload>;
-        updateBaseLayer: ActionPayload<UpdateBaseLayerPayload>;
-        updateOverlay: ActionPayload<UpdateOverlayPayload>;
-        selectBaseLayer: ActionPayload<SelectBaseLayerPayload>;
-        expandGroup: ActionPayload<ToggleGroupPayload>;
-        collapseGroup: ActionPayload<ToggleGroupPayload>;
-        addCategory: ActionPayload<AddCategoryPayload>;
-        updateCategory: ActionPayload<UpdateCategoryPayload>;
-        removeCategory: ActionPayload<RemoveCategoryPayload>;
-        setCategoryVisibility: ActionPayload<SetCategoryVisibilityPayload>;
-        setCategoriesGroupVisibility: ActionPayload<SetCategoriesGroupVisibilityPayload>;
-        toggleOffline: ActionPayload<ToggleOfflinePayload>;
-    };
-
+    static actions: ReducerActions<LayersReducer>;
 
     private sort(layers: EditableLayer[]): EditableLayer[] {
         let ordered = orderBy(layers, l => l.key);

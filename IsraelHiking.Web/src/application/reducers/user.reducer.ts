@@ -1,6 +1,7 @@
-import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer } from "@angular-redux2/store";
 
 import type { UserInfo, UserState } from "../models/models";
+import type { ReducerActions } from "./initial-state";
 
 export type SetUserInfoPayload = {
     userInfo: UserInfo;
@@ -15,11 +16,7 @@ export type SetArgreeToTermsPayload = {
 };
 
 export class UserInfoReducer extends AbstractReducer {
-    static actions: {
-        setUserInfo: ActionPayload<SetUserInfoPayload>;
-        setToken: ActionPayload<SetTokenPayload>;
-        setAgreeToTerms: ActionPayload<SetArgreeToTermsPayload>;
-    };
+    static actions: ReducerActions<UserInfoReducer>;
 
     @Action
     public setUserInfo(lastState: UserState, payload: SetUserInfoPayload): UserState {

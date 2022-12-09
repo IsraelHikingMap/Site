@@ -1,7 +1,7 @@
-import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer } from "@angular-redux2/store";
 
-import type { Configuration, Language } from "../models/models";
-import { BatteryOptimizationType } from "application/models/state/configuration";
+import type { Configuration, Language, BatteryOptimizationType } from "../models/models";
+import type { ReducerActions } from "./initial-state";
 
 export type SetLanguagePayload = {
     language: Language;
@@ -12,14 +12,7 @@ export type SetBatteryOptimizationTypePayload = {
 };
 
 export class ConfigurationReducer extends AbstractReducer {
-    static actions: {
-        setBatteryOptimization: ActionPayload<SetBatteryOptimizationTypePayload>;
-        toggleAutomaticRecordingUpload: ActionPayload<void>;
-        toggleGotLostWarnings: ActionPayload<void>;
-        stopShowingBatteryConfirmation: ActionPayload<void>;
-        stopShowingIntro: ActionPayload<void>;
-        setLanguage: ActionPayload<SetLanguagePayload>;
-    };
+    static actions: ReducerActions<ConfigurationReducer>;
 
     @Action
     public setBatteryOptimization(lastState: Configuration, payload: SetBatteryOptimizationTypePayload): Configuration {

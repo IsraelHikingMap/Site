@@ -1,6 +1,7 @@
-import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer } from "@angular-redux2/store";
 
 import type { UICompoentsState } from "../models/models";
+import type { ReducerActions } from "./initial-state";
 
 export type UIComponentType = "search" | "drawing" | "statistics";
 
@@ -10,9 +11,7 @@ export interface SetUIComponentVisibilityPayload {
 }
 
 export class UIComponentsReducer extends AbstractReducer {
-    static actions: {
-        setVisibility: ActionPayload<SetUIComponentVisibilityPayload>;
-    };
+    static actions: ReducerActions<UIComponentsReducer>;
 
     @Action
     public setVisibility(lastState: UICompoentsState, payload: SetUIComponentVisibilityPayload): UICompoentsState {

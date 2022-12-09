@@ -1,6 +1,7 @@
-import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer } from "@angular-redux2/store";
 
 import type { TracesState, Trace } from "../models/models";
+import type { ReducerActions } from "./initial-state";
 
 export type AddTracePayload = {
     trace: Trace;
@@ -28,14 +29,7 @@ export type RemoveMissingPartPayload = {
 };
 
 export class TracesReducer extends AbstractReducer {
-    static actions: {
-        add: ActionPayload<AddTracePayload>;
-        update: ActionPayload<UpdateTracePayload>;
-        remove: ActionPayload<RemoveTracePayload>;
-        setVisibleTrace: ActionPayload<SetVisibleTracePayload>;
-        setMissingPart: ActionPayload<SetMissingPartsPayload>;
-        removeMissingPart: ActionPayload<RemoveMissingPartPayload>;
-    };
+    static actions: ReducerActions<TracesReducer>;
 
     @Action
     public add(lastState: TracesState, payload: AddTracePayload): TracesState {

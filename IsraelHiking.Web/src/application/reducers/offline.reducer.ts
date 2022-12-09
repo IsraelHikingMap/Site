@@ -1,6 +1,7 @@
-import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer } from "@angular-redux2/store";
 
 import type { OfflineState } from "../models/models";
+import type { ReducerActions } from "./initial-state";
 
 export type SetOfflineAvailablePayload = {
     isAvailble: boolean;
@@ -16,15 +17,8 @@ export type PoiQueuePayload = {
 
 
 export class OfflineReducer extends AbstractReducer {
-    static actions: {
-        setOfflineAvailable: ActionPayload<SetOfflineAvailablePayload>;
-        setLastModifed: ActionPayload<SetLastModifiedPayload>;
-        setPoisLastModifed: ActionPayload<SetLastModifiedPayload>;
-        setShareUrlsLastModified: ActionPayload<SetLastModifiedPayload>;
-        addToPoiQueue: ActionPayload<PoiQueuePayload>;
-        removeFromPoiQueue: ActionPayload<PoiQueuePayload>;
+    static actions: ReducerActions<OfflineReducer>;
 
-    };
     @Action
     public setOfflineAvailable(lastState: OfflineState, payload: SetOfflineAvailablePayload): OfflineState {
         lastState.isOfflineAvailable = payload.isAvailble;

@@ -1,7 +1,7 @@
 import undoable, { UndoableOptions } from "redux-undo";
-import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer } from "@angular-redux2/store";
 
-import { initialState } from "./initial-state";
+import { initialState, ReducerActions } from "./initial-state";
 import type { RouteData, MarkerData, RouteSegmentData, RouteEditStateType } from "../models/models";
 
 export type RoutePayload = {
@@ -73,28 +73,7 @@ export type BulkReplaceRoutesPayload = {
 };
 
 export class RoutesReducer extends AbstractReducer {
-    static actions: {
-        addRoute: ActionPayload<AddRoutePayload>;
-        deleteRoute: ActionPayload<RoutePayload>;
-        changeProperties: ActionPayload<ChangeRoutePropertiesActionPayload>;
-        addPoi: ActionPayload<AddPrivatePoiPayload>;
-        updatePoi: ActionPayload<UpdatePrivatePoiPayload>;
-        deletePoi: ActionPayload<DeletePrivatePoiPayload>;
-        addSegment: ActionPayload<AddSegmentPayload>;
-        updateSegments: ActionPayload<UpdateSegmentsPayload>;
-        replaceSegments: ActionPayload<ReplaceSegmentsPayload>;
-        deleteSegment: ActionPayload<DeleteSegmentPayload>;
-        changeEditState: ActionPayload<ChangeEditStatePayload>;
-        changeVisibility: ActionPayload<ChangeVisibilityPayload>;
-        replaceRoute: ActionPayload<ReplaceRoutePayload>;
-        splitRoute: ActionPayload<SplitRoutePayload>;
-        mergeRoutes: ActionPayload<MergeRoutesPayload>;
-        clearPois: ActionPayload<RoutePayload>;
-        clearPoisAndRoute: ActionPayload<RoutePayload>;
-        deleteAllRoutes: ActionPayload<any>;
-        toggleAllRoutes: ActionPayload<any>;
-        replaceRoutes: ActionPayload<BulkReplaceRoutesPayload>;
-    };
+    static actions: ReducerActions<RoutesReducer>;
 
     @Action
     public addRoute(lastState: RouteData[], payload: AddRoutePayload): RouteData[] {
