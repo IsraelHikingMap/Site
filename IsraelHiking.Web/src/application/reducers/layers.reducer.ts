@@ -1,5 +1,5 @@
 import { orderBy, remove } from "lodash-es";
-import { Action, AbstractReducer, AnyAction, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
 
 import { ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS } from "./initial-state";
 import type { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models/models";
@@ -94,120 +94,120 @@ export class LayersReducer extends AbstractReducer {
     }
 
     @Action
-    public addBaseLayer(lastState: LayersState, action: AnyAction<AddBaseLayerPayload>): LayersState {
-        lastState.baseLayers.push(action.payload.layerData);
+    public addBaseLayer(lastState: LayersState, payload: AddBaseLayerPayload): LayersState {
+        lastState.baseLayers.push(payload.layerData);
         lastState.baseLayers = this.sort(lastState.baseLayers);
         return lastState;
     }
 
     @Action
-    public addOverlay(lastState: LayersState, action: AnyAction<AddOverlayPayload>): LayersState {
-        lastState.overlays.push(action.payload.layerData);
+    public addOverlay(lastState: LayersState, payload: AddOverlayPayload): LayersState {
+        lastState.overlays.push(payload.layerData);
         lastState.overlays = this.sort(lastState.overlays) as Overlay[];
         return lastState;
     }
 
     @Action
-    public removeBaseLayer(lastState: LayersState, action: AnyAction<RemoveLayerPayload>): LayersState {
+    public removeBaseLayer(lastState: LayersState, payload: RemoveLayerPayload): LayersState {
         let baseLayers = lastState.baseLayers;
-        baseLayers.splice(baseLayers.indexOf(baseLayers.find(b => b.key === action.payload.key)), 1);
+        baseLayers.splice(baseLayers.indexOf(baseLayers.find(b => b.key === payload.key)), 1);
         return lastState;
     }
 
     @Action
-    public removeOverlay(lastState: LayersState, action: AnyAction<RemoveLayerPayload>): LayersState {
+    public removeOverlay(lastState: LayersState, payload: RemoveLayerPayload): LayersState {
         let overlays = lastState.overlays;
-        overlays.splice(overlays.indexOf(overlays.find(o => o.key === action.payload.key)), 1);
+        overlays.splice(overlays.indexOf(overlays.find(o => o.key === payload.key)), 1);
         return lastState;
     }
 
     @Action
-    public updateBaseLayer(lastState: LayersState, action: AnyAction<UpdateBaseLayerPayload>): LayersState {
+    public updateBaseLayer(lastState: LayersState, payload: UpdateBaseLayerPayload): LayersState {
         let baseLayers = lastState.baseLayers;
-        baseLayers.splice(baseLayers.indexOf(baseLayers.find(b => b.key === action.payload.key)), 1, action.payload.layerData);
+        baseLayers.splice(baseLayers.indexOf(baseLayers.find(b => b.key === payload.key)), 1, payload.layerData);
         lastState.baseLayers = this.sort(baseLayers);
         return lastState;
     }
 
     @Action
-    public updateOverlay(lastState: LayersState, action: AnyAction<UpdateOverlayPayload>): LayersState {
+    public updateOverlay(lastState: LayersState, payload: UpdateOverlayPayload): LayersState {
         let overlays = lastState.overlays;
-        overlays.splice(overlays.indexOf(overlays.find(o => o.key === action.payload.key)), 1, action.payload.layerData);
+        overlays.splice(overlays.indexOf(overlays.find(o => o.key === payload.key)), 1, payload.layerData);
         lastState.overlays = this.sort(overlays) as Overlay[];
         return lastState;
     }
 
     @Action
-    public selectBaseLayer(lastState: LayersState, action: AnyAction<SelectBaseLayerPayload>): LayersState {
-        lastState.selectedBaseLayerKey = action.payload.key;
+    public selectBaseLayer(lastState: LayersState, payload: SelectBaseLayerPayload): LayersState {
+        lastState.selectedBaseLayerKey = payload.key;
         return lastState;
     }
 
     @Action
-    public expandGroup(lastState: LayersState, action: AnyAction<ToggleGroupPayload>): LayersState {
-        if (lastState.expanded.find(n => n === action.payload.name) != null) {
+    public expandGroup(lastState: LayersState, payload: ToggleGroupPayload): LayersState {
+        if (lastState.expanded.find(n => n === payload.name) != null) {
             return lastState;
         }
-        lastState.expanded.push(action.payload.name);
+        lastState.expanded.push(payload.name);
         return lastState;
     }
 
     @Action
-    public collapseGroup(lastState: LayersState, action: AnyAction<ToggleGroupPayload>): LayersState {
-        if (lastState.expanded.find(n => n === action.payload.name) == null) {
+    public collapseGroup(lastState: LayersState, payload: ToggleGroupPayload): LayersState {
+        if (lastState.expanded.find(n => n === payload.name) == null) {
             return lastState;
         }
-        lastState.expanded.splice(lastState.expanded.indexOf(action.payload.name));
+        lastState.expanded.splice(lastState.expanded.indexOf(payload.name));
         return lastState;
     }
 
     @Action
-    public addCategory(lastState: LayersState, action: AnyAction<AddCategoryPayload>): LayersState {
-        let group = lastState.categoriesGroups.find(g => g.type === action.payload.groupType);
-        group.categories.push(action.payload.category);
+    public addCategory(lastState: LayersState, payload: AddCategoryPayload): LayersState {
+        let group = lastState.categoriesGroups.find(g => g.type === payload.groupType);
+        group.categories.push(payload.category);
         return lastState;
     }
 
     @Action
-    public updateCategory(lastState: LayersState, action: AnyAction<UpdateCategoryPayload>): LayersState {
-        let group = lastState.categoriesGroups.find(g => g.type === action.payload.groupType);
+    public updateCategory(lastState: LayersState, payload: UpdateCategoryPayload): LayersState {
+        let group = lastState.categoriesGroups.find(g => g.type === payload.groupType);
         let categories = group.categories;
-        let categoryIndex = categories.indexOf(categories.find(c => c.name === action.payload.category.name));
-        categories.splice(categoryIndex, 1, action.payload.category);
+        let categoryIndex = categories.indexOf(categories.find(c => c.name === payload.category.name));
+        categories.splice(categoryIndex, 1, payload.category);
         return lastState;
     }
 
     @Action
-    public removeCategory(lastState: LayersState, action: AnyAction<RemoveCategoryPayload>): LayersState {
-        let group = lastState.categoriesGroups.find(g => g.type === action.payload.groupType);
-        let categoryIndex = group.categories.indexOf(group.categories.find(c => c.name === action.payload.categoryName));
+    public removeCategory(lastState: LayersState, payload: RemoveCategoryPayload): LayersState {
+        let group = lastState.categoriesGroups.find(g => g.type === payload.groupType);
+        let categoryIndex = group.categories.indexOf(group.categories.find(c => c.name === payload.categoryName));
         group.categories.splice(categoryIndex, 1);
         return lastState;
     }
 
     @Action
-    public setCategoryVisibility(lastState: LayersState, action: AnyAction<SetCategoryVisibilityPayload>): LayersState {
-        let group = lastState.categoriesGroups.find(g => g.type === action.payload.groupType);
-        let category = group.categories.find(c => c.name === action.payload.name);
-        category.visible = action.payload.visible;
+    public setCategoryVisibility(lastState: LayersState, payload: SetCategoryVisibilityPayload): LayersState {
+        let group = lastState.categoriesGroups.find(g => g.type === payload.groupType);
+        let category = group.categories.find(c => c.name === payload.name);
+        category.visible = payload.visible;
         return lastState;
     }
 
     @Action
-    public setCategoriesGroupVisibility(lastState: LayersState, action: AnyAction<SetCategoriesGroupVisibilityPayload>): LayersState {
-        let group = lastState.categoriesGroups.find(g => g.type === action.payload.groupType);
+    public setCategoriesGroupVisibility(lastState: LayersState, payload: SetCategoriesGroupVisibilityPayload): LayersState {
+        let group = lastState.categoriesGroups.find(g => g.type === payload.groupType);
         for (let category of group.categories) {
-            category.visible = action.payload.visible;
+            category.visible = payload.visible;
         }
-        group.visible = action.payload.visible;
+        group.visible = payload.visible;
         return lastState;
     }
 
     @Action
-    public toggleOffline(lastState: LayersState, action: AnyAction<ToggleOfflinePayload>): LayersState {
-        let layer = action.payload.isOverlay
-            ? lastState.overlays.find(b => b.key === action.payload.key)
-            : lastState.baseLayers.find(b => b.key === action.payload.key);
+    public toggleOffline(lastState: LayersState, payload: ToggleOfflinePayload): LayersState {
+        let layer = payload.isOverlay
+            ? lastState.overlays.find(b => b.key === payload.key)
+            : lastState.baseLayers.find(b => b.key === payload.key);
         layer.isOfflineOn = !layer.isOfflineOn;
         return lastState;
     }

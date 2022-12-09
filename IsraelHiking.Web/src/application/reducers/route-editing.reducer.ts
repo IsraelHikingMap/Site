@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, ActionPayload, AnyAction } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
 
 import type { RoutingType, RouteEditingState } from "../models/models";
 
@@ -23,21 +23,21 @@ export class RouteEditingReducer extends AbstractReducer {
     };
 
     @Action
-    public setSelectedRoute(lastState: RouteEditingState, action: AnyAction<RoutePayload>): RouteEditingState {
-        lastState.selectedRouteId = action.payload.routeId;
+    public setSelectedRoute(lastState: RouteEditingState, payload: RoutePayload): RouteEditingState {
+        lastState.selectedRouteId = payload.routeId;
         return lastState;
     }
 
     @Action
-    public setRoutingType(lastState: RouteEditingState, action: AnyAction<SetRoutingTypePayload>): RouteEditingState {
-        lastState.routingType = action.payload.routingType;
+    public setRoutingType(lastState: RouteEditingState, payload: SetRoutingTypePayload): RouteEditingState {
+        lastState.routingType = payload.routingType;
         return lastState;
     }
 
     @Action
-    public setOpacityAndWeight(lastState: RouteEditingState, action: AnyAction<SetOpacityAndWeightPayload>): RouteEditingState {
-        lastState.opacity = action.payload.opacity;
-        lastState.weight = action.payload.weight;
+    public setOpacityAndWeight(lastState: RouteEditingState, payload: SetOpacityAndWeightPayload): RouteEditingState {
+        lastState.opacity = payload.opacity;
+        lastState.weight = payload.weight;
         return lastState;
     }
 }

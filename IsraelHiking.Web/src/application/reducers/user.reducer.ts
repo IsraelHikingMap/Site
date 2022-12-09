@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, AnyAction, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
 
 import type { UserInfo, UserState } from "../models/models";
 
@@ -22,20 +22,20 @@ export class UserInfoReducer extends AbstractReducer {
     };
 
     @Action
-    public setUserInfo(lastState: UserState, action: AnyAction<SetUserInfoPayload>) {
-        lastState.userInfo = action.payload.userInfo;
+    public setUserInfo(lastState: UserState, payload: SetUserInfoPayload): UserState {
+        lastState.userInfo = payload.userInfo;
         return lastState;
     }
 
     @Action
-    public setToken(lastState: UserState, action: AnyAction<SetTokenPayload>) {
-        lastState.token = action.payload.token;
+    public setToken(lastState: UserState, payload: SetTokenPayload): UserState {
+        lastState.token = payload.token;
         return lastState;
     }
 
     @Action
-    public setAgreeToTerms(lastState: UserState, action: AnyAction<SetArgreeToTermsPayload>) {
-        lastState.agreedToTheTermsOfService = action.payload.agree;
+    public setAgreeToTerms(lastState: UserState, payload: SetArgreeToTermsPayload): UserState {
+        lastState.agreedToTheTermsOfService = payload.agree;
         return lastState;
     }
 }

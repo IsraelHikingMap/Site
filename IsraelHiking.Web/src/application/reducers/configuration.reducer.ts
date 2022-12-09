@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, ActionPayload, AnyAction } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
 
 import type { Configuration, Language } from "../models/models";
 import { BatteryOptimizationType } from "application/models/state/configuration";
@@ -22,38 +22,38 @@ export class ConfigurationReducer extends AbstractReducer {
     };
 
     @Action
-    public setBatteryOptimization(lastState: Configuration, action: AnyAction<SetBatteryOptimizationTypePayload>): Configuration {
-        lastState.batteryOptimizationType = action.payload.batteryOptimizationType;
+    public setBatteryOptimization(lastState: Configuration, payload: SetBatteryOptimizationTypePayload): Configuration {
+        lastState.batteryOptimizationType = payload.batteryOptimizationType;
         return lastState;
     }
 
     @Action
-    public toggleAutomaticRecordingUpload(lastState: Configuration, _action: AnyAction<void>): Configuration {
+    public toggleAutomaticRecordingUpload(lastState: Configuration): Configuration {
         lastState.isAutomaticRecordingUpload = !lastState.isAutomaticRecordingUpload;
         return lastState;
     }
 
     @Action
-    public toggleGotLostWarnings(lastState: Configuration, _action: AnyAction<void>): Configuration {
+    public toggleGotLostWarnings(lastState: Configuration): Configuration {
         lastState.isGotLostWarnings = !lastState.isGotLostWarnings;
         return lastState;
     }
 
     @Action
-    public stopShowingBatteryConfirmation(lastState: Configuration, _: AnyAction<void>): Configuration {
+    public stopShowingBatteryConfirmation(lastState: Configuration): Configuration {
         lastState.isShowBatteryConfirmation = false;
         return lastState;
     }
 
     @Action
-    public stopShowingIntro(lastState: Configuration, _action: AnyAction<void>): Configuration {
+    public stopShowingIntro(lastState: Configuration): Configuration {
         lastState.isShowIntro = false;
         return lastState;
     }
 
     @Action
-    public setLanguage(lastState: Configuration, action: AnyAction<SetLanguagePayload>): Configuration {
-        lastState.language = action.payload.language;
+    public setLanguage(lastState: Configuration, payload: SetLanguagePayload): Configuration {
+        lastState.language = payload.language;
         return lastState;
     }
 }

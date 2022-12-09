@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, AnyAction, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
 
 import type { ShareUrl, ShareUrlsState } from "../models/models";
 
@@ -14,21 +14,21 @@ export class ShareUrlsReducer extends AbstractReducer {
     };
 
     @Action
-    public addShareUrl(lastState: ShareUrlsState, action: AnyAction<ShareUrlPayload>): ShareUrlsState {
-        lastState.shareUrls.push(action.payload.shareUrl);
+    public addShareUrl(lastState: ShareUrlsState, payload: ShareUrlPayload): ShareUrlsState {
+        lastState.shareUrls.push(payload.shareUrl);
         return lastState;
     }
 
     @Action
-    public removeShareUrl(lastState: ShareUrlsState, action: AnyAction<ShareUrlPayload>): ShareUrlsState {
-        lastState.shareUrls = lastState.shareUrls.filter(s => s.id !== action.payload.shareUrl.id);
+    public removeShareUrl(lastState: ShareUrlsState, payload: ShareUrlPayload): ShareUrlsState {
+        lastState.shareUrls = lastState.shareUrls.filter(s => s.id !== payload.shareUrl.id);
         return lastState;
     }
 
     @Action
-    public updateShareUrl(lastState: ShareUrlsState, action: AnyAction<ShareUrlPayload>): ShareUrlsState {
-        let shareUrlIndex = lastState.shareUrls.findIndex(s => s.id === action.payload.shareUrl.id);
-        lastState.shareUrls.splice(shareUrlIndex, 1, action.payload.shareUrl);
+    public updateShareUrl(lastState: ShareUrlsState, payload: ShareUrlPayload): ShareUrlsState {
+        let shareUrlIndex = lastState.shareUrls.findIndex(s => s.id === payload.shareUrl.id);
+        lastState.shareUrls.splice(shareUrlIndex, 1, payload.shareUrl);
         return lastState;
     }
 }

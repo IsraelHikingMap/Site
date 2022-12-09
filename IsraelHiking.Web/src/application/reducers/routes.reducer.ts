@@ -1,5 +1,5 @@
 import undoable, { UndoableOptions } from "redux-undo";
-import { Action, AbstractReducer, AnyAction, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
 
 import { initialState } from "./initial-state";
 import type { RouteData, MarkerData, RouteSegmentData, RouteEditStateType } from "../models/models";
@@ -97,147 +97,147 @@ export class RoutesReducer extends AbstractReducer {
     };
 
     @Action
-    public addRoute(lastState: RouteData[], action: AnyAction<AddRoutePayload>): RouteData[] {
-        lastState.push(action.payload.routeData);
+    public addRoute(lastState: RouteData[], payload: AddRoutePayload): RouteData[] {
+        lastState.push(payload.routeData);
         return lastState;
     }
 
     @Action
-    public deleteRoute(lastState: RouteData[], action: AnyAction<RoutePayload>): RouteData[] {
-        let routeToRemove = lastState.find(r => r.id === action.payload.routeId);
+    public deleteRoute(lastState: RouteData[], payload: RoutePayload): RouteData[] {
+        let routeToRemove = lastState.find(r => r.id === payload.routeId);
         lastState.splice(lastState.indexOf(routeToRemove), 1);
         return lastState;
     }
 
     @Action
-    public changeProperties(lastState: RouteData[], action: AnyAction<ChangeRoutePropertiesActionPayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        route.name = action.payload.routeData.name;
-        route.opacity = action.payload.routeData.opacity || route.opacity;
-        route.weight = action.payload.routeData.weight || route.weight;
-        route.color =  action.payload.routeData.color || route.color;
-        route.description = action.payload.routeData.description || route.description;
+    public changeProperties(lastState: RouteData[], payload: ChangeRoutePropertiesActionPayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        route.name = payload.routeData.name;
+        route.opacity = payload.routeData.opacity || route.opacity;
+        route.weight = payload.routeData.weight || route.weight;
+        route.color =  payload.routeData.color || route.color;
+        route.description = payload.routeData.description || route.description;
         return lastState;
     }
 
     @Action
-    public addPoi(lastState: RouteData[], action: AnyAction<AddPrivatePoiPayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        route.markers.push(action.payload.markerData);
+    public addPoi(lastState: RouteData[], payload: AddPrivatePoiPayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        route.markers.push(payload.markerData);
         return lastState;
     }
 
     @Action
-    public updatePoi(lastState: RouteData[], action: AnyAction<UpdatePrivatePoiPayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        route.markers.splice(action.payload.index, 1, action.payload.markerData);
+    public updatePoi(lastState: RouteData[], payload: UpdatePrivatePoiPayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        route.markers.splice(payload.index, 1, payload.markerData);
         return lastState;
     }
 
     @Action
-    public deletePoi(lastState: RouteData[], action: AnyAction<DeletePrivatePoiPayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        route.markers.splice(action.payload.index, 1);
+    public deletePoi(lastState: RouteData[], payload: DeletePrivatePoiPayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        route.markers.splice(payload.index, 1);
         return lastState;
     }
 
     @Action
-    public addSegment(lastState: RouteData[], action: AnyAction<AddSegmentPayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        route.segments.push(action.payload.segmentData);
+    public addSegment(lastState: RouteData[], payload: AddSegmentPayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        route.segments.push(payload.segmentData);
         return lastState;
     }
 
     @Action
-    public updateSegments(lastState: RouteData[], action: AnyAction<UpdateSegmentsPayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        if (action.payload.segmentsData.length === action.payload.indices.length) {
-            for (let segmentIndex = 0; segmentIndex < action.payload.indices.length; segmentIndex++) {
-                route.segments.splice(action.payload.indices[segmentIndex], 1, action.payload.segmentsData[segmentIndex]);
+    public updateSegments(lastState: RouteData[], payload: UpdateSegmentsPayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        if (payload.segmentsData.length === payload.indices.length) {
+            for (let segmentIndex = 0; segmentIndex < payload.indices.length; segmentIndex++) {
+                route.segments.splice(payload.indices[segmentIndex], 1, payload.segmentsData[segmentIndex]);
             }
-        } else if (action.payload.segmentsData.length === 2 && action.payload.indices.length === 1) {
-            route.segments.splice(action.payload.indices[0], 1, ...action.payload.segmentsData);
-        } else if (action.payload.segmentsData.length === 1 && action.payload.indices.length === 2) {
-            route.segments.splice(action.payload.indices[1], 1, action.payload.segmentsData[0]);
-            route.segments.splice(action.payload.indices[0], 1);
+        } else if (payload.segmentsData.length === 2 && payload.indices.length === 1) {
+            route.segments.splice(payload.indices[0], 1, ...payload.segmentsData);
+        } else if (payload.segmentsData.length === 1 && payload.indices.length === 2) {
+            route.segments.splice(payload.indices[1], 1, payload.segmentsData[0]);
+            route.segments.splice(payload.indices[0], 1);
         }
         return lastState;
     }
 
     @Action
-    public replaceSegments(lastState: RouteData[], action: AnyAction<ReplaceSegmentsPayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        route.segments = action.payload.segmentsData;
+    public replaceSegments(lastState: RouteData[], payload: ReplaceSegmentsPayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        route.segments = payload.segmentsData;
         return lastState;
     }
 
     @Action
-    public deleteSegment(lastState: RouteData[], action: AnyAction<DeleteSegmentPayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        route.segments.splice(action.payload.index, 1);
+    public deleteSegment(lastState: RouteData[], payload: DeleteSegmentPayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        route.segments.splice(payload.index, 1);
         return lastState;
     }
 
     @Action
-    public changeEditState(lastState: RouteData[], action: AnyAction<ChangeEditStatePayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        route.state = action.payload.state;
+    public changeEditState(lastState: RouteData[], payload: ChangeEditStatePayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        route.state = payload.state;
         return lastState;
     }
 
     @Action
-    public changeVisibility(lastState: RouteData[], action: AnyAction<ChangeVisibilityPayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        route.state = action.payload.isVisible ? "ReadOnly" : "Hidden";
+    public changeVisibility(lastState: RouteData[], payload: ChangeVisibilityPayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        route.state = payload.isVisible ? "ReadOnly" : "Hidden";
         return lastState;
     }
 
     @Action
-    public replaceRoute(lastState: RouteData[], action: AnyAction<ReplaceRoutePayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
+    public replaceRoute(lastState: RouteData[], payload: ReplaceRoutePayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
         let routeIndex = lastState.indexOf(route);
-        lastState.splice(routeIndex, 1, action.payload.routeData);
+        lastState.splice(routeIndex, 1, payload.routeData);
         return lastState;
     }
 
     @Action
-    public splitRoute(lastState: RouteData[], action: AnyAction<SplitRoutePayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        lastState.splice(lastState.indexOf(route), 1, action.payload.routeData, action.payload.splitRouteData);
+    public splitRoute(lastState: RouteData[], payload: SplitRoutePayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        lastState.splice(lastState.indexOf(route), 1, payload.routeData, payload.splitRouteData);
         return lastState;
     }
 
     @Action
-    public mergeRoutes(lastState: RouteData[], action: AnyAction<MergeRoutesPayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
-        let secondaryRoute = lastState.find(r => r.id === action.payload.secondaryRouteId);
-        lastState.splice(lastState.indexOf(route), 1, action.payload.mergedRouteData);
+    public mergeRoutes(lastState: RouteData[], payload: MergeRoutesPayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
+        let secondaryRoute = lastState.find(r => r.id === payload.secondaryRouteId);
+        lastState.splice(lastState.indexOf(route), 1, payload.mergedRouteData);
         lastState.splice(lastState.indexOf(secondaryRoute), 1);
         return lastState;
     }
 
     @Action
-    public clearPois(lastState: RouteData[], action: AnyAction<RoutePayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
+    public clearPois(lastState: RouteData[], payload: RoutePayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
         route.markers = [];
         return lastState;
     }
 
     @Action
-    public clearPoisAndRoute(lastState: RouteData[], action: AnyAction<RoutePayload>): RouteData[] {
-        let route = lastState.find(r => r.id === action.payload.routeId);
+    public clearPoisAndRoute(lastState: RouteData[], payload: RoutePayload): RouteData[] {
+        let route = lastState.find(r => r.id === payload.routeId);
         route.segments = [];
         route.markers = [];
         return lastState;
     }
 
     @Action
-    public deleteAllRoutes(_lastState: RouteData[], _action: AnyAction<any>): RouteData[] {
+    public deleteAllRoutes(_lastState: RouteData[]): RouteData[] {
         return [];
     }
 
     @Action
-    public toggleAllRoutes(lastState: RouteData[], _action: AnyAction<any>): RouteData[] {
+    public toggleAllRoutes(lastState: RouteData[]): RouteData[] {
         let isAllRoutesHidden = lastState.find(r => r.state !== "Hidden") == null;
         for (let route of lastState) {
             route.state = isAllRoutesHidden ? "ReadOnly" : "Hidden";
@@ -246,8 +246,8 @@ export class RoutesReducer extends AbstractReducer {
     }
 
     @Action
-    public replaceRoutes(_lastState: RouteData[], action: AnyAction<BulkReplaceRoutesPayload>): RouteData[] {
-        return action.payload.routesData;
+    public replaceRoutes(_lastState: RouteData[], payload: BulkReplaceRoutesPayload): RouteData[] {
+        return payload.routesData;
     }
 }
 

@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, ActionPayload, AnyAction } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
 
 import type { GpsState, TrackingStateType } from "../models/models";
 
@@ -17,24 +17,24 @@ export class GpsReducer extends AbstractReducer {
     };
 
     @Action
-    public setTrackingState(lastState: GpsState, action: AnyAction<SetTrackingStatePayload>): GpsState {
-        lastState.tracking = action.payload.state;
+    public setTrackingState(lastState: GpsState, payload: SetTrackingStatePayload): GpsState {
+        lastState.tracking = payload.state;
         return lastState;
     }
 
     @Action
-    public setCurrentPosition(lastState: GpsState, action: AnyAction<SetCurrentPositionPayload>): GpsState {
+    public setCurrentPosition(lastState: GpsState, payload: SetCurrentPositionPayload): GpsState {
         // Clone position before setting into state since this object can't be cloned regularly
-        let currentPoistion = action.payload.position == null ? null : {
+        let currentPoistion = payload.position == null ? null : {
             coords: {
-                accuracy: action.payload.position.coords.accuracy,
-                altitude: action.payload.position.coords.altitude,
-                latitude: action.payload.position.coords.latitude,
-                longitude: action.payload.position.coords.longitude,
-                speed: action.payload.position.coords.speed,
-                heading: action.payload.position.coords.heading
+                accuracy: payload.position.coords.accuracy,
+                altitude: payload.position.coords.altitude,
+                latitude: payload.position.coords.latitude,
+                longitude: payload.position.coords.longitude,
+                speed: payload.position.coords.speed,
+                heading: payload.position.coords.heading
             },
-            timestamp: action.payload.position.timestamp
+            timestamp: payload.position.timestamp
         } as GeolocationPosition;
         lastState.currentPoistion = currentPoistion;
         return lastState;

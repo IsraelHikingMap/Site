@@ -11,7 +11,6 @@ import {
     ISRAEL_HIKING_MAP,
     ISRAEL_MTB_MAP,
     SATELLITE,
-    ESRI,
     HIKING_TRAILS,
     BICYCLE_TRAILS
 } from "../reducers/initial-state";
@@ -194,7 +193,6 @@ export class LayersService {
     private async addBaseLayerToDatabase(layer: EditableLayer) {
         if (layer.key === ISRAEL_HIKING_MAP ||
             layer.key === ISRAEL_MTB_MAP ||
-            layer.key === ESRI ||
             layer.key === SATELLITE) {
             return;
         }

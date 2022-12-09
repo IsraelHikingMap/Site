@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, ActionPayload, AnyAction } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
 
 import type { ShareUrl, InMemoryState } from "../models/models";
 
@@ -29,33 +29,33 @@ export class InMemoryReducer extends AbstractReducer {
     };
 
     @Action
-    public toggleDistance(lastState: InMemoryState, _action: AnyAction<void>): InMemoryState {
+    public toggleDistance(lastState: InMemoryState): InMemoryState {
         lastState.distance = !lastState.distance;
         return lastState;
     }
 
     @Action
-    public setFollowing(lastState: InMemoryState, action: AnyAction<SetFollowingPayload>): InMemoryState {
-        lastState.following = action.payload.following;
+    public setFollowing(lastState: InMemoryState, payload: SetFollowingPayload): InMemoryState {
+        lastState.following = payload.following;
         return lastState;
     }
 
     @Action
-    public setPanned(lastState: InMemoryState, action: AnyAction<SetPannedPayload>): InMemoryState {
-        lastState.pannedTimestamp = action.payload.pannedTimestamp;
+    public setPanned(lastState: InMemoryState, payload: SetPannedPayload): InMemoryState {
+        lastState.pannedTimestamp = payload.pannedTimestamp;
         return lastState;
     }
 
     @Action
-    public setShareUrl(lastState: InMemoryState, action: AnyAction<SetShareUrlPayload>): InMemoryState {
-        lastState.shareUrl = action.payload.shareUrl;
+    public setShareUrl(lastState: InMemoryState, payload: SetShareUrlPayload): InMemoryState {
+        lastState.shareUrl = payload.shareUrl;
         return lastState;
     }
 
     @Action
-    public setFileUrlAndBaseLayer(lastState: InMemoryState, action: AnyAction<SetFileUrlAndBaseLayerPayload>): InMemoryState {
-        lastState.fileUrl = action.payload.fileUrl;
-        lastState.baseLayer = action.payload.baseLayer;
+    public setFileUrlAndBaseLayer(lastState: InMemoryState, payload: SetFileUrlAndBaseLayerPayload): InMemoryState {
+        lastState.fileUrl = payload.fileUrl;
+        lastState.baseLayer = payload.baseLayer;
         return lastState;
     }
 }

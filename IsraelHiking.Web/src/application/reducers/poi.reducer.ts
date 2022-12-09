@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, AnyAction, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
 
 import type { PointsOfInterestState, MarkerData } from "../models/models";
 
@@ -23,20 +23,20 @@ export class PointsOfInterestReducer extends AbstractReducer {
     };
 
     @Action
-    public setSelectedPoi(lastState: PointsOfInterestState, action: AnyAction<SetSelectedPoiPayload>): PointsOfInterestState {
-        lastState.selectedPointOfInterest = action.payload.poi;
+    public setSelectedPoi(lastState: PointsOfInterestState, payload: SetSelectedPoiPayload): PointsOfInterestState {
+        lastState.selectedPointOfInterest = payload.poi;
         return lastState;
     }
 
     @Action
-    public setUploadMarkerData(lastState: PointsOfInterestState, action: AnyAction<SetUploadMarkerDataPayload>): PointsOfInterestState {
-        lastState.uploadMarkerData = action.payload.markerData;
+    public setUploadMarkerData(lastState: PointsOfInterestState, payload: SetUploadMarkerDataPayload): PointsOfInterestState {
+        lastState.uploadMarkerData = payload.markerData;
         return lastState;
     }
 
     @Action
-    public setSidebar(lastState: PointsOfInterestState, action: AnyAction<SetSidebarPayload>): PointsOfInterestState {
-        lastState.isSidebarOpen =  action.payload.isOpen;
+    public setSidebar(lastState: PointsOfInterestState, payload: SetSidebarPayload): PointsOfInterestState {
+        lastState.isSidebarOpen =  payload.isOpen;
         return lastState;
     }
 }

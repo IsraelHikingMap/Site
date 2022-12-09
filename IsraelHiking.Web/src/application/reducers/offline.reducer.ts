@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, AnyAction, ActionPayload } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
 
 import type { OfflineState } from "../models/models";
 
@@ -26,38 +26,38 @@ export class OfflineReducer extends AbstractReducer {
 
     };
     @Action
-    public setOfflineAvailable(lastState: OfflineState, action: AnyAction<SetOfflineAvailablePayload>): OfflineState {
-        lastState.isOfflineAvailable = action.payload.isAvailble;
+    public setOfflineAvailable(lastState: OfflineState, payload: SetOfflineAvailablePayload): OfflineState {
+        lastState.isOfflineAvailable = payload.isAvailble;
         return lastState;
     }
 
     @Action
-    public setLastModifed(lastState: OfflineState, action: AnyAction<SetLastModifiedPayload>): OfflineState {
-        lastState.lastModifiedDate = action.payload.lastModifiedDate;
+    public setLastModifed(lastState: OfflineState, payload: SetLastModifiedPayload): OfflineState {
+        lastState.lastModifiedDate = payload.lastModifiedDate;
         return lastState;
     }
 
     @Action
-    public setPoisLastModifed(lastState: OfflineState, action: AnyAction<SetLastModifiedPayload>): OfflineState {
-        lastState.poisLastModifiedDate = action.payload.lastModifiedDate;
+    public setPoisLastModifed(lastState: OfflineState, payload: SetLastModifiedPayload): OfflineState {
+        lastState.poisLastModifiedDate = payload.lastModifiedDate;
         return lastState;
     }
 
     @Action
-    public setShareUrlsLastModified(lastState: OfflineState, action: AnyAction<SetLastModifiedPayload>): OfflineState {
-        lastState.shareUrlsLastModifiedDate = action.payload.lastModifiedDate;
+    public setShareUrlsLastModified(lastState: OfflineState, payload: SetLastModifiedPayload): OfflineState {
+        lastState.shareUrlsLastModifiedDate = payload.lastModifiedDate;
         return lastState;
     }
 
     @Action
-    public addToPoiQueue(lastState: OfflineState, action: AnyAction<PoiQueuePayload>): OfflineState {
-        lastState.uploadPoiQueue.push(action.payload.featureId);
+    public addToPoiQueue(lastState: OfflineState, payload: PoiQueuePayload): OfflineState {
+        lastState.uploadPoiQueue.push(payload.featureId);
         return lastState;
     }
 
     @Action
-    public removeFromPoiQueue(lastState: OfflineState, action: AnyAction<PoiQueuePayload>): OfflineState {
-        lastState.uploadPoiQueue = lastState.uploadPoiQueue.filter(f => f !== action.payload.featureId);
+    public removeFromPoiQueue(lastState: OfflineState, payload: PoiQueuePayload): OfflineState {
+        lastState.uploadPoiQueue = lastState.uploadPoiQueue.filter(f => f !== payload.featureId);
         return lastState;
     }
 }

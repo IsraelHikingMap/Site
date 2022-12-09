@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, ActionPayload, AnyAction } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionPayload } from "@angular-redux2/store";
 
 import type { UICompoentsState } from "../models/models";
 
@@ -15,16 +15,16 @@ export class UIComponentsReducer extends AbstractReducer {
     };
 
     @Action
-    public setVisibility(lastState: UICompoentsState, action: AnyAction<SetUIComponentVisibilityPayload>): UICompoentsState {
-        switch (action.payload.component) {
+    public setVisibility(lastState: UICompoentsState, payload: SetUIComponentVisibilityPayload): UICompoentsState {
+        switch (payload.component) {
             case "drawing":
-                lastState.drawingVisible = action.payload.isVisible;
+                lastState.drawingVisible = payload.isVisible;
                 break;
             case "search":
-                lastState.searchVisible = action.payload.isVisible;
+                lastState.searchVisible = payload.isVisible;
                 break;
             case "statistics":
-                lastState.statisticsVisible = action.payload.isVisible;
+                lastState.statisticsVisible = payload.isVisible;
                 break;
         }
         return lastState;
