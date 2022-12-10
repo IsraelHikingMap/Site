@@ -26,11 +26,11 @@ namespace IsraelHiking.API.Tests.Converters
             };
         }
 
-        private Node CreateNode(int number, double latitude, double logitude)
+        private Node CreateNode(int number, double latitude, double longitude)
         {
             return new Node
             {
-                Longitude = logitude,
+                Longitude = longitude,
                 Latitude = latitude,
                 Id = number
             };
@@ -164,35 +164,35 @@ namespace IsraelHiking.API.Tests.Converters
         [TestMethod]
         public void ToGeoJson_RelationWithTwoSubRelationsWithInnerRole_ShouldReturnMultiPolygon()
         {
-            int id = 1;
-            var node1 = CreateNode(id++, 1, 1);
-            var node2 = CreateNode(id++, 2, 2);
-            var node3 = CreateNode(id++, 1, 2);
+            var id = 0;
+            var node1 = CreateNode(++id, 1, 1);
+            var node2 = CreateNode(++id, 2, 2);
+            var node3 = CreateNode(++id, 1, 2);
            
             var way1 = new CompleteWay
             {
                 Id = 4,
                 Nodes = new[] {node1, node2, node3, node1}
             };
-            var node4 = CreateNode(id++, 4, 4);
-            var node5 = CreateNode(id++, 5, 5);
-            var node6 = CreateNode(id++, 4, 5);
+            var node4 = CreateNode(++id, 4, 4);
+            var node5 = CreateNode(++id, 5, 5);
+            var node6 = CreateNode(++id, 4, 5);
             var way2 = new CompleteWay
             {
-                Id = id++,
+                Id = ++id,
                 Nodes = new[] { node4, node5, node6, node4 }
             };
             var subRelation1 = new CompleteRelation
             {
-                Id = id++,
+                Id = ++id,
                 Members = new[] {new CompleteRelationMember {Member = way1, Role = "outer"}}
             };
             var subRelation2 = new CompleteRelation
             {
-                Id = id++,
+                Id = ++id,
                 Members = new[] {new CompleteRelationMember {Member = way2, Role = "outer"}}
             };
-            var relation = new CompleteRelation { Id = id++, Tags = new TagsCollection() };
+            var relation = new CompleteRelation { Id = ++id, Tags = new TagsCollection() };
             relation.Tags.Add("type", "multipolygon");
             relation.Members = new[] {
                 new CompleteRelationMember { Member = subRelation1 },
@@ -236,7 +236,7 @@ namespace IsraelHiking.API.Tests.Converters
         [TestMethod]
         public void ToGeoJson_RelationWithoutMembers_ShouldReturnNull()
         {
-            var relation = new CompleteRelation { Id = 3, Tags = new TagsCollection(), Members = new CompleteRelationMember[0] };
+            var relation = new CompleteRelation { Id = 3, Tags = new TagsCollection(), Members = Array.Empty<CompleteRelationMember>() };
             relation.Tags.Add(NAME, NAME);
 
             var feature = _converter.ToGeoJson(relation);
@@ -247,22 +247,23 @@ namespace IsraelHiking.API.Tests.Converters
         [TestMethod]
         public void ToGeoJson_RelationWithPolygonAndLineString_ShouldReturnMultiLineStringAfterGrouping()
         {
-            var node1 = CreateNode(1);
-            var node2 = CreateNode(2);
-            var node3 = CreateNode(3);
-            var node4 = CreateNode(4);
-            var node5 = CreateNode(5);
-            var node6 = CreateNode(6);
-            var node7 = CreateNode(7);
-            var wayPartOfLineString1 = new CompleteWay { Id = 8 };
-            var wayPartOfLineString2 = new CompleteWay { Id = 9 };
+            var id = 0;
+            var node1 = CreateNode(++id);
+            var node2 = CreateNode(++id);
+            var node3 = CreateNode(++id);
+            var node4 = CreateNode(++id);
+            var node5 = CreateNode(++id);
+            var node6 = CreateNode(++id);
+            var node7 = CreateNode(++id);
+            var wayPartOfLineString1 = new CompleteWay { Id = ++id };
+            var wayPartOfLineString2 = new CompleteWay { Id = ++id };
             wayPartOfLineString1.Nodes = new[] { node1, node2 };
             wayPartOfLineString2.Nodes = new[] { node2, node3 };
-            var wayPartOfPolygon1 = new CompleteWay { Id = 10 };
-            var wayPartOfPolygon2 = new CompleteWay { Id = 11 };
+            var wayPartOfPolygon1 = new CompleteWay { Id = ++id };
+            var wayPartOfPolygon2 = new CompleteWay { Id = ++id };
             wayPartOfPolygon1.Nodes = new[] { node4, node5, node6 };
             wayPartOfPolygon2.Nodes = new[] { node4, node7, node6 };
-            var relation = new CompleteRelation { Id = 12, Tags = new TagsCollection() };
+            var relation = new CompleteRelation { Id = ++id, Tags = new TagsCollection() };
             relation.Tags.Add(NAME, NAME);
             relation.Members = new[] {
                 new CompleteRelationMember { Member = wayPartOfLineString1 },
@@ -286,36 +287,37 @@ namespace IsraelHiking.API.Tests.Converters
         [TestMethod]
         public void ToGeoJson_RelationWithRelation_ShouldReturnMultiLineStringAfterGrouping()
         {
-            var node1 = CreateNode(1);
-            var node2 = CreateNode(2);
-            var node3 = CreateNode(3);
-            var node4 = CreateNode(4);
-            var node5 = CreateNode(5);
-            var node6 = CreateNode(6);
-            var node7 = CreateNode(7);
+            var id = 0;
+            var node1 = CreateNode(++id);
+            var node2 = CreateNode(++id);
+            var node3 = CreateNode(++id);
+            var node4 = CreateNode(++id);
+            var node5 = CreateNode(++id);
+            var node6 = CreateNode(++id);
+            var node7 = CreateNode(++id);
 
-            var wayPartOfLineString1 = new CompleteWay { Id = 8 };
-            var wayPartOfLineString2 = new CompleteWay { Id = 9 };
+            var wayPartOfLineString1 = new CompleteWay { Id = ++id };
+            var wayPartOfLineString2 = new CompleteWay { Id = ++id };
 
             wayPartOfLineString1.Nodes = new[] { node2, node3 };
             wayPartOfLineString2.Nodes = new[] { node1, node2 };
 
-            var wayPartOfPolygon1 = new CompleteWay { Id = 10 };
-            var wayPartOfPolygon2 = new CompleteWay { Id = 11 };
+            var wayPartOfPolygon1 = new CompleteWay { Id = ++id };
+            var wayPartOfPolygon2 = new CompleteWay { Id = ++id };
 
             wayPartOfPolygon1.Nodes = new[] { node4, node5, node6 };
             wayPartOfPolygon2.Nodes = new[] { node4, node7, node6 };
 
             var subRelation = new CompleteRelation
             {
-                Id = 12,
+                Id = ++id,
                 Members = new[]
                 {
                     new CompleteRelationMember {Member = wayPartOfLineString1},
                     new CompleteRelationMember {Member = wayPartOfLineString2}
                 }
             };
-            var relation = new CompleteRelation { Id = 13, Tags = new TagsCollection() };
+            var relation = new CompleteRelation { Id = ++id, Tags = new TagsCollection() };
             relation.Tags.Add(NAME, NAME);
             relation.Members = new[] {
                 new CompleteRelationMember { Member = subRelation },
@@ -341,27 +343,28 @@ namespace IsraelHiking.API.Tests.Converters
         [TestMethod]
         public void ToGeoJson_MultiPolygonWithHole_ShouldReturnMultiPolygonWithSinglePolygon()
         {
-            var node1 = CreateNode(1, 0, 0);
-            var node2 = CreateNode(2, 1, 0);
-            var node3 = CreateNode(3, 1, 1);
-            var node4 = CreateNode(4, 0, 1);
-            var node5 = CreateNode(5, 0.5, 0.5);
-            var node6 = CreateNode(6, 0.5, 0.6);
-            var node7 = CreateNode(7, 0.6, 0.6);
-            var node8 = CreateNode(8, 0.6, 0.5);
+            var id = 0;
+            var node1 = CreateNode(++id, 0, 0);
+            var node2 = CreateNode(++id, 1, 0);
+            var node3 = CreateNode(++id, 1, 1);
+            var node4 = CreateNode(++id, 0, 1);
+            var node5 = CreateNode(++id, 0.5, 0.5);
+            var node6 = CreateNode(++id, 0.5, 0.6);
+            var node7 = CreateNode(++id, 0.6, 0.6);
+            var node8 = CreateNode(++id, 0.6, 0.5);
             var wayOuter = new CompleteWay
             {
-                Id = 9,
+                Id = ++id,
                 Nodes = new[] {node1, node2, node3, node4, node1}
             };
             var wayInner = new CompleteWay
             {
-                Id = 9,
+                Id = ++id,
                 Nodes = new[] {node5, node6, node7, node8, node5}
             };
             var relation = new CompleteRelation
             {
-                Id = 10,
+                Id = ++id,
                 Tags = new TagsCollection(),
                 Members = new[]
                 {
@@ -373,47 +376,47 @@ namespace IsraelHiking.API.Tests.Converters
 
             var geoJson = _converter.ToGeoJson(relation);
 
-            var multiPlygon = geoJson.Geometry as MultiPolygon;
-            Assert.IsNotNull(multiPlygon);
-            Assert.IsTrue(multiPlygon.IsValid);
-            Assert.AreEqual(1, multiPlygon.Geometries.Length);
+            var multiPolygon = geoJson.Geometry as MultiPolygon;
+            Assert.IsNotNull(multiPolygon);
+            Assert.IsTrue(multiPolygon.IsValid);
+            Assert.AreEqual(1, multiPolygon.Geometries.Length);
         }
 
         [TestMethod]
         public void ToGeoJson_MultiPolygonWithTwoHoles_ShouldReturnMultiPolygonWithSinglePolygon()
         {
-            var id = 1;
-            var node1 = CreateNode(id++, 0, 0);
-            var node2 = CreateNode(id++, 1, 0);
-            var node3 = CreateNode(id++, 1, 1);
-            var node4 = CreateNode(id++, 0, 1);
-            var node5 = CreateNode(id++, 0.5, 0.5);
-            var node6 = CreateNode(id++, 0.5, 0.6);
-            var node7 = CreateNode(id++, 0.6, 0.6);
-            var node8 = CreateNode(id++, 0.6, 0.5);
-            var node9 = CreateNode(id++, 0.3, 0.3);
-            var node10 = CreateNode(id++, 0.3, 0.4);
-            var node11 = CreateNode(id++, 0.4, 0.4);
-            var node12 = CreateNode(id++, 0.4, 0.3);
+            var id = 0;
+            var node1 = CreateNode(++id, 0, 0);
+            var node2 = CreateNode(++id, 1, 0);
+            var node3 = CreateNode(++id, 1, 1);
+            var node4 = CreateNode(++id, 0, 1);
+            var node5 = CreateNode(++id, 0.5, 0.5);
+            var node6 = CreateNode(++id, 0.5, 0.6);
+            var node7 = CreateNode(++id, 0.6, 0.6);
+            var node8 = CreateNode(++id, 0.6, 0.5);
+            var node9 = CreateNode(++id, 0.3, 0.3);
+            var node10 = CreateNode(++id, 0.3, 0.4);
+            var node11 = CreateNode(++id, 0.4, 0.4);
+            var node12 = CreateNode(++id, 0.4, 0.3);
 
             var wayOuter = new CompleteWay
             {
-                Id = id++,
+                Id = ++id,
                 Nodes = new[] { node1, node2, node3, node4, node1 }
             };
             var wayInner1 = new CompleteWay
             {
-                Id = id++,
+                Id = ++id,
                 Nodes = new[] { node5, node6, node7, node8, node5 }
             };
             var wayInner2 = new CompleteWay
             {
-                Id = id++,
+                Id = ++id,
                 Nodes = new[] { node9, node10, node11, node12, node9 }
             };
             var relation = new CompleteRelation
             {
-                Id = id++,
+                Id = ++id,
                 Tags = new TagsCollection(),
                 Members = new[]
                 {
@@ -426,45 +429,45 @@ namespace IsraelHiking.API.Tests.Converters
 
             var geoJson = _converter.ToGeoJson(relation);
 
-            var multiPlygon = geoJson.Geometry as MultiPolygon;
-            Assert.IsNotNull(multiPlygon);
-            Assert.IsTrue(multiPlygon.IsValid);
-            Assert.AreEqual(1, multiPlygon.Geometries.Length);
+            var multiPolygon = geoJson.Geometry as MultiPolygon;
+            Assert.IsNotNull(multiPolygon);
+            Assert.IsTrue(multiPolygon.IsValid);
+            Assert.AreEqual(1, multiPolygon.Geometries.Length);
         }
 
         [TestMethod]
         public void ToGeoJson_MultiPolygonWithTwoTouchingHoles_ShouldReturnMultiPolygonWithSinglePolygon()
         {
-            var id = 1;
-            var node1 = CreateNode(id++, 0, 0);
-            var node2 = CreateNode(id++, 1, 0);
-            var node3 = CreateNode(id++, 1, 1);
-            var node4 = CreateNode(id++, 0, 1);
-            var node5 = CreateNode(id++, 0.5, 0.5);
-            var node6 = CreateNode(id++, 0.5, 0.6);
-            var node7 = CreateNode(id++, 0.6, 0.6);
-            var node8 = CreateNode(id++, 0.6, 0.5);
-            var node9 = CreateNode(id++, 0.4, 0.6);
-            var node10 = CreateNode(id++, 0.4, 0.5);
+            var id = 0;
+            var node1 = CreateNode(++id, 0, 0);
+            var node2 = CreateNode(++id, 1, 0);
+            var node3 = CreateNode(++id, 1, 1);
+            var node4 = CreateNode(++id, 0, 1);
+            var node5 = CreateNode(++id, 0.5, 0.5);
+            var node6 = CreateNode(++id, 0.5, 0.6);
+            var node7 = CreateNode(++id, 0.6, 0.6);
+            var node8 = CreateNode(++id, 0.6, 0.5);
+            var node9 = CreateNode(++id, 0.4, 0.6);
+            var node10 = CreateNode(++id, 0.4, 0.5);
 
             var wayOuter = new CompleteWay
             {
-                Id = id++,
+                Id = ++id,
                 Nodes = new[] { node1, node2, node3, node4, node1 }
             };
             var wayInner1 = new CompleteWay
             {
-                Id = id++,
+                Id = ++id,
                 Nodes = new[] { node5, node6, node7, node8, node5 }
             };
             var wayInner2 = new CompleteWay
             {
-                Id = id++,
+                Id = ++id,
                 Nodes = new[] { node5, node6, node9, node10, node5 }
             };
             var relation = new CompleteRelation
             {
-                Id = id++,
+                Id = ++id,
                 Tags = new TagsCollection(),
                 Members = new[]
                 {
@@ -477,27 +480,28 @@ namespace IsraelHiking.API.Tests.Converters
 
             var geoJson = _converter.ToGeoJson(relation);
 
-            var multiPlygon = geoJson.Geometry as MultiPolygon;
-            Assert.IsNotNull(multiPlygon);
-            Assert.IsTrue(multiPlygon.IsValid);
-            Assert.AreEqual(1, multiPlygon.Geometries.Length);
+            var multiPolygon = geoJson.Geometry as MultiPolygon;
+            Assert.IsNotNull(multiPolygon);
+            Assert.IsTrue(multiPolygon.IsValid);
+            Assert.AreEqual(1, multiPolygon.Geometries.Length);
         }
 
 
         [TestMethod]
         public void ToGeoJson_UnsortedRelation_ShouldReturnMultiLineStringAfterGrouping()
         {
-            var node1 = CreateNode(1);
-            var node2 = CreateNode(2);
-            var node3 = CreateNode(3);
-            var node4 = CreateNode(4);
-            var wayPartOfLineString1 = new CompleteWay { Id = 8 };
-            var wayPartOfLineString2 = new CompleteWay { Id = 9 };
-            var wayPartOfLineString3 = new CompleteWay { Id = 10 };
+            var id = 0;
+            var node1 = CreateNode(++id);
+            var node2 = CreateNode(++id);
+            var node3 = CreateNode(++id);
+            var node4 = CreateNode(++id);
+            var wayPartOfLineString1 = new CompleteWay { Id = ++id };
+            var wayPartOfLineString2 = new CompleteWay { Id = ++id };
+            var wayPartOfLineString3 = new CompleteWay { Id = ++id };
             wayPartOfLineString1.Nodes = new[] { node1, node2 };
             wayPartOfLineString2.Nodes = new[] { node3, node4 };
             wayPartOfLineString3.Nodes = new[] { node3, node2 };
-            var relation = new CompleteRelation { Id = 11, Tags = new TagsCollection() };
+            var relation = new CompleteRelation { Id = ++id, Tags = new TagsCollection() };
             relation.Tags.Add(NAME, NAME);
             relation.Members = new[] {
                 new CompleteRelationMember { Member = wayPartOfLineString1 },
@@ -517,18 +521,19 @@ namespace IsraelHiking.API.Tests.Converters
         [TestMethod]
         public void ToGeoJson_UnsortedRelationWithDirection_ShouldReturnMultiLineStringAfterGrouping()
         {
-            var node1 = CreateNode(1);
-            var node2 = CreateNode(2);
-            var node3 = CreateNode(3);
-            var node4 = CreateNode(4);
-            var wayPartOfLineString1 = new CompleteWay { Id = 8 };
-            var wayPartOfLineString2 = new CompleteWay { Id = 9 };
-            var wayPartOfLineString3 = new CompleteWay { Id = 10 };
+            var id = 0;
+            var node1 = CreateNode(++id);
+            var node2 = CreateNode(++id);
+            var node3 = CreateNode(++id);
+            var node4 = CreateNode(++id);
+            var wayPartOfLineString1 = new CompleteWay { Id = ++id };
+            var wayPartOfLineString2 = new CompleteWay { Id = ++id };
+            var wayPartOfLineString3 = new CompleteWay { Id = ++id };
             wayPartOfLineString1.Nodes = new[] { node1, node2 };
             wayPartOfLineString2.Nodes = new[] { node3, node4 };
             wayPartOfLineString3.Nodes = new[] { node3, node2 };
             wayPartOfLineString3.Tags = new TagsCollection() { { "oneway", "yes" } };
-            var relation = new CompleteRelation { Id = 11, Tags = new TagsCollection() };
+            var relation = new CompleteRelation { Id = ++id, Tags = new TagsCollection() };
             relation.Tags.Add(NAME, NAME);
             relation.Members = new[] {
                 new CompleteRelationMember { Member = wayPartOfLineString1 },
@@ -547,30 +552,30 @@ namespace IsraelHiking.API.Tests.Converters
         }
 
         [TestMethod]
-        public void ToGeoJson_RelationWithTouchingPolygones_ShouldReturnValidMultiPolygon()
+        public void ToGeoJson_RelationWithTouchingPolygons_ShouldReturnValidMultiPolygon()
         {
-            int id = 1;
-            var node1 = CreateNode(id++, 0, 0);
-            var node2 = CreateNode(id++, 0, 1);
-            var node3 = CreateNode(id++, 1, 1);
-            var node4 = CreateNode(id++, 1, 0);
-            var node5 = CreateNode(id++, 0, 2);
-            var node6 = CreateNode(id++, 1, 2);
-            var node7 = CreateNode(id++, -1, -1);
-            var node8 = CreateNode(id++, 3, -1);
-            var node9 = CreateNode(id++, 3, 3);
-            var node10 = CreateNode(id++, -1, 3);
-            var polygon1inner = new CompleteWay { Id = id++, Nodes = new[] { node1, node2, node3, node4, node1 } };
-            var polygon2inner = new CompleteWay { Id = id++, Nodes = new[] { node2, node5, node6, node3, node2 } };
-            var polygonOuter = new CompleteWay { Id = id++, Nodes = new[] { node7, node8, node9, node10, node7 } };
+            var id = 0;
+            var node1 = CreateNode(++id, 0, 0);
+            var node2 = CreateNode(++id, 0, 1);
+            var node3 = CreateNode(++id, 1, 1);
+            var node4 = CreateNode(++id, 1, 0);
+            var node5 = CreateNode(++id, 0, 2);
+            var node6 = CreateNode(++id, 1, 2);
+            var node7 = CreateNode(++id, -1, -1);
+            var node8 = CreateNode(++id, 3, -1);
+            var node9 = CreateNode(++id, 3, 3);
+            var node10 = CreateNode(++id, -1, 3);
+            var polygon1Inner = new CompleteWay { Id = ++id, Nodes = new[] { node1, node2, node3, node4, node1 } };
+            var polygon2Inner = new CompleteWay { Id = ++id, Nodes = new[] { node2, node5, node6, node3, node2 } };
+            var polygonOuter = new CompleteWay { Id = ++id, Nodes = new[] { node7, node8, node9, node10, node7 } };
 
-            var relation = new CompleteRelation { Id = id++, Tags = new TagsCollection() };
+            var relation = new CompleteRelation { Id = ++id, Tags = new TagsCollection() };
             relation.Tags.Add(NAME, NAME);
             relation.Tags.Add("type", "multipolygon");
             relation.Members = new[] {
                 new CompleteRelationMember { Member = polygonOuter, Role = "outer" },
-                new CompleteRelationMember { Member = polygon1inner },
-                new CompleteRelationMember { Member = polygon2inner }
+                new CompleteRelationMember { Member = polygon1Inner },
+                new CompleteRelationMember { Member = polygon2Inner }
             };
 
             var feature = _converter.ToGeoJson(relation);
@@ -584,21 +589,21 @@ namespace IsraelHiking.API.Tests.Converters
         [TestMethod]
         public void ToGeoJson_Convert8Shape_ShouldConvertToMultipolygon()
         {
-            int id = 1;
-            var node1 = CreateNode(id++, 0, 0);
-            var node2 = CreateNode(id++, 0, 1);
-            var node3 = CreateNode(id++, 1, 1);
+            var id = 0;
+            var node1 = CreateNode(++id, 0, 0);
+            var node2 = CreateNode(++id, 0, 1);
+            var node3 = CreateNode(++id, 1, 1);
 
-            var node4 = CreateNode(id++, 1, 0);
-            var node5 = CreateNode(id++, 0, -1);
-            var node6 = CreateNode(id++, -1, -1);
+            var node4 = CreateNode(++id, 1, 0);
+            var node5 = CreateNode(++id, 0, -1);
+            var node6 = CreateNode(++id, -1, -1);
 
-            var node7 = CreateNode(id++, -1, 0);
-            var way1 = new CompleteWay { Id = id++, Nodes = new[] { node1, node2, node3 } };
-            var way2 = new CompleteWay { Id = id++, Nodes = new[] { node3, node4, node1, node5, node6 } };
-            var way3 = new CompleteWay { Id = id++, Nodes = new[] { node6, node7, node1 } };
+            var node7 = CreateNode(++id, -1, 0);
+            var way1 = new CompleteWay { Id = ++id, Nodes = new[] { node1, node2, node3 } };
+            var way2 = new CompleteWay { Id = ++id, Nodes = new[] { node3, node4, node1, node5, node6 } };
+            var way3 = new CompleteWay { Id = ++id, Nodes = new[] { node6, node7, node1 } };
 
-            var relation = new CompleteRelation { Id = id++, Tags = new TagsCollection() };
+            var relation = new CompleteRelation { Id = ++id, Tags = new TagsCollection() };
             relation.Tags.Add(NAME, NAME);
             relation.Tags.Add("type", "multipolygon");
             relation.Members = new[] {
@@ -618,18 +623,18 @@ namespace IsraelHiking.API.Tests.Converters
         [TestMethod]
         public void ToGeoJson_ConvertLoopAndLines_ShouldCreateValidMultiLine()
         {
-            int id = 1;
-            var node1 = CreateNode(id++, 0, 0);
-            var node2 = CreateNode(id++, 0, 1);
-            var node3 = CreateNode(id++, 1, 1);
-            var node4 = CreateNode(id++, 1, 0);
+            var id = 0;
+            var node1 = CreateNode(++id, 0, 0);
+            var node2 = CreateNode(++id, 0, 1);
+            var node3 = CreateNode(++id, 1, 1);
+            var node4 = CreateNode(++id, 1, 0);
 
-            var node5 = CreateNode(id++, 0, -1);
+            var node5 = CreateNode(++id, 0, -1);
 
-            var way1 = new CompleteWay { Id = id++, Nodes = new[] { node1, node5 } };
-            var way2 = new CompleteWay { Id = id++, Nodes = new[] { node1, node2, node3, node4, node1 } };
+            var way1 = new CompleteWay { Id = ++id, Nodes = new[] { node1, node5 } };
+            var way2 = new CompleteWay { Id = ++id, Nodes = new[] { node1, node2, node3, node4, node1 } };
 
-            var relation = new CompleteRelation { Id = id++, Tags = new TagsCollection() };
+            var relation = new CompleteRelation { Id = ++id, Tags = new TagsCollection() };
             relation.Tags.Add(NAME, NAME);
             relation.Members = new[] {
                 new CompleteRelationMember { Member = way1, Role = "outer" },
@@ -647,17 +652,17 @@ namespace IsraelHiking.API.Tests.Converters
         [TestMethod]
         public void ToGeoJson_ConvertQRoute_ShouldCreateValidMultiLine()
         {
-            int id = 1;
-            var node1 = CreateNode(id++);
-            var node2 = CreateNode(id++);
-            var node3 = CreateNode(id++);
-            var node4 = CreateNode(id++);
-            var node5 = CreateNode(id++);
+            var id = 0;
+            var node1 = CreateNode(++id);
+            var node2 = CreateNode(++id);
+            var node3 = CreateNode(++id);
+            var node4 = CreateNode(++id);
+            var node5 = CreateNode(++id);
 
-            var way1 = new CompleteWay { Id = id++, Nodes = new[] { node1, node5 } };
-            var way2 = new CompleteWay { Id = id++, Nodes = new[] { node1, node2, node3, node4, node1 } };
+            var way1 = new CompleteWay { Id = ++id, Nodes = new[] { node1, node5 } };
+            var way2 = new CompleteWay { Id = ++id, Nodes = new[] { node1, node2, node3, node4, node1 } };
 
-            var relation = new CompleteRelation { Id = id++, Tags = new TagsCollection() };
+            var relation = new CompleteRelation { Id = ++id, Tags = new TagsCollection() };
             relation.Tags.Add(NAME, NAME);
             relation.Members = new[] {
                 new CompleteRelationMember { Member = way1, Role = "outer" },
