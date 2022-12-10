@@ -672,5 +672,74 @@ namespace IsraelHiking.API.Tests.Converters
             Assert.IsTrue(isValidOp.IsValid);
             Assert.AreEqual(1, multiLineString.Geometries.Length);
         }
+        
+        [TestMethod]
+        public void ToGeoJson_ConvertUnsortedQRoute_ShouldCreateMultiLineWithSingleLine()
+        {
+            var id = 0;
+            var node1 = CreateNode(++id);
+            var node2 = CreateNode(++id);
+            var node3 = CreateNode(++id);
+            var node4 = CreateNode(++id);
+            var node5 = CreateNode(++id);
+
+            var way1 = new CompleteWay { Id = ++id, Nodes = new[] { node1, node2, node3 } };
+            var way2 = new CompleteWay { Id = ++id, Nodes = new[] { node3, node4, node1 } };
+            var way3 = new CompleteWay { Id = ++id, Nodes = new[] { node3, node5 } };
+
+            var relation = new CompleteRelation { Id = ++id, Tags = new TagsCollection() };
+            relation.Tags.Add(NAME, NAME);
+            relation.Members = new[] {
+                new CompleteRelationMember { Member = way1, Role = "outer" },
+                new CompleteRelationMember { Member = way2, Role = "outer" },
+                new CompleteRelationMember { Member = way3, Role = "outer" }
+            };
+
+            var feature = _converter.ToGeoJson(relation);
+            var multiLineString = feature.Geometry as MultiLineString;
+
+            Assert.IsNotNull(multiLineString);
+            var isValidOp = new IsValidOp(multiLineString);
+            Assert.IsTrue(isValidOp.IsValid);
+            Assert.AreEqual(1, multiLineString.Geometries.Length);
+            Assert.AreEqual(6, multiLineString.Geometries.First().Coordinates.Length);
+            Assert.AreEqual(node5.Longitude, multiLineString.Geometries.First().Coordinates[5].X);
+        }
+        
+        [TestMethod]
+        public void ToGeoJson_ConvertUnsortedQAndORoutes_ShouldCreateMultiLineWithTwoLines()
+        {
+            var id = 0;
+            var node1 = CreateNode(++id);
+            var node2 = CreateNode(++id);
+            var node3 = CreateNode(++id);
+            var node4 = CreateNode(++id);
+            var node5 = CreateNode(++id);
+            var node6 = CreateNode(++id);
+            var node7 = CreateNode(++id);
+
+            var way1 = new CompleteWay { Id = ++id, Nodes = new[] { node1, node2, node3, node1 } };
+            var way2 = new CompleteWay { Id = ++id, Nodes = new[] { node4, node5, node6, node4 } };
+            var way3 = new CompleteWay { Id = ++id, Nodes = new[] { node7, node5 } };
+
+            var relation = new CompleteRelation { Id = ++id, Tags = new TagsCollection() };
+            relation.Tags.Add(NAME, NAME);
+            relation.Members = new[] {
+                new CompleteRelationMember { Member = way1, Role = "outer" },
+                new CompleteRelationMember { Member = way2, Role = "outer" },
+                new CompleteRelationMember { Member = way3, Role = "outer" }
+            };
+
+            var feature = _converter.ToGeoJson(relation);
+            var multiLineString = feature.Geometry as MultiLineString;
+
+            Assert.IsNotNull(multiLineString);
+            var isValidOp = new IsValidOp(multiLineString);
+            Assert.IsTrue(isValidOp.IsValid);
+            Assert.AreEqual(2, multiLineString.Geometries.Length);
+            Assert.AreEqual(4, multiLineString.Geometries.First().Coordinates.Length);
+            Assert.AreEqual(5, multiLineString.Geometries.Last().Coordinates.Length);
+            Assert.AreEqual(node5.Longitude, multiLineString.Geometries[1].Coordinates[4].X);
+        }
     }
 }
