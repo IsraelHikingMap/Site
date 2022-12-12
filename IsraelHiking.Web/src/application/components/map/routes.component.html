@@ -54,11 +54,32 @@
            source="editing-route-source"
            [filter]="['==', '$type', 'LineString']"
            [before]="resources.endOfRoutes"
+           [layout]="{
+                'line-cap': 'butt',
+                'line-join': 'bevel'
+            }"
            [paint]="{
                    'line-color': ['get', 'color'],
                    'line-width': ['get', 'weight'],
                    'line-opacity': ['get', 'opacity']
                }">
+</mgl-layer>
+<mgl-layer id="edit-route-line-direction"
+           type="symbol"
+           source="editing-route-source"
+           [before]="resources.endOfRoutes"
+           [filter]="['==', '$type', 'LineString']"
+           [layout]="{
+                'symbol-placement': 'line',
+                'symbol-spacing': 40,
+                'icon-image': 'arrow',
+                'icon-size': ['get', 'iconSize'],
+                'icon-allow-overlap': true,
+                'icon-ignore-placement': true
+           }"
+           [paint]="{
+                'icon-color': ['get', 'iconColor']
+            }">
 </mgl-layer>
 <mgl-layer id="{{resources.editRoutePoints}}"
            type="circle"
