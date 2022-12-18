@@ -1,0 +1,33 @@
+name: "\U0002753 uestion"
+description: Ask a question about the Israel Hiking Map project
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for scontacting the Israel Hiking Map.
+        
+        Please checkout the [Frequently Asked Questions](https://github.com/IsraelHikingMap/Site/wiki/Israel-Hiking-Maps-FAQ) and the video clips there.
+
+        You may also consider asking on [OUR Facebook group](https://www.facebook.com/groups/israelhikingmap) 
+
+        Otherwise, please fill in as much of the following form as you're able.
+  - type: textarea
+    attributes:
+      label: Is your question related to a problem? Please describe.
+      placeholder: |
+        A clear and concise description of what you want to know.
+        Please add annotated screenshots, if applicable.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What alternatives have you considered or tried?
+      description: |
+        Describe the other ways you have considered or tried, if any.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: Things I think the developers should know, images, links etc.
