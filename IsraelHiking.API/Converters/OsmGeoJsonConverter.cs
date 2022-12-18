@@ -137,7 +137,7 @@ namespace IsraelHiking.API.Converters
             }
             var nodes = closePolygons 
                 ? nodesGroups.Select(SplitListByLoops).SelectMany(g => g).ToList()
-                : nodesGroups;
+                : RearrangeInCaseOfCircleAndLine(nodesGroups);
 
             return nodes.Select(g => GetGeometryFromNodes(g.ToArray(), closePolygons)).ToList();
         }
@@ -347,6 +347,60 @@ namespace IsraelHiking.API.Converters
             var leftNodes = nodes.Take(minimalIndexStart).Concat(nodes.Skip(minimalIndexEnd)).ToList();
             // run this again on the nodes without the above loop
             return list.Concat(SplitListByLoops(leftNodes)).ToList();
+        }
+
+        /// <summary>
+        /// The purpose of this method is to take grouped results that grouped into "O" shape and lines that
+        /// touches this "O" shape and turn them into a "Q" shape.
+        /// This should only be applied to multiline strings
+        /// It does so by going over all the circles, finding lines that are not circles that touches those
+        /// and reorder the points, adding a new line and removes the circle and the line from the original list
+        /// </summary>
+        /// <param name="nodeGroups">The original list of list of nodes to alter</param>
+        /// <returns>A new list of list of nodes after the changes</returns>
+        private List<List<Node>> RearrangeInCaseOfCircleAndLine(List<List<Node>> nodeGroups)
+        {
+            if (nodeGroups.Count == 1)
+            {
+                return nodeGroups;
+            }
+            var circles = nodeGroups.Where(g => g.First().Id == g.Last().Id).ToList();
+            if (!circles.Any())
+            {
+                return nodeGroups;
+            }
+            foreach (var circle in circles)
+            {
+                var lineThatTouchesTheCircle = nodeGroups
+                    .Except(circles).FirstOrDefault(g => circle
+                        .Any(n => n.Id == g.First().Id || n.Id == g.Last().Id));
+                if (lineThatTouchesTheCircle == null)
+                {
+                    continue;
+                }
+                nodeGroups.Remove(circle);
+                nodeGroups.Remove(lineThatTouchesTheCircle);
+                var nodeInCircleThatTouches = circle.FirstOrDefault(n => n.Id == lineThatTouchesTheCircle.Last().Id);
+                if (nodeInCircleThatTouches != null)
+                {
+                    var indexInCircle = circle.IndexOf(nodeInCircleThatTouches);
+                    var newList = lineThatTouchesTheCircle;
+                    newList.AddRange(circle.Skip(indexInCircle + 1).ToList());
+                    newList.AddRange(circle.Skip(1).Take(indexInCircle));
+                    nodeGroups.Add(newList);
+                    continue;
+                }
+                nodeInCircleThatTouches = circle.FirstOrDefault(n => n.Id == lineThatTouchesTheCircle.First().Id);
+                if (nodeInCircleThatTouches != null)
+                {
+                    var indexInCircle = circle.IndexOf(nodeInCircleThatTouches);
+                    var newList = circle.Skip(1).Take(indexInCircle - 1).ToList();
+                    newList.AddRange(lineThatTouchesTheCircle);
+                    newList.InsertRange(0, circle.Skip(indexInCircle));
+                    nodeGroups.Add(newList);
+                }
+            }
+            return nodeGroups;
         }
     }
 }
