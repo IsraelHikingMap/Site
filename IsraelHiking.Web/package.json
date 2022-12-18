@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@angular-redux2/store": "^5.0.0-beta.1",
+    "@angular-redux2/store": "^5.0.0-beta.2",
     "@angular/animations": "14.2.1",
     "@angular/cdk": "14.2.1",
     "@angular/common": "14.2.1",

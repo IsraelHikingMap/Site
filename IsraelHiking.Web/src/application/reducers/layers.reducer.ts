@@ -1,7 +1,7 @@
 import { orderBy, remove } from "lodash-es";
-import { Action, AbstractReducer } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionsReducer } from "@angular-redux2/store";
 
-import { ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS, ReducerActions } from "./initial-state";
+import { ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS } from "./initial-state";
 import type { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models/models";
 
 export type AddBaseLayerPayload = {
@@ -66,7 +66,7 @@ export type ToggleOfflinePayload = {
 };
 
 export class LayersReducer extends AbstractReducer {
-    static actions: ReducerActions<LayersReducer>;
+    static actions: ActionsReducer<LayersReducer>;
 
     private sort(layers: EditableLayer[]): EditableLayer[] {
         let ordered = orderBy(layers, l => l.key);

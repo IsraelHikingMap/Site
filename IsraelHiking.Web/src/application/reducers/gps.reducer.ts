@@ -1,7 +1,6 @@
-import { Action, AbstractReducer } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionsReducer } from "@angular-redux2/store";
 
 import type { GpsState, TrackingStateType } from "../models/models";
-import type { ReducerActions } from "./initial-state";
 
 export type SetTrackingStatePayload = {
     state: TrackingStateType;
@@ -12,7 +11,7 @@ export type SetCurrentPositionPayload = {
 };
 
 export class GpsReducer extends AbstractReducer {
-    static actions: ReducerActions<GpsReducer>;
+    static actions: ActionsReducer<GpsReducer>;
 
     @Action
     public setTrackingState(lastState: GpsState, payload: SetTrackingStatePayload): GpsState {

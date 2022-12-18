@@ -1,7 +1,7 @@
 import undoable, { UndoableOptions } from "redux-undo";
-import { Action, AbstractReducer } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionsReducer } from "@angular-redux2/store";
 
-import { initialState, ReducerActions } from "./initial-state";
+import { initialState } from "./initial-state";
 import type { RouteData, MarkerData, RouteSegmentData, RouteEditStateType } from "../models/models";
 
 export type RoutePayload = {
@@ -73,7 +73,7 @@ export type BulkReplaceRoutesPayload = {
 };
 
 export class RoutesReducer extends AbstractReducer {
-    static actions: ReducerActions<RoutesReducer>;
+    static actions: ActionsReducer<RoutesReducer>;
 
     @Action
     public addRoute(lastState: RouteData[], payload: AddRoutePayload): RouteData[] {

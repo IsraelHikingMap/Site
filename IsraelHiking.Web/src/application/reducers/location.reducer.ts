@@ -1,7 +1,6 @@
-import { Action, AbstractReducer } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionsReducer } from "@angular-redux2/store";
 
 import type { Location } from "../models/models";
-import type { ReducerActions } from "./initial-state";
 
 export type SetLocationPayload = {
     longitude: number;
@@ -10,7 +9,7 @@ export type SetLocationPayload = {
 };
 
 export class LocationReducer extends AbstractReducer {
-    static actions: ReducerActions<LocationReducer>;
+    static actions: ActionsReducer<LocationReducer>;
 
     @Action
     public setLocation(lastState: Location, payload: SetLocationPayload) {

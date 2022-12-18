@@ -1,7 +1,6 @@
-import { Action, AbstractReducer } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionsReducer } from "@angular-redux2/store";
 
 import type { LatLngAltTime, MarkerData, RecordedRouteState } from "../models/models";
-import type { ReducerActions } from "./initial-state";
 
 export type AddRecordingPointsPayload = {
     latlngs: LatLngAltTime[];
@@ -21,7 +20,7 @@ export type DeleteRecordingPoiPayload = {
 };
 
 export class RecordedRouteReducer extends AbstractReducer {
-    static actions: ReducerActions<RecordedRouteReducer>;
+    static actions: ActionsReducer<RecordedRouteReducer>;
 
     @Action
     public startRecording(lastState: RecordedRouteState): RecordedRouteState {

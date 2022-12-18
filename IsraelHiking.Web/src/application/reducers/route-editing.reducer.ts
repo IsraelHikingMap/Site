@@ -1,7 +1,6 @@
-import { Action, AbstractReducer } from "@angular-redux2/store";
+import { Action, AbstractReducer, ActionsReducer } from "@angular-redux2/store";
 
 import type { RoutingType, RouteEditingState } from "../models/models";
-import type { ReducerActions } from "./initial-state";
 
 export type RoutePayload = {
     routeId: string;
@@ -17,7 +16,7 @@ export type SetOpacityAndWeightPayload = {
 };
 
 export class RouteEditingReducer extends AbstractReducer {
-    static actions: ReducerActions<RouteEditingReducer>;
+    static actions: ActionsReducer<RouteEditingReducer>;
 
     @Action
     public setSelectedRoute(lastState: RouteEditingState, payload: RoutePayload): RouteEditingState {
