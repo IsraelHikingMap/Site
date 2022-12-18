@@ -1,4 +1,4 @@
-name: "\U0001F41E Bug"
+name: "\U0001F41E Bug report"
 description: Create a bug report to help us fix a failure or an incorrect behavior
 labels: ["bug"]
 body:
