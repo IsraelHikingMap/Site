@@ -1,1 +1,13 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Israel Hiking Map F.A.Q.
+    url: https://github.com/IsraelHikingMap/Site/wiki/Israel-Hiking-Maps-FAQ
+    about: |
+      Answers to many Frequently-Asked-Questions.
+      Clips on the use of Israel Hiking map, OpenStreetMap mapping, and more.
+  - name: Israel Hiking Map on Facebook
+    url: https://www.facebook.com/groups/israelhikingmap
+    about: Discuss and receive advice from the community.
+  - name: Github Discussions
+    url: https://github.com/IsraelHikingMap/Site/discussions
+    about: The place for technical discussions and questions.
