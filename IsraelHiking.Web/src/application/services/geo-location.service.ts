@@ -226,6 +226,10 @@ export class GeoLocationService {
         } as GeolocationPosition;
     }
 
+    public async getLog(): Promise<string> {
+        return "";
+    }
+
     private storeLocationForLater(position: GeolocationPosition) {
         this.bgPositions.push(position);
     }
