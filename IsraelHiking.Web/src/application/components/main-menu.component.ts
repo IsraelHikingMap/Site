@@ -15,7 +15,7 @@ import { RunningContextService } from "../services/running-context.service";
 import { LoggingService } from "../services/logging.service";
 import { ToastService } from "../services/toast.service";
 import { FileService } from "../services/file.service";
-import { GeoLocationService } from "application/services/geo-location.service";
+import { GeoLocationService } from "../services/geo-location.service";
 import { LayersService } from "../services/layers.service";
 import { SidebarService } from "../services/sidebar.service";
 import { HashService } from "../services/hash.service";
