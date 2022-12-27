@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System;
+using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 
 namespace IsraelHiking.DataAccess
@@ -23,6 +24,7 @@ namespace IsraelHiking.DataAccess
         {
             var client = _httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromMinutes(20);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(Branding.USER_AGENT);
             var response = await client.GetAsync(url);
             var fileName = response.Content.Headers.ContentDisposition?.FileName?.Trim('"') ??
                 response.Content.Headers.ContentDisposition?.FileNameStar?.Trim('"') ??
@@ -47,6 +49,7 @@ namespace IsraelHiking.DataAccess
         {
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
             httpWebRequest.Method = "HEAD";
+            httpWebRequest.UserAgent = Branding.USER_AGENT;
             var resp = (HttpWebResponse)await httpWebRequest.GetResponseAsync();
             return resp.ContentLength;
         }

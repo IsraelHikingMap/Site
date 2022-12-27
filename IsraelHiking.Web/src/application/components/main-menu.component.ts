@@ -212,9 +212,11 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 `OS version: ${info.osVersion}`,
                 `App version: ${(await App.getInfo()).version}`
             ].join("\n");
-            let logBase64zipped = await this.fileService.compressTextToBase64Zip(logs);
-            logs = await this.geoLocationService.getLog();
-            let logBase64zippedGeoLocation = await this.fileService.compressTextToBase64Zip(logs);
+            let geoLocationLogs = await this.geoLocationService.getLog();
+            let logBase64zipped = await this.fileService.compressTextToBase64Zip([
+                { name: "log.txt", text: logs},
+                { name: "geolocation.txt", text: geoLocationLogs}
+            ]);
             let infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
             this.socialSharing.shareViaEmail(
@@ -225,7 +227,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 null,
                 [
                     `df:log.zip;data:application/zip;base64,${logBase64zipped}`,
-                    `df:geolocation-log.zip;data:application/zip;base64,${logBase64zippedGeoLocation}`,
                     `df:info-${userInfo.id}.txt;data:text/plain;base64,${infoBase64}`
                 ]
             );

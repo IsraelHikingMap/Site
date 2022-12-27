@@ -118,10 +118,8 @@ namespace IsraelHiking.API.Services.Poi
         {
             _logger.LogInformation("Starting getting OSM points of interest");
             await using var stream = await _latestFileGateway.Get();
-            var osmEntities = await _osmRepository.GetElementsWithName(stream);
             var relevantTagsDictionary = _tagsHelper.GetAllTags();
-            var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(stream, relevantTagsDictionary);
-            osmEntities.AddRange(namelessNodes.Cast<ICompleteOsmGeo>().ToList());
+            var osmEntities = await _osmRepository.GetPoints(stream, relevantTagsDictionary);
             var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmEntities);
             _logger.LogInformation("Finished getting OSM points of interest: " + features.Count);
             return features;
