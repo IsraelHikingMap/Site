@@ -371,9 +371,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void GetPointsForIndexing_ShouldGetThem()
         {
             _latestFileGateway.Get().Returns(new MemoryStream());
-            _osmRepository.GetElementsWithName(Arg.Any<Stream>()).Returns(new List<ICompleteOsmGeo>());
-            _osmRepository.GetPointsWithNoNameByTags(Arg.Any<Stream>(), Arg.Any<List<KeyValuePair<string, string>>>())
-                .Returns(new List<Node>());
+            _osmRepository.GetPoints(Arg.Any<Stream>(), Arg.Any<List<KeyValuePair<string, string>>>()).Returns(new List<ICompleteOsmGeo>());
 
             var results = _adapter.GetAll().Result;
 

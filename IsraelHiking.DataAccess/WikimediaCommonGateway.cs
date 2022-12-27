@@ -1,4 +1,5 @@
-﻿using IsraelHiking.Common.Configuration;
+﻿using IsraelHiking.Common;
+using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -57,7 +58,7 @@ namespace IsraelHiking.DataAccess
         {
             var wikiClient = new WikiClient
             {
-                ClientUserAgent = "IsraelHikingMapSite/5.x bot (https://israelhiking.osm.org.il; israelhikingmap@gmail.com)",
+                ClientUserAgent = Branding.USER_AGENT,
                 Timeout = new TimeSpan(0, 5, 0) // allow large images upload
             };
 
