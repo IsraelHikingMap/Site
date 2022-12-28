@@ -64,13 +64,13 @@ namespace IsraelHiking.DataAccess
                 var features = pages.Where(p => p.Exists).Select(p => ConvertPageToFeature(p, language)).ToList();
                 if (features.Count != titles.Length)
                 {
-                    _logger.LogWarning("The following pages do not exists: " + string.Join(",", pages.Where(p => p.Exists == false).Select(p => p.Title).ToArray()));
+                    _logger.LogWarning("The following pages do not exists. This is usually causes by a dead link from OSM to a page that was removed in Wikipedia. Please find the OSM entity and delete the link: " + string.Join(",", pages.Where(p => p.Exists == false).Select(p => p.Title).ToArray()));
                 }
                 return features;
             } 
             catch (Exception ex)
             {
-                _logger.LogError($"Unable to get wikipedia pages due to {ex.Message} for: " + string.Join(",", titles));
+                _logger.LogError($"Unable to get wikipedia pages due to {ex.Message} for (note that the titles are batched and so not all the titles here are causing this issue): " + string.Join(",", titles));
             }
             return new List<Feature>();
             
