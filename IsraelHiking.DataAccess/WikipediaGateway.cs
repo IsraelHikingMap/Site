@@ -157,7 +157,7 @@ namespace IsraelHiking.DataAccess
                 attributes.Add(FeatureAttributes.IMAGE_URL, imageUrl);
             }
             attributes.Add(FeatureAttributes.POI_USER_NAME, page.LastRevision.UserName);
-            attributes.Add(FeatureAttributes.POI_USER_ADDRESS, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeUriString(page.LastRevision.UserName)}"));
+            attributes.Add(FeatureAttributes.POI_USER_ADDRESS, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeDataString(page.LastRevision.UserName)}"));
             attributes.SetLastModified(page.LastRevision.TimeStamp);
             var feature = new Feature(new Point(coordinate), attributes);
             feature.SetTitles();

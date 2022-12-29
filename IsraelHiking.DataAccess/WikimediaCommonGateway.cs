@@ -102,7 +102,7 @@ namespace IsraelHiking.DataAccess
                    $"|date={DateTime.Now:yyyy-MM-dd}" + Environment.NewLine +
                    $"|description={description}" + Environment.NewLine +
                    "|source={{own}}" + Environment.NewLine +
-                   $"|author=[//www.openstreetmap.org/user/{Uri.EscapeUriString(author)} {author}]" + Environment.NewLine +
+                   $"|author=[//www.openstreetmap.org/user/{Uri.EscapeDataString(author)} {author}]" + Environment.NewLine +
                    "|permission=" + Environment.NewLine +
                    "|other versions=" + Environment.NewLine +
                    "}}" + Environment.NewLine + Environment.NewLine +
