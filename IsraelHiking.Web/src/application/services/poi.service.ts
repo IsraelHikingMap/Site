@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { NgProgress } from "ngx-progressbar";
-import { uniq, cloneDeep, isEqual } from "lodash-es";
+import { uniq, cloneDeep, isEqualWith } from "lodash-es";
 import { Observable, fromEvent, Subscription, firstValueFrom } from "rxjs";
 import { timeout, throttleTime, skip, filter } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
@@ -491,7 +491,7 @@ export class PoiService {
                             groupType: categoriesGroup.type,
                             category
                         }));
-                    } else if (!isEqual(category, exsitingCategory)) {
+                    } else if (!isEqualWith(category, exsitingCategory, (_v1, _v2, key) => key == "visible" ? true : undefined)) {
                         this.ngRedux.dispatch(new UpdateCategoryAction({
                             groupType: categoriesGroup.type,
                             category
