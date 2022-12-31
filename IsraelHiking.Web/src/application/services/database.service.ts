@@ -95,7 +95,7 @@ export class DatabaseService {
             storedState = this.initialStateUpgrade(dbState.state);
         } else {
             // initial load ever:
-            if (this.runningContext.isCapacitor) {
+            if (this.runningContext.isMobile) {
                 initialState.gpsState.tracking = "tracking";
             }
             this.updateState(initialState);
