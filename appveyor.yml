@@ -47,6 +47,7 @@ for:
         - PRODUCT: tests
     install:
       - sh: nvm install 16.13
+      - sh: sudo apt-get update && sudo apt-get install -y dotnet-sdk-7.0
     before_build:
       - pwsh: dotnet restore
     build:
