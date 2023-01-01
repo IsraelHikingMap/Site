@@ -87,6 +87,12 @@ export class LocationComponent extends BaseMapComponent {
                 this.updateDistanceFeatureCollection();
             });
 
+            this.mapComponent.mapInstance.on("resize", () => {
+                if (this.locationFeatures.features.length > 0 && this.isFollowingLocation()) {
+                    this.mapComponent.mapInstance.setCenter(this.getCenterFromLocationFeatureCollection());
+                }
+            });
+
             this.currentPoistion$.subscribe((position: GeolocationPosition) => {
                 if (position != null) {
                     this.handlePositionChange(position);
