@@ -5,6 +5,9 @@ namespace IsraelHiking.Common.DataContainer
 {
     public class RouteData
     {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+        
         [JsonProperty("name")]
         public string Name { get; set; }
         [JsonProperty("description")]
