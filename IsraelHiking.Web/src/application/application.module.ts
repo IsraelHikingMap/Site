@@ -38,6 +38,7 @@ import { NgIdleModule } from "@ng-idle/core";
 import { LottieModule } from "ngx-lottie";
 import { NgReduxModule } from "@angular-redux2/store";
 import { saveAs } from "file-saver-es";
+import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import player from "lottie-web";
 // Cordova plugins
 import { InAppPurchase2 } from "@awesome-cordova-plugins/in-app-purchase-2/ngx";
@@ -45,7 +46,6 @@ import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 // services
-import { ScrollToModule } from "./infra/scroll-to/scroll-to.module";
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
 import { OsmTokenInterceptor } from "./services/osm-token.interceptor";

@@ -148,7 +148,7 @@
               "src/application/components/**",
               "src/application/directives/**",
               "src/application/pipes/**",
-              "src/application/reduces/**"
+              "src/application/reducers/**"
             ],
             "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
