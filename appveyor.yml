@@ -1,4 +1,4 @@
-version: 9.15.{build}
+version: 9.16.{build}
 clone_depth: 3
 configuration: Release
 skip_branch_with_pr: true
