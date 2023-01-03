@@ -7,7 +7,7 @@ RUN npm ci
 RUN npm run build:prod -- --no-progress
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 as build-net
-ARG VERSION=9.15.0
+ARG VERSION=9.16.0
 WORKDIR /net
 COPY . .
 

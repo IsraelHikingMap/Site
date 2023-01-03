@@ -64,7 +64,7 @@
     "linear-interpolator": "^1.0.2",
     "lodash-es": "^4.17.21",
     "lottie-web": "^5.9.6",
-    "maplibre-gl": "^3.0.0-pre.1",
+    "maplibre-gl": "^3.0.0-pre.3",
     "minisearch": "^5.0.0",
     "ngx-infinite-scroll": "^14.0.0",
     "ngx-lottie": "^9.0.1",
@@ -150,5 +150,5 @@
     "download": "node download-and-compile.js",
     "postinstall": "patch-package"
   },
-  "version": "9.15.0"
+  "version": "9.16.0"
 }
