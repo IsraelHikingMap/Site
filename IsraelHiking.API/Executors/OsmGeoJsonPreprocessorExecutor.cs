@@ -90,18 +90,18 @@ namespace IsraelHiking.API.Executors
             var feature = _osmGeoJsonConverter.ToGeoJson(osmEntity);
             if (feature == null)
             {
-                _logger.LogError("Unable to convert " + osmEntity);
+                _logger.LogWarning("Unable to convert " + osmEntity);
                 return null;
             }
             var isValidOp = new IsValidOp(feature.Geometry);
             if (!isValidOp.IsValid)
             {
-                _logger.LogError($"{feature.Geometry.GeometryType} with ID: {feature.Attributes[FeatureAttributes.ID]} {isValidOp.ValidationError.Message} ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                _logger.LogWarning($"{feature.Geometry.GeometryType} with ID: {feature.Attributes[FeatureAttributes.ID]} {isValidOp.ValidationError.Message} ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
                 return null;
             }
             if (feature.Geometry.IsEmpty)
             {
-                _logger.LogError($"{feature.Geometry.GeometryType} with ID: {feature.Attributes[FeatureAttributes.ID]} is an empty geometry - check for non-closed relations.");
+                _logger.LogWarning($"{feature.Geometry.GeometryType} with ID: {feature.Attributes[FeatureAttributes.ID]} is an empty geometry - check for non-closed relations.");
                 return null;
             }
 
