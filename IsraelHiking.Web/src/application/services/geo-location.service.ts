@@ -20,6 +20,7 @@ export class GeoLocationService {
     private watchNumber: number;
     private isBackground: boolean;
     private wasInitialized: boolean;
+    private gettingLocations: boolean;
 
     public bulkPositionChanged: EventEmitter<GeolocationPosition[]>;
     public backToForeground: EventEmitter<void>;
@@ -35,6 +36,7 @@ export class GeoLocationService {
         this.bulkPositionChanged = new EventEmitter<GeolocationPosition[]>();
         this.isBackground = false;
         this.wasInitialized = false;
+        this.gettingLocations = false;
     }
 
     public initialize() {
@@ -185,7 +187,13 @@ export class GeoLocationService {
     }
 
     private async onLocationUpdate() {
+        if (this.gettingLocations) {
+            this.loggingService.debug("[GeoLocation] Trying to get locations while already getting them, skipping...");
+            return;
+        }
+        this.gettingLocations = true;
         let locations = await BackgroundGeolocation.getValidLocationsAndDelete();
+        this.gettingLocations = false;
         let positions = locations.map((l) => this.locationToPosition(l));
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
