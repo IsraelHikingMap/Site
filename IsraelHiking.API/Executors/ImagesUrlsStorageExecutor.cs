@@ -56,7 +56,7 @@ namespace IsraelHiking.API.Executors
                     counter++;
                     if (counter % 500 == 0)
                     {
-                        _logger.LogInformation($"Indexed {counter} images of {imagesUrls.Count}");
+                        _logger.LogDebug($"Indexed {counter} images of {imagesUrls.Count}");
                     }
                     if (exitingUrls.Contains(imageUrl))
                     {
@@ -106,8 +106,8 @@ namespace IsraelHiking.API.Executors
                 ? newSizeInPixels * 1.0 / originalImage.Width
                 : newSizeInPixels * 1.0 / originalImage.Height;
             var newSize = new Size((int)(originalImage.Width * ratio), (int)(originalImage.Height * ratio));
+            originalImage.Metadata.ExifProfile = null;
             originalImage.Mutate(x => x.Resize(newSize));
-
             using var memoryStream = new MemoryStream();
             originalImage.SaveAsJpeg(memoryStream);
             return memoryStream.ToArray();

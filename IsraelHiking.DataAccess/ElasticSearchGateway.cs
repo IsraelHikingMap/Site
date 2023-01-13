@@ -532,7 +532,7 @@ namespace IsraelHiking.DataAccess
                 }
                 total += smallCahceList.Count;
                 await UpdateData(smallCahceList, alias);
-                _logger.LogInformation($"Indexed {total} records of {features.Count}");
+                _logger.LogDebug($"Indexed {total} records of {features.Count}");
                 smallCahceList.Clear();
             }
             await UpdateData(smallCahceList, alias);
