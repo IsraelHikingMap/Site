@@ -64,9 +64,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="IsraelHiking.Web.nlog">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="src\content\legend\legend.json" />
     <None Include="angular.json" />
     <None Include="package.json" />

@@ -1,25 +1,185 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using System.Globalization;
 using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
 using System.IO;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading.Tasks;
+using IsraelHiking.API;
+using IsraelHiking.API.Services;
+using IsraelHiking.API.Swagger;
+using IsraelHiking.Common.Configuration;
+using IsraelHiking.DataAccess;
+using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.Web;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
+using NeoSmart.Caching.Sqlite;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
+using Newtonsoft.Json.Converters;
+using NLog.Web;
+using OsmSharp.IO.API;
 
-namespace IsraelHiking.Web
+NLog.LogManager.Setup().LoadConfigurationFromAppSettings();
+var builder = WebApplication.CreateBuilder(args);
+SetupServices(builder.Services, builder.Environment.IsDevelopment());
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
+var application = builder.Build();
+SetupApplication(application);
+application.Run();
+
+
+void SetupApplication(WebApplication app)
 {
-    public class Program
+    if (application.Environment.IsDevelopment())
     {
-        public static void Main(string[] args)
+        application.UseDeveloperExceptionPage();
+    }
+    app.UseResponseCompression();
+    app.UseRouting();
+    app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    app.UseAuthentication();
+    app.UseAuthorization();
+    app.MapControllers();
+    app.MapHealthChecks("/api/health");
+    SetupStaticFiles(app);
+
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Israel Hiking Map API V1");
+    });
+// This should be the last middleware
+    app.UseMiddleware<NonApiMiddleware>();
+    InitializeServices(app.Services);
+}
+
+void SetupServices(IServiceCollection services, bool isDevelopment)
+{
+    services.AddResponseCompression();
+    services.AddMemoryCache();
+    services.AddLazyCache();
+    services.AddHealthChecks();
+    services.AddDetection();
+    services.AddHttpClient();
+    services.AddIHMDataAccess();
+    services.AddIHMApi();
+    services.AddSqliteCache(@"./cache.sqlite");
+    services.AddSingleton<OsmAccessTokenEventsHelper>();
+    services.AddSingleton<IClientsFactory>(serviceProvider =>
+        new ClientsFactory(serviceProvider.GetRequiredService<ILogger>(),
+        serviceProvider.GetRequiredService<IHttpClientFactory>().CreateClient(),
+        serviceProvider.GetRequiredService<IOptions<ConfigurationData>>().Value.OsmConfiguration.BaseAddress + "/api/"));
+    var geometryFactory = new GeometryFactory(new PrecisionModel(100000000));
+    services.AddSingleton<GeometryFactory, GeometryFactory>(_ => geometryFactory);
+    services.AddSingleton<IHomePageHelper, HomePageHelper>();
+    services.AddControllers(options =>
+    {
+        options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
+    }).AddNewtonsoftJson(options =>
+    {
+        foreach (var converter in GeoJsonSerializer.Create(geometryFactory, 3).Converters)
         {
-            WebHost.CreateDefaultBuilder(args)
-                .ConfigureLogging((hostingContext, logging) => {
-                    NLog.LogManager.LoadConfiguration("IsraelHiking.Web.nlog");
-                    logging.AddNLog();
-                    logging.SetMinimumLevel(LogLevel.Trace);
-                })
-                .UseStartup<Startup>()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .Build()
-                .Run();
+            options.SerializerSettings.Converters.Add(converter);
         }
+        options.SerializerSettings.Converters.Add(new IsoDateTimeConverter
+        {
+            DateTimeStyles = DateTimeStyles.AdjustToUniversal
+        });
+    });
+    services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    }).AddJwtBearer(jwtBearerOptions =>
+    {
+        jwtBearerOptions.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var tokenService = context.HttpContext.RequestServices.GetService<OsmAccessTokenEventsHelper>();
+                return tokenService?.OnMessageReceived(context);
+            }
+        };
+    });
+    services.AddCors();
+    services.AddOptions();
+
+    var config = new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .Build();
+    services.Configure<ConfigurationData>(config);
+    var nonPublicConfiguration = new ConfigurationBuilder();
+    if (isDevelopment)
+    {
+        nonPublicConfiguration.AddUserSecrets<NonPublicConfigurationData>();
+    }
+    else
+    {
+        nonPublicConfiguration.AddJsonFile("nonPublic.json");
+    }
+    services.Configure<NonPublicConfigurationData>(nonPublicConfiguration.Build());
+
+    services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IHM"));
+    services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Israel Hiking API", Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() });
+        c.SchemaFilter<FeatureExampleFilter>();
+        c.SchemaFilter<FeatureCollectionExampleFilter>();
+        c.AddSecurityDefinition("Bearer",
+            new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme - need OSM token and secret joined by ';'",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                In = ParameterLocation.Header
+            }
+        );
+        c.OperationFilter<AssignOAuthSecurityRequirements>();
+        var xmlFile = "IsraelHiking.API.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        c.IncludeXmlComments(xmlPath);
+    });
+    services.AddDirectoryBrowser();
+}
+
+void SetupStaticFiles(IApplicationBuilder app)
+{
+    app.UseDefaultFiles();
+    var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
+    fileExtensionContentTypeProvider.Mappings.Add(".pbf", "application/x-protobuf");
+    fileExtensionContentTypeProvider.Mappings.Add(".db", "application/octet-stream");
+    fileExtensionContentTypeProvider.Mappings.Add(".geojson", "application/json");
+
+    // wwwroot
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        ContentTypeProvider = fileExtensionContentTypeProvider
+    });
+}
+
+void InitializeServices(IServiceProvider serviceProvider)
+{
+    var logger = serviceProvider.GetRequiredService<ILogger>();
+    logger.LogInformation("-----------------------------------------------");
+    logger.LogInformation("Initializing singleton services");
+    var initializableServices = serviceProvider.GetServices<IInitializable>();
+    foreach (var service in initializableServices)
+    {
+        var serviceName = service.GetType().ToString();
+        service.Initialize().ContinueWith((t) =>
+        {
+            logger.LogError(t.Exception, $"Failed to initialize service {serviceName}");
+        }, TaskContinuationOptions.OnlyOnFaulted);
     }
 }
