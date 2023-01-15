@@ -59,7 +59,7 @@ The architecture is based on layers:
 In order to be able to build this site you'll need some tools:
 * Install [Docker](https://www.docker.com/products/docker-desktop)
 * Install [.Net core SDK 7.0 ](https://www.microsoft.com/net/download/core)
-* Install [node.js](https://nodejs.org/en/) (16.13+).
+* Install [node.js](https://nodejs.org/en/) (16.18+).
 * Run from command line `dotnet restore` and after that `dotnet build`
 * Go to `IsraelHiking.Web` and run from command line: 
   * `npm install` to install all npm packages for the client side code

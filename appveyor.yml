@@ -46,7 +46,7 @@ for:
       only: 
         - PRODUCT: tests
     install:
-      - sh: nvm install 16.13
+      - sh: nvm install 16.18
       - sh: sudo apt-get update && sudo apt-get install -y dotnet-sdk-7.0
     before_build:
       - pwsh: dotnet restore
@@ -66,7 +66,7 @@ for:
       only:
         - PRODUCT: android
     install:
-      - ps: Install-Product node 16.13
+      - ps: Install-Product node 16.18
     build_script:
     - pwsh: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER/Scripts/BuildAndPublishAndroid.ps1"
@@ -79,7 +79,7 @@ for:
         - PRODUCT: ios
       fast_finish: true
     install:
-      - sh: nvm install 16.13
+      - sh: nvm install 16.18
     build_script: 
     - pwsh: >-
         $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER/Scripts/BuildAndPublishIOS.ps1"
