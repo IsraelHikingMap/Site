@@ -50,8 +50,11 @@ void SetupApplication(WebApplication app)
     app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
     app.UseAuthentication();
     app.UseAuthorization();
-    app.MapControllers();
-    app.MapHealthChecks("/api/health");
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+        endpoints.MapHealthChecks("/api/health");
+    });
     SetupStaticFiles(app);
 
     app.UseSwagger();
