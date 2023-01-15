@@ -15,6 +15,7 @@ using IsraelHiking.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -53,8 +54,13 @@ void SetupApplication(WebApplication app)
     app.MapHealthChecks("/api/health");
     // wwwroot
     app.UseDefaultFiles();
-    app.UseStaticFiles();
-
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        ContentTypeProvider = new FileExtensionContentTypeProvider
+        {
+            Mappings = { {".pbf", "application/x-protobuf"} } // for the fonts files
+        }
+    });
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
