@@ -15,7 +15,6 @@ using IsraelHiking.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -50,19 +49,18 @@ void SetupApplication(WebApplication app)
     app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
     app.UseAuthentication();
     app.UseAuthorization();
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllers();
-        endpoints.MapHealthChecks("/api/health");
-    });
-    SetupStaticFiles(app);
+    app.MapControllers();
+    app.MapHealthChecks("/api/health");
+    // wwwroot
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
 
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Israel Hiking Map API V1");
     });
-// This should be the last middleware
+    // This should be the last middleware
     app.UseMiddleware<NonApiMiddleware>();
     InitializeServices(app.Services);
 }
@@ -152,22 +150,6 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
         var xmlFile = "IsraelHiking.API.xml";
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         c.IncludeXmlComments(xmlPath);
-    });
-    services.AddDirectoryBrowser();
-}
-
-void SetupStaticFiles(IApplicationBuilder app)
-{
-    app.UseDefaultFiles();
-    var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
-    fileExtensionContentTypeProvider.Mappings.Add(".pbf", "application/x-protobuf");
-    fileExtensionContentTypeProvider.Mappings.Add(".db", "application/octet-stream");
-    fileExtensionContentTypeProvider.Mappings.Add(".geojson", "application/json");
-
-    // wwwroot
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        ContentTypeProvider = fileExtensionContentTypeProvider
     });
 }
 

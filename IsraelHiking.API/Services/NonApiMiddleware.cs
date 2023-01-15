@@ -18,6 +18,7 @@ namespace IsraelHiking.API.Services
     {
         private readonly IShareUrlsRepository _shareUrlsRepository;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
+        private readonly RequestDelegate _next;
         private readonly IHomePageHelper _homePageHelper;
 
         /// <summary>
@@ -32,6 +33,7 @@ namespace IsraelHiking.API.Services
             IShareUrlsRepository shareUrlsRepository,
             IPointsOfInterestProvider pointsOfInterestProvider)
         {
+            _next = next;
             _homePageHelper = homePageHelper;
 
             _shareUrlsRepository = shareUrlsRepository;
@@ -46,6 +48,11 @@ namespace IsraelHiking.API.Services
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context, IDetectionService detectionService)
         {
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                await _next.Invoke(context);
+                return;
+            }
             var isCrawler = detectionService.Crawler.IsCrawler;
             var isWhatsApp = detectionService.Crawler.Name == Wangkanai.Detection.Models.Crawler.WhatsApp;
             if (isCrawler && context.Request.Path.StartsWithSegments("/share"))
