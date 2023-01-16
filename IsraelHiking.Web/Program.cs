@@ -46,10 +46,7 @@ void SetupApplication(WebApplication app)
         application.UseDeveloperExceptionPage();
     }
     app.UseResponseCompression();
-    app.UseRouting();
     app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-    app.UseAuthentication();
-    app.UseAuthorization();
     app.MapControllers();
     app.MapHealthChecks("/api/health");
     // wwwroot
