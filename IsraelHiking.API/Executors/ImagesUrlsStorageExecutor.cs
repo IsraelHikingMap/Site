@@ -44,6 +44,7 @@ namespace IsraelHiking.API.Executors
             _logger.LogInformation($"Need to remove {needToRemove.Count} images that are no longer relevant");
             foreach(var imageUrlToRemove in needToRemove)
             {
+                _logger.LogInformation($"Removing image since it does not exist in the OSM file or in the POIs database: {imageUrlToRemove}");
                 await _imagesRepository.DeleteImageByUrl(imageUrlToRemove);
             }
             _logger.LogInformation($"Finished removing images, starting downloading and index: {imagesUrls.Count}");
@@ -86,6 +87,7 @@ namespace IsraelHiking.API.Executors
                     }
                     if (content.Length == 0)
                     {
+                        _logger.LogInformation($"Removing image since getting it failed in 3 retries: {imageUrl}");
                         await _imagesRepository.DeleteImageByUrl(imageUrl);
                     } 
                     else 

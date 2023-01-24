@@ -521,21 +521,21 @@ namespace IsraelHiking.DataAccess
         private async Task UpdateUsingPaging(List<Feature> features, string alias)
         {
             _logger.LogInformation($"Starting indexing {features.Count} records");
-            var smallCahceList = new List<Feature>(PAGE_SIZE);
+            var smallCacheList = new List<Feature>(PAGE_SIZE);
             int total = 0;
             foreach (var feature in features)
             {
-                smallCahceList.Add(feature);
-                if (smallCahceList.Count < PAGE_SIZE)
+                smallCacheList.Add(feature);
+                if (smallCacheList.Count < PAGE_SIZE)
                 {
                     continue;
                 }
-                total += smallCahceList.Count;
-                await UpdateData(smallCahceList, alias);
+                total += smallCacheList.Count;
+                await UpdateData(smallCacheList, alias);
                 _logger.LogDebug($"Indexed {total} records of {features.Count}");
-                smallCahceList.Clear();
+                smallCacheList.Clear();
             }
-            await UpdateData(smallCahceList, alias);
+            await UpdateData(smallCacheList, alias);
             _logger.LogInformation($"Finished indexing {features.Count} records");
         }
 
@@ -635,7 +635,7 @@ namespace IsraelHiking.DataAccess
         }
         public async Task<List<string>> GetAllUrls()
         {
-            _elasticClient.Indices.Refresh(IMAGES);
+            await _elasticClient.Indices.RefreshAsync(IMAGES);
             var response = await _elasticClient.SearchAsync<ImageItem>(
                 s => s.Index(IMAGES)
                     .Size(10000)
@@ -675,11 +675,9 @@ namespace IsraelHiking.DataAccess
                     .Query(q => q.Term(t => t.Field(r => r.Succeeded).Value(true)))
                     .Aggregations(a => a.Max(maxDate, m => m.Field(r => r.StartTime)))
                     );
-            if (DateTime.TryParse(response.Aggregations.Max(maxDate).ValueAsString, out var date))
-            {
-                return date;
-            }
-            return DateTime.MinValue;
+            return DateTime.TryParse(response.Aggregations.Max(maxDate).ValueAsString, out var date) 
+                ? date 
+                : DateTime.MinValue;
         }
     }
 }
