@@ -9,7 +9,7 @@
                 <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="hasFocus = true" (blur)="hasFocus = false">
             </mat-form-field>
             <mat-autocomplete positionY="below" #autoFrom="matAutocomplete" [displayWith]="displayResults">
-                <mat-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
+                <mat-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)" matTooltip="{{result.displayName}}" matTooltipPosition="left">
                     <i *ngIf="result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
                     <span>{{result.displayName}}</span>
                 </mat-option>
