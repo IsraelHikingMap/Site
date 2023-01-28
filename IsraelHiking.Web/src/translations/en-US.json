@@ -41,7 +41,7 @@
     "Background text: You need to purchase offline maps": "If you would like to see the maps while offline, you'll need to purchase them first...",
     "Background text: You need to toggle offline maps": "You can toggle the offline maps in cases of poor reception by clicking the cloud icon next to the map",
     "Barriers": "Barriers",
-    "Base layer and overlay are overlapping.": "Base layer and overlay are overlapping.",
+    "Base layer and overlay are overlapping.": "Base layer and overlay are overlapping, it is advised to open the layers and hide the overlays.",
     "Base Layer Properties": "Base Layer Properties",
     "Base Layers": "Base Maps",
     "Battery optimization": "Battery optimization",

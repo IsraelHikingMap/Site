@@ -41,7 +41,7 @@
     "Background text: You need to purchase offline maps": "אם ברצונכם לראות מפות ללא חיבור לרשת יש לרכוש אותן ראשית...",
     "Background text: You need to toggle offline maps": "אתם יכולים לאפשר את המפות הלא מקוונות בתנאי קליטה גרועים ע״י לחיצה על סמליל הענן ליד השכבה המתאימה.",
     "Barriers": "מחסומים",
-    "Base layer and overlay are overlapping.": "שכבת הבסיס והשכבה מעל חופפות.",
+    "Base layer and overlay are overlapping.": "שכבת הבסיס והשכבה מעל חופפות, מומלץ לפתוח את פקד השכבות ולכבות את השכבות השקופות",
     "Base Layer Properties": "מאפייני מפת בסיס",
     "Base Layers": "מפות בסיס",
     "Battery optimization": "שיפור ביצועי סוללה",
