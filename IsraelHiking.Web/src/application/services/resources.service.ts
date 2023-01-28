@@ -300,6 +300,7 @@ export class ResourcesService {
     public noLocationPermissionOpenAppSettings: string;
     public tracesAreOnlySavedLocally: string;
     public unexpectedErrorPleaseTryAgainLater: string;
+    public editingRouteWhileTracking: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -475,7 +476,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1668932437125");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1674931885669");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -779,6 +780,8 @@ export class ResourcesService {
         this.tracesAreOnlySavedLocally = this.gettextCatalog.getString("Traces are only saved locally. " +
             "You can change that in the configuration settings");
         this.unexpectedErrorPleaseTryAgainLater = this.gettextCatalog.getString("Oops, something went wrong. Please try again later");
+        this.editingRouteWhileTracking = this.gettextCatalog.getString("GPS tracking is enabled while editing, " + 
+            "in order to avoid map centering to current location please click the cross icon on the top left corner");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

@@ -79,6 +79,10 @@ export class LocationComponent extends BaseMapComponent {
             }
             if (this.isFollowingLocation()) {
                 this.moveMapToGpsPosition();
+                let selectedRoute = this.selectedRouteService.getSelectedRoute();
+                if (selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
+                    this.toastService.warning(this.resources.editingRouteWhileTracking);
+                }
             }
         });
 
