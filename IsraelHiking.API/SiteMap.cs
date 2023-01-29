@@ -24,6 +24,7 @@ using System.Xml.Serialization;
 [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://www.sitemaps.org/schemas/sitemap/0.9")]
 [System.Xml.Serialization.XmlRootAttribute(Namespace="http://www.sitemaps.org/schemas/sitemap/0.9", IsNullable=false)]
 [ExcludeFromCodeCoverage]
+#pragma warning disable CS8981
 public partial class urlset {
     
     private System.Xml.XmlElement[] anyField;
@@ -178,3 +179,4 @@ public enum tChangeFreq {
     /// <remarks/>
     never,
 }
+#pragma warning restore CS8981
