@@ -199,14 +199,11 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 }));
             return;
         }
-        if (routeData.state === "Hidden") {
-            routeData.state = "ReadOnly";
-            this.ngRedux.dispatch(new ChangeRoutePropertiesAction(
-                {
-                    routeId: routeData.id,
-                    routeData
-                }));
-        }
+        routeData.state = selectedRoute != null ? selectedRoute.state : "ReadOnly";
+        this.ngRedux.dispatch(new ChangeRoutePropertiesAction({
+            routeId: routeData.id,
+            routeData
+        }));
         this.selectedRouteService.setSelectedRoute(routeData.id);
     }
 
