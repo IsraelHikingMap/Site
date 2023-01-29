@@ -4,42 +4,57 @@ using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess
 {
+    public class DateTimeConverterUsingDateTimeParse : JsonConverter<DateTime>
+    {
+        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return DateTime.Parse(reader.GetString() ?? string.Empty);
+        }
+
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString());
+        }
+    }
+    
     internal class JsonNakebItem
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public long Id { get; set; }
-        [JsonProperty("start")]
+        [JsonPropertyName("start")]
         public LatLng Start { get; set; }
-        [JsonProperty("title")]
+        [JsonPropertyName("title")]
         public string Title { get; set; }
-        [JsonProperty("last_modified")]
+        [JsonPropertyName("last_modified")]
+        [JsonConverter(typeof(DateTimeConverterUsingDateTimeParse))]
         public DateTime LastModified { get; set; }
     }
 
     internal class JsonNakebItemExtended : JsonNakebItem
     {
-        [JsonProperty("length")]
+        [JsonPropertyName("length")]
         public double Length { get; set; }
-        [JsonProperty("picture")]
+        [JsonPropertyName("picture")]
         public string Picture { get; set; }
-        [JsonProperty("link")]
+        [JsonPropertyName("link")]
         public string Link { get; set; }
-        [JsonProperty("attributes")]
+        [JsonPropertyName("attributes")]
         public string[] Attributes { get; set; }
-        [JsonProperty("prolog")]
+        [JsonPropertyName("prolog")]
         public string Prolog { get; set; }
-        [JsonProperty("latlngs")]
+        [JsonPropertyName("latlngs")]
         public LatLng[] Latlngs { get; set; }
-        [JsonProperty("markers")]
+        [JsonPropertyName("markers")]
         public MarkerData[] Markers { get; set; }
     }
 
@@ -59,7 +74,7 @@ namespace IsraelHiking.DataAccess
             var client = _httpClientFactory.CreateClient();
             var reponse = await client.GetAsync($"{NAKEB_BASE_ADDRESS}/all");
             var content = await reponse.Content.ReadAsStringAsync();
-            var nakebItem = JsonConvert.DeserializeObject<List<JsonNakebItem>>(content);
+            var nakebItem = JsonSerializer.Deserialize<List<JsonNakebItem>>(content);
             return nakebItem.Select(ConvertToPointFeature).ToList();
         }
 
@@ -68,7 +83,7 @@ namespace IsraelHiking.DataAccess
             var client = _httpClientFactory.CreateClient();
             var reponse = await client.GetAsync($"{NAKEB_BASE_ADDRESS}/{id}");
             var content = await reponse.Content.ReadAsStringAsync();
-            var nakebItem = JsonConvert.DeserializeObject<JsonNakebItemExtended>(content);
+            var nakebItem = JsonSerializer.Deserialize<JsonNakebItemExtended>(content);
             var attributes = GetAttributes(nakebItem);
             var description = nakebItem.Prolog ?? string.Empty;
             if (!description.EndsWith("."))

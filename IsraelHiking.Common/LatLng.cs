@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Linq;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace IsraelHiking.Common
 {
     public class LatLng : IEquatable<LatLng>
     {
-        [JsonProperty("lat")]
+        [JsonPropertyName("lat")]
         public double Lat { get; set; }
-        [JsonProperty("lng")]
+        [JsonPropertyName("lng")]
         public double Lng { get; set; }
-        [JsonProperty("alt")]
+        [JsonPropertyName("alt")]
         public double? Alt { get; set; }
 
         public bool Equals(LatLng other)
@@ -58,7 +58,7 @@ namespace IsraelHiking.Common
 
     public class LatLngTime : LatLng
     {
-        [JsonProperty("timestamp")]
+        [JsonPropertyName("timestamp")]
         public DateTime? Timestamp { get; set; }
 
         public LatLngTime()

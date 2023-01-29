@@ -25,7 +25,7 @@ using NeoSmart.Caching.Sqlite;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
-using Newtonsoft.Json.Converters;
+using NetTopologySuite.IO.Converters;
 using NLog.Web;
 using OsmSharp.IO.API;
 
@@ -90,17 +90,17 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddControllers(options =>
     {
         options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
-    }).AddNewtonsoftJson(options =>
+    }).AddJsonOptions(options => {
+        options.JsonSerializerOptions.Converters.Add(new GeoJsonConverterFactory());
+    });
+        /* HM TODO: fix/add this
+        AddNewtonsoftJson(options =>
     {
-        foreach (var converter in GeoJsonSerializer.Create(geometryFactory, 3).Converters)
-        {
-            options.SerializerSettings.Converters.Add(converter);
-        }
         options.SerializerSettings.Converters.Add(new IsoDateTimeConverter
         {
             DateTimeStyles = DateTimeStyles.AdjustToUniversal
         });
-    });
+    }); */
     services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

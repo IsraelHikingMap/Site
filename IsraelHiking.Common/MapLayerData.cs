@@ -1,15 +1,15 @@
 ﻿using IsraelHiking.Common.DataContainer;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace IsraelHiking.Common
 {
     public class MapLayerData : LayerData
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public string Id { get; set; }
-        [JsonProperty("osmUserId")]
+        [JsonPropertyName("osmUserId")]
         public string OsmUserId { get; set; }
-        [JsonProperty("isOverlay")]
+        [JsonPropertyName("isOverlay")]
         public bool IsOverlay { get; set; }
     }
 }

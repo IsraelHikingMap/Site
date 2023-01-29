@@ -1,19 +1,19 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace IsraelHiking.Common.DataContainer
 {
     public class DataContainerPoco
     {
-        [JsonProperty("routes")]
+        [JsonPropertyName("routes")]
         public List<RouteData> Routes { get; set; }
-        [JsonProperty("northEast")]
+        [JsonPropertyName("northEast")]
         public LatLng NorthEast { get; set; }
-        [JsonProperty("southWest")]
+        [JsonPropertyName("southWest")]
         public LatLng SouthWest { get; set; }
-        [JsonProperty("baseLayer")]
+        [JsonPropertyName("baseLayer")]
         public LayerData BaseLayer { get; set; }
-        [JsonProperty("overlays")]
+        [JsonPropertyName("overlays")]
         public List<LayerData> Overlays { get; set; }
 
         public DataContainerPoco()

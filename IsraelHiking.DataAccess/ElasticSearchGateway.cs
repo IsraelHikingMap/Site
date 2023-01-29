@@ -7,15 +7,281 @@ using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Nest;
-using Nest.JsonNetSerializer;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Unicode;
+using System.Threading;
 using System.Threading.Tasks;
+using NetTopologySuite.IO.Converters;
 using Feature = NetTopologySuite.Features.Feature;
+
+public class DynamicDictionaryConverter : JsonConverter<DynamicDictionary>
+{
+    public override DynamicDictionary Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.StartArray)
+        {
+            var array = JsonSerializer.Deserialize<object[]>(ref reader, options);
+            var arrayDict = new Dictionary<string, object>();
+            for (var i = 0; i < array.Length; i++)
+                arrayDict[i.ToString(CultureInfo.InvariantCulture)] = new DynamicValue(array[i]);
+            return DynamicDictionary.Create(arrayDict);
+        }
+        if (reader.TokenType != JsonTokenType.StartObject) throw new JsonException();
+
+        var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(ref reader, options);
+        return DynamicDictionary.Create(dict);
+    }
+
+    public override void Write(Utf8JsonWriter writer, DynamicDictionary dictionary, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+
+        foreach (var kvp in dictionary.GetKeyValues())
+        {
+            if (kvp.Value == null) continue;
+
+            writer.WritePropertyName(kvp.Key);
+
+            JsonSerializer.Serialize(writer, kvp.Value?.Value, options);
+        }
+
+        writer.WriteEndObject();
+    }
+}
+
+internal class ExceptionConverter : JsonConverter<Exception>
+	{
+		private static List<Dictionary<string, object>> FlattenExceptions(Exception e)
+		{
+			var maxExceptions = 20;
+			var exceptions = new List<Dictionary<string, object>>(maxExceptions);
+			var depth = 0;
+			do
+			{
+				var o = ToDictionary(e, depth);
+				exceptions.Add(o);
+				depth++;
+				e = e.InnerException;
+			} while (depth < maxExceptions && e != null);
+
+			return exceptions;
+		}
+
+		private static Dictionary<string, object> ToDictionary(Exception e, int depth)
+		{
+			var o = new Dictionary<string, object>(10);
+			var si = new SerializationInfo(e.GetType(), new FormatterConverter());
+			var sc = new StreamingContext();
+			e.GetObjectData(si, sc);
+
+			var helpUrl = si.GetString("HelpURL");
+			var stackTrace = si.GetString("StackTraceString");
+			var remoteStackTrace = si.GetString("RemoteStackTraceString");
+			var remoteStackIndex = si.GetInt32("RemoteStackIndex");
+			var exceptionMethod = si.GetString("ExceptionMethod");
+			var hresult = si.GetInt32("HResult");
+			var source = si.GetString("Source");
+			var className = si.GetString("ClassName");
+
+			o.Add("Depth", depth);
+			o.Add("ClassName", className);
+			o.Add("Message", e.Message);
+			o.Add("Source", source);
+			o.Add("StackTraceString", stackTrace);
+			o.Add("RemoteStackTraceString", remoteStackTrace);
+			o.Add("RemoteStackIndex", remoteStackIndex);
+			o.Add("HResult", hresult);
+			o.Add("HelpURL", helpUrl);
+
+			WriteStructuredExceptionMethod(o, exceptionMethod);
+			return o;
+		}
+
+		private static void WriteStructuredExceptionMethod(Dictionary<string,object> o, string exceptionMethodString)
+		{
+			if (string.IsNullOrWhiteSpace(exceptionMethodString)) return;
+
+			var args = exceptionMethodString.Split('\0', '\n');
+
+			if (args.Length != 5) return;
+
+			var memberType = int.Parse(args[0], CultureInfo.InvariantCulture);
+			var name = args[1];
+			var assemblyName = args[2];
+			var className = args[3];
+			var signature = args[4];
+			var an = new AssemblyName(assemblyName);
+			var exceptionMethod = new Dictionary<string, object>(7)
+			{
+				{ "Name", name },
+				{ "AssemblyName", an.Name },
+				{ "AssemblyVersion", an.Version.ToString() },
+				{ "AssemblyCulture", an.CultureName },
+				{ "ClassName", className },
+				{ "Signature", signature },
+				{ "MemberType", memberType }
+			};
+
+			o.Add("ExceptionMethod", exceptionMethod);
+		}
+
+		public override Exception Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+			throw new NotSupportedException();
+
+		public override void Write(Utf8JsonWriter writer, Exception value, JsonSerializerOptions options)
+		{
+			if (value == null)
+			{
+				writer.WriteNullValue();
+				return;
+			}
+
+			var flattenedExceptions = FlattenExceptions(value);
+			writer.WriteStartArray();
+			for (var i = 0; i < flattenedExceptions.Count; i++)
+			{
+				var flattenedException = flattenedExceptions[i];
+				writer.WriteStartObject();
+				foreach (var kv in flattenedException)
+				{
+					writer.WritePropertyName(kv.Key);
+					JsonSerializer.Serialize(writer, kv.Value, options);
+				}
+				writer.WriteEndObject();
+			}
+			writer.WriteEndArray();
+		}
+	}
+
+public class SystemTextJsonSerializer : IElasticsearchSerializer
+{
+    private readonly Lazy<JsonSerializerOptions> _indented;
+    private readonly Lazy<JsonSerializerOptions> _none;
+
+    private IList<JsonConverter> BakedInConverters { get; } = new List<JsonConverter>
+    {
+        {new ExceptionConverter()},
+        {new DynamicDictionaryConverter()}
+    };
+
+    public SystemTextJsonSerializer(JsonConverterFactory factory)
+    {
+        var indentedOptions = new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = true
+        };
+        indentedOptions.Converters.Add(factory);
+        foreach (var converter in BakedInConverters)
+            indentedOptions.Converters.Add(converter);
+        var noneIndentedOptions = new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = false
+        };
+        noneIndentedOptions.Converters.Add(factory);
+        foreach (var converter in BakedInConverters)
+            noneIndentedOptions.Converters.Add(converter);
+        _indented = new Lazy<JsonSerializerOptions>(() => indentedOptions);
+        _none = new Lazy<JsonSerializerOptions>(() => noneIndentedOptions);
+    }
+
+    private static bool TryReturnDefault<T>(Stream stream, out T deserialize)
+    {
+        deserialize = default;
+        return stream == null || stream == Stream.Null || (stream.CanSeek && stream.Length == 0);
+    }
+
+    private static MemoryStream ToMemoryStream(Stream stream)
+    {
+        if (stream is MemoryStream m) return m;
+        var length = stream.CanSeek ? stream.Length : (long?) null;
+        var wrapped = length.HasValue ? new MemoryStream(new byte[length.Value]) : new MemoryStream();
+        stream.CopyTo(wrapped);
+        return wrapped;
+    }
+
+    private static ReadOnlySpan<byte> ToReadOnlySpan(Stream stream)
+    {
+        using var m = ToMemoryStream(stream);
+
+        if (m.TryGetBuffer(out var segment))
+            return segment;
+
+        var a = m.ToArray();
+        return new ReadOnlySpan<byte>(a).Slice(0, a.Length);
+    }
+
+    private JsonSerializerOptions GetFormatting(SerializationFormatting formatting) =>
+        formatting == SerializationFormatting.None ? _none.Value : _indented.Value;
+
+    public object Deserialize(Type type, Stream stream)
+    {
+        if (TryReturnDefault(stream, out object deserialize)) return deserialize;
+
+        var buffered = ToReadOnlySpan(stream);
+        return JsonSerializer.Deserialize(buffered, type, _none.Value);
+    }
+
+    public T Deserialize<T>(Stream stream)
+    {
+        if (TryReturnDefault(stream, out T deserialize)) return deserialize;
+
+        var buffered = ToReadOnlySpan(stream);
+        Console.WriteLine(Encoding.UTF8.GetString(buffered));
+        return JsonSerializer.Deserialize<T>(buffered, _none.Value);
+    }
+
+    public void Serialize<T>(T data, Stream stream, SerializationFormatting formatting = SerializationFormatting.None)
+    {
+        using var writer = new Utf8JsonWriter(stream);
+        if (data == null)
+            JsonSerializer.Serialize(writer, null, typeof(object), GetFormatting(formatting));
+        //TODO validate if we can avoid boxing by checking if data is typeof(object)
+        else
+            JsonSerializer.Serialize(writer, data, data.GetType(), GetFormatting(formatting));
+    }
+
+    public async Task SerializeAsync<T>(T data, Stream stream, SerializationFormatting formatting = SerializationFormatting.None,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (data == null)
+            await JsonSerializer
+                .SerializeAsync(stream, null, typeof(object), GetFormatting(formatting), cancellationToken)
+                .ConfigureAwait(false);
+        else
+            await JsonSerializer
+                .SerializeAsync(stream, data, data.GetType(), GetFormatting(formatting), cancellationToken)
+                .ConfigureAwait(false);
+    }
+
+    //TODO return ValueTask, breaking change? probably 8.0
+    public Task<object> DeserializeAsync(Type type, Stream stream, CancellationToken cancellationToken = default)
+    {
+        if (TryReturnDefault(stream, out object deserialize)) return Task.FromResult(deserialize);
+
+        return JsonSerializer.DeserializeAsync(stream, type, _none.Value, cancellationToken).AsTask();
+    }
+
+    public Task<T> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default)
+    {
+        if (TryReturnDefault(stream, out T deserialize)) return Task.FromResult(deserialize);
+
+        return JsonSerializer.DeserializeAsync<T>(stream, _none.Value, cancellationToken).AsTask();
+    }
+}
 
 namespace IsraelHiking.DataAccess
 {
@@ -62,7 +328,7 @@ namespace IsraelHiking.DataAccess
             var connectionString = new ConnectionSettings(
                 pool,
                 new HttpConnection(),
-                (b, c) => new JsonNetSerializer(b, c, null, null, GeoJsonSerializer.Create(GeometryFactory.Default, 3).Converters))
+                (b, c) => new SystemTextJsonSerializer(new GeoJsonConverterFactory(new GeometryFactory(), false, "poiId")))
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
             await InitializeIndexWithAlias(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS, CreatePointsOfInterestIndex);

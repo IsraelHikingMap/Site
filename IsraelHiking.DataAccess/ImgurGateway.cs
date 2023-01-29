@@ -2,11 +2,12 @@
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess
@@ -37,7 +38,7 @@ namespace IsraelHiking.DataAccess
             {
                 throw new Exception("Unable to upload an image to imgur: " + content);
             }
-            var jsonObject = JsonConvert.DeserializeObject<JObject>(content);
+            var jsonObject = JsonSerializer.Deserialize<JObject>(content);
             var link = jsonObject.SelectToken("data.link").Value<string>();
             _logger.LogInformation($"Imgur file uploaded successfully, link: {link}");
             return link;

@@ -1,18 +1,18 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace IsraelHiking.Common.DataContainer
 {
     public class LayerData
     {
-        [JsonProperty("key")]
+        [JsonPropertyName("key")]
         public string Key { get; set; }
-        [JsonProperty("address")]
+        [JsonPropertyName("address")]
         public string Address { get; set; }
-        [JsonProperty("minZoom")]
+        [JsonPropertyName("minZoom")]
         public int? MinZoom { get; set; }
-        [JsonProperty("maxZoom")]
+        [JsonPropertyName("maxZoom")]
         public int? MaxZoom { get; set; }
-        [JsonProperty("opacity")]
+        [JsonPropertyName("opacity")]
         public double? Opacity { get; set; }
     }
 }

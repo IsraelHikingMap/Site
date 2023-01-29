@@ -2,8 +2,9 @@
 using IsraelHiking.Common.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System.Net;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -73,7 +74,7 @@ namespace IsraelHiking.API.Controllers
                     };
                     _logger.LogInformation("No specific filters were applied, updating all databases.");
                 }
-                _logger.LogInformation("Starting updating site's databases according to request: " + JsonConvert.SerializeObject(request));
+                _logger.LogInformation("Starting updating site's databases according to request: " + JsonSerializer.Serialize(request));
                 await _databasesUpdaterService.Rebuild(request);
                 _logger.LogInformation("Finished updating site's databases according to request");
                 return Ok();

@@ -2,14 +2,16 @@
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
+using NetTopologySuite.IO.Converters;
 
 namespace IsraelHiking.API.Gpx
 {
@@ -77,13 +79,10 @@ namespace IsraelHiking.API.Gpx
         /// <returns>The <see cref="byte"/> array</returns>
         public static byte[] ToBytes(this FeatureCollection featureCollection)
         {
-            using var outputStream = new MemoryStream();
-            var writer = new StreamWriter(outputStream);
-            var jsonWriter = new JsonTextWriter(writer);
-            var serializer = GeoJsonSerializer.Create(new GeometryFactory(), 3);
-            serializer.Serialize(jsonWriter, featureCollection);
-            jsonWriter.Flush();
-            return outputStream.ToArray();
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new GeoJsonConverterFactory());
+            var serialized = JsonSerializer.Serialize(featureCollection, options);
+            return Encoding.UTF8.GetBytes(serialized);
         }
 
         /// <summary>
@@ -93,11 +92,10 @@ namespace IsraelHiking.API.Gpx
         /// <returns>The <see cref="FeatureCollection"/></returns>
         public static FeatureCollection ToFeatureCollection(this byte[] featureCollectionContent)
         {
-            using var stream = new MemoryStream(featureCollectionContent);
-            var serializer = GeoJsonSerializer.Create(new GeometryFactory(), 3);
-            using var streamReader = new StreamReader(stream);
-            using var jsonTextReader = new JsonTextReader(streamReader);
-            return serializer.Deserialize<FeatureCollection>(jsonTextReader);
+            var stringJson = Encoding.UTF8.GetString(featureCollectionContent);
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new GeoJsonConverterFactory());
+            return JsonSerializer.Deserialize<FeatureCollection>(stringJson, options);
         }
 
         /// <summary>

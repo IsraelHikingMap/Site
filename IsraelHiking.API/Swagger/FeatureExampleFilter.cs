@@ -2,10 +2,10 @@
 using Microsoft.OpenApi.Models;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
-using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
+using NetTopologySuite.IO.Converters;
 
 namespace IsraelHiking.API.Swagger
 {
@@ -30,18 +30,16 @@ namespace IsraelHiking.API.Swagger
             {
                 return;
             }
-            var writer = new GeoJsonWriter
-            {
-                SerializerSettings = new JsonSerializerSettings { Formatting = Formatting.Indented }
-            };
-            var exampleFeatureString = writer.Write(
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new GeoJsonConverterFactory());
+            var exampleFeatureString = JsonSerializer.Serialize(
                 new Feature(new LineString(new[]
                     {
                         new Coordinate(1, 2),
                         new Coordinate(3, 4),
                     }),
                     new AttributesTable { { "key", "value" } })
-            );
+            , options);
             schema.Example = new OpenApiString(exampleFeatureString);
             schema.Default = new OpenApiString(exampleFeatureString);
         }
