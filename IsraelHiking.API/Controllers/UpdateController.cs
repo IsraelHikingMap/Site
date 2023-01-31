@@ -2,7 +2,6 @@
 using IsraelHiking.Common.Api;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Text.Json.Serialization;
 using System.Net;
 using System.Text.Json;
 using System.Threading;

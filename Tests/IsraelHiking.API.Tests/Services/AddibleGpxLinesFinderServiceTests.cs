@@ -23,12 +23,14 @@ namespace IsraelHiking.API.Tests.Services
 
         private void SetupHighways(List<LineString> lineStrings = null)
         {
-            lineStrings = lineStrings ?? new List<LineString>();
-            var conveter = new ItmWgs84MathTransfromFactory().Create();
-            var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(c => conveter.Transform(c.X, c.Y))
+            lineStrings ??= new List<LineString>();
+            var converter = new ItmWgs84MathTransfromFactory().Create();
+            var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(c => converter.Transform(c.X, c.Y))
                 .Select(c => new Coordinate(c.x, c.y))
                 .ToArray()),
-                new AttributesTable())).ToList();
+                new AttributesTable()))
+                .Cast<IFeature>()
+                .ToList();
             int id = 1;
             foreach (var highway in highways)
             {
@@ -42,8 +44,10 @@ namespace IsraelHiking.API.Tests.Services
         public void TestInitialize()
         {
             _highwaysRepository = Substitute.For<IHighwaysRepository>();
-            _options = new ConfigurationData();
-            _options.MinimalProlongLineLength = 0;
+            _options = new ConfigurationData
+            {
+                MinimalProlongLineLength = 0
+            };
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(_options);
             var geometryFactory = new GeometryFactory();

@@ -27,7 +27,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetSearchResults_ShouldPassRequestToGateway_NoResultsFound()
         {
-            var list = new List<Feature>();
+            var list = new List<IFeature>();
             var searchTerm = "searchTerm";
             _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns(list);
 
@@ -40,7 +40,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetSearchResults_UsingQuotes_ShouldGetExactMatch()
         {
-            var list = new List<Feature>();
+            var list = new List<IFeature>();
             var searchTerm = "\"searchTerm\"";
             _searchRepository.SearchExact(Arg.Any<string>(), Languages.ENGLISH).Returns(list);
 
@@ -69,9 +69,9 @@ namespace IsraelHiking.API.Tests.Controllers
             featureInPlace.SetTitles();
             featureInPlace.SetLocation(featureLocation);
             var featuresInsidePlace = new List<Feature> { featureInPlace };
-            _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<Feature>());
-            _searchRepository.Search("searchTerm", Languages.ENGLISH).Returns(new List<Feature> { featureInPlace });
-            _searchRepository.GetContainers(featureLocation).Returns(new List<Feature>());
+            _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<IFeature>());
+            _searchRepository.Search("searchTerm", Languages.ENGLISH).Returns(new List<IFeature> { featureInPlace });
+            _searchRepository.GetContainers(featureLocation).Returns(new List<IFeature>());
 
             var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.ToList();
 
@@ -109,12 +109,12 @@ namespace IsraelHiking.API.Tests.Controllers
             });
             featureInPlace.SetTitles();
             featureInPlace.SetLocation(featureLocation);
-            var featuresInsidePlace = new List<Feature> { featureInPlace };
-            _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<Feature> {placeFeature});
+            var featuresInsidePlace = new List<IFeature> { featureInPlace };
+            _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<IFeature> {placeFeature});
             _searchRepository
                 .SearchByLocation(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), "searchTerm", Languages.ENGLISH)
                 .Returns(featuresInsidePlace);
-            _searchRepository.GetContainers(featureLocation).Returns(new List<Feature> { placeFeature });
+            _searchRepository.GetContainers(featureLocation).Returns(new List<IFeature> { placeFeature });
 
             var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.ToList();
 
@@ -156,12 +156,12 @@ namespace IsraelHiking.API.Tests.Controllers
             );
             featureInPlace.SetTitles();
             featureInPlace.SetLocation(featureLocation);
-            var featuresInsidePlace = new List<Feature> { featureInPlace };
-            _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<Feature> { placeFeature });
+            var featuresInsidePlace = new List<IFeature> { featureInPlace };
+            _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<IFeature> { placeFeature });
             _searchRepository
                 .SearchByLocation(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), "searchTerm", Languages.ENGLISH)
                 .Returns(featuresInsidePlace);
-            _searchRepository.GetContainers(featureLocation).Returns(new List<Feature> { placeFeature });
+            _searchRepository.GetContainers(featureLocation).Returns(new List<IFeature> { placeFeature });
 
             var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.ToList();
 
@@ -204,12 +204,12 @@ namespace IsraelHiking.API.Tests.Controllers
             );
             featureInPlace.SetTitles();
             featureInPlace.SetLocation(featureLocation);
-            var featuresInsidePlace = new List<Feature> { featureInPlace };
-            _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<Feature> { placeFeature });
+            var featuresInsidePlace = new List<IFeature> { featureInPlace };
+            _searchRepository.SearchPlaces(place, Languages.ENGLISH).Returns(new List<IFeature> { placeFeature });
             _searchRepository
                 .SearchByLocation(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), "searchTerm", Languages.ENGLISH)
                 .Returns(featuresInsidePlace);
-            _searchRepository.GetContainers(featureLocation).Returns(new List<Feature> { placeFeature });
+            _searchRepository.GetContainers(featureLocation).Returns(new List<IFeature> { placeFeature });
 
             var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result.ToList();
 
@@ -247,8 +247,8 @@ namespace IsraelHiking.API.Tests.Controllers
             });
             featureInPlace.SetTitles();
             featureInPlace.SetLocation(featureLocation);
-            _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns(new List<Feature> { featureInPlace });
-            _searchRepository.GetContainers(featureLocation).Returns(new List<Feature> { placeFeature });
+            _searchRepository.Search(searchTerm, Languages.ENGLISH).Returns(new List<IFeature> { featureInPlace });
+            _searchRepository.GetContainers(featureLocation).Returns(new List<IFeature> { placeFeature });
 
             var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result;
 

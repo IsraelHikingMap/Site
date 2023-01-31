@@ -9,13 +9,13 @@ namespace IsraelHiking.DataAccessInterfaces.Repositories
 {
     public interface IPointsOfInterestRepository
     {
-        Task StorePointsOfInterestDataToSecondaryIndex(List<Feature> pointsOfInterest);
+        Task StorePointsOfInterestDataToSecondaryIndex(List<IFeature> pointsOfInterest);
         Task SwitchPointsOfInterestIndices();
-        Task UpdatePointsOfInterestData(List<Feature> features);
-        Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language);
-        Task<List<Feature>> GetAllPointsOfInterest(bool withDeleted);
-        Task<List<Feature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate, DateTime modifiedUntil);
-        Task<Feature> GetPointOfInterestById(string id, string source);
+        Task UpdatePointsOfInterestData(List<IFeature> features);
+        Task<List<IFeature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language);
+        Task<List<IFeature>> GetAllPointsOfInterest(bool withDeleted);
+        Task<List<IFeature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate, DateTime modifiedUntil);
+        Task<IFeature> GetPointOfInterestById(string id, string source);
         Task DeletePointOfInterestById(string id, string source);
         Task StoreRebuildContext(RebuildContext context);
         Task<DateTime> GetLastSuccessfulRebuildTime();

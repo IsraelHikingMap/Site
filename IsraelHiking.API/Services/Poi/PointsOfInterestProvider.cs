@@ -46,7 +46,6 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
         private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
         private readonly ILogger _logger;
-        private readonly MathTransform _wgs84ItmMathTransform;
         private readonly ConfigurationData _options;
 
         /// <summary>
@@ -56,7 +55,6 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="elevationGateway"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>
-        /// <param name="itmWgs84MathTransformFactory"></param>
         /// <param name="latestFileGateway"></param>
         /// <param name="base64ImageConverter"></param>
         /// <param name="wikimediaCommonGateway"></param>
@@ -68,7 +66,6 @@ namespace IsraelHiking.API.Services.Poi
             IElevationGateway elevationGateway,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransformFactory,
             IOsmLatestFileGateway latestFileGateway,
             IWikimediaCommonGateway wikimediaCommonGateway,
             IBase64ImageStringToFileConverter base64ImageConverter,
@@ -82,7 +79,6 @@ namespace IsraelHiking.API.Services.Poi
             _tagsHelper = tagsHelper;
             _latestFileGateway = latestFileGateway;
             _elevationGateway = elevationGateway;
-            _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
             _options = options.Value;
             _pointsOfInterestRepository = pointsOfInterestRepository;
             _wikimediaCommonGateway = wikimediaCommonGateway;
@@ -114,7 +110,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetAll()
+        public async Task<List<IFeature>> GetAll()
         {
             _logger.LogInformation("Starting getting OSM points of interest");
             await using var stream = await _latestFileGateway.Get();
@@ -125,13 +121,13 @@ namespace IsraelHiking.API.Services.Poi
             return features;
         }
 
-        private Feature ConvertOsmToFeature(ICompleteOsmGeo osm)
+        private IFeature ConvertOsmToFeature(ICompleteOsmGeo osm)
         {
             var features = _osmGeoJsonPreprocessorExecutor.Preprocess(new List<ICompleteOsmGeo> {osm});
             return features.Any() ? features.First() : null;
         }
 
-        private async Task<Feature> UpdateElasticSearch(ICompleteOsmGeo osm)
+        private async Task<IFeature> UpdateElasticSearch(ICompleteOsmGeo osm)
         {
             var feature = ConvertOsmToFeature(osm);
             if (feature == null)
@@ -154,7 +150,7 @@ namespace IsraelHiking.API.Services.Poi
                 }
             }
             feature.SetLastModified(DateTime.Now);
-            await _pointsOfInterestRepository.UpdatePointsOfInterestData(new List<Feature> { feature });
+            await _pointsOfInterestRepository.UpdatePointsOfInterestData(new List<IFeature> { feature });
             return feature;
         }
 
@@ -262,7 +258,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public async Task<Feature> GetClosestPoint(Coordinate location, string source, string language = "")
+        public async Task<IFeature> GetClosestPoint(Coordinate location, string source, string language = "")
         {
             var distance = _options.ClosestPointsOfInterestThreshold;
             var results = await _pointsOfInterestRepository.GetPointsOfInterest(
@@ -293,7 +289,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public async Task<Feature> GetFeatureById(string source, string id)
+        public async Task<IFeature> GetFeatureById(string source, string id)
         {
             var feature = await _pointsOfInterestRepository.GetPointOfInterestById(id, source);
             if (feature != null) {
@@ -307,7 +303,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public async Task<Feature[]> GetFeatures(Coordinate northEast, Coordinate southWest, string[] categories, string language)
+        public async Task<IFeature[]> GetFeatures(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
             var features = await _pointsOfInterestRepository.GetPointsOfInterest(northEast, southWest, categories, language);
             var points = features.Where(f => f.IsProperPoi(language)).ToArray();
@@ -324,7 +320,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public async Task<Feature> AddFeature(Feature feature, IAuthClient osmGateway, string language)
+        public async Task<IFeature> AddFeature(IFeature feature, IAuthClient osmGateway, string language)
         {
             var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
             var location = feature.GetLocation();
@@ -358,7 +354,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc/>
-        public async Task<Feature> UpdateFeature(Feature partialFeature, IAuthClient osmGateway, string language)
+        public async Task<IFeature> UpdateFeature(IFeature partialFeature, IAuthClient osmGateway, string language)
         {
             ICompleteOsmGeo completeOsmGeo = await osmGateway.GetCompleteElement(partialFeature.GetOsmId(), partialFeature.GetOsmType());
             var featureBeforeUpdate = await _pointsOfInterestRepository.GetPointOfInterestById(partialFeature.Attributes[FeatureAttributes.ID].ToString(), Sources.OSM);
@@ -478,7 +474,7 @@ namespace IsraelHiking.API.Services.Poi
             SetMultipleValuesForTag(completeOsmGeo.Tags, FeatureAttributes.IMAGE_URL, existingImages.Distinct().ToArray());
         }
 
-        private async Task<string[]> UploadImages(Feature feature, string language, IAuthClient osmGateway)
+        private async Task<string[]> UploadImages(IFeature feature, string language, IAuthClient osmGateway)
         {
             var user = await osmGateway.GetUserDetails();
             feature.SetTitles();
@@ -495,7 +491,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         private async Task<string> UploadImageIfNeeded(string imageUrl,
-            Feature feature, string language, string userDisplayName)
+            IFeature feature, string language, string userDisplayName)
         {
             var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
             var fileName = string.IsNullOrWhiteSpace(feature.GetTitle(language))

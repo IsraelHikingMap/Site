@@ -113,6 +113,7 @@ namespace IsraelHiking.API.Tests.Services
             var fileInfo = Substitute.For<IFileInfo>();
             fileInfo.CreateReadStream().Returns(new MemoryStream(new byte[] {1}));
             _homePageHelper.IndexFileInfo.Returns(fileInfo);
+            _pointsOfInterestProvider.GetFeatureById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
             
             _middleware.InvokeAsync(context, detectionService).Wait();
             

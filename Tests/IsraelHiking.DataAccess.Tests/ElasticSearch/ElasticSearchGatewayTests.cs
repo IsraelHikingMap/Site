@@ -10,10 +10,7 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using NetTopologySuite.IO.Converters;
 
 namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 {
@@ -100,7 +97,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         [Ignore]
         public void GetPoisBySource_ShouldGetThem()
         {
-            var tasks = new List<Task<List<Feature>>>
+            var tasks = new List<Task<List<IFeature>>>
             {
                 _gateway.GetExternalPoisBySource(Sources.INATURE),
                 _gateway.GetExternalPoisBySource(Sources.NAKEB),
@@ -152,7 +149,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             });
             feature.SetId();
             feature.SetTitles();
-            _gateway.UpdatePointsOfInterestData(new List<Feature> { feature }).Wait();
+            _gateway.UpdatePointsOfInterestData(new List<IFeature> { feature }).Wait();
             var results = _gateway.GetPointOfInterestById(id, Sources.OSM).Result;
             Assert.IsNotNull(results);
         }

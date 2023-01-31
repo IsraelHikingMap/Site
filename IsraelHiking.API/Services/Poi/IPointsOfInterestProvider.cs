@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="id"></param>
         /// <param name="source"></param>
         /// <returns></returns>
-        Task<Feature> GetFeatureById(string source, string id);
+        Task<IFeature> GetFeatureById(string source, string id);
 
         /// <summary>
         /// Gets all the POIs within the bounding box that matches the given categories in the given language
@@ -29,7 +29,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="categories">The categories</param>
         /// <param name="language">The language</param>
         /// <returns>An array of POIs</returns>
-        Task<Feature[]> GetFeatures(Coordinate northEast, Coordinate southWest, string[] categories, string language);
+        Task<IFeature[]> GetFeatures(Coordinate northEast, Coordinate southWest, string[] categories, string language);
 
         /// <summary>
         /// Adds a POI
@@ -38,7 +38,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="osmGateway"></param>
         /// <param name="language"></param>
         /// <returns></returns>
-        Task<Feature> AddFeature(Feature feature, IAuthClient osmGateway, string language);
+        Task<IFeature> AddFeature(IFeature feature, IAuthClient osmGateway, string language);
 
         /// <summary>
         /// Updates a POI
@@ -47,7 +47,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="osmGateway"></param>
         /// <param name="language">The relevant language</param>
         /// <returns></returns>
-        Task<Feature> UpdateFeature(Feature partialFeature, IAuthClient osmGateway, string language);
+        Task<IFeature> UpdateFeature(IFeature partialFeature, IAuthClient osmGateway, string language);
 
         /// <summary>
         /// Get the closest point to the given location, only for the given source
@@ -56,7 +56,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="source">Source is optional</param>
         /// <param name="language"></param>
         /// <returns></returns>
-        public Task<Feature> GetClosestPoint(Coordinate location, string source, string language = "");
+        public Task<IFeature> GetClosestPoint(Coordinate location, string source, string language = "");
 
         /// <summary>
         /// Get the all the points that were undated since the given date, and up until a given data
@@ -70,6 +70,6 @@ namespace IsraelHiking.API.Services.Poi
         /// Get all points from the OSM repository
         /// </summary>
         /// <returns></returns>
-        public Task<List<Feature>> GetAll();
+        public Task<List<IFeature>> GetAll();
     }
 }

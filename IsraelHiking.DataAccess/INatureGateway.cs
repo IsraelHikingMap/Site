@@ -42,7 +42,7 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation("Finished initializing iNature service");
         }
 
-        public async Task<List<Feature>> GetAll()
+        public async Task<List<IFeature>> GetAll()
         {
             var allpagesGenerator = new AllPagesGenerator(_wikiSite)
             {
@@ -193,7 +193,7 @@ namespace IsraelHiking.DataAccess
             return feature;
         }
 
-        public async Task<List<Feature>> GetUpdates(DateTime lastUpdated)
+        public async Task<List<IFeature>> GetUpdates(DateTime lastUpdated)
         {
             var recentChangesGEnerator = new RecentChangesGenerator(_wikiSite)
             {
@@ -207,9 +207,9 @@ namespace IsraelHiking.DataAccess
             return await GetFeaturesFromTitles(titles.Select(i => i.Title).ToArray());
         }
 
-        private async Task<List<Feature>> GetFeaturesFromTitles(string[] titles)
+        private async Task<List<IFeature>> GetFeaturesFromTitles(string[] titles)
         {
-            var features = new ConcurrentBag<Feature>();
+            var features = new ConcurrentBag<IFeature>();
             await Task.Run(() =>
             {
                 Parallel.ForEach(titles, new ParallelOptions { MaxDegreeOfParallelism = 5 }, (title) =>

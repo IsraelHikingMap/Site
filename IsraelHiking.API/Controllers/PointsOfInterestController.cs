@@ -87,12 +87,12 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of GeoJSON features</returns>
         [Route("")]
         [HttpGet]
-        public async Task<Feature[]> GetPointsOfInterest(string northEast, string southWest, string categories,
+        public async Task<IFeature[]> GetPointsOfInterest(string northEast, string southWest, string categories,
             string language = "")
         {
             if (string.IsNullOrWhiteSpace(categories))
             {
-                return Array.Empty<Feature>();
+                return Array.Empty<IFeature>();
             }
             var categoriesArray = categories.Split(',').Select(f => f.Trim()).ToArray();
             var northEastCoordinate = northEast.ToCoordinate();
@@ -232,7 +232,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("closest")]
-        public Task<Feature> GetClosestPoint(string location, string source, string language)
+        public Task<IFeature> GetClosestPoint(string location, string source, string language)
         {
             return _pointsOfInterestProvider.GetClosestPoint(location.ToCoordinate(), source, language);
         }

@@ -19,11 +19,9 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Unicode;
 using System.Threading;
 using System.Threading.Tasks;
 using NetTopologySuite.IO.Converters;
-using Feature = NetTopologySuite.Features.Feature;
 
 public class DynamicDictionaryConverter : JsonConverter<DynamicDictionary>
 {
@@ -239,7 +237,6 @@ public class SystemTextJsonSerializer : IElasticsearchSerializer
         if (TryReturnDefault(stream, out T deserialize)) return deserialize;
 
         var buffered = ToReadOnlySpan(stream);
-        Console.WriteLine(Encoding.UTF8.GetString(buffered));
         return JsonSerializer.Deserialize<T>(buffered, _none.Value);
     }
 
@@ -400,7 +397,7 @@ namespace IsraelHiking.DataAccess
             return list;
         }
 
-        private QueryContainer FeatureNameSearchQueryWithFactor(QueryContainerDescriptor<Feature> q, string searchTerm, string language)
+        private QueryContainer FeatureNameSearchQueryWithFactor(QueryContainerDescriptor<IFeature> q, string searchTerm, string language)
         {
             return q.FunctionScore(
                 fs => fs.Query(
@@ -409,7 +406,7 @@ namespace IsraelHiking.DataAccess
             );
         }
 
-        private QueryContainer FeatureNameSearchQuery(QueryContainerDescriptor<Feature> q, string searchTerm, string language)
+        private QueryContainer FeatureNameSearchQuery(QueryContainerDescriptor<IFeature> q, string searchTerm, string language)
         {
             return q.DisMax(
                 dm => dm.Queries(
@@ -428,13 +425,13 @@ namespace IsraelHiking.DataAccess
             );
         }
 
-        public async Task<List<Feature>> Search(string searchTerm, string language)
+        public async Task<List<IFeature>> Search(string searchTerm, string language)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
             {
-                return new List<Feature>();
+                return new List<IFeature>();
             }
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(NUMBER_OF_RESULTS)
                     .TrackScores()
@@ -444,13 +441,13 @@ namespace IsraelHiking.DataAccess
             return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
-        public async Task<List<Feature>> SearchExact(string searchTerm, string language)
+        public async Task<List<IFeature>> SearchExact(string searchTerm, string language)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
             {
-                return new List<Feature>();
+                return new List<IFeature>();
             }
-            var response = await _elasticClient.SearchAsync<Feature>(s => 
+            var response = await _elasticClient.SearchAsync<IFeature>(s => 
                 s.Index(OSM_POIS_ALIAS)
                 .Size(100)
                 .Query(q => 
@@ -476,9 +473,9 @@ namespace IsraelHiking.DataAccess
                 .ToList();
         }
 
-        public async Task<List<Feature>> SearchPlaces(string place, string language)
+        public async Task<List<IFeature>> SearchPlaces(string place, string language)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(5)
                     .TrackScores()
@@ -490,9 +487,9 @@ namespace IsraelHiking.DataAccess
             return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
-        public async Task<List<Feature>> SearchByLocation(Coordinate northEast, Coordinate southWest, string searchTerm, string language)
+        public async Task<List<IFeature>> SearchByLocation(Coordinate northEast, Coordinate southWest, string searchTerm, string language)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(NUMBER_OF_RESULTS)
                     .TrackScores()
@@ -505,9 +502,9 @@ namespace IsraelHiking.DataAccess
             return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
-        public async Task<List<Feature>> GetContainers(Coordinate coordinate)
+        public async Task<List<IFeature>> GetContainers(Coordinate coordinate)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(100)
                     .Query(q =>
@@ -541,7 +538,7 @@ namespace IsraelHiking.DataAccess
             await _elasticClient.Indices.DeleteAsync(currentIndex);
         }
 
-        public async Task UpdateHighwaysZeroDownTime(List<Feature> highways)
+        public async Task UpdateHighwaysZeroDownTime(List<IFeature> highways)
         {
             var (currentIndex, newIndex) = GetIndicesStatus(OSM_HIGHWAYS_INDEX1, OSM_HIGHWAYS_INDEX2, OSM_HIGHWAYS_ALIAS);
 
@@ -551,7 +548,7 @@ namespace IsraelHiking.DataAccess
             await SwitchIndices(currentIndex, newIndex, OSM_HIGHWAYS_ALIAS);
         }
 
-        public async Task StorePointsOfInterestDataToSecondaryIndex(List<Feature> pointsOfInterest)
+        public async Task StorePointsOfInterestDataToSecondaryIndex(List<IFeature> pointsOfInterest)
         {
             var (_, newIndex) = GetIndicesStatus(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS);
             await CreatePointsOfInterestIndex(newIndex);
@@ -564,23 +561,23 @@ namespace IsraelHiking.DataAccess
             await SwitchIndices(currentIndex, newIndex, OSM_POIS_ALIAS);
         }
 
-        public Task UpdateHighwaysData(List<Feature> features)
+        public Task UpdateHighwaysData(List<IFeature> features)
         {
             return UpdateData(features, OSM_HIGHWAYS_ALIAS);
         }
 
-        public Task UpdatePointsOfInterestData(List<Feature> features)
+        public Task UpdatePointsOfInterestData(List<IFeature> features)
         {
             return UpdateData(features, OSM_POIS_ALIAS);
         }
 
-        private async Task UpdateData(List<Feature> features, string alias)
+        private async Task UpdateData(List<IFeature> features, string alias)
         {
             var result = await _elasticClient.BulkAsync(bulk =>
             {
                 foreach (var feature in features)
                 {
-                    bulk.Index<Feature>(i => i.Index(alias).Document(feature).Id(feature.GetId()));
+                    bulk.Index<IFeature>(i => i.Index(alias).Document(feature).Id(feature.GetId()));
                 }
                 return bulk;
             });
@@ -590,9 +587,9 @@ namespace IsraelHiking.DataAccess
             }
         }
 
-        public async Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest)
+        public async Task<List<IFeature>> GetHighways(Coordinate northEast, Coordinate southWest)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_HIGHWAYS_ALIAS)
                     .Size(5000)
                     .Query(
@@ -611,11 +608,11 @@ namespace IsraelHiking.DataAccess
             return new GeoCoordinate(coordinate.Y, coordinate.X);
         }
 
-        public async Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
+        public async Task<List<IFeature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
             var languages = language == Languages.ALL ? Languages.Array : new[] { language };
             languages = languages.Concat(new[] { Languages.ALL }).ToArray();
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000).Query(
                         q => q.GeoBoundingBox(
@@ -628,11 +625,11 @@ namespace IsraelHiking.DataAccess
             return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
-        public async Task<List<Feature>> GetAllPointsOfInterest(bool withDeleted)
+        public async Task<List<IFeature>> GetAllPointsOfInterest(bool withDeleted)
         {
             await _elasticClient.Indices.RefreshAsync(OSM_POIS_ALIAS);
             var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
-            var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
+            var response = await _elasticClient.SearchAsync<IFeature>(s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000)
                     .Scroll("10s")
                     .Query(q => q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories))
@@ -645,7 +642,7 @@ namespace IsraelHiking.DataAccess
             return list;
         }
 
-        private GeoBoundingBoxQueryDescriptor<Feature> ConvertToGeoBoundingBox(GeoBoundingBoxQueryDescriptor<Feature> b,
+        private GeoBoundingBoxQueryDescriptor<IFeature> ConvertToGeoBoundingBox(GeoBoundingBoxQueryDescriptor<IFeature> b,
             Coordinate northEast, Coordinate southWest)
         {
             return b.BoundingBox(
@@ -654,10 +651,10 @@ namespace IsraelHiking.DataAccess
             ).Field($"{PROPERTIES}.{FeatureAttributes.POI_GEOLOCATION}");
         }
 
-        public async Task<List<Feature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate, DateTime modifiedUntil)
+        public async Task<List<IFeature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate, DateTime modifiedUntil)
         {
             var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
-            var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
+            var response = await _elasticClient.SearchAsync<IFeature>(s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000)
                     .Scroll("10s")
                     .Query(q => q.DateRange(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_LAST_MODIFIED}").GreaterThan(lastModifiedDate).LessThanOrEquals(modifiedUntil))
@@ -666,22 +663,22 @@ namespace IsraelHiking.DataAccess
             return GetAllItemsByScrolling(response);
         }
 
-        public async Task<Feature> GetPointOfInterestById(string id, string source)
+        public async Task<IFeature> GetPointOfInterestById(string id, string source)
         {
             var fullId = GeoJsonExtensions.GetId(source, id);
-            var response = await _elasticClient.GetAsync<Feature>(fullId, r => r.Index(OSM_POIS_ALIAS));
+            var response = await _elasticClient.GetAsync<IFeature>(fullId, r => r.Index(OSM_POIS_ALIAS));
             return response.Source;
         }
 
         public Task DeletePointOfInterestById(string id, string source)
         {
             var fullId = GeoJsonExtensions.GetId(source, id);
-            return _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_POIS_ALIAS));
+            return _elasticClient.DeleteAsync<IFeature>(fullId, d => d.Index(OSM_POIS_ALIAS));
         }
 
-        public async Task<List<Feature>> GetExternalPoisBySource(string source)
+        public async Task<List<IFeature>> GetExternalPoisBySource(string source)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(EXTERNAL_POIS)
                     .Size(10000)
                     .Scroll("10s")
@@ -694,13 +691,13 @@ namespace IsraelHiking.DataAccess
             return features;
         }
 
-        public async Task<Feature> GetExternalPoiById(string id, string source)
+        public async Task<IFeature> GetExternalPoiById(string id, string source)
         {
-            var response = await _elasticClient.GetAsync<Feature>(GeoJsonExtensions.GetId(source, id), r => r.Index(EXTERNAL_POIS));
+            var response = await _elasticClient.GetAsync<IFeature>(GeoJsonExtensions.GetId(source, id), r => r.Index(EXTERNAL_POIS));
             return response.Source;
         }
 
-        public async Task AddExternalPois(List<Feature> features)
+        public async Task AddExternalPois(List<IFeature> features)
         {
             if ((await _elasticClient.Indices.ExistsAsync(EXTERNAL_POIS)).Exists == false)
             {
@@ -711,7 +708,7 @@ namespace IsraelHiking.DataAccess
 
         public Task DeleteExternalPoisBySource(string source)
         {
-            return _elasticClient.DeleteByQueryAsync<Feature>(d =>
+            return _elasticClient.DeleteByQueryAsync<IFeature>(d =>
                 d.Index(EXTERNAL_POIS)
                 .Query(q =>
                     q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
@@ -722,7 +719,7 @@ namespace IsraelHiking.DataAccess
         private Task CreateHighwaysIndex(string highwaysIndexName)
         {
             return _elasticClient.Indices.CreateAsync(highwaysIndexName,
-                c => c.Map<Feature>(m =>
+                c => c.Map<IFeature>(m =>
                     m.Dynamic(false)
                     .Properties(ps =>
                         ps.GeoShape(g =>
@@ -736,7 +733,7 @@ namespace IsraelHiking.DataAccess
         private Task CreatePointsOfInterestIndex(string poisIndexName)
         {
             return _elasticClient.Indices.CreateAsync(poisIndexName,
-                c => c.Map<Feature>(m =>
+                c => c.Map<IFeature>(m =>
                     m.Properties(ps =>
                         ps.Object<AttributesTable>(o => o
                             .Name(PROPERTIES)
@@ -754,9 +751,9 @@ namespace IsraelHiking.DataAccess
         private Task CreateExternalPoisIndex()
         {
             return _elasticClient.Indices.CreateAsync(EXTERNAL_POIS,
-                c => c.Map<Feature>(m =>
+                c => c.Map<IFeature>(m =>
                     m.Properties(fp =>
-                        fp.Object<AttributesTable>(a => a
+                        fp.Object<IAttributesTable>(a => a
                             .Name(PROPERTIES)
                             .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
                         )
@@ -784,10 +781,10 @@ namespace IsraelHiking.DataAccess
                 c => c.Map<ShareUrl>(m => m.AutoMap<ShareUrl>())
             );
         }
-        private async Task UpdateUsingPaging(List<Feature> features, string alias)
+        private async Task UpdateUsingPaging(List<IFeature> features, string alias)
         {
             _logger.LogInformation($"Starting indexing {features.Count} records");
-            var smallCacheList = new List<Feature>(PAGE_SIZE);
+            var smallCacheList = new List<IFeature>(PAGE_SIZE);
             int total = 0;
             foreach (var feature in features)
             {
@@ -924,7 +921,7 @@ namespace IsraelHiking.DataAccess
             var imageItem = await GetImageByUrl(url);
             if (imageItem != null)
             {
-                await _elasticClient.DeleteAsync<Feature>(imageItem.Hash, d => d.Index(IMAGES));
+                await _elasticClient.DeleteAsync<IFeature>(imageItem.Hash, d => d.Index(IMAGES));
             }
         }
 

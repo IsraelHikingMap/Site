@@ -14,12 +14,12 @@ namespace IsraelHiking.API.Executors
         /// </summary>
         /// <param name="osmEntities"></param>
         /// <returns>a list of preprocessed features</returns>
-        List<Feature> Preprocess(List<ICompleteOsmGeo> osmEntities);
+        List<IFeature> Preprocess(List<ICompleteOsmGeo> osmEntities);
         /// <summary>
         /// Preprocess highways into features - line strings
         /// </summary>
         /// <param name="highways"></param>
         /// <returns></returns>
-        List<Feature> Preprocess(List<CompleteWay> highways);
+        List<IFeature> Preprocess(List<CompleteWay> highways);
     }
 }

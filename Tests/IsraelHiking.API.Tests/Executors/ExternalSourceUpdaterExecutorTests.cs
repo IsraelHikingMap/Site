@@ -38,13 +38,13 @@ namespace IsraelHiking.API.Tests.Executors
         {
             const string sourceName = "sourceName";
             var adapter = Substitute.For<IPointsOfInterestAdapter>();
-            adapter.GetUpdates(Arg.Any<DateTime>()).Returns(new List<Feature>());
+            adapter.GetUpdates(Arg.Any<DateTime>()).Returns(new List<IFeature>());
             _pointsOfInterestAdapterFactory.GetBySource(sourceName).Returns(adapter);
-            _externalSourcesRepository.GetExternalPoisBySource(sourceName).Returns(new List<Feature>());
+            _externalSourcesRepository.GetExternalPoisBySource(sourceName).Returns(new List<IFeature>());
             
             _executor.UpdateSource(sourceName).Wait();
 
-            _externalSourcesRepository.Received(1).AddExternalPois(Arg.Any<List<Feature>>());
+            _externalSourcesRepository.Received(1).AddExternalPois(Arg.Any<List<IFeature>>());
         }
         
         [TestMethod]
@@ -54,13 +54,13 @@ namespace IsraelHiking.API.Tests.Executors
             var feature = new Feature(new Point(0, 0), new AttributesTable());
             feature.SetLastModified(new DateTime(0));
             var adapter = Substitute.For<IPointsOfInterestAdapter>();
-            adapter.GetUpdates(Arg.Any<DateTime>()).Returns(new List<Feature>());
+            adapter.GetUpdates(Arg.Any<DateTime>()).Returns(new List<IFeature>());
             _pointsOfInterestAdapterFactory.GetBySource(sourceName).Returns(adapter);
-            _externalSourcesRepository.GetExternalPoisBySource(sourceName).Returns(new List<Feature> {feature});
+            _externalSourcesRepository.GetExternalPoisBySource(sourceName).Returns(new List<IFeature> {feature});
             
             _executor.UpdateSource(sourceName).Wait();
 
-            _externalSourcesRepository.Received(1).AddExternalPois(Arg.Any<List<Feature>>());
+            _externalSourcesRepository.Received(1).AddExternalPois(Arg.Any<List<IFeature>>());
         }
 
         [TestMethod]
@@ -70,14 +70,14 @@ namespace IsraelHiking.API.Tests.Executors
             var adapter = Substitute.For<IPointsOfInterestAdapter>();
             var feature = new Feature(new Point(0, 0), new AttributesTable());
             feature.SetLocation(new Coordinate(0,0));
-            adapter.GetAll().Returns(new List<Feature> { feature});
+            adapter.GetAll().Returns(new List<IFeature> { feature});
             _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(new [] {0.0});
             _pointsOfInterestAdapterFactory.GetBySource(sourceName).Returns(adapter);
 
             _executor.RebuildSource(sourceName).Wait();
             
             _externalSourcesRepository.Received(1).DeleteExternalPoisBySource(sourceName);
-            _externalSourcesRepository.Received(1).AddExternalPois(Arg.Any<List<Feature>>());
+            _externalSourcesRepository.Received(1).AddExternalPois(Arg.Any<List<IFeature>>());
         }
     }
 }

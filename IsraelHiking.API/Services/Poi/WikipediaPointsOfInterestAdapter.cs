@@ -40,7 +40,7 @@ namespace IsraelHiking.API.Services.Poi
         public string Source => Sources.WIKIPEDIA;
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetAll()
+        public async Task<List<IFeature>> GetAll()
         {
             _logger.LogInformation("Start getting Wikipedia pages for indexing.");
             var allLinkedWikipedia = await _overpassTurboGateway.GetWikipediaLinkedTitles();
@@ -68,10 +68,10 @@ namespace IsraelHiking.API.Services.Poi
             }
 
             _logger.LogInformation($"Created {coordinatesList.Count} coordinates centers to fetch Wikipedia data.");
-            var allFeatures = new List<Feature>();
+            var allFeatures = new List<IFeature>();
             foreach (var language in Languages.Array)
             {
-                var lists = new ConcurrentBag<List<Feature>>();
+                var lists = new ConcurrentBag<List<IFeature>>();
                 await Task.Run(() =>
                 {
                     Parallel.ForEach(coordinatesList, new ParallelOptions { MaxDegreeOfParallelism = 10 }, (coordinate) =>
@@ -89,7 +89,7 @@ namespace IsraelHiking.API.Services.Poi
                 _logger.LogInformation($"Got {wikiFeaturesTitles.Count} wiki pages for language: {language}, getting full data");
                 var requests = 200;
                 var pageSize = wikiFeaturesTitles.Count / requests + 1;
-                lists = new ConcurrentBag<List<Feature>>();
+                lists = new ConcurrentBag<List<IFeature>>();
                 await Task.Run(() =>
                 {
                     Parallel.For(0, requests, new ParallelOptions { MaxDegreeOfParallelism = 10 }, (requestNumber) =>
@@ -109,7 +109,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetUpdates(DateTime lastModifiedDate)
+        public async Task<List<IFeature>> GetUpdates(DateTime lastModifiedDate)
         {
             var features = await GetAll();
             // The features with the invalid location might be added by editing an OSM element,

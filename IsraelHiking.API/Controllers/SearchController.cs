@@ -44,7 +44,7 @@ namespace IsraelHiking.API.Controllers
                 (term.EndsWith("\"") || term.StartsWith("״")))
             {
                 var exactFeatures = await _searchRepository.SearchExact(term.Substring(1, term.Length - 2), language);
-                return await Task.WhenAll(exactFeatures.OfType<IFeature>().ToList().Select(f => ConvertFromFeature(f, language)));
+                return await Task.WhenAll(exactFeatures.ToList().Select(f => ConvertFromFeature(f, language)));
             }
             if (term.Count(c => c == ',') == 1)
             {
@@ -57,11 +57,11 @@ namespace IsraelHiking.API.Controllers
                     var envelope = placesFeatures.First().Geometry.EnvelopeInternal;
                     var featuresWithinPlaces = await _searchRepository.SearchByLocation(
                         new Coordinate(envelope.MaxX, envelope.MaxY), new Coordinate(envelope.MinX, envelope.MinY), term, language);
-                    return await Task.WhenAll(featuresWithinPlaces.OfType<IFeature>().ToList().Select(f => ConvertFromFeature(f,language)));
+                    return await Task.WhenAll(featuresWithinPlaces.ToList().Select(f => ConvertFromFeature(f,language)));
                 }
             }
             var features = await _searchRepository.Search(term, language);
-            return await Task.WhenAll(features.OfType<IFeature>().ToList().Select(f => ConvertFromFeature(f, language)));
+            return await Task.WhenAll(features.ToList().Select(f => ConvertFromFeature(f, language)));
         }
 
         private async Task<SearchResultsPointOfInterest> ConvertFromFeature(IFeature feature, string language)

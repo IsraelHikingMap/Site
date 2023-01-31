@@ -89,7 +89,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestMethod]
         public void AddGate_NearNoWhere_ShouldSucceed()
         {
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature>());
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature>());
             
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
@@ -119,7 +119,7 @@ namespace IsraelHiking.API.Tests.Executors
                     .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y, Tags = new TagsCollection { {"tourism", "viewpoint"}}});
             }
             _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 1, Nodes = new long[] { 0, 1, 2 } });
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature> { feature });
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
                 LatLng = new LatLng(0, 1),
@@ -150,7 +150,7 @@ namespace IsraelHiking.API.Tests.Executors
                     .Returns(new Node {Longitude = coordinate.X, Latitude = coordinate.Y});
             }
             _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 1, Nodes = new long[] { 0, 1, 2 } });
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature> { feature });
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
                 LatLng = new LatLng(0, 1),
@@ -178,7 +178,7 @@ namespace IsraelHiking.API.Tests.Executors
                     .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 1, Nodes = new long[] { 0, 1, 2 } });
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature> { feature });
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
                 LatLng = new LatLng(0, 2.0001),
@@ -208,7 +208,7 @@ namespace IsraelHiking.API.Tests.Executors
                     .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 1, Nodes = new long[] { 0, 1, 2 } });
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature> { feature });
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
                 LatLng = new LatLng(0, 1),
@@ -238,7 +238,7 @@ namespace IsraelHiking.API.Tests.Executors
                     .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 1, Nodes = new long[] { 0, 1, 2 } });
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature> { feature });
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
                 LatLng = new LatLng(0.0001, 0.5),
@@ -280,7 +280,7 @@ namespace IsraelHiking.API.Tests.Executors
             }
             _authClient.GetWay(1).Returns(new Way { Id = 1, Version = 1, Nodes = new long[] { 0, 1, 2 } });
             _authClient.GetWay(2).Returns(new Way { Id = 2, Version = 1, Nodes = new long[] { 3, 1, 4 } });
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature, feature2 });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature> { feature, feature2 });
 
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
@@ -311,7 +311,7 @@ namespace IsraelHiking.API.Tests.Executors
                     .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(1).Returns(new Way { Id = 1, Version = 1, Nodes = new long[] { 0, 1, 2 } });
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature> { feature });
 
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
@@ -342,7 +342,7 @@ namespace IsraelHiking.API.Tests.Executors
                     .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(1).Returns(new Way { Id = 1, Version = 1, Nodes = new long[] { 0, 1, 2 } });
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature> { feature });
 
             Assert.ThrowsException<AggregateException>(() => _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
@@ -380,7 +380,7 @@ namespace IsraelHiking.API.Tests.Executors
             }
             _authClient.GetWay(1).Returns(new Way { Id = 1, Version = 1, Nodes = new long[] { 0, 1 } });
             _authClient.GetWay(2).Returns(new Way { Id = 2, Version = 1, Nodes = new long[] { 2, 3, 4, 5, 2 } });
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature, feature2 });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature> { feature, feature2 });
 
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
@@ -423,7 +423,7 @@ namespace IsraelHiking.API.Tests.Executors
                     .Returns(new Node { Longitude = coordinate.X, Latitude = coordinate.Y });
             }
             _authClient.GetWay(2).Returns(new Way { Id = 2, Version = 1, Nodes = new long[] { 2, 3, 4, 5, 2 } });
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature> { feature });
 
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {
@@ -454,7 +454,7 @@ namespace IsraelHiking.API.Tests.Executors
             }
             _authClient.GetWay(42).Returns(new Way { Id = 42, Version = 2, Nodes = new long[] { 0, 1, 2, 3 } });
             _authClient.GetCompleteWay(42).Returns(new CompleteWay());
-            _osmGeoJsonPreprocessorExecutor.Preprocess(Arg.Any<List<CompleteWay>>()).Returns(new List<Feature> {
+            _osmGeoJsonPreprocessorExecutor.Preprocess(Arg.Any<List<CompleteWay>>()).Returns(new List<IFeature> {
                 new Feature(new LineString(new[] {
                     new Coordinate(0,0),
                     new Coordinate(0.5,0),
@@ -466,7 +466,7 @@ namespace IsraelHiking.API.Tests.Executors
                     {FeatureAttributes.POI_VERSION, 2 }
                 })
             });
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature> { feature });
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature> { feature });
 
             _executor.Add(_authClient, new AddSimplePointOfInterestRequest
             {

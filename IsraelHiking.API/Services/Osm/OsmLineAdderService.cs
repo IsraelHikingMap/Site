@@ -168,7 +168,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="itmHighways"></param>
         /// <param name="highways"></param>
         private void AddIntersectingNodes(Coordinate previousCoordinate, Coordinate coordinate, List<Node> newWayNodes,
-            List<LineString> itmHighways, List<Feature> highways)
+            List<LineString> itmHighways, List<IFeature> highways)
         {
             var previousItmPoint = GetItmCoordinate(previousCoordinate);
             var lineSegment = _geometryFactory.CreateLineString(new [] { previousItmPoint.Coordinate, GetItmCoordinate(coordinate).Coordinate});
@@ -238,7 +238,7 @@ namespace IsraelHiking.API.Services.Osm
             return indexToInsert;
         }
 
-        private async Task<List<Feature>> GetHighwaysInArea(LineString line)
+        private async Task<List<IFeature>> GetHighwaysInArea(LineString line)
         {
             var northEast = _wgs84ItmMathTransform.Transform(line.Coordinates.Max(c => c.X), line.Coordinates.Max(c => c.Y));
             var southWest = _wgs84ItmMathTransform.Transform(line.Coordinates.Min(c => c.X), line.Coordinates.Min(c => c.Y));
@@ -261,7 +261,7 @@ namespace IsraelHiking.API.Services.Osm
             return new Point(northEast.x, northEast.y);
         }
 
-        private Feature GetClosetHighway(Coordinate coordinate, List<LineString> itmHighways, List<Feature> highways)
+        private IFeature GetClosetHighway(Coordinate coordinate, List<LineString> itmHighways, List<IFeature> highways)
         {
             var point = GetItmCoordinate(coordinate);
             if (!itmHighways.Any())
@@ -271,14 +271,12 @@ namespace IsraelHiking.API.Services.Osm
             var closestHighway = itmHighways.Where(l => l.Distance(point) <= _options.MaxDistanceToExistingLineForMerge)
                 .OrderBy(l => l.Distance(point))
                 .FirstOrDefault();
-            if (closestHighway == null)
-            {
-                return null;
-            }
-            return highways.First(h => h.GetOsmId() == closestHighway.GetOsmId());
+            return closestHighway == null 
+                ? null 
+                : highways.First(h => h.GetOsmId() == closestHighway.GetOsmId());
         }
 
-        private LineString ToItmLineString(Feature feature)
+        private LineString ToItmLineString(IFeature feature)
         {
             var itmCoordinates = feature.Geometry.Coordinates.Select(c => _wgs84ItmMathTransform.Transform(c.X, c.Y)).Select(c => new Coordinate(c.x, c.y)).ToArray();
             var lineString = new LineString(itmCoordinates);
@@ -374,7 +372,7 @@ namespace IsraelHiking.API.Services.Osm
             newWayNodes.Insert(itmLine.Coordinates.ToList().IndexOf(closestSegment.P1), newWayNodes.First());
         }
 
-        private Node CreateNodeFromExistingHighway(Feature closetHighway, int indexOnWay)
+        private Node CreateNodeFromExistingHighway(IFeature closetHighway, int indexOnWay)
         {
             var closestNodeId = long.Parse(((List<object>)closetHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[indexOnWay].ToString());
             return new Node

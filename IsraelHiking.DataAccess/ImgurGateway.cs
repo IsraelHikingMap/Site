@@ -2,7 +2,6 @@
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Text.Json.Serialization;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;

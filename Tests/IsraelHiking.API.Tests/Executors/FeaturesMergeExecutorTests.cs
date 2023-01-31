@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Tests.Executors
     {
         private IFeaturesMergeExecutor _executor;
 
-        private Feature CreateFeature(string id, double x, double y)
+        private IFeature CreateFeature(string id, double x, double y)
         {
             var feature = new Feature(new Point(x, y), new AttributesTable
             {
@@ -60,7 +60,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
         }
@@ -75,7 +75,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.MTB_NAME, "1");
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
         }
@@ -95,7 +95,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web1");
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(2, results.First().Attributes.GetNames().Count(n => n.StartsWith(FeatureAttributes.IMAGE_URL)));
@@ -114,7 +114,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_CATEGORY, Categories.HISTORIC);
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(2, results.Count);
         }
@@ -139,7 +139,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON_COLOR, "green");
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+            var results = _executor.Merge(new List<IFeature> { feature1 }, new List<IFeature> { feature2 });
 
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(Categories.INATURE, results.First().Attributes[FeatureAttributes.POI_CATEGORY]);
@@ -162,7 +162,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(2, results.Count);
         }
@@ -178,7 +178,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+            var results = _executor.Merge(new List<IFeature> { feature1 }, new List<IFeature> { feature2 });
 
             Assert.AreEqual(1, results.Count);
         }
@@ -195,7 +195,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.SetTitles();
             feature2.SetLocation(new Coordinate());
 
-            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+            var results = _executor.Merge(new List<IFeature> { feature1 }, new List<IFeature> { feature2 });
 
             Assert.AreEqual(2, results.Count);
         }
@@ -213,7 +213,7 @@ namespace IsraelHiking.API.Tests.Executors
             node3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "2");
             node3.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { node1, node2, node3 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { node1, node2, node3 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
         }
@@ -231,7 +231,7 @@ namespace IsraelHiking.API.Tests.Executors
             node3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "2");
             node3.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { node1, node2, node3 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { node1, node2, node3 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
         }
@@ -249,7 +249,7 @@ namespace IsraelHiking.API.Tests.Executors
             node3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "2");
             node3.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { node1, node2, node3 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { node1, node2, node3 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
         }
@@ -274,7 +274,7 @@ namespace IsraelHiking.API.Tests.Executors
             point.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             point.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { point, area }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { point, area }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue(results.First().Geometry is Polygon);
@@ -293,7 +293,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA);
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1 },  new List<Feature> { feature2 });
+            var results = _executor.Merge(new List<IFeature> { feature1 },  new List<IFeature> { feature2 });
 
             Assert.AreEqual(1, results.Count);
         }
@@ -335,7 +335,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature3.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2, feature3 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2, feature3 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
         }
@@ -367,7 +367,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate("highway", "residential");
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(OgcGeometryType.MultiLineString, results.First().Geometry.OgcGeometryType);
@@ -407,7 +407,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
             var mls = results.First().Geometry as MultiLineString;
@@ -452,7 +452,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
             var mls = results.First().Geometry as MultiPolygon;
@@ -489,7 +489,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
             var isValidOp = new IsValidOp(results.First().Geometry);
@@ -527,7 +527,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
             var isValidOp = new IsValidOp(results.First().Geometry);
@@ -565,7 +565,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
             var isValidOp = new IsValidOp(results.First().Geometry);
@@ -604,7 +604,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA);
             feature2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { feature1 } , new List<Feature> { feature2 });
+            var results = _executor.Merge(new List<IFeature> { feature1 } , new List<IFeature> { feature2 });
 
             Assert.AreEqual(1, results.Count);
             var mls = results.First().Geometry as MultiPolygon;
@@ -630,7 +630,7 @@ namespace IsraelHiking.API.Tests.Executors
             node3.SetTitles();
             node3.SetLocation(new Coordinate());
 
-            var results = _executor.Merge(new List<Feature> { node1, node2 }, new List<Feature> { node3 });
+            var results = _executor.Merge(new List<IFeature> { node1, node2 }, new List<IFeature> { node3 });
 
             Assert.AreEqual(2, results.Count);
         }
@@ -650,7 +650,7 @@ namespace IsraelHiking.API.Tests.Executors
             node.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
             node.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { way, node }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { way, node }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
         }
@@ -682,7 +682,7 @@ namespace IsraelHiking.API.Tests.Executors
             node3.Attributes.AddOrUpdate(hebrewDescriptionKey, "wiki description");
             node3.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { node1 }, new List<Feature> { node2, node3 });
+            var results = _executor.Merge(new List<IFeature> { node1 }, new List<IFeature> { node2, node3 });
 
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(importantDescription, results.First().Attributes[hebrewDescriptionKey].ToString());
@@ -704,7 +704,7 @@ namespace IsraelHiking.API.Tests.Executors
             node2.Attributes.AddOrUpdate("railway", "station");
             node2.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { node1, node2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { node1, node2 }, new List<IFeature>());
 
             Assert.AreEqual(2, results.Count);
         }
@@ -734,7 +734,7 @@ namespace IsraelHiking.API.Tests.Executors
             node4.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
             node4.SetTitles();
 
-            var results = _executor.Merge(new List<Feature> { node1, node2, node3, node4 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { node1, node2, node3, node4 }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
             var multiPoint = results.First().Geometry as MultiPoint;
@@ -767,7 +767,7 @@ namespace IsraelHiking.API.Tests.Executors
                 new Coordinate(0,0),
             }));
 
-            var results = _executor.Merge(new List<Feature>() { placeBoundary, placeNode }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { placeBoundary, placeNode }, new List<IFeature>());
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue(results.First().Geometry is Polygon);
@@ -812,7 +812,7 @@ namespace IsraelHiking.API.Tests.Executors
                 new Coordinate(-1,-1),
             }));
 
-            var results = _executor.Merge(new List<Feature> { placeBoundary, placeBoundary2, placeNode }, new List<Feature> ()).ToList();
+            var results = _executor.Merge(new List<IFeature> { placeBoundary, placeBoundary2, placeNode }, new List<IFeature> ()).ToList();
 
             Assert.AreEqual(1, results.Count);
         }
@@ -855,7 +855,7 @@ namespace IsraelHiking.API.Tests.Executors
                 new Coordinate(-1,-1),
             }));
 
-            var results = _executor.Merge(new List<Feature> { placeBoundary, placeBoundary2, placeNode }, new List<Feature>()).ToList();
+            var results = _executor.Merge(new List<IFeature> { placeBoundary, placeBoundary2, placeNode }, new List<IFeature>()).ToList();
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue(results.First().Geometry.IsValid);
@@ -873,7 +873,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate("highway", "track");
             feature2.SetTitles();
             feature2.Geometry = new LineString(new Coordinate[] { new Coordinate(0, 0), new Coordinate(1, 1) });
-            var results = _executor.Merge(new List<Feature> { feature1, feature2 }, new List<Feature>());
+            var results = _executor.Merge(new List<IFeature> { feature1, feature2 }, new List<IFeature>());
 
             Assert.AreEqual(2, results.Count);
         }
@@ -891,7 +891,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "website");
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "siu");
             feature2.SetTitles();
-            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+            var results = _executor.Merge(new List<IFeature> { feature1 }, new List<IFeature> { feature2 });
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL));
@@ -909,7 +909,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "website");
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "siu");
             feature2.SetTitles();
-            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+            var results = _executor.Merge(new List<IFeature> { feature1 }, new List<IFeature> { feature2 });
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL));
@@ -929,7 +929,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web2");
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "siu");
             feature2.SetTitles();
-            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+            var results = _executor.Merge(new List<IFeature> { feature1 }, new List<IFeature> { feature2 });
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL + "1"));
@@ -954,7 +954,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature3.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE, "web2");
             feature3.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL, "siu2");
             feature3.SetTitles();
-            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2, feature3 });
+            var results = _executor.Merge(new List<IFeature> { feature1 }, new List<IFeature> { feature2, feature3 });
 
             Assert.AreEqual(1, results.Count);
             Assert.IsTrue(results.First().Attributes.Exists(FeatureAttributes.POI_SOURCE_IMAGE_URL));
@@ -974,7 +974,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
             feature2.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION, "description");
             feature2.SetTitles();
-            var results = _executor.Merge(new List<Feature> { feature1 }, new List<Feature> { feature2 });
+            var results = _executor.Merge(new List<IFeature> { feature1 }, new List<IFeature> { feature2 });
 
             Assert.AreEqual(1, results.Count);
             Assert.IsFalse(results.First().Attributes.Exists(FeatureAttributes.DESCRIPTION));

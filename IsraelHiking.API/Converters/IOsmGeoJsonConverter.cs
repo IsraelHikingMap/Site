@@ -13,6 +13,6 @@ namespace IsraelHiking.API.Converters
         /// </summary>
         /// <param name="completeOsmGeo">The OSM element to convert</param>
         /// <returns>The GeoJson data</returns>
-        Feature ToGeoJson(ICompleteOsmGeo completeOsmGeo);
+        IFeature ToGeoJson(ICompleteOsmGeo completeOsmGeo);
     }
 }

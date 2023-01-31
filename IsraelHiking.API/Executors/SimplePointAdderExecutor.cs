@@ -110,7 +110,7 @@ namespace IsraelHiking.API.Executors
         /// <param name="osmGateway"></param>
         /// <param name="latLng"></param>
         /// <returns>The way from OSM and the equivalent feature, and also all the other closest highways</returns>
-        private async Task<(Way, Feature[])> GetClosestHighways(IAuthClient osmGateway, LatLng latLng)
+        private async Task<(Way, IFeature[])> GetClosestHighways(IAuthClient osmGateway, LatLng latLng)
         {
             var diff = 0.003; // get highways around 300 m radius not to miss highways (elastic bug?)
             var highways = await _highwaysRepository.GetHighways(new Coordinate(latLng.Lng + diff, latLng.Lat + diff),
@@ -169,7 +169,7 @@ namespace IsraelHiking.API.Executors
         /// <param name="latLng"></param>
         /// <param name="closestHighways"></param>
         /// <returns>The closest node, its index in the way and whether it is a junction node</returns>
-        private (Coordinate, int, long, bool) GetClosestNodeAndCheckIsJunction(LatLng latLng, Feature[] closestHighways)
+        private (Coordinate, int, long, bool) GetClosestNodeAndCheckIsJunction(LatLng latLng, IFeature[] closestHighways)
         {
             var coordinate = latLng.ToCoordinate();
             var closestHighway = closestHighways.First();
@@ -233,7 +233,7 @@ namespace IsraelHiking.API.Executors
             };
         }
 
-        private int GetIndexToInsert(int closetNodeIndex, Coordinate closestNodeCoordinate, Feature[] closestHighways, Coordinate newNodeCoordinate)
+        private int GetIndexToInsert(int closetNodeIndex, Coordinate closestNodeCoordinate, IFeature[] closestHighways, Coordinate newNodeCoordinate)
         {
             // Default location is before the closest node
             var indexToInsert = closetNodeIndex;
@@ -272,7 +272,7 @@ namespace IsraelHiking.API.Executors
             return indexToInsert;
         }
 
-        private OsmChange CreateUpdateWayChangeFromData(Way way, int indexToInsert, Node newNode, Feature closestHighway)
+        private OsmChange CreateUpdateWayChangeFromData(Way way, int indexToInsert, Node newNode, IFeature closestHighway)
         {
             if (indexToInsert != 0 && indexToInsert != way.Nodes.Length)
             {

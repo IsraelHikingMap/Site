@@ -151,7 +151,7 @@ namespace IsraelHiking.Common.Extensions
             {
                 return string.Empty;
             }
-            if (!(feature.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable titleByLanguage))
+            if (feature.Attributes[FeatureAttributes.POI_NAMES] is not IAttributesTable titleByLanguage)
             {
                 return string.Empty;
             }
@@ -203,12 +203,9 @@ namespace IsraelHiking.Common.Extensions
 
         public static string[] GetTitles(this IFeature feature)
         {
-            if (!(feature.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable titleByLanguage))
-            {
-                return new string[0];
-            }
-            
-            return titleByLanguage.GetValues().Select(GetStringListFromAttributeValue).SelectMany(v => v).Distinct().ToArray();
+            return feature.Attributes[FeatureAttributes.POI_NAMES] is not IAttributesTable titleByLanguage 
+                ? Array.Empty<string>() 
+                : titleByLanguage.GetValues().Select(GetStringListFromAttributeValue).SelectMany(v => v).Distinct().ToArray();
         }
 
         public static List<string> GetStringListFromAttributeValue(object value)
@@ -227,6 +224,9 @@ namespace IsraelHiking.Common.Extensions
                     break;
                 case string str:
                     titles.Add(str);
+                    break;
+                case object[] objectArray:
+                    titles.AddRange(objectArray.Select(o => o.ToString()).ToList());
                     break;
             }
             return titles;
@@ -293,17 +293,15 @@ namespace IsraelHiking.Common.Extensions
 
         public static Coordinate GetLocation(this IFeature feature)
         {
-            var locationTable = feature.Attributes[FeatureAttributes.POI_GEOLOCATION] as AttributesTable;
-            if (locationTable == null)
+            if (feature.Attributes[FeatureAttributes.POI_GEOLOCATION] is not IAttributesTable locationTable)
             {
                 throw new InvalidOperationException($"Missing location for feature with id {feature.GetId()}");
             }
-            var location = new Coordinate();
-            if (locationTable != null)
+            var location = new Coordinate
             {
-                location.Y = double.Parse(locationTable[FeatureAttributes.LAT].ToString());
-                location.X = double.Parse(locationTable[FeatureAttributes.LON].ToString());
-            }
+                Y = double.Parse(locationTable[FeatureAttributes.LAT].ToString()),
+                X = double.Parse(locationTable[FeatureAttributes.LON].ToString())
+            };
             return location;
         }
 

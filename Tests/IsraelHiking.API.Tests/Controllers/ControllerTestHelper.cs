@@ -1,8 +1,6 @@
-﻿using IsraelHiking.Common;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 
 namespace IsraelHiking.API.Tests.Controllers

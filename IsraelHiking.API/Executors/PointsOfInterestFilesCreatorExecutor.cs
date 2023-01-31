@@ -52,7 +52,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc/>
-        public void CreateSiteMapXmlFile(List<Feature> features)
+        public void CreateSiteMapXmlFile(List<IFeature> features)
         {
             using var fileStream = _fileSystemHelper.CreateWriteStream(Path.Combine(_environment.WebRootPath, "sitemap.xml"));
             var list = features.Where(f => Languages.Array.Any(l => f.IsProperPoi(l))).Select(feature =>
@@ -75,7 +75,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc/>
-        public void CreateOfflinePoisFile(List<Feature> features)
+        public void CreateOfflinePoisFile(List<IFeature> features)
         {
             using var outputMemStream = new MemoryStream();
             using var zipStream = new ZipOutputStream(outputMemStream);

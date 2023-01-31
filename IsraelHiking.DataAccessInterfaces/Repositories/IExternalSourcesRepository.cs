@@ -6,9 +6,9 @@ namespace IsraelHiking.DataAccessInterfaces.Repositories
 {
     public interface IExternalSourcesRepository
     {
-        Task<List<Feature>> GetExternalPoisBySource(string source);
-        Task<Feature> GetExternalPoiById(string id, string source);
-        Task AddExternalPois(List<Feature> features);
+        Task<List<IFeature>> GetExternalPoisBySource(string source);
+        Task<IFeature> GetExternalPoiById(string id, string source);
+        Task AddExternalPois(List<IFeature> features);
         Task DeleteExternalPoisBySource(string source);
     }
 }

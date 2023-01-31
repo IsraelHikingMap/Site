@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Net.Http;
@@ -24,7 +23,6 @@ using Microsoft.OpenApi.Models;
 using NeoSmart.Caching.Sqlite;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
 using NetTopologySuite.IO.Converters;
 using NLog.Web;
 using OsmSharp.IO.API;
