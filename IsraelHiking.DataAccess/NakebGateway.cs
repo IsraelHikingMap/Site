@@ -14,19 +14,6 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess
 {
-    public class DateTimeConverterUsingDateTimeParse : JsonConverter<DateTime>
-    {
-        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            return DateTime.Parse(reader.GetString() ?? string.Empty);
-        }
-
-        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value.ToString());
-        }
-    }
-    
     internal class JsonNakebItem
     {
         [JsonPropertyName("id")]
@@ -36,7 +23,7 @@ namespace IsraelHiking.DataAccess
         [JsonPropertyName("title")]
         public string Title { get; set; }
         [JsonPropertyName("last_modified")]
-        [JsonConverter(typeof(DateTimeConverterUsingDateTimeParse))]
+        [JsonConverter(typeof(DateTimeConverter))]
         public DateTime LastModified { get; set; }
     }
 

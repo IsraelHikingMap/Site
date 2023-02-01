@@ -8,6 +8,7 @@ using IsraelHiking.API;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.Web;
@@ -90,15 +91,8 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
         options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
     }).AddJsonOptions(options => {
         options.JsonSerializerOptions.Converters.Add(new GeoJsonConverterFactory());
+        options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
     });
-        /* HM TODO: fix/add this
-        AddNewtonsoftJson(options =>
-    {
-        options.SerializerSettings.Converters.Add(new IsoDateTimeConverter
-        {
-            DateTimeStyles = DateTimeStyles.AdjustToUniversal
-        });
-    }); */
     services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

@@ -238,12 +238,13 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Get a POI by id and source
+        /// Get POIs that were updated between lastModified and modifiedUntil or now if not provided
         /// </summary>
         /// <param name="lastModified">Start date for updates</param>
         /// <param name="modifiedUntil">End date for updates</param>
         /// <returns></returns>
-        [Route("updates/{lastModified}/{modifiedUntil?}")]
+        [Route("updates/{lastModified}/")]
+        [Route("updates/{lastModified}/{modifiedUntil}")]
         [HttpGet]
         public async Task<UpdatesResponse> GetPointOfInterestUpdates(DateTime lastModified, DateTime? modifiedUntil)
         {
