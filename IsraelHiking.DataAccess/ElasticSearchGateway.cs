@@ -16,7 +16,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -59,7 +58,7 @@ public class DynamicDictionaryConverter : JsonConverter<DynamicDictionary>
 }
 
 internal class ExceptionConverter : JsonConverter<Exception>
-	{
+{
 		private static List<Dictionary<string, object>> FlattenExceptions(Exception e)
 		{
 			var maxExceptions = 20;
@@ -160,7 +159,7 @@ internal class ExceptionConverter : JsonConverter<Exception>
 			}
 			writer.WriteEndArray();
 		}
-	}
+    }
 
 public class SystemTextJsonSerializer : IElasticsearchSerializer
 {
@@ -245,12 +244,12 @@ public class SystemTextJsonSerializer : IElasticsearchSerializer
         using var writer = new Utf8JsonWriter(stream);
         if (data == null)
             JsonSerializer.Serialize(writer, null, typeof(object), GetFormatting(formatting));
-        //TODO validate if we can avoid boxing by checking if data is typeof(object)
         else
             JsonSerializer.Serialize(writer, data, data.GetType(), GetFormatting(formatting));
     }
 
-    public async Task SerializeAsync<T>(T data, Stream stream, SerializationFormatting formatting = SerializationFormatting.None,
+    public async Task SerializeAsync<T>(T data, Stream stream,
+        SerializationFormatting formatting = SerializationFormatting.None,
         CancellationToken cancellationToken = default
     )
     {
@@ -264,7 +263,6 @@ public class SystemTextJsonSerializer : IElasticsearchSerializer
                 .ConfigureAwait(false);
     }
 
-    //TODO return ValueTask, breaking change? probably 8.0
     public Task<object> DeserializeAsync(Type type, Stream stream, CancellationToken cancellationToken = default)
     {
         if (TryReturnDefault(stream, out object deserialize)) return Task.FromResult(deserialize);

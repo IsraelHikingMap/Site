@@ -15,7 +15,6 @@ using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.IO.API;
 using OsmSharp.Tags;
-using ProjNet.CoordinateSystems.Transformations;
 using System;
 using System.Collections.Generic;
 using System.IO;
