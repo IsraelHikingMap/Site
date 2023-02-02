@@ -63,7 +63,7 @@ export class SearchComponent extends BaseMapComponent {
     public searchFrom: FormControl<string | SearchResultsPointOfInterest>;
     public searchTo: FormControl<string | SearchResultsPointOfInterest>;
     public hasFocus: boolean;
-    public hideCoordinates: boolean;
+    public showCoordinates: boolean;
     public directional: DirectionalContext;
 
     private requestsQueue: SearchRequestQueueItem[];
