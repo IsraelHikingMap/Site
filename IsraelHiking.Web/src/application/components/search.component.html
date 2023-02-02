@@ -68,14 +68,24 @@
                type="circle"
                source="directional-source"
                [filter]="['==', 'class', 'start']"
-               [paint]="{ 'circle-stroke-color': '#43a047', 'circle-radius': 7, 'circle-stroke-width': 3, 'circle-color': 'blue' }"
+               [paint]="{ 
+                    'circle-stroke-color': '#43a047', 
+                    'circle-radius': 7, 
+                    'circle-stroke-width': 4, 
+                    'circle-color': 'magenta' 
+                }"
                (layerClick)="openDirectionalSearchPopup($event)">
     </mgl-layer>
     <mgl-layer id="directional-layer-end"
                type="circle"
                source="directional-source"
                [filter]="['==', 'class', 'end']"
-               [paint]="{ 'circle-stroke-color': 'red', 'circle-radius': 7, 'circle-stroke-width': 3, 'circle-color': 'blue' }"
+               [paint]="{ 
+                    'circle-stroke-color': 'red', 
+                    'circle-radius': 7, 
+                    'circle-stroke-width': 4, 
+                    'circle-color': 'magenta' 
+                }"
                (layerClick)="openDirectionalSearchPopup($event)">
     </mgl-layer>
     <mgl-popup [lngLat]="directional.overlayLocation" *ngIf="directional.overlayLocation" [closeOnClick]="true">
