@@ -115,7 +115,7 @@ export class FileService {
 
     public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
         try {
-            if (isOffline) {
+            if (isOffline || (this.runningContextService.isCapacitor && url.startsWith("."))) {
                 let styleFileName = last(url.split("/"));
                 let styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
                 return JSON.parse(styleText) as StyleSpecification;
