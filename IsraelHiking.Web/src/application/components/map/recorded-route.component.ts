@@ -25,13 +25,15 @@ export class RecordedRouteComponent extends BaseMapComponent {
     public recordedRouteSegments: GeoJSON.FeatureCollection<GeoJSON.LineString>[];
     public startPointGeoJson: GeoJSON.Feature<GeoJSON.Point>;
 
+    private lastSplit: number;
+
     constructor(resources: ResourcesService,
         private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
 
         this.recordedRouteSegments = [];
-
+        this.lastSplit = 0;
         this.startPointGeoJson = {
             type: "Feature",
             geometry: {
@@ -60,6 +62,7 @@ export class RecordedRouteComponent extends BaseMapComponent {
         let recording = this.ngRedux.getState().recordedRouteState.route;
         if (recording == null || recording.latlngs.length === 0) {
             this.recordedRouteSegments = [];
+            this.lastSplit = 0;
             this.startPointGeoJson = {
                 type: "Feature",
                 geometry: {
@@ -82,11 +85,9 @@ export class RecordedRouteComponent extends BaseMapComponent {
             };
         }
 
-        if (latlngs.length / RecordedRouteComponent.NUMBER_OF_POINTS_IN_ROUTE_SPLIT <= this.recordedRouteSegments.length) {
-            this.recordedRouteSegments.pop(); // remove last segmenet
-        }
-        latlngs.splice(0, RecordedRouteComponent.NUMBER_OF_POINTS_IN_ROUTE_SPLIT * this.recordedRouteSegments.length - 1);
-
+        // Refresh the last segment with current data
+        latlngs.splice(0, this.lastSplit);
+        this.recordedRouteSegments.pop();
         this.recordedRouteSegments.push({
             type: "FeatureCollection",
             features: [{
@@ -98,5 +99,20 @@ export class RecordedRouteComponent extends BaseMapComponent {
                 properties: {}
             }]
         });
+        if (recording.latlngs.length - this.lastSplit > RecordedRouteComponent.NUMBER_OF_POINTS_IN_ROUTE_SPLIT) {
+            // In case the segment is too long, update last split point and create an empty segment to allow the next updates to refresh it
+            this.lastSplit = recording.latlngs.length - 1;
+            this.recordedRouteSegments.push({
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: []
+                    },
+                    properties: {}
+                }]
+            });
+        }
     }
 }
