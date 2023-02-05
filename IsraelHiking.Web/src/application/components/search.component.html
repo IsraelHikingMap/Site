@@ -49,6 +49,26 @@
         <mgl-feature id="2" [properties]="{ 'class': 'end' }" [geometry]="{ type: 'Point', coordinates: directional.routeCoordinates[directional.routeCoordinates.length - 1] }">
         </mgl-feature>
     </mgl-geojson-source>
+    <mgl-layer id="directional-layer-left"
+        type="line"
+        source="directional-source"
+        [paint]="{
+            'line-color': 'magenta',
+            'line-offset': -5,
+            'line-opacity': 0.5,
+            'line-width': 2
+        }">
+    </mgl-layer>
+    <mgl-layer id="directional-layer-right"
+        type="line"
+        source="directional-source"
+        [paint]="{
+            'line-color': 'magenta',
+            'line-offset': 5,
+            'line-opacity': 0.5,
+            'line-width': 2
+        }">
+    </mgl-layer>
     <mgl-layer id="directional-layer"
                 type="symbol"
                 source="directional-source"

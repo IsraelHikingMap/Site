@@ -77,7 +77,27 @@
             }"
             [filter]="['==', '$type', 'Polygon']">
 </mgl-layer>
-<mgl-layer id="selected-poi-line"
+<mgl-layer id="selected-poi-left"
+            type="line"
+            source="selected-poi"
+            [paint]="{
+                'line-color': 'magenta',
+                'line-offset': -5,
+                'line-opacity': 0.5,
+                'line-width': 2
+            }">
+</mgl-layer>
+<mgl-layer id="selected-poi-right"
+            type="line"
+            source="selected-poi"
+            [paint]="{
+                'line-color': 'magenta',
+                'line-offset': 5,
+                'line-opacity': 0.5,
+                'line-width': 2
+            }">
+</mgl-layer>
+<mgl-layer id="selected-poi-arrows"
             type="symbol"
             source="selected-poi"
             [layout]="{
