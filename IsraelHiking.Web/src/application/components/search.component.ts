@@ -239,7 +239,8 @@ export class SearchComponent extends BaseMapComponent {
 
     public convertToRoute() {
         let route = this.routesFactory.createRouteData(this.directional.routeTitle);
-        route.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(this.directional.latlngs as LatLngAltTime[], this.routingType);
+        route.segments = GpxDataContainerConverterService
+            .getSegmentsFromLatlngs(this.directional.latlngs as LatLngAltTime[], this.routingType);
         this.ngRedux.dispatch(new AddRouteAction({
             routeData: route
         }));
