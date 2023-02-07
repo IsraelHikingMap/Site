@@ -14,7 +14,7 @@ import { ApplicationState, RecordedRoute } from "../../models/models";
 })
 export class RecordedRouteComponent extends BaseMapComponent {
 
-    static readonly NUMBER_OF_POINTS_IN_ROUTE_SPLIT = 4000;
+    static readonly NUMBER_OF_POINTS_IN_ROUTE_SPLIT = 100;
 
     @Select((state: ApplicationState) => state.recordedRouteState.isAddingPoi)
     public isAddingPoi$: Observable<boolean>;
@@ -23,6 +23,7 @@ export class RecordedRouteComponent extends BaseMapComponent {
     public recordedRoute$: Observable<RecordedRoute>;
 
     public recordedRouteSegments: GeoJSON.FeatureCollection<GeoJSON.LineString>[];
+    public lastRouteSegment: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public startPointGeoJson: GeoJSON.Feature<GeoJSON.Point>;
 
     private lastSplit: number;
@@ -87,8 +88,7 @@ export class RecordedRouteComponent extends BaseMapComponent {
 
         // Refresh the last segment with current data
         latlngs.splice(0, this.lastSplit);
-        this.recordedRouteSegments.pop();
-        this.recordedRouteSegments.push({
+        let currentSegment = {
             type: "FeatureCollection",
             features: [{
                 type: "Feature",
@@ -98,11 +98,14 @@ export class RecordedRouteComponent extends BaseMapComponent {
                 },
                 properties: {}
             }]
-        });
-        if (recording.latlngs.length - this.lastSplit > RecordedRouteComponent.NUMBER_OF_POINTS_IN_ROUTE_SPLIT) {
-            // In case the segment is too long, update last split point and create an empty segment to allow the next updates to refresh it
+        } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
+        if (recording.latlngs.length - this.lastSplit <= RecordedRouteComponent.NUMBER_OF_POINTS_IN_ROUTE_SPLIT) {
+            this.lastRouteSegment = currentSegment;
+        } else {
+            // In case the segment is too long, update last split point, move the current segment to the list and create an empty segment
             this.lastSplit = recording.latlngs.length - 1;
-            this.recordedRouteSegments.push({
+            this.recordedRouteSegments.push(currentSegment);
+            this.lastRouteSegment = {
                 type: "FeatureCollection",
                 features: [{
                     type: "Feature",
@@ -112,7 +115,7 @@ export class RecordedRouteComponent extends BaseMapComponent {
                     },
                     properties: {}
                 }]
-            });
+            };
         }
     }
 }
