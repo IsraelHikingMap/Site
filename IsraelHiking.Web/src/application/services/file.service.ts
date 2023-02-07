@@ -120,7 +120,8 @@ export class FileService {
                 let styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
                 return JSON.parse(styleText) as StyleSpecification;
             }
-            return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
+            let response = await fetch(url);
+            return await response.json();
         } catch (ex) {
             this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {
