@@ -14,7 +14,7 @@ import { ApplicationState, RecordedRoute } from "../../models/models";
 })
 export class RecordedRouteComponent extends BaseMapComponent {
 
-    static readonly NUMBER_OF_POINTS_IN_ROUTE_SPLIT = 100;
+    static readonly NUMBER_OF_POINTS_IN_ROUTE_SPLIT = 4000;
 
     @Select((state: ApplicationState) => state.recordedRouteState.isAddingPoi)
     public isAddingPoi$: Observable<boolean>;
