@@ -7,7 +7,7 @@ export type { MarkerData } from "./marker-data";
 export type { RouteData, RouteEditStateType } from "./route-data";
 export type { RouteSegmentData, RoutingType } from "./route-segment-data";
 export type { ShareUrl } from "./share-url";
-export type { Location } from "./location";
+export type { LocationState } from "./location-state";
 export type { Trace, TraceVisibility } from "./trace";
 export type { OsmUserDetails } from "./osm-user-details";
 export type { UserInfo } from "./user-info";
@@ -18,7 +18,7 @@ export type { Language, LanguageCode } from "./language";
 export type { RecordedRoute } from "./recorded-route";
 // states:
 export type { ApplicationState } from "./state/application-state";
-export type { Configuration, BatteryOptimizationType } from "./state/configuration";
+export type { ConfigurationState, BatteryOptimizationType } from "./state/configuration-state";
 export type { TracesState } from "./state/traces-state";
 export type { LayersState } from "./state/layers-state";
 export type { ShareUrlsState } from "./state/share-urls-state";

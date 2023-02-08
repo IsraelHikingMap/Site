@@ -23,6 +23,8 @@ export const initialState =
             isGotLostWarnings: false,
             isShowBatteryConfirmation: true,
             isShowIntro: true,
+            isShowKmMarker: false,
+            isShowSlope: false,
             version: "9.16",
             language: {
                 code: "he",

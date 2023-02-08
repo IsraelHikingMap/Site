@@ -2,21 +2,24 @@ import { Action } from "redux";
 import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
 
 import { initialState, BaseAction } from "./initial-state";
-import type { Configuration, Language } from "../models/models";
-import { BatteryOptimizationType } from "application/models/state/configuration";
+import type { ConfigurationState, Language, BatteryOptimizationType } from "../models/models";
 
-const IS_BATTERY_OPTIMIZATION_TOGGLE = "IS_BATTERY_OPTIMIZATION_TOGGLE";
-const IS_AUTOMATIC_RECORDING_UPLOAD_TOGGLE = "IS_AUTOMATIC_RECORDING_UPLOAD_TOGGLE";
-const IS_GOT_LOST_WARNINGS_TOGGLE = "IS_GOT_LOST_WARNINGS_TOGGLE";
+const TOGGLE_IS_BATTERY_OPTIMIZATION = "TOGGLE_IS_BATTERY_OPTIMIZATION";
+const TOGGLE_IS_AUTOMATIC_RECORDING_UPLOAD = "TOGGLE_IS_AUTOMATIC_RECORDING_UPLOAD";
+const TOGGLE_IS_GOT_LOST_WARNINGS = "TOGGLE_IS_GOT_LOST_WARNINGS";
+const TOGGLE_IS_SHOW_SLOPE = "TOGGLE_IS_SHOW_SLOPE";
+const TOGGLE_IS_SHOW_KM_MARKERS = "TOGGLE_IS_SHOW_KM_MARKERS";
 const STOP_SHOW_BATTERY_CONFIRMATION = "STOP_SHOW_BATTERY_CONFIRMATION";
 const STOP_SHOW_INTRO = "STOP_SHOW_INTRO";
 const SET_LANGUAGE = "SET_LANGUAGE";
 const SET_BATTERY_OPTIMIZATION_TYPE = "SET_BATTERY_OPTIMIZATION_TYPE";
 
 export class ConfigurationActions {
-    public static readonly toggleIsBatteryOptimizationAction: Action = { type: IS_BATTERY_OPTIMIZATION_TOGGLE };
-    public static readonly toggleIsAutomaticRecordingUploadAction: Action = { type: IS_AUTOMATIC_RECORDING_UPLOAD_TOGGLE };
-    public static readonly toggleIsGotLostWarningsAction: Action = { type: IS_GOT_LOST_WARNINGS_TOGGLE };
+    public static readonly toggleIsBatteryOptimizationAction: Action = { type: TOGGLE_IS_BATTERY_OPTIMIZATION };
+    public static readonly toggleIsAutomaticRecordingUploadAction: Action = { type: TOGGLE_IS_AUTOMATIC_RECORDING_UPLOAD };
+    public static readonly toggleIsGotLostWarningsAction: Action = { type: TOGGLE_IS_GOT_LOST_WARNINGS };
+    public static readonly toggleIsShowSlopeAction: Action = { type: TOGGLE_IS_SHOW_SLOPE };
+    public static readonly toggleIsShowKmMarkersAction: Action = { type: TOGGLE_IS_SHOW_KM_MARKERS };
     public static readonly stopShowBatteryConfirmationAction: Action = { type: STOP_SHOW_BATTERY_CONFIRMATION };
     public static readonly stopShowIntroAction: Action = { type: STOP_SHOW_INTRO };
 }
@@ -43,31 +46,47 @@ export class SetBatteryOptimizationTypeAction extends BaseAction<SetBatteryOptim
 
 class ConfigurationReducer {
     @ReduxAction(SET_BATTERY_OPTIMIZATION_TYPE)
-    public toggleBatteryOptimization(lastState: Configuration, action: SetBatteryOptimizationTypeAction): Configuration {
+    public toggleBatteryOptimization(lastState: ConfigurationState, action: SetBatteryOptimizationTypeAction): ConfigurationState {
         return {
             ...lastState,
             batteryOptimizationType: action.payload.batteryOptimizationType
         };
     }
 
-    @ReduxAction(IS_AUTOMATIC_RECORDING_UPLOAD_TOGGLE)
-    public toggleAutomaticRecordingUpload(lastState: Configuration, _: Action): Configuration {
+    @ReduxAction(TOGGLE_IS_AUTOMATIC_RECORDING_UPLOAD)
+    public toggleAutomaticRecordingUpload(lastState: ConfigurationState, _: Action): ConfigurationState {
         return {
             ...lastState,
             isAutomaticRecordingUpload: !lastState.isAutomaticRecordingUpload
         };
     }
 
-    @ReduxAction(IS_GOT_LOST_WARNINGS_TOGGLE)
-    public toggleGotLostWarnings(lastState: Configuration, _: Action): Configuration {
+    @ReduxAction(TOGGLE_IS_GOT_LOST_WARNINGS)
+    public toggleGotLostWarnings(lastState: ConfigurationState, _: Action): ConfigurationState {
         return {
             ...lastState,
             isGotLostWarnings: !lastState.isGotLostWarnings
         };
     }
 
+    @ReduxAction(TOGGLE_IS_SHOW_SLOPE)
+    public toggleIsShowSlope(lastState: ConfigurationState, _: Action): ConfigurationState {
+        return {
+            ...lastState,
+            isShowSlope: !lastState.isShowSlope
+        };
+    }
+
+    @ReduxAction(TOGGLE_IS_SHOW_KM_MARKERS)
+    public toggleIsShowKmMarkers(lastState: ConfigurationState, _: Action): ConfigurationState {
+        return {
+            ...lastState,
+            isShowKmMarker: !lastState.isShowKmMarker
+        };
+    }
+
     @ReduxAction(STOP_SHOW_BATTERY_CONFIRMATION)
-    public stopShowingBatteryConfirmation(lastState: Configuration, _: Action): Configuration {
+    public stopShowingBatteryConfirmation(lastState: ConfigurationState, _: Action): ConfigurationState {
         return {
             ...lastState,
             isShowBatteryConfirmation: false
@@ -75,7 +94,7 @@ class ConfigurationReducer {
     }
 
     @ReduxAction(STOP_SHOW_INTRO)
-    public stopShowingIntro(lastState: Configuration, _: Action): Configuration {
+    public stopShowingIntro(lastState: ConfigurationState, _: Action): ConfigurationState {
         return {
             ...lastState,
             isShowIntro: false
@@ -83,7 +102,7 @@ class ConfigurationReducer {
     }
 
     @ReduxAction(SET_LANGUAGE)
-    public setLanugage(lastState: Configuration, action: SetLanguageAction): Configuration {
+    public setLanugage(lastState: ConfigurationState, action: SetLanguageAction): ConfigurationState {
         return {
             ...lastState,
             language: action.payload.language
