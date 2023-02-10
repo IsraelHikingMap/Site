@@ -742,7 +742,8 @@ describe("Poi Service", () => {
             expect(calls.first().args[0].payload.category.items[0].iconColorCategory.label).toBe("label2");
     })));
 
-    it("should sync categories when categories are not the same but ignore visibility", (inject([PoiService, HttpTestingController, RunningContextService],
+    it("should sync categories when categories are not the same but ignore visibility",
+        (inject([PoiService, HttpTestingController, RunningContextService],
         async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
             MockNgRedux.store.getState = () => ({
                 layersState: {

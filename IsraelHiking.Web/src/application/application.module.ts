@@ -154,6 +154,7 @@ import { ApplicationStateComponent } from "./components/application-state.compon
 import { LayersViewComponent } from "./components/map/layers-view.component";
 import { RoutesComponent } from "./components/map/routes.component";
 import { TracesComponent } from "./components/map/traces.component";
+import { RecordedRouteComponent } from "./components/map/recorded-route.component";
 import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
 import { SecuredImageComponent } from "./components/secured-image.component";
 import { CategoriesGroupComponent } from "./components/sidebar/categories-group.component";
@@ -310,6 +311,7 @@ const initializeApplication = (injector: Injector) => async () => {
             LayersViewComponent,
             RoutesComponent,
             TracesComponent,
+            RecordedRouteComponent,
             AutomaticLayerPresentationComponent,
             SecuredImageComponent,
             CategoriesGroupComponent,

@@ -2,8 +2,8 @@
 
 import type {
     RouteData,
-    Configuration,
-    Location,
+    ConfigurationState,
+    LocationState,
     RouteEditingState,
     RecordedRouteState,
     TracesState,
@@ -18,8 +18,8 @@ import type {
 } from "../models";
 
 export type ApplicationState = {
-    configuration: Configuration;
-    location: Location;
+    configuration: ConfigurationState;
+    location: LocationState;
     routes: StateWithHistory<RouteData[]>;
     routeEditingState: RouteEditingState;
     recordedRouteState: RecordedRouteState;

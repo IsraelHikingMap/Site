@@ -115,12 +115,13 @@ export class FileService {
 
     public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
         try {
-            if (isOffline) {
+            if (isOffline || (this.runningContextService.isCapacitor && url.startsWith("."))) {
                 let styleFileName = last(url.split("/"));
                 let styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
                 return JSON.parse(styleText) as StyleSpecification;
             }
-            return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
+            let response = await fetch(url);
+            return await response.json();
         } catch (ex) {
             this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {

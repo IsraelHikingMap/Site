@@ -12,7 +12,7 @@ import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
 import { SetLocationAction } from "../../reducers/location.reducer";
-import type { ApplicationState, Location } from "../../models/models";
+import type { ApplicationState, LocationState } from "../../models/models";
 
 @Component({
     selector: "main-map",
@@ -37,7 +37,7 @@ export class MainMapComponent extends BaseMapComponent {
     @ViewChildren("bottomRightControl", { read: ElementRef })
     public bottomRightControls: QueryList<ElementRef>;
 
-    public location: Location;
+    public location: LocationState;
     public initialStyle: StyleSpecification;
     private isTerrainOn: boolean;
 

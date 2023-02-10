@@ -1,4 +1,4 @@
-﻿export type Location = {
+﻿export type LocationState = {
     latitude: number;
     longitude: number;
     zoom: number;

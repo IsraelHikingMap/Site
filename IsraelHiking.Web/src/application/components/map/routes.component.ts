@@ -13,7 +13,7 @@ import { FileService } from "../../services/file.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
 import { Urls } from "../../urls";
-import type { LatLngAlt, ApplicationState, RouteData, RecordedRoute } from "../../models/models";
+import type { LatLngAlt, ApplicationState, RouteData } from "../../models/models";
 
 type RouteViewProperties = {
     color: string;
@@ -47,16 +47,13 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     public selectedRouteId$: Observable<RouteData[]>;
 
-    @Select((state: ApplicationState) => state.recordedRouteState.route)
-    public recordedRoute$: Observable<RecordedRoute>;
-
     @Select((state: ApplicationState) => state.recordedRouteState.isAddingPoi)
     public isAddingPoi$: Observable<boolean>;
 
     public routePointPopupData: RoutePointViewData;
     public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string};
 
-    public editingRoute: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
+    public editingRouteGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
 
     private routes: RouteData[];
@@ -74,7 +71,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             type: "FeatureCollection",
             features: []
         };
-        this.editingRoute = {
+        this.editingRouteGeoJson = {
             type: "FeatureCollection",
             features: []
         };
@@ -82,7 +79,6 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routeEditRouteInteraction.onRoutePointClick.subscribe(this.handleRoutePointClick);
         this.routes$.subscribe(this.handleRoutesChanges);
         this.selectedRouteId$.subscribe(() => this.handleRoutesChanges(this.routes));
-        this.recordedRoute$.subscribe(this.buildFeatureCollections);
         this.isAddingPoi$.subscribe(() => this.setInteractionAccordingToState());
     }
 
@@ -92,7 +88,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.buildFeatureCollections();
     };
 
-    private buildFeatureCollections = () => {
+    private buildFeatureCollections() {
         let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
         let editingFeatures = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
         for (let route of this.routes) {
@@ -104,28 +100,17 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 continue;
             }
             let latlngs = this.selectedRouteService.getLatlngs(route);
-            features = features.concat(this.createFeaturesForRoute(latlngs, this.routeToProperties(route), false));
-        }
-        if (this.ngRedux.getState().recordedRouteState.isRecording) {
-            let latlngs = this.ngRedux.getState().recordedRouteState.route.latlngs;
-            let properties = {
-                color: this.resources.recordedRouteColor,
-                iconColor: invert(this.resources.recordedRouteColor, true),
-                opacity: 1.0,
-                weight: 6,
-                iconSize: 0.5
-            } as RouteViewProperties;
-            features = features.concat(this.createFeaturesForRoute(latlngs, properties, true));
+            features = features.concat(this.createFeaturesForRoute(latlngs, this.routeToProperties(route)));
         }
         this.routesGeoJson = {
             type: "FeatureCollection",
             features
         };
-        this.editingRoute = {
+        this.editingRouteGeoJson = {
             type: "FeatureCollection",
             features: editingFeatures
         };
-        this.routeEditRouteInteraction.setData(this.editingRoute);
+        this.routeEditRouteInteraction.setData(this.editingRouteGeoJson);
     };
 
     private handleRoutePointClick = (pointIndex: number) => {
@@ -184,53 +169,46 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
 
     private createFeaturesForRoute(
         latlngs: LatLngAlt[],
-        routeProperties: RouteViewProperties,
-        isRecordingRoute: boolean): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
+        routeProperties: RouteViewProperties): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
         let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];;
         let routeCoordinates = latlngs.map(l => SpatialService.toCoordinate(l));
         if (routeCoordinates.length < 2) {
             return features;
         }
         let properties = {...routeProperties};
-        features.push(
-            {
-                type: "Feature",
-                id: routeProperties.id,
-                properties,
-                geometry: {
-                    type: "LineString",
-                    coordinates: routeCoordinates
-                }
-            });
+        features.push({
+            type: "Feature",
+            id: routeProperties.id,
+            properties,
+            geometry: {
+                type: "LineString",
+                coordinates: routeCoordinates
+            }
+        });
         properties = {...routeProperties};
         properties.color = RoutesComponent.START_COLOR;
         properties.id = routeProperties.id + "_start";
-        features.push(
-            {
-                type: "Feature",
-                id: properties.id,
-                properties,
-                geometry: {
-                    type: "Point",
-                    coordinates: routeCoordinates[0]
-                }
-            });
-        if (isRecordingRoute) {
-            return features;
-        }
+        features.push({
+            type: "Feature",
+            id: properties.id,
+            properties,
+            geometry: {
+                type: "Point",
+                coordinates: routeCoordinates[0]
+            }
+        });
         properties = {...routeProperties};
         properties.color = RoutesComponent.END_COLOR;
         properties.id = routeProperties.id + "_end";
-        features.push(
-            {
-                type: "Feature",
-                id: properties.id,
-                properties,
-                geometry: {
-                    type: "Point",
-                    coordinates: routeCoordinates[routeCoordinates.length - 1]
-                }
-            });
+        features.push({
+            type: "Feature",
+            id: properties.id,
+            properties,
+            geometry: {
+                type: "Point",
+                coordinates: routeCoordinates[routeCoordinates.length - 1]
+            }
+        });
         return features;
     }
 

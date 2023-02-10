@@ -1,7 +1,7 @@
 import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
 
 import { initialState, BaseAction } from "./initial-state";
-import type { Location } from "../models/models";
+import type { LocationState } from "../models/models";
 
 const SET_LOCATION = "SET_LOCATION";
 
@@ -19,7 +19,7 @@ export class SetLocationAction extends BaseAction<SetLocationPayload> {
 
 export class LocationReducer {
     @ReduxAction(SET_LOCATION)
-    public setLocation(lastState: Location, action: SetLocationAction) {
+    public setLocation(lastState: LocationState, action: SetLocationAction) {
         return {
             zoom: action.payload.zoom || lastState.zoom,
             longitude: action.payload.longitude || lastState.longitude,

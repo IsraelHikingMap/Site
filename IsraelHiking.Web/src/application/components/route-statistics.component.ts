@@ -16,6 +16,7 @@ import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
+import { ConfigurationActions } from "../reducers/configuration.reducer";
 import type { LatLngAlt, RouteData, ApplicationState, Language, LatLngAltTime } from "../models/models";
 
 declare type DragState = "start" | "drag" | "none";
@@ -117,6 +118,12 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     @Select((state: ApplicationState) => state.configuration.language)
     public language$: Observable<Language>;
 
+    @Select((state: ApplicationState) => state.configuration.isShowSlope)
+    public isShowSlope$: Observable<boolean>;
+
+    @Select((state: ApplicationState) => state.configuration.isShowKmMarker)
+    public isShowKmMarkers$: Observable<boolean>;
+
     private statistics: RouteStatistics;
     private chartElements: IChartElements;
     private componentSubscriptions: Subscription[];
@@ -136,8 +143,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
-        this.isKmMarkersOn = false;
-        this.isSlopeOn = false;
         this.isExpanded = false;
         this.isOpen = false;
         this.isTable = false;
@@ -255,6 +260,15 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.componentSubscriptions.push(this.currentPoistion$.subscribe(p => {
             this.onGeolocationChanged(p);
         }));
+        this.componentSubscriptions.push(this.isShowSlope$.subscribe(showSlope => {
+            this.isSlopeOn = showSlope;
+            this.redrawChart();
+            this.updateSlopeRoute();
+        }));
+        this.componentSubscriptions.push(this.isShowKmMarkers$.subscribe(showKmMarkers => {
+            this.isKmMarkersOn = showKmMarkers;
+            this.updateKmMarkers();
+        }))
         this.routeChanged();
         this.componentSubscriptions.push(interval(1000).subscribe(() => {
             if (this.ngRedux.getState().recordedRouteState.isRecording) {
@@ -720,14 +734,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public toggleKmMarker() {
-        this.isKmMarkersOn = !this.isKmMarkersOn;
-        this.updateKmMarkers();
+        this.ngRedux.dispatch(ConfigurationActions.toggleIsShowKmMarkersAction);
     }
 
     public toggleSlope() {
-        this.isSlopeOn = !this.isSlopeOn;
-        this.redrawChart();
-        this.updateSlopeRoute();
+        this.ngRedux.dispatch(ConfigurationActions.toggleIsShowSlopeAction);
     }
 
     private updateKmMarkers() {

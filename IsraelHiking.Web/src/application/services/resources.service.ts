@@ -780,7 +780,7 @@ export class ResourcesService {
         this.tracesAreOnlySavedLocally = this.gettextCatalog.getString("Traces are only saved locally. " +
             "You can change that in the configuration settings");
         this.unexpectedErrorPleaseTryAgainLater = this.gettextCatalog.getString("Oops, something went wrong. Please try again later");
-        this.editingRouteWhileTracking = this.gettextCatalog.getString("GPS tracking is enabled while editing, " + 
+        this.editingRouteWhileTracking = this.gettextCatalog.getString("GPS tracking is enabled while editing, " +
             "in order to avoid map centering to current location please click the cross icon on the top left corner");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");

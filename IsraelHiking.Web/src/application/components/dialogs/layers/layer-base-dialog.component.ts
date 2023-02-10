@@ -7,7 +7,7 @@ import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers.service";
-import type { LayerData, ApplicationState, EditableLayer, Location } from "../../../models/models";
+import type { LayerData, ApplicationState, EditableLayer, LocationState } from "../../../models/models";
 
 export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     public title: string;
@@ -17,7 +17,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     public layerData: EditableLayer;
 
     @Select((state: ApplicationState) => state.location)
-    public location: Observable<Location>;
+    public location: Observable<LocationState>;
 
     protected constructor(resources: ResourcesService,
                           protected readonly mapService: MapService,

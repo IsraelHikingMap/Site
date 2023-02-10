@@ -491,7 +491,7 @@ export class PoiService {
                             groupType: categoriesGroup.type,
                             category
                         }));
-                    } else if (!isEqualWith(category, exsitingCategory, (_v1, _v2, key) => key == "visible" ? true : undefined)) {
+                    } else if (!isEqualWith(category, exsitingCategory, (_v1, _v2, key) => key === "visible" ? true : undefined)) {
                         this.ngRedux.dispatch(new UpdateCategoryAction({
                             groupType: categoriesGroup.type,
                             category
