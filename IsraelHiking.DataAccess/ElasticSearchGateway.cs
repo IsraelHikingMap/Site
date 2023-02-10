@@ -323,7 +323,7 @@ namespace IsraelHiking.DataAccess
             var connectionString = new ConnectionSettings(
                 pool,
                 new HttpConnection(),
-                (b, c) => new SystemTextJsonSerializer(new GeoJsonConverterFactory(new GeometryFactory(), false, "poiId")))
+                (b, c) => new SystemTextJsonSerializer(new GeoJsonConverterFactory(new GeometryFactory(), false, "poiId", RingOrientationOption.EnforceRfc9746, true)))
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
             await InitializeIndexWithAlias(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS, CreatePointsOfInterestIndex);
