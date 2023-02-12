@@ -93,7 +93,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
             this.isShowCoordinatesPopup = !this.isShowCoordinatesPopup;
             return;
         }
-        let sourceAndId = this.getSourceAndId(feature.properties.poiId);
+        let sourceAndId = this.getSourceAndId(this.poiService.getFeatureId(feature));
         this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
 

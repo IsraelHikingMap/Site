@@ -122,7 +122,7 @@ export class PoiService {
             idField: "poiId",
             extractField: (p: GeoJSON.Feature<GeoJSON.Geometry>, fieldName) => {
                 if (fieldName === "poiId") {
-                    return p.properties.poiId;
+                    return this.getFeatureId(p);
                 }
                 if (p.properties.poiNames[fieldName]) {
                     return p.properties.poiNames[fieldName].join(" ");
@@ -199,8 +199,8 @@ export class PoiService {
         }
         try {
             let postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-            let putAddress = Urls.poi + feature.properties.poiId + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-            let poi$ = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(feature.properties.poiId)
+            let putAddress = Urls.poi + this.getFeatureId(feature) + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+            let poi$ = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(this.getFeatureId(feature))
                 ? this.httpClient.post(postAddress, feature).pipe(timeout(180000))
                 : this.httpClient.put(putAddress, feature).pipe(timeout(180000));
             let poi = await firstValueFrom(poi$) as GeoJSON.Feature;
@@ -314,7 +314,7 @@ export class PoiService {
 
     private async downlodOfflineFileAndUpdateDatabase(progressCallback: (value: number, text?: string) => void): Promise<void> {
         progressCallback(1, this.resources.downloadingPoisForOfflineUsage);
-        let poiIdsToDelete = this.poisGeojson.features.map(f => f.properties.poiId);
+        let poiIdsToDelete = this.poisGeojson.features.map(f => this.getFeatureId(f));
         this.loggingService.info(`[POIs] Deleting exiting pois: ${poiIdsToDelete.length}`);
         await this.databaseService.deletePois(poiIdsToDelete);
         this.loggingService.info("[POIs] Getting cached offline pois file");
@@ -345,7 +345,7 @@ export class PoiService {
             let updates = await firstValueFrom(updates$) as UpdatesResponse;
             this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()},` +
                 `got: ${ updates.features.length }`);
-            let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => f.properties.poiId);
+            let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => this.getFeatureId(f));
             do {
                 await this.databaseService.storePois(updates.features.splice(0, 500));
             } while (updates.features.length > 0);
@@ -535,7 +535,7 @@ export class PoiService {
     }
 
     public async getPoint(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
-        let itemInCache = this.poisCache.find(f => f.properties.poiId === id && f.properties.source === source);
+        let itemInCache = this.poisCache.find(f => this.getFeatureId(f) === id && f.properties.source === source);
         if (itemInCache) {
             return cloneDeep(itemInCache);
         }
@@ -567,6 +567,7 @@ export class PoiService {
         let latlng = this.getLatLngFromId(id);
         let feature = {
             type: "Feature",
+            id: `${RouteStrings.COORDINATES}_${id}`,
             properties: {
                 poiId: `${RouteStrings.COORDINATES}_${id}`,
                 identifier: id,
@@ -586,9 +587,9 @@ export class PoiService {
 
     private async addPointToUploadQueue(feature: GeoJSON.Feature): Promise<void> {
         this.poisCache = [];
-        this.loggingService.info(`[POIs] adding POI with id ${feature.properties.poiId} to queue`);
+        this.loggingService.info(`[POIs] adding POI with id ${this.getFeatureId(feature)} to queue`);
         await this.databaseService.addPoiToUploadQueue(feature);
-        this.ngRedux.dispatch(new AddToPoiQueueAction({featureId: feature.properties.poiId}));
+        this.ngRedux.dispatch(new AddToPoiQueueAction({featureId: this.getFeatureId(feature)}));
     }
 
     public getPoiSocialLinks(feature: GeoJSON.Feature): PoiSocialLinks {
@@ -712,12 +713,14 @@ export class PoiService {
     }
 
     public addSimplePoint(latlng: LatLngAlt, pointType: SimplePointType): Promise<any> {
+        let id = uuidv4();
         let feature = {
+            id,
             type: "Feature",
             properties: {
                 poiIsSimple: true,
                 poiType: pointType,
-                poiId: uuidv4(),
+                poiId: id,
                 poiSource: "OSM"
             },
             geometry: {
@@ -732,7 +735,9 @@ export class PoiService {
     public addComplexPoi(info: EditablePublicPointData, location: LatLngAlt): Promise<void> {
         let feature = this.getFeatureFromEditableData(info);
         this.setLocation(feature, location);
-        feature.properties.poiId = uuidv4();
+        let id = uuidv4();
+        feature.id = id;
+        feature.properties.poiId = id;
         feature.properties.poiSource = "OSM";
         feature.geometry = {
             type: "Point",
@@ -745,19 +750,21 @@ export class PoiService {
         let originalFeature = this.ngRedux.getState().poiState.selectedPointOfInterest;
         let editableDataBeforeChanges = this.getEditableDataFromFeature(originalFeature);
         let hasChages = false;
+        let originalId = this.getFeatureId(originalFeature);
         let featureContainingOnlyChanges = {
+            id: originalId,
             type: "Feature",
             geometry: originalFeature.geometry,
             properties: {
-                poiId: originalFeature.properties.poiId,
+                poiId: originalId,
                 identifier: originalFeature.properties.identifier,
                 poiSource: originalFeature.properties.poiSource
             } as any
         } as GeoJSON.Feature;
 
-        if (this.ngRedux.getState().offlineState.uploadPoiQueue.indexOf(originalFeature.properties.poiId) !== -1) {
+        if (this.ngRedux.getState().offlineState.uploadPoiQueue.indexOf(originalId) !== -1) {
             // this is the case where there was a previous update request but this hs not been uploaded to the server yet...
-            let featureFromDatabase = await this.databaseService.getPoiFromUploadQueue(originalFeature.properties.poiId);
+            let featureFromDatabase = await this.databaseService.getPoiFromUploadQueue(originalId);
             if (featureFromDatabase != null) {
                 featureContainingOnlyChanges = featureFromDatabase;
                 hasChages = true;
@@ -804,7 +811,7 @@ export class PoiService {
             hasChages = true;
         }
         if (!hasChages) {
-            this.loggingService.info(`[POIs] No updates were made to feature with id ${originalFeature.properties.poiId}, ` +
+            this.loggingService.info(`[POIs] No updates were made to feature with id ${originalId}, ` +
                 "no need to add to queue");
             return;
         }
@@ -814,7 +821,7 @@ export class PoiService {
     public getEditableDataFromFeature(feature: GeoJSON.Feature): EditablePublicPointData {
         let language = this.resources.getCurrentLanguageCodeSimplified();
         return {
-            id: feature.properties.poiId,
+            id: this.getFeatureId(feature),
             category: feature.properties.poiCategory,
             description: this.getDescription(feature, language),
             title: this.getTitle(feature, language),
@@ -832,6 +839,7 @@ export class PoiService {
 
     public getFeatureFromEditableData(info: EditablePublicPointData): GeoJSON.Feature {
         let feature = {
+            id: info.id,
             type: "Feature",
             properties: {
                 poiId: info.id,
@@ -856,5 +864,13 @@ export class PoiService {
         this.setDescription(feature, info.description, language);
         this.setTitle(feature, info.title, language);
         return feature;
+    }
+
+    public getFeatureId(feature: GeoJSON.Feature): string {
+        if (feature.id) {
+            console.log("REMOVE ME!!" + feature.id);
+            return feature.id.toString();
+        }
+        return feature.id ?? feature.properties.poiId;
     }
 }

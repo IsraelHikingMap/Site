@@ -597,11 +597,11 @@ namespace IsraelHiking.API.Executors
 
         private void MergeTitles(IFeature target, IFeature source)
         {
-            if (!(target.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable targetTitlesByLanguage))
+            if (target.Attributes[FeatureAttributes.POI_NAMES] is not IAttributesTable targetTitlesByLanguage)
             {
                 return;
             }
-            if (!(source.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable sourceTitlesByLanguage))
+            if (source.Attributes[FeatureAttributes.POI_NAMES] is not IAttributesTable sourceTitlesByLanguage)
             {
                 return;
             }

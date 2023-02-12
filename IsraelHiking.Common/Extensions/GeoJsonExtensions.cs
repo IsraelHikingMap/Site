@@ -137,7 +137,7 @@ namespace IsraelHiking.Common.Extensions
 
         public static string GetId(this IFeature feature)
         {
-            return feature.Attributes[FeatureAttributes.POI_ID].ToString();
+            return feature.GetOptionalId(FeatureAttributes.POI_ID)?.ToString() ?? string.Empty;
         }
 
         public static string GetId(string source, string id)

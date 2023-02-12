@@ -29,7 +29,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _options.Value.Returns(new ConfigurationData());
         }
 
-        protected Feature GetValidFeature(string poiId, string source)
+        protected Feature GetValidFeature(string someId, string source)
         {
             var feature = new Feature
             {
@@ -42,7 +42,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 {
                     {FeatureAttributes.POI_CATEGORY, FeatureAttributes.POI_CATEGORY},
                     {FeatureAttributes.NAME, FeatureAttributes.NAME},
-                    {FeatureAttributes.ID, poiId},
+                    {FeatureAttributes.ID, someId},
                     {FeatureAttributes.POI_SOURCE, source},
                     {FeatureAttributes.POI_ICON, FeatureAttributes.POI_ICON},
                     {FeatureAttributes.POI_ICON_COLOR, FeatureAttributes.POI_ICON_COLOR},

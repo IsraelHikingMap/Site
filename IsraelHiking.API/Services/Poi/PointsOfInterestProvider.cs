@@ -323,7 +323,7 @@ namespace IsraelHiking.API.Services.Poi
         {
             var icon = feature.Attributes[FeatureAttributes.POI_ICON].ToString();
             var location = feature.GetLocation();
-            var idString = feature.Attributes.Exists(FeatureAttributes.POI_ID) ? feature.GetId() : "";
+            var idString = feature.GetId();
             _logger.LogInformation($"Uploaded a POI of type {icon} with id: {idString}, at {location.Y}, {location.X}");
             var imagesList = await UploadImages(feature, language, osmGateway);
             var node = new Node

@@ -143,6 +143,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             }));
             if (data.source === "new") {
                 let newFeature = {
+                    id: "",
                     type: "Feature",
                     properties: {
                         poiSource: "OSM",
@@ -183,7 +184,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             this.ngRedux.dispatch(new SetUploadMarkerDataAction({
                 markerData: null
             }));
-            if (feature.properties.poiId && feature.geometry.type === "Point") {
+            if (this.poiService.getFeatureId(feature) && feature.geometry.type === "Point") {
                 this.showLocationUpdate = true;
             }
         }

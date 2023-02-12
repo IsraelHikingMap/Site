@@ -91,7 +91,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void GetFeature_EnglishTitleOnly_ShouldReturnIt()
         {
             var name = "English name";
-            var feature = GetValidFeature("poiId", Sources.OSM);
+            var feature = GetValidFeature("some-id", Sources.OSM);
             feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
             feature.Attributes.Add("name:en", name);
             _pointsOfInterestRepository.GetPointsOfInterest(null, null, null, "en").Returns(new List<IFeature> { feature });
@@ -106,7 +106,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetFeature_ImageAndDescriptionOnly_ShouldReturnIt()
         {
-            var feature = GetValidFeature("poiId", Sources.OSM);
+            var feature = GetValidFeature("some-id", Sources.OSM);
             feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
             feature.Attributes.Add(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
             feature.Attributes.Add(FeatureAttributes.WIKIPEDIA, FeatureAttributes.DESCRIPTION);
@@ -121,7 +121,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetFeature_NoIcon_ShouldReturnItWithSearchIcon()
         {
-            var feature = GetValidFeature("poiId", Sources.OSM);
+            var feature = GetValidFeature("some-id", Sources.OSM);
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, string.Empty);
             _pointsOfInterestRepository.GetPointsOfInterest(null, null, null, "he").Returns(new List<IFeature> { feature });
 
@@ -134,16 +134,16 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetFeatureById_RouteWithMultipleAttributes_ShouldReturnIt()
         {
-            var poiId = "poiId";
-            var feature = GetValidFeature(poiId, Sources.OSM);
+            var someId = "some-id";
+            var feature = GetValidFeature(someId, Sources.OSM);
             feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
             feature.Attributes.Add(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
             feature.Attributes.Add(FeatureAttributes.IMAGE_URL + "1", FeatureAttributes.IMAGE_URL + "1");
             feature.Attributes.Add(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
             feature.Attributes.Add(FeatureAttributes.WIKIPEDIA + ":en", "page with space");
-            _pointsOfInterestRepository.GetPointOfInterestById(poiId, Sources.OSM).Returns(feature);
+            _pointsOfInterestRepository.GetPointOfInterestById(someId, Sources.OSM).Returns(feature);
 
-            var result = _adapter.GetFeatureById(Sources.OSM, poiId).Result;
+            var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(string.Empty, result.GetTitle("en"));
@@ -160,13 +160,13 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetFeatureById_NonValidWikiTag_ShouldReturnIt()
         {
-            var poiId = "poiId";
-            var feature = GetValidFeature(poiId, Sources.OSM);
+            var someId = "some-id";
+            var feature = GetValidFeature(someId, Sources.OSM);
             feature.Attributes.Add(FeatureAttributes.WIKIPEDIA, "en:en:page");
             feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
-            _pointsOfInterestRepository.GetPointOfInterestById(poiId, Sources.OSM).Returns(feature);
+            _pointsOfInterestRepository.GetPointOfInterestById(someId, Sources.OSM).Returns(feature);
 
-            var result = _adapter.GetFeatureById(Sources.OSM, poiId).Result;
+            var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual("website", result.Attributes[FeatureAttributes.WEBSITE]);
@@ -175,12 +175,12 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetFeatureById_NoIcon_ShouldReturnItWithSearchIcon()
         {
-            var poiId = "poiId";
-            var feature = GetValidFeature(poiId, Sources.OSM);
+            var someId = "some-id";
+            var feature = GetValidFeature(someId, Sources.OSM);
             feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, string.Empty);
-            _pointsOfInterestRepository.GetPointOfInterestById(poiId, Sources.OSM).Returns(feature);
+            _pointsOfInterestRepository.GetPointOfInterestById(someId, Sources.OSM).Returns(feature);
 
-            var result = _adapter.GetFeatureById(Sources.OSM, poiId).Result;
+            var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(PointsOfInterestProvider.SEARCH_ICON, result.Attributes[FeatureAttributes.POI_ICON]);
@@ -189,16 +189,16 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetFeatureById_WithMultipleWebsiteAndSourceImages_ShouldNotFail()
         {
-            var poiId = "poiId";
-            var feature = GetValidFeature(poiId, Sources.OSM);
+            var someId = "some-id";
+            var feature = GetValidFeature(someId, Sources.OSM);
             feature.Attributes.Add(FeatureAttributes.WEBSITE, "website");
             feature.Attributes.Add(FeatureAttributes.POI_SOURCE_IMAGE_URL, "sourceImage");
             feature.Attributes.Add(FeatureAttributes.WEBSITE + "1", "website1");
             feature.Attributes.Add(FeatureAttributes.POI_SOURCE_IMAGE_URL + "1", "sourceImage1");
             feature.Attributes.Add(FeatureAttributes.WEBSITE + "2", "website2");
-            _pointsOfInterestRepository.GetPointOfInterestById(poiId, Sources.OSM).Returns(feature);
+            _pointsOfInterestRepository.GetPointOfInterestById(someId, Sources.OSM).Returns(feature);
 
-            var result = _adapter.GetFeatureById(Sources.OSM, poiId).Result;
+            var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
 
             Assert.IsNotNull(result);
             var references = result.Attributes.GetNames()
