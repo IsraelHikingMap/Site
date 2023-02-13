@@ -228,6 +228,9 @@ namespace IsraelHiking.Common.Extensions
                 case object[] objectArray:
                     titles.AddRange(objectArray.Select(o => o.ToString()).ToList());
                     break;
+                case IList<object> objectsIList:
+                    titles.AddRange(objectsIList.Select(o => o.ToString()).ToList());
+                    break;
             }
             return titles;
         }
