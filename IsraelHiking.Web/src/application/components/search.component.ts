@@ -12,7 +12,6 @@ import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap, map } from "rxjs/operators";
 import { remove } from "lodash-es";
-import { PointLike } from "maplibre-gl";
 import { Observable } from "rxjs";
 import { skip } from "rxjs/operators";
 import { NgRedux, Select } from "@angular-redux2/store";
@@ -26,9 +25,10 @@ import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
 import { RoutesFactory } from "../services/routes.factory";
 import { SpatialService } from "../services/spatial.service";
+import { GpxDataContainerConverterService } from "application/services/gpx-data-container-converter.service";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
-import type { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt, SearchResultsPointOfInterest } from "../models/models";
+import type { RoutingType, ApplicationState, LatLngAlt, SearchResultsPointOfInterest, LatLngAltTime } from "../models/models";
 
 export type SearchContext = {
     searchTerm: string;
@@ -44,9 +44,15 @@ type DirectionalContext = {
     isOn: boolean;
     overlayLocation: LatLngAlt;
     showResults: boolean;
-    routeCoordinates: PointLike[];
+    /**
+     * This is needed for display
+     */
+    routeCoordinates: [number, number][];
+    /**
+     * This is needed to facilitate easy conversion to private route to keep elevation data
+     */
+    latlngs: LatLngAlt[];
     routeTitle: string;
-    routeSegments: RouteSegmentData[];
 };
 
 @Component({
@@ -64,7 +70,7 @@ export class SearchComponent extends BaseMapComponent {
     public searchFrom: FormControl<string | SearchResultsPointOfInterest>;
     public searchTo: FormControl<string | SearchResultsPointOfInterest>;
     public hasFocus: boolean;
-    public hideCoordinates: boolean;
+    public showCoordinates: boolean;
     public directional: DirectionalContext;
 
     private requestsQueue: SearchRequestQueueItem[];
@@ -94,9 +100,9 @@ export class SearchComponent extends BaseMapComponent {
             isOn: false,
             overlayLocation: null,
             routeCoordinates: [],
+            latlngs: [],
             routeTitle: "",
             showResults: false,
-            routeSegments: []
         };
         this.isOpen = false;
         this.routingType = "Hike";
@@ -208,6 +214,7 @@ export class SearchComponent extends BaseMapComponent {
     }
 
     public async searchRoute() {
+        this.clearDirectionalRoute();
         if (!this.fromContext.selectedSearchResults) {
             this.toastService.warning(this.resources.pleaseSelectFrom);
             return;
@@ -216,17 +223,12 @@ export class SearchComponent extends BaseMapComponent {
             this.toastService.warning(this.resources.pleaseSelectTo);
             return;
         }
-        this.directional.routeSegments = await this.routerService.getRoute(this.fromContext.selectedSearchResults.location,
+        let latlngs = await this.routerService.getRoute(this.fromContext.selectedSearchResults.location,
             this.toContext.selectedSearchResults.location,
             this.routingType);
         this.directional.showResults = true;
-        let latlngs = [];
-        for (let segment of this.directional.routeSegments) {
-            for (let latlng of segment.latlngs) {
-                latlngs.push(latlng);
-                this.directional.routeCoordinates.push([latlng.lng, latlng.lat]);
-            }
-        }
+        this.directional.routeCoordinates = latlngs.map(l => SpatialService.toCoordinate(l));
+        this.directional.latlngs = latlngs;
         this.directional.routeTitle = this.fromContext.selectedSearchResults.displayName +
             " - " +
             this.toContext.selectedSearchResults.displayName;
@@ -237,18 +239,20 @@ export class SearchComponent extends BaseMapComponent {
 
     public convertToRoute() {
         let route = this.routesFactory.createRouteData(this.directional.routeTitle);
-        route.segments = this.directional.routeSegments;
+        route.segments = GpxDataContainerConverterService
+            .getSegmentsFromLatlngs(this.directional.latlngs as LatLngAltTime[], this.routingType);
         this.ngRedux.dispatch(new AddRouteAction({
             routeData: route
         }));
         this.ngRedux.dispatch(new SetSelectedRouteAction({
             routeId: route.id
         }));
-        this.directionalCleared();
+        this.clearDirectionalRoute();
     }
 
-    public directionalCleared() {
+    public clearDirectionalRoute() {
         this.directional.routeCoordinates = [];
+        this.directional.latlngs = [];
         this.directional.showResults = false;
     }
 

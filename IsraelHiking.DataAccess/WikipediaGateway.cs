@@ -34,7 +34,7 @@ namespace IsraelHiking.DataAccess
         {
             var wikiClient = new WikiClient
             {
-                ClientUserAgent = "IsraelHikingMapSite/5.x bot (https://israelhiking.osm.org.il; israelhikingmap@gmail.com)",
+                ClientUserAgent = Branding.USER_AGENT,
                 Timeout = new TimeSpan(0, 1, 0)
             };
             foreach (var language in Languages.Array)
@@ -64,13 +64,13 @@ namespace IsraelHiking.DataAccess
                 var features = pages.Where(p => p.Exists).Select(p => ConvertPageToFeature(p, language)).ToList();
                 if (features.Count != titles.Length)
                 {
-                    _logger.LogWarning("The following pages do not exists: " + string.Join(",", pages.Where(p => p.Exists == false).Select(p => p.Title).ToArray()));
+                    _logger.LogWarning("The following pages do not exists. This is usually causes by a dead link from OSM to a page that was removed in Wikipedia. Please find the OSM entity and delete the link: " + string.Join(",", pages.Where(p => p.Exists == false).Select(p => p.Title).ToArray()));
                 }
                 return features;
             } 
             catch (Exception ex)
             {
-                _logger.LogError($"Unable to get wikipedia pages due to {ex.Message} for: " + string.Join(",", titles));
+                _logger.LogError($"Unable to get wikipedia pages due to {ex.Message} for (note that the titles are batched and so not all the titles here are causing this issue): " + string.Join(",", titles));
             }
             return new List<Feature>();
             
@@ -157,7 +157,7 @@ namespace IsraelHiking.DataAccess
                 attributes.Add(FeatureAttributes.IMAGE_URL, imageUrl);
             }
             attributes.Add(FeatureAttributes.POI_USER_NAME, page.LastRevision.UserName);
-            attributes.Add(FeatureAttributes.POI_USER_ADDRESS, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeUriString(page.LastRevision.UserName)}"));
+            attributes.Add(FeatureAttributes.POI_USER_ADDRESS, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeDataString(page.LastRevision.UserName)}"));
             attributes.SetLastModified(page.LastRevision.TimeStamp);
             var feature = new Feature(new Point(coordinate), attributes);
             feature.SetTitles();

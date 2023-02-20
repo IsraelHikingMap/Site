@@ -11,7 +11,7 @@ services:
 #    volumes:
 #      - ./IsraelHiking.Web/appsettings.json:/israelhiking/appsettings.json
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.9.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
     container_name: elasticsearch
     environment:
       - node.name=elasticsearch
@@ -24,7 +24,7 @@ services:
       - 9300:9300
     restart: always
   graphhopper:
-    image: israelhikingmap/graphhopper:6.2
+    image: israelhikingmap/graphhopper:latest
     container_name: graphhopper
     volumes:
       - ghdata:/data:rw
@@ -33,7 +33,8 @@ services:
         target: /data/gh-config.yml
     ports:
       - 8989:8989
-    entrypoint: ./graphhopper.sh --host 0.0.0.0 -i ignore.pbf -o /data/default-gh/ -c /data/gh-config.yml
+    entrypoint: ./graphhopper.sh -c /data/gh-config.yml
+    command: --host 0.0.0.0 -o /data/default-gh/ 
     restart: always
   gpsbabel:
     image: israelhikingmap/gpsbabelwebapi

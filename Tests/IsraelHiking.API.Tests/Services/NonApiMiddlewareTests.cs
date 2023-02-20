@@ -25,10 +25,12 @@ namespace IsraelHiking.API.Tests.Services
         private IShareUrlsRepository _repository;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
         private IHomePageHelper _homePageHelper;
+        private RequestDelegate _next;
 
         [TestInitialize]
         public void TestInitialize()
         {
+            _next = Substitute.For<RequestDelegate>();
             _serviceProvider = Substitute.For<IServiceProvider>();
             _repository = Substitute.For<IShareUrlsRepository>();
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
@@ -36,7 +38,7 @@ namespace IsraelHiking.API.Tests.Services
             var config = new ConfigurationData();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(config);
-            _middleware = new NonApiMiddleware(null, _homePageHelper, _repository,
+            _middleware = new NonApiMiddleware(_next, _homePageHelper, _repository,
                 _pointsOfInterestProvider);
         }
 
@@ -51,6 +53,21 @@ namespace IsraelHiking.API.Tests.Services
             return detectionService;
         }
 
+        [TestMethod]
+        public void TestAPI_ShouldPassThrough()
+        {
+            var context = new DefaultHttpContext();
+            context.Request.Path = new PathString($"/api/something");
+            context.Request.Host = new HostString("israelhiking.osm.org.il");
+            context.Request.QueryString = QueryString.Empty;
+            context.Request.PathBase = PathString.Empty;
+            context.Request.Scheme = "http";
+
+            _middleware.InvokeAsync(context, null).Wait();
+
+            _next.Received().Invoke(context);
+        }
+        
         [TestMethod]
         public void TestCrawler_Poi()
         {

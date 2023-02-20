@@ -288,10 +288,8 @@ export class RouteEditRouteInteraction {
 
     private runRouting = async (startLatLng: LatLngAlt, segment: RouteSegmentData): Promise<void> => {
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, []);
-        let data = await this.routerService.getRoute(startLatLng, segment.routePoint, segment.routingType);
-        let latLngs = data[data.length - 1].latlngs;
-        latLngs = await this.elevationProvider.updateHeights(latLngs) as LatLngAltTime[];
-        segment.latlngs = latLngs;
+        let latLngs =  await this.routerService.getRoute(startLatLng, segment.routePoint, segment.routingType);
+        segment.latlngs = await this.elevationProvider.updateHeights(latLngs) as LatLngAltTime[];
         let last = latLngs[latLngs.length - 1];
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, [last]);
     };

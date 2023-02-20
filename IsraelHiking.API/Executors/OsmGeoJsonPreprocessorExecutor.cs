@@ -101,7 +101,8 @@ namespace IsraelHiking.API.Executors
             }
             if (feature.Geometry.IsEmpty)
             {
-                _logger.LogError($"{feature.Geometry.GeometryType} with ID: {feature.Attributes[FeatureAttributes.ID]} is an empty geometry - check for non-closed relations.");
+                // This is the case where partial relations are in the pbf or non closed ones.
+                // This can be checked here: https://tools.geofabrik.de/osmi/?view=areas&lon=35.33202&lat=32.39600&zoom=9&baselayer=Geofabrik%20Standard&overlays=ring_not_closed%2Crole_should_be_inner%2Crole_should_be_outer
                 return null;
             }
 

@@ -141,6 +141,26 @@
     </style>
 </head>
 <body>
+    <script>
+        function isWebglSupported() {
+            if (!!window.WebGLRenderingContext) {
+                var canvas = document.createElement("canvas");
+                try {
+                    var context = canvas.getContext("webgl");
+                    if (context && typeof context.getParameter == "function") {
+                        return true;
+                    }
+                } catch(e) {}
+                // WebGL is supported, but disabled
+                return false;
+            }
+            // WebGL not supported
+            return false;
+        }
+        if (!isWebglSupported()) {
+            alert("נראה שיש בעיה... אנא נסו לעדכן את גרסת הכרום ו/או גרסת Android System Webview");
+        }
+    </script>
     <div class="preloader">
         <img src="content/logo.png" />
         <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>

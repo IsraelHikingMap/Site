@@ -742,6 +742,48 @@ describe("Poi Service", () => {
             expect(calls.first().args[0].payload.category.items[0].iconColorCategory.label).toBe("label2");
     })));
 
+    it("should sync categories when categories are not the same but ignore visibility",
+        (inject([PoiService, HttpTestingController, RunningContextService],
+        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+            MockNgRedux.store.getState = () => ({
+                layersState: {
+                    categoriesGroups: [{
+                        type: "my-type",
+                        visible: true,
+                        categories: [{
+                            color: "color",
+                            icon: "icon",
+                            name: "name",
+                            visible: false,
+                            items: [{iconColorCategory: {
+                                color: "color",
+                                icon: "icon",
+                                label: "label"
+                            }}]
+                        }]
+                    }]
+                }
+            });
+            (runningContextService as any).isIFrame = false;
+
+            let promise = poiService.syncCategories();
+
+            mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([{
+                color: "color",
+                icon: "icon",
+                name: "name",
+                visible: true,
+                items: [{iconColorCategory: {
+                    color: "color",
+                    icon: "icon",
+                    label: "label"
+                }}]
+            }] as Category[]));
+
+            await promise;
+            expect(MockNgRedux.store.dispatch).toHaveBeenCalledTimes(0);
+    })));
+
     it("should sync categories when need to remove a category", (inject([PoiService, HttpTestingController, RunningContextService],
         async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
             MockNgRedux.store.getState = () => ({

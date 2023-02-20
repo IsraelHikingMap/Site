@@ -525,10 +525,10 @@
       {
         "key": "legendTunnel",
         "latlng": {
-          "lat": 31.78985,
-          "lng": 35.2486
+          "lat": 31.7209,
+          "lng": 34.8205
         },
-        "zoom": 17.7,
+        "zoom": 18,
         "type": "Way",
         "osmTags": [ "tunnel=yes", "highway=..." ],
         "link": "osm-key-link"
@@ -740,6 +740,17 @@
         "type": "POI",
         "osmTags": [ "historic=memorial or historic=monument" ],
         "link": "osm-key-link"
+      },
+      {
+        "key": "legendCemetery",
+        "latlng": {
+          "lat": 32.831568,
+          "lng": 35.7989717
+        },
+        "zoom": 16,
+        "type": "POI",
+        "osmTags": [ "landuse=cemetery" ],
+        "link": "osm-tag-link"
       },
       {
         "key": "legendObservationTower",
@@ -1243,17 +1254,6 @@
         "zoom": 17,
         "type": "POI",
         "osmTags": [ "natural=beach" ],
-        "link": "osm-tag-link"
-      },
-      {
-        "key": "legendCemetery",
-        "latlng": {
-          "lat": 32.831568,
-          "lng": 35.7989717
-        },
-        "zoom": 16,
-        "type": "POI",
-        "osmTags": [ "landuse=cemetery" ],
         "link": "osm-tag-link"
       },
       {

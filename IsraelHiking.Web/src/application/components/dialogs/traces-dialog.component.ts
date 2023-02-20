@@ -134,7 +134,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             this.fitBoundsService.fitBounds(bounds);
             this.matDialogRef.close();
         } catch (ex) {
-            this.toastService.confirm({ message: (ex as Error).message, type: "Ok" });
+            this.toastService.error(ex, this.resources.unexpectedErrorPleaseTryAgainLater);
         }
     }
 

@@ -117,5 +117,8 @@
         public static string DESCRIPTION =  "בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע.";
 
         public const string ROUTE_SHARE_DEFAULT_TITLE = "Israel Hiking Map Route Share";
+
+        public const string USER_AGENT =
+            "IsraelHikingMapSite/5.x bot (https://israelhiking.osm.org.il; israelhikingmap@gmail.com)";
     }
 }

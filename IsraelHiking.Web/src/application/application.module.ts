@@ -37,6 +37,8 @@ import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { NgIdleModule } from "@ng-idle/core";
 import { LottieModule } from "ngx-lottie";
 import { NgReduxModule } from "@angular-redux2/store";
+import { saveAs } from "file-saver-es";
+import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import player from "lottie-web";
 // Cordova plugins
 import { InAppPurchase2 } from "@awesome-cordova-plugins/in-app-purchase-2/ngx";
@@ -44,13 +46,12 @@ import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 // services
-import { ScrollToModule } from "./infra/scroll-to/scroll-to.module";
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
 import { OsmTokenInterceptor } from "./services/osm-token.interceptor";
 import { MapService } from "./services/map.service";
 import { ResourcesService } from "./services/resources.service";
-import { FileService } from "./services/file.service";
+import { FileService, SaveAsFactory } from "./services/file.service";
 import { SidebarService } from "./services/sidebar.service";
 import { HashService } from "./services/hash.service";
 import { LayersService } from "./services/layers.service";
@@ -73,7 +74,6 @@ import { ImageGalleryService } from "./services/image-gallery.service";
 import { CancelableTimeoutService } from "./services/cancelable-timeout.service";
 import { WhatsAppService } from "./services/whatsapp.service";
 import { ImageResizeService } from "./services/image-resize.service";
-import { NonAngularObjectsFactory } from "./services/non-angular-objects.factory";
 import { PrivatePoiUploaderService } from "./services/private-poi-uploader.service";
 import { SelectedRouteService } from "./services/selected-route.service";
 import { RunningContextService } from "./services/running-context.service";
@@ -154,6 +154,7 @@ import { ApplicationStateComponent } from "./components/application-state.compon
 import { LayersViewComponent } from "./components/map/layers-view.component";
 import { RoutesComponent } from "./components/map/routes.component";
 import { TracesComponent } from "./components/map/traces.component";
+import { RecordedRouteComponent } from "./components/map/recorded-route.component";
 import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
 import { SecuredImageComponent } from "./components/secured-image.component";
 import { CategoriesGroupComponent } from "./components/sidebar/categories-group.component";
@@ -229,6 +230,7 @@ const initializeApplication = (injector: Injector) => async () => {
             { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
             { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [Injector], multi: true },
             { provide: ErrorHandler, useClass: GlobalErrorHandler },
+            { provide: SaveAsFactory, useFactory: () => saveAs },
             GetTextCatalogService,
             MapService,
             ResourcesService,
@@ -256,7 +258,6 @@ const initializeApplication = (injector: Injector) => async () => {
             CancelableTimeoutService,
             WhatsAppService,
             ImageResizeService,
-            NonAngularObjectsFactory,
             OpenWithService,
             PrivatePoiUploaderService,
             SelectedRouteService,
@@ -310,6 +311,7 @@ const initializeApplication = (injector: Injector) => async () => {
             LayersViewComponent,
             RoutesComponent,
             TracesComponent,
+            RecordedRouteComponent,
             AutomaticLayerPresentationComponent,
             SecuredImageComponent,
             CategoriesGroupComponent,

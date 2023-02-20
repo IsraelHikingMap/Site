@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Inject, Injectable, InjectionToken } from "@angular/core";
 import { HttpClient, HttpEventType } from "@angular/common/http";
 import { StyleSpecification } from "maplibre-gl";
 import { File as FileSystemWrapper, FileEntry } from "@awesome-cordova-plugins/file/ngx";
@@ -6,10 +6,10 @@ import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
+import type { saveAs as saveAsForType } from "file-saver";
 import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
-import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
@@ -18,6 +18,10 @@ import { LoggingService } from "./logging.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { Urls } from "../urls";
 import type { DataContainer } from "../models/models";
+
+
+export const SaveAsFactory = new InjectionToken<typeof saveAsForType>(null);
+
 
 export type FormatViewModel = {
     label: string;
@@ -35,12 +39,12 @@ export class FileService {
                 private readonly fileTransfer: FileTransfer,
                 private readonly runningContextService: RunningContextService,
                 private readonly imageResizeService: ImageResizeService,
-                private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly gpxDataContainerConverterService: GpxDataContainerConverterService,
                 private readonly socialSharing: SocialSharing,
-                private readonly loggingService: LoggingService) {
+                private readonly loggingService: LoggingService,
+                @Inject(SaveAsFactory) private readonly saveAs: typeof saveAsForType) {
         this.formats = [
             {
                 label: "GPX version 1.1 (.gpx)",
@@ -111,12 +115,13 @@ export class FileService {
 
     public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
         try {
-            if (isOffline) {
+            if (isOffline || (this.runningContextService.isCapacitor && url.startsWith("."))) {
                 let styleFileName = last(url.split("/"));
                 let styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
                 return JSON.parse(styleText) as StyleSpecification;
             }
-            return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
+            let response = await fetch(url);
+            return await response.json();
         } catch (ex) {
             this.loggingService.error(`[Files] Unanle to get style file, isOffline: ${isOffline}, ${(ex as Error).message}`);
             return {
@@ -139,7 +144,7 @@ export class FileService {
 
         if (!this.runningContextService.isCapacitor) {
             let blobToSave = await this.base64StringToBlob(responseData);
-            this.nonAngularObjectsFactory.saveAsWrapper(blobToSave, fileName, { autoBom: false });
+            this.saveAs(blobToSave, fileName, { autoBom: false });
             return;
         }
         fileName = fileName.replace(/[/\\?%*:|"<>]/g, "-");
@@ -153,7 +158,7 @@ export class FileService {
         let zip = new JSZip();
         zip.file("log.txt", content);
         let blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
-        this.nonAngularObjectsFactory.saveAsWrapper(blob, fileName, { autoBom: false });
+        this.saveAs(blob, fileName, { autoBom: false });
     }
 
     public async getFileFromUrl(url: string, type?: string): Promise<File> {
@@ -250,9 +255,11 @@ export class FileService {
         }
     }
 
-    public async compressTextToBase64Zip(content: string): Promise<string> {
+    public async compressTextToBase64Zip(contents: {name: string; text: string}[]): Promise<string> {
         let zip = new JSZip();
-        zip.file("log.txt", content);
+        for (let content of contents) {
+            zip.file(content.name, content.text);
+        }
         let data = await zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });
         return data;
     }

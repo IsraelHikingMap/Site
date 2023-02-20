@@ -9,6 +9,7 @@ import { NgRedux, Select } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
+import { ToggleAddRecordingPoiAction } from "application/reducers/recorded-route.reducer";
 import type { ApplicationState, BatteryOptimizationType } from "../models/models";
 
 @Injectable()
@@ -48,6 +49,9 @@ export class ScreenService {
         this.userIdleService.setIdle(30);
         this.userIdleService.setTimeout(false);
         this.userIdleService.onIdleStart.subscribe(() => {
+            if (this.ngRedux.getState().recordedRouteState.isAddingPoi) {
+                this.ngRedux.dispatch(new ToggleAddRecordingPoiAction());
+            }
             if (this.ngRedux.getState().configuration.batteryOptimizationType === "dark") {
                 this.logger.info("[Screen] User is idle, setting brightness to 0.01");
                 ScreenBrightness.setBrightness({ brightness: 0.01});

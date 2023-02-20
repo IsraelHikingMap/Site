@@ -29,7 +29,8 @@ import type {
     LatLngAlt,
     ApplicationState,
     EditablePublicPointData,
-    Contribution
+    Contribution,
+    LatLngAltTime
 } from "../../../models/models";
 
 export type SourceImageUrlPair = {
@@ -192,9 +193,30 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     private initFromFeature(feature: GeoJSON.Feature) {
         this.fullFeature = feature;
         this.latlng = this.poiService.getLocation(feature);
-        this.sourceImageUrls = Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => {
-            let url = feature.properties[k];
+        this.sourceImageUrls = this.getSourceImageUrls(feature);
+        this.shareLinks = this.poiService.getPoiSocialLinks(feature);
+        this.contribution = this.poiService.getContribution(feature);
+        this.info = this.poiService.getEditableDataFromFeature(feature);
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        this.titleService.set(this.poiService.getTitle(feature, language));
+    }
+
+    private getSourceImageUrls(feature: GeoJSON.Feature): SourceImageUrlPair[] {
+        return Object.keys(feature.properties).filter(k => k.startsWith("website")).map(k => {
+            let url = feature.properties[k] as string;
             let imageUrl = feature.properties[k.replace("website", "poiSourceImageUrl")] as string;
+            if (!imageUrl) {
+                if (url.includes("kkl.org.il")) {
+                    imageUrl = "https://www.kkl.org.il/education/files/about/symbols/kkl_logo440.jpg";
+                } else if (url.includes("inature.info")) {
+                    imageUrl = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
+                } else if (url.includes("ibt.org.il")) {
+                    imageUrl = "http://www.ibt.org.il/images/logo.png";
+                } else {
+                    let domain = new URL(url).hostname;
+                    imageUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+                }
+            }
             if (this.isBadWikipediaUrl(url)) {
                 url = null;
             }
@@ -203,11 +225,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 url
             } as SourceImageUrlPair;
         }).filter(iup => iup.url != null);
-        this.shareLinks = this.poiService.getPoiSocialLinks(feature);
-        this.contribution = this.poiService.getContribution(feature);
-        this.info = this.poiService.getEditableDataFromFeature(feature);
-        const language = this.resources.getCurrentLanguageCodeSimplified();
-        this.titleService.set(this.poiService.getTitle(feature, language));
     }
 
     public isHideEditMode(): boolean {
@@ -287,17 +304,12 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public convertToRoute() {
-        let routesCopy = this.geoJsonParser.toDataContainer({
-            type: "FeatureCollection",
-            features: [this.fullFeature]
-        }).routes;
-        for (let routeData of routesCopy) {
-            let name = this.selectedRouteService.createRouteName(routeData.name);
+        let routes = this.geoJsonParser.toRoutes(this.fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
+        for (let route of routes) {
+            let name = this.selectedRouteService.createRouteName(route.name);
             let newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
             newRoute.description = this.info.description;
-            newRoute.segments = routeData.segments;
-            newRoute.markers = routeData.markers;
-            GpxDataContainerConverterService.splitRouteSegments(newRoute);
+            newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
             this.ngRedux.dispatch(new AddRouteAction({
                 routeData: newRoute
             }));

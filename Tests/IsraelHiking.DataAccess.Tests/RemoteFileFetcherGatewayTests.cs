@@ -9,7 +9,7 @@ namespace IsraelHiking.DataAccess.Tests
     [TestClass]
     public class RemoteFileFetcherGatewayTests
     {
-        private IRemoteFileFetcherGateway _gateway;
+        private IRemoteFileSizeFetcherGateway _gateway;
 
         [TestInitialize]
         public void TestInitialize()
@@ -54,6 +54,15 @@ namespace IsraelHiking.DataAccess.Tests
             var response = _gateway.GetFileContent("https://upload.wikimedia.org/wikipedia/commons/2/2a/Israel_Hiking_Map_%D7%97%D7%95%D7%A8%D7%91%D7%AA_%D7%9C%D7%95%D7%96%D7%94.jpeg").Result;
 
             Assert.IsFalse(response.Content.Any());
+        }
+        
+        [TestMethod]
+        [Ignore]
+        public void TestGateway_ImageFileSize()
+        {
+            var response = _gateway.GetFileSize("https://upload.wikimedia.org/wikipedia/commons/d/d5/Khan_al-Ahmar_school_building%2C_2015.jpg").Result;
+
+            Assert.AreNotEqual(0, response);
         }
     }
 }

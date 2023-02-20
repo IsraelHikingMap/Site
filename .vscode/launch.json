@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/IsraelHiking.Web/bin/Debug/netcoreapp5.0/IsraelHiking.Web.dll",
+            "program": "${workspaceFolder}/IsraelHiking.Web/bin/Debug/net7.0/IsraelHiking.Web.dll",
             "args": [],
             "cwd": "${workspaceFolder}/IsraelHiking.Web/",
             "stopAtEntry": false,

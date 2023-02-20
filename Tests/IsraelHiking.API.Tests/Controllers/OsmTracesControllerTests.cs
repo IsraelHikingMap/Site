@@ -13,11 +13,15 @@ using NSubstitute;
 using OsmSharp.API;
 using OsmSharp.IO.API;
 using System.IO;
+using System.Text;
+using Castle.Core.Logging;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Caching.Distributed;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -29,6 +33,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IDataContainerConverterService _dataContainerConverterService;
         private IImageCreationGateway _imageCreationGateway;
         private ISearchRepository _searchRepository;
+        private IDistributedCache _distributedCache;
         
         [TestInitialize]
         public void TestInitialize()
@@ -36,11 +41,12 @@ namespace IsraelHiking.API.Tests.Controllers
             _clientsFactory = Substitute.For<IClientsFactory>();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
             _imageCreationGateway = Substitute.For<IImageCreationGateway>();
-            _searchRepository = Substitute.For<ISearchRepository>(); 
+            _searchRepository = Substitute.For<ISearchRepository>();
+            _distributedCache = Substitute.For<IDistributedCache>();
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
-            _controller = new OsmTracesController(_clientsFactory, _dataContainerConverterService, _imageCreationGateway, _searchRepository, optionsProvider);
+            _controller = new OsmTracesController(_clientsFactory, _dataContainerConverterService, _imageCreationGateway, _searchRepository, _distributedCache, optionsProvider, Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -101,6 +107,20 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
+        public void PostUploadGpsTrace_UploadFileWhenAlreadyInCache_ShouldReturnOK()
+        {
+            var file = Substitute.For<IFormFile>();
+            file.FileName.Returns("SomeFile.gpx");
+            var osmGateWay = SetupOAuthClient();
+            _distributedCache.Get(Arg.Any<string>()).Returns(Encoding.UTF8.GetBytes("something"));
+            _controller.SetupIdentity();
+        
+            var response = _controller.PostUploadGpsTrace(file).Result;
+
+            Assert.IsNotNull(response as OkResult);
+        }
+        
+        [TestMethod]
         public void PostUploadGpsTrace_UploadFile_ShouldSendItToOsmGateway()
         {
             var file = Substitute.For<IFormFile>();
@@ -117,37 +137,11 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostUploadRouteData_NotEnoughPoint_ShouldReturnBadRequest()
         {
-            var result = _controller.PostUploadRouteData(new RouteData(), false, Languages.HEBREW).Result as BadRequestObjectResult;
+            var result = _controller.PostUploadRouteData(new RouteData(), Languages.HEBREW).Result as BadRequestObjectResult;
             
             Assert.IsNotNull(result);
         }
-        
-        [TestMethod]
-        public void PostUploadRouteData_NoneDefaultName_ShouldCreateTrace()
-        {
-            _controller.SetupIdentity();
-            var osmGateWay = SetupOAuthClient();
-            var routeData = new RouteData
-            {
-                Segments = new List<RouteSegmentData>
-                {
-                    new()
-                    {
-                        Latlngs = new List<LatLngTime>
-                        {
-                            new(0, 0),
-                            new(1, 1),
-                            new(2, 2)
-                        }
-                    }
-                }
-            };
-            
-            _controller.PostUploadRouteData(routeData, false, Languages.ENGLISH).Wait();
 
-            osmGateWay.Received(1).CreateTrace(Arg.Any<GpxFile>(), Arg.Any<Stream>());
-        }
-        
         [TestMethod]
         public void PostUploadRouteData_DefaultName_ShouldCreateTraceAndUpdateDescriptionToMatchArea()
         {
@@ -155,6 +149,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var osmGateWay = SetupOAuthClient();
             var routeData = new RouteData
             {
+                Id = "42",
                 Name = "Route",
                 Description = "Route",
                 Segments = new List<RouteSegmentData>
@@ -185,8 +180,9 @@ namespace IsraelHiking.API.Tests.Controllers
             });
             containingFeature.SetTitles();
             _searchRepository.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature> {containingFeature});
-
-            _controller.PostUploadRouteData(routeData, true, Languages.ENGLISH).Wait();
+            _distributedCache.Get(Arg.Any<string>()).Returns((byte[])null);
+            
+            _controller.PostUploadRouteData(routeData, Languages.ENGLISH).Wait();
 
             osmGateWay.Received(1).CreateTrace(Arg.Is<GpxFile>(f => f.Description.Contains("A route in")), Arg.Any<Stream>());
         }

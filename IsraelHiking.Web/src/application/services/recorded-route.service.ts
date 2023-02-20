@@ -97,19 +97,8 @@ export class RecordedRouteService {
         let name = this.resources.route + " " + dateString;
         let routeData = this.routesFactory.createRouteData(name);
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
-        let firstLatlng = route.latlngs[0];
         routeData.markers = route.markers;
-        routeData.segments.push({
-            latlngs: [firstLatlng, firstLatlng],
-            routePoint: firstLatlng,
-            routingType
-        });
-        routeData.segments.push({
-            routingType,
-            latlngs: [...route.latlngs],
-            routePoint: route.latlngs[route.latlngs.length - 1]
-        });
-        GpxDataContainerConverterService.splitRouteSegments(routeData);
+        routeData.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs, routingType);
         return routeData;
     }
 

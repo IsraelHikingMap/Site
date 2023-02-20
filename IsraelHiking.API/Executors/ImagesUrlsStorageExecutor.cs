@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Executors
@@ -45,26 +44,27 @@ namespace IsraelHiking.API.Executors
             _logger.LogInformation($"Need to remove {needToRemove.Count} images that are no longer relevant");
             foreach(var imageUrlToRemove in needToRemove)
             {
+                _logger.LogInformation($"Removing image since it does not exist in the OSM file or in the POIs database: {imageUrlToRemove}");
                 await _imagesRepository.DeleteImageByUrl(imageUrlToRemove);
             }
             _logger.LogInformation($"Finished removing images, starting downloading and index: {imagesUrls.Count}");
             using var md5 = MD5.Create();
             var counter = 0;
-            Parallel.ForEach(imagesUrls, new ParallelOptions { MaxDegreeOfParallelism = 20 }, (imageUrl) =>
+            foreach (var imageUrl in imagesUrls) // this can't be paralleled due to wikimedia traffic limitations...
             {
                 try
                 {
-                    Interlocked.Increment(ref counter);
-                    if (counter % 200 == 0)
+                    counter++;
+                    if (counter % 500 == 0)
                     {
-                        _logger.LogInformation($"Indexed {counter} images of {imagesUrls.Count}");
+                        _logger.LogDebug($"Indexed {counter} images of {imagesUrls.Count}");
                     }
                     if (exitingUrls.Contains(imageUrl))
                     {
-                        var size = _remoteFileFetcherGateway.GetFileSize(imageUrl).Result;
+                        var size = await _remoteFileFetcherGateway.GetFileSize(imageUrl);
                         if (size > 0)
                         {
-                            return;
+                            continue;
                         }
                     }
                     var content = Array.Empty<byte>();
@@ -72,30 +72,34 @@ namespace IsraelHiking.API.Executors
                     {
                         try
                         {
-                            if (imageUrl.StartsWith("File:"))
+                            var fullImage = imageUrl;
+                            if (fullImage.StartsWith("File:"))
                             {
-                                imageUrl = $"https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/{imageUrl.Replace("File:", "")}";
+                                fullImage = $"https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/{imageUrl.Replace("File:", "")}";
                             }
-                            content = _remoteFileFetcherGateway.GetFileContent(imageUrl).Result.Content;
+                            content = (await _remoteFileFetcherGateway.GetFileContent(fullImage)).Content;
                             break;
                         }
                         catch
                         {
-                            Task.Delay(200).Wait();
+                            await Task.Delay(200);
                         }
                     }
                     if (content.Length == 0)
                     {
-                        _imagesRepository.DeleteImageByUrl(imageUrl).Wait();
-                        return;
+                        _logger.LogInformation($"Removing image since getting it failed in 3 retries: {imageUrl}");
+                        await _imagesRepository.DeleteImageByUrl(imageUrl);
+                    } 
+                    else 
+                    {
+                        await StoreImage(md5, content, imageUrl);
                     }
-                    StoreImage(md5, content, imageUrl).Wait();
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "There was a problem with the following image url: " + imageUrl + " ");
+                    _logger.LogWarning(ex, $"There was a problem with the following image url: {imageUrl} ");
                 }
-            });
+            }
         }
 
         private byte[] ResizeImage(Image originalImage, int newSizeInPixels)
@@ -104,8 +108,8 @@ namespace IsraelHiking.API.Executors
                 ? newSizeInPixels * 1.0 / originalImage.Width
                 : newSizeInPixels * 1.0 / originalImage.Height;
             var newSize = new Size((int)(originalImage.Width * ratio), (int)(originalImage.Height * ratio));
+            originalImage.Metadata.ExifProfile = null;
             originalImage.Mutate(x => x.Resize(newSize));
-
             using var memoryStream = new MemoryStream();
             originalImage.SaveAsJpeg(memoryStream);
             return memoryStream.ToArray();
@@ -127,7 +131,7 @@ namespace IsraelHiking.API.Executors
             await _imagesRepository.StoreImage(new ImageItem
             {
                 ImageUrls = new List<string> { imageUrl },
-                Thumbnail = $"data:image/jpeg;base64," + Convert.ToBase64String(content),
+                Thumbnail = "data:image/jpeg;base64," + Convert.ToBase64String(content),
                 Hash = hash
             });
         }

@@ -175,7 +175,14 @@ export class SpatialService {
         return [latlng.lng, latlng.lat];
     }
 
-    public static toLatLng(coordinate: [number, number]): LatLngAlt {
+    public static toLatLng(coordinate: [number, number] | [number, number, number] | GeoJSON.Position): LatLngAlt {
+        if (coordinate.length === 3) {
+            return {
+                lat: coordinate[1],
+                lng: coordinate[0],
+                alt: coordinate[2]
+            };
+        }
         return {
             lat: coordinate[1],
             lng: coordinate[0]

@@ -34,7 +34,7 @@ namespace IsraelHiking.DataAccess
         {
             var wikiClient = new WikiClient
             {
-                ClientUserAgent = "IsraelHikingMapSite/5.x bot (https://israelhiking.osm.org.il; israelhikingmap@gmail.com)",
+                ClientUserAgent = Branding.USER_AGENT,
                 Timeout = TimeSpan.FromMinutes(1)
             };
             _wikiSite = new WikiSite(wikiClient, new SiteOptions(BASE_API_ADDRESS));

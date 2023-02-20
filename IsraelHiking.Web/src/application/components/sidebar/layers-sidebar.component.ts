@@ -199,20 +199,20 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 }));
             return;
         }
-        if (routeData.state === "Hidden") {
-            routeData.state = "ReadOnly";
-            this.ngRedux.dispatch(new ChangeRoutePropertiesAction(
-                {
-                    routeId: routeData.id,
-                    routeData
-                }));
-        }
+        routeData.state = selectedRoute != null && selectedRoute.state !== "Hidden" ? selectedRoute.state : "ReadOnly";
+        this.ngRedux.dispatch(new ChangeRoutePropertiesAction({
+            routeId: routeData.id,
+            routeData
+        }));
         this.selectedRouteService.setSelectedRoute(routeData.id);
     }
 
     public toggleAllRoutes(event: Event) {
         event.stopPropagation();
         this.ngRedux.dispatch(new ToggleAllRoutesAction());
+        if (this.isAllRoutesHidden()) {
+            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: null }));
+        }
     }
 
     public isAllRoutesHidden(): boolean {

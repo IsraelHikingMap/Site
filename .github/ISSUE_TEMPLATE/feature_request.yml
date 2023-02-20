@@ -1,0 +1,34 @@
+name: "\U0001F680 Feature request"
+description: Suggest an idea for the Israel Hiking Map project
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting an idea to improve the Israel Hiking Map.
+        Please fill in as much of the following form as you're able.
+  - type: textarea
+    attributes:
+      label: What is the problem this feature will solve?
+      placeholder: |
+        Please add annotated screenshots, if applicable.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What is the feature you are proposing to solve the problem?
+      description: Describe the request. If you already have something in mind... PRs are welcome!
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What alternatives have you considered or tried?
+      description: |
+        Describe the other ways you have considered or tried to solve the problem, if any.
+        Please let us know how each of them failed to solve it.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: Things I think the developers should know, images, links etc.

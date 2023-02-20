@@ -79,12 +79,22 @@ export class LocationComponent extends BaseMapComponent {
             }
             if (this.isFollowingLocation()) {
                 this.moveMapToGpsPosition();
+                let selectedRoute = this.selectedRouteService.getSelectedRoute();
+                if (selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
+                    this.toastService.warning(this.resources.editingRouteWhileTracking);
+                }
             }
         });
 
         this.mapComponent.mapLoad.subscribe(() => {
             this.mapComponent.mapInstance.on("move", () => {
                 this.updateDistanceFeatureCollection();
+            });
+
+            this.mapComponent.mapInstance.on("resize", () => {
+                if (this.locationFeatures.features.length > 0 && this.isFollowingLocation()) {
+                    this.mapComponent.mapInstance.setCenter(this.getCenterFromLocationFeatureCollection());
+                }
             });
 
             this.currentPoistion$.subscribe((position: GeolocationPosition) => {
