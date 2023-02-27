@@ -14,5 +14,11 @@ Disallow: /Hebrew/Tiles/
 Disallow: /English/Tiles/
 Disallow: /Otrho/
 
+# There is no need to crwal images
+Disallow: /*.png$
+Disallow: /*.jpg$
+Disallow: /*.jpeg$
+Disallow: /*.gif$
+
 # Sitemap files
 Sitemap: https://israelhiking.osm.org.il/sitemap.xml
