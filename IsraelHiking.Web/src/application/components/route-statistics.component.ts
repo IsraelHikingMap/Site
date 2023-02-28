@@ -268,7 +268,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.componentSubscriptions.push(this.isShowKmMarkers$.subscribe(showKmMarkers => {
             this.isKmMarkersOn = showKmMarkers;
             this.updateKmMarkers();
-        }))
+        }));
         this.routeChanged();
         this.componentSubscriptions.push(interval(1000).subscribe(() => {
             if (this.ngRedux.getState().recordedRouteState.isRecording) {
