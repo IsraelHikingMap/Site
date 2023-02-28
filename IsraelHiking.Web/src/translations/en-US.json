@@ -159,6 +159,7 @@
     "hr": "hr",
     "I have read and agree to the terms": "I have read and agree to the terms",
     "If you manage to read this click the main menu button and then click layers:": "If you manage to read this click the main menu button and then click layers:",
+    "Image by": "Image by",
     "Information Center": "Travel Information",
     "Installation Instructions": "Installation Instructions",
     "Installation instructions for Locus on desktop - surround each new line with <li></li>": "<li>\nSurf to this site from your mobile device and follow the instructions<br>\n- OR -\n</li>\n<li>Click on 'Start Download' and wait for the zip file to finish downloading.</li>\n<li>Connect the Android device to your PC.</li>\n<li>If needed, change your Android device USB connection mode from 'USB for charging' to 'File transfers'.</li>\n<li>On your PC:</li>\n<ul>\n<li>Open the downloaded zip file and copy the directory it contains to a temporary location, such as your Desktop.</li>\n<li>Move this directory into the 'Locus/maps' directory of the connected Android device.</li>\n</ul>",

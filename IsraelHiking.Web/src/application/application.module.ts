@@ -96,6 +96,7 @@ import { CoordinatesService } from "./services/coordinates.service";
 import { AudioPlayerFactory } from "./services/audio-player.factory";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 import { OverpassTurboService } from "./services/overpass-turbo.service";
+import { ImageAttributionService } from "./services/image-attribution.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -278,6 +279,7 @@ const initializeApplication = (injector: Injector) => async () => {
             CoordinatesService,
             OfflineFilesDownloadService,
             OverpassTurboService,
+            ImageAttributionService,
             AudioPlayerFactory,
             InAppPurchase2,
             FileSystemWrapper,
