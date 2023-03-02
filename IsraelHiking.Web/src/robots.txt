@@ -24,6 +24,16 @@ Disallow: /*.PNG
 Disallow: /*.JPG
 Disallow: /*.JPEG
 Disallow: /*.GIF
+# Wothout the leading /
+Disallow: *.png
+Disallow: *.jpg
+Disallow: *.jpeg
+Disallow: *.gif
+# Patterns are case-sensitive
+Disallow: *.PNG
+Disallow: *.JPG
+Disallow: *.JPEG
+Disallow: *.GIF
 
 # Sitemap files
 Sitemap: https://israelhiking.osm.org.il/sitemap.xml
