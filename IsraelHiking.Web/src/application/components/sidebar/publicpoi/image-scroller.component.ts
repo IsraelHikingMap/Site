@@ -42,6 +42,7 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
         this.currentIndex = 0;
         this.currentImageChanged = new EventEmitter();
         this.currentImageAttribution = null;
+        console.log("ctor");
     }
 
     public ngOnChanges(changes: SimpleChanges): void {
@@ -115,6 +116,7 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
     private async updateCurrentImageAttribution(): Promise<void> {
         let imageUrl = this.getCurrentValue();
         if (imageUrl == null) {
+            this.currentImageAttribution = null;
             return;
         }
         this.currentImageAttribution = await this.imageAttributionService.getAttributionForImage(imageUrl);
