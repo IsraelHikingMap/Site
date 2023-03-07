@@ -22,9 +22,10 @@ export class TermsOfServiceDialogComponent extends BaseMapComponent {
         super(resources);
 
         this.iAgree = false;
-        this.osmTermsOfServiceUrl = "http://wiki.osmfoundation.org/wiki/Privacy_Policy";
+        this.osmTermsOfServiceUrl = "https://wiki.osmfoundation.org/wiki/Privacy_Policy";
         this.wikimediaTermsOfServiceUrl =
             `https://wikimediafoundation.org/wiki/Terms_of_Use/${this.resources.getCurrentLanguageCodeSimplified()}`;
+        this.imgurTermsOfServiceUrl = "https://imgur.com/tos";
     }
 
     public submit() {

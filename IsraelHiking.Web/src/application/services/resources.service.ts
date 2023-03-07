@@ -149,6 +149,7 @@ export class ResourcesService {
     public termsOfServiceElaborated: string;
     public osmTermsOfService: string;
     public wikimediaTermsOfService: string;
+    public imgurTermsOfService: string;
     public iHaveReadAndAgree: string;
     public submit: string;
     public createNakebHike: string;
@@ -477,7 +478,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1677963418027");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1678189473093");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -607,6 +608,7 @@ export class ResourcesService {
         this.termsOfServiceElaborated = this.gettextCatalog.getString("Elaborated terms of service of this site, OSM and wikimedia");
         this.osmTermsOfService = this.gettextCatalog.getString("OSM terms of service");
         this.wikimediaTermsOfService = this.gettextCatalog.getString("Wikimedia terms of service");
+        this.imgurTermsOfService = this.gettextCatalog.getString("Imgur terms of service");
         this.iHaveReadAndAgree = this.gettextCatalog.getString("I have read and agree to the terms");
         this.submit = this.gettextCatalog.getString("Submit");
         this.satelliteImagery = this.gettextCatalog.getString("Satellite Imagery");
