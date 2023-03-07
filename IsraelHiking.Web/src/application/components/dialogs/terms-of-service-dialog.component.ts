@@ -13,6 +13,7 @@ import { ToastService } from "../../services/toast.service";
 export class TermsOfServiceDialogComponent extends BaseMapComponent {
     public osmTermsOfServiceUrl: string;
     public wikimediaTermsOfServiceUrl: string;
+    public imgurTermsOfServiceUrl: string;
     public iAgree: boolean;
 
     constructor(resources: ResourcesService,
