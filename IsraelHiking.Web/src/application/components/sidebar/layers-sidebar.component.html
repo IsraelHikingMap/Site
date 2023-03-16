@@ -1,9 +1,12 @@
 ﻿<div [dir]="resources.direction">
-    <div fxLayout="row" *ngIf="isPurchaseAvailable()">
-        <button mat-raised-button color="primary" fxFill (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Purchase offline maps"><i class="fa icon-dollar"></i> {{resources.purchaseOfflineMaps}}</button>
+    <div fxLayout="row" *ngIf="isPurchaseAvailable()" fxLayoutAlign="center none">
+        <button mat-raised-button color="primary" (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Purchase offline maps"><i class="fa icon-dollar"></i> {{resources.purchaseOfflineMaps}}</button>
     </div>
-    <div fxLayout="row" *ngIf="isOfflineDownloadAvailable()">
-        <button mat-raised-button color="primary" fxFill (click)="downloadOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download offline maps"><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
+    <div fxLayout="row" *ngIf="isRenewAvailable()" fxLayoutAlign="center none">
+        <button mat-raised-button color="primary" (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Renew offline maps"><i class="fa icon-dollar"></i> {{resources.renewOfflineMaps}}</button>
+    </div>
+    <div fxLayout="row" *ngIf="isOfflineDownloadAvailable()" fxLayoutAlign="center none">
+        <button mat-raised-button color="primary" (click)="downloadOfflineMaps()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download offline maps"><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
     </div>
     <mat-accordion multi="true">
         <mat-expansion-panel [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')" (closed)="collapse('Base Layers')">

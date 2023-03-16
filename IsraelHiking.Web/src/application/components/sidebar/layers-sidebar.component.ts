@@ -156,7 +156,14 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public isPurchaseAvailable() {
         return this.runningContextService.isCapacitor &&
-            !this.ngRedux.getState().offlineState.isOfflineAvailable;
+            !this.ngRedux.getState().offlineState.isOfflineAvailable &&
+            this.ngRedux.getState().offlineState.lastModifiedDate == null;
+    }
+
+    public isRenewAvailable() {
+        return this.runningContextService.isCapacitor &&
+            !this.ngRedux.getState().offlineState.isOfflineAvailable &&
+            this.ngRedux.getState().offlineState.lastModifiedDate != null;
     }
 
     public orderOfflineMaps() {

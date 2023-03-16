@@ -201,6 +201,7 @@ export class ResourcesService {
     public navigateWithWaze: string;
     public offlinePurchaseGraditude: string;
     public purchaseOfflineMaps: string;
+    public renewOfflineMaps: string;
     public lastUpdatedOn: string;
     public remainingDistance: string;
     public traveledDistance: string;
@@ -478,7 +479,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1678189473093");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1678977830533");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -665,6 +666,7 @@ export class ResourcesService {
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
         this.offlinePurchaseGraditude = this.gettextCatalog.getString("Thanks for purchasing! download instructions here...");
         this.purchaseOfflineMaps = this.gettextCatalog.getString("Purchase maps for offline use");
+        this.renewOfflineMaps = this.gettextCatalog.getString("Renew offline maps subscription");
         this.lastUpdatedOn = this.gettextCatalog.getString("Last updated on");
         this.remainingDistance = this.gettextCatalog.getString("Remaining distance");
         this.traveledDistance = this.gettextCatalog.getString("Traveled distance");
