@@ -46,9 +46,6 @@ describe("ImageAttributionService", () => {
                     "-1": {
                         imageinfo: [{
                             extmetadata: {
-                                AttributionRequired: {
-                                    value: "true"
-                                },
                                 Artist: {
                                     value: "hello"
                                 }
@@ -66,7 +63,7 @@ describe("ImageAttributionService", () => {
         expect(response.url).toBe("https://en.wikipedia.org/wiki/File:Israel_Hiking_Map_Image.jpeg");
     }));
 
-    it("should return null when getting wikimedia image without need for attributnio", inject([ImageAttributionService, HttpTestingController], 
+    it("should remove html tags and get the value inside", inject([ImageAttributionService, HttpTestingController], 
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
         let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Israel_Hiking_Map_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://en.wikipedia.org/"))[0].flush({
@@ -75,12 +72,33 @@ describe("ImageAttributionService", () => {
                     "-1": {
                         imageinfo: [{
                             extmetadata: {
-                                AttributionRequired: {
-                                    value: "false"
-                                },
                                 Artist: {
-                                    value: "hello"
+                                    value: "<span>hello</span>"
                                 }
+                            }
+                        }]
+                    }
+                }
+            }
+        });
+
+        let response = await promise;
+
+        expect(response).not.toBeNull();
+        expect(response.author).toBe("hello");
+        expect(response.url).toBe("https://en.wikipedia.org/wiki/File:Israel_Hiking_Map_Image.jpeg");
+    }));
+
+    it("should return null when getting wikimedia image without artist", inject([ImageAttributionService, HttpTestingController], 
+        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
+        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Israel_Hiking_Map_Image.jpeg");
+        mockBackend.match(r => r.url.startsWith("https://en.wikipedia.org/"))[0].flush({
+            query: {
+                pages: {
+                    "-1": {
+                        imageinfo: [{
+                            extmetadata: {
+                                somthing: {},
                             }
                         }]
                     }

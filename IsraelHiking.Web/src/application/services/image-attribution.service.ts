@@ -45,9 +45,9 @@ export class ImageAttributionService {
         try {
             let response: any = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000)));
             let extmetadata = response.query.pages[-1].imageinfo[0].extmetadata;
-            if (extmetadata.AttributionRequired.value === "true") {
+            if (extmetadata?.Artist.value) {
                 let imageAttribution = {
-                    author: extmetadata.Artist.value.replace(/\<a.*\>(.*)\<\/a\>/, "$1"),
+                    author: extmetadata.Artist.value.replace(/\<.*\>(.*)\<\/.*\>/, "$1"),
                     url: `https://${language}.wikipedia.org/wiki/File:${imageName}`
                 };
                 this.attributionImageCache.set(imageUrl, imageAttribution);
