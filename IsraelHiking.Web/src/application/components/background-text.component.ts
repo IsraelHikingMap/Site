@@ -36,7 +36,7 @@ export class BackgroundTextComponent extends BaseMapComponent {
 
     private updateText() {
         let offlineState = this.ngRedux.getState().offlineState;
-        if (offlineState.isOfflineAvailable && offlineState.lastModifiedDate != null) {
+        if (offlineState.lastModifiedDate != null) {
             this.text = this.resources.youNeedToToggleOfflineMaps;
         } else if (offlineState.isOfflineAvailable && offlineState.lastModifiedDate == null) {
             this.text = this.resources.youNeedToDownloadOfflineMaps;

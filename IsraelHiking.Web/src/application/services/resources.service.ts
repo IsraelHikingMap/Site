@@ -237,7 +237,6 @@ export class ResourcesService {
     public screenOn: string;
     public screenOff: string;
     public screenDark: string;
-    public ifYouManageToReadThis: string;
     public youNeedToPurchaseOfflineMaps: string;
     public youNeedToDownloadOfflineMaps: string;
     public youNeedToToggleOfflineMaps: string;
@@ -479,7 +478,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1678977830533");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1679061617453");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -701,8 +700,6 @@ export class ResourcesService {
         this.screenOn = this.gettextCatalog.getString("Keep screen on");
         this.screenOff = this.gettextCatalog.getString("Allow turning off the screen");
         this.screenDark = this.gettextCatalog.getString("Darken the screen");
-        this.ifYouManageToReadThis = this.gettextCatalog
-            .getString("If you manage to read this click the main menu button and then click layers:");
         this.youNeedToDownloadOfflineMaps = this.gettextCatalog.getString("Background text: You need to download offline maps");
         this.youNeedToToggleOfflineMaps = this.gettextCatalog.getString("Background text: You need to toggle offline maps");
         this.youNeedToPurchaseOfflineMaps = this.gettextCatalog.getString("Background text: You need to purchase offline maps");
