@@ -61,7 +61,6 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.traceIdInEditMode = null;
         this.page = 1;
         this.searchTerm = new FormControl<string>("");
-        console.log("data", data);
         if (data) {
             this.specificIds = data;
         } else {

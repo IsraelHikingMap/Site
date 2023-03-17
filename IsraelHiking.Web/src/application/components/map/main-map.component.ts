@@ -133,9 +133,9 @@ export class MainMapComponent extends BaseMapComponent {
         this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" as Unit}), "bottom-left");
 
         this.mapComponent.mapInstance.on("click", (e) => {
+            // This is used for the personal heatmap, assuming there's a layer there called "record_lines".
             let features = this.mapComponent.mapInstance.queryRenderedFeatures(e.point).filter(f => f.sourceLayer === "record_lines");
             if (features.length <= 0) { return }
-            console.log(features);
             this.dialog.open(TracesDialogComponent, { width: "480px", data: features.map(f => f.properties.trace_id) } as MatDialogConfig);
         });
     }
