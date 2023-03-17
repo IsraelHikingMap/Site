@@ -41,7 +41,7 @@ export class ProgressDialogComponent extends BaseMapComponent {
             }).then(
                 () => this.matDialogRef.close(),
                 (ex) => {
-                    this.loggingService.error("Error in download dialog, " + JSON.stringify(ex));
+                    this.loggingService.error("Error in download dialog, " + ex.message);
                     this.text = ex.message;
                     this.isError = true;
                 });
