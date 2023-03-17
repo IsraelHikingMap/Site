@@ -6,6 +6,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
+import { GeoLocationService } from "../../services/geo-location.service";
 import { ApplicationState, RecordedRoute } from "../../models/models";
 
 @Component({
@@ -75,6 +76,11 @@ export class RecordedRouteComponent extends BaseMapComponent {
             return;
         }
         let latlngs = [...recording.latlngs];
+        let currentPosition = this.ngRedux.getState().gpsState.currentPoistion;
+        if (currentPosition) {
+            // Adding current position to the end of the presented recorded line
+            latlngs.push(GeoLocationService.positionToLatLngTime(currentPosition));
+        }
         if (this.startPointGeoJson.geometry.coordinates.length <= 0) {
             this.startPointGeoJson = {
                 type: "Feature",

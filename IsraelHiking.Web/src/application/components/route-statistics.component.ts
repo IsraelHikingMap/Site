@@ -138,7 +138,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 private readonly routeStatisticsService: RouteStatisticsService,
                 private readonly cancelableTimeoutService: CancelableTimeoutService,
                 private readonly sidebarService: SidebarService,
-                private readonly geoLocationService: GeoLocationService,
                 private readonly audioPlayerFactory: AudioPlayerFactory,
                 private readonly ngRedux: NgRedux<ApplicationState>
     ) {
@@ -871,7 +870,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private refreshLocationGroup() {
-        let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+        let currentLocation = GeoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
         let point = this.getPointFromLatLng(currentLocation, this.heading);
         if (!point) {
             this.hideLocationGroup();
@@ -916,7 +915,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.setViewStatisticsValues(null);
             return;
         }
-        let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+        let currentLocation = GeoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
         let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
 
         if (this.ngRedux.getState().recordedRouteState.isRecording && closestRouteToGps) {
@@ -940,7 +939,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private getRouteForChart(): { latlngs: LatLngAltTime[]; color: string; weight: number} | null {
-        let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+        let currentLocation = GeoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
         let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
         if (closestRouteToGps) {
             return {

@@ -43,7 +43,6 @@ export class RouteEditRouteInteraction {
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly routerService: RouterService,
                 private readonly elevationProvider: ElevationProvider,
-                private readonly geoLocationService: GeoLocationService,
                 private readonly snappingService: SnappingService,
                 private readonly ngZone: NgZone,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -378,7 +377,7 @@ export class RouteEditRouteInteraction {
 
     private getSnappingForRoute(latlng: LatLngAlt, additionalLatlngs: LatLngAlt[]): LatLngAlt {
         if (this.ngRedux.getState().gpsState.tracking === "tracking") {
-            let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+            let currentLocation = GeoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
             additionalLatlngs.push(currentLocation);
         }
         // private POIs + Geo Location + Additional Point:
