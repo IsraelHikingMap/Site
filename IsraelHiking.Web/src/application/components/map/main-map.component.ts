@@ -1,7 +1,7 @@
 import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import mapliregl, { StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification } from "maplibre-gl";
+import mapliregl, { StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike } from "maplibre-gl";
 import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -134,7 +134,11 @@ export class MainMapComponent extends BaseMapComponent {
 
         this.mapComponent.mapInstance.on("click", (e) => {
             // This is used for the personal heatmap, assuming there's a layer there called "record_lines".
-            let features = this.mapComponent.mapInstance.queryRenderedFeatures(e.point).filter(f => f.sourceLayer === "record_lines");
+            const bbox = [
+                [e.point.x - 5, e.point.y - 5],
+                [e.point.x + 5, e.point.y + 5]
+            ] as [PointLike, PointLike];
+            let features = this.mapComponent.mapInstance.queryRenderedFeatures(bbox).filter(f => f.sourceLayer === "record_lines");
             if (features.length <= 0) { return }
             this.dialog.open(TracesDialogComponent, { width: "480px", data: features.map(f => f.properties.trace_id) } as MatDialogConfig);
         });
