@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Converters;
+﻿using System;
+using IsraelHiking.API.Converters;
 using NetTopologySuite.Features;
 using NetTopologySuite.IO;
 using System.Collections.Generic;
@@ -9,13 +10,14 @@ using System.Text;
 using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
+using IsraelHiking.Common.Extensions;
 using NetTopologySuite.IO.Converters;
 
 namespace IsraelHiking.API.Gpx
 {
     internal class IsraelHikingGpxExtensionReader : GpxExtensionReader
     {
-        public string FromXml(IEnumerable<XElement> extensionElements, string elementName)
+        private string FromXml(IEnumerable<XElement> extensionElements, string elementName)
         {
             return extensionElements.FirstOrDefault(a => a.Name.LocalName == elementName)?.FirstNode?.ToString();
         }
@@ -61,17 +63,17 @@ namespace IsraelHiking.API.Gpx
                     new XElement("Weight", colorOpacityWeight.Weight)
                 };
             }
-            return new XElement[0];
+            return Array.Empty<XElement>();
         }
     }
 
     /// <summary>
     /// This is a helper class to facilitate easier serializations
     /// </summary>
-    public static class SerializarionExtensions
+    public static class SerializationExtensions
     {
         /// <summary>
-        /// Convers <see cref="FeatureCollection"/> to <see cref="byte"/> array
+        /// Converts <see cref="FeatureCollection"/> to <see cref="byte"/> array
         /// </summary>
         /// <param name="featureCollection">The <see cref="FeatureCollection"/></param>
         /// <returns>The <see cref="byte"/> array</returns>
@@ -79,6 +81,7 @@ namespace IsraelHiking.API.Gpx
         {
             var options = new JsonSerializerOptions();
             options.Converters.Add(new GeoJsonConverterFactory());
+            options.Converters.Add(new DateTimeConverter());
             var serialized = JsonSerializer.Serialize(featureCollection, options);
             return Encoding.UTF8.GetBytes(serialized);
         }
@@ -93,6 +96,7 @@ namespace IsraelHiking.API.Gpx
             var stringJson = Encoding.UTF8.GetString(featureCollectionContent);
             var options = new JsonSerializerOptions();
             options.Converters.Add(new GeoJsonConverterFactory());
+            options.Converters.Add(new DateTimeConverter());
             return JsonSerializer.Deserialize<FeatureCollection>(stringJson, options);
         }
 
@@ -182,9 +186,9 @@ namespace IsraelHiking.API.Gpx
         public static string ToHashString(this byte[] hash)
         {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < hash.Length; i++)
+            foreach (var b in hash)
             {
-                sb.Append(hash[i].ToString("X2"));
+                sb.Append(b.ToString("X2"));
             }
             return sb.ToString();
         }

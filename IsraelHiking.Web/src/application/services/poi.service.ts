@@ -868,7 +868,6 @@ export class PoiService {
 
     public getFeatureId(feature: GeoJSON.Feature): string {
         if (feature.id) {
-            console.log("REMOVE ME!!" + feature.id);
             return feature.id.toString();
         }
         return feature.id ?? feature.properties.poiId;

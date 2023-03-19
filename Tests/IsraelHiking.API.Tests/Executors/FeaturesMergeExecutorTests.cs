@@ -11,6 +11,8 @@ using NSubstitute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using IsraelHiking.API.Gpx;
 using NetTopologySuite.Operation.Valid;
 
 namespace IsraelHiking.API.Tests.Executors
@@ -1063,6 +1065,33 @@ namespace IsraelHiking.API.Tests.Executors
             Assert.IsTrue(pointFeature.Geometry is GeometryCollection);
             Assert.AreEqual(2, ((GeometryCollection) pointFeature.Geometry).Geometries.Length);
             Assert.IsTrue(((GeometryCollection) pointFeature.Geometry).Geometries.All(g => g.OgcGeometryType != OgcGeometryType.GeometryCollection));
+        }
+
+        [TestMethod]
+        public void ValidateTitlesParsing()
+        {
+            var featureString =
+            @"
+                {
+                    ""type"": ""FeatureCollection"",
+                    ""features"": [{
+                        ""type"": ""Feature"",
+                        ""geometry"": {
+                            ""type"": ""Point"",
+                            ""coordinates"": [1,2]
+                        },
+                        ""properties"": {
+                            ""poiNames"": {
+                                ""he"": [""name1"", ""name2""],
+                                ""en"": [""name3"", ""name4""],
+                                ""all"": [""name1"", ""name2"", ""name3"", ""name4""]
+                            }
+                        }
+                    }]
+                }";
+
+            var collection = Encoding.UTF8.GetBytes(featureString).ToFeatureCollection();
+            Assert.AreEqual(4, collection.First().GetTitles().Length);
         }
     }
 }

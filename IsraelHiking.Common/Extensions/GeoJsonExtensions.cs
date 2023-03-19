@@ -213,23 +213,14 @@ namespace IsraelHiking.Common.Extensions
             var titles = new List<string>();
             switch (value)
             {
-                case List<object> objectsList:
-                    titles.AddRange(objectsList.Select(o => o.ToString()).ToList());
-                    break;
-                case List<string> stringsList:
-                    titles.AddRange(stringsList);
-                    break;
-                case string[] array:
-                    titles.AddRange(array);
-                    break;
                 case string str:
                     titles.Add(str);
                     break;
-                case object[] objectArray:
-                    titles.AddRange(objectArray.Select(o => o.ToString()).ToList());
+                case IEnumerable<string> stringsEnumerable:
+                    titles.AddRange(stringsEnumerable);
                     break;
-                case IList<object> objectsIList:
-                    titles.AddRange(objectsIList.Select(o => o.ToString()).ToList());
+                case IEnumerable<object> objectsEnumerable:
+                    titles.AddRange(objectsEnumerable.Select(o => o.ToString()).ToList());
                     break;
             }
             return titles;

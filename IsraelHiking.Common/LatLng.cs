@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.Json.Serialization;
+using IsraelHiking.Common.Extensions;
 
 namespace IsraelHiking.Common
 {
@@ -58,6 +59,7 @@ namespace IsraelHiking.Common
 
     public class LatLngTime : LatLng
     {
+        [JsonConverter(typeof(DateTimeConverter))]
         [JsonPropertyName("timestamp")]
         public DateTime? Timestamp { get; set; }
 

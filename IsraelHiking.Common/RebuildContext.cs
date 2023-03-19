@@ -1,6 +1,7 @@
 ﻿using IsraelHiking.Common.Api;
 using System;
 using System.Text.Json.Serialization;
+using IsraelHiking.Common.Extensions;
 
 namespace IsraelHiking.Common
 {
@@ -8,6 +9,7 @@ namespace IsraelHiking.Common
     {
         [JsonPropertyName("request")]
         public UpdateRequest Request { get; set; }
+        [JsonConverter(typeof(DateTimeConverter))]
         [JsonPropertyName("startTime")]
         public DateTime StartTime { get; set; }
         [JsonPropertyName("succeeded")]
