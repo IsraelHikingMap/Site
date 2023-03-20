@@ -149,12 +149,15 @@ namespace IsraelHiking.API.Services.Poi
                 {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
                 {FeatureAttributes.POI_CATEGORY, pointOfInterest.Category},
                 {FeatureAttributes.POI_SHARE_REFERENCE, pointOfInterest.FileUrl },
-                {FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl},
                 {FeatureAttributes.POI_SOURCE_IMAGE_URL, pointOfInterest.SourceImageUrl},
                 {FeatureAttributes.ID, pointOfInterest.Id},
                 {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                 {FeatureAttributes.WEBSITE, pointOfInterest.Website}
             };
+            if (!string.IsNullOrWhiteSpace(pointOfInterest.ImageUrl))
+            {
+                table.Add(FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl);
+            }
             var feature = new Feature(new Point(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude)), table);
             feature.SetLocation(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude));
             feature.SetLastModified(pointOfInterest.LastModified > DateTime.Now ? DateTime.Now : pointOfInterest.LastModified);

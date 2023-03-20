@@ -14,7 +14,6 @@ import type { ApplicationState, LatLngAlt, LatLngAltTime } from "../models/model
 @Injectable()
 export class NavigateHereService {
     constructor(private readonly resources: ResourcesService,
-                private readonly geoLocationService: GeoLocationService,
                 private readonly toastService: ToastService,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly routerService: RouterService,
@@ -28,7 +27,7 @@ export class NavigateHereService {
             return;
         }
         let routingType = this.ngRedux.getState().routeEditingState.routingType;
-        let currentLocation = this.geoLocationService.positionToLatLngTime(currentPoistion);
+        let currentLocation = GeoLocationService.positionToLatLngTime(currentPoistion);
         let latlngs = await this.routerService.getRoute(currentLocation, latlng, routingType);
         let name = this.resources.route + (title ? " " + title : "");
         if (!this.selectedRouteService.isNameAvailable(name)) {

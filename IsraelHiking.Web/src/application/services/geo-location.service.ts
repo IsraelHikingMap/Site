@@ -231,7 +231,7 @@ export class GeoLocationService {
     }
 
     private handlePoistionChange(position: GeolocationPosition): void {
-        this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(this.positionToLatLngTime(position)));
+        this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(GeoLocationService.positionToLatLngTime(position)));
         if (this.ngRedux.getState().gpsState.tracking === "searching") {
             this.ngRedux.dispatch(new SetTrackingStateAction({ state: "tracking"}));
         }
@@ -241,7 +241,7 @@ export class GeoLocationService {
         this.ngRedux.dispatch(new SetCurrentPositionAction({position}));
     }
 
-    public positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {
+    public static positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {
         if (position == null) {
             return null;
         }

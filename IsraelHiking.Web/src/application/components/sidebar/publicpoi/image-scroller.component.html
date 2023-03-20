@@ -34,3 +34,6 @@
         <button mat-button (click)="next()" [disabled]="!hasNext()" fxFill><i class="fa icon-chevron-{{resources.end}}"></i></button>
     </div>
 </div>
+<div fxLayout="row" *ngIf="!canEdit && currentImageAttribution" class="text-center text-small">
+    <div fxFill [dir]="resources.direction">{{resources.imageBy}} <a [href]="currentImageAttribution.url" target="_blank">{{currentImageAttribution.author}}</a></div>
+</div>

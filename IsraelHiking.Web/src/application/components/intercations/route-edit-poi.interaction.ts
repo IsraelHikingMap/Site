@@ -19,7 +19,6 @@ export class RouteEditPoiInteraction {
     constructor(private readonly matDialog: MatDialog,
                 private readonly ngZone: NgZone,
                 private readonly selectedRouteService: SelectedRouteService,
-                private readonly geoLocationService: GeoLocationService,
                 private readonly snappingService: SnappingService,
                 private readonly poiService: PoiService,
                 private readonly resources: ResourcesService,
@@ -118,7 +117,7 @@ export class RouteEditPoiInteraction {
 
     private async getSnappingForPoint(latlng: LatLngAlt): Promise<SnappingPointResponse> {
         if (this.ngRedux.getState().gpsState.tracking === "tracking") {
-            let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+            let currentLocation = GeoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
             let snappingPointResponse = this.snappingService.snapToPoint(latlng,
                 [
                     {

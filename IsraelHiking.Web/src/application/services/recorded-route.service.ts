@@ -61,7 +61,7 @@ export class RecordedRouteService {
     public startRecording() {
         this.loggingService.info("[Record] Starting recording");
         this.rejectedPosition = null;
-        let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+        let currentLocation = GeoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
         this.lastValidLocation = currentLocation;
         this.ngRedux.dispatch(new StartRecordingAction());
         this.ngRedux.dispatch(new AddRecordingRoutePointsAction({
@@ -148,13 +148,13 @@ export class RecordedRouteService {
         for (let position of positions) {
             if (this.validateRecordingAndUpdateState(position)) {
                 validPositions.push(position);
-                this.lastValidLocation = this.geoLocationService.positionToLatLngTime(position);
+                this.lastValidLocation = GeoLocationService.positionToLatLngTime(position);
             }
         }
         if (validPositions.length === 0) {
             return;
         }
-        let locations = validPositions.map(p => this.geoLocationService.positionToLatLngTime(p));
+        let locations = validPositions.map(p => GeoLocationService.positionToLatLngTime(p));
         setTimeout(() => {
             // This is needed when dispatching an action within a @Select subscription event
             this.ngRedux.dispatch(new AddRecordingRoutePointsAction({
@@ -172,26 +172,26 @@ export class RecordedRouteService {
             return true;
         }
         if (this.rejectedPosition == null) {
-            this.rejectedPosition = this.geoLocationService.positionToLatLngTime(position);
+            this.rejectedPosition = GeoLocationService.positionToLatLngTime(position);
             this.loggingService.debug(`[Record] Rejecting position, reason: ${nonValidReason}` +
-                JSON.stringify(this.geoLocationService.positionToLatLngTime(position)));
+                JSON.stringify(GeoLocationService.positionToLatLngTime(position)));
             return false;
         }
         nonValidReason = this.isValid(this.rejectedPosition, position);
         if (nonValidReason === "") {
             this.loggingService.debug("[Record] Validating a rejected position: " +
-                JSON.stringify(this.geoLocationService.positionToLatLngTime(position)));
+                JSON.stringify(GeoLocationService.positionToLatLngTime(position)));
             this.rejectedPosition = null;
             return true;
         }
-        this.rejectedPosition = this.geoLocationService.positionToLatLngTime(position);
+        this.rejectedPosition = GeoLocationService.positionToLatLngTime(position);
         this.loggingService.debug("[Record] Rejecting position for rejected: " +
             JSON.stringify(this.rejectedPosition) + " reason: " + nonValidReason);
         return false;
     }
 
     private isValid(test: LatLngAltTime, position: GeolocationPosition): string {
-        let distance = SpatialService.getDistanceInMeters(test, this.geoLocationService.positionToLatLngTime(position));
+        let distance = SpatialService.getDistanceInMeters(test, GeoLocationService.positionToLatLngTime(position));
         let timeDifference = Math.abs(position.timestamp - test.timestamp.getTime()) / 1000;
         if (timeDifference === 0) {
             return "Time difference is 0";

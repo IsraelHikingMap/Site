@@ -7,6 +7,7 @@ import { FileService } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
 import { ImageResizeService } from "../../../services/image-resize.service";
 import { RunningContextService } from "../../../services/running-context.service";
+import { ImageAttributionService, ImageAttribution } from "../../../services/image-attribution.service";
 import sceneryPlaceholder from "../../../../content/lottie/placeholder-scenery.json";
 
 @Component({
@@ -19,6 +20,8 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
     };
 
     private currentIndex: number;
+
+    public currentImageAttribution: ImageAttribution;
 
     @Input()
     public images: string[];
@@ -33,15 +36,19 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
                 private readonly fileService: FileService,
                 private readonly runningContextService: RunningContextService,
                 private readonly imageGalleryService: ImageGalleryService,
-                private readonly imageResizeService: ImageResizeService) {
+                private readonly imageResizeService: ImageResizeService,
+                private readonly imageAttributionService: ImageAttributionService) {
         super(resources);
         this.currentIndex = 0;
         this.currentImageChanged = new EventEmitter();
+        this.currentImageAttribution = null;
+        console.log("ctor");
     }
 
     public ngOnChanges(changes: SimpleChanges): void {
         if (changes.images) {
             this.currentIndex = 0;
+            this.updateCurrentImageAttribution();
         }
     }
 
@@ -51,6 +58,7 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
             this.currentIndex = this.images.length - 1;
         }
         this.currentImageChanged.next(this.getCurrentValue());
+        this.updateCurrentImageAttribution();
     }
 
     public previous() {
@@ -59,6 +67,7 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
             this.currentIndex = 0;
         }
         this.currentImageChanged.next(this.getCurrentValue());
+        this.updateCurrentImageAttribution();
     }
 
     public hasNext(): boolean {
@@ -102,6 +111,15 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
         return this.runningContextService.isOnline
             ? this.resources.getResizedImageUrl(imageUrl, 800)
             : imageUrl;
+    }
+
+    private async updateCurrentImageAttribution(): Promise<void> {
+        let imageUrl = this.getCurrentValue();
+        if (imageUrl == null) {
+            this.currentImageAttribution = null;
+            return;
+        }
+        this.currentImageAttribution = await this.imageAttributionService.getAttributionForImage(imageUrl);
     }
 
     public showImage() {

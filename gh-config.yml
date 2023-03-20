@@ -46,8 +46,33 @@ graphhopper:
           - if: "road_class == TRACK"
             multiply_by: "20"
     - name: hike
-      vehicle: hike
-      weighting: short_fastest
+      vehicle: roads
+      weighting: custom
+      custom_model:
+        priority:
+          - if: "true"
+            multiply_by: "foot_priority"
+          - if: "!foot_access && hike_rating < 4"
+            multiply_by: "0"
+          - if: "foot_network == INTERNATIONAL || foot_network == NATIONAL"
+            multiply_by: "1.7"
+          - else_if: "foot_network == REGIONAL || foot_network == LOCAL"
+            multiply_by: "1.5"
+        speed:
+          - if: "hike_rating < 1"
+            limit_to: "foot_average_speed"
+          - else_if: "hike_rating > 2"
+            limit_to: "2"
+          - else: ""
+            limit_to: "4"
+          - if: "average_slope >= 15"
+            limit_to: "1.5"
+          - else_if: "average_slope >=  7"
+            limit_to: "2.5"
+          - else_if: "average_slope >=  4"
+            multiply_by: "0.85"
+          - else_if: "average_slope <= -4"
+            multiply_by: "1.05"
     - name: mtb
       vehicle: mtb
       weighting: short_fastest
@@ -80,7 +105,7 @@ graphhopper:
   # The vehicle defines the base for how the routing of a profile behaves. It can be fine tuned using the options:
   # name=mycustomvehicle,block_private=true,turn_costs=true,transportation_mode=MOTOR_VEHICLE (only for the roads vehicle)
   # Still, it is recommended to avoid changing the vehicle settings and change the custom model instead.
-  graph.flag_encoders: car|block_fords=false|block_barriers=false,hike|block_fords=false,mtb|block_fords=false|block_barriers=false
+  graph.vehicles: roads|block_fords=false|block_barriers=false,car|block_fords=false|block_barriers=false,foot|block_fords=false,mtb|block_fords=false|block_barriers=false
   # Other standard vehicles: foot,bike,mtb,racingbike,motorcycle,wheelchair
 
 
@@ -90,7 +115,7 @@ graphhopper:
   # Default values are: road_class,road_class_link,road_environment,max_speed,road_access
   # More are: surface,smoothness,max_width,max_height,max_weight,hgv,max_axle_load,max_length,hazmat,hazmat_tunnel,hazmat_water,toll,track_type,
   #           mtb_rating, hike_rating,horse_rating,lanes
-  graph.encoded_values: road_class,road_class_link,road_environment,max_speed,road_access,track_type,surface
+  graph.encoded_values: road_class,road_class_link,road_environment,max_speed,road_access,track_type,surface,hike_rating,average_slope,max_slope
 
   #### Speed, hybrid and flexible mode ####
 
@@ -175,6 +200,8 @@ graphhopper:
 
 
   #### Storage ####
+
+  import.osm.ignored_highways:
 
   # configure the memory access, use RAM_STORE for well equipped servers (default and recommended)
   graph.dataaccess.default_type: RAM_STORE

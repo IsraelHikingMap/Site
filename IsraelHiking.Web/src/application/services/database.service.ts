@@ -114,7 +114,6 @@ export class DatabaseService {
                     callback(null, tileBuffer, null, null);
                 } else {
                     let message = `Tile is not in DB: ${params.url}`;
-                    this.loggingService.debug(message);
                     callback(new Error(message));
                 }
             });
@@ -137,12 +136,16 @@ export class DatabaseService {
 
     public async closeDatabase(dbKey: string) {
         this.loggingService.info("[Database] Closing database: " + dbKey);
-        let db = await this.sourceDatabases.get(dbKey);
-        if (db != null) {
+        if (!this.sourceDatabases.has(dbKey)) {
+            this.loggingService.info(`[Database] database ${dbKey} was never opened`);
+            return;
+        }
+        try {
+            let db = await this.sourceDatabases.get(dbKey);
             await db.close();
             this.sourceDatabases.delete(dbKey);
-        } else if (this.sourceDatabases.keys.length > 0) {
-            this.loggingService.warning("Unable to close database: " + dbKey);
+        } catch (ex) {
+            this.loggingService.error(`[Database] Unable to close database ${dbKey}, ${(ex as Error).message}`);
         }
     }
 
@@ -197,19 +200,25 @@ export class DatabaseService {
     }
 
     private async getDatabase(dbName: string): Promise<SQLiteDBConnection> {
-        if (!this.sourceDatabases.has(dbName)) {
-            this.loggingService.info(`[Database] creating connection to ${dbName}`);
-            this.sourceDatabases.set(dbName, new Promise(async (resolve, reject) => {
-                try {
-                    let dbPromise = this.sqlite.createConnection(dbName + ".db", false, "no-encryption", 1, true);
-                    let db = await dbPromise;
-                    await db.open();
-                    resolve(db);
-                } catch (ex) {
-                    reject(ex);
-                }
-            }));
+        if (this.sourceDatabases.has(dbName)) {
+            try {
+                let db = await this.sourceDatabases.get(dbName);
+                return db;
+            } catch (ex) {
+                this.loggingService.info(`[Database] There's a problem with the connection to ${dbName}, ${(ex as Error).message}`);
+            }
         }
+        this.loggingService.info(`[Database] Creating connection to ${dbName}`);
+        this.sourceDatabases.set(dbName, new Promise(async (resolve, reject) => {
+            try {
+                let dbPromise = this.sqlite.createConnection(dbName + ".db", false, "no-encryption", 1, true);
+                let db = await dbPromise;
+                await db.open();
+                resolve(db);
+            } catch (ex) {
+                reject(ex);
+            }
+        }));
         return this.sourceDatabases.get(dbName);
     }
 
