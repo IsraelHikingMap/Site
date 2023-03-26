@@ -39,6 +39,18 @@ export class GeoLocationService {
         this.gettingLocations = false;
     }
 
+    public static positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {
+        if (position == null) {
+            return null;
+        }
+        return {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            alt: position.coords.altitude,
+            timestamp: new Date(position.timestamp)
+        };
+    }
+
     public initialize() {
         if (this.ngRedux.getState().gpsState.tracking !== "disabled") {
             this.ngRedux.dispatch(new SetTrackingStateAction({ state: "disabled"}));
@@ -239,18 +251,6 @@ export class GeoLocationService {
             return;
         }
         this.ngRedux.dispatch(new SetCurrentPositionAction({position}));
-    }
-
-    public static positionToLatLngTime(position: GeolocationPosition): LatLngAltTime {
-        if (position == null) {
-            return null;
-        }
-        return {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            alt: position.coords.altitude,
-            timestamp: new Date(position.timestamp)
-        };
     }
 
     private locationToPosition(location: Location): GeolocationPosition {

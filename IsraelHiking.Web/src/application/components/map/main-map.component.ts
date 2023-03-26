@@ -139,7 +139,7 @@ export class MainMapComponent extends BaseMapComponent {
                 [e.point.x + 5, e.point.y + 5]
             ] as [PointLike, PointLike];
             let features = this.mapComponent.mapInstance.queryRenderedFeatures(bbox).filter(f => f.sourceLayer === "record_lines");
-            if (features.length <= 0) { return }
+            if (features.length <= 0) { return; }
             this.dialog.open(TracesDialogComponent, { width: "480px", data: features.map(f => f.properties.trace_id) } as MatDialogConfig);
         });
     }

@@ -2,7 +2,6 @@
 
 declare module "linear-interpolator";
 declare module "piexifjs";
-declare module "ohauth";
 declare module "d3-regression";
 declare module "xml-beautify";
 

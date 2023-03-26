@@ -37,9 +37,9 @@ describe("ImageAttributionService", () => {
         expect(response.url).toBe("https://www.example.com");
     }));
 
-    it("should fetch data from wikipedia when getting wikimedia image", inject([ImageAttributionService, HttpTestingController], 
+    it("should fetch data from wikipedia when getting wikimedia image", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Israel_Hiking_Map_Image.jpeg");
+        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://en.wikipedia.org/"))[0].flush({
             query: {
                 pages: {
@@ -60,12 +60,12 @@ describe("ImageAttributionService", () => {
 
         expect(response).not.toBeNull();
         expect(response.author).toBe("hello");
-        expect(response.url).toBe("https://en.wikipedia.org/wiki/File:Israel_Hiking_Map_Image.jpeg");
+        expect(response.url).toBe("https://en.wikipedia.org/wiki/File:IHM_Image.jpeg");
     }));
 
-    it("should remove html tags and get the value inside", inject([ImageAttributionService, HttpTestingController], 
+    it("should remove html tags and get the value inside", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Israel_Hiking_Map_Image.jpeg");
+        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://en.wikipedia.org/"))[0].flush({
             query: {
                 pages: {
@@ -86,12 +86,12 @@ describe("ImageAttributionService", () => {
 
         expect(response).not.toBeNull();
         expect(response.author).toBe("hello");
-        expect(response.url).toBe("https://en.wikipedia.org/wiki/File:Israel_Hiking_Map_Image.jpeg");
+        expect(response.url).toBe("https://en.wikipedia.org/wiki/File:IHM_Image.jpeg");
     }));
 
-    it("should return null when getting wikimedia image without artist", inject([ImageAttributionService, HttpTestingController], 
+    it("should return null when getting wikimedia image without artist", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Israel_Hiking_Map_Image.jpeg");
+        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://en.wikipedia.org/"))[0].flush({
             query: {
                 pages: {

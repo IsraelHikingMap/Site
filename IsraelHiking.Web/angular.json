@@ -40,7 +40,6 @@
             "scripts": [],
             "allowedCommonJsDependencies": [
               "geojson-rbush",
-              "ohauth",
               "redux-undo",
               "photoswipe",
               "photoswipe-ui-default",

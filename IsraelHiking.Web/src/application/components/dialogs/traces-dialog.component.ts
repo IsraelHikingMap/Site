@@ -157,7 +157,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         let traces = this.ngRedux.getState().tracesState.traces;
         traces = orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
         if (this.specificIds.length > 0) {
-            traces = traces.filter(t => this.specificIds.find(id => id == t.id) != null);
+            traces = traces.filter(t => this.specificIds.find(id => id === t.id) != null);
         }
         this.filteredTraces = take(traces, this.page * 10);
     }
