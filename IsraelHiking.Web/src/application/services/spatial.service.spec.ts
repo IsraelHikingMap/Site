@@ -44,4 +44,20 @@ describe("Spatial service", () => {
         expect(lines[0].geometry.coordinates.length).toBe(3);
         expect(lines[0].geometry.coordinates[1][0]).toBeCloseTo(0);
     });
+
+    it("Should find the closest point on a line and replace that line", () => {
+        let lines = [lineString([[-1,0], [1,0]])];
+        let point = SpatialService.insertProjectedPointToClosestLineAndReplaceIt({lat: 1, lng: 0}, lines);
+        expect(point.geometry.coordinates[0]).toBeCloseTo(0);
+        expect(point.geometry.coordinates[1]).toBeCloseTo(0);
+        expect(lines[0].geometry.coordinates.length).toBe(3);
+    });
+
+    it("Should find the closest point on a line and replace that line given two lines", () => {
+        let lines = [lineString([[-1,0], [1,0]]), lineString([[-1,1], [1,1]])];
+        let point = SpatialService.insertProjectedPointToClosestLineAndReplaceIt({lat: 1, lng: 0}, lines);
+        expect(point.geometry.coordinates[0]).toBeCloseTo(0);
+        expect(point.geometry.coordinates[1]).toBeCloseTo(1);
+        expect(lines[1].geometry.coordinates.length).toBe(3);
+    });
 });

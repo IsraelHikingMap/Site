@@ -79,15 +79,15 @@ export class SpatialService {
         latlng: LatLngAlt,
         lines: GeoJSON.Feature<GeoJSON.LineString>[]): GeoJSON.Feature<GeoJSON.Point> {
         let closetLine = null;
+        let nearestPoint = null;
         let minimalDistance = Infinity;
         let coordinates = SpatialService.toCoordinate(latlng);
-        let nearestPoint = nearestPointOnLine(lines[0], coordinates);
-        for (let feature of lines) {
-            let currentNearestPoint = nearestPointOnLine(feature, coordinates);
+        for (let line of lines) {
+            let currentNearestPoint = nearestPointOnLine(line, coordinates);
             if (currentNearestPoint.properties.dist < minimalDistance) {
                 minimalDistance = currentNearestPoint.properties.dist;
-                closetLine = feature;
-                currentNearestPoint = currentNearestPoint;
+                closetLine = line;
+                nearestPoint = currentNearestPoint;
             }
         }
         let newCoordinates = [...closetLine.geometry.coordinates];
