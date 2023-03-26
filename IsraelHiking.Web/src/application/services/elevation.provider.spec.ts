@@ -1,12 +1,14 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
 
 import { ResourcesService } from "./resources.service";
 import { ElevationProvider } from "./elevation.provider";
 import { ToastService } from "./toast.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { LoggingService } from "./logging.service";
+import { DatabaseService } from "./database.service";
 
 describe("ElevationProvider", () => {
 
@@ -15,15 +17,18 @@ describe("ElevationProvider", () => {
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
-                HttpClientTestingModule
+                HttpClientTestingModule,
+                MockNgReduxModule
             ],
             providers: [
                 { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
                 { provide: ToastService, useValue: toastMockCreator.toastService },
                 { provide: LoggingService, useValue: { warning: () => { } } },
+                { provide: DatabaseService, useValue: {} },
                 ElevationProvider
             ]
         });
+        MockNgRedux.reset();
     });
 
     it("Should update height data", inject([ElevationProvider, HttpTestingController],
@@ -31,8 +36,8 @@ describe("ElevationProvider", () => {
 
             let latlngs = [{ lat: 0, lng: 0, alt: 0 }];
 
-            let promise = elevationProvider.updateHeights(latlngs).then((lls) => {
-                expect(lls[0].alt).toBe(1);
+            let promise = elevationProvider.updateHeights(latlngs).then(() => {
+                expect(latlngs[0].alt).toBe(1);
             });
 
             mockBackend.match(() => true)[0].flush([1]);
@@ -44,9 +49,9 @@ describe("ElevationProvider", () => {
 
             let latlngs = [{ lat: 0, lng: 0, alt: 1 }];
 
-            elevationProvider.updateHeights(latlngs).then((lls => {
-                expect(lls[0].alt).toBe(1);
-            }));
+            elevationProvider.updateHeights(latlngs).then(() => {
+                expect(latlngs[0].alt).toBe(1);
+            });
         }));
 
     it("Should raise toast when error occurs", inject([ElevationProvider, HttpTestingController, ToastService],

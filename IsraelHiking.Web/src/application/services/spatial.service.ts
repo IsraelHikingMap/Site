@@ -1,12 +1,17 @@
 import { Injectable } from "@angular/core";
 import { Map, LngLatBounds, LngLatBoundsLike } from "maplibre-gl";
-import { lineString, featureCollection, Units } from "@turf/helpers";
+import { lineString, featureCollection, point, Units } from "@turf/helpers";
 import simplify from "@turf/simplify";
 import distance from "@turf/distance";
 import center from "@turf/center";
 import bbox from "@turf/bbox";
+import bboxPolygon from "@turf/bbox-polygon";
 import circle from "@turf/circle";
+import nearestPointOnLine from "@turf/nearest-point-on-line";
 import pointToLineDistance from "@turf/point-to-line-distance";
+import lineSplit from "@turf/line-split";
+import lineIntersect from "@turf/line-intersect";
+import booleanWithin from "@turf/boolean-within";
 
 import type { LatLngAlt, Bounds } from "../models/models";
 
@@ -59,6 +64,99 @@ export class SpatialService {
 
     public static getDistanceFromPointToLine(latlng: LatLngAlt, line: LatLngAlt[]): number {
         return pointToLineDistance(SpatialService.toCoordinate(latlng), SpatialService.getLineString(line), { units: "meters" });
+    }
+
+    /**
+     * This method will insert a single point to the closest line in the collection and replace that line
+     * so that the original is not changed.
+     * The point that will be added will be on the closest segment of the closest line.
+     *
+     * @param latlng the point to add a projected version to the closest line
+     * @param collection the collection of all the lines to test against
+     * @returns the projected point
+     */
+    public static insertProjectedPointToClosestLineAndReplaceIt(
+        latlng: LatLngAlt,
+        lines: GeoJSON.Feature<GeoJSON.LineString>[]): GeoJSON.Feature<GeoJSON.Point> {
+        let closetLine = null;
+        let minimalDistance = Infinity;
+        let coordinates = SpatialService.toCoordinate(latlng);
+        let nearestPoint = nearestPointOnLine(lines[0], coordinates);
+        for (let feature of lines) {
+            let currentNearestPoint = nearestPointOnLine(feature, coordinates);
+            if (currentNearestPoint.properties.dist < minimalDistance) {
+                minimalDistance = currentNearestPoint.properties.dist;
+                closetLine = feature;
+                currentNearestPoint = currentNearestPoint;
+            }
+        }
+        let newCoordinates = [...closetLine.geometry.coordinates];
+        newCoordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
+        lines.splice(lines.indexOf(closetLine), 1);
+        lines.push(lineString(newCoordinates, closetLine.properties));
+        return point(nearestPoint.geometry.coordinates);
+    }
+
+    public static clipLinesToTileBoundary(lines: GeoJSON.Feature<GeoJSON.LineString>[],
+        tile: { x: number; y: number},
+        zoom: number): GeoJSON.Feature<GeoJSON.LineString>[] {
+        let northEast = SpatialService.fromTile(tile, zoom);
+        let southWest = SpatialService.fromTile({x: tile.x + 1, y: tile.y + 1}, zoom);
+        let tilePolygon = bboxPolygon([northEast.lng, southWest.lat, southWest.lng, northEast.lat]);
+        // This is to overcome accuracy issues...
+        let tilePolygonTest = bboxPolygon([northEast.lng - 1e-6, southWest.lat - 1e-6, southWest.lng + 1e-6, northEast.lat + 1e-6]);
+        let clippedLines: GeoJSON.Feature<GeoJSON.LineString>[] = [];
+        for (let line of lines) {
+            let intersectionPoints = lineIntersect(line, tilePolygon);
+            if (intersectionPoints.features.length === 0) {
+                clippedLines.push(line);
+                continue;
+            }
+            let splitLines = lineSplit(line, tilePolygon);
+            clippedLines = clippedLines.concat(splitLines.features.filter(f => booleanWithin(f, tilePolygonTest)));
+        }
+        return clippedLines;
+    }
+
+    /**
+     * The lines that are part of the tiles are simplified and might miss juctions points.
+     * This methods add these juctions by only looking at the start and end of a line
+     * and checking aginast all other lines
+     * To improve performance this is done by first checking the bounding box of a line
+     * and only after that finding the nearest point.
+     *
+     * @param lines - The lines to find and add juction points, these lines will be updated as part of this method.
+     */
+    public static addMissinIntersectionPoints(lines: GeoJSON.Feature<GeoJSON.LineString>[]) {
+        for (let lineForPoints of lines) {
+            let start = lineForPoints.geometry.coordinates[0];
+            let end = lineForPoints.geometry.coordinates[lineForPoints.geometry.coordinates.length - 1];
+            for (let lineToCheck of lines) {
+                if (lineToCheck === lineForPoints) {
+                    continue;
+                }
+                if (!lineToCheck.bbox) {
+                    lineToCheck.bbox = bbox(lineToCheck);
+                }
+                if (start[0] >= lineToCheck.bbox[0] && start[0] <= lineToCheck.bbox[2] &&
+                    start[1] >= lineToCheck.bbox[1] && start[1] <= lineToCheck.bbox[3]) {
+                    let nearestPoint = nearestPointOnLine(lineToCheck, start);
+                    if (nearestPoint.properties.dist < 1e-5) {
+                        lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
+                        continue;
+                    }
+                }
+                if (end[0] >= lineToCheck.bbox[0] && end[0] <= lineToCheck.bbox[2] &&
+                    end[1] >= lineToCheck.bbox[1] && end[1] <= lineToCheck.bbox[3]) {
+                    let nearestPoint = nearestPointOnLine(lineToCheck, end);
+                    if (nearestPoint.properties.dist < 1e-5) {
+                        lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
+                        continue;
+                    }
+                }
+            }
+        }
+
     }
 
     public static splitLine(newLatlng: LatLngAlt, line: LatLngAlt[]): { start: LatLngAlt[]; end: LatLngAlt[] } {
@@ -241,5 +339,28 @@ export class SpatialService {
                 Math.sin(lat1Radians) * Math.cos(lat2Radians) * Math.cos(lngDiffRadians);
         let bearingRadians = Math.atan2(y, x);
         return (bearingRadians * 180 / Math.PI + 360) % 360; // in degrees
+    }
+
+    public static toTile(latlng: LatLngAlt, zoom: number) {
+        return {
+            x: (latlng.lng + 180) / 360 * Math.pow(2, zoom),
+            y: (1 - Math.log(Math.tan(latlng.lat * Math.PI / 180) + 1 / Math.cos(latlng.lat * Math.PI / 180)) / Math.PI) /
+                2 * Math.pow(2, zoom)
+        };
+    }
+
+    public static fromTile(tile: {x: number; y: number}, zoom: number): LatLngAlt {
+        const n = Math.pow(2, zoom);
+        const lng = Math.floor(tile.x) / n * 360 - 180;
+        const lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * Math.floor(tile.y) / n))) * 180 / Math.PI;
+        return {lat, lng};
+    }
+
+    public static toRelativePixel(latlng: LatLngAlt, zoom: number, tileSize: number) {
+        let tile = SpatialService.toTile(latlng, zoom);
+        return {
+            pixelX: Math.floor((tile.x - Math.floor(tile.x)) * tileSize),
+            pixelY: Math.floor((tile.y - Math.floor(tile.y)) * tileSize)
+        };
     }
 }
