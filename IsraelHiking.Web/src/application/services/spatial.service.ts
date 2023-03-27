@@ -156,7 +156,6 @@ export class SpatialService {
                 }
             }
         }
-
     }
 
     public static splitLine(newLatlng: LatLngAlt, line: LatLngAlt[]): { start: LatLngAlt[]; end: LatLngAlt[] } {

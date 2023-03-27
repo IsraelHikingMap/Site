@@ -11,11 +11,15 @@ import { ToastServiceMockCreator } from "./toast.service.spec";
 import { DatabaseService } from "./database.service";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
+import geojsonVt from "geojson-vt";
+import vtpbf from "vt-pbf";
 
-// Tile from https://israelhiking.osm.org.il/vector/data/IHM/14/9788/6769.pbf that has a single highway in it
-// See here: https://israelhiking.osm.org.il/map/15.13/29.8131/35.0839
-// eslint-disable-next-line
-const base64Tile = "GoYECg50cmFuc3BvcnRhdGlvbhLOARIKAAAUARYCGgAbABgCIr0BCYBBiAmSBC8UzwFabTC5AVClAUDxAWaPAmw3GN8BXvEBZsMBUpMBOu8BZN8BXpcCfoMBPjseaTZ3PqkBVk8oXTZbNIcBUI0BVlc0TTBlQmtIowFwvQGEAYUBYo8BbJMBds0BqgGhAYgBX1Z1aokBfokBiAGjAaABXWSjAa4BlwGqAWFyR1ZRZnOQAUFSNURrkgF9rgF5rgFfjgFXhgFbkgFJeGOoAVeaAUWCAVGWAVOsAUeSAVvGAUusARtEGgVjbGFzcxoIc3ViY2xhc3MaB25ldHdvcmsaBm9uZXdheRoEcmFtcBoHYnJ1bm5lbBoHc2VydmljZRoGYWNjZXNzGgR0b2xsGgpleHByZXNzd2F5GgVsYXllchoFbGV2ZWwaBmluZG9vchoHYmljeWNsZRoEZm9vdBoFaG9yc2UaCW10Yl9zY2FsZRoJdHJhY2t0eXBlGgZjb2xvdXIaB2NvbG91cjIaB3N1cmZhY2UaCm9uZXdheTptdGIaCG1heHNwZWVkGghjeWNsZXdheRoNY3ljbGV3YXk6bGVmdBoOY3ljbGV3YXk6cmlnaHQaCWlobV9jbGFzcxoLaWxtdGJfY2xhc3MiBwoFdHJ1bmsiBwoFcGF2ZWQiBQoDMTAwKIAgeAIapQQKE3RyYW5zcG9ydGF0aW9uX25hbWUS2AESDgAAAQACAAwBDQIOAw8EGAIiwwEJgELUCKIErwFIzwFabTC5AVClAUDxAWaPAmw3GN8BXvEBZsMBUpMBOu8BZN8BXpcCfoMBPjseaTZ3PqkBVk8oXTZbNIcBUI0BVlc0TTBlQmtIowFwvQGEAYUBYo8BbJMBds0BqgGhAYgBX1Z1aokBfokBiAGjAaABXWSjAa4BlwGqAWFyR1ZRZnOQAUFSNURrkgF9rgF5rgFfjgFXhgFbkgFJeGOoAVeaAUWCAVGWAVOsAUeSAVvGAUusAS1wR6IBJV4aBG5hbWUaB25hbWVfZW4aB25hbWVfZGUaCG10YjpuYW1lGgttdGI6bmFtZTplbhoLbXRiOm5hbWU6aGUaB25hbWU6ZGUaB25hbWU6ZW4aB25hbWU6aGUaCG5hbWVfaW50GgpuYW1lOmxhdGluGg1uYW1lOm5vbmxhdGluGgNyZWYaCnJlZl9sZW5ndGgaB25ldHdvcmsaBWNsYXNzGghzdWJjbGFzcxoHYnJ1bm5lbBoFbGF5ZXIaBWxldmVsGgZpbmRvb3IaB3JvdXRlXzEaB3JvdXRlXzIaB3JvdXRlXzMaB3JvdXRlXzQaB3JvdXRlXzUaB3JvdXRlXzYiFwoVSm9yZGFuIFZhbGxleSBIaWdod2F5IgQKAjY1IgIoAiIGCgRyb2FkIgcKBXRydW5rKIAgeAIa/gEKCGl0bV9ncmlkEhMSCAAAAQECAgMDGAEiBQmCFbwYEhMSCAAEAQECAwMDGAEiBQmSM7gYEhMSCAAAAQUCAgMCGAEiBQmGFeA2EhYSBAAEAgMYAiIMCZgzgEESBccoA7cZEhMSBAAAAgIYAiIJCYgVgEEKCf9BEhISBAEFAwIYAiIICX/iNgqAQgcSGBIEAQEDAxgCIg4Jf74YGoIWAZAeA+4NARITEggABAEFAgMDAhgBIgUJljPcNhoEZWFzdBoFbm9ydGgaCWVhc3RfcmFuaxoKbm9ydGhfcmFuayIDKM8BIgMongMiAigBIgIoAiIDKNABIgMonQMogCB4Ag==";
+function createTileFromFeatureCollection(featureCollection: GeoJSON.FeatureCollection): ArrayBuffer {
+    let tileindex = geojsonVt(featureCollection);
+    let tile = tileindex.getTile(14, 8192, 8191);
+    return vtpbf.fromGeojsonVt({ geojsonLayer: tile });
+
+}
 
 describe("Router Service", () => {
     beforeEach(() => {
@@ -139,7 +143,21 @@ describe("Router Service", () => {
         inject([RouterService, HttpTestingController, DatabaseService],
         async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService) => {
 
-            db.getTile = () => fetch(`data:application/x-protobuf;base64,${base64Tile}`).then(r => r.arrayBuffer());
+            let featureCollection = {
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]]
+                    },
+                    properties: {
+                        ihm_class: "track"
+                    }
+                }]
+            } as GeoJSON.FeatureCollection;
+
+            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
             MockNgRedux.store.getState = () => ({
                 offlineState: {
@@ -148,8 +166,172 @@ describe("Router Service", () => {
                 }
             });
 
-            let promise = router.getRoute({ lat: 29.807326, lng: 35.071012 }, { lat: 29.817968, lng: 35.088073 }, "Hike").then((data) => {
-                expect(data.length).toBe(48);
+            let promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0001 }, "Hike").then((data) => {
+                expect(data.length).toBe(3);
+            }, fail);
+
+            mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+            return promise;
+        }
+    ));
+
+    it("Should return a route when getting error response from server and offline is available for a multiline string",
+        inject([RouterService, HttpTestingController, DatabaseService],
+        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService) => {
+
+            let featureCollection = {
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    geometry: {
+                        type: "MultiLineString",
+                        coordinates: [
+                            [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]],
+                            [[0.0001,0.0003], [0.0002,0.0003], [0.0003,0.0003]]
+                        ]
+                    },
+                    properties: {
+                        ihm_class: "track"
+                    }
+                }]
+            } as GeoJSON.FeatureCollection;
+
+            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+
+            MockNgRedux.store.getState = () => ({
+                offlineState: {
+                    isOfflineAvailable: true,
+                    lastModifiedDate: new Date()
+                }
+            });
+
+            let promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Hike").then((data) => {
+                expect(data.length).toBe(5);
+            }, fail);
+
+            mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+            return promise;
+        }
+    ));
+
+    it("Should return a route when getting error response from server and offline is available only through one line",
+        inject([RouterService, HttpTestingController, DatabaseService],
+        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService) => {
+
+            let featureCollection = {
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]]
+                    },
+                    properties: {
+                        ihm_class: "track"
+                    }
+                }, {
+                    type: "Feature",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0.0001,0.0003], [0.0002,0.0003], [0.0003,0.0003]]
+                    },
+                    properties: {
+                        ihm_class: "steps"
+                    }
+                }]
+            } as GeoJSON.FeatureCollection;
+
+            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+
+            MockNgRedux.store.getState = () => ({
+                offlineState: {
+                    isOfflineAvailable: true,
+                    lastModifiedDate: new Date()
+                }
+            });
+
+            let promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Bike").then((data) => {
+                expect(data.length).toBe(3);
+            }, fail);
+
+            mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+            return promise;
+        }
+    ));
+
+    it("Should return srart and end point when all lines are filtered out",
+        inject([RouterService, HttpTestingController, DatabaseService],
+        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService) => {
+
+            let featureCollection = {
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0.0001,0.0003], [0.0002,0.0003], [0.0003,0.0003]]
+                    },
+                    properties: {
+                        ihm_class: "path"
+                    }
+                }]
+            } as GeoJSON.FeatureCollection;
+
+            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+
+            MockNgRedux.store.getState = () => ({
+                offlineState: {
+                    isOfflineAvailable: true,
+                    lastModifiedDate: new Date()
+                }
+            });
+
+            let promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "4WD").then((data) => {
+                expect(data.length).toBe(2);
+            }, fail);
+
+            mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+            return promise;
+        }
+    ));
+
+    it("Should return a route between two lines when points are not exactly the same",
+        inject([RouterService, HttpTestingController, DatabaseService],
+        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService) => {
+            let featureCollection = {
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]]
+                    },
+                    properties: {
+                        ihm_class: "major"
+                    }
+                }, {
+                    type: "Feature",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[0.0001,0.000305], [0.0002,0.0003], [0.0003,0.0003]]
+                    },
+                    properties: {
+                        ihm_class: "minor"
+                    }
+                }]
+            } as GeoJSON.FeatureCollection;
+
+            db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
+
+            MockNgRedux.store.getState = () => ({
+                offlineState: {
+                    isOfflineAvailable: true,
+                    lastModifiedDate: new Date()
+                }
+            });
+
+            let promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Bike").then((data) => {
+                expect(data.length).toBe(5);
             }, fail);
 
             mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });

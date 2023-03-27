@@ -84,7 +84,7 @@ export class RouterService {
             type: "FeatureCollection",
             features
         } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
-        let pathFinder = new PathFinder(collection);
+        let pathFinder = new PathFinder(collection, {tolerance: 2e-5});
         let route = pathFinder.findPath(startFeature, endFeature);
         if (!route) {
             throw new Error("[Routing] No route found... :-(");
@@ -122,10 +122,19 @@ export class RouterService {
                             continue;
                         }
                         let geojsonFeature = feature.toGeoJSON(tileX, tileY, zoom);
-                        if (geojsonFeature.geometry.type !== "LineString") {
-                            continue;
+                        if (geojsonFeature.geometry.type === "LineString") {
+                            collection.features.push(geojsonFeature as GeoJSON.Feature<GeoJSON.LineString>);
+                        } else if (geojsonFeature.geometry.type === "MultiLineString") {
+                            let multiLines = geojsonFeature.geometry.coordinates.map(coordinates => ({
+                                type: "Feature",
+                                geometry: {
+                                    type: "LineString",
+                                    coordinates
+                                },
+                                properties: {...geojsonFeature.properties}
+                            } as GeoJSON.Feature<GeoJSON.LineString>));
+                            collection.features.push(...multiLines);
                         }
-                        collection.features.push(geojsonFeature as GeoJSON.Feature<GeoJSON.LineString>);
                     }
                 }
                 collection.features = SpatialService.clipLinesToTileBoundary(collection.features, { x: tileX, y: tileY}, zoom);
