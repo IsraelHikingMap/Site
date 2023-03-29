@@ -129,7 +129,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             let trace = await this.tracesService.getTraceById(this.selectedTraceId);
             this.ngRedux.dispatch(new SetVisibleTraceAction({ traceId: trace.id }));
             this.ngRedux.dispatch(new SetMissingPartsAction({ missingParts: geoJson }));
-            let bounds = SpatialService.getGeoJsonBounds(geoJson);
+            let bounds = SpatialService.getBoundsForFeatureCollection(geoJson);
             this.fitBoundsService.fitBounds(bounds);
             this.matDialogRef.close();
         } catch (ex) {

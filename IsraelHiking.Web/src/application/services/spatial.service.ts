@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Map, LngLatBounds, LngLatBoundsLike } from "maplibre-gl";
+import { Map, LngLatBounds, LngLatLike } from "maplibre-gl";
 import { lineString, featureCollection, point, Units } from "@turf/helpers";
 import simplify from "@turf/simplify";
 import distance from "@turf/distance";
@@ -234,12 +234,11 @@ export class SpatialService {
     }
 
     public static getLatlngInterpolatedValue(latlng1: LatLngAlt, latlng2: LatLngAlt, ratio: number, alt?: number): LatLngAlt {
-        let returnValue = {
+        return {
             lat: (latlng2.lat - latlng1.lat) * ratio + latlng1.lat,
             lng: (latlng2.lng - latlng1.lng) * ratio + latlng1.lng,
             alt
         };
-        return returnValue;
     }
 
     public static getBounds(latlngs: LatLngAlt[]): Bounds {
@@ -252,10 +251,6 @@ export class SpatialService {
         let line = SpatialService.getLineString(latlngs);
         let boundingBox = bbox(line);
         return SpatialService.bboxToBounds(boundingBox);
-    }
-
-    public static getGeoJsonBounds(geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>): Bounds {
-        return SpatialService.bboxToBounds(bbox(geoJson));
     }
 
     public static getCenter(latlngs: LatLngAlt[]): LatLngAlt {
@@ -286,7 +281,7 @@ export class SpatialService {
         };
     }
 
-    public static boundsToMBBounds(bounds: Bounds): LngLatBoundsLike {
+    public static boundsToMBBounds(bounds: Bounds): [LngLatLike, LngLatLike] {
         return [bounds.southWest, bounds.northEast];
     }
 
@@ -297,8 +292,12 @@ export class SpatialService {
         };
     }
 
-    public static getBoundsForFeature(feature: GeoJSON.Feature<GeoJSON.Geometry>) {
-        return SpatialService.bboxToBounds(bbox(featureCollection([feature])));
+    public static getBoundsForFeatureCollection(featureCollection: GeoJSON.FeatureCollection): Bounds {
+        return SpatialService.bboxToBounds(bbox(featureCollection));
+    }
+
+    public static getBoundsForFeature(feature: GeoJSON.Feature<GeoJSON.Geometry>): Bounds {
+        return SpatialService.getBoundsForFeatureCollection(featureCollection([feature]));
     }
 
     private static bboxToBounds(boundingBox: number[]): Bounds {
@@ -324,7 +323,8 @@ export class SpatialService {
         return SpatialService.mBBoundsToBounds(bounds);
     }
 
-    public static getCirclePolygonFeature(centerPoint: LatLngAlt, radius: number): GeoJSON.Feature<GeoJSON.Polygon> {
+    public static getCirclePolygonFeature(centerPoint: LatLngAlt, radius: number): 
+        GeoJSON.Feature<GeoJSON.Polygon> & { properties: { radius: number }} {
         let options = { steps: 64, units: "meters" as Units, properties: { radius } };
         return circle(SpatialService.toCoordinate(centerPoint), radius, options);
     }
