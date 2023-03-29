@@ -11,6 +11,8 @@ import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { SpatialService } from "./spatial.service";
 import { DatabaseService } from "./database.service";
+import { LoggingService } from "./logging.service";
+import { RunningContextService } from "./running-context.service";
 import { Urls } from "../urls";
 import type { ApplicationState, LatLngAlt, RoutingType } from "../models/models";
 
@@ -22,6 +24,8 @@ export class RouterService {
                 private readonly resources: ResourcesService,
                 private readonly toastService: ToastService,
                 private readonly databaseService: DatabaseService,
+                private readonly loggingService: LoggingService,
+                private readonly runningContextService: RunningContextService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         this.featuresCache = new Map<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>();
     }
@@ -37,10 +41,11 @@ export class RouterService {
             try {
                 return await this.getOffineRoute(latlngStart, latlngEnd, routinType);
             } catch (ex2) {
-                // HM TODO: consider adding message about offline routing
-                this.toastService.error({
-                    message: (ex as Error).message + ", " + (ex2 as Error).message
-                }, this.resources.routingFailed);
+                this.loggingService.error(`[Routing] failed: ${(ex as Error).message}, ${(ex2 as Error).message}`);
+                this.toastService.warning(this.ngRedux.getState().offlineState.isOfflineAvailable || !this.runningContextService.isCapacitor
+                    ? this.resources.routingFailedTryShorterRoute
+                    : this.resources.routingFailedBuySubscription
+                );
                 return [latlngStart, latlngEnd];
             }
         }
@@ -52,17 +57,24 @@ export class RouterService {
         }
         let offlineState = this.ngRedux.getState().offlineState;
         if (!offlineState.isOfflineAvailable || offlineState.lastModifiedDate == null) {
-            throw new Error("[Routing] Offline routing is only supported after downloading offline data");
+            throw new Error("Offline routing is only supported after downloading offline data");
         }
         const zoom = 14; // this is the max zoom for these tiles
         let tiles = [latlngStart, latlngEnd].map(latlng => SpatialService.toTile(latlng, zoom));
-        const tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
+        let tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
         const tileXmin = Math.min(...tiles.map(tile => Math.floor(tile.x)));
-        const tileYmax = Math.max(...tiles.map(tile => Math.floor(tile.y)));
+        let tileYmax = Math.max(...tiles.map(tile => Math.floor(tile.y)));
         const tileYmin = Math.min(...tiles.map(tile => Math.floor(tile.y)));
         if (tileXmax - tileXmin > 2 || tileYmax - tileYmin > 2) {
-            throw new Error("[Routing] Offline routing is only supported for adjecent tiles maximum...");
+            throw new Error("Offline routing is only supported for adjecent tiles maximum...");
         }
+        // increase the chance of getting a route by adding more tiles
+        if (tileXmax === tileXmin) {
+            tileXmax += 1;
+        };
+        if (tileYmax === tileYmin) {
+            tileYmax += 1;
+        };
         let features = await this.updateCacheAndGetFeatures(tileXmin, tileXmax, tileYmin, tileYmax, zoom);
         if (routinType === "4WD") {
             features = features.filter(f =>

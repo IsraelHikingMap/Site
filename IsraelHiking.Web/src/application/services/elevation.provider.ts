@@ -4,8 +4,6 @@ import { NgRedux } from "@angular-redux2/store";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 
-import { ResourcesService } from "./resources.service";
-import { ToastService } from "./toast.service";
 import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
 import { DatabaseService } from "./database.service";
@@ -21,8 +19,6 @@ export class ElevationProvider {
     private elevationCache: Map<string, Uint8ClampedArray>;
 
     constructor(private readonly httpClient: HttpClient,
-                private readonly resources: ResourcesService,
-                private readonly toastService: ToastService,
                 private readonly loggingService: LoggingService,
                 private readonly databaseService: DatabaseService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -59,7 +55,6 @@ export class ElevationProvider {
             } catch (ex2) {
                 this.loggingService.warning(`[Elevation] Unable to get elevation data for ${latlngs.length} points. ` +
                     `${(ex as Error).message}, ${(ex2 as Error).message}`);
-                this.toastService.warning(this.resources.unableToGetElevationData);
             }
         }
     }
@@ -75,9 +70,6 @@ export class ElevationProvider {
         const tileXmin = Math.min(...tiles.map(tile => Math.floor(tile.x)));
         const tileYmax = Math.max(...tiles.map(tile => Math.floor(tile.y)));
         const tileYmin = Math.min(...tiles.map(tile => Math.floor(tile.y)));
-        if (tileXmax - tileXmin > 1 || tileYmax - tileYmin > 1) {
-            throw new Error("[Elevation] Getting elevation is only supported for adjecent tiles maximum...");
-        }
         for (let tileX = tileXmin; tileX <= tileXmax; tileX++) {
             for (let tileY = tileYmin; tileY <= tileYmax; tileY++) {
                 let key = `${tileX}/${tileY}`;

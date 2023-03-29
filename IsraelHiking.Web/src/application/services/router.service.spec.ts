@@ -14,12 +14,12 @@ import { RunningContextService } from "./running-context.service";
 import geojsonVt from "geojson-vt";
 import vtpbf from "vt-pbf";
 
-function createTileFromFeatureCollection(featureCollection: GeoJSON.FeatureCollection): ArrayBuffer {
+const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureCollection): ArrayBuffer => {
     let tileindex = geojsonVt(featureCollection);
     let tile = tileindex.getTile(14, 8192, 8191);
     return vtpbf.fromGeojsonVt({ geojsonLayer: tile });
 
-}
+};
 
 describe("Router Service", () => {
     beforeEach(() => {
@@ -34,8 +34,8 @@ describe("Router Service", () => {
                 { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
                 { provide: ToastService, useValue: toastMockCreator.toastService },
                 { provide: DatabaseService, usevalue: {} },
-                { provide: LoggingService, useValue: {} },
-                { provide: RunningContextService, useValue: null },
+                { provide: LoggingService, useValue: { error: () => {} } },
+                { provide: RunningContextService, useValue: {} },
                 GeoJsonParser,
                 RouterService
             ]

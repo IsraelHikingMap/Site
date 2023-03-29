@@ -254,8 +254,8 @@ export class ResourcesService {
     public unableToLoadFromUrl: string;
     public routeNameAlreadyInUse: string;
     public unableToGenerateUrl: string;
-    public unableToGetElevationData: string;
-    public routingFailed: string;
+    public routingFailedTryShorterRoute: string;
+    public routingFailedBuySubscription: string;
     public unableToLogin: string;
     public unableToSendRoute: string;
     public noUnmappedRoutes: string;
@@ -478,7 +478,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1679061617453");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1680089205399");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -717,8 +717,8 @@ export class ResourcesService {
         this.unableToLoadFromUrl = this.gettextCatalog.getString("Unable to load from URL...");
         this.routeNameAlreadyInUse = this.gettextCatalog.getString("The route's name was altered since it is in use...");
         this.unableToGenerateUrl = this.gettextCatalog.getString("Unable to generate URL, please try again later...");
-        this.unableToGetElevationData = this.gettextCatalog.getString("Unable to get elevation data:");
-        this.routingFailed = this.gettextCatalog.getString("Routing failed:");
+        this.routingFailedTryShorterRoute = this.gettextCatalog.getString("Routing failed, please try a shorter route...");
+        this.routingFailedBuySubscription = this.gettextCatalog.getString("Routing failed, consider buying a subscription.");
         this.unableToLogin = this.gettextCatalog.getString("Unable to login...");
         this.unableToSendRoute = this.gettextCatalog.getString("Unable to send route...");
         this.noUnmappedRoutes = this.gettextCatalog.getString("No unmapped routes! :-)");
