@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using OsmSharp.Complete;
 using System.IO;
-using OsmSharp;
 
 namespace IsraelHiking.DataAccessInterfaces.Repositories
 {

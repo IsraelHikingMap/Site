@@ -52,7 +52,7 @@ namespace IsraelHiking.API.Tests.Executors
             var stream = new MemoryStream();
             _fileSystemHelper.CreateWriteStream(Arg.Any<string>()).Returns(stream);
 
-            _executor.CreateSiteMapXmlFile(new List<Feature> {feature});
+            _executor.CreateSiteMapXmlFile(new List<IFeature> {feature});
             
             Assert.IsTrue(stream.ToArray().Length > 0);
         }
@@ -75,7 +75,7 @@ namespace IsraelHiking.API.Tests.Executors
             _imagesRepository.GetAllUrls().Returns(new List<string> {"image", "image2"});
             _imagesRepository.GetImageByUrl("image2").Returns(new ImageItem());
             
-            _executor.CreateOfflinePoisFile(new List<Feature> {feature});
+            _executor.CreateOfflinePoisFile(new List<IFeature> {feature});
             
             _fileSystemHelper.Received(1).WriteAllBytes(Arg.Any<string>(), Arg.Any<byte[]>());
         }

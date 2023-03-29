@@ -1,10 +1,8 @@
-﻿using System.Net;
-using IsraelHiking.DataAccessInterfaces;
+﻿using IsraelHiking.DataAccessInterfaces;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System;
-using System.Linq;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 

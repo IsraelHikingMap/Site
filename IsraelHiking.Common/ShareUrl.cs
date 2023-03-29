@@ -1,29 +1,29 @@
 ﻿using IsraelHiking.Common.DataContainer;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System;
 
 namespace IsraelHiking.Common
 {
     public class ShareUrl
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public string Id { get; set; }
-        [JsonProperty("title")]
+        [JsonPropertyName("title")]
         public string Title { get; set; }
-        [JsonProperty("description")]
+        [JsonPropertyName("description")]
         public string Description { get; set; }
-        [JsonProperty("osmUserId")]
+        [JsonPropertyName("osmUserId")]
         public string OsmUserId { get; set; }
-        [JsonProperty("viewsCount")]
+        [JsonPropertyName("viewsCount")]
         public int ViewsCount { get; set; }
-        [JsonProperty("creationDate")]
+        [JsonPropertyName("creationDate")]
         public DateTime CreationDate { get; set; }
-        [JsonProperty("lastModifiedDate")]
+        [JsonPropertyName("lastModifiedDate")]
         public DateTime LastModifiedDate { get; set; }
-        [JsonProperty("lastViewed")]
+        [JsonPropertyName("lastViewed")]
         public DateTime LastViewed { get; set; }
 
-        [JsonProperty("dataContainer")]
+        [JsonPropertyName("dataContainer")]
         public DataContainerPoco DataContainer { get; set; }
     }
 

@@ -7,15 +7,277 @@ using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Nest;
-using Nest.JsonNetSerializer;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
-using Feature = NetTopologySuite.Features.Feature;
+using NetTopologySuite.IO.Converters;
+
+public class DynamicDictionaryConverter : JsonConverter<DynamicDictionary>
+{
+    public override DynamicDictionary Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.StartArray)
+        {
+            var array = JsonSerializer.Deserialize<object[]>(ref reader, options);
+            var arrayDict = new Dictionary<string, object>();
+            for (var i = 0; i < array.Length; i++)
+                arrayDict[i.ToString(CultureInfo.InvariantCulture)] = new DynamicValue(array[i]);
+            return DynamicDictionary.Create(arrayDict);
+        }
+        if (reader.TokenType != JsonTokenType.StartObject) throw new JsonException();
+
+        var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(ref reader, options);
+        return DynamicDictionary.Create(dict);
+    }
+
+    public override void Write(Utf8JsonWriter writer, DynamicDictionary dictionary, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+
+        foreach (var kvp in dictionary.GetKeyValues())
+        {
+            if (kvp.Value == null) continue;
+
+            writer.WritePropertyName(kvp.Key);
+
+            JsonSerializer.Serialize(writer, kvp.Value?.Value, options);
+        }
+
+        writer.WriteEndObject();
+    }
+}
+
+internal class ExceptionConverter : JsonConverter<Exception>
+{
+		private static List<Dictionary<string, object>> FlattenExceptions(Exception e)
+		{
+			var maxExceptions = 20;
+			var exceptions = new List<Dictionary<string, object>>(maxExceptions);
+			var depth = 0;
+			do
+			{
+				var o = ToDictionary(e, depth);
+				exceptions.Add(o);
+				depth++;
+				e = e.InnerException;
+			} while (depth < maxExceptions && e != null);
+
+			return exceptions;
+		}
+
+		private static Dictionary<string, object> ToDictionary(Exception e, int depth)
+		{
+			var o = new Dictionary<string, object>(10);
+			var si = new SerializationInfo(e.GetType(), new FormatterConverter());
+			var sc = new StreamingContext();
+			e.GetObjectData(si, sc);
+
+			var helpUrl = si.GetString("HelpURL");
+			var stackTrace = si.GetString("StackTraceString");
+			var remoteStackTrace = si.GetString("RemoteStackTraceString");
+			var remoteStackIndex = si.GetInt32("RemoteStackIndex");
+			var exceptionMethod = si.GetString("ExceptionMethod");
+			var hresult = si.GetInt32("HResult");
+			var source = si.GetString("Source");
+			var className = si.GetString("ClassName");
+
+			o.Add("Depth", depth);
+			o.Add("ClassName", className);
+			o.Add("Message", e.Message);
+			o.Add("Source", source);
+			o.Add("StackTraceString", stackTrace);
+			o.Add("RemoteStackTraceString", remoteStackTrace);
+			o.Add("RemoteStackIndex", remoteStackIndex);
+			o.Add("HResult", hresult);
+			o.Add("HelpURL", helpUrl);
+
+			WriteStructuredExceptionMethod(o, exceptionMethod);
+			return o;
+		}
+
+		private static void WriteStructuredExceptionMethod(Dictionary<string,object> o, string exceptionMethodString)
+		{
+			if (string.IsNullOrWhiteSpace(exceptionMethodString)) return;
+
+			var args = exceptionMethodString.Split('\0', '\n');
+
+			if (args.Length != 5) return;
+
+			var memberType = int.Parse(args[0], CultureInfo.InvariantCulture);
+			var name = args[1];
+			var assemblyName = args[2];
+			var className = args[3];
+			var signature = args[4];
+			var an = new AssemblyName(assemblyName);
+			var exceptionMethod = new Dictionary<string, object>(7)
+			{
+				{ "Name", name },
+				{ "AssemblyName", an.Name },
+				{ "AssemblyVersion", an.Version.ToString() },
+				{ "AssemblyCulture", an.CultureName },
+				{ "ClassName", className },
+				{ "Signature", signature },
+				{ "MemberType", memberType }
+			};
+
+			o.Add("ExceptionMethod", exceptionMethod);
+		}
+
+		public override Exception Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+			throw new NotSupportedException();
+
+		public override void Write(Utf8JsonWriter writer, Exception value, JsonSerializerOptions options)
+		{
+			if (value == null)
+			{
+				writer.WriteNullValue();
+				return;
+			}
+
+			var flattenedExceptions = FlattenExceptions(value);
+			writer.WriteStartArray();
+			for (var i = 0; i < flattenedExceptions.Count; i++)
+			{
+				var flattenedException = flattenedExceptions[i];
+				writer.WriteStartObject();
+				foreach (var kv in flattenedException)
+				{
+					writer.WritePropertyName(kv.Key);
+					JsonSerializer.Serialize(writer, kv.Value, options);
+				}
+				writer.WriteEndObject();
+			}
+			writer.WriteEndArray();
+		}
+    }
+
+public class SystemTextJsonSerializer : IElasticsearchSerializer
+{
+    private readonly Lazy<JsonSerializerOptions> _indented;
+    private readonly Lazy<JsonSerializerOptions> _none;
+
+    private IList<JsonConverter> BakedInConverters { get; } = new List<JsonConverter>
+    {
+        {new ExceptionConverter()},
+        {new DynamicDictionaryConverter()},
+        {new DateTimeConverter()}
+    };
+
+    public SystemTextJsonSerializer(JsonConverterFactory factory)
+    {
+        var indentedOptions = new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = true
+        };
+        indentedOptions.Converters.Add(factory);
+        foreach (var converter in BakedInConverters)
+            indentedOptions.Converters.Add(converter);
+        var noneIndentedOptions = new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            WriteIndented = false
+        };
+        noneIndentedOptions.Converters.Add(factory);
+        foreach (var converter in BakedInConverters)
+            noneIndentedOptions.Converters.Add(converter);
+        _indented = new Lazy<JsonSerializerOptions>(() => indentedOptions);
+        _none = new Lazy<JsonSerializerOptions>(() => noneIndentedOptions);
+    }
+
+    private static bool TryReturnDefault<T>(Stream stream, out T deserialize)
+    {
+        deserialize = default;
+        return stream == null || stream == Stream.Null || (stream.CanSeek && stream.Length == 0);
+    }
+
+    private static MemoryStream ToMemoryStream(Stream stream)
+    {
+        if (stream is MemoryStream m) return m;
+        var length = stream.CanSeek ? stream.Length : (long?) null;
+        var wrapped = length.HasValue ? new MemoryStream(new byte[length.Value]) : new MemoryStream();
+        stream.CopyTo(wrapped);
+        return wrapped;
+    }
+
+    private static ReadOnlySpan<byte> ToReadOnlySpan(Stream stream)
+    {
+        using var m = ToMemoryStream(stream);
+
+        if (m.TryGetBuffer(out var segment))
+            return segment;
+
+        var a = m.ToArray();
+        return new ReadOnlySpan<byte>(a).Slice(0, a.Length);
+    }
+
+    private JsonSerializerOptions GetFormatting(SerializationFormatting formatting) =>
+        formatting == SerializationFormatting.None ? _none.Value : _indented.Value;
+
+    public object Deserialize(Type type, Stream stream)
+    {
+        if (TryReturnDefault(stream, out object deserialize)) return deserialize;
+
+        var buffered = ToReadOnlySpan(stream);
+        return JsonSerializer.Deserialize(buffered, type, _none.Value);
+    }
+
+    public T Deserialize<T>(Stream stream)
+    {
+        if (TryReturnDefault(stream, out T deserialize)) return deserialize;
+
+        var buffered = ToReadOnlySpan(stream);
+        return JsonSerializer.Deserialize<T>(buffered, _none.Value);
+    }
+
+    public void Serialize<T>(T data, Stream stream, SerializationFormatting formatting = SerializationFormatting.None)
+    {
+        using var writer = new Utf8JsonWriter(stream);
+        if (data == null)
+            JsonSerializer.Serialize(writer, null, typeof(object), GetFormatting(formatting));
+        else
+            JsonSerializer.Serialize(writer, data, data.GetType(), GetFormatting(formatting));
+    }
+
+    public async Task SerializeAsync<T>(T data, Stream stream,
+        SerializationFormatting formatting = SerializationFormatting.None,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (data == null)
+            await JsonSerializer
+                .SerializeAsync(stream, null, typeof(object), GetFormatting(formatting), cancellationToken)
+                .ConfigureAwait(false);
+        else
+            await JsonSerializer
+                .SerializeAsync(stream, data, data.GetType(), GetFormatting(formatting), cancellationToken)
+                .ConfigureAwait(false);
+    }
+
+    public Task<object> DeserializeAsync(Type type, Stream stream, CancellationToken cancellationToken = default)
+    {
+        if (TryReturnDefault(stream, out object deserialize)) return Task.FromResult(deserialize);
+
+        return JsonSerializer.DeserializeAsync(stream, type, _none.Value, cancellationToken).AsTask();
+    }
+
+    public Task<T> DeserializeAsync<T>(Stream stream, CancellationToken cancellationToken = default)
+    {
+        if (TryReturnDefault(stream, out T deserialize)) return Task.FromResult(deserialize);
+
+        return JsonSerializer.DeserializeAsync<T>(stream, _none.Value, cancellationToken).AsTask();
+    }
+}
 
 namespace IsraelHiking.DataAccess
 {
@@ -62,7 +324,7 @@ namespace IsraelHiking.DataAccess
             var connectionString = new ConnectionSettings(
                 pool,
                 new HttpConnection(),
-                (b, c) => new JsonNetSerializer(b, c, null, null, GeoJsonSerializer.Create(GeometryFactory.Default, 3).Converters))
+                (b, c) => new SystemTextJsonSerializer(new GeoJsonConverterFactory(new GeometryFactory(), false, null, RingOrientationOption.EnforceRfc9746, true)))
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
             await InitializeIndexWithAlias(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS, CreatePointsOfInterestIndex);
@@ -134,7 +396,7 @@ namespace IsraelHiking.DataAccess
             return list;
         }
 
-        private QueryContainer FeatureNameSearchQueryWithFactor(QueryContainerDescriptor<Feature> q, string searchTerm, string language)
+        private QueryContainer FeatureNameSearchQueryWithFactor(QueryContainerDescriptor<IFeature> q, string searchTerm, string language)
         {
             return q.FunctionScore(
                 fs => fs.Query(
@@ -143,7 +405,7 @@ namespace IsraelHiking.DataAccess
             );
         }
 
-        private QueryContainer FeatureNameSearchQuery(QueryContainerDescriptor<Feature> q, string searchTerm, string language)
+        private QueryContainer FeatureNameSearchQuery(QueryContainerDescriptor<IFeature> q, string searchTerm, string language)
         {
             return q.DisMax(
                 dm => dm.Queries(
@@ -162,13 +424,13 @@ namespace IsraelHiking.DataAccess
             );
         }
 
-        public async Task<List<Feature>> Search(string searchTerm, string language)
+        public async Task<List<IFeature>> Search(string searchTerm, string language)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
             {
-                return new List<Feature>();
+                return new List<IFeature>();
             }
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(NUMBER_OF_RESULTS)
                     .TrackScores()
@@ -178,13 +440,13 @@ namespace IsraelHiking.DataAccess
             return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
-        public async Task<List<Feature>> SearchExact(string searchTerm, string language)
+        public async Task<List<IFeature>> SearchExact(string searchTerm, string language)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
             {
-                return new List<Feature>();
+                return new List<IFeature>();
             }
-            var response = await _elasticClient.SearchAsync<Feature>(s => 
+            var response = await _elasticClient.SearchAsync<IFeature>(s => 
                 s.Index(OSM_POIS_ALIAS)
                 .Size(100)
                 .Query(q => 
@@ -210,9 +472,9 @@ namespace IsraelHiking.DataAccess
                 .ToList();
         }
 
-        public async Task<List<Feature>> SearchPlaces(string place, string language)
+        public async Task<List<IFeature>> SearchPlaces(string place, string language)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(5)
                     .TrackScores()
@@ -224,9 +486,9 @@ namespace IsraelHiking.DataAccess
             return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
-        public async Task<List<Feature>> SearchByLocation(Coordinate northEast, Coordinate southWest, string searchTerm, string language)
+        public async Task<List<IFeature>> SearchByLocation(Coordinate northEast, Coordinate southWest, string searchTerm, string language)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(NUMBER_OF_RESULTS)
                     .TrackScores()
@@ -239,9 +501,9 @@ namespace IsraelHiking.DataAccess
             return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
-        public async Task<List<Feature>> GetContainers(Coordinate coordinate)
+        public async Task<List<IFeature>> GetContainers(Coordinate coordinate)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(100)
                     .Query(q =>
@@ -275,7 +537,7 @@ namespace IsraelHiking.DataAccess
             await _elasticClient.Indices.DeleteAsync(currentIndex);
         }
 
-        public async Task UpdateHighwaysZeroDownTime(List<Feature> highways)
+        public async Task UpdateHighwaysZeroDownTime(List<IFeature> highways)
         {
             var (currentIndex, newIndex) = GetIndicesStatus(OSM_HIGHWAYS_INDEX1, OSM_HIGHWAYS_INDEX2, OSM_HIGHWAYS_ALIAS);
 
@@ -285,7 +547,7 @@ namespace IsraelHiking.DataAccess
             await SwitchIndices(currentIndex, newIndex, OSM_HIGHWAYS_ALIAS);
         }
 
-        public async Task StorePointsOfInterestDataToSecondaryIndex(List<Feature> pointsOfInterest)
+        public async Task StorePointsOfInterestDataToSecondaryIndex(List<IFeature> pointsOfInterest)
         {
             var (_, newIndex) = GetIndicesStatus(OSM_POIS_INDEX1, OSM_POIS_INDEX2, OSM_POIS_ALIAS);
             await CreatePointsOfInterestIndex(newIndex);
@@ -298,23 +560,23 @@ namespace IsraelHiking.DataAccess
             await SwitchIndices(currentIndex, newIndex, OSM_POIS_ALIAS);
         }
 
-        public Task UpdateHighwaysData(List<Feature> features)
+        public Task UpdateHighwaysData(List<IFeature> features)
         {
             return UpdateData(features, OSM_HIGHWAYS_ALIAS);
         }
 
-        public Task UpdatePointsOfInterestData(List<Feature> features)
+        public Task UpdatePointsOfInterestData(List<IFeature> features)
         {
             return UpdateData(features, OSM_POIS_ALIAS);
         }
 
-        private async Task UpdateData(List<Feature> features, string alias)
+        private async Task UpdateData(List<IFeature> features, string alias)
         {
             var result = await _elasticClient.BulkAsync(bulk =>
             {
                 foreach (var feature in features)
                 {
-                    bulk.Index<Feature>(i => i.Index(alias).Document(feature).Id(feature.GetId()));
+                    bulk.Index<IFeature>(i => i.Index(alias).Document(feature).Id(feature.GetId()));
                 }
                 return bulk;
             });
@@ -324,9 +586,9 @@ namespace IsraelHiking.DataAccess
             }
         }
 
-        public async Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest)
+        public async Task<List<IFeature>> GetHighways(Coordinate northEast, Coordinate southWest)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_HIGHWAYS_ALIAS)
                     .Size(5000)
                     .Query(
@@ -345,11 +607,11 @@ namespace IsraelHiking.DataAccess
             return new GeoCoordinate(coordinate.Y, coordinate.X);
         }
 
-        public async Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
+        public async Task<List<IFeature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
             var languages = language == Languages.ALL ? Languages.Array : new[] { language };
             languages = languages.Concat(new[] { Languages.ALL }).ToArray();
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000).Query(
                         q => q.GeoBoundingBox(
@@ -362,11 +624,11 @@ namespace IsraelHiking.DataAccess
             return response.Documents.Where(f => !f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToList();
         }
 
-        public async Task<List<Feature>> GetAllPointsOfInterest(bool withDeleted)
+        public async Task<List<IFeature>> GetAllPointsOfInterest(bool withDeleted)
         {
             await _elasticClient.Indices.RefreshAsync(OSM_POIS_ALIAS);
             var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
-            var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
+            var response = await _elasticClient.SearchAsync<IFeature>(s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000)
                     .Scroll("10s")
                     .Query(q => q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories))
@@ -379,7 +641,7 @@ namespace IsraelHiking.DataAccess
             return list;
         }
 
-        private GeoBoundingBoxQueryDescriptor<Feature> ConvertToGeoBoundingBox(GeoBoundingBoxQueryDescriptor<Feature> b,
+        private GeoBoundingBoxQueryDescriptor<IFeature> ConvertToGeoBoundingBox(GeoBoundingBoxQueryDescriptor<IFeature> b,
             Coordinate northEast, Coordinate southWest)
         {
             return b.BoundingBox(
@@ -388,10 +650,10 @@ namespace IsraelHiking.DataAccess
             ).Field($"{PROPERTIES}.{FeatureAttributes.POI_GEOLOCATION}");
         }
 
-        public async Task<List<Feature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate, DateTime modifiedUntil)
+        public async Task<List<IFeature>> GetPointsOfInterestUpdates(DateTime lastModifiedDate, DateTime modifiedUntil)
         {
             var categories = Categories.Points.Concat(Categories.Routes).Select(c => c.ToLower()).ToArray();
-            var response = await _elasticClient.SearchAsync<Feature>(s => s.Index(OSM_POIS_ALIAS)
+            var response = await _elasticClient.SearchAsync<IFeature>(s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000)
                     .Scroll("10s")
                     .Query(q => q.DateRange(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_LAST_MODIFIED}").GreaterThan(lastModifiedDate).LessThanOrEquals(modifiedUntil))
@@ -400,22 +662,22 @@ namespace IsraelHiking.DataAccess
             return GetAllItemsByScrolling(response);
         }
 
-        public async Task<Feature> GetPointOfInterestById(string id, string source)
+        public async Task<IFeature> GetPointOfInterestById(string id, string source)
         {
             var fullId = GeoJsonExtensions.GetId(source, id);
-            var response = await _elasticClient.GetAsync<Feature>(fullId, r => r.Index(OSM_POIS_ALIAS));
+            var response = await _elasticClient.GetAsync<IFeature>(fullId, r => r.Index(OSM_POIS_ALIAS));
             return response.Source;
         }
 
         public Task DeletePointOfInterestById(string id, string source)
         {
             var fullId = GeoJsonExtensions.GetId(source, id);
-            return _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_POIS_ALIAS));
+            return _elasticClient.DeleteAsync<IFeature>(fullId, d => d.Index(OSM_POIS_ALIAS));
         }
 
-        public async Task<List<Feature>> GetExternalPoisBySource(string source)
+        public async Task<List<IFeature>> GetExternalPoisBySource(string source)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<IFeature>(
                 s => s.Index(EXTERNAL_POIS)
                     .Size(10000)
                     .Scroll("10s")
@@ -428,13 +690,13 @@ namespace IsraelHiking.DataAccess
             return features;
         }
 
-        public async Task<Feature> GetExternalPoiById(string id, string source)
+        public async Task<IFeature> GetExternalPoiById(string id, string source)
         {
-            var response = await _elasticClient.GetAsync<Feature>(GeoJsonExtensions.GetId(source, id), r => r.Index(EXTERNAL_POIS));
+            var response = await _elasticClient.GetAsync<IFeature>(GeoJsonExtensions.GetId(source, id), r => r.Index(EXTERNAL_POIS));
             return response.Source;
         }
 
-        public async Task AddExternalPois(List<Feature> features)
+        public async Task AddExternalPois(List<IFeature> features)
         {
             if ((await _elasticClient.Indices.ExistsAsync(EXTERNAL_POIS)).Exists == false)
             {
@@ -445,7 +707,7 @@ namespace IsraelHiking.DataAccess
 
         public Task DeleteExternalPoisBySource(string source)
         {
-            return _elasticClient.DeleteByQueryAsync<Feature>(d =>
+            return _elasticClient.DeleteByQueryAsync<IFeature>(d =>
                 d.Index(EXTERNAL_POIS)
                 .Query(q =>
                     q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
@@ -456,7 +718,7 @@ namespace IsraelHiking.DataAccess
         private Task CreateHighwaysIndex(string highwaysIndexName)
         {
             return _elasticClient.Indices.CreateAsync(highwaysIndexName,
-                c => c.Map<Feature>(m =>
+                c => c.Map<IFeature>(m =>
                     m.Dynamic(false)
                     .Properties(ps =>
                         ps.GeoShape(g =>
@@ -470,9 +732,9 @@ namespace IsraelHiking.DataAccess
         private Task CreatePointsOfInterestIndex(string poisIndexName)
         {
             return _elasticClient.Indices.CreateAsync(poisIndexName,
-                c => c.Map<Feature>(m =>
+                c => c.Map<IFeature>(m =>
                     m.Properties(ps =>
-                        ps.Object<AttributesTable>(o => o
+                        ps.Object<IAttributesTable>(o => o
                             .Name(PROPERTIES)
                             .Properties(p => p.GeoPoint(s => s.Name(FeatureAttributes.POI_GEOLOCATION)))
                             .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
@@ -488,9 +750,9 @@ namespace IsraelHiking.DataAccess
         private Task CreateExternalPoisIndex()
         {
             return _elasticClient.Indices.CreateAsync(EXTERNAL_POIS,
-                c => c.Map<Feature>(m =>
+                c => c.Map<IFeature>(m =>
                     m.Properties(fp =>
-                        fp.Object<AttributesTable>(a => a
+                        fp.Object<IAttributesTable>(a => a
                             .Name(PROPERTIES)
                             .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
                         )
@@ -518,10 +780,10 @@ namespace IsraelHiking.DataAccess
                 c => c.Map<ShareUrl>(m => m.AutoMap<ShareUrl>())
             );
         }
-        private async Task UpdateUsingPaging(List<Feature> features, string alias)
+        private async Task UpdateUsingPaging(List<IFeature> features, string alias)
         {
             _logger.LogInformation($"Starting indexing {features.Count} records");
-            var smallCacheList = new List<Feature>(PAGE_SIZE);
+            var smallCacheList = new List<IFeature>(PAGE_SIZE);
             int total = 0;
             foreach (var feature in features)
             {
@@ -658,7 +920,7 @@ namespace IsraelHiking.DataAccess
             var imageItem = await GetImageByUrl(url);
             if (imageItem != null)
             {
-                await _elasticClient.DeleteAsync<Feature>(imageItem.Hash, d => d.Index(IMAGES));
+                await _elasticClient.DeleteAsync<IFeature>(imageItem.Hash, d => d.Index(IMAGES));
             }
         }
 

@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace IsraelHiking.Common
 {
     public class IconAndTags
     {
+        [JsonPropertyName("iconColorCategory")]
         public IconColorCategory IconColorCategory { get; }
+        [JsonPropertyName("tags")]
         public List<KeyValuePair<string, string>> Tags { get; }
 
         public IconAndTags(IconColorCategory iconColorCategory)
@@ -31,10 +34,14 @@ namespace IsraelHiking.Common
 
     public class Category
     {
+        [JsonPropertyName("name")]
         public string Name { get; set; }
+        [JsonPropertyName("icon")]
         public string Icon { get; set; }
+        [JsonPropertyName("color")]
         public string Color { get; set; }
-
+        
+        [JsonPropertyName("items")]
         public List<IconAndTags> Items { get; set; }
 
         public Category()

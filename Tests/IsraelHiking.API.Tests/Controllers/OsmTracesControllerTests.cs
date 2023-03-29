@@ -14,7 +14,6 @@ using OsmSharp.API;
 using OsmSharp.IO.API;
 using System.IO;
 using System.Text;
-using Castle.Core.Logging;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
@@ -179,7 +178,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 {FeatureAttributes.POI_ID, "42"}
             });
             containingFeature.SetTitles();
-            _searchRepository.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature> {containingFeature});
+            _searchRepository.GetContainers(Arg.Any<Coordinate>()).Returns(new List<IFeature> {containingFeature});
             _distributedCache.Get(Arg.Any<string>()).Returns((byte[])null);
             
             _controller.PostUploadRouteData(routeData, Languages.ENGLISH).Wait();

@@ -115,7 +115,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <summary>
-        /// This method is used as late initialiation for setting file name and address
+        /// This method is used as late initialization for setting file name and address
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="fileAddress"></param>
@@ -126,7 +126,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetAll()
+        public async Task<List<IFeature>> GetAll()
         {
             var features = await GetAllFeaturesWithoutGeometry();
             foreach (var feature in features)
@@ -136,7 +136,7 @@ namespace IsraelHiking.API.Services.Poi
             return features;
         }
 
-        private Feature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest)
+        private IFeature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest)
         {
             var table = new AttributesTable
             {
@@ -178,7 +178,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        private async Task UpdateGeometry(Feature feature)
+        private async Task UpdateGeometry(IFeature feature)
         {
             if (feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE) &&
                 !string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString()))
@@ -190,7 +190,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetUpdates(DateTime lastModifiedDate)
+        public async Task<List<IFeature>> GetUpdates(DateTime lastModifiedDate)
         {
             var features = await GetAllFeaturesWithoutGeometry();
             features = features.Where(f => f.GetLastModified() > lastModifiedDate).ToList();
@@ -201,7 +201,7 @@ namespace IsraelHiking.API.Services.Poi
             return features;
         }
 
-        private async Task<List<Feature>> GetAllFeaturesWithoutGeometry()
+        private async Task<List<IFeature>> GetAllFeaturesWithoutGeometry()
         {
             _logger.LogInformation("Getting records from csv file: " + _fileName);
             var fileContent = await _remoteFileFetcherGateway.GetFileContent(_fileAddress);

@@ -137,7 +137,7 @@ namespace IsraelHiking.Common.Extensions
 
         public static string GetId(this IFeature feature)
         {
-            return feature.Attributes[FeatureAttributes.POI_ID].ToString();
+            return feature.GetOptionalId(FeatureAttributes.POI_ID)?.ToString() ?? string.Empty;
         }
 
         public static string GetId(string source, string id)
@@ -151,7 +151,7 @@ namespace IsraelHiking.Common.Extensions
             {
                 return string.Empty;
             }
-            if (!(feature.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable titleByLanguage))
+            if (feature.Attributes[FeatureAttributes.POI_NAMES] is not IAttributesTable titleByLanguage)
             {
                 return string.Empty;
             }
@@ -203,12 +203,9 @@ namespace IsraelHiking.Common.Extensions
 
         public static string[] GetTitles(this IFeature feature)
         {
-            if (!(feature.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable titleByLanguage))
-            {
-                return new string[0];
-            }
-            
-            return titleByLanguage.GetValues().Select(GetStringListFromAttributeValue).SelectMany(v => v).Distinct().ToArray();
+            return feature.Attributes[FeatureAttributes.POI_NAMES] is not IAttributesTable titleByLanguage 
+                ? Array.Empty<string>() 
+                : titleByLanguage.GetValues().Select(GetStringListFromAttributeValue).SelectMany(v => v).Distinct().ToArray();
         }
 
         public static List<string> GetStringListFromAttributeValue(object value)
@@ -216,17 +213,14 @@ namespace IsraelHiking.Common.Extensions
             var titles = new List<string>();
             switch (value)
             {
-                case List<object> objectsList:
-                    titles.AddRange(objectsList.Select(o => o.ToString()).ToList());
-                    break;
-                case List<string> stringsList:
-                    titles.AddRange(stringsList);
-                    break;
-                case string[] array:
-                    titles.AddRange(array);
-                    break;
                 case string str:
                     titles.Add(str);
+                    break;
+                case IEnumerable<string> stringsEnumerable:
+                    titles.AddRange(stringsEnumerable);
+                    break;
+                case IEnumerable<object> objectsEnumerable:
+                    titles.AddRange(objectsEnumerable.Select(o => o.ToString()).ToList());
                     break;
             }
             return titles;
@@ -293,17 +287,15 @@ namespace IsraelHiking.Common.Extensions
 
         public static Coordinate GetLocation(this IFeature feature)
         {
-            var locationTable = feature.Attributes[FeatureAttributes.POI_GEOLOCATION] as AttributesTable;
-            if (locationTable == null)
+            if (feature.Attributes[FeatureAttributes.POI_GEOLOCATION] is not IAttributesTable locationTable)
             {
                 throw new InvalidOperationException($"Missing location for feature with id {feature.GetId()}");
             }
-            var location = new Coordinate();
-            if (locationTable != null)
+            var location = new Coordinate
             {
-                location.Y = double.Parse(locationTable[FeatureAttributes.LAT].ToString());
-                location.X = double.Parse(locationTable[FeatureAttributes.LON].ToString());
-            }
+                Y = double.Parse(locationTable[FeatureAttributes.LAT].ToString()),
+                X = double.Parse(locationTable[FeatureAttributes.LON].ToString())
+            };
             return location;
         }
 

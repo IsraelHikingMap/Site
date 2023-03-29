@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using IsraelHiking.Common;
 using NetTopologySuite.Geometries;
 using OsmSharp.IO.API;
 

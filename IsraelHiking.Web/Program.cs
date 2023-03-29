@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Net.Http;
@@ -9,6 +8,7 @@ using IsraelHiking.API;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common.Configuration;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.Web;
@@ -24,8 +24,7 @@ using Microsoft.OpenApi.Models;
 using NeoSmart.Caching.Sqlite;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
-using Newtonsoft.Json.Converters;
+using NetTopologySuite.IO.Converters;
 using NLog.Web;
 using OsmSharp.IO.API;
 
@@ -90,16 +89,9 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     services.AddControllers(options =>
     {
         options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
-    }).AddNewtonsoftJson(options =>
-    {
-        foreach (var converter in GeoJsonSerializer.Create(geometryFactory, 3).Converters)
-        {
-            options.SerializerSettings.Converters.Add(converter);
-        }
-        options.SerializerSettings.Converters.Add(new IsoDateTimeConverter
-        {
-            DateTimeStyles = DateTimeStyles.AdjustToUniversal
-        });
+    }).AddJsonOptions(options => {
+        options.JsonSerializerOptions.Converters.Add(new GeoJsonConverterFactory());
+        options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
     });
     services.AddAuthentication(options =>
     {

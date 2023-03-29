@@ -33,11 +33,11 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetAll()
+        public async Task<List<IFeature>> GetAll()
         {
             _logger.LogInformation("Getting data from Nakeb.");
             var slimFeatures = await _nakebGateway.GetAll();
-            var features = new List<Feature>();
+            var features = new List<IFeature>();
             foreach (var slimFeature in slimFeatures)
             {
                 features.Add(await _nakebGateway.GetById(slimFeature.Attributes[FeatureAttributes.ID].ToString()));
@@ -47,10 +47,10 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetUpdates(DateTime lastModifiedDate)
+        public async Task<List<IFeature>> GetUpdates(DateTime lastModifiedDate)
         {
             var slimFeatures = await _nakebGateway.GetAll();
-            var features = new List<Feature>();
+            var features = new List<IFeature>();
             foreach (var slimFeature in slimFeatures.Where(f => f.GetLastModified() > lastModifiedDate))
             {
                 features.Add(await _nakebGateway.GetById(slimFeature.Attributes[FeatureAttributes.ID].ToString()));

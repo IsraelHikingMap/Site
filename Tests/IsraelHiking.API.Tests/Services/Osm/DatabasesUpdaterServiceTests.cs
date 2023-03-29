@@ -95,34 +95,34 @@ namespace IsraelHiking.API.Tests.Services.Osm
         { 
             _service.Rebuild(new UpdateRequest {Highways = true}).Wait();
 
-            _highwaysRepository.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
+            _highwaysRepository.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<IFeature>>());
             _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
         }
 
         [TestMethod] public void TestRebuild_Points_ShouldRebuildPointsWhileMarkingOneAsDeleted()
         {
             var adapter = Substitute.For<IPointsOfInterestAdapter>();
-            adapter.GetAll().Returns(new List<Feature>());
+            adapter.GetAll().Returns(new List<IFeature>());
             _pointsOfInterestAdapterFactory.GetAll().Returns(new[] {adapter});
-            _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns(new List<Feature>());
+            _externalSourcesRepository.GetExternalPoisBySource(Arg.Any<string>()).Returns(new List<IFeature>());
             var feature = new Feature(new Point(0, 0), new AttributesTable
             {
                 {FeatureAttributes.NAME, "feature in database that needs to be deleted"},
                 {FeatureAttributes.POI_ID, "42"}
             });
             feature.SetLastModified(new DateTime(0));
-            _pointsOfInterestRepository.GetAllPointsOfInterest(Arg.Any<bool>()).Returns(new List<Feature> {feature});
-            _pointsOfInterestRepository.GetPointsOfInterestUpdates(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<Feature>());
-            _featuresMergeExecutor.Merge(Arg.Any<List<Feature>>(), Arg.Any<List<Feature>>()).Returns(new List<Feature>
+            _pointsOfInterestRepository.GetAllPointsOfInterest(Arg.Any<bool>()).Returns(new List<IFeature> {feature});
+            _pointsOfInterestRepository.GetPointsOfInterestUpdates(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<IFeature>());
+            _featuresMergeExecutor.Merge(Arg.Any<List<IFeature>>(), Arg.Any<List<IFeature>>()).Returns(new List<IFeature>
             {
-                new (new Point(0,0), new AttributesTable { {FeatureAttributes.POI_ID, "1"}})
+                new Feature(new Point(0,0), new AttributesTable { {FeatureAttributes.POI_ID, "1"}})
             });
-            _pointsOfInterestProvider.GetAll().Returns(new List<Feature>());
+            _pointsOfInterestProvider.GetAll().Returns(new List<IFeature>());
             
             _service.Rebuild(new UpdateRequest {PointsOfInterest = true}).Wait();
             
-            _pointsOfInterestRepository.Received(2).StorePointsOfInterestDataToSecondaryIndex(Arg.Any<List<Feature>>());
-            _pointsOfInterestRepository.Received(1).StorePointsOfInterestDataToSecondaryIndex(Arg.Is<List<Feature>>(l => l.Any(f => f.Attributes.Exists(FeatureAttributes.POI_DELETED))));
+            _pointsOfInterestRepository.Received(2).StorePointsOfInterestDataToSecondaryIndex(Arg.Any<List<IFeature>>());
+            _pointsOfInterestRepository.Received(1).StorePointsOfInterestDataToSecondaryIndex(Arg.Is<List<IFeature>>(l => l.Any(f => f.Attributes.Exists(FeatureAttributes.POI_DELETED))));
             _pointsOfInterestRepository.Received(1).SwitchPointsOfInterestIndices();
             _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
         }
@@ -136,7 +136,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 {FeatureAttributes.IMAGE_URL, "imageUrl2"}
             });
             feature.SetLastModified(new DateTime(0));
-            _pointsOfInterestRepository.GetAllPointsOfInterest(false).Returns(new List<Feature> {feature});
+            _pointsOfInterestRepository.GetAllPointsOfInterest(false).Returns(new List<IFeature> {feature});
             _osmRepository.GetImagesUrls(Arg.Any<Stream>()).Returns(new List<string> {imageUrl});
             
             _service.Rebuild(new UpdateRequest {Images = true}).Wait();
@@ -150,7 +150,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         {
             _service.Rebuild(new UpdateRequest {SiteMap = true}).Wait();
 
-            _pointsOfInterestFilesCreatorExecutor.Received(1).CreateSiteMapXmlFile(Arg.Any<List<Feature>>());
+            _pointsOfInterestFilesCreatorExecutor.Received(1).CreateSiteMapXmlFile(Arg.Any<List<IFeature>>());
             _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
         }
         
@@ -159,12 +159,12 @@ namespace IsraelHiking.API.Tests.Services.Osm
         {
             var feature = new Feature(new Point(0, 0), new AttributesTable());
             feature.SetLastModified(new DateTime(0));
-            _pointsOfInterestRepository.GetAllPointsOfInterest(false).Returns(new List<Feature> {feature});
+            _pointsOfInterestRepository.GetAllPointsOfInterest(false).Returns(new List<IFeature> {feature});
             _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(new[] {1.0});
             
             _service.Rebuild(new UpdateRequest {OfflinePoisFile = true}).Wait();
 
-            _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<Feature>>());
+            _pointsOfInterestFilesCreatorExecutor.Received(1).CreateOfflinePoisFile(Arg.Any<List<IFeature>>());
             _pointsOfInterestRepository.StoreRebuildContext(Arg.Is<RebuildContext>(c => c.Succeeded == true));
         }
         

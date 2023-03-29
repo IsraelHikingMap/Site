@@ -7,9 +7,9 @@ namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IINatureGateway : IInitializable
     {
-        Task<List<Feature>> GetAll();
+        Task<List<IFeature>> GetAll();
 
-        Task<List<Feature>> GetUpdates(DateTime lastUpdated);
+        Task<List<IFeature>> GetUpdates(DateTime lastUpdated);
 
 
     }

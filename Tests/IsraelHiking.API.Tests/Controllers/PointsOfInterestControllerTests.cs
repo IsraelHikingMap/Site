@@ -88,6 +88,8 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetPointOfInterest_WrongSource_ShouldReturnBadRequest()
         {
+            _pointsOfInterestProvider.GetFeatureById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
+            
             var result = _controller.GetPointOfInterest("wrong source", string.Empty).Result as NotFoundResult;
 
             Assert.IsNotNull(result);

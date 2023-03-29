@@ -1,26 +1,26 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 using System.Collections.Generic;
 
 namespace IsraelHiking.Common.DataContainer
 {
     public class RouteData
     {
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public string Id { get; set; }
         
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
-        [JsonProperty("description")]
+        [JsonPropertyName("description")]
         public string Description { get; set; }
-        [JsonProperty("color")]
+        [JsonPropertyName("color")]
         public string Color { get; set; }
-        [JsonProperty("opacity")]
+        [JsonPropertyName("opacity")]
         public double? Opacity { get; set; }
-        [JsonProperty("weight")]
+        [JsonPropertyName("weight")]
         public int? Weight { get; set; }
-        [JsonProperty("markers")]
+        [JsonPropertyName("markers")]
         public List<MarkerData> Markers { get; set; }
-        [JsonProperty("segments")]
+        [JsonPropertyName("segments")]
         public List<RouteSegmentData> Segments { get; set; }
 
         public RouteData()
