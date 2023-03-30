@@ -1,12 +1,12 @@
 ﻿<div [dir]="resources.direction">
     <p>{{confirmMessage}}</p>
     <br />
-    <div fxLayout="row">
-        <div fxFlex>
-            <button mat-button fxFill (click)="confirmAction()"><i *ngIf="confirmIcon" class="fa fa-lg icon-{{confirmIcon}}"></i> {{confirmButtonText}}</button>
+    <div class="flex flex-row">
+        <div class="flex-1">
+            <button mat-button class="w-full" (click)="confirmAction()"><i *ngIf="confirmIcon" class="fa fa-lg icon-{{confirmIcon}}"></i> {{confirmButtonText}}</button>
         </div>
-        <div *ngIf="hasTwoButtons" fxFlex>
-            <button mat-button fxFill (click)="declineAction()"><i *ngIf="declineIcon" class="fa fa-lg icon-{{declineIcon}}"></i> {{declineButtonText}}</button>
+        <div *ngIf="hasTwoButtons" class="flex-1">
+            <button mat-button class="w-full" (click)="declineAction()"><i *ngIf="declineIcon" class="fa fa-lg icon-{{declineIcon}}"></i> {{declineButtonText}}</button>
         </div>
     </div>
 </div>
