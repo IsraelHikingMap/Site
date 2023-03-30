@@ -6,8 +6,6 @@
     <string>app-store</string>
     <key>teamID</key>
     <string>2KT88923M5</string>
-    <key>uploadBitcode</key>
-    <true/>
     <key>uploadSymbols</key>
     <true/>
     <key>provisioningProfiles</key> 
