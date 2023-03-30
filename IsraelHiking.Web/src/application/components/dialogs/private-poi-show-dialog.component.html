@@ -11,16 +11,16 @@
         </div>
     </div>
     <div mat-dialog-content>
-        <div flexLayout="row">
-            <img fxFill *ngIf="imageLink"
+        <div class="flex flex-row">
+            <img *ngIf="imageLink"
                  [src]="resources.getResizedImageUrl(imageLink.url, 300)"
-                 class="img-responsive cursor-pointer"
+                 class="img-responsive cursor-pointer w-full"
                  (click)="showImage()" />
         </div>
-        <div flexLayout="row">
+        <div class="flex flex-row">
             <p [dir]="resources.getDirection(description)" class="break-lines {{resources.getTextAlignment(description)}}">{{description}}</p>
         </div>
-        <div flexLayout="row" *ngIf="showCoordinates">
+        <div class="flex flex-row" *ngIf="showCoordinates">
             <coordinates [latlng]="marker.latlng"></coordinates>
         </div>
     </div>

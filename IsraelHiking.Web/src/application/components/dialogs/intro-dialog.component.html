@@ -35,14 +35,14 @@
         </div>
     </div>
     <div mat-dialog-actions>
-        <div fxLayout="row" fxFlex>
-            <div fxFlex>
+        <div class="flex flex-row w-full">
+            <div class="flex-1">
                 <button *ngIf="step !== 0" mat-button fxFill (click)="step = step - 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro back">{{resources.back}}</button>
             </div>
-            <div fxFlex *ngIf="step !== 3">
+            <div class="flex-1" *ngIf="step !== 3">
                 <button mat-raised-button color="primary" fxFill (click)="step = step + 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro next">{{resources.next}}</button>
             </div>
-            <div fxFlex *ngIf="step === 3">
+            <div class="flex-1" *ngIf="step === 3">
                 <button mat-raised-button color="primary" fxFill (click)="close()" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro close">{{resources.close}}</button>
             </div>
         </div>

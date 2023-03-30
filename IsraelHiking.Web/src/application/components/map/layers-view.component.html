@@ -48,7 +48,7 @@
             <button mat-button (click)="clearSelected()" matTooltip="{{resources.clear}}" matTooltipPosition="above" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear coordinate search"><i class="fa icon-eye-slash"></i></button>
         </div>
     </div>
-    <div flexLayout="row" [dir]="resources.direction">
+    <div fxLayout="row" [dir]="resources.direction">
         <coordinates [latlng]="getSelectedFeatureLatlng()"></coordinates>
     </div>
 </mgl-popup>
