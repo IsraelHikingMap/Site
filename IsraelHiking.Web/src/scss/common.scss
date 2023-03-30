@@ -4,6 +4,8 @@
 @import "../fonts/icons.css";
 @import "font-awesome/css/font-awesome.css";
 @import "~maplibre-gl/dist/maplibre-gl.css";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 $app-primary: mat.define-palette(mat.$green-palette, 600);
 $app-accent: mat.define-palette(mat.$yellow-palette);
