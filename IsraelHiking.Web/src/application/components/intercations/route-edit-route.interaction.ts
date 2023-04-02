@@ -1,5 +1,5 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import { MapMouseEvent, Map } from "maplibre-gl";
+import { MapMouseEvent, Map, GeoJSONSource } from "maplibre-gl";
 import { NgRedux } from "@angular-redux2/store";
 import type Point from "@mapbox/point-geometry";
 
@@ -54,6 +54,29 @@ export class RouteEditRouteInteraction {
         this.mouseDownPoint = null;
     }
 
+    private addEndOfRouteProgress(start: LatLngAlt, end: LatLngAlt): string {
+        let id = "end-of-route-progress-line";
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        let newPointProgress = {
+            type: "Feature",
+            geometry: {
+                type: "LineString",
+                coordinates: [[start.lng, start.lat], [end.lng, end.lat]]
+            },
+            properties: {
+                id,
+                weight: selectedRoute.weight,
+                color: selectedRoute.color,
+                opacity: selectedRoute.opacity,
+                iconColor: selectedRoute.color,
+                iconSize: 0.5
+            }
+        } as GeoJSON.Feature<GeoJSON.LineString>;
+        this.updateData(newPointProgress);
+        return id;
+    }
+
+
     public static createSegmentId(route: RouteData, index: number) {
         return route.id + SEGMENT + index;
     }
@@ -70,7 +93,12 @@ export class RouteEditRouteInteraction {
         let features = this.geoJsonData.features.filter(f => f.id !== feature.id);
         features.push(feature);
         this.geoJsonData.features = features;
-        (this.map.getSource("editing-route-source") as any).setData(this.geoJsonData);
+        (this.map.getSource("editing-route-source") as GeoJSONSource).setData(this.geoJsonData);
+    }
+
+    private removeFeatureFromData(id: string) {
+        this.geoJsonData.features = this.geoJsonData.features.filter(f => f.id !== id);
+        (this.map.getSource("editing-route-source") as GeoJSONSource).setData(this.geoJsonData);
     }
 
     private getFeatureById<TGeometry extends GeoJSON.Geometry>(id: string): GeoJSON.Feature<TGeometry> {
@@ -268,7 +296,9 @@ export class RouteEditRouteInteraction {
         } else {
             let endPointSegmentIndex = selectedRoute.segments.length - 1;
             let startLatLng = selectedRoute.segments[endPointSegmentIndex].routePoint;
+            let id = this.addEndOfRouteProgress(startLatLng, newSegment.routePoint);
             await this.runRouting(startLatLng, newSegment);
+            this.removeFeatureFromData(id);
         }
         this.ngRedux.dispatch(new AddSegmentAction({
             routeId: selectedRoute.id,
