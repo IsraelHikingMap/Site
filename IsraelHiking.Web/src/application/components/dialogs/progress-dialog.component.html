@@ -10,13 +10,13 @@
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
             <div class="flex-1" *ngIf="isError">
-                <button mat-raised-button fxFill color="warn" mat-dialog-close angulartics2On="click" angularticsCategory="Progress" angularticsAction="Error progress dialog">{{resources.close}}</button>
+                <button mat-raised-button class="w-full" color="warn" mat-dialog-close angulartics2On="click" angularticsCategory="Progress" angularticsAction="Error progress dialog">{{resources.close}}</button>
             </div>
             <div class="flex-1" *ngIf="isContinue">
-                <button mat-raised-button fxFill color="primary" (click)="continueAction()" angulartics2On="click" angularticsCategory="Progress" angularticsAction="Continue progress dialog">{{resources.continue}}</button>
+                <button mat-raised-button class="w-full" color="primary" (click)="continueAction()" angulartics2On="click" angularticsCategory="Progress" angularticsAction="Continue progress dialog">{{resources.continue}}</button>
             </div>
             <div class="w-1/4">
-                <button mat-raised-button fxFill mat-dialog-close angulartics2On="click" angularticsCategory="Progress" angularticsAction="Cancel progress dialog">{{resources.cancel}}</button>
+                <button mat-raised-button class="w-full" mat-dialog-close angulartics2On="click" angularticsCategory="Progress" angularticsAction="Cancel progress dialog">{{resources.cancel}}</button>
             </div>
         </div>
     </div>

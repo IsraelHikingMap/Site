@@ -37,13 +37,13 @@
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
             <div class="flex-1">
-                <button *ngIf="step !== 0" mat-button fxFill (click)="step = step - 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro back">{{resources.back}}</button>
+                <button *ngIf="step !== 0" mat-button class="w-full" (click)="step = step - 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro back">{{resources.back}}</button>
             </div>
             <div class="flex-1" *ngIf="step !== 3">
-                <button mat-raised-button color="primary" fxFill (click)="step = step + 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro next">{{resources.next}}</button>
+                <button mat-raised-button color="primary" class="w-full" (click)="step = step + 1" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro next">{{resources.next}}</button>
             </div>
             <div class="flex-1" *ngIf="step === 3">
-                <button mat-raised-button color="primary" fxFill (click)="close()" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro close">{{resources.close}}</button>
+                <button mat-raised-button color="primary" class="w-full" (click)="close()" angulartics2On="click" angularticsCategory="Intro" angularticsAction="Intro close">{{resources.close}}</button>
             </div>
         </div>
     </div>

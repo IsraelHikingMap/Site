@@ -7,7 +7,7 @@ import { switchMap, map } from "rxjs/operators";
 @Component({
     selector: "secured-image",
     template: `
-    <img [src]="dataUrl$|async" fxFill/>
+    <img [src]="dataUrl$|async" class="w-full"/>
   `
 })
 export class SecuredImageComponent implements OnChanges {

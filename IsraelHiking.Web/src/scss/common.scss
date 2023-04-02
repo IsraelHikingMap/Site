@@ -138,6 +138,10 @@ overlay.overlay-shown {
     padding: 0 !important;
 }
 
+.min-w-unset {
+    min-width: unset !important;
+}
+
 .control-container {
     display: table;
 }
