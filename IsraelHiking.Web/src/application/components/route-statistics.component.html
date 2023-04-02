@@ -4,19 +4,19 @@
             <mat-grid-list cols="3" rowHeight="fit" class="chart-table">
                 <ng-container *ngIf="!isFollowing">
                     <mat-grid-tile matTooltip="{{resources.gain}}" matTooltipPosition="below">
-                        <div fxLayout="column" fxLayoutAlign=" center">
+                        <div class="flex flex-col items-center">
                             <i class="fa icon-arrow-up"></i>
                             <span>{{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span></span>
                         </div>
                     </mat-grid-tile>
                     <mat-grid-tile matTooltip="{{resources.loss}}" matTooltipPosition="below">
-                        <div fxLayout="column" fxLayoutAlign=" center">
+                        <div class="flex flex-col items-center">
                             <i class="fa icon-arrow-down"></i>
                             <span><span dir="ltr">{{toShortNumber(loss)}}</span>&nbsp;<span class="units">{{getUnits(loss)}}</span></span>
                         </div>
                     </mat-grid-tile>
                     <mat-grid-tile matTooltip="{{resources.length}}" matTooltipPosition="below">
-                        <div fxLayout="column" fxLayoutAlign=" center">
+                        <div class="flex flex-col items-center">
                             <i class="fa icon-arrow-right"></i>
                             <span>{{toShortNumber(length)}} <span class="units">{{getUnits(length)}}</span></span>
                         </div>
@@ -24,39 +24,39 @@
                 </ng-container>
                 <ng-container *ngIf="isFollowing">
                     <mat-grid-tile>
-                        <div fxLayout="column" fxLayoutAlign=" center">
+                        <div class="flex flex-col items-center">
                             ETA
                             <span><span dir="ltr">{{ETA}}</span></span>
                         </div>
                     </mat-grid-tile>
                     <mat-grid-tile matTooltip="{{resources.remainingDistance}}" matTooltipPosition="below">
-                        <div fxLayout="column" fxLayoutAlign=" center">
+                        <div class="flex flex-col items-center">
                             <i class="fa icon-arrow-circle-right"></i>
                             <span>&nbsp;<span dir="ltr">{{toShortNumber(remainingDistance)}}</span>&nbsp;<span class="units">{{getUnits(remainingDistance)}}</span></span>
                         </div>
                     </mat-grid-tile>
                     <mat-grid-tile matTooltip="{{resources.traveledDistance}}" matTooltipPosition="below">
-                        <div fxLayout="column" fxLayoutAlign=" center">
+                        <div class="flex flex-col items-center">
                             <i class="fa icon-arrow-right"></i>
                             <span>{{toShortNumber(traveledDistance)}} <span class="units">{{getUnits(traveledDistance)}}</span></span>
                         </div>
                     </mat-grid-tile>
                 </ng-container>
                 <mat-grid-tile matTooltip="{{resources.duration}}" matTooltipPosition="above">
-                    <div fxLayout="column" fxLayoutAlign=" center">
+                    <div class="flex flex-col items-center">
                         <i class="fa icon-clock-o"></i>
                         <span>{{duration}} <span class="units">{{durationUnits}}</span></span>
                     </div>
                 </mat-grid-tile>
                 <mat-grid-tile matTooltip="{{resources.averageSpeed}}" matTooltipPosition="above">
-                    <div fxLayout="column" fxLayoutAlign=" center">
+                    <div class="flex flex-col items-center">
                         <i class="fa icon-avg-speed"></i>
                         <span *ngIf="averageSpeed">{{averageSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
                         <span *ngIf="!averageSpeed">--</span>
                     </div>
                 </mat-grid-tile>
                 <mat-grid-tile matTooltip="{{resources.currentSpeed}}" matTooltipPosition="above">
-                    <div fxLayout="column" fxLayoutAlign=" center">
+                    <div class="flex flex-col items-center">
                         <i class="fa icon-speed"></i>
                         <span *ngIf="currentSpeed">{{currentSpeed | number: '1.0-2'}} <span class="units">{{resources.kmPerHourUnit}}</span></span>
                         <span *ngIf="!currentSpeed">--</span>
@@ -67,7 +67,7 @@
         <div *ngIf="!isTable" class="chart-container" #lineChartContainer>
             <svg direction="ltr"></svg>
             <div *ngIf="subRouteRange && subRouteRange.xEnd" class="sub-route-statistics-container">
-                <div fxLayout="row" fxLayoutAlign="center center">
+                <div class="flex flex-row justify-center items-center">
                     <button mat-button (click)="clearSubRouteSelection()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Clear sub route selection"><i class="fa icon-close fa-lg"></i></button>
                     <span class="label-margin">
                         <i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} <span class="units">{{getUnits(gain)}}</span>

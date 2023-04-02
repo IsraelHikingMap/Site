@@ -1,17 +1,17 @@
 ﻿<div [dir]="resources.direction">
-    <div fxLayour="row">
-        <div fxFlex>
-            <button mat-button (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above" fxFill><i class="fa icon-trash"></i></button>
+    <div class="flex flex-row">
+        <div class="flex-1">
+            <button mat-button class="w-full min-w-unset" (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
         </div>
-        <div fxFlex>
-            <button mat-button (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" fxFill><i class="fa icon-globe"></i></button>
+        <div class="flex-1">
+            <button mat-button class="w-full min-w-unset" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
         </div>
-        <div fxFlex *ngIf="!isMiddle">
-            <button mat-button (click)="reverse()" matTooltip="{{resources.reverseRoute}}" matTooltipPosition="above" fxFill><i class="fa icon-arrows-h"></i></button>
+        <div class="flex-1" *ngIf="!isMiddle">
+            <button mat-button class="w-full min-w-unset" (click)="reverse()" matTooltip="{{resources.reverseRoute}}" matTooltipPosition="above"><i class="fa icon-arrows-h"></i></button>
         </div>
-        <div fxFlex>
-            <button mat-button *ngIf="isMiddle" (click)="split()" matTooltip="{{resources.split}}" matTooltipPosition="above" fxFill><i class="fa icon-cut"></i></button>
-            <button mat-button *ngIf="!isMiddle" [disabled]="!canMerge" (click)="merge()" matTooltip="{{resources.merge}}" matTooltipPosition="above" fxFill><i class="fa icon-merge"></i></button>
+        <div class="flex-1">
+            <button mat-button class="w-full min-w-unset" *ngIf="isMiddle" (click)="split()" matTooltip="{{resources.split}}" matTooltipPosition="above"><i class="fa icon-cut"></i></button>
+            <button mat-button class="w-full min-w-unset" *ngIf="!isMiddle" [disabled]="!canMerge" (click)="merge()" matTooltip="{{resources.merge}}" matTooltipPosition="above"><i class="fa icon-merge"></i></button>
         </div>
     </div>
     <div *ngIf="!hideCoordinates">

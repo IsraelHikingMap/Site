@@ -1,22 +1,22 @@
 ﻿<div [dir]="resources.direction">
     <div mat-dialog-content>
-        <div fxLayout="row">
+        <div class="flex flex-row">
             <mat-progress-bar color="primary" [mode]="progressPersentage > 0 ? 'buffer' : 'determinate'" [value]="progressPersentage"></mat-progress-bar>
         </div>
-        <div fxLayout="row">
+        <div class="flex flex-row">
             <span class="text-small"><span *ngIf="progressPersentage > 0">{{progressPersentage | number: '1.1-1' }}%</span> {{text}}</span>
         </div>
     </div>
     <div mat-dialog-actions>
-        <div fxLayout="row" fxFlex>
-            <div fxFlex *ngIf="isError">
-                <button mat-raised-button fxFill color="warn" mat-dialog-close angulartics2On="click" angularticsCategory="Progress" angularticsAction="Error progress dialog">{{resources.close}}</button>
+        <div class="flex flex-row w-full">
+            <div class="flex-1" *ngIf="isError">
+                <button mat-raised-button class="w-full" color="warn" mat-dialog-close angulartics2On="click" angularticsCategory="Progress" angularticsAction="Error progress dialog">{{resources.close}}</button>
             </div>
-            <div fxFlex *ngIf="isContinue">
-                <button mat-raised-button fxFill color="primary" (click)="continueAction()" angulartics2On="click" angularticsCategory="Progress" angularticsAction="Continue progress dialog">{{resources.continue}}</button>
+            <div class="flex-1" *ngIf="isContinue">
+                <button mat-raised-button class="w-full" color="primary" (click)="continueAction()" angulartics2On="click" angularticsCategory="Progress" angularticsAction="Continue progress dialog">{{resources.continue}}</button>
             </div>
-            <div fxFelx="25">
-                <button mat-raised-button fxFill mat-dialog-close angulartics2On="click" angularticsCategory="Progress" angularticsAction="Cancel progress dialog">{{resources.cancel}}</button>
+            <div class="w-1/4">
+                <button mat-raised-button class="w-full" mat-dialog-close angulartics2On="click" angularticsCategory="Progress" angularticsAction="Cancel progress dialog">{{resources.cancel}}</button>
             </div>
         </div>
     </div>

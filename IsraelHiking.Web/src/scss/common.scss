@@ -4,6 +4,8 @@
 @import "../fonts/icons.css";
 @import "font-awesome/css/font-awesome.css";
 @import "~maplibre-gl/dist/maplibre-gl.css";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 $app-primary: mat.define-palette(mat.$green-palette, 600);
 $app-accent: mat.define-palette(mat.$yellow-palette);
@@ -134,6 +136,10 @@ overlay.overlay-shown {
 
 .no-padding {
     padding: 0 !important;
+}
+
+.min-w-unset {
+    min-width: unset !important;
 }
 
 .control-container {

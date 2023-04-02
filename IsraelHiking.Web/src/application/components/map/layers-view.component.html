@@ -40,15 +40,15 @@
     <span [dir]="resources.getDirection(getTitle(hoverFeature))">{{getTitle(hoverFeature)}}</span>
 </mgl-popup>
 <mgl-popup *ngIf="isShowCoordinatesPopup && selectedPoiFeature && isCoordinatesFeature(selectedPoiFeature)" [lngLat]="selectedPoiFeature.geometry.coordinates" [offset]="[0, -30]" (popupClose)="isShowCoordinatesPopup = false">
-    <div fxLayour="row">
-        <div fxFlex>
-            <button mat-button (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Add coordinate search to route"><i class="fa icon-plus"></i></button>
+    <div class="flex flex-row">
+        <div class="w-1/2">
+            <button mat-button class="w-full" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Add coordinate search to route"><i class="fa icon-plus"></i></button>
         </div>
-        <div fxFlex>
-            <button mat-button (click)="clearSelected()" matTooltip="{{resources.clear}}" matTooltipPosition="above" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear coordinate search"><i class="fa icon-eye-slash"></i></button>
+        <div class="w-1/2">
+            <button mat-button class="w-full" (click)="clearSelected()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear coordinate search"><i class="fa icon-eye-slash"></i></button>
         </div>
     </div>
-    <div flexLayout="row" [dir]="resources.direction">
+    <div class="flex flex-row" [dir]="resources.direction">
         <coordinates [latlng]="getSelectedFeatureLatlng()"></coordinates>
     </div>
 </mgl-popup>

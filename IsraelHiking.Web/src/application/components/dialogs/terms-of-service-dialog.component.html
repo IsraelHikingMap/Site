@@ -9,22 +9,22 @@
     </div>
     <div mat-dialog-content>
         <div>
-            <div fxLayout="row">
-                <p fxFill>{{resources.termsOfServiceElaborated}}</p>
+            <div class="flex flex-row">
+                <p class="w-full">{{resources.termsOfServiceElaborated}}</p>
             </div>
-            <div fxLayout="row">
+            <div class="flex flex-row">
                 <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank">{{resources.osmTermsOfService}}</a>
             </div>
-            <div fxLayout="row">
+            <div class="flex flex-row">
                 <a [href]="wikimediaTermsOfServiceUrl" target="_blank">{{resources.wikimediaTermsOfService}}</a>
             </div>
-            <div fxLayout="row">
+            <div class="flex flex-row">
                 <a href="https://imgur.com/tos" target="_blank">{{resources.imgurTermsOfService}}</a>
             </div>
-            <div fxLayout="row">
+            <div class="flex flex-row">
                 <a href="https://github.com/IsraelHikingMap/Site/wiki/Privacy-Policy-and-Terms-of-Service" target="_blank">{{resources.infoPrivacyPolicyTermsOfService}}</a>
             </div>
-            <div fxLayout="row">
+            <div class="flex flex-row">
                 <mat-checkbox color="primary" [(ngModel)]="iAgree">{{resources.iHaveReadAndAgree}}</mat-checkbox>
             </div>
             <br />

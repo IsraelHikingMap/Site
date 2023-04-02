@@ -8,66 +8,66 @@
         </div>
     </div>
     <div mat-dialog-content>
-        <div fxLayout="row" *ngIf="imageUrl">
-            <img [src]="imageUrl" fxFill height="100" />
+        <div class="flex flex-row" *ngIf="imageUrl">
+            <img [src]="imageUrl" class="w-full" height="100" />
         </div>
         <div *ngIf="!shareAddress">
-            <div fxLayout="row">
-                <mat-form-field fxFill hintLabel="{{resources.titlePlaceHolder}}">
-                    <input matInput fxFill type="text" [(ngModel)]="title" placeholder="{{resources.title}}" />
+            <div class="flex flex-row">
+                <mat-form-field class="w-full" hintLabel="{{resources.titlePlaceHolder}}">
+                    <input matInput class="w-full" type="text" [(ngModel)]="title" placeholder="{{resources.title}}" />
                 </mat-form-field>
             </div>
-            <div fxLayout="row">
-                <mat-form-field fxFill hintLabel="{{resources.descriptionPlaceHolder}}">
-                    <textarea matInput rows="2" type="text" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
+            <div class="flex flex-row">
+                <mat-form-field class="w-full" hintLabel="{{resources.descriptionPlaceHolder}}">
+                    <textarea matInput class="w-full" rows="2" type="text" [(ngModel)]="description" placeholder="{{resources.description}}"></textarea>
                 </mat-form-field>
             </div>
-            <div fxLayout="row">
+            <div class="flex flex-row">
                 <mat-checkbox color="primary" [(ngModel)]="shareOverlays">{{resources.shareMapOverlays}}</mat-checkbox>
             </div>
-            <div fxLayout="row" *ngIf="showUnhide">
+            <div class="flex flex-row" *ngIf="showUnhide">
                 <mat-checkbox color="primary" [(ngModel)]="unhideRoutes">{{resources.unhideHiddenRoutes}}</mat-checkbox>
             </div>
-            <div fxLayout="row" *ngIf="showUnhide && !unhideRoutes">
+            <div class="flex flex-row" *ngIf="showUnhide && !unhideRoutes">
                 <mat-hint class="text-small">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
             </div>
-            <div fxLayout="row" *ngIf="canUpdate">
+            <div class="flex flex-row" *ngIf="canUpdate">
                 <mat-checkbox color="primary" [(ngModel)]="updateCurrentShare">{{resources.updateCurrentShare}}</mat-checkbox>
             </div>
             <div class="input-wrapper-spacer"></div>
-            <div fxLayout="row">
-                <button mat-raised-button color="primary" (click)="uploadShareUrl()" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}{{shareOverlays ? ' with overlays' : ''}}">{{updateCurrentShare ? resources.update : resources.generateUrlToShareWithYourFriends}}</button>
+            <div class="flex flex-row">
+                <button mat-raised-button class="w-full" color="primary" (click)="uploadShareUrl()" [disabled]="isLoading" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}{{shareOverlays ? ' with overlays' : ''}}">{{updateCurrentShare ? resources.update : resources.generateUrlToShareWithYourFriends}}</button>
             </div>
         </div>
         <div *ngIf="shareAddress && !isApp()">
-            <div fxLayout="row" class="break-lines">
-                <span fxFill [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">{{description}}</span>
+            <div class="flex flex-row" class="break-lines">
+                <span class="w-full" [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">{{description}}</span>
             </div>
-            <div fxLayout="row">
-                <a [href]="shareAddress" class="text-left chrome-wordwrap-fix" [target]="'_blank'" fxFill angulartics2On="click" angularticsCategory="Share" angularticsAction="Share text address">{{shareAddress}}</a>
+            <div class="flex flex-row">
+                <a [href]="shareAddress" class="text-left chrome-wordwrap-fix w-full" [target]="'_blank'" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share text address">{{shareAddress}}</a>
             </div>
             <div class="input-wrapper-spacer"></div>
-            <div fxLayout="row" fxFill>
-                <div fxFlex>
-                    <a mat-button fxFill [href]="facebookShareAddress" [target]="'_blank'" matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook"><i class="fa icon-facebook fa-lg"></i></a>
+            <div class="flex flex-row w-full">
+                <div class="flex-1">
+                    <a mat-button class="w-full" [href]="facebookShareAddress" [target]="'_blank'" matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook"><i class="fa icon-facebook fa-lg"></i></a>
                 </div>
-                <div fxFlex>
-                    <a mat-button fxFill [href]="whatsappShareAddress" [target]="'_blank'" matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp"><i class="fa icon-whatsapp fa-lg"></i></a>
+                <div class="flex-1">
+                    <a mat-button class="w-full" [href]="whatsappShareAddress" [target]="'_blank'" matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp"><i class="fa icon-whatsapp fa-lg"></i></a>
                 </div>
-                <div fxFlex>
-                    <button mat-button fxFill [cdkCopyToClipboard]="shareAddress" matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard"><i class="fa icon-clipboard fa-lg"></i></button>
+                <div class="flex-1">
+                    <button mat-button class="w-full" [cdkCopyToClipboard]="shareAddress" matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard"><i class="fa icon-clipboard fa-lg"></i></button>
                 </div>
-                <div fxFlex>
-                    <a mat-button fxFill [href]="nakebCreateHikeAddress" [target]="'_blank'" matTooltip="{{resources.createNakebHike}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share nakeb"><i class="fa icon-nakeb fa-lg"></i></a>
+                <div class="flex-1">
+                    <a mat-button class="w-full" [href]="nakebCreateHikeAddress" [target]="'_blank'" matTooltip="{{resources.createNakebHike}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share nakeb"><i class="fa icon-nakeb fa-lg"></i></a>
                 </div>
             </div>
         </div>
         <div *ngIf="shareAddress && isApp()">
-            <div fxLayout="row" class="break-lines">
-                <span fxFill [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">{{description}}</span>
+            <div class="flex flex-row" class="break-lines">
+                <span class="w-full" [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">{{description}}</span>
             </div>
-            <div fxLayout="row">
-                <button mat-button fxFill (click)="share()" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share mobile button"><i class="fa fa-lg icon-share-alt"></i></button>
+            <div class="flex flex-row">
+                <button mat-button class="w-full" (click)="share()" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share mobile button"><i class="fa fa-lg icon-share-alt"></i></button>
             </div>
         </div>
     </div>
