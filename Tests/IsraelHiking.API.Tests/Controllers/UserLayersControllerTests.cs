@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -174,6 +175,15 @@ namespace IsraelHiking.API.Tests.Controllers
 
             Assert.IsNotNull(results);
             _repository.Received(1).DeleteUserLayer(layer);
+        }
+        
+        [TestMethod]
+        public void DeserializeObject_OsmIdIsNumber_ShouldSucceed()
+        {
+            var mapLayerString =
+                "{\"minZoom\":7,\"maxZoom\":16,\"key\":\"= מנדטורית 1:20k 1940s =\",\"address\":\"https://palopenmaps.org/tiles/pal20k-1940s/{z}/{x}/{y}.jpg\",\"opacity\":1,\"isEditable\":true,\"isOfflineAvailable\":false,\"isOfflineOn\":false,\"isOverlay\":false,\"osmUserId\":1257210}";
+            var serialized = JsonSerializer.Deserialize<MapLayerData>(mapLayerString);
+            Assert.IsNotNull(serialized);
         }
     }
 }

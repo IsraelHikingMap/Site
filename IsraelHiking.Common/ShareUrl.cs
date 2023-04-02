@@ -1,6 +1,7 @@
 ﻿using IsraelHiking.Common.DataContainer;
 using System.Text.Json.Serialization;
 using System;
+using IsraelHiking.Common.Extensions;
 
 namespace IsraelHiking.Common
 {
@@ -13,6 +14,7 @@ namespace IsraelHiking.Common
         [JsonPropertyName("description")]
         public string Description { get; set; }
         [JsonPropertyName("osmUserId")]
+        [JsonConverter(typeof(AutoNumberToStringConverter))]
         public string OsmUserId { get; set; }
         [JsonPropertyName("viewsCount")]
         public int ViewsCount { get; set; }

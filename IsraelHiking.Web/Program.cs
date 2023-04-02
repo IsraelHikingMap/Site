@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using IsraelHiking.API;
 using IsraelHiking.API.Services;
@@ -92,6 +93,7 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     }).AddJsonOptions(options => {
         options.JsonSerializerOptions.Converters.Add(new GeoJsonConverterFactory());
         options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
+        options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
     });
     services.AddAuthentication(options =>
     {
