@@ -216,7 +216,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
         event.stopPropagation();
         this.ngRedux.dispatch(RoutesReducer.actions.toggleAllRoutes());
         if (this.isAllRoutesHidden()) {
-            this.ngRedux.dispatch(RoutesReducer.actions.setSelectedRouteAction({ routeId: null }));
+            this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({ routeId: null }));
         }
     }
 

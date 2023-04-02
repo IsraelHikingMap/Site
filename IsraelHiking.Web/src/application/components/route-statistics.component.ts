@@ -16,7 +16,7 @@ import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
-import { ConfigurationActions } from "../reducers/configuration.reducer";
+import { ConfigurationReducer } from "../reducers/configuration.reducer";
 import type { LatLngAlt, RouteData, ApplicationState, Language, LatLngAltTime } from "../models/models";
 
 declare type DragState = "start" | "drag" | "none";
@@ -733,11 +733,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public toggleKmMarker() {
-        this.ngRedux.dispatch(ConfigurationActions.toggleIsShowKmMarkersAction);
+        this.ngRedux.dispatch(ConfigurationReducer.actions.toggleIsShowKmMarkers());
     }
 
     public toggleSlope() {
-        this.ngRedux.dispatch(ConfigurationActions.toggleIsShowSlopeAction);
+        this.ngRedux.dispatch(ConfigurationReducer.actions.toggleIsShowSlope());
     }
 
     private updateKmMarkers() {
