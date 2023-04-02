@@ -46,8 +46,13 @@ export class ImageAttributionService {
             let response: any = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000)));
             let extmetadata = response.query.pages[-1].imageinfo[0].extmetadata;
             if (extmetadata?.Artist.value) {
+                const match = extmetadata.Artist.value.match(/<[^>]*>([^<]*)<\/[^>]*>/);
+                let author = extmetadata.Artist.value as string;
+                if (match) {
+                    author = match[1]; // Extract the content between the opening and closing tags
+                }
                 let imageAttribution = {
-                    author: extmetadata.Artist.value.replace(/\<.*\>(.*)\<\/.*\>/, "$1"),
+                    author,
                     url: `https://${language}.wikipedia.org/wiki/File:${imageName}`
                 };
                 this.attributionImageCache.set(imageUrl, imageAttribution);
