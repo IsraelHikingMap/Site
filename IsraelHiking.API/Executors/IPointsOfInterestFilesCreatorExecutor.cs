@@ -12,12 +12,12 @@ namespace IsraelHiking.API.Executors
         /// This function creates the sitemap.xml file inside the wwwroot folder
         /// </summary>
         /// <param name="features"></param>
-        void CreateSiteMapXmlFile(List<Feature> features);
+        void CreateSiteMapXmlFile(List<IFeature> features);
 
         /// <summary>
         /// This function creates the pois-slim.geojson file inside the wwwroot folder
         /// </summary>
         /// <param name="features"></param>
-        void CreateOfflinePoisFile(List<Feature> features);
+        void CreateOfflinePoisFile(List<IFeature> features);
     }
 }

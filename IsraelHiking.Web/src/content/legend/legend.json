@@ -742,6 +742,17 @@
         "link": "osm-key-link"
       },
       {
+        "key": "legendCemetery",
+        "latlng": {
+          "lat": 32.831568,
+          "lng": 35.7989717
+        },
+        "zoom": 16,
+        "type": "POI",
+        "osmTags": [ "landuse=cemetery" ],
+        "link": "osm-tag-link"
+      },
+      {
         "key": "legendObservationTower",
         "latlng": {
           "lat": 31.518188,
@@ -1243,17 +1254,6 @@
         "zoom": 17,
         "type": "POI",
         "osmTags": [ "natural=beach" ],
-        "link": "osm-tag-link"
-      },
-      {
-        "key": "legendCemetery",
-        "latlng": {
-          "lat": 32.831568,
-          "lng": 35.7989717
-        },
-        "zoom": 16,
-        "type": "POI",
-        "osmTags": [ "landuse=cemetery" ],
         "link": "osm-tag-link"
       },
       {

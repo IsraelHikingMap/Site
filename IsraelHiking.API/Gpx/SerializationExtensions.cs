@@ -1,21 +1,23 @@
-﻿using IsraelHiking.API.Converters;
+﻿using System;
+using IsraelHiking.API.Converters;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
+using IsraelHiking.Common.Extensions;
+using NetTopologySuite.IO.Converters;
 
 namespace IsraelHiking.API.Gpx
 {
     internal class IsraelHikingGpxExtensionReader : GpxExtensionReader
     {
-        public string FromXml(IEnumerable<XElement> extensionElements, string elementName)
+        private string FromXml(IEnumerable<XElement> extensionElements, string elementName)
         {
             return extensionElements.FirstOrDefault(a => a.Name.LocalName == elementName)?.FirstNode?.ToString();
         }
@@ -61,29 +63,27 @@ namespace IsraelHiking.API.Gpx
                     new XElement("Weight", colorOpacityWeight.Weight)
                 };
             }
-            return new XElement[0];
+            return Array.Empty<XElement>();
         }
     }
 
     /// <summary>
     /// This is a helper class to facilitate easier serializations
     /// </summary>
-    public static class SerializarionExtensions
+    public static class SerializationExtensions
     {
         /// <summary>
-        /// Convers <see cref="FeatureCollection"/> to <see cref="byte"/> array
+        /// Converts <see cref="FeatureCollection"/> to <see cref="byte"/> array
         /// </summary>
         /// <param name="featureCollection">The <see cref="FeatureCollection"/></param>
         /// <returns>The <see cref="byte"/> array</returns>
         public static byte[] ToBytes(this FeatureCollection featureCollection)
         {
-            using var outputStream = new MemoryStream();
-            var writer = new StreamWriter(outputStream);
-            var jsonWriter = new JsonTextWriter(writer);
-            var serializer = GeoJsonSerializer.Create(new GeometryFactory(), 3);
-            serializer.Serialize(jsonWriter, featureCollection);
-            jsonWriter.Flush();
-            return outputStream.ToArray();
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new GeoJsonConverterFactory());
+            options.Converters.Add(new DateTimeConverter());
+            var serialized = JsonSerializer.Serialize(featureCollection, options);
+            return Encoding.UTF8.GetBytes(serialized);
         }
 
         /// <summary>
@@ -93,11 +93,11 @@ namespace IsraelHiking.API.Gpx
         /// <returns>The <see cref="FeatureCollection"/></returns>
         public static FeatureCollection ToFeatureCollection(this byte[] featureCollectionContent)
         {
-            using var stream = new MemoryStream(featureCollectionContent);
-            var serializer = GeoJsonSerializer.Create(new GeometryFactory(), 3);
-            using var streamReader = new StreamReader(stream);
-            using var jsonTextReader = new JsonTextReader(streamReader);
-            return serializer.Deserialize<FeatureCollection>(jsonTextReader);
+            var stringJson = Encoding.UTF8.GetString(featureCollectionContent);
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new GeoJsonConverterFactory());
+            options.Converters.Add(new DateTimeConverter());
+            return JsonSerializer.Deserialize<FeatureCollection>(stringJson, options);
         }
 
         /// <summary>
@@ -186,9 +186,9 @@ namespace IsraelHiking.API.Gpx
         public static string ToHashString(this byte[] hash)
         {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < hash.Length; i++)
+            foreach (var b in hash)
             {
-                sb.Append(hash[i].ToString("X2"));
+                sb.Append(b.ToString("X2"));
             }
             return sb.ToString();
         }

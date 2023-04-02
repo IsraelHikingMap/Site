@@ -20,9 +20,9 @@ namespace IsraelHiking.API.Executors
     /// Features that are ordered first will be the target of the merge 
     /// while features that are ordered last will be the source of the merge.
     /// </summary>
-    internal class FeatureComparer : IComparer<Feature>
+    internal class FeatureComparer : IComparer<IFeature>
     {
-        public int Compare(Feature x, Feature y)
+        public int Compare(IFeature x, IFeature y)
         {
             if (x.Geometry is Point && y.Geometry is Point)
             {
@@ -72,7 +72,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc />
-        public List<Feature> Merge(List<Feature> osmFeatures, List<Feature> externalFeatures)
+        public List<IFeature> Merge(List<IFeature> osmFeatures, List<IFeature> externalFeatures)
         {
             AddAlternativeTitleToNatureReserves(osmFeatures);
             externalFeatures = MergeWikipediaToOsmByWikipediaTags(osmFeatures, externalFeatures);
@@ -93,7 +93,7 @@ namespace IsraelHiking.API.Executors
             return all;
         }
 
-        private List<Feature> MergeOsmElementsByName(List<Feature> orderedOsmFeatures, string nameAttribute)
+        private List<IFeature> MergeOsmElementsByName(List<IFeature> orderedOsmFeatures, string nameAttribute)
         {
             _logger.LogInformation($"Starting OSM merging by {nameAttribute}.");
             var featureIdsToRemove = new ConcurrentBag<string>();
@@ -137,11 +137,11 @@ namespace IsraelHiking.API.Executors
             return orderedOsmFeatures;
         }
 
-        private List<Feature> MergeExternalFeaturesToOsm(List<Feature> osmFeatures, List<Feature> externalFeatures)
+        private List<IFeature> MergeExternalFeaturesToOsm(List<IFeature> osmFeatures, List<IFeature> externalFeatures)
         {
             var featureIdsToRemove = new HashSet<string>();
             _logger.LogInformation("Starting external features merging by title into OSM.");
-            var titlesDictionary = new Dictionary<string, List<Feature>>();
+            var titlesDictionary = new Dictionary<string, List<IFeature>>();
             foreach (var osmFeature in osmFeatures)
             {
                 foreach (var title in osmFeature.GetTitles())
@@ -152,7 +152,7 @@ namespace IsraelHiking.API.Executors
                     }
                     else
                     {
-                        titlesDictionary[title] = new List<Feature> { osmFeature };
+                        titlesDictionary[title] = new List<IFeature> { osmFeature };
                     }
                 }
             }
@@ -176,7 +176,7 @@ namespace IsraelHiking.API.Executors
             return externalFeatures;
         }
 
-        private List<Feature> MergePlaceNodes(List<Feature> osmFeatures)
+        private List<IFeature> MergePlaceNodes(List<IFeature> osmFeatures)
         {
             var featureIdsToRemove = new ConcurrentBag<string>();
             var containers = osmFeatures.Where(IsPlaceContainer).OrderBy(f => f.Geometry.Area).ToList();
@@ -200,9 +200,9 @@ namespace IsraelHiking.API.Executors
             return osmFeatures.Where(f => list.Contains(f.GetId()) == false).ToList();
         }
 
-        private bool IsPlaceContainer(Feature feature)
+        private bool IsPlaceContainer(IFeature feature)
         {
-            if (!(feature.Geometry is Polygon) && !(feature.Geometry is MultiPolygon))
+            if (feature.Geometry is not Polygon && feature.Geometry is not MultiPolygon)
             {
                 return false;
             }
@@ -225,7 +225,7 @@ namespace IsraelHiking.API.Executors
             return false;
         }
 
-        private List<Feature> UpdatePlacesGeometry(Feature feature, List<Feature> places)
+        private List<IFeature> UpdatePlacesGeometry(IFeature feature, List<IFeature> places)
         {
             var placeContainers = places.Where(c => IsPlaceContainerContainsFeature(c, feature))
                 .OrderBy(f => f.Geometry.Area)
@@ -243,7 +243,7 @@ namespace IsraelHiking.API.Executors
             return placeContainers;
         }
 
-        private bool IsPlaceContainerContainsFeature(Feature container, Feature feature)
+        private bool IsPlaceContainerContainsFeature(IFeature container, IFeature feature)
         {
             try
             {
@@ -270,7 +270,7 @@ namespace IsraelHiking.API.Executors
             return false;
         }
 
-        private void SimplifyGeometriesCollection(List<Feature> results)
+        private void SimplifyGeometriesCollection(List<IFeature> results)
         {
             foreach (var feature in results)
             {
@@ -366,7 +366,7 @@ namespace IsraelHiking.API.Executors
             }
         }
 
-        private void WriteToReport(Feature featureToMergeTo, Feature feature)
+        private void WriteToReport(IFeature featureToMergeTo, IFeature feature)
         {
             if (!_options.WriteMergeReport)
             {
@@ -386,7 +386,7 @@ namespace IsraelHiking.API.Executors
             _reportLogger.LogInformation(from + " " + to);
         }
 
-        private string GetWebsite(Feature feature)
+        private string GetWebsite(IFeature feature)
         {
             if (feature.Attributes.Exists(FeatureAttributes.WEBSITE))
             {
@@ -402,7 +402,7 @@ namespace IsraelHiking.API.Executors
             return string.Empty;
         }
 
-        private void MergeFeatures(Feature featureToMergeTo, Feature feature)
+        private void MergeFeatures(IFeature featureToMergeTo, IFeature feature)
         {
             if (featureToMergeTo.GetId().Equals(feature.GetId()))
             {
@@ -447,7 +447,7 @@ namespace IsraelHiking.API.Executors
             WriteToReport(featureToMergeTo, feature);
         }
 
-        private bool CanMerge(Feature target, Feature source)
+        private bool CanMerge(IFeature target, IFeature source)
         {
             if (target.GetId().Equals(source.GetId()))
             {
@@ -514,7 +514,7 @@ namespace IsraelHiking.API.Executors
         /// <param name="source"></param>
         /// <param name="tagName"></param>
         /// <returns></returns>
-        private bool IsFeaturesTagsMismatched(Feature target, Feature source, string tagName) {
+        private bool IsFeaturesTagsMismatched(IFeature target, IFeature source, string tagName) {
             return target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) && 
                 (target.Attributes.GetNames().Contains(tagName) &&
                  !source.Attributes.GetNames().Contains(tagName) || 
@@ -522,7 +522,7 @@ namespace IsraelHiking.API.Executors
                 source.Attributes.GetNames().Contains(tagName));
         }
 
-        private List<Feature> MergeWikipediaToOsmByWikipediaTags(List<Feature> osmFeatures, List<Feature> externalFeatures)
+        private List<IFeature> MergeWikipediaToOsmByWikipediaTags(List<IFeature> osmFeatures, List<IFeature> externalFeatures)
         {
             WriteToBothLoggers("Starting joining Wikipedia markers.");
             var featureIdsToRemove = new HashSet<string>();
@@ -550,7 +550,7 @@ namespace IsraelHiking.API.Executors
             return externalFeatures.Where(f => featureIdsToRemove.Contains(f.GetId()) == false).ToList();
         }
 
-        private void AddAlternativeTitleToNatureReserves(List<Feature> features)
+        private void AddAlternativeTitleToNatureReserves(List<IFeature> features)
         {
             WriteToBothLoggers("Starting adding alternative names to nature reserves");
             var natureReserveFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_ICON].Equals("icon-nature-reserve")).ToList();
@@ -595,13 +595,13 @@ namespace IsraelHiking.API.Executors
             _reportLogger.LogInformation(message + "<br/>");
         }
 
-        private void MergeTitles(Feature target, Feature source)
+        private void MergeTitles(IFeature target, IFeature source)
         {
-            if (!(target.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable targetTitlesByLanguage))
+            if (target.Attributes[FeatureAttributes.POI_NAMES] is not IAttributesTable targetTitlesByLanguage)
             {
                 return;
             }
-            if (!(source.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable sourceTitlesByLanguage))
+            if (source.Attributes[FeatureAttributes.POI_NAMES] is not IAttributesTable sourceTitlesByLanguage)
             {
                 return;
             }
@@ -625,7 +625,7 @@ namespace IsraelHiking.API.Executors
         /// </summary>
         /// <param name="target"></param>
         /// <param name="source"></param>
-        private void MergeDescriptionAndAuthor(Feature target, Feature source)
+        private void MergeDescriptionAndAuthor(IFeature target, IFeature source)
         {
             foreach (var languagePostfix in Languages.Array.Select(s => ":" + s).Concat(new[] { string.Empty }))
             {
@@ -648,7 +648,7 @@ namespace IsraelHiking.API.Executors
             }
         }
 
-        private void MergeDates(Feature target, Feature source)
+        private void MergeDates(IFeature target, IFeature source)
         {
             if (target.GetLastModified() < source.GetLastModified())
             {
@@ -656,7 +656,7 @@ namespace IsraelHiking.API.Executors
             }
         }
 
-        private void MergeWebsite(Feature target, Feature source)
+        private void MergeWebsite(IFeature target, IFeature source)
         {
             var websiteUrls = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE))
                 .Select(key => target.Attributes[key]).ToList();
@@ -690,7 +690,7 @@ namespace IsraelHiking.API.Executors
             }
         }
 
-        private void MergeImages(Feature target, Feature source)
+        private void MergeImages(IFeature target, IFeature source)
         {
             var imagesUrls = target.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
                 .Select(key => target.Attributes[key]).ToList();
@@ -713,7 +713,7 @@ namespace IsraelHiking.API.Executors
             }
         }
 
-        private void CopyKeysIfExist(Feature target, Feature source, params string[] attributeKeys)
+        private void CopyKeysIfExist(IFeature target, IFeature source, params string[] attributeKeys)
         {
             foreach (var key in attributeKeys)
             {

@@ -1,9 +1,9 @@
-﻿using System.Net;
-using IsraelHiking.DataAccessInterfaces;
+﻿using IsraelHiking.DataAccessInterfaces;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System;
+using IsraelHiking.Common;
 using IsraelHiking.Common.Api;
 
 namespace IsraelHiking.DataAccess
@@ -23,11 +23,12 @@ namespace IsraelHiking.DataAccess
         {
             var client = _httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromMinutes(20);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(Branding.USER_AGENT);
             var response = await client.GetAsync(url);
             var fileName = response.Content.Headers.ContentDisposition?.FileName?.Trim('"') ??
                 response.Content.Headers.ContentDisposition?.FileNameStar?.Trim('"') ??
                 url.Substring(url.LastIndexOf("/", StringComparison.Ordinal) + 1);
-            var content = new byte[0];
+            var content = Array.Empty<byte>();
             if (response.IsSuccessStatusCode)
             {
                 content = await response.Content.ReadAsByteArrayAsync();
@@ -45,10 +46,10 @@ namespace IsraelHiking.DataAccess
         }
         public async Task<long> GetFileSize(string url)
         {
-            var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
-            httpWebRequest.Method = "HEAD";
-            var resp = (HttpWebResponse)await httpWebRequest.GetResponseAsync();
-            return resp.ContentLength;
+            var client = _httpClientFactory.CreateClient();
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(Branding.USER_AGENT);
+            var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
+            return response.Content.Headers.ContentLength ?? 0;
         }
     }
 }

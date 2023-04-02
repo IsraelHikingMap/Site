@@ -1,0 +1,62 @@
+name: "\U0001F41E Bug report"
+description: Create a bug report to help us fix a failure or an incorrect behavior
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue.
+
+        Please fill in as much of the following form as you're able.
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: A clear and concise description of what happend. Please
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What steps will reproduce the bug?
+      description: |
+        Enter details about your bug. Please add full-screen screenshots if possibe.
+      placeholder: |
+        For example,
+        1. Do this step...
+        2. Do that step...
+        3. ...
+        4. See error ...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What I expect to happen
+      description: If possible please provide annotated screenshots of what you expect differently.
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Platform
+      description: Where do you experience this bug?
+      options:
+        - label: Israel Hiking Map app
+        - label: Israel Hiking Map site in a browser
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: OS Name and Version
+      description: Name and version of the Operating systen
+      placeholder: Android 11 / iOS 11 / Windows 11 / ...
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Browser Name and Version
+      description: |
+        Name and version of the browser, if applicable.
+        Usually available using `menu` -> `help` -> `about ...`
+      placeholder: Chrome 108.0 / Safari 16.1 / Firefox 108.0 / ...
+  - type: textarea
+    attributes:
+      label: Additional information
+      description: Things I think the developers should know, images, links etc.

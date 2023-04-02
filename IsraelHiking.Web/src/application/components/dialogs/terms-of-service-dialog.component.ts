@@ -11,7 +11,6 @@ import { ToastService } from "../../services/toast.service";
     templateUrl: "./terms-of-service-dialog.component.html"
 })
 export class TermsOfServiceDialogComponent extends BaseMapComponent {
-    public osmTermsOfServiceUrl: string;
     public wikimediaTermsOfServiceUrl: string;
     public iAgree: boolean;
 
@@ -22,7 +21,6 @@ export class TermsOfServiceDialogComponent extends BaseMapComponent {
         super(resources);
 
         this.iAgree = false;
-        this.osmTermsOfServiceUrl = "http://wiki.osmfoundation.org/wiki/Privacy_Policy";
         this.wikimediaTermsOfServiceUrl =
             `https://wikimediafoundation.org/wiki/Terms_of_Use/${this.resources.getCurrentLanguageCodeSimplified()}`;
     }

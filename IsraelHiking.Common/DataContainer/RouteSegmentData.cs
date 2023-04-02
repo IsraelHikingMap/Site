@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 using System.Collections.Generic;
 
 namespace IsraelHiking.Common.DataContainer
@@ -7,18 +7,17 @@ namespace IsraelHiking.Common.DataContainer
     {
         public const string HIKE = "Hike";
         public const string BIKE = "Bike";
-        public const string CAR = "Car";
         public const string FOUR_WHEEL_DRIVE = "4WD";
         public const string NONE = "None";
     }
 
     public class RouteSegmentData
     {
-        [JsonProperty("routingType")]
+        [JsonPropertyName("routingType")]
         public string RoutingType { get; set; }
-        [JsonProperty("routePoint")]
+        [JsonPropertyName("routePoint")]
         public LatLng RoutePoint { get; set; }
-        [JsonProperty("latlngs")]
+        [JsonPropertyName("latlngs")]
         public List<LatLngTime> Latlngs { get; set; }
 
         public RouteSegmentData()

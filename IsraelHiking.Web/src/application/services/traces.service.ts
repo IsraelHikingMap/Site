@@ -128,11 +128,9 @@ export class TracesService {
     }
 
     public async uploadRouteAsTrace(route: RouteData): Promise<any> {
-        let isDefaultName = route.name.startsWith(this.resources.route) &&
-            route.name.replace(this.resources.route, "").trim().startsWith(new Date().toISOString().split("T")[0]);
-        this.loggingService.info(`[Traces] Uploading a route as trace with name ${route.name}, default: ${isDefaultName}`);
+        this.loggingService.info(`[Traces] Uploading a route as trace with name ${route.name}`);
         return firstValueFrom(this.httpClient.post(Urls.osmTraceRoute, route, {
-            params: { isDefaultName: isDefaultName.toString(), language: this.resources.getCurrentLanguageCodeSimplified() }
+            params: { language: this.resources.getCurrentLanguageCodeSimplified() }
         }).pipe(timeout(3 * 60 * 1000)));
     }
 

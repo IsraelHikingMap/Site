@@ -3,7 +3,6 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
-using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -17,6 +16,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using NSubstitute.ExceptionExtensions;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -37,7 +38,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var fileResponse = new TypedStream
             {
                 FileName = "file.gpx",
-                Stream = new MemoryStream(new byte[0])
+                Stream = new MemoryStream(Array.Empty<byte>())
             };
             fetcher.GetTraceData(traceId).Returns(fileResponse);
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>())
@@ -80,7 +81,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PutAddUnmappedPartIntoOsm_ShouldDoIt()
         {
-            var feature = new Feature(new LineString(new Coordinate[0]), new AttributesTable());
+            var feature = new Feature(new LineString(Array.Empty<Coordinate>()), new AttributesTable());
             _controller.SetupIdentity();
 
             _controller.PutAddUnmappedPartIntoOsm(feature).Wait();
@@ -93,7 +94,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             _controller.SetupIdentity();
             var fetcher = Substitute.For<IAuthClient>();
-            fetcher.GetTraceData(Arg.Any<long>()).Returns((TypedStream)null);
+            fetcher.GetTraceData(Arg.Any<long>()).Throws(new OsmApiException(null, "something", HttpStatusCode.NotFound));
             _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(fetcher);
 
             var results = _controller.PostFindUnmappedPartsFromGpsTrace(-1).Result as BadRequestObjectResult;

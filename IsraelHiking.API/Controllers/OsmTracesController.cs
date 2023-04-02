@@ -20,6 +20,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -33,26 +35,34 @@ namespace IsraelHiking.API.Controllers
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IImageCreationGateway _imageCreationGateway;
         private readonly ISearchRepository _searchRepository;
+        private readonly IDistributedCache _persistentCache;
         private readonly ConfigurationData _options;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="clientsFactory"></param>
         /// <param name="dataContainerConverterService"></param>
-        /// <param name="options"></param>
         /// <param name="imageCreationGateway"></param>
         /// <param name="searchRepository"></param>
+        /// <param name="persistentCache"></param>
+        /// <param name="options"></param>
+        /// <param name="logger"></param>
         public OsmTracesController(IClientsFactory clientsFactory,
             IDataContainerConverterService dataContainerConverterService,
             IImageCreationGateway imageCreationGateway,
             ISearchRepository searchRepository,
-            IOptions<ConfigurationData> options)
+            IDistributedCache persistentCache,
+            IOptions<ConfigurationData> options, 
+            ILogger logger)
         {
             _clientsFactory = clientsFactory;
             _dataContainerConverterService = dataContainerConverterService;
             _imageCreationGateway = imageCreationGateway;
             _searchRepository = searchRepository;
+            _persistentCache = persistentCache;
+            _logger = logger;
             _options = options.Value;
         }
 
@@ -135,21 +145,25 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         [HttpPost]
         [Route("route")]
-        public async Task<IActionResult> PostUploadRouteData([FromBody] RouteData routeData, [FromQuery] bool isDefaultName, [FromQuery]string language)
+        public async Task<IActionResult> PostUploadRouteData([FromBody] RouteData routeData, [FromQuery]string language)
         {
             var allPoints = routeData.Segments.SelectMany(s => s.Latlngs).Select(l => l.ToCoordinate()).ToList();
             if (allPoints.Count < 2)
             {
                 return BadRequest("There are not enough points in the route");
             }
+
+            if (_persistentCache.GetString(routeData.Id) != null)
+            {
+                _logger.LogInformation($"Trace with ID {routeData.Id} was already uploaded in the past, returning OK");
+                return Ok();
+            }
+            _logger.LogInformation($"Uploading trace with ID {routeData.Id}");
+            _persistentCache.SetString(routeData.Id, "Uploading a trace", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(10) });
             var bytes = await  _dataContainerConverterService.ToAnyFormat(new DataContainerPoco { Routes = new List<RouteData> { routeData } }, FlowFormats.GPX_SINGLE_TRACK);
             await using var memoryStream = new MemoryStream(bytes);
             var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
-            var description = routeData.Name;
-            if (isDefaultName)
-            {
-                description = await GetDescriptionByArea(language, allPoints, description);
-            }
+            var description = await GetDescriptionByArea(language, allPoints, routeData.Name);
             await gateway.CreateTrace(new GpxFile
             {
                 Name = routeData.Name + "." + FlowFormats.GPX,

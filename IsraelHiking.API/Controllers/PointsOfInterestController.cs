@@ -31,7 +31,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly IImagesUrlsStorageExecutor _imageUrlStoreExecutor;
         private readonly ISimplePointAdderExecutor _simplePointAdderExecutor;
-        private readonly IDistributedCache _persistantCache;
+        private readonly IDistributedCache _persistentCache;
         private readonly ILogger _logger;
         private readonly ConfigurationData _options;
 
@@ -43,7 +43,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="imageUrlStoreExecutor"></param>
         /// <param name="simplePointAdderExecutor"></param>
-        /// <param name="persistantCache"></param>
+        /// <param name="persistentCache"></param>
         /// <param name="logger"></param>
         /// <param name="options"></param>
         public PointsOfInterestController(IClientsFactory clientsFactory,
@@ -51,7 +51,7 @@ namespace IsraelHiking.API.Controllers
             IPointsOfInterestProvider pointsOfInterestProvider,
             IImagesUrlsStorageExecutor imageUrlStoreExecutor,
             ISimplePointAdderExecutor simplePointAdderExecutor,
-            IDistributedCache persistantCache,
+            IDistributedCache persistentCache,
             ILogger logger,
             IOptions<ConfigurationData> options)
         {
@@ -60,7 +60,7 @@ namespace IsraelHiking.API.Controllers
             _imageUrlStoreExecutor = imageUrlStoreExecutor;
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _simplePointAdderExecutor = simplePointAdderExecutor;
-            _persistantCache = persistantCache;
+            _persistentCache = persistentCache;
             _logger = logger;
             _options = options.Value;
         }
@@ -87,12 +87,12 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of GeoJSON features</returns>
         [Route("")]
         [HttpGet]
-        public async Task<Feature[]> GetPointsOfInterest(string northEast, string southWest, string categories,
+        public async Task<IFeature[]> GetPointsOfInterest(string northEast, string southWest, string categories,
             string language = "")
         {
             if (string.IsNullOrWhiteSpace(categories))
             {
-                return new Feature[0];
+                return Array.Empty<IFeature>();
             }
             var categoriesArray = categories.Split(',').Select(f => f.Trim()).ToArray();
             var northEastCoordinate = northEast.ToCoordinate();
@@ -147,7 +147,7 @@ namespace IsraelHiking.API.Controllers
                 });
                 return Ok();
             }
-            var mappedId = _persistantCache.GetString(feature.GetId());
+            var mappedId = _persistentCache.GetString(feature.GetId());
             if (!string.IsNullOrEmpty(mappedId))
             {
                 var featureFromDatabase = await _pointsOfInterestProvider.GetFeatureById(feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(), mappedId);
@@ -157,11 +157,11 @@ namespace IsraelHiking.API.Controllers
                 }
                 return Ok(featureFromDatabase);
             }
-            _persistantCache.SetString(feature.GetId(), "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
+            _persistentCache.SetString(feature.GetId(), "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             
             var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             var newFeature = await _pointsOfInterestProvider.AddFeature(feature, osmGateway, language);
-            _persistantCache.SetString(feature.GetId(), newFeature.Attributes[FeatureAttributes.ID].ToString(), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
+            _persistentCache.SetString(feature.GetId(), newFeature.Attributes[FeatureAttributes.ID].ToString(), new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             return Ok(newFeature);
         }
 
@@ -232,18 +232,19 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("closest")]
-        public Task<Feature> GetClosestPoint(string location, string source, string language)
+        public Task<IFeature> GetClosestPoint(string location, string source, string language)
         {
             return _pointsOfInterestProvider.GetClosestPoint(location.ToCoordinate(), source, language);
         }
 
         /// <summary>
-        /// Get a POI by id and source
+        /// Get POIs that were updated between lastModified and modifiedUntil or now if not provided
         /// </summary>
         /// <param name="lastModified">Start date for updates</param>
         /// <param name="modifiedUntil">End date for updates</param>
         /// <returns></returns>
-        [Route("updates/{lastModified}/{modifiedUntil?}")]
+        [Route("updates/{lastModified}/")]
+        [Route("updates/{lastModified}/{modifiedUntil}")]
         [HttpGet]
         public async Task<UpdatesResponse> GetPointOfInterestUpdates(DateTime lastModified, DateTime? modifiedUntil)
         {
@@ -268,10 +269,10 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         private async Task AddSimplePoint(AddSimplePointOfInterestRequest request)
         {
-            if (!string.IsNullOrEmpty(_persistantCache.GetString(request.Guid))) {
+            if (!string.IsNullOrEmpty(_persistentCache.GetString(request.Guid))) {
                 return;
             }
-            _persistantCache.SetString(request.Guid, "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
+            _persistentCache.SetString(request.Guid, "In process", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30) });
             _logger.LogInformation($"Adding a simple POI of type {request.PointType} at {request.LatLng.Lat}, {request.LatLng.Lng}");
             var osmGateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
             await _simplePointAdderExecutor.Add(osmGateway, request);

@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using IsraelHiking.Common;
 using GpxFile = NetTopologySuite.IO.GpxFile;
 
 namespace IsraelHiking.API.Controllers
@@ -42,14 +41,14 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="clientsFactory"></param>
         /// <param name="dataContainerConverterService"></param>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="itmWgs84MathTransformFactory"></param>
         /// <param name="addibleGpxLinesFinderService"></param>
         /// <param name="osmLineAdderService"></param>
         /// <param name="options"></param>
         /// <param name="geometryFactory"></param>
         public OsmController(IClientsFactory clientsFactory,
             IDataContainerConverterService dataContainerConverterService,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            IItmWgs84MathTransfromFactory itmWgs84MathTransformFactory,
             IAddibleGpxLinesFinderService addibleGpxLinesFinderService,
             IOsmLineAdderService osmLineAdderService,
             IOptions<ConfigurationData> options,
@@ -57,8 +56,8 @@ namespace IsraelHiking.API.Controllers
         {
             _clientsFactory = clientsFactory;
             _dataContainerConverterService = dataContainerConverterService;
-            _itmWgs84MathTransform = itmWgs84MathTransfromFactory.Create();
-            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
+            _itmWgs84MathTransform = itmWgs84MathTransformFactory.Create();
+            _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
             _addibleGpxLinesFinderService = addibleGpxLinesFinderService;
             _osmLineAdderService = osmLineAdderService;
             _options = options.Value;
@@ -110,14 +109,25 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(FeatureCollection), 200)]
-        public async Task<IActionResult> PostFindUnmappedPartsFromGpsTrace([FromQuery]int traceId)
+        public async Task<IActionResult> PostFindUnmappedPartsFromGpsTrace([FromQuery]long traceId)
         {
-            var file = await OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options).GetTraceData(traceId);
+            TypedStream file = null;
+            try
+            {
+                file = await OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options)
+                    .GetTraceData(traceId);
+            }
+            catch
+            {
+                // ignored
+            }
+
             if (file == null)
             {
                 return BadRequest("Invalid trace id: " + traceId);
             }
-            using var memoryStream = new MemoryStream();
+
+            await using var memoryStream = new MemoryStream();
             await file.Stream.CopyToAsync(memoryStream);
             var gpxBytes = await _dataContainerConverterService.Convert(memoryStream.ToArray(), file.FileName, DataContainerConverterService.GPX);
             var gpx = gpxBytes.ToGpx().UpdateBounds();
@@ -128,8 +138,11 @@ namespace IsraelHiking.API.Controllers
                 return BadRequest("File does not contain any traces...");
             }
             var manipulatedItmLines = await _addibleGpxLinesFinderService.GetLines(gpxItmLines);
-            var attributesTable = new AttributesTable { { "highway", highwayType } };
-            attributesTable.Add("source", "trace id: " + traceId);
+            var attributesTable = new AttributesTable
+            {
+                {"highway", highwayType},
+                {"source", "trace id: " + traceId}
+            };
             var featureCollection = new FeatureCollection();
             foreach (var line in manipulatedItmLines)
             {

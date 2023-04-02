@@ -5,52 +5,55 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess
 {
     internal class JsonGraphHopperResponse
     {
-        [JsonProperty("paths")]
+        [JsonPropertyName("paths")]
         public List<JsonPath> Paths { get; set; }
     }
 
     internal class JsonPath
     {
-        [JsonProperty("distance")]
+        [JsonPropertyName("distance")]
         public double Distance { get; set; }
-        [JsonProperty("bbox")]
+        [JsonPropertyName("bbox")]
         public List<double> Bbox { get; set; }
-        [JsonProperty("weight")]
+        [JsonPropertyName("weight")]
         public double Weight { get; set; }
-        [JsonProperty("time")]
+        [JsonPropertyName("time")]
         public long Time { get; set; }
-        [JsonProperty("points_encoded")]
+        [JsonPropertyName("points_encoded")]
         public bool PointsEncoded { get; set; }
-        [JsonProperty("points")]
+        [JsonPropertyName("points")]
         public JsonPoints Points { get; set; }
-        [JsonProperty("details")]
+        [JsonPropertyName("details")]
         public JsonDetails Details { get; set; }
     }
 
     internal class JsonPoints
     {
-        [JsonProperty("type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
-        [JsonProperty("coordinates")]
+        [JsonPropertyName("coordinates")]
         public List<List<double>> Coordinates { get; set; }
     }
 
     internal class JsonDetails
     {
-        [JsonProperty("road_class")]
-        public List<List<string>> RoadClass { get; set; }
-        [JsonProperty("track_type")]
-        public List<List<string>> TrackType { get; set; }
+        // two leading indexes and a string
+        [JsonPropertyName("road_class")]
+        public List<List<object>> RoadClass { get; set; }
+        // two leading indexes and a string
+        [JsonPropertyName("track_type")]
+        public List<List<object>> TrackType { get; set; }
     }
 
     public class GraphHopperGateway : IGraphHopperGateway
@@ -82,7 +85,7 @@ namespace IsraelHiking.DataAccess
             var requestAddress = $"{$"{_options.GraphhopperServerAddress}route?instructions=false&points_encoded=false&elevation=true&details=track_type&details=road_class&point="}{fromStr}&point={toStr}&profile={profile}";
             var response = await httpClient.GetAsync(requestAddress);
             var content = await response.Content.ReadAsStringAsync();
-            var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
+            var jsonResponse = JsonSerializer.Deserialize<JsonGraphHopperResponse>(content);
             if (jsonResponse?.Paths == null || !jsonResponse.Paths.Any())
             {
                 _logger.LogWarning($"Problem with routing response: {response.StatusCode} {content}");

@@ -62,7 +62,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 {FeatureAttributes.ID, wayId.ToString()},
                 {FeatureAttributes.POI_OSM_NODES, osmCompleteWay.Nodes.Select(n => n.Id.Value).Cast<object>().ToList()}
             };
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature>
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature>
             {
                 new Feature(new LineString(coordinates), table)
             });
@@ -73,7 +73,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         {
             long changesetId = 1;
             var osmGateway = SetupOsmGateway(changesetId);
-            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature>());
+            _highwaysRepository.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<IFeature>());
             osmGateway.UploadChangeset(changesetId, Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0]});
             var tags = new Dictionary<string, string>
             {

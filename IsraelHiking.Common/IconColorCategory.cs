@@ -1,10 +1,16 @@
-﻿namespace IsraelHiking.Common
+﻿using System.Text.Json.Serialization;
+
+namespace IsraelHiking.Common
 {
     public class IconColorCategory
     {
+        [JsonPropertyName("icon")]
         public string Icon { get; set; }
+        [JsonPropertyName("category")]
         public string Category { get; set; }
+        [JsonPropertyName("color")]
         public string Color { get; set; }
+        [JsonPropertyName("label")]
         public string Label { get; set; }
 
         public IconColorCategory() : this(string.Empty)

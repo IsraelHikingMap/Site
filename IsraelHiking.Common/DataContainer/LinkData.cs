@@ -1,14 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace IsraelHiking.Common.DataContainer
 {
     public class LinkData
     {
-        [JsonProperty("url")]
+        [JsonPropertyName("url")]
         public string Url { get; set; }
-        [JsonProperty("text")]
+        [JsonPropertyName("text")]
         public string Text { get; set; }
-        [JsonProperty("mimeType")]
+        [JsonPropertyName("mimeType")]
         public string MimeType { get; set; }
     }
 }

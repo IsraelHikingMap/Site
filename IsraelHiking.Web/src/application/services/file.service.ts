@@ -115,7 +115,7 @@ export class FileService {
 
     public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
         try {
-            if (isOffline) {
+            if (isOffline || (this.runningContextService.isCapacitor && url.startsWith("."))) {
                 let styleFileName = last(url.split("/"));
                 let styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
                 return JSON.parse(styleText) as StyleSpecification;
@@ -254,9 +254,11 @@ export class FileService {
         }
     }
 
-    public async compressTextToBase64Zip(content: string): Promise<string> {
+    public async compressTextToBase64Zip(contents: {name: string; text: string}[]): Promise<string> {
         let zip = new JSZip();
-        zip.file("log.txt", content);
+        for (let content of contents) {
+            zip.file(content.name, content.text);
+        }
         let data = await zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });
         return data;
     }

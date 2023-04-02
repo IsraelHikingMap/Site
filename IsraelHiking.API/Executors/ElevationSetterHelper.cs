@@ -73,7 +73,7 @@ namespace IsraelHiking.API.Executors
         /// </summary>
         /// <param name="features">The features to update</param>
         /// <param name="elevationGateway">The elevation gateway</param>
-        public static void SetElevation(IEnumerable<Feature> features, IElevationGateway elevationGateway)
+        public static void SetElevation(IEnumerable<IFeature> features, IElevationGateway elevationGateway)
         {
             foreach (var feature in features)
             {

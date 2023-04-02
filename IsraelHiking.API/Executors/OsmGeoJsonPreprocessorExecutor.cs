@@ -40,7 +40,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc />
-        public List<Feature> Preprocess(List<ICompleteOsmGeo> osmEntities)
+        public List<IFeature> Preprocess(List<ICompleteOsmGeo> osmEntities)
         {
             _logger.LogInformation("Preprocessing OSM data to GeoJson, total entities: " + osmEntities.Count);
             osmEntities = RemoveDuplicateWaysThatExistInRelations(osmEntities);
@@ -85,7 +85,7 @@ namespace IsraelHiking.API.Executors
             return osmByIdDictionary.Values.ToList();
         }
 
-        private Feature ConvertToFeature(ICompleteOsmGeo osmEntity)
+        private IFeature ConvertToFeature(ICompleteOsmGeo osmEntity)
         {
             var feature = _osmGeoJsonConverter.ToGeoJson(osmEntity);
             if (feature == null)
@@ -101,7 +101,8 @@ namespace IsraelHiking.API.Executors
             }
             if (feature.Geometry.IsEmpty)
             {
-                _logger.LogError($"{feature.Geometry.GeometryType} with ID: {feature.Attributes[FeatureAttributes.ID]} is an empty geometry - check for non-closed relations.");
+                // This is the case where partial relations are in the pbf or non closed ones.
+                // This can be checked here: https://tools.geofabrik.de/osmi/?view=areas&lon=35.33202&lat=32.39600&zoom=9&baselayer=Geofabrik%20Standard&overlays=ring_not_closed%2Crole_should_be_inner%2Crole_should_be_outer
                 return null;
             }
 
@@ -120,7 +121,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc />
-        public List<Feature> Preprocess(List<CompleteWay> highways)
+        public List<IFeature> Preprocess(List<CompleteWay> highways)
         {
             var highwayFeatures = highways.Select(_osmGeoJsonConverter.ToGeoJson).Where(h => h != null).ToList();
             foreach (var highwayFeature in highwayFeatures)
@@ -135,10 +136,10 @@ namespace IsraelHiking.API.Executors
         /// This is a static function to update the geolocation of a feature for search capabilities
         /// </summary>
         /// <param name="feature"></param>
-        private void UpdateLocation(Feature feature)
+        private void UpdateLocation(IFeature feature)
         {
             Coordinate geoLocation;
-            if ((feature.Geometry is LineString || feature.Geometry is MultiLineString) && feature.Geometry.Coordinate != null)
+            if (feature.Geometry is LineString or MultiLineString && feature.Geometry.Coordinate != null)
             {
                 geoLocation = feature.Geometry.Coordinate;
             }
@@ -153,7 +154,7 @@ namespace IsraelHiking.API.Executors
             feature.Attributes.SetLocation(geoLocation);
         }
 
-        private void UpdateAltitude(List<Feature> features)
+        private void UpdateAltitude(List<IFeature> features)
         {
             _logger.LogInformation("Starting to get altitude for features " + features.Count);
             var coordinates = features.Select(f => f.GetLocation()).ToArray();

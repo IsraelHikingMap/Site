@@ -22,24 +22,6 @@ namespace IsraelHiking.DataAccess
             _logger = logger;
         }
 
-        public Task<List<ICompleteOsmGeo>> GetElementsWithName(Stream osmFileStream)
-        {
-            return Task.Run(() =>
-            {
-                _logger.LogInformation("Starting extracting elements with name from OSM stream.");
-                osmFileStream.Seek(0, SeekOrigin.Begin);
-                var source = new PBFOsmStreamSource(osmFileStream);
-                var completeSource = new OsmSimpleCompleteStreamSource(source);
-                var elements = completeSource
-                    .Where(o => !o.Tags.Contains("highway", "construction"))
-                    .Where(o => !o.Tags.Contains("boundary", "disputed"))
-                    .Where(o => string.IsNullOrWhiteSpace(o.Tags.GetName()) == false)
-                    .ToList();
-                _logger.LogInformation("Finished extracting elements with name: " + elements.Count);
-                return elements;
-            });
-        }
-
         public Task<List<CompleteWay>> GetAllHighways(Stream osmFileStream)
         {
             return Task.Run(() =>
@@ -57,23 +39,29 @@ namespace IsraelHiking.DataAccess
             });
         }
 
-        public Task<List<Node>> GetPointsWithNoNameByTags(Stream osmFileStream, List<KeyValuePair<string, string>> tags)
+        public Task<List<ICompleteOsmGeo>> GetPoints(Stream osmFileStream, List<KeyValuePair<string, string>> tags)
         {
             return Task.Run(() =>
             {
-                _logger.LogInformation("Extracting nodes by tags from OSM stream.");
+                _logger.LogInformation("Extracting points from OSM stream.");
                 osmFileStream.Seek(0, SeekOrigin.Begin);
                 var source = new PBFOsmStreamSource(osmFileStream);
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
-                var nodes = completeSource
-                    .OfType<Node>()
+                var completeOsmGeos = completeSource
+                    .Where(o => !o.Tags.Contains("highway", "construction"))
+                    .Where(o => !o.Tags.Contains("boundary", "disputed"))
+                    .Where(o => !string.IsNullOrWhiteSpace(o.Tags.GetName()))
+                    .ToList();
+                
+                var nodes = completeSource.OfType<Node>()
                     .Where(node =>
                         node.Tags.GetName() == string.Empty &&
                         node.Tags.HasAny(tags)
-                    )
-                    .ToList();
-                _logger.LogInformation("Finished getting nodes by tags. " + nodes.Count);
-                return nodes;
+                    ).ToList();
+                completeOsmGeos.AddRange(nodes);
+                
+                _logger.LogInformation("Finished extracting points. " + completeOsmGeos.Count);
+                return completeOsmGeos;
             });
         }
 

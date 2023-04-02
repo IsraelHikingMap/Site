@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <DebugType>portable</DebugType>
     <Version>1.0.0</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
@@ -17,8 +17,8 @@
 
   <ItemGroup>
     <PackageReference Include="NetTopologySuite" Version="2.5.0" />
-    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="3.0.0" />
-    <PackageReference Include="OsmSharp" Version="7.0.0-pre014" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJSON4STJ" Version="3.1.0-pre.193970619" />
+    <PackageReference Include="OsmSharp" Version="7.0.0-pre022" />
     <PackageReference Include="ProjNet" Version="2.0.0" />
   </ItemGroup>
 

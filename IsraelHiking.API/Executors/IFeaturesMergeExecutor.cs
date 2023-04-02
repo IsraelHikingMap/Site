@@ -14,6 +14,6 @@ namespace IsraelHiking.API.Executors
         /// <param name="osmFeatures"></param>
         /// <param name="externalFeatures"></param>
         /// <returns></returns>
-        List<Feature> Merge(List<Feature> osmFeatures, List<Feature> externalFeatures);
+        List<IFeature> Merge(List<IFeature> osmFeatures, List<IFeature> externalFeatures);
     }
 }

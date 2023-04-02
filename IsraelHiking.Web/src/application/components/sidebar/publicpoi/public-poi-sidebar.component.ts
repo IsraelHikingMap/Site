@@ -143,6 +143,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             }));
             if (data.source === "new") {
                 let newFeature = {
+                    id: "",
                     type: "Feature",
                     properties: {
                         poiSource: "OSM",
@@ -183,7 +184,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             this.ngRedux.dispatch(PointsOfInterestReducer.actions.setUploadMarkerData({
                 markerData: null
             }));
-            if (feature.properties.poiId && feature.geometry.type === "Point") {
+            if (this.poiService.getFeatureId(feature) && feature.geometry.type === "Point") {
                 this.showLocationUpdate = true;
             }
         }
@@ -210,6 +211,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                     imageUrl = "https://www.kkl.org.il/education/files/about/symbols/kkl_logo440.jpg";
                 } else if (url.includes("inature.info")) {
                     imageUrl = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
+                } else if (url.includes("ibt.org.il")) {
+                    imageUrl = "http://www.ibt.org.il/images/logo.png";
                 } else {
                     let domain = new URL(url).hostname;
                     imageUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;

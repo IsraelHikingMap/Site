@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, ViewEncapsulation } from "@angular/core";
+import { Component, OnInit, OnDestroy, ViewEncapsulation, Inject } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { MatDialogRef } from "@angular/material/dialog";
+import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash-es";
 import { NgRedux, Select } from "@angular-redux2/store";
@@ -15,7 +15,6 @@ import { LayersService } from "../../services/layers.service";
 import { TracesService } from "../../services/traces.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SpatialService } from "../../services/spatial.service";
-import { RecordedRouteService } from "../../services/recorded-route.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { TracesReducer } from "../../reducers/traces.reducer";
 import type { ApplicationState, Trace, TraceVisibility } from "../../models/models";
@@ -41,6 +40,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     private sessionSearchTerm = "";
     private page: number;
     private tracesChangedSubscription: Subscription;
+    private specificIds: string[];
 
     constructor(resources: ResourcesService,
                 private readonly matDialogRef: MatDialogRef<TracesDialogComponent>,
@@ -51,9 +51,9 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                 private readonly authorizationService: AuthorizationService,
                 private readonly tracesService: TracesService,
                 private readonly runningContextService: RunningContextService,
-                private readonly recordedRouteService: RecordedRouteService,
                 private readonly dataContainerService: DataContainerService,
-                private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly ngRedux: NgRedux<ApplicationState>,
+                @Inject(MAT_DIALOG_DATA) data: string[]
     ) {
         super(resources);
         this.loadingTraces = false;
@@ -61,6 +61,11 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.traceIdInEditMode = null;
         this.page = 1;
         this.searchTerm = new FormControl<string>("");
+        if (data) {
+            this.specificIds = data;
+        } else {
+            this.specificIds = [];
+        }
 
         this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
@@ -124,16 +129,15 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             let trace = await this.tracesService.getTraceById(this.selectedTraceId);
             this.ngRedux.dispatch(TracesReducer.actions.setVisibleTrace({ traceId: trace.id }));
             this.ngRedux.dispatch(TracesReducer.actions.setMissingPart({ missingParts: geoJson }));
-            let bounds = SpatialService.getGeoJsonBounds(geoJson);
+            let bounds = SpatialService.getBoundsForFeatureCollection(geoJson);
             this.fitBoundsService.fitBounds(bounds);
             this.matDialogRef.close();
         } catch (ex) {
-            this.toastService.confirm({ message: (ex as Error).message, type: "Ok" });
+            this.toastService.error(ex, this.resources.unexpectedErrorPleaseTryAgainLater);
         }
     }
 
     public async uploadToOsm(e: any) {
-
         let file = this.fileService.getFileFromEvent(e);
         if (!file) {
             return;
@@ -152,6 +156,9 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.sessionSearchTerm = searchTerm;
         let traces = this.ngRedux.getState().tracesState.traces;
         traces = orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
+        if (this.specificIds.length > 0) {
+            traces = traces.filter(t => this.specificIds.find(id => id === t.id) != null);
+        }
         this.filteredTraces = take(traces, this.page * 10);
     }
 

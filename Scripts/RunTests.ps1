@@ -24,8 +24,8 @@ npm ci
 Write-Host "run lint - send warnings to appveyor"
 npm run lint | Select-String -Pattern 'ERROR:' | ForEach-Object { Add-AppveyorCompilationMessage -Message $_.line -Category Warning; }
 
-Write-Host "npm run test -- --code-coverage --watch=false"
-npm run test -- --code-coverage --watch=false
+Write-Host "npm run test-ci"
+npm run test-ci
 
 # Locate Tests results files
 

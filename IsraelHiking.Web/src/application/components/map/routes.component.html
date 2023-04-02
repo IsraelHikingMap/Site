@@ -48,7 +48,7 @@
             }"
             (layerClick)="nonEditRoutePointClick($event)">
 </mgl-layer>
-<mgl-geojson-source id="editing-route-source" [data]="editingRoute"></mgl-geojson-source>
+<mgl-geojson-source id="editing-route-source" [data]="editingRouteGeoJson"></mgl-geojson-source>
 <mgl-layer id="{{resources.editRouteLines}}"
            type="line"
            source="editing-route-source"
@@ -62,7 +62,7 @@
                    'line-color': ['get', 'color'],
                    'line-width': ['get', 'weight'],
                    'line-opacity': ['get', 'opacity']
-               }">
+            }">
 </mgl-layer>
 <mgl-layer id="edit-route-line-direction"
            type="symbol"
@@ -91,7 +91,7 @@
                    'circle-radius': 7,
                    'circle-stroke-color': 'white',
                    'circle-stroke-width': 3
-               }">
+            }">
 </mgl-layer>
 
 <mgl-popup *ngIf="routePointPopupData"
@@ -126,17 +126,6 @@
                 <private-poi-overlay [marker]="marker" [routeId]="route.id" [index]="idx" [color]="route.color"></private-poi-overlay>
             </mgl-marker>
         </div>
-    </div>
-</div>
-
-<div *ngIf="(recordedRoute$ | async)">
-    <div *ngFor="let marker of (recordedRoute$ | async).markers; let idx = index">
-        <mgl-marker anchor="bottom"
-                    [draggable]="isAddingPoi$ | async"
-                    [lngLat]="[marker.latlng.lng, marker.latlng.lat]"
-                    (markerDragEnd)="markerDragEnd(idx, $event)">
-            <private-poi-overlay [marker]="marker" [index]="idx" [color]="resources.recordedRouteColor"></private-poi-overlay>
-        </mgl-marker>
     </div>
 </div>
 

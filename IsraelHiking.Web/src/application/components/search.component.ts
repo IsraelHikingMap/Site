@@ -44,7 +44,14 @@ type DirectionalContext = {
     isOn: boolean;
     overlayLocation: LatLngAlt;
     showResults: boolean;
+    /**
+     * This is needed for display
+     */
     routeCoordinates: [number, number][];
+    /**
+     * This is needed to facilitate easy conversion to private route to keep elevation data
+     */
+    latlngs: LatLngAlt[];
     routeTitle: string;
 };
 
@@ -63,7 +70,7 @@ export class SearchComponent extends BaseMapComponent {
     public searchFrom: FormControl<string | SearchResultsPointOfInterest>;
     public searchTo: FormControl<string | SearchResultsPointOfInterest>;
     public hasFocus: boolean;
-    public hideCoordinates: boolean;
+    public showCoordinates: boolean;
     public directional: DirectionalContext;
 
     private requestsQueue: SearchRequestQueueItem[];
@@ -93,6 +100,7 @@ export class SearchComponent extends BaseMapComponent {
             isOn: false,
             overlayLocation: null,
             routeCoordinates: [],
+            latlngs: [],
             routeTitle: "",
             showResults: false,
         };
@@ -220,6 +228,7 @@ export class SearchComponent extends BaseMapComponent {
             this.routingType);
         this.directional.showResults = true;
         this.directional.routeCoordinates = latlngs.map(l => SpatialService.toCoordinate(l));
+        this.directional.latlngs = latlngs;
         this.directional.routeTitle = this.fromContext.selectedSearchResults.displayName +
             " - " +
             this.toContext.selectedSearchResults.displayName;
@@ -230,8 +239,8 @@ export class SearchComponent extends BaseMapComponent {
 
     public convertToRoute() {
         let route = this.routesFactory.createRouteData(this.directional.routeTitle);
-        let latlngs = this.directional.routeCoordinates.map((c) => SpatialService.toLatLng(c) as LatLngAltTime);
-        route.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(latlngs, this.routingType);
+        route.segments = GpxDataContainerConverterService
+            .getSegmentsFromLatlngs(this.directional.latlngs as LatLngAltTime[], this.routingType);
         this.ngRedux.dispatch(RoutesReducer.actions.addRoute({
             routeData: route
         }));
@@ -243,6 +252,7 @@ export class SearchComponent extends BaseMapComponent {
 
     public clearDirectionalRoute() {
         this.directional.routeCoordinates = [];
+        this.directional.latlngs = [];
         this.directional.showResults = false;
     }
 

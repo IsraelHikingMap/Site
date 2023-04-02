@@ -71,14 +71,13 @@ namespace IsraelHiking.API.Executors
             _logger.LogInformation($"Finished rebuilding {currentSource}, indexed {features.Count} points.");
         }
 
-        private void UpdateAltitude(List<Feature> features)
+        private void UpdateAltitude(List<IFeature> features)
         {
             var coordinates = features.Select(f => f.GetLocation()).ToArray();
             var elevationValues = _elevationGateway.GetElevation(coordinates).Result;
             for (var index = 0; index < features.Count; index++)
             {
                 var feature = features[index];
-                var geoLocationCoordinate = feature.GetLocation();
                 feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ALT, elevationValues[index]);
             }
         }

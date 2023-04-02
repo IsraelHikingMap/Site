@@ -35,7 +35,7 @@ namespace IsraelHiking.DataAccess
         /// <inheritdoc />
         public async Task<Stream> Get()
         {
-            //return await Task.FromResult(new MemoryStream(File.ReadAllBytes("/Users/user/Downloads/israel-and-palestine-latest.osm.pbf")) as Stream);
+            // return await Task.FromResult(new MemoryStream(File.ReadAllBytes("/Users/harel/Downloads/israel-and-palestine-latest.osm.pbf")) as Stream);
             var client = _httpClientFactory.CreateClient();
             _logger.LogInformation($"Starting to fetch OSM file from {_options.OsmFileAddress}");
             client.Timeout = TimeSpan.FromMinutes(20);

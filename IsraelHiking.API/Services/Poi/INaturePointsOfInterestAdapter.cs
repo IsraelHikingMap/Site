@@ -45,7 +45,7 @@ namespace IsraelHiking.API.Services.Poi
         public string Source => Sources.INATURE;
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetAll()
+        public async Task<List<IFeature>> GetAll()
         {
             _logger.LogInformation("Getting data from iNature.");
             var features = await _iNatureGateway.GetAll();
@@ -57,7 +57,7 @@ namespace IsraelHiking.API.Services.Poi
             return features;
         }
 
-        private async Task UpdateGeometry(Feature feature)
+        private async Task UpdateGeometry(IFeature feature)
         {
             if (!feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE))
             {
@@ -74,7 +74,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetUpdates(DateTime lastModifiedDate)
+        public async Task<List<IFeature>> GetUpdates(DateTime lastModifiedDate)
         {
             return await _iNatureGateway.GetUpdates(lastModifiedDate);
         }

@@ -38,6 +38,7 @@ import { NgIdleModule } from "@ng-idle/core";
 import { LottieModule } from "ngx-lottie";
 import { NgReduxModule } from "@angular-redux2/store";
 import { saveAs } from "file-saver-es";
+import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import player from "lottie-web";
 // Cordova plugins
 import { InAppPurchase2 } from "@awesome-cordova-plugins/in-app-purchase-2/ngx";
@@ -45,7 +46,6 @@ import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 // services
-import { ScrollToModule } from "./infra/scroll-to/scroll-to.module";
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
 import { OsmTokenInterceptor } from "./services/osm-token.interceptor";
@@ -96,6 +96,7 @@ import { CoordinatesService } from "./services/coordinates.service";
 import { AudioPlayerFactory } from "./services/audio-player.factory";
 import { GlobalErrorHandler } from "./services/global-error.handler";
 import { OverpassTurboService } from "./services/overpass-turbo.service";
+import { ImageAttributionService } from "./services/image-attribution.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -154,6 +155,7 @@ import { ApplicationStateComponent } from "./components/application-state.compon
 import { LayersViewComponent } from "./components/map/layers-view.component";
 import { RoutesComponent } from "./components/map/routes.component";
 import { TracesComponent } from "./components/map/traces.component";
+import { RecordedRouteComponent } from "./components/map/recorded-route.component";
 import { AutomaticLayerPresentationComponent } from "./components/map/automatic-layer-presentation.component";
 import { SecuredImageComponent } from "./components/secured-image.component";
 import { CategoriesGroupComponent } from "./components/sidebar/categories-group.component";
@@ -277,6 +279,7 @@ const initializeApplication = (injector: Injector) => async () => {
             CoordinatesService,
             OfflineFilesDownloadService,
             OverpassTurboService,
+            ImageAttributionService,
             AudioPlayerFactory,
             InAppPurchase2,
             FileSystemWrapper,
@@ -310,6 +313,7 @@ const initializeApplication = (injector: Injector) => async () => {
             LayersViewComponent,
             RoutesComponent,
             TracesComponent,
+            RecordedRouteComponent,
             AutomaticLayerPresentationComponent,
             SecuredImageComponent,
             CategoriesGroupComponent,

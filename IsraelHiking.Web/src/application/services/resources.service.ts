@@ -149,6 +149,7 @@ export class ResourcesService {
     public termsOfServiceElaborated: string;
     public osmTermsOfService: string;
     public wikimediaTermsOfService: string;
+    public imgurTermsOfService: string;
     public iHaveReadAndAgree: string;
     public submit: string;
     public createNakebHike: string;
@@ -200,6 +201,7 @@ export class ResourcesService {
     public navigateWithWaze: string;
     public offlinePurchaseGraditude: string;
     public purchaseOfflineMaps: string;
+    public renewOfflineMaps: string;
     public lastUpdatedOn: string;
     public remainingDistance: string;
     public traveledDistance: string;
@@ -235,12 +237,12 @@ export class ResourcesService {
     public screenOn: string;
     public screenOff: string;
     public screenDark: string;
-    public ifYouManageToReadThis: string;
     public youNeedToPurchaseOfflineMaps: string;
     public youNeedToDownloadOfflineMaps: string;
     public youNeedToToggleOfflineMaps: string;
     public deleteAccount: string;
     public manageSubscriptions: string;
+    public imageBy: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -252,8 +254,8 @@ export class ResourcesService {
     public unableToLoadFromUrl: string;
     public routeNameAlreadyInUse: string;
     public unableToGenerateUrl: string;
-    public unableToGetElevationData: string;
-    public routingFailed: string;
+    public routingFailedTryShorterRoute: string;
+    public routingFailedBuySubscription: string;
     public unableToLogin: string;
     public unableToSendRoute: string;
     public noUnmappedRoutes: string;
@@ -300,6 +302,7 @@ export class ResourcesService {
     public noLocationPermissionOpenAppSettings: string;
     public tracesAreOnlySavedLocally: string;
     public unexpectedErrorPleaseTryAgainLater: string;
+    public editingRouteWhileTracking: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -475,7 +478,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1668932437125");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1680089205399");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -605,6 +608,7 @@ export class ResourcesService {
         this.termsOfServiceElaborated = this.gettextCatalog.getString("Elaborated terms of service of this site, OSM and wikimedia");
         this.osmTermsOfService = this.gettextCatalog.getString("OSM terms of service");
         this.wikimediaTermsOfService = this.gettextCatalog.getString("Wikimedia terms of service");
+        this.imgurTermsOfService = this.gettextCatalog.getString("Imgur terms of service");
         this.iHaveReadAndAgree = this.gettextCatalog.getString("I have read and agree to the terms");
         this.submit = this.gettextCatalog.getString("Submit");
         this.satelliteImagery = this.gettextCatalog.getString("Satellite Imagery");
@@ -661,6 +665,7 @@ export class ResourcesService {
         this.navigateWithWaze = this.gettextCatalog.getString("Navigate with Waze");
         this.offlinePurchaseGraditude = this.gettextCatalog.getString("Thanks for purchasing! download instructions here...");
         this.purchaseOfflineMaps = this.gettextCatalog.getString("Purchase maps for offline use");
+        this.renewOfflineMaps = this.gettextCatalog.getString("Renew offline maps subscription");
         this.lastUpdatedOn = this.gettextCatalog.getString("Last updated on");
         this.remainingDistance = this.gettextCatalog.getString("Remaining distance");
         this.traveledDistance = this.gettextCatalog.getString("Traveled distance");
@@ -695,13 +700,12 @@ export class ResourcesService {
         this.screenOn = this.gettextCatalog.getString("Keep screen on");
         this.screenOff = this.gettextCatalog.getString("Allow turning off the screen");
         this.screenDark = this.gettextCatalog.getString("Darken the screen");
-        this.ifYouManageToReadThis = this.gettextCatalog
-            .getString("If you manage to read this click the main menu button and then click layers:");
         this.youNeedToDownloadOfflineMaps = this.gettextCatalog.getString("Background text: You need to download offline maps");
         this.youNeedToToggleOfflineMaps = this.gettextCatalog.getString("Background text: You need to toggle offline maps");
         this.youNeedToPurchaseOfflineMaps = this.gettextCatalog.getString("Background text: You need to purchase offline maps");
         this.deleteAccount = this.gettextCatalog.getString("Delete Account");
         this.manageSubscriptions = this.gettextCatalog.getString("Manage subscriptions");
+        this.imageBy = this.gettextCatalog.getString("Image by");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -713,8 +717,8 @@ export class ResourcesService {
         this.unableToLoadFromUrl = this.gettextCatalog.getString("Unable to load from URL...");
         this.routeNameAlreadyInUse = this.gettextCatalog.getString("The route's name was altered since it is in use...");
         this.unableToGenerateUrl = this.gettextCatalog.getString("Unable to generate URL, please try again later...");
-        this.unableToGetElevationData = this.gettextCatalog.getString("Unable to get elevation data:");
-        this.routingFailed = this.gettextCatalog.getString("Routing failed:");
+        this.routingFailedTryShorterRoute = this.gettextCatalog.getString("Routing failed, please try a shorter route...");
+        this.routingFailedBuySubscription = this.gettextCatalog.getString("Routing failed, consider buying a subscription.");
         this.unableToLogin = this.gettextCatalog.getString("Unable to login...");
         this.unableToSendRoute = this.gettextCatalog.getString("Unable to send route...");
         this.noUnmappedRoutes = this.gettextCatalog.getString("No unmapped routes! :-)");
@@ -779,6 +783,8 @@ export class ResourcesService {
         this.tracesAreOnlySavedLocally = this.gettextCatalog.getString("Traces are only saved locally. " +
             "You can change that in the configuration settings");
         this.unexpectedErrorPleaseTryAgainLater = this.gettextCatalog.getString("Oops, something went wrong. Please try again later");
+        this.editingRouteWhileTracking = this.gettextCatalog.getString("GPS tracking is enabled while editing, " +
+            "in order to avoid map centering to current location please click the cross icon on the top left corner");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

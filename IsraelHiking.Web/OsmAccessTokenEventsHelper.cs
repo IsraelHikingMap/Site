@@ -1,12 +1,10 @@
-﻿using IsraelHiking.Common;
-using IsraelHiking.Common.Configuration;
+﻿using IsraelHiking.Common.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OsmSharp.IO.API;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using LazyCache;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

@@ -39,15 +39,15 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetPointsForIndexing_ShouldGetFromGateway()
         {
-            var features = new List<Feature>
+            var features = new List<IFeature>
             {
-                new (new Point(0,0), new AttributesTable()),
-                new (new LineString(new [] { new Coordinate(0,0), new Coordinate(1,1)}),
+                new Feature(new Point(0,0), new AttributesTable()),
+                new Feature(new LineString(new [] { new Coordinate(0,0), new Coordinate(1,1)}),
                     new AttributesTable
                     {
                         {FeatureAttributes.POI_SHARE_REFERENCE, "missing-url"}
                     }),
-                new (new LineString(new [] { new Coordinate(0,0), new Coordinate(1,1)}),
+                new Feature(new LineString(new [] { new Coordinate(0,0), new Coordinate(1,1)}),
                     new AttributesTable
                     {
                         {FeatureAttributes.POI_SHARE_REFERENCE, "share-url"}
@@ -66,7 +66,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetUpdates_ShouldGetThem()
         {
-            var list = new List<Feature>();
+            var list = new List<IFeature>();
             _iNatureGateway.GetUpdates(Arg.Any<DateTime>()).Returns(list);
 
             var results = _adapter.GetUpdates(DateTime.Now).Result;

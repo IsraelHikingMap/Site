@@ -2,15 +2,28 @@
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess
 {
+    // This is only partial in order to get what we need
+    internal class ImgurData
+    {
+        [JsonPropertyName("link")]
+        public string Link { get; set; }
+    }
+    
+    // This is only partial in order to get what we need, see https://apidocs.imgur.com/
+    internal class ImgurUploadResponse {
+        [JsonPropertyName("data")]
+        public ImgurData Data { get; set; }
+    }
+    
     public class ImgurGateway : IImgurGateway
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -37,8 +50,8 @@ namespace IsraelHiking.DataAccess
             {
                 throw new Exception("Unable to upload an image to imgur: " + content);
             }
-            var jsonObject = JsonConvert.DeserializeObject<JObject>(content);
-            var link = jsonObject.SelectToken("data.link").Value<string>();
+            var responseJson = JsonSerializer.Deserialize<ImgurUploadResponse>(content);
+            var link = responseJson.Data.Link;
             _logger.LogInformation($"Imgur file uploaded successfully, link: {link}");
             return link;
         }

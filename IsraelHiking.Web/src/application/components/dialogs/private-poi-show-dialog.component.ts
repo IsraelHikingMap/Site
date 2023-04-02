@@ -8,6 +8,7 @@ import { PrivatePoiEditDialogComponent } from "./private-poi-edit-dialog.compone
 import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
+import { ToastService } from "../../services/toast.service";
 import { RoutesReducer } from "../../reducers/routes.reducer";
 import type { ApplicationState, MarkerData, LinkData } from "../../models/models";
 
@@ -37,6 +38,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
                 private readonly matDialog: MatDialog,
                 private readonly imageGalleryService: ImageGalleryService,
                 private readonly selectedRouteService: SelectedRouteService,
+                private readonly toastService: ToastService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 private readonly dialogRef: MatDialogRef<PrivatePoiShowDialogComponent>,
                 @Inject(MAT_DIALOG_DATA) data: IPrivatePoiShowDialogData) {
@@ -80,6 +82,10 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     }
 
     public async uploadPoint() {
+        if (this.ngRedux.getState().userState.userInfo == null) {
+            this.toastService.warning(this.resources.loginRequired);
+            return;
+        }
         AddSimplePoiDialogComponent.openDialog(this.matDialog,
             {
                 latlng: this.marker.latlng,

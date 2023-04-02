@@ -11,6 +11,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
+import { ToastService } from "../../services/toast.service";
 import { RoutesReducer } from "../../reducers/routes.reducer";
 import { InMemoryReducer } from "../../reducers/in-memory.reducer";
 import { RecordedRouteReducer } from "../../reducers/recorded-route.reducer";
@@ -39,6 +40,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
                 private readonly runningContextService: RunningContextService,
                 private readonly socialSharing: SocialSharing,
                 private readonly hashService: HashService,
+                private readonly toastService: ToastService,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.hideCoordinates = true;
@@ -72,6 +74,10 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     }
 
     public openAddSimplePointDialog() {
+        if (this.ngRedux.getState().userState.userInfo == null) {
+            this.toastService.warning(this.resources.loginRequired);
+            return;
+        }
         AddSimplePoiDialogComponent.openDialog(this.matDialog, {
             latlng: { ...this.latlng },
             description: "",

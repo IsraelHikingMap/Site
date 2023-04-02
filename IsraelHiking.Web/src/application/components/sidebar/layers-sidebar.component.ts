@@ -156,7 +156,14 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public isPurchaseAvailable() {
         return this.runningContextService.isCapacitor &&
-            !this.ngRedux.getState().offlineState.isOfflineAvailable;
+            !this.ngRedux.getState().offlineState.isOfflineAvailable &&
+            this.ngRedux.getState().offlineState.lastModifiedDate == null;
+    }
+
+    public isRenewAvailable() {
+        return this.runningContextService.isCapacitor &&
+            !this.ngRedux.getState().offlineState.isOfflineAvailable &&
+            this.ngRedux.getState().offlineState.lastModifiedDate != null;
     }
 
     public orderOfflineMaps() {
@@ -197,18 +204,20 @@ export class LayersSidebarComponent extends BaseMapComponent {
             }));
             return;
         }
-        if (routeData.state === "Hidden") {
-            this.ngRedux.dispatch(RoutesReducer.actions.changeVisibility({
-                routeId: routeData.id,
-                isVisible: true
-            }));
-        }
+        routeData.state = selectedRoute != null && selectedRoute.state !== "Hidden" ? selectedRoute.state : "ReadOnly";
+        this.ngRedux.dispatch(RoutesReducer.actions.changeVisibility({
+            routeId: routeData.id,
+            isVisible: true
+        }));
         this.selectedRouteService.setSelectedRoute(routeData.id);
     }
 
     public toggleAllRoutes(event: Event) {
         event.stopPropagation();
         this.ngRedux.dispatch(RoutesReducer.actions.toggleAllRoutes());
+        if (this.isAllRoutesHidden()) {
+            this.ngRedux.dispatch(RoutesReducer.actions.setSelectedRouteAction({ routeId: null }));
+        }
     }
 
     public isAllRoutesHidden(): boolean {

@@ -1,7 +1,9 @@
-sudo gem install cocoapods
 $env:LANG="en_US.UTF-8"
 $env:LANGUAGE="en_US.UTF-8"
 $env:LC_ALL="en_US.UTF-8"
+
+Write-Host "Installing cocoapods 1.11.3" #later version is not compatible with the ruby installed in the CI (2.3.2023)
+sudo gem install cocoapods -v 1.11.3
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
@@ -36,7 +38,7 @@ security import ./signing/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain
 Write-Host "Avoid popup for keychain password by setting partition list"
 # https://medium.com/@ceyhunkeklik/how-to-fix-ios-application-code-signing-error-4818bd331327
 # Must be after the import process
-security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k appveyor ~/Library/Keychains/ios-build.keychain
+security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k appveyor ~/Library/Keychains/ios-build.keychain > /dev/null
 
 Write-Host "Copy provisioning file"
 New-Item -ItemType "directory" -Path "~/Library/MobileDevice/Provisioning Profiles"

@@ -325,6 +325,7 @@ export class LayersService {
         this.ngRedux.dispatch(LayersReducer.actions.selectBaseLayer({
             key
         }));
+        this.warnBaselayerOverlayOverlappingIfNeeded();
     }
 
     public toggleOverlay(overlay: Overlay) {
@@ -337,13 +338,13 @@ export class LayersService {
                 visible: newVisibility
             }
         }));
-        if (newVisibility) {
-            if ((overlay.key === HIKING_TRAILS &&
-                this.selectedBaseLayerKey === ISRAEL_HIKING_MAP) ||
-                (overlay.key === BICYCLE_TRAILS &&
-                this.selectedBaseLayerKey === ISRAEL_MTB_MAP)) {
-                this.toastService.warning(this.resources.baseLayerAndOverlayAreOverlapping);
-            }
+        this.warnBaselayerOverlayOverlappingIfNeeded();
+    }
+
+    private warnBaselayerOverlayOverlappingIfNeeded() {
+        if ((this.overlays.find(o => o.key === HIKING_TRAILS).visible && this.selectedBaseLayerKey === ISRAEL_HIKING_MAP ||
+            this.overlays.find(o => o.key === BICYCLE_TRAILS).visible && this.selectedBaseLayerKey === ISRAEL_MTB_MAP)) {
+            this.toastService.warning(this.resources.baseLayerAndOverlayAreOverlapping);
         }
     }
 

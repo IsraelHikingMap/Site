@@ -11,6 +11,7 @@ import { ImageResizeService } from "../../services/image-resize.service";
 import { NavigateHereService } from "../../services/navigate-here.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
+import { ToastService } from "../../services/toast.service";
 import { RoutesReducer } from "../../reducers/routes.reducer";
 import { RecordedRouteReducer } from "../../reducers/recorded-route.reducer";
 import { Urls } from "../../urls";
@@ -59,6 +60,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                 private readonly runningContextService: RunningContextService,
                 private readonly socialSharing: SocialSharing,
                 private readonly hashService: HashService,
+                private readonly toastService: ToastService,
                 private readonly ngRedux: NgRedux<ApplicationState>,
                 @Inject(MAT_DIALOG_DATA) data: PrivatePoiEditDialogData) {
         super(resources);
@@ -178,6 +180,10 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public async uploadPoint() {
+        if (this.ngRedux.getState().userState.userInfo == null) {
+            this.toastService.warning(this.resources.loginRequired);
+            return;
+        }
         AddSimplePoiDialogComponent.openDialog(this.matDialog, {
             latlng: this.marker.latlng,
             imageLink: this.imageLink,

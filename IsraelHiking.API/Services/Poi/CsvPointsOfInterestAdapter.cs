@@ -115,7 +115,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <summary>
-        /// This method is used as late initialiation for setting file name and address
+        /// This method is used as late initialization for setting file name and address
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="fileAddress"></param>
@@ -126,7 +126,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetAll()
+        public async Task<List<IFeature>> GetAll()
         {
             var features = await GetAllFeaturesWithoutGeometry();
             foreach (var feature in features)
@@ -136,7 +136,7 @@ namespace IsraelHiking.API.Services.Poi
             return features;
         }
 
-        private Feature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest)
+        private IFeature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest)
         {
             var table = new AttributesTable
             {
@@ -149,12 +149,15 @@ namespace IsraelHiking.API.Services.Poi
                 {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
                 {FeatureAttributes.POI_CATEGORY, pointOfInterest.Category},
                 {FeatureAttributes.POI_SHARE_REFERENCE, pointOfInterest.FileUrl },
-                {FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl},
                 {FeatureAttributes.POI_SOURCE_IMAGE_URL, pointOfInterest.SourceImageUrl},
                 {FeatureAttributes.ID, pointOfInterest.Id},
                 {FeatureAttributes.POI_SEARCH_FACTOR, 1.0},
                 {FeatureAttributes.WEBSITE, pointOfInterest.Website}
             };
+            if (!string.IsNullOrWhiteSpace(pointOfInterest.ImageUrl))
+            {
+                table.Add(FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl);
+            }
             var feature = new Feature(new Point(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude)), table);
             feature.SetLocation(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude));
             feature.SetLastModified(pointOfInterest.LastModified > DateTime.Now ? DateTime.Now : pointOfInterest.LastModified);
@@ -175,7 +178,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        private async Task UpdateGeometry(Feature feature)
+        private async Task UpdateGeometry(IFeature feature)
         {
             if (feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE) &&
                 !string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString()))
@@ -187,7 +190,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetUpdates(DateTime lastModifiedDate)
+        public async Task<List<IFeature>> GetUpdates(DateTime lastModifiedDate)
         {
             var features = await GetAllFeaturesWithoutGeometry();
             features = features.Where(f => f.GetLastModified() > lastModifiedDate).ToList();
@@ -198,7 +201,7 @@ namespace IsraelHiking.API.Services.Poi
             return features;
         }
 
-        private async Task<List<Feature>> GetAllFeaturesWithoutGeometry()
+        private async Task<List<IFeature>> GetAllFeaturesWithoutGeometry()
         {
             _logger.LogInformation("Getting records from csv file: " + _fileName);
             var fileContent = await _remoteFileFetcherGateway.GetFileContent(_fileAddress);

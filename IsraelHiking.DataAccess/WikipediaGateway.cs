@@ -34,7 +34,7 @@ namespace IsraelHiking.DataAccess
         {
             var wikiClient = new WikiClient
             {
-                ClientUserAgent = "IsraelHikingMapSite/5.x bot (https://israelhiking.osm.org.il; israelhikingmap@gmail.com)",
+                ClientUserAgent = Branding.USER_AGENT,
                 Timeout = new TimeSpan(0, 1, 0)
             };
             foreach (var language in Languages.Array)
@@ -45,7 +45,7 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation("Finished initializing Wikipedia service");
         }
 
-        public async Task<List<Feature>> GetByPagesTitles(string[] titles, string language)
+        public async Task<List<IFeature>> GetByPagesTitles(string[] titles, string language)
         {
             try
             {
@@ -64,22 +64,22 @@ namespace IsraelHiking.DataAccess
                 var features = pages.Where(p => p.Exists).Select(p => ConvertPageToFeature(p, language)).ToList();
                 if (features.Count != titles.Length)
                 {
-                    _logger.LogWarning("The following pages do not exists: " + string.Join(",", pages.Where(p => p.Exists == false).Select(p => p.Title).ToArray()));
+                    _logger.LogWarning("The following pages do not exists. This is usually causes by a dead link from OSM to a page that was removed in Wikipedia. Please find the OSM entity and delete the link: " + string.Join(",", pages.Where(p => p.Exists == false).Select(p => p.Title).ToArray()));
                 }
                 return features;
             } 
             catch (Exception ex)
             {
-                _logger.LogError($"Unable to get wikipedia pages due to {ex.Message} for: " + string.Join(",", titles));
+                _logger.LogError($"Unable to get wikipedia pages due to {ex.Message} for (note that the titles are batched and so not all the titles here are causing this issue): " + string.Join(",", titles));
             }
-            return new List<Feature>();
+            return new List<IFeature>();
             
         }
 
         /// <summary>
         /// This recursive method is used to get wikipedia features by bounding box.
-        /// Since boundingbox can't scroll diue to a wikimedia implementiaion issue the workaround is
-        /// to recursivly split each bounding box to 4 rectangles until there's no overflow of results.
+        /// Since bounding-box can't scroll due to a wikimedia implementation issue the workaround is
+        /// to recursively split each bounding box to 4 rectangles until there's no overflow of results.
         /// A rectangle that is not overflowing will not be split.
         /// See here: https://github.com/CXuesong/WikiClientLibrary/issues/64
         /// </summary>
@@ -87,7 +87,7 @@ namespace IsraelHiking.DataAccess
         /// <param name="northEast">Top right corner of the rectangle</param>
         /// <param name="language">The relevant language</param>
         /// <returns>A list of features inside this rectangle</returns>
-        public async Task<List<Feature>> GetByBoundingBox(Coordinate southWest, Coordinate northEast, string language)
+        public async Task<List<IFeature>> GetByBoundingBox(Coordinate southWest, Coordinate northEast, string language)
         {
             for (int retryIndex = 0; retryIndex < 3; retryIndex++)
             {
@@ -99,7 +99,7 @@ namespace IsraelHiking.DataAccess
                         PaginationSize = 500
                     };
                     var results = await geoSearchGenerator.EnumItemsAsync().ToListAsync();
-                    var features = new List<Feature>();
+                    var features = new List<IFeature>();
                     if (results.Count < 500) // recursive stop condition
                     {
                         foreach (var geoSearchResultItem in results)
@@ -127,7 +127,7 @@ namespace IsraelHiking.DataAccess
                 }
             }
             _logger.LogError($"All Retries failed while trying to get data from {language}.wikipedia");
-            return new List<Feature>();
+            return new List<IFeature>();
         }
 
         public Reference GetReference(string title, string language)
@@ -139,7 +139,7 @@ namespace IsraelHiking.DataAccess
             };
         }
 
-        private Feature ConvertPageToFeature(WikiPage page, string language)
+        private IFeature ConvertPageToFeature(WikiPage page, string language)
         {
             var geoCoordinate = page.GetPropertyGroup<GeoCoordinatesPropertyGroup>().PrimaryCoordinate;
             var coordinate = geoCoordinate.IsEmpty
@@ -157,7 +157,7 @@ namespace IsraelHiking.DataAccess
                 attributes.Add(FeatureAttributes.IMAGE_URL, imageUrl);
             }
             attributes.Add(FeatureAttributes.POI_USER_NAME, page.LastRevision.UserName);
-            attributes.Add(FeatureAttributes.POI_USER_ADDRESS, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeUriString(page.LastRevision.UserName)}"));
+            attributes.Add(FeatureAttributes.POI_USER_ADDRESS, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeDataString(page.LastRevision.UserName)}"));
             attributes.SetLastModified(page.LastRevision.TimeStamp);
             var feature = new Feature(new Point(coordinate), attributes);
             feature.SetTitles();

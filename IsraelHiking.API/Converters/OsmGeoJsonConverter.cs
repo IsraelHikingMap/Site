@@ -31,7 +31,7 @@ namespace IsraelHiking.API.Converters
         }
 
         /// <inheritdoc />
-        public Feature ToGeoJson(ICompleteOsmGeo completeOsmGeo)
+        public IFeature ToGeoJson(ICompleteOsmGeo completeOsmGeo)
         {
             if (completeOsmGeo?.Tags == null || completeOsmGeo.Tags.Count == 0)
             {
@@ -79,7 +79,7 @@ namespace IsraelHiking.API.Converters
             if (!string.IsNullOrWhiteSpace(osmObject.UserName))
             {
                 table.Add(FeatureAttributes.POI_USER_NAME, osmObject.UserName);
-                table.Add(FeatureAttributes.POI_USER_ADDRESS, $"https://www.openstreetmap.org/user/{Uri.EscapeUriString(osmObject.UserName)}");
+                table.Add(FeatureAttributes.POI_USER_ADDRESS, $"https://www.openstreetmap.org/user/{Uri.EscapeDataString(osmObject.UserName)}");
             }
             if (osmObject.Version.HasValue)
             {

@@ -25,7 +25,6 @@ export class CoordinatesComponent extends BaseMapComponent implements OnInit {
 
     public async ngOnInit(): Promise<void> {
         this.itmCoordinates = this.itmCoordinatesService.toItm(this.latlng);
-        let response = await this.elevationProvider.updateHeights([this.latlng]);
-        this.latlng.alt = response[0].alt;
+        await this.elevationProvider.updateHeights([this.latlng]);
     }
 }

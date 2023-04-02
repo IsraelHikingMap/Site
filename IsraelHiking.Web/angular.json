@@ -40,7 +40,6 @@
             "scripts": [],
             "allowedCommonJsDependencies": [
               "geojson-rbush",
-              "ohauth",
               "redux-undo",
               "photoswipe",
               "photoswipe-ui-default",
@@ -143,7 +142,13 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "codeCoverageExclude": ["src/application/services/database.service.ts"],
+            "codeCoverageExclude": [
+              "src/application/services/database.service.ts",
+              "src/application/components/**",
+              "src/application/directives/**",
+              "src/application/pipes/**",
+              "src/application/reducers/**"
+            ],
             "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/polyfills.ts",

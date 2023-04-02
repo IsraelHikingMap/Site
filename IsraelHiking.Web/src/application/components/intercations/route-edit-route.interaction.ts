@@ -43,7 +43,6 @@ export class RouteEditRouteInteraction {
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly routerService: RouterService,
                 private readonly elevationProvider: ElevationProvider,
-                private readonly geoLocationService: GeoLocationService,
                 private readonly snappingService: SnappingService,
                 private readonly ngZone: NgZone,
                 private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -265,7 +264,7 @@ export class RouteEditRouteInteraction {
         let newSegment = this.createRouteSegment(latlng, [latlng, latlng]);
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute.segments.length === 0) {
-            newSegment.latlngs = await this.elevationProvider.updateHeights(newSegment.latlngs) as LatLngAltTime[];
+            await this.elevationProvider.updateHeights(newSegment.latlngs);
         } else {
             let endPointSegmentIndex = selectedRoute.segments.length - 1;
             let startLatLng = selectedRoute.segments[endPointSegmentIndex].routePoint;
@@ -289,7 +288,8 @@ export class RouteEditRouteInteraction {
     private runRouting = async (startLatLng: LatLngAlt, segment: RouteSegmentData): Promise<void> => {
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, []);
         let latLngs =  await this.routerService.getRoute(startLatLng, segment.routePoint, segment.routingType);
-        segment.latlngs = await this.elevationProvider.updateHeights(latLngs) as LatLngAltTime[];
+        await this.elevationProvider.updateHeights(latLngs);
+        segment.latlngs = latLngs as LatLngAltTime[];
         let last = latLngs[latLngs.length - 1];
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, [last]);
     };
@@ -302,8 +302,9 @@ export class RouteEditRouteInteraction {
         if (index === 0) {
             let nextSegment = { ...routeData.segments[index + 1] };
             await this.runRouting(latlng, nextSegment);
-            let snappedLatLng = this.getSnappingForRoute(latlng, [nextSegment.latlngs[0]]);
-            segment.latlngs = await this.elevationProvider.updateHeights([snappedLatLng, snappedLatLng]) as LatLngAltTime[];
+            let snappedLatLng = this.getSnappingForRoute(latlng, [nextSegment.latlngs[0]]) as LatLngAltTime;
+            await this.elevationProvider.updateHeights([snappedLatLng]);
+            segment.latlngs = [snappedLatLng, snappedLatLng];
             segment.routePoint = snappedLatLng;
             segment.routingType = routingType;
 
@@ -378,7 +379,7 @@ export class RouteEditRouteInteraction {
 
     private getSnappingForRoute(latlng: LatLngAlt, additionalLatlngs: LatLngAlt[]): LatLngAlt {
         if (this.ngRedux.getState().gpsState.tracking === "tracking") {
-            let currentLocation = this.geoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+            let currentLocation = GeoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
             additionalLatlngs.push(currentLocation);
         }
         // private POIs + Geo Location + Additional Point:

@@ -32,7 +32,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             var feature = GetValidFeature("1", Sources.WIKIPEDIA);
             feature.SetId();
-            var list = new List<Feature> { feature };
+            var list = new List<IFeature> { feature };
             _wikipediaGateway.GetByBoundingBox(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string>()).Returns(list);
             _wikipediaGateway.GetByPagesTitles(Arg.Any<string[]>(), Arg.Any<string>()).Returns(list);
             _overpassTurboGateway.GetWikipediaLinkedTitles().Returns(new List<string>());
