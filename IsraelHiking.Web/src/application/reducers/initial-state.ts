@@ -25,7 +25,7 @@ export const initialState =
             isShowIntro: true,
             isShowKmMarker: false,
             isShowSlope: false,
-            version: "9.16",
+            version: "9.17",
             language: {
                 code: "he",
                 rtl: true
