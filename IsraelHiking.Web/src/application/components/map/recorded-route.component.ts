@@ -23,6 +23,9 @@ export class RecordedRouteComponent extends BaseMapComponent {
     @Select((state: ApplicationState) => state.recordedRouteState.route)
     public recordedRoute$: Observable<RecordedRoute>;
 
+    @Select((state: ApplicationState) => state.gpsState.currentPoistion)
+    public currentPoistion$: Observable<GeolocationPosition>;
+
     public recordedRouteSegments: GeoJSON.FeatureCollection<GeoJSON.LineString>[];
     public lastRouteSegment: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public startPointGeoJson: GeoJSON.Feature<GeoJSON.Point>;
@@ -45,7 +48,9 @@ export class RecordedRouteComponent extends BaseMapComponent {
             properties: {}
         };
 
-        this.recordedRoute$.subscribe(() => this.handleRecordingChanges());
+        // HM TODO: verify that this is not needed anymore
+        //this.recordedRoute$.subscribe(() => this.handleRecordingChanges());
+        this.currentPoistion$.subscribe(() => this.handleRecordingChanges());
     }
 
     public isRecording() {
