@@ -15,7 +15,7 @@
             <routes></routes>
             <recorded-route></recorded-route>
             <traces></traces>
-            <zoom fxShow.sm="false" fxShow.xs="false" #topLeftControl></zoom>
+            <zoom #topLeftControl></zoom>
             <location #topLeftControl *ngIf="isMobile() || !isIFrame()"></location>
             <main-menu #topRightControl></main-menu>
             <search #topRightControl *ngIf="!isIFrame()"></search>
