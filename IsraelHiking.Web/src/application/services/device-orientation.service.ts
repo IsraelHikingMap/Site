@@ -48,12 +48,12 @@ export class DeviceOrientationService {
             if (heading < 0) {
                 heading += 360;
             }
-            if (window.screen.orientation.type === "landscape-primary") {
+            if (this.getDeviceOrientation() === "landscape-primary") {
                 heading += 90;
                 if (heading > 360) {
                     heading -= 360;
                 }
-            } else if (window.screen.orientation.type === "landscape-secondary") {
+            } else if (this.getDeviceOrientation() === "landscape-secondary") {
                 heading -= 90;
                 if (heading < 0) {
                     heading += 360;
@@ -61,6 +61,21 @@ export class DeviceOrientationService {
             }
             this.orientationChanged.next(heading);
         });
+    }
+
+    private getDeviceOrientation(): OrientationType {
+        if (window.screen.orientation) {
+          return window.screen.orientation.type;
+        }
+      
+        // iOS/safari
+        switch (+window.orientation) {
+            case 0: return "portrait-primary";
+            case 90: return "landscape-primary";
+            case 180: return "portrait-secondary";
+            case -90: return "landscape-secondary";
+            default: return "portrait-primary"
+      }
     }
 
     public enable() {
