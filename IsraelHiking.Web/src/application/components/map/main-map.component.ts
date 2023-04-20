@@ -1,5 +1,5 @@
 import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
-import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog, MatLegacyDialogConfig as MatDialogConfig } from "@angular/material/legacy-dialog";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import mapliregl, { StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike } from "maplibre-gl";
 import { NgRedux } from "@angular-redux2/store";

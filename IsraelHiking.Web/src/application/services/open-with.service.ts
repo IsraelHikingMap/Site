@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
-import { MatDialog } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
 import { App } from "@capacitor/app";
 
 import { RunningContextService } from "./running-context.service";

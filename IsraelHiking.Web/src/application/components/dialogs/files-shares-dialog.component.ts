@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { MatDialog, MatDialogRef } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog, MatLegacyDialogRef as MatDialogRef } from "@angular/material/legacy-dialog";
 import { every } from "lodash-es";
 import { NgRedux } from "@angular-redux2/store";
 

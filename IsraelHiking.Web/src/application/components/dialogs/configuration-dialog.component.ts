@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { MatDialogRef } from "@angular/material/dialog";
+import { MatLegacyDialogRef as MatDialogRef } from "@angular/material/legacy-dialog";
 import { Observable } from "rxjs";
 import { NgRedux, Select } from "@angular-redux2/store";
 

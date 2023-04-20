@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation, Inject } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
+import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from "@angular/material/legacy-dialog";
 import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash-es";
 import { NgRedux, Select } from "@angular-redux2/store";

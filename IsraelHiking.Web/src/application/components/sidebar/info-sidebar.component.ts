@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { MatDialog } from "@angular/material/dialog";
+import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
 import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { Observable } from "rxjs";
