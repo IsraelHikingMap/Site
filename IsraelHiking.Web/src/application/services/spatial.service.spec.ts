@@ -230,9 +230,9 @@ describe("Spatial service", () => {
     });
 
     it("Should calculate bounds from a feature", () => {
-        let bounds = SpatialService.getBoundsForFeature({ 
-            type: "Feature", geometry: { 
-                type:"LineString", 
+        let bounds = SpatialService.getBoundsForFeature({
+            type: "Feature", geometry: {
+                type:"LineString",
                 coordinates: [[1,1], [2,2]]
             },
             properties: {}
