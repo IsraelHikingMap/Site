@@ -1,9 +1,9 @@
 import { Component, Inject } from "@angular/core";
 import {
-    MatLegacyDialogRef as MatDialogRef,
-    MatLegacyDialog as MatDialog,
-    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA
-} from "@angular/material/legacy-dialog";
+    MatDialogRef,
+    MatDialog,
+    MAT_DIALOG_DATA
+} from "@angular/material/dialog";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";

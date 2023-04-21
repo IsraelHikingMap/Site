@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
+import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { NgRedux, Select } from "@angular-redux2/store";

@@ -1,9 +1,9 @@
 import { Component } from "@angular/core";
 import {
-    MatLegacyDialog as MatDialog,
-    MatLegacyDialogConfig as MatDialogConfig,
-    MatLegacyDialogRef as MatDialogRef
-} from "@angular/material/legacy-dialog";
+    MatDialog,
+    MatDialogConfig,
+    MatDialogRef
+} from "@angular/material/dialog";
 import { AnimationOptions } from "ngx-lottie";
 import { NgRedux } from "@angular-redux2/store";
 

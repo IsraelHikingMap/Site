@@ -1,9 +1,9 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, Inject } from "@angular/core";
 import {
-    MatLegacyDialogRef as MatDialogRef,
-    MatLegacyDialog as MatDialog,
-    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA
-} from "@angular/material/legacy-dialog";
+    MatDialogRef,
+    MatDialog,
+    MAT_DIALOG_DATA
+} from "@angular/material/dialog";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { NgRedux } from "@angular-redux2/store";
 

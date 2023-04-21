@@ -1,9 +1,9 @@
 import { Component, Inject } from "@angular/core";
 import {
-    MatLegacyDialog as MatDialog,
-    MatLegacyDialogRef as MatDialogRef,
-    MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA
-} from "@angular/material/legacy-dialog";
+    MatDialog,
+    MatDialogRef,
+    MAT_DIALOG_DATA
+} from "@angular/material/dialog";
 import { NgRedux } from "@angular-redux2/store";
 
 import { BaseMapComponent } from "../base-map.component";

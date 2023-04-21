@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
-import { MatLegacySnackBar as MatSnackBar } from "@angular/material/legacy-snack-bar";
+import { MatDialog } from "@angular/material/dialog";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { ResourcesService } from "./resources.service";
 import { ConfirmDialogComponent, ConfirmType } from "../components/dialogs/confirm-dialog.component";
 import { ProgressDialogComponent, IProgressDialogConfig } from "../components/dialogs/progress-dialog.component";

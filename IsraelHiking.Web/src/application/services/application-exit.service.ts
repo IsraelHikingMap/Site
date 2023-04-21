@@ -7,7 +7,7 @@ import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { ToastService } from "./toast.service";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
+import { MatDialog } from "@angular/material/dialog";
 import { SidebarService } from "./sidebar.service";
 import { SetSidebarAction } from "../reducers/poi.reducer";
 import { GeoLocationService } from "./geo-location.service";

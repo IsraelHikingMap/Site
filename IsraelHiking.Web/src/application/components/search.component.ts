@@ -8,7 +8,7 @@ import {
     QueryList
 } from "@angular/core";
 import { Router } from "@angular/router";
-import { MatLegacyAutocompleteTrigger as MatAutocompleteTrigger } from "@angular/material/legacy-autocomplete";
+import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap, map } from "rxjs/operators";
 import { remove } from "lodash-es";

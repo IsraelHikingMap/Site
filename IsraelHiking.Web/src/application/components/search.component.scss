@@ -6,16 +6,19 @@
     width: 200px;
 }
 
+    /* HM TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
     .search-input-container .mat-form-field-wrapper {
         margin: 0 !important;
         padding: 0 !important;
         width: 200px;
     }
 
+    /* HM TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
     .search-input-container .mat-form-field-underline {
         bottom: 0.1em !important;
     }
 
+    /* HM TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
     .search-input-container .mat-form-field-infix {
         padding: 0 !important;
         border: 0 !important;
@@ -50,6 +53,7 @@
     }
 
 @media only screen and (min-width : 768px) {
+    /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
     .search-input-container .mat-form-field-wrapper {
         width: 100%;
     }

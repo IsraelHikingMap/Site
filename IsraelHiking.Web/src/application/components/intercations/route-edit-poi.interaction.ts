@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from "@angular/core";
 import { MapMouseEvent, Map } from "maplibre-gl";
-import { MatLegacyDialog as MatDialog } from "@angular/material/legacy-dialog";
+import { MatDialog } from "@angular/material/dialog";
 import { NgRedux } from "@angular-redux2/store";
 
 import { SelectedRouteService } from "../../services/selected-route.service";

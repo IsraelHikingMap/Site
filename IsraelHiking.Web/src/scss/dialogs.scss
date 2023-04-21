@@ -44,12 +44,12 @@
 }
 
 @media (max-width:767px) {
-    .mat-dialog-container {
+    .mat-mdc-dialog-container {
         margin: 0 auto;
         max-height: 90vh;
     }
 
-    .mat-dialog-container .mat-button {
+    .mat-mdc-dialog-container .mat-mdc-button {
         white-space: normal;
     }
 }

@@ -1,4 +1,4 @@
-﻿<div class="side-control maplibregl-ctrl">
+﻿﻿<div class="side-control maplibregl-ctrl">
     <button mat-button (click)="toggleTracking()" [class.active]="isActive()" matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location" angularticsAction="Toggle GPS location">
         <i *ngIf="isDisabled() || isActive()" class="fa fa-lg icon-crosshairs" [class.following]="isActive() && isFollowingLocation()"></i>
         <div *ngIf="isLoading()" class="spinner-container">
