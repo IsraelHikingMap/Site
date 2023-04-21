@@ -60,3 +60,7 @@
 .circle.offline {
     background: #f00;
 }
+
+::ng-deep .mdc-list-item__primary-text {
+    width: 100%;
+}
