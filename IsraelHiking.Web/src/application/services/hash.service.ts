@@ -83,13 +83,17 @@ export class HashService {
     public getHref(): string {
         let inMemoryState = this.ngRedux.getState().inMemoryState;
         if (inMemoryState.fileUrl != null) {
-            let urlTree = this.router.createUrlTree([RouteStrings.URL, inMemoryState.fileUrl]);
+            let urlTree = this.router.createUrlTree([RouteStrings.URL, inMemoryState.fileUrl], { 
+                queryParams: {
+                    [RouteStrings.BASE_LAYER]: this.ngRedux.getState().layersState.selectedBaseLayerKey
+                }
+            });
             return Urls.baseAddress + urlTree.toString();
         }
         if (inMemoryState.shareUrl != null) {
             return this.getFullUrlFromShareId(inMemoryState.shareUrl.id);
         }
-        return Urls.baseAddress;
+        return this.getMapAddress();
     }
 
     public getMapAddress() {
