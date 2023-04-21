@@ -24,6 +24,22 @@ $app-background: map-get($app-theme, background);
 @include mat.all-component-themes($app-theme);
 
 
+.mat-mdc-snack-bar-container {
+    &.success-snackbar {
+        --mdc-snackbar-container-color: #{mat.get-color-from-palette($app-primary)};
+    }
+    &.warn-snackbar {
+        --mdc-snackbar-container-color: #{mat.get-color-from-palette($app-accent)};
+        --mdc-snackbar-supporting-text-color: ##000;
+    }
+    &.error-snackbar {
+        --mdc-snackbar-container-color: #{mat.get-color-from-palette($app-warm)};
+    }
+    &.confirm-snackbar {
+        --mat-mdc-snack-bar-button-color: var(--mdc-snackbar-supporting-text-color);
+    }
+  }
+
 
 /* added direction to fix issue with scroll bar and legend maps */
 .sidebar-wrapper {
@@ -149,6 +165,10 @@ overlay.overlay-shown {
 
 .min-w-unset {
     min-width: unset !important;
+}
+
+.h-unset {
+    height: unset !important;
 }
 
 .control-container {

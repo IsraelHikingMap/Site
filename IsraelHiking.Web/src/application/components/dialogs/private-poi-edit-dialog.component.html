@@ -27,7 +27,7 @@
             <div class="w-2/5">
                 <div class="flex flex-row">
                     <label *ngIf="!imageLink">
-                        <a mat-button class="flex-center w-full" [style.color]="'black'" imageCapture (changed)="addImage($event)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
+                        <a mat-button class="flex-center w-full h-unset" [style.color]="'black'" imageCapture (changed)="addImage($event)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
                         <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera" />
                     </label>
                     <img *ngIf="imageLink"
