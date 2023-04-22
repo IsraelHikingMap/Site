@@ -2,7 +2,7 @@ import { Component, Inject } from "@angular/core";
 import { MatDialog, MAT_DIALOG_DATA } from "@angular/material/dialog";
 
 import { BaseMapComponent } from "../base-map.component";
-import { ResourcesService } from "application/services/resources.service";
+import { ResourcesService } from "../../services/resources.service";
 
 export type SendReportDialogData = {
     subject: string;

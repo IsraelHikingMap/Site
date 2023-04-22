@@ -1,8 +1,8 @@
 import { Directive, Output, ElementRef, Renderer2, OnDestroy, EventEmitter, NgZone } from "@angular/core";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
-import { FileService } from "application/services/file.service";
 
 import { environment } from "../../environments/environment";
+import { FileService } from "../services/file.service";
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
 

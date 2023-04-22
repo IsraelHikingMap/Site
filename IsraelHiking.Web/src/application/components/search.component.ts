@@ -25,7 +25,7 @@ import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
 import { RoutesFactory } from "../services/routes.factory";
 import { SpatialService } from "../services/spatial.service";
-import { GpxDataContainerConverterService } from "application/services/gpx-data-container-converter.service";
+import { GpxDataContainerConverterService } from "../services/gpx-data-container-converter.service";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import type { RoutingType, ApplicationState, LatLngAlt, SearchResultsPointOfInterest, LatLngAltTime } from "../models/models";
