@@ -1,22 +1,20 @@
-[matDialogTitle] {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: top;
-}
-
 [matDialogTitle] [matDialogClose] {
+    position: absolute;
     min-width: 0;
     min-height: 0;
     line-height: initial;
     padding: 5px;
+    top: 0;
+    right: 5px;
 }
 
-[matDialogTitle] [matDialogClose] i {
-    display: block;
+[dir=rtl] [matDialogTitle] [matDialogClose] {
+    right: unset;
+    left: 5px;
 }
 
-.close-wrapper {
-    float: left;
+.mdc-dialog__title::before {
+    height: 0 !important;
 }
 
 .dialog-small {
