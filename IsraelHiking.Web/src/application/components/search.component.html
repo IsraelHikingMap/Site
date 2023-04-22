@@ -5,7 +5,7 @@
     <div class="side-control maplibregl-ctrl flex flex-row">
         <button mat-button class="pull-right" (click)="toggleDirectional()" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle directional search"><i class="fa fa-lg" [ngClass]="{'icon-plus': !directional.isOn, 'icon-minus': directional.isOn}"></i></button>
         <div [dir]="resources.direction">
-            <mat-form-field class="search-input-container">
+            <mat-form-field class="search-input-container" subscriptSizing="dynamic">
                 <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="hasFocus = true" (blur)="hasFocus = false">
                 <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete" [displayWith]="displayResults">
                     <!--HM TODO: bring tooltip back, remove full content? matTooltip="{{result.displayName}}" matTooltipPosition="left"-->
@@ -28,15 +28,15 @@
     <div class="side-control maplibregl-ctrl flex flex-row" *ngIf="directional.isOn">
         <button mat-button class="pull-right" (click)="searchRoute()"><i class="fa icon-arrow-left fa-lg"></i></button>
         <div [dir]="resources.direction">
-            <mat-form-field class="pull-right search-input-container">
+            <mat-form-field class="pull-right search-input-container" subscriptSizing="dynamic">
                 <input type="text" matInput #searchToInput [formControl]="searchTo" [matAutocomplete]="autoTo" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(toContext.searchTerm)">
+                <mat-autocomplete positionY="below" #autoTo="matAutocomplete" [displayWith]="displayResults">
+                    <mat-option *ngFor="let result of toContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
+                        <i *ngIf="result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
+                        {{result.displayName}}
+                    </mat-option>
+                </mat-autocomplete>
             </mat-form-field>
-            <mat-autocomplete positionY="below" #autoTo="matAutocomplete" [displayWith]="displayResults">
-                <mat-option *ngFor="let result of toContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
-                    <i *ngIf="result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
-                    {{result.displayName}}
-                </mat-option>
-            </mat-autocomplete>
         </div>
         <button mat-button class="pull-right" (click)="toggleOpen()" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search close"><i class="fa icon-search fa-lg"></i></button>
     </div>
