@@ -135,18 +135,20 @@ export class DatabaseService {
     }
 
     public async closeDatabase(dbKey: string) {
-        this.loggingService.info("[Database] Closing database: " + dbKey);
+        this.loggingService.info("[Database] Closing " + dbKey);
         if (!this.sourceDatabases.has(dbKey)) {
-            this.loggingService.info(`[Database] database ${dbKey} was never opened`);
+            this.loggingService.info(`[Database] ${dbKey} was never opened`);
             return;
         }
         try {
             let db = await this.sourceDatabases.get(dbKey);
             await db.close();
-            this.loggingService.info("[Database] Database closed succefully: " + dbKey);
+            this.loggingService.info("[Database] Closed succefully: " + dbKey);
+            await this.sqlite.closeConnection(dbKey + ".db", true);
+            this.loggingService.info("[Database] Connection closed succefully: " + dbKey);
             this.sourceDatabases.delete(dbKey);
         } catch (ex) {
-            this.loggingService.error(`[Database] Unable to close database ${dbKey}, ${(ex as Error).message}`);
+            this.loggingService.error(`[Database] Unable to close ${dbKey}, ${(ex as Error).message}`);
         }
     }
 
@@ -219,7 +221,7 @@ export class DatabaseService {
                 this.loggingService.info(`[Database] Connection opened succefully: ${dbName}`);
                 resolve(db);
             } catch (ex) {
-                this.loggingService.error(`[Database] Failed creating or opening connection to ${dbName}, ${(ex as Error).message}`);
+                this.loggingService.error(`[Database] Failed opening ${dbName}, ${(ex as Error).message}`);
                 reject(ex);
             }
         }));
@@ -227,6 +229,7 @@ export class DatabaseService {
     }
 
     public async moveDownloadedDatabaseFile(dbFileName: string) {
+        await this.closeDatabase(dbFileName.replace(".db", ""));
         this.loggingService.info(`[Database] Starting moving file ${dbFileName}`);
         await this.sqlite.moveDatabasesAndAddSuffix("cache", [dbFileName]);
         this.loggingService.info(`[Database] Finished moving file ${dbFileName}`);
