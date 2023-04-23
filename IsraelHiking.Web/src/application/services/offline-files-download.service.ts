@@ -108,9 +108,10 @@ export class OfflineFilesDownloadService {
                 let token = this.ngRedux.getState().userState.token;
                 if (fileName.endsWith(".mbtiles")) {
                     let dbFileName = fileName.replace(".mbtiles", ".db");
+                    await this.databaseService.closeDatabase(dbFileName.replace(".db", ""));
                     await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`, dbFileName, token,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
-                        await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
+                    await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
                 } else {
                     let fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));

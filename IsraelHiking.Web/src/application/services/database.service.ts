@@ -143,6 +143,7 @@ export class DatabaseService {
         try {
             let db = await this.sourceDatabases.get(dbKey);
             await db.close();
+            this.loggingService.info("[Database] Database closed succefully: " + dbKey);
             this.sourceDatabases.delete(dbKey);
         } catch (ex) {
             this.loggingService.error(`[Database] Unable to close database ${dbKey}, ${(ex as Error).message}`);
@@ -205,7 +206,7 @@ export class DatabaseService {
                 let db = await this.sourceDatabases.get(dbName);
                 return db;
             } catch (ex) {
-                this.loggingService.info(`[Database] There's a problem with the connection to ${dbName}, ${(ex as Error).message}`);
+                this.loggingService.error(`[Database] There's a problem with the connection to ${dbName}, ${(ex as Error).message}`);
             }
         }
         this.loggingService.info(`[Database] Creating connection to ${dbName}`);
@@ -213,9 +214,12 @@ export class DatabaseService {
             try {
                 let dbPromise = this.sqlite.createConnection(dbName + ".db", false, "no-encryption", 1, true);
                 let db = await dbPromise;
+                this.loggingService.info(`[Database] Connection created succefully to ${dbName}`);
                 await db.open();
+                this.loggingService.info(`[Database] Connection opened succefully: ${dbName}`);
                 resolve(db);
             } catch (ex) {
+                this.loggingService.error(`[Database] Failed creating or opening connection to ${dbName}, ${(ex as Error).message}`);
                 reject(ex);
             }
         }));
@@ -223,7 +227,6 @@ export class DatabaseService {
     }
 
     public async moveDownloadedDatabaseFile(dbFileName: string) {
-        await this.closeDatabase(dbFileName.replace(".db", ""));
         this.loggingService.info(`[Database] Starting moving file ${dbFileName}`);
         await this.sqlite.moveDatabasesAndAddSuffix("cache", [dbFileName]);
         this.loggingService.info(`[Database] Finished moving file ${dbFileName}`);
