@@ -22,7 +22,7 @@
 }
 
 .dialog-xs {
-    max-width: 360px;
+    max-width: 400px;
 }
 
 .item {
@@ -38,6 +38,7 @@
     border: 1px solid #b7b7b7;
     border-radius: 5px;
     width: 64px;
+    min-width: 64px;
     height: 64px;
 }
 
@@ -49,5 +50,12 @@
 
     .mat-mdc-dialog-container .mat-mdc-button {
         white-space: normal;
+    }
+
+    .item-image {
+        padding: 0;
+        width: 48px;
+        min-width: 48px;
+        height: 48px;
     }
 }

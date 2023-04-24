@@ -28,7 +28,7 @@
                         {{getTraceDisplayName(trace)}}<br />
                         {{trace.timeStamp | date:'dd/MM/yyyy'}}<br />
                         {{getVisibilityTranslation(trace.visibility)}}<br />
-                        {{trace.tagsString || resources.noTags}}
+                        {{trace.tagsString}}
                     </div>
                     <div *ngIf="isTraceInEditMode(trace.id)">
                         <mat-form-field>
