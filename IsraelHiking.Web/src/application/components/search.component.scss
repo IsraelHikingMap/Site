@@ -1,9 +1,12 @@
+@use '@angular/material' as mat;
+
 .pull-left-important {
     float: left !important;
 }
 
 .search-input-container {
     width: 200px;
+    @include mat.all-component-densities(-3);
 }
 
 .search-result-option {
