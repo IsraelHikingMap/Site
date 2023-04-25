@@ -87,14 +87,18 @@ body {
     background-color: white;
     margin: 0 !important;
     border: 2px solid rgba(0,0,0,.2);
-}
 
-.side-control button, .side-control a {
-    min-width: unset !important;
-    padding: 0 !important;
-    display: block;
-    width: v.$app-button-size;
-    height: v.$app-button-size;
+    & button, a {
+        min-width: unset !important;
+        padding: 0 !important;
+        display: block;
+        width: v.$app-button-size;
+        height: v.$app-button-size;
+
+        & i {
+            vertical-align: middle !important;
+        }
+    }
 }
 
 .input-wrapper-spacer {
