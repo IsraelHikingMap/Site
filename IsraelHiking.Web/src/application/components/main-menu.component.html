@@ -1,21 +1,16 @@
 ﻿﻿<div class="side-control maplibregl-ctrl">
     <div class="control-container">
-        <button mat-button class="pull-right cursor-pointer" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle main menu"><i class="fa fa-lg icon-bars"></i></button>
-        <div class="pull-right" *ngIf="!isLoggedIn() && !isIFrame()">
-            <div class="control-container-item gutters" style="position: relative;">
-                <div class="table-cell button-height">
-                    <span class="pull-right space-after cursor-pointer" (click)="login()">
-                        <i class="fa icon-frown-o fa-lg"></i>
-                    </span>
-                </div>
-                <span class="circle" [ngClass]="{'offline': isOffline(), 'online': !isOffline()}"></span>
-            </div>
-        </div>
-        <button mat-button *ngIf="isLoggedIn()" class="pull-right cursor-pointer" [matMenuTriggerFor]="userMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle user menu">
-            <img *ngIf="userInfo?.imageUrl" class="pull-right space-after profile-image" [src]="userInfo.imageUrl | offlineImage:true | async" alt=""/>
-            <i *ngIf="!userInfo.imageUrl" class="fa icon-user fa-lg"></i>
+        <button mat-button class="pull-right" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle main menu"><i class="fa fa-lg icon-bars"></i></button>
+        <div class="pull-right relative">
+            <button mat-button *ngIf="isLoggedIn()" [matMenuTriggerFor]="userMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle user menu">
+                <img *ngIf="userInfo?.imageUrl" class="pull-right space-after profile-image" [src]="userInfo.imageUrl | offlineImage:true | async" alt=""/>
+                <i *ngIf="!userInfo.imageUrl" class="fa icon-user fa-lg"></i>
+            </button>
+            <button mat-button *ngIf="!isLoggedIn() && !isIFrame()" (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
+                <i class="fa icon-frown-o fa-lg"></i>
+            </button>
             <span class="circle" [ngClass]="{'offline': isOffline(), 'online': !isOffline()}">{{getQueueText()}}</span>
-        </button>
+        </div>
         <mat-menu #appMenu="matMenu" xPosition="before">
             <ng-template matMenuContent>
                 <div [dir]="resources.direction">
