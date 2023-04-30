@@ -135,17 +135,20 @@ export class DatabaseService {
     }
 
     public async closeDatabase(dbKey: string) {
-        this.loggingService.info("[Database] Closing database: " + dbKey);
+        this.loggingService.info("[Database] Closing " + dbKey);
         if (!this.sourceDatabases.has(dbKey)) {
-            this.loggingService.info(`[Database] database ${dbKey} was never opened`);
+            this.loggingService.info(`[Database] ${dbKey} was never opened`);
             return;
         }
         try {
             let db = await this.sourceDatabases.get(dbKey);
             await db.close();
+            this.loggingService.info("[Database] Closed succefully: " + dbKey);
+            await this.sqlite.closeConnection(dbKey + ".db", true);
+            this.loggingService.info("[Database] Connection closed succefully: " + dbKey);
             this.sourceDatabases.delete(dbKey);
         } catch (ex) {
-            this.loggingService.error(`[Database] Unable to close database ${dbKey}, ${(ex as Error).message}`);
+            this.loggingService.error(`[Database] Unable to close ${dbKey}, ${(ex as Error).message}`);
         }
     }
 
@@ -205,7 +208,7 @@ export class DatabaseService {
                 let db = await this.sourceDatabases.get(dbName);
                 return db;
             } catch (ex) {
-                this.loggingService.info(`[Database] There's a problem with the connection to ${dbName}, ${(ex as Error).message}`);
+                this.loggingService.error(`[Database] There's a problem with the connection to ${dbName}, ${(ex as Error).message}`);
             }
         }
         this.loggingService.info(`[Database] Creating connection to ${dbName}`);
@@ -213,9 +216,12 @@ export class DatabaseService {
             try {
                 let dbPromise = this.sqlite.createConnection(dbName + ".db", false, "no-encryption", 1, true);
                 let db = await dbPromise;
+                this.loggingService.info(`[Database] Connection created succefully to ${dbName}`);
                 await db.open();
+                this.loggingService.info(`[Database] Connection opened succefully: ${dbName}`);
                 resolve(db);
             } catch (ex) {
+                this.loggingService.error(`[Database] Failed opening ${dbName}, ${(ex as Error).message}`);
                 reject(ex);
             }
         }));

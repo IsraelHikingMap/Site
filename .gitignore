@@ -206,3 +206,4 @@ ModelManifest.xml
 /IsraelHiking.Web/ul_web_hooks/android
 /IsraelHiking.Web/.angular/
 *.swp
+elevation-cache
