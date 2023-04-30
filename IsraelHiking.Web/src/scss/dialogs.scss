@@ -42,7 +42,7 @@
     height: 64px;
 }
 
-@media (max-width:767px) {
+@media (width <= 768px) {
     .mat-mdc-dialog-container {
         margin: 0 auto;
         max-height: 90vh;

@@ -58,7 +58,7 @@ $app-background: map-get($app-theme, background);
 }
 
 
-@media (max-width:500px) {
+@media (width <= 550px) {
     .sidebar-wrapper {
         width: 100vw;
         box-sizing: border-box;
@@ -106,7 +106,7 @@ body {
     margin-bottom: 1rem;
 }
 
-@media (max-width: 550px) {
+@media (width <= 550px) {
     .route-statistics-control-container {
         margin-bottom: 0 !important;
         margin-right: 0 !important;

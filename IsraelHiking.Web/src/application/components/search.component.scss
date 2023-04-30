@@ -29,12 +29,7 @@
         padding: 0 0 0 5px;
     }
 
-@media only screen and (min-width : 768px) {
-    /* TODO(mdc-migration): The following rule targets internal classes of form-field that may no longer apply for the MDC version. */
-    .search-input-container .mat-form-field-wrapper {
-        width: 100%;
-    }
-
+@media (width > 550px) {
     .search-input-container {
         width: 350px;
     }
