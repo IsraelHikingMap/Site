@@ -9,7 +9,7 @@ import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
-import { SetShareUrlAction } from "../reducers/in-memory.reducer";
+import { SetPannedAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { UpdateShareUrlAction, AddShareUrlAction, RemoveShareUrlAction } from "../reducers/share-urls.reducer";
 import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
@@ -171,6 +171,9 @@ export class ShareUrlsService {
         this.ngRedux.dispatch(new SetShareUrlAction({
             shareUrl
         }));
+        if (shareUrl != null) {
+            this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: new Date() }));
+        }
     }
 
     public async setShareUrlById(shareId: string): Promise<ShareUrl> {
