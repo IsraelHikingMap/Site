@@ -1,11 +1,7 @@
-﻿<div [dir]="resources.direction">
+﻿﻿<div [dir]="resources.direction">
     <div matDialogTitle>
-        <div>
-            {{title}}
-        </div>
-        <div>
-            <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
-        </div>
+        <div>{{title}}</div>
+        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
         <div class="flex flex-row">
@@ -23,37 +19,43 @@
             <a class="text-small" href="https://github.com/IsraelHikingMap/Site/wiki/Custom-maps" target="_blank">{{resources.moreInfo}}</a>
         </div>
         <div class="input-wrapper-spacer"></div>
-        <div class="flex flex-row">
-            <mat-form-field class="w-1/2">
+        <div class="flex flex-row gap-1">
+            <mat-form-field class="flex-1">
                 <input matInput type="number" [(ngModel)]="layerData.minZoom" placeholder="{{resources.minZoom}}" required="" />
             </mat-form-field>
-            <mat-form-field class="w-1/2 margin-10">
+            <mat-form-field class="flex-1">
                 <input matInput type="number" [(ngModel)]="layerData.maxZoom" placeholder="{{resources.maxZoom}}" required="" />
             </mat-form-field>
-        </div>
-        <div class="flex flex-row">
-            <div class="w-1/5" *ngIf="isOverlay">
-                <label class="text-center">{{resources.opacity}}</label>
-                <mat-slider [(ngModel)]="layerData.opacity" min="0.1" max="1.0" step="0.1" color="primary" vertical></mat-slider>
-            </div>
-            <div class="flex-1">
-                <div class="w-full" style="height: 138px">
-                    <mgl-map [zoom]="[(layerData.minZoom + layerData.maxZoom) / 2]"
-                             [center]="[(location | async)?.longitude, (location | async)?.latitude]"
-                             [style]='{"version": 8, "sources": {}, "layers": [] }'
-                             [attributionControl]="false">
-                        <auto-layer [layerData]="layerData"
-                                    [visible]="true"
-                                    [isBaselayer]="!isOverlay"
-                                    [isMainMap]="false">
-                        </auto-layer>
-                    </mgl-map>
+            <div class="flex-1" *ngIf="isOverlay">
+                <div class="flex flex-col">
+                    <label class="text-center">{{resources.opacity}}</label>
+                    <mat-slider min="0.1" max="1.0" step="0.1" color="primary"><input matSliderThumb [(ngModel)]="layerData.opacity"/></mat-slider>
                 </div>
             </div>
         </div>
+        <div class="flex flex-row">
+            <div class="w-full" style="height: 138px">
+                <mgl-map [zoom]="[(layerData.minZoom + layerData.maxZoom) / 2]"
+                            [center]="[(location | async)?.longitude, (location | async)?.latitude]"
+                            [style]='{"version": 8, "sources": {}, "layers": [] }'
+                            [attributionControl]="false">
+                    <auto-layer [layerData]="layerData"
+                                [visible]="true"
+                                [isBaselayer]="!isOverlay"
+                                [isMainMap]="false">
+                    </auto-layer>
+                </mgl-map>
+            </div>
+        </div>
     </div>
-    <div mat-dialog-actions class="flex flex-row justify-end">
-        <button matDialogClose type="button" mat-button *ngIf="!isNew" (click)="removeLayer()" matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
-        <button matDialogClose type="button" mat-button (click)="saveLayer()" [disabled]="keyInput.errors !== null" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Save layer"><i class="fa icon-check"></i></button>
+    <div mat-dialog-actions>
+        <div class="flex flex-row w-full">
+            <div class="flex-1">
+                <button mat-button class="w-full" *ngIf="!isNew" matDialogClose type="button" (click)="removeLayer()" matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
+            </div>
+            <div class="flex-1">
+                <button mat-button class="w-full" matDialogClose type="button" (click)="saveLayer()" [disabled]="keyInput.errors !== null" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Save layer"><i class="fa icon-check"></i></button>
+            </div>
+        </div>
     </div>
 </div>

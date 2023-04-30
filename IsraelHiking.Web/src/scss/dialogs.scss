@@ -1,22 +1,20 @@
-[matDialogTitle] {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: top;
-}
-
 [matDialogTitle] [matDialogClose] {
+    position: absolute;
     min-width: 0;
     min-height: 0;
     line-height: initial;
     padding: 5px;
+    top: 0;
+    right: 5px;
 }
 
-[matDialogTitle] [matDialogClose] i {
-    display: block;
+[dir=rtl] [matDialogTitle] [matDialogClose] {
+    right: unset;
+    left: 5px;
 }
 
-.close-wrapper {
-    float: left;
+.mdc-dialog__title::before {
+    height: 0 !important;
 }
 
 .dialog-small {
@@ -24,7 +22,7 @@
 }
 
 .dialog-xs {
-    max-width: 360px;
+    max-width: 400px;
 }
 
 .item {
@@ -40,16 +38,24 @@
     border: 1px solid #b7b7b7;
     border-radius: 5px;
     width: 64px;
+    min-width: 64px;
     height: 64px;
 }
 
-@media (max-width:767px) {
-    .mat-dialog-container {
+@media (width <= 768px) {
+    .mat-mdc-dialog-container {
         margin: 0 auto;
         max-height: 90vh;
     }
 
-    .mat-dialog-container .mat-button {
+    .mat-mdc-dialog-container .mat-mdc-button {
         white-space: normal;
+    }
+
+    .item-image {
+        padding: 0;
+        width: 48px;
+        min-width: 48px;
+        height: 48px;
     }
 }

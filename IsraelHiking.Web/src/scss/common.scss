@@ -10,11 +10,36 @@
 $app-primary: mat.define-palette(mat.$green-palette, 600);
 $app-accent: mat.define-palette(mat.$yellow-palette);
 $app-warm: mat.define-palette(mat.$red-palette);
-$app-theme: mat.define-light-theme($app-primary, $app-accent, $app-warm);
+$app-theme: mat.define-light-theme((
+ color: (
+   primary: $app-primary,
+   accent: $app-accent,
+   warn: $app-warm,
+ ),
+ typography: mat.define-typography-config(),
+ density: 0,
+));
 $app-background: map-get($app-theme, background);
-
 @include mat.core();
 @include mat.all-component-themes($app-theme);
+
+
+.mat-mdc-snack-bar-container {
+    &.success-snackbar {
+        --mdc-snackbar-container-color: #{mat.get-color-from-palette($app-primary)};
+    }
+    &.warn-snackbar {
+        --mdc-snackbar-container-color: #{mat.get-color-from-palette($app-accent)};
+        --mdc-snackbar-supporting-text-color: ##000;
+    }
+    &.error-snackbar {
+        --mdc-snackbar-container-color: #{mat.get-color-from-palette($app-warm)};
+    }
+    &.confirm-snackbar {
+        --mat-mdc-snack-bar-button-color: var(--mdc-snackbar-supporting-text-color);
+    }
+  }
+
 
 /* added direction to fix issue with scroll bar and legend maps */
 .sidebar-wrapper {
@@ -33,7 +58,7 @@ $app-background: map-get($app-theme, background);
 }
 
 
-@media (max-width:500px) {
+@media (width <= 550px) {
     .sidebar-wrapper {
         width: 100vw;
         box-sizing: border-box;
@@ -62,14 +87,18 @@ body {
     background-color: white;
     margin: 0 !important;
     border: 2px solid rgba(0,0,0,.2);
-}
 
-.side-control button, .side-control a {
-    min-width: unset !important;
-    padding: 0 !important;
-    display: block;
-    width: v.$app-button-size;
-    height: v.$app-button-size;
+    & button, a {
+        min-width: unset !important;
+        padding: 0 !important;
+        display: block;
+        width: v.$app-button-size;
+        height: v.$app-button-size;
+
+        & i {
+            vertical-align: middle !important;
+        }
+    }
 }
 
 .input-wrapper-spacer {
@@ -77,7 +106,7 @@ body {
     margin-bottom: 1rem;
 }
 
-@media (max-width: 550px) {
+@media (width <= 550px) {
     .route-statistics-control-container {
         margin-bottom: 0 !important;
         margin-right: 0 !important;
@@ -140,6 +169,10 @@ overlay.overlay-shown {
 
 .min-w-unset {
     min-width: unset !important;
+}
+
+.h-unset {
+    height: unset !important;
 }
 
 .control-container {
@@ -267,7 +300,7 @@ overlay.overlay-shown {
 /* Margins*/
 
 @media print {
-    .mat-tooltip,
+    .mat-mdc-tooltip,
     .side-control {
         display: none !important;
     }

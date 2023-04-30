@@ -20,7 +20,7 @@ describe("RoutesFactory", () => {
         let routeEditingState = {
             opacity: 1,
             weight: 2,
-        }
+        };
         MockNgRedux.store.getState = () => ({
             routeEditingState
         });
@@ -42,7 +42,7 @@ describe("RoutesFactory", () => {
         let routeEditingState = {
             opacity: 1,
             weight: 2,
-        }
+        };
         MockNgRedux.store.getState = () => ({
             routeEditingState
         });

@@ -15,7 +15,7 @@ const config: CapacitorConfig = {
   },
   plugins: {
     CapacitorSQLite: {
-      "iosDatabaseLocation": "Library/CapacitorDatabase"
+      iosDatabaseLocation: "Library/CapacitorDatabase"
     }
   },
   ios: {

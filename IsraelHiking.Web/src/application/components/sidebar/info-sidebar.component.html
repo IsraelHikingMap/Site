@@ -1,7 +1,7 @@
-﻿<div [dir]="resources.direction">
+﻿﻿<div [dir]="resources.direction">
     <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="selectedTabChanged($event)" [dynamicHeight]="'true'">
         <mat-tab label="{{resources.about}}">
-            <mat-card>
+            <mat-card appearance="outlined">
                 <p><span [innerHtml]="resources.infoSubheader"></span></p>
                 <div *ngIf="!isApp()" class="flex flex-row justify-center items-center">
                     <a href="https://play.google.com/store/apps/details?id=il.org.osm.israelhiking&hl=en" target="_blank" angulartics2On="click" angularticsCategory="Info" angularticsAction="Download from google play store">

@@ -1,4 +1,4 @@
-﻿<div [dir]="resources.direction">
+﻿﻿<div [dir]="resources.direction">
     <mat-card-header *ngIf="!info.canEditTitle">
         <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
             <span class="text-large" [dir]="resources.getDirection(info.title)">{{info.title}}</span>
@@ -22,7 +22,7 @@
             </mat-form-field>
         </div>
         <div class="w-1/12">
-            <button mat-button class="w-full h-full min-w-unset no-padding" (click)="removeUrl(i)"><i class="fa icon-trash"></i></button>
+            <button mat-button class="w-full !h-full min-w-unset no-padding" (click)="removeUrl(i)"><i class="fa icon-trash"></i></button>
         </div>
     </div>
     <br />
@@ -31,7 +31,7 @@
             {{resources.addLink}}
         </div>
         <div class="w-1/12">
-            <button mat-button class="w-full h-full min-w-unset no-padding"><i class="fa icon-plus"></i></button>
+            <button mat-button class="w-full !h-full min-w-unset no-padding"><i class="fa icon-plus"></i></button>
         </div>
     </div>
     <div *ngIf="isPoint()">
@@ -44,7 +44,7 @@
         </div>
         <br />
         <div class="flex flex-row flex-wrap" *ngIf="selectedCategory">
-            <button mat-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" class="flex-1" [ngClass]="{active: icon === selectedCategory.selectedIcon}">
+            <button mat-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" class="flex-1 h-unset" [ngClass]="{active: icon === selectedCategory.selectedIcon}">
                 <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
                 <br />
                 <span class="chrome-wordwrap-fix category-button-text">{{resources.translate(icon.label)}}</span>

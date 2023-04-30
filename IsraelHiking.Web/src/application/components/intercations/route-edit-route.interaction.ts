@@ -54,6 +54,14 @@ export class RouteEditRouteInteraction {
         this.mouseDownPoint = null;
     }
 
+    public static createSegmentId(route: RouteData, index: number) {
+        return route.id + SEGMENT + index;
+    }
+
+    public static createSegmentPointId(route: RouteData, index: number) {
+        return route.id + SEGMENT_POINT + index;
+    }
+
     private addEndOfRouteProgress(start: LatLngAlt, end: LatLngAlt): string {
         let id = "end-of-route-progress-line";
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
@@ -74,15 +82,6 @@ export class RouteEditRouteInteraction {
         } as GeoJSON.Feature<GeoJSON.LineString>;
         this.updateData(newPointProgress);
         return id;
-    }
-
-
-    public static createSegmentId(route: RouteData, index: number) {
-        return route.id + SEGMENT + index;
-    }
-
-    public static createSegmentPointId(route: RouteData, index: number) {
-        return route.id + SEGMENT_POINT + index;
     }
 
     public setData(geojsonData: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>) {

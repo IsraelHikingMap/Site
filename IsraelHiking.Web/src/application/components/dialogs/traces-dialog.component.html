@@ -1,4 +1,4 @@
-﻿<div [dir]="resources.direction" 
+﻿﻿<div [dir]="resources.direction" 
      infiniteScroll 
      [infiniteScrollDistance]="2" 
      (scrolled)="onScrollDown()" 
@@ -9,9 +9,7 @@
                 <input matInput type="text" class="w-full" [formControl]="searchTerm" placeholder="{{resources.search}}" />
             </mat-form-field>
         </div>
-        <div class="close-wrapper">
-            <button type="button" mat-button class="flex flex-col justify-start items-start" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
-        </div>
+        <button type="button" mat-button class="flex flex-col justify-start items-start" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content id="dialogContentForScroll">
         <div class="flex flex-row">
@@ -30,7 +28,7 @@
                         {{getTraceDisplayName(trace)}}<br />
                         {{trace.timeStamp | date:'dd/MM/yyyy'}}<br />
                         {{getVisibilityTranslation(trace.visibility)}}<br />
-                        {{trace.tagsString || resources.noTags}}
+                        {{trace.tagsString}}
                     </div>
                     <div *ngIf="isTraceInEditMode(trace.id)">
                         <mat-form-field>

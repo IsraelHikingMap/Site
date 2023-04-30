@@ -1,4 +1,4 @@
-﻿<div [dir]="resources.direction" dnd-droppable (onDropSuccess)="addImage($event.mouseEvent)">
+﻿﻿<div [dir]="resources.direction" dnd-droppable (onDropSuccess)="addImage($event.mouseEvent)">
     <div matDialogTitle>
         <div *ngIf="!url">
             {{title}}
@@ -6,9 +6,7 @@
         <a *ngIf="url" href="{{url.url}}" target="_blank">
             {{title}}
         </a>
-        <div>
-            <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
-        </div>
+        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
         <div class="flex flex-row">
@@ -27,7 +25,7 @@
             <div class="w-2/5">
                 <div class="flex flex-row">
                     <label *ngIf="!imageLink">
-                        <a mat-button class="flex-center w-full" [style.color]="'black'" imageCapture (changed)="addImage($event)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
+                        <a mat-button class="flex-center w-full h-unset" [style.color]="'black'" imageCapture (changed)="addImage($event)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
                         <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera" />
                     </label>
                     <img *ngIf="imageLink"

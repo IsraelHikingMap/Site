@@ -1,4 +1,4 @@
-﻿<div [dir]="resources.direction"
+﻿﻿<div [dir]="resources.direction"
      infiniteScroll 
      [infiniteScrollDistance]="2" 
      (scrolled)="onScrollDown()" 
@@ -9,9 +9,7 @@
                 <input matInput type="text" class="w-full" [formControl]="searchTerm" placeholder="{{resources.search}}" />
             </mat-form-field>
         </div>
-        <div class="close-wrapper">
-            <button type="button" mat-button matDialogClose tabindex="-1" class="flex flex-col justify-start items-start"><i class="fa icon-close"></i></button>
-        </div>
+        <button type="button" mat-button matDialogClose tabindex="-1" class="flex flex-col justify-start items-start"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content id="dialogContentForScroll">
         <div class="flex flex-row">

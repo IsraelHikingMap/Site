@@ -1,4 +1,4 @@
-﻿<div class="sidebar-wrapper" *ngIf="isOpen | async" [@animateSidebar]>
+﻿﻿<div class="sidebar-wrapper" *ngIf="isOpen | async" [@animateSidebar]>
     <div [dir]="resources.direction">
         <div class="flex flex-row">
             <div class="flex-1" *ngIf="!isHideEditMode()">
@@ -39,7 +39,7 @@
         </div>
         <mat-spinner *ngIf="isLoading"></mat-spinner>
         <div *ngIf="isEditMode()">
-            <mat-card class="mat-elevation-z0">
+            <mat-card appearance="outlined" class="mat-elevation-z0">
                 <public-poi-edit [info]="info"></public-poi-edit>
                 <div class="flex flex-row" *ngIf="showLocationUpdate">
                     <mat-checkbox color="primary" [(ngModel)]="updateLocation">{{resources.updateLocation}}</mat-checkbox>
@@ -55,7 +55,7 @@
             </div>
         </div>
         <div *ngIf="!isEditMode()">
-            <mat-card class="mat-elevation-z0">
+            <mat-card appearance="outlined" class="mat-elevation-z0">
                 <mat-card-header>
                     <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
                         <a *ngIf="hasUrl()" [href]="getUrl()" [target]="'_blank'" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site from title">

@@ -9,7 +9,7 @@ import { NgRedux, Select } from "@angular-redux2/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { ToggleAddRecordingPoiAction } from "application/reducers/recorded-route.reducer";
+import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import type { ApplicationState, BatteryOptimizationType } from "../models/models";
 
 @Injectable()
