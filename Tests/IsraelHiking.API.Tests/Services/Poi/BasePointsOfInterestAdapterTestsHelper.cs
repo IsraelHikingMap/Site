@@ -50,6 +50,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 }
             };
             feature.SetLocation(new Coordinate(2.2, 1.1));
+            feature.SetId();
             return feature;
         }
     }
