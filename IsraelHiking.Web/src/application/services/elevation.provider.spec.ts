@@ -1,7 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/mocks";
 
 import { ElevationProvider } from "./elevation.provider";
 import { LoggingService } from "./logging.service";

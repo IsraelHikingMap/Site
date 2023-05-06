@@ -1,5 +1,5 @@
 import { Router } from "@angular/router";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/mocks";
 import { TestBed, inject } from "@angular/core/testing";
 import { RouterTestingModule } from "@angular/router/testing";
 import { Subject } from "rxjs";

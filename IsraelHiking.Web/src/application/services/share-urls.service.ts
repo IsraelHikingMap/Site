@@ -172,7 +172,7 @@ export class ShareUrlsService {
             shareUrl
         }));
         if (shareUrl != null) {
-            this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: new Date() }));
+            this.ngRedux.dispatch(InMemoryReducer.actions.setPanned({ pannedTimestamp: new Date() }));
         }
     }
 

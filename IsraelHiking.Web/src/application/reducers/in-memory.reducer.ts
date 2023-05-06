@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, ActionsReducer } from "@angular-redux2/store";
+import { Action, AbstractReducer, ReducerActions } from "@angular-redux2/store";
 
 import type { ShareUrl, InMemoryState } from "../models/models";
 
@@ -20,7 +20,7 @@ export type SetFileUrlAndBaseLayerPayload = {
 };
 
 export class InMemoryReducer extends AbstractReducer {
-    static actions: ActionsReducer<InMemoryReducer>;
+    static actions: ReducerActions<InMemoryReducer>;
 
     @Action
     public toggleDistance(lastState: InMemoryState): InMemoryState {

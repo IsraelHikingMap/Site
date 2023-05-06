@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, ActionsReducer } from "@angular-redux2/store";
+import { Action, AbstractReducer, ReducerActions } from "@angular-redux2/store";
 
 import type { ShareUrl, ShareUrlsState } from "../models/models";
 
@@ -7,7 +7,7 @@ export class ShareUrlPayload {
 }
 
 export class ShareUrlsReducer extends AbstractReducer {
-    static actions: ActionsReducer<ShareUrlsReducer>;
+    static actions: ReducerActions<ShareUrlsReducer>;
 
     @Action
     public addShareUrl(lastState: ShareUrlsState, payload: ShareUrlPayload): ShareUrlsState {

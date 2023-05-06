@@ -1,4 +1,4 @@
-import { Action, AbstractReducer, ActionsReducer } from "@angular-redux2/store";
+import { Action, AbstractReducer, ReducerActions } from "@angular-redux2/store";
 
 import type { OfflineState } from "../models/models";
 
@@ -16,7 +16,7 @@ export type PoiQueuePayload = {
 
 
 export class OfflineReducer extends AbstractReducer {
-    static actions: ActionsReducer<OfflineReducer>;
+    static actions: ReducerActions<OfflineReducer>;
 
     @Action
     public setOfflineAvailable(lastState: OfflineState, payload: SetOfflineAvailablePayload): OfflineState {

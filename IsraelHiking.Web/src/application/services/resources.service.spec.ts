@@ -1,5 +1,5 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/mocks";
 
 import { ResourcesService } from "./resources.service";
 import { GetTextCatalogService } from "./gettext-catalog.service";

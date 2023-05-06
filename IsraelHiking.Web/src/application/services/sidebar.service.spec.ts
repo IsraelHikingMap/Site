@@ -1,5 +1,5 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/mocks";
 
 import { SidebarService } from "./sidebar.service";
 import { HashService } from "./hash.service";

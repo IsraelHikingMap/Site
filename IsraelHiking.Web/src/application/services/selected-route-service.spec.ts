@@ -1,5 +1,5 @@
 import { inject, TestBed } from "@angular/core/testing";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
+import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/mocks";
 import { Subject } from "rxjs";
 
 import { SelectedRouteService } from "./selected-route.service";
