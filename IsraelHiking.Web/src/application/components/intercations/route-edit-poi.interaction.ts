@@ -73,21 +73,23 @@ export class RouteEditPoiInteraction {
     }
 
     private async addPrivatePoi(latlng: LatLngAlt) {
-        let snapping = await this.getSnappingForPoint(latlng);
-        let markerData = (snapping.markerData != null)
-            ? { ...snapping.markerData }
-            : {
-                latlng,
-                urls: [],
-                title: "",
-                description: "",
-                type: "star"
-            };
+        let markerData: MarkerData = {
+            latlng,
+            urls: [],
+            title: "",
+            description: "",
+            type: "star"
+        };
         if (this.ngRedux.getState().recordedRouteState.isAddingPoi) {
             this.addToRecording(markerData);
-        } else {
-            this.addToSelectedRoute(markerData);
+            return;
         }
+
+        let snapping = await this.getSnappingForPoint(latlng);
+        if (snapping != null) {
+            markerData = { ...snapping.markerData }
+        }
+        this.addToSelectedRoute(markerData);
     }
 
     private addToSelectedRoute(markerData: MarkerData) {
