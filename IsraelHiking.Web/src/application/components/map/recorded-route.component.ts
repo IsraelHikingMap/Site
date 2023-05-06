@@ -1,6 +1,6 @@
 import { NgRedux, Select } from "@angular-redux2/store";
 import { Component } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, combineLatest, concatAll, throttleTime } from "rxjs";
 
 import { BaseMapComponent } from "../base-map.component";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
@@ -22,6 +22,9 @@ export class RecordedRouteComponent extends BaseMapComponent {
 
     @Select((state: ApplicationState) => state.recordedRouteState.route)
     public recordedRoute$: Observable<RecordedRoute>;
+
+    @Select((state: ApplicationState) => state.gpsState.currentPoistion)
+    public currentPoistion$: Observable<GeolocationPosition>;
 
     public recordedRouteSegments: GeoJSON.FeatureCollection<GeoJSON.LineString>[];
     public lastRouteSegment: GeoJSON.FeatureCollection<GeoJSON.LineString>;
@@ -45,7 +48,9 @@ export class RecordedRouteComponent extends BaseMapComponent {
             properties: {}
         };
 
-        this.recordedRoute$.subscribe(() => this.handleRecordingChanges());
+        // Combine streams to work when both current location and recorded route changes, added throttle to avoid a double update of the UI
+        combineLatest([this.recordedRoute$, this.currentPoistion$]).pipe(throttleTime(200, undefined, { trailing: true }))
+            .subscribe(() => this.handleRecordingChanges());
     }
 
     public isRecording() {

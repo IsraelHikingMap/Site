@@ -28,7 +28,6 @@ import { MatTabsModule } from "@angular/material/tabs";
 import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { ClipboardModule } from "@angular/cdk/clipboard";
-import { FlexLayoutModule } from "@angular/flex-layout";
 import { Angulartics2Module, Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { NgProgressModule } from "ngx-progressbar";
 import { NgProgressHttpModule } from "ngx-progressbar/http";
@@ -211,7 +210,6 @@ const initializeApplication = (injector: Injector) => async () => {
             MatGridListModule,
             FormsModule,
             ReactiveFormsModule,
-            FlexLayoutModule,
             ClipboardModule,
             RouterModule.forRoot(routes),
             Angulartics2Module.forRoot(),

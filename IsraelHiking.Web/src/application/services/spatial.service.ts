@@ -292,8 +292,8 @@ export class SpatialService {
         };
     }
 
-    public static getBoundsForFeatureCollection(featureCollection: GeoJSON.FeatureCollection): Bounds {
-        return SpatialService.bboxToBounds(bbox(featureCollection));
+    public static getBoundsForFeatureCollection(feature: GeoJSON.FeatureCollection): Bounds {
+        return SpatialService.bboxToBounds(bbox(feature));
     }
 
     public static getBoundsForFeature(feature: GeoJSON.Feature<GeoJSON.Geometry>): Bounds {
@@ -323,7 +323,7 @@ export class SpatialService {
         return SpatialService.mBBoundsToBounds(bounds);
     }
 
-    public static getCirclePolygonFeature(centerPoint: LatLngAlt, radius: number): 
+    public static getCirclePolygonFeature(centerPoint: LatLngAlt, radius: number):
         GeoJSON.Feature<GeoJSON.Polygon> & { properties: { radius: number }} {
         let options = { steps: 64, units: "meters" as Units, properties: { radius } };
         return circle(SpatialService.toCoordinate(centerPoint), radius, options);

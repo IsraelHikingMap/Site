@@ -33,7 +33,7 @@ export class ToastService {
         this.snackbar.open(message, title, {
             direction: this.resources.direction,
             duration: ToastService.DURATION,
-            panelClass: ["mat-toolbar", "mat-warn"] // for some reason warn is red
+            panelClass: ["error-snackbar"]
         });
 
     }
@@ -42,7 +42,7 @@ export class ToastService {
         this.snackbar.open(message, title, {
             direction: this.resources.direction,
             duration: ToastService.DURATION,
-            panelClass: ["mat-toolbar", "mat-accent"] // for some reason accent is yellow
+            panelClass: ["warn-snackbar"]
         });
     }
 
@@ -50,7 +50,7 @@ export class ToastService {
         this.snackbar.open(message, title, {
             direction: this.resources.direction,
             duration: ToastService.DURATION,
-            panelClass: ["mat-toolbar", "mat-primary"]
+            panelClass: ["success-snackbar"]
         });
     }
 
@@ -62,8 +62,7 @@ export class ToastService {
     }
 
     public confirm(options: IConfirmOptions) {
-
-        let componentRef = this.snackbar.openFromComponent(ConfirmDialogComponent);
+        let componentRef = this.snackbar.openFromComponent(ConfirmDialogComponent, { panelClass: ["confirm-snackbar"]});
         componentRef.instance.confirmMessage = options.message;
         componentRef.instance.confirmAction = () => {
             if (options.confirmAction != null) {

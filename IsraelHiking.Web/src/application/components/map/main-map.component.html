@@ -1,8 +1,8 @@
-﻿<ng-progress [ngStyle]="{'z-index':1500}"></ng-progress>
+﻿﻿<ng-progress [ngStyle]="{'z-index':1500}"></ng-progress>
 <sidebar></sidebar>
 <background-text></background-text>
-<div fxLayout="row" style="height: 100%">
-    <div fxFlex>
+<div class="flex flex-row" style="height: 100%">
+    <div class="w-full">
         <mgl-map [zoom]="[location.zoom]"
                  [center]="[location.longitude, location.latitude]"
                  [style]="initialStyle"
@@ -15,7 +15,7 @@
             <routes></routes>
             <recorded-route></recorded-route>
             <traces></traces>
-            <zoom fxShow.sm="false" fxShow.xs="false" #topLeftControl></zoom>
+            <zoom #topLeftControl></zoom>
             <location #topLeftControl *ngIf="isMobile() || !isIFrame()"></location>
             <main-menu #topRightControl></main-menu>
             <search #topRightControl *ngIf="!isIFrame()"></search>

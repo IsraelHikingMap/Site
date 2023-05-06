@@ -171,6 +171,9 @@ export class ShareUrlsService {
         this.ngRedux.dispatch(InMemoryReducer.actions.setShareUrl({
             shareUrl
         }));
+        if (shareUrl != null) {
+            this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: new Date() }));
+        }
     }
 
     public async setShareUrlById(shareId: string): Promise<ShareUrl> {

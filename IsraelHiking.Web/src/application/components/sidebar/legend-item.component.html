@@ -1,4 +1,4 @@
-﻿<div class="legend-item" [ngClass]="{'legend-route': item.type === 'Way', 'legend-poi' : item.type === 'POI'}">
+﻿﻿<div class="legend-item" [ngClass]="{'legend-route': item.type === 'Way', 'legend-poi' : item.type === 'POI'}">
     <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer" dir="ltr" angulartics2On="click" angularticsCategory="Info" angularticsAction="Legend move map">
         <img [src]="getImageAddress(item)" />
     </div>

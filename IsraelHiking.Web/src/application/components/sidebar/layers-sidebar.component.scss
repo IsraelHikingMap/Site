@@ -1,5 +1,6 @@
 ﻿.row-button {
     line-height: unset !important;
+    height: unset !important;
     & .fa {
         padding: 0 16px;
         width: 14px;
@@ -7,16 +8,8 @@
 }
 
 .short-button {
+    height: unset !important;
+    min-width: unset;
     line-height: unset !important;
     padding: 0;
-}
-
-.break-all {
-    word-break: break-all;
-}
-
-.route-name {
-    cursor: move !important;
-    display: inline-block;
-    width: 100%;
 }

@@ -1,20 +1,5 @@
-@use "variables" as v;
-
-.table {
-    display: table
-}
-
 .space-after {
     margin-left: 5px;
-}
-
-.table-cell {
-    display: table-cell;
-    vertical-align: middle;
-}
-
-.button-height {
-    height: v.$app-button-size;
 }
 
 .margin-top {
@@ -51,6 +36,9 @@
     font-size: 8px;
     color: white;
     line-height: normal;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
 }
 
 .circle.online {
@@ -59,4 +47,8 @@
 
 .circle.offline {
     background: #f00;
+}
+
+::ng-deep .mdc-list-item__primary-text {
+    width: 100%;
 }

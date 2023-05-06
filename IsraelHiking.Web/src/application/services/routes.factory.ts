@@ -55,6 +55,17 @@ export class RoutesFactory {
     }
 
     private generateRandomId() {
-        return Math.random().toString(36).substr(2, 9);
+        return Math.random().toString(36).substring(2, 9);
+    }
+
+    public regenerateDuplicateIds(routesData: RouteData[]) {
+        let ids = [] as string[];
+        for (let routeData of routesData) {
+            if (ids.includes(routeData.id)) {
+                routeData.id = this.generateRandomId();
+            } else {
+                ids.push(routeData.id);
+            }
+        }
     }
 }

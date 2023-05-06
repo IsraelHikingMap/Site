@@ -1,4 +1,4 @@
-﻿<div [dir]="resources.direction" class="dialog-small">
+﻿﻿<div [dir]="resources.direction" class="dialog-small">
     <div matDialogTitle>
         <div>
             {{title}}
@@ -8,43 +8,41 @@
         </div>
     </div>
     <div mat-dialog-content>
-        <mat-form-field fxFill>
-            <input matInput type="text" [(ngModel)]="routeData.name" placeholder="{{resources.name}}" required="" fxFill/>
+        <mat-form-field class="w-full">
+            <input matInput type="text" class="w-full" [(ngModel)]="routeData.name" placeholder="{{resources.name}}" required=""/>
         </mat-form-field>
-        <mat-form-field fxFill>
-            <textarea matInput rows="2" type="text" [dir]="resources.getDirection(routeData.description)" [(ngModel)]="routeData.description" placeholder="{{resources.description}}" fxFill></textarea>
+        <mat-form-field class="w-full">
+            <textarea matInput rows="2" type="text" class="w-full" [dir]="resources.getDirection(routeData.description)" [(ngModel)]="routeData.description" placeholder="{{resources.description}}"></textarea>
         </mat-form-field>
         
-        <div fxLayout="row wrap" fxLayoutAlign="space-between stretch">
-            <div fxFlex="50" fxFlex.xs="100">
-                <div fxLayout="column" fxLayoutGap="5px">
+        <div class="flex flex-row flex-wrap justify-between items-stretch">
+            <div class="sm:w-1/2 w-full">
+                <div class="flex flex-col gap-1">
                     <div *ngFor="let rowIndex of [0,1,2]" class="button-row">
-                        <div fxLayout="row" fxLayoutGap="5px">
-                            <div *ngFor="let currentColor of colors; let i = index" fxFlex [hidden]="i % 3 !== rowIndex">
-                                <button mat-mini-fab color="primary" fxFill type="button" [style.backgroundColor]="currentColor" (click)="routeData.color = currentColor"> <i *ngIf="currentColor === routeData.color" class="fa icon-check" [style.color]="getCheckIconColor(currentColor)"></i>  </button>
+                        <div class="flex flex-row gap-1">
+                            <div *ngFor="let currentColor of colors; let i = index" class="flex-1" [hidden]="i % 3 !== rowIndex">
+                                <button mat-mini-fab color="primary" class="w-full" type="button" [style.backgroundColor]="currentColor" (click)="routeData.color = currentColor"> <i *ngIf="currentColor === routeData.color" class="fa icon-check" [style.color]="getCheckIconColor(currentColor)"></i>  </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div fxFlex="50" fxFlex.xs="100">
-                <div fxLayout="row" fxFill>
-                    <div fxFlex="50">
-                        <div fxLayout="column" fxFill fxLayoutAlign="space-between center">
-                            <label>{{resources.width}}</label>
-                            <mat-slider [(ngModel)]="routeData.weight" min="4" max="20" step="2" color="primary" vertical></mat-slider>
-                        </div>
-                    </div>
-                    <div fxFlex>
-                        <div fxLayout="column" fxFill fxLayoutAlign="space-between center">
-                            <label>{{resources.opacity}}</label>
-                            <mat-slider [(ngModel)]="routeData.opacity" min="0.1" max="1.0" step="0.1" color="primary" vertical></mat-slider>
-                        </div>
-                    </div>
+            <div class="sm:w-1/2 w-full">
+                <div class="flex flex-row w-full">
+                    <label>{{resources.width}}</label>
+                </div>
+                <div class="flex flex-row w-full" dir="ltr">
+                    <mat-slider class="!w-full" min="4" max="20" step="2" color="primary"><input [(ngModel)]="routeData.weight" matSliderThumb /></mat-slider>
+                </div>
+                <div class="flex flex-row w-full">
+                    <label>{{resources.opacity}}</label>
+                </div>
+                <div class="flex flex-row w-full" dir="ltr">
+                    <mat-slider class="!w-full" min="0.1" max="1.0" step="0.1" color="primary"><input [(ngModel)]="routeData.opacity" matSliderThumb /></mat-slider>
                 </div>
             </div>
         </div>
-        <div fxLayout="row" style="position: relative">
+        <div class="flex flex-row" style="position: relative">
             <img width="100%" height="50px" src="content/legend/IHM_legendLight4WDVehicles.png">
             <hr class="preview-line" 
                 [ngStyle]="{
@@ -56,7 +54,7 @@
         </div>
     </div>
     <div mat-dialog-actions>
-        <div fxLayout="row" fxFill>
+        <div class="flex flex-row w-full">
             <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
                 <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="saveRouteToFile()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Save route to file">
                     <i class="fa fa-lg icon-external-link-square"></i>
@@ -75,14 +73,14 @@
                     <span class="margin-10">{{resources.reverseRoute}}</span>
                 </button>
             </mat-menu>
-            <div fxFlex>
+            <div class="flex-1">
                 <button mat-button *ngIf="!isNew" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Route" angularticsAction="Toggle advance options"><i class="fa icon-ellipsis-v fa-lg"></i></button>
             </div>
-            <div fxFlex>
-                <button matDialogClose type="button" mat-button *ngIf="!isNew" (click)="deleteRoute()" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Delete route" fxFill><i class="fa fa-lg icon-trash"></i></button>
+            <div class="flex-1">
+                <button mat-button *ngIf="!isNew" matDialogClose type="button" class="w-full"  (click)="deleteRoute()" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Delete route"><i class="fa fa-lg icon-trash"></i></button>
             </div>
-            <div fxFlex>
-                <button matDialogClose type="button" mat-button (click)="saveRoute()" matTooltip="{{resources.save}}" matTooltipPosition="above" fxFill><i class="fa icon-check"></i></button>
+            <div class="flex-1">
+                <button mat-button matDialogClose type="button" class="w-full"  (click)="saveRoute()" matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
             </div>
         </div>
     </div>

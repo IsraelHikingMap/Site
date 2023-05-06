@@ -42,6 +42,7 @@ export class DataContainerService {
         if (keepCurrentRoutes) {
             routesData = [...this.ngRedux.getState().routes.present, ...routesData];
         }
+        this.routesFactory.regenerateDuplicateIds(routesData);
         this.ngRedux.dispatch(RoutesReducer.actions.replaceRoutes({
             routesData
         }));

@@ -27,16 +27,21 @@ describe("HashService", () => {
         MockNgRedux.reset();
     });
 
-    it("Should return base url",
-        inject([HashService], (hashService: HashService) => {
-
+    it("Should return map address",
+        inject([HashService, Router], (hashService: HashService, routerMock: any) => {
+            routerMock.createUrlTree = (arr: []) => arr.join("/");
             MockNgRedux.store.getState = () => ({
-                inMemoryState: {}
+                inMemoryState: {},
+                location: {
+                    zoom: 1,
+                    latitude: 2,
+                    longitude: 3
+                }
             });
 
             let href = hashService.getHref();
 
-            expect(href).toBe(Urls.baseAddress);
+            expect(href).toBe(Urls.baseAddress + "map/2.00/2.000000/3.000000");
         }));
 
     it("Should return share url",
@@ -56,14 +61,17 @@ describe("HashService", () => {
 
     it("Should return external url",
         inject([HashService, Router], (hashService: HashService, routerMock: any) => {
-            routerMock.createUrlTree = () => "file-address";
+            routerMock.createUrlTree = (array: [], options: any) => "file-address?" + options.queryParams.baselayer;
             MockNgRedux.store.getState = () => ({
                 inMemoryState: {
                     fileUrl: "fileUrl"
+                },
+                layersState: { 
+                    selectedBaseLayerKey: "base-layer"
                 }
             });
             let href = hashService.getHref();
 
-            expect(href).toBe(Urls.baseAddress + "file-address");
+            expect(href).toBe(Urls.baseAddress + "file-address?base-layer");
         }));
 });

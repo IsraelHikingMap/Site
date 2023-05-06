@@ -2,7 +2,7 @@
     height: 64px;
 }
 
-@media (max-width: 550px) {
+@media (width <= 550px) {
     .img-placeholder {
         display: none;
     }

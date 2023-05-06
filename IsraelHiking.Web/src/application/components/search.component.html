@@ -1,41 +1,42 @@
-﻿<div class="side-control maplibregl-ctrl" *ngIf="!isOpen && (searchVisible$ | async)" [dir]="resources.direction">
+﻿﻿<div class="side-control maplibregl-ctrl" *ngIf="!isOpen && (searchVisible$ | async)" [dir]="resources.direction">
     <button mat-button (click)="toggleOpen()" matTooltip="{{resources.search}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search open"><i class="fa icon-search fa-lg"></i></button>
 </div>
 <div *ngIf="isOpen && (searchVisible$ | async)">
-    <div class="side-control maplibregl-ctrl" fxLayout="row">
+    <div class="side-control maplibregl-ctrl flex flex-row">
         <button mat-button class="pull-right" (click)="toggleDirectional()" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle directional search"><i class="fa fa-lg" [ngClass]="{'icon-plus': !directional.isOn, 'icon-minus': directional.isOn}"></i></button>
         <div [dir]="resources.direction">
-            <mat-form-field class="search-input-container">
+            <mat-form-field class="search-input-container" subscriptSizing="dynamic">
                 <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="hasFocus = true" (blur)="hasFocus = false">
+                <mat-autocomplete positionY="below" autoActiveFirstOption="true" #autoFrom="matAutocomplete" [displayWith]="displayResults">
+                    <!--HM TODO: bring tooltip back, remove full content? matTooltip="{{result.displayName}}" matTooltipPosition="left"-->
+                    <mat-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
+                        <i *ngIf="result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
+                        <span>{{result.displayName}}</span>
+                    </mat-option>
+                </mat-autocomplete>
             </mat-form-field>
-            <mat-autocomplete positionY="below" #autoFrom="matAutocomplete" [displayWith]="displayResults">
-                <mat-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)" matTooltip="{{result.displayName}}" matTooltipPosition="left">
-                    <i *ngIf="result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
-                    <span>{{result.displayName}}</span>
-                </mat-option>
-            </mat-autocomplete>
         </div>
         <button mat-button class="pull-right" (click)="toggleOpen()" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search close"><i class="fa icon-search fa-lg"></i></button>
     </div>
-    <div class="side-control maplibregl-ctrl pull-left-important" fxLayout="row" *ngIf="directional.isOn" [style.float]="'left'">
+    <div class="side-control maplibregl-ctrl pull-left-important flex flex-row" *ngIf="directional.isOn" [style.float]="'left'">
         <button mat-button class="pull-right" (click)="setRouting('Hike')" [ngClass]="{active : routingType === 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></button>
         <button mat-button class="pull-right" (click)="setRouting('Bike')" [ngClass]="{active : routingType === 'Bike' }" matTooltip="{{resources.bikeRouting}}" matTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></button>
         <button mat-button class="pull-right" (click)="setRouting('4WD')" [ngClass]="{active : routingType === '4WD' }" matTooltip="{{resources.fourWheelDriveRouting}}" matTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></button>
         <button mat-button class="pull-right" (click)="setRouting('None')" [ngClass]="{active : routingType === 'None' }" matTooltip="{{resources.straightLines}}" matTooltipPosition="below"><i class="fa icon-none fa-lg"></i></button>
     </div>
     <br *ngIf="directional.isOn" />
-    <div class="side-control maplibregl-ctrl" *ngIf="directional.isOn" fxLayout="row">
+    <div class="side-control maplibregl-ctrl flex flex-row" *ngIf="directional.isOn">
         <button mat-button class="pull-right" (click)="searchRoute()"><i class="fa icon-arrow-left fa-lg"></i></button>
         <div [dir]="resources.direction">
-            <mat-form-field class="pull-right search-input-container">
+            <mat-form-field class="pull-right search-input-container" subscriptSizing="dynamic">
                 <input type="text" matInput #searchToInput [formControl]="searchTo" [matAutocomplete]="autoTo" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(toContext.searchTerm)">
+                <mat-autocomplete positionY="below" #autoTo="matAutocomplete" [displayWith]="displayResults">
+                    <mat-option *ngFor="let result of toContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
+                        <i *ngIf="result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
+                        {{result.displayName}}
+                    </mat-option>
+                </mat-autocomplete>
             </mat-form-field>
-            <mat-autocomplete positionY="below" #autoTo="matAutocomplete" [displayWith]="displayResults">
-                <mat-option *ngFor="let result of toContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">
-                    <i *ngIf="result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
-                    {{result.displayName}}
-                </mat-option>
-            </mat-autocomplete>
         </div>
         <button mat-button class="pull-right" (click)="toggleOpen()" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search close"><i class="fa icon-search fa-lg"></i></button>
     </div>
@@ -110,15 +111,15 @@
     </mgl-layer>
     <mgl-popup [lngLat]="directional.overlayLocation" *ngIf="directional.overlayLocation" [closeOnClick]="true">
         <h3 *ngIf="directional.routeTitle" [ngClass]="resources.getTextAlignment(directional.routeTitle)" [dir]="resources.getDirection(directional.routeTitle)" class="chrome-wordwrap-fix">{{directional.routeTitle}}</h3>
-        <div fxLayout="row">
-            <div fxFlex="33">
-                <button mat-button fxFill (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Convert search to route"><i class="fa icon-plus"></i></button>
+        <div class="flex flex-row">
+            <div class="w-1/3">
+                <button mat-button class="w-full" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Convert search to route"><i class="fa icon-plus"></i></button>
             </div>
-            <div fxFlex="33">
-                <button mat-button fxFill (click)="clearDirectionalRoute()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Remove search route from map"><i class="fa icon-eye-slash"></i></button>
+            <div class="w-1/3">
+                <button mat-button class="w-full" (click)="clearDirectionalRoute()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Remove search route from map"><i class="fa icon-eye-slash"></i></button>
             </div>
-            <div fxFlex>
-                <button mat-button fxFill (click)="showCoordinates = !showCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i></button>
+            <div class="flex-1">
+                <button mat-button class="w-full" (click)="showCoordinates = !showCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i></button>
             </div>
         </div>
         <div *ngIf="showCoordinates">

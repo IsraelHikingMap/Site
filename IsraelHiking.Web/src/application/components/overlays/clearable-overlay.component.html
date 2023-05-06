@@ -1,14 +1,14 @@
-﻿<div class="wide" [dir]="resources.direction">
+﻿﻿<div class="wide" [dir]="resources.direction">
     <h3 *ngIf="title" [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h3>
-    <div fxLayout="row">
-        <div fxFlex="33">
-            <button mat-button fxFill (click)="convertToRoute.emit()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Convert search to route"><i class="fa icon-plus"></i></button>
+    <div class="flex flex-row">
+        <div class="w-1/3">
+            <button mat-button class="w-full min-w-unset" (click)="convertToRoute.emit()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Convert search to route"><i class="fa icon-plus"></i></button>
         </div>
-        <div fxFlex="33">
-            <button mat-button fxFill (click)="cleared.emit()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Remove search route from map"><i class="fa icon-eye-slash"></i></button>
+        <div class="w-1/3">
+            <button mat-button class="w-full min-w-unset" (click)="cleared.emit()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Remove search route from map"><i class="fa icon-eye-slash"></i></button>
         </div>
-        <div fxFlex>
-            <button mat-button fxFill (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
+        <div class="w-1/3">
+            <button mat-button class="w-full min-w-unset" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
         </div>
     </div>
     <div *ngIf="!hideCoordinates">

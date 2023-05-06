@@ -3,15 +3,11 @@
         <div>
             <i class="fa fa-lg icon-exclamation-triangle" [style.color]="'orange'"></i> {{resources.facebookWarning}}
         </div>
-        <div>
-            <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
-        </div>
+        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-actions>
-        <div fxLayout="row" fxFlex>
-            <div fxFlex>
-                <a mat-button href="https://www.technologyhint.com/in-app-browser/" target="_blank" fxFill mat-dialog-close angulartics2On="click" angularticsCategory="Application" angularticsAction="Facebook disable in app info"><i class="fa fa-lg icon-info"></i> {{resources.moreInfo}}</a>
-            </div>
+        <div class="flex flex-row w-full">
+            <a mat-button class="w-full" href="https://www.technologyhint.com/in-app-browser/" target="_blank" mat-dialog-close angulartics2On="click" angularticsCategory="Application" angularticsAction="Facebook disable in app info"><i class="fa fa-lg icon-info"></i> {{resources.moreInfo}}</a>
         </div>
     </div>
 </div>

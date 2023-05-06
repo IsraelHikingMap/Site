@@ -99,7 +99,7 @@ $buttons-margin: 5px;
     background: white;
 }
 
-@media (max-width: 550px) {
+@media (width <= 550px) {
     .hidden-xs {
         display: none !important
     }
@@ -113,7 +113,7 @@ $buttons-margin: 5px;
         height: $container-height-small-screen;
     }
 
-    .chart-buttons .mat-button {
+    .chart-buttons .mat-mdc-button {
         padding: 0 !important;
     }
 

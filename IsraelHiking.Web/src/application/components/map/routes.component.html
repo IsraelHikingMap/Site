@@ -1,4 +1,4 @@
-﻿<mgl-geojson-source id="routes-geojson" [data]="routesGeoJson"></mgl-geojson-source>
+﻿﻿<mgl-geojson-source id="routes-geojson" [data]="routesGeoJson"></mgl-geojson-source>
 <mgl-layer id="route-line"
            type="line"
            source="routes-geojson"
@@ -104,12 +104,12 @@
            [lngLat]="[nonEditRoutePointPopupData.latlng.lng, nonEditRoutePointPopupData.latlng.lat]"
            (popupClose)="nonEditRoutePointPopupData = null">
     <div [dir]="resources.direction">
-        <div fxLayour="row">
-            <div fxFlex>
-                <a mat-button [href]="nonEditRoutePointPopupData.wazeAddress" target="_blank" matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="above" fxFill><i class="fa icon-waze"></i></a>
+        <div class="flex flex-row">
+            <div class="w-1/2">
+                <a mat-button class="w-full" [href]="nonEditRoutePointPopupData.wazeAddress" target="_blank" matTooltip="{{resources.navigateWithWaze}}" matTooltipPosition="above"><i class="fa icon-waze"></i></a>
             </div>
-            <div fxFlex>
-                <button mat-button (click)="switchToEditMode(nonEditRoutePointPopupData.routeId)" matTooltip="{{resources.edit}}" matTooltipPosition="above" fxFill><i class="fa icon-pencil"></i></button>
+            <div class="w-1/2">
+                <button mat-button class="w-full" (click)="switchToEditMode(nonEditRoutePointPopupData.routeId)" matTooltip="{{resources.edit}}" matTooltipPosition="above"><i class="fa icon-pencil"></i></button>
             </div>
         </div>
     </div>

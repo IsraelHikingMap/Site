@@ -26,11 +26,9 @@ export class LoggingService {
     private static readonly LOGGING_TABLE_NAME = "logging";
     private static readonly MAX_LOG_LINES = 50000;
 
-    private queue: LogLine[];
     private loggingDatabase: Dexie;
 
     constructor(private readonly runningContextService: RunningContextService) {
-        this.queue = [];
         this.loggingDatabase = null;
     }
 
@@ -39,32 +37,27 @@ export class LoggingService {
         this.loggingDatabase.version(1).stores({
             logging: "++, date"
         });
-        let lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).count();
-        if (lines > LoggingService.MAX_LOG_LINES) {
-            // keep only last MAX_LOG_LINES
-            await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
-                .orderBy("date")
-                .reverse()
-                .offset(LoggingService.MAX_LOG_LINES)
-                .delete();
-        }
+    }
 
-        while (this.queue.length > 0) {
-            this.writeToStorage(this.queue[0]);
-            this.queue.splice(0, 1);
+    private async reduceStoredLogLinesIfNeeded() {
+        let lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).count();
+        if (lines <= LoggingService.MAX_LOG_LINES) {
+            return;
         }
+        let keysToDelete = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
+            .orderBy("date")
+            .primaryKeys();
+        // keep only last MAX_LOG_LINES - 10% to reduce the need to do it every time.
+        keysToDelete.splice(keysToDelete.length - LoggingService.MAX_LOG_LINES, LoggingService.MAX_LOG_LINES * 0.9);
+        await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).bulkDelete(keysToDelete);
     }
 
     private writeToStorage(logLine: LogLine): void {
-        if (this.loggingDatabase) {
-            this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).add({
-                message: logLine.message,
-                date: logLine.date,
-                level: logLine.level
-            });
-        } else {
-            this.queue.push(logLine);
-        }
+        this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).add({
+            message: logLine.message,
+            date: logLine.date,
+            level: logLine.level
+        }).then(() => this.reduceStoredLogLinesIfNeeded());
     }
 
     public info(message: string) {
@@ -110,23 +103,6 @@ export class LoggingService {
         this.writeToStorage(logLine);
     }
 
-    public async uninitialize(): Promise<void> {
-        if (this.runningContextService.isProduction) {
-            return;
-        }
-        let checkQueuePromise = new Promise<void>((resolve, _) => {
-            let checkQueue = () => {
-                if (this.queue.length === 0) {
-                    resolve();
-                    return;
-                }
-                setTimeout(checkQueue, 100);
-            };
-            setTimeout(checkQueue, 100);
-        });
-        await checkQueuePromise;
-        this.loggingDatabase = null;
-    }
 
     public async getLog(): Promise<string> {
         let lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)

@@ -89,6 +89,39 @@ describe("ImageAttributionService", () => {
         expect(response.url).toBe("https://en.wikipedia.org/wiki/File:IHM_Image.jpeg");
     }));
 
+    it("should remove html tags and get the value inside for multiple html tags", inject([ImageAttributionService, HttpTestingController],
+        async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
+        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+        mockBackend.match(r => r.url.startsWith("https://en.wikipedia.org/"))[0].flush({
+            query: {
+                pages: {
+                    "-1": {
+                        imageinfo: [{
+                            extmetadata: {
+                                Artist: {
+                                    value: "<p>Sources for historical series of maps as follows:\n</p>\n<ul><li>" +
+                                        "<a href=\"https://en.wikipedia.org/wiki/PEF_Survey_of_Palestine\"" +
+                                        " class=\"extiw\" title=\"w:PEF Survey of Palestine\">PEF Survey of Palestine" +
+                                        "</a></li>\n<li><a href=\"https://en.wikipedia.org/wiki/Survey_of_Palestine\" " +
+                                        "class=\"extiw\" title=\"w:Survey of Palestine\">Survey of Palestine</a></li></ul>" +
+                                        "<p>Overlay from <a rel=\"nofollow\" class=\"external text\" href=\"https://palopenmaps.org\">" +
+                                        "Palestine Open Maps</a>\n</p>\n<ul><li><a href=\"https://en.wikipedia.org/wiki/OpenStreetMap\" " +
+                                        "class=\"extiw\" title=\"w:OpenStreetMap\">OpenStreetMap</a></li></ul>"
+                                }
+                            }
+                        }]
+                    }
+                }
+            }
+        });
+
+        let response = await promise;
+
+        expect(response).not.toBeNull();
+        expect(response.author).toBe("Sources for historical series of maps as follows:\n");
+        expect(response.url).toBe("https://en.wikipedia.org/wiki/File:IHM_Image.jpeg");
+    }));
+
     it("should return null when getting wikimedia image without artist", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
         let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");

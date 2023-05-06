@@ -1,4 +1,4 @@
-﻿<div [dir]="resources.direction" dnd-droppable (onDropSuccess)="addImage($event.mouseEvent)">
+﻿﻿<div [dir]="resources.direction" dnd-droppable (onDropSuccess)="addImage($event.mouseEvent)">
     <div matDialogTitle>
         <div *ngIf="!url">
             {{title}}
@@ -6,42 +6,40 @@
         <a *ngIf="url" href="{{url.url}}" target="_blank">
             {{title}}
         </a>
-        <div>
-            <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
-        </div>
+        <button mat-button type="button" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
     </div>
     <div mat-dialog-content>
-        <div flexLayout="row">
-            <div fxFlex="60" class="margin-10-reverse">
-                <div fxLayout="row">
-                    <mat-form-field fxFill>
-                        <input matInput #titleInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.title}}" fxFill />
+        <div class="flex flex-row">
+            <div class="w-3/5 margin-10-reverse">
+                <div class="flex flex-row">
+                    <mat-form-field class="w-full">
+                        <input matInput #titleInput class="w-full" type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.title}}" />
                     </mat-form-field>
                 </div>
-                <div fxLayout="row">
-                    <mat-form-field fxFill>
-                        <textarea rows="4" maxlength="255" matInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
+                <div class="flex flex-row">
+                    <mat-form-field class="w-full">
+                        <textarea class="w-full" rows="4" maxlength="255" matInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.description}}"></textarea>
                     </mat-form-field>
                 </div>
             </div>
-            <div fxFlex>
-                <div fxLayout="row">
+            <div class="w-2/5">
+                <div class="flex flex-row">
                     <label *ngIf="!imageLink">
-                        <a mat-button class="flex-center" [style.color]="'black'" imageCapture (changed)="addImage($event)" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
+                        <a mat-button class="flex-center w-full h-unset" [style.color]="'black'" imageCapture (changed)="addImage($event)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
                         <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera" />
                     </label>
-                    <img fxFill *ngIf="imageLink"
+                    <img *ngIf="imageLink"
                          [src]="resources.getResizedImageUrl(imageLink.url, 300)"
-                         class="img-responsive" />
+                         class="img-responsive w-full" />
                 </div>
-                <div fxLayout="row" *ngIf="imageLink">
-                    <button mat-button fxFill (click)="clearImage()" matTooltip="{{resources.clear}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
+                <div class="flex flex-row" *ngIf="imageLink">
+                    <button mat-button class="w-full" (click)="clearImage()" matTooltip="{{resources.clear}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
                 </div>
                 <div *ngIf="showIcons">
                     <br />
                     <div *ngFor="let group of iconsGroups">
-                        <div fxLayout="row" fxFill>
-                            <div *ngFor="let icon of group.icons" (click)="setMarkerType(icon)" class="cursor-pointer text-center" fxFlex="{{100/iconsGroups.length}}" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Select icon {{icon}}">
+                        <div class="flex flex-row w-full">
+                            <div *ngFor="let icon of group.icons" (click)="setMarkerType(icon)" class="cursor-pointer text-center" [ngStyle]="{width:100/iconsGroups.length + '%'}" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Select icon {{icon}}">
                                 <i class="fa icon-{{icon}} fa-lg" [ngClass]="{ 'active': icon === markerType }"></i>
                             </div>
                         </div>
@@ -49,22 +47,22 @@
                 </div>
             </div>
         </div>
-        <div fxLayout="row" *ngIf="showUrl && url">
-            <div fxFlex="90">
-                <mat-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
-                    <input matInput type="text" [dir]="'ltr'" [(ngModel)]="url.url" placeholder="{{resources.website}}" fxFill />
+        <div class="flex flex-row" *ngIf="showUrl && url">
+            <div class="w-1/12">
+                <mat-form-field class="w-full" hintLabel="{{resources.aLinkToAWebsite}}">
+                    <input matInput class="w-full" type="text" [dir]="'ltr'" [(ngModel)]="url.url" placeholder="{{resources.website}}" />
                 </mat-form-field>
             </div>
-            <div fxFlex="10">
-                <button mat-button fxFill (click)="removeUrl()"><i class="fa icon-trash"></i></button>
+            <div class="w-11/12">
+                <button mat-button class="w-full" (click)="removeUrl()"><i class="fa icon-trash"></i></button>
             </div>
         </div>
-        <div flexLayout="row" *ngIf="showCoordinates">
+        <div class="flex flex-row" *ngIf="showCoordinates">
             <coordinates [latlng]="marker.latlng"></coordinates>
         </div>
     </div>
     <div mat-dialog-actions>
-        <div fxFlex>
+        <div class="flex-1">
             <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
                 <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="toggleCoordinates()" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Toggle coordinates"><i class="fa icon-globe"></i> {{resources.showCoordinates}}</button>
                 <button mat-menu-item [dir]="resources.direction" [ngClass]="resources.getTextAlignment()" (click)="showIcons = !showIcons" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Toggle select icon"><i class="fa icon-{{markerType}}"></i> {{resources.selectIcon}}</button>
@@ -75,14 +73,14 @@
             </mat-menu>
             <button mat-button [matMenuTriggerFor]="appMenu" matTooltip="{{resources.more}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="More"><i class="fa icon-ellipsis-v fa-lg"></i></button>
         </div>
-        <div fxFlex>
-            <button mat-button type="button" matDialogClose (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above" fxFill><i class="fa icon-trash"></i></button>
+        <div class="flex-1">
+            <button mat-button class="w-full" type="button" matDialogClose (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
         </div>
-        <div fxFlex>
-            <button mat-button type="button" matDialogClose (click)="uploadPoint()" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Open upload point dialog" fxFill><i class="fa icon-cloud-upload"></i></button>
+        <div class="flex-1">
+            <button mat-button class="w-full" type="button" matDialogClose (click)="uploadPoint()" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Open upload point dialog"><i class="fa icon-cloud-upload"></i></button>
         </div>
-        <div fxFlex>
-            <button mat-button type="button" matDialogClose (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Save" fxFill><i class="fa icon-check"></i></button>
+        <div class="flex-1">
+            <button mat-button class="w-full" type="button" matDialogClose (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Private POI" angularticsAction="Save"><i class="fa icon-check"></i></button>
         </div>
     </div>
 </div>

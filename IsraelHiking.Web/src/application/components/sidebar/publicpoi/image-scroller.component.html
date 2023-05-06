@@ -1,39 +1,39 @@
-﻿<div fxLayout="row" *ngIf="images.length === 0">
+﻿﻿<div class="flex flex-row" *ngIf="images.length === 0">
     <div class="img-container-small" style="overflow: hidden;" *ngIf="!canEdit">
         <ng-lottie class="img-responsive img-center" [options]="lottiePOI"></ng-lottie>
     </div>
-    <label fxFill *ngIf="canEdit" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
-        <a mat-button imageCapture (changed)="add($event)" fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
+    <label class="w-full" *ngIf="canEdit" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
+        <a mat-button imageCapture class="w-full h-unset" (changed)="add($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
         <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
     </label>
 </div>
-<div fxLayout="row" *ngIf="images.length > 0">
+<div class="flex flex-row" *ngIf="images.length > 0">
     <div class="img-container-small" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
         <img [src]="getCurrentImage() | offlineImage:true | async"
              class="img-responsive-full cursor-zoom-in img-center"
              (click)="showImage()"/>
     </div>
 </div>
-<div fxLayout="row" *ngIf="hasNext() || hasPrevious() || canEdit">
-    <div fxFlex>
-        <button mat-button (click)="previous()" [disabled]="!hasPrevious()" fxFill><i class="fa icon-chevron-{{resources.start}}"></i></button>
+<div class="flex flex-row" *ngIf="hasNext() || hasPrevious() || canEdit">
+    <div class="flex-1">
+        <button mat-button class="w-full" (click)="previous()" [disabled]="!hasPrevious()"><i class="fa icon-chevron-{{resources.start}}"></i></button>
     </div>
-    <div fxFlex *ngIf="canEdit">
-        <label fxFill>
-            <a mat-button imageCapture (changed)="add($event)" fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload non first image"><i class="fa icon-plus"></i></a>
+    <div class="flex-1" *ngIf="canEdit">
+        <label class="w-full">
+            <a mat-button imageCapture class="w-full" (changed)="add($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload non first image"><i class="fa icon-plus"></i></a>
             <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
         </label>
     </div>
-    <div fxFlex *ngIf="canEdit">
-        <button mat-button (click)="remove()" fxFill><i class="fa icon-trash"></i></button>
+    <div class="flex-1" *ngIf="canEdit">
+        <button mat-button class="w-full" (click)="remove()"><i class="fa icon-trash"></i></button>
     </div>
-    <div fxFlex *ngIf="!canEdit" >
-        <div class="text-center" dir="ltr" fxFill>{{getIndexString()}}</div>
+    <div class="flex-1" *ngIf="!canEdit" >
+        <div class="w-full text-center" dir="ltr">{{getIndexString()}}</div>
     </div>
-    <div fxFlex>
-        <button mat-button (click)="next()" [disabled]="!hasNext()" fxFill><i class="fa icon-chevron-{{resources.end}}"></i></button>
+    <div class="flex-1">
+        <button mat-button class="w-full" (click)="next()" [disabled]="!hasNext()"><i class="fa icon-chevron-{{resources.end}}"></i></button>
     </div>
 </div>
-<div fxLayout="row" *ngIf="!canEdit && currentImageAttribution" class="text-center text-small">
-    <div fxFill [dir]="resources.direction">{{resources.imageBy}} <a [href]="currentImageAttribution.url" target="_blank">{{currentImageAttribution.author}}</a></div>
+<div class="flex flex-row" *ngIf="!canEdit && currentImageAttribution" class="text-center text-small">
+    <div class="w-full truncate" [dir]="resources.direction">{{resources.imageBy}} <a [href]="currentImageAttribution.url" target="_blank">{{currentImageAttribution.author}}</a></div>
 </div>

@@ -35,7 +35,9 @@
               "src/scss/common.scss"
             ],
             "stylePreprocessorOptions": {
-              "includePaths": ["src/scss"]
+              "includePaths": [
+                "src/scss"
+              ]
             },
             "scripts": [],
             "allowedCommonJsDependencies": [
@@ -149,9 +151,11 @@
               "src/application/pipes/**",
               "src/application/reducers/**"
             ],
-            "main": "src/test.ts",
             "karmaConfig": "./karma.conf.js",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
             "tsConfig": "./tsconfig.spec.json",
             "scripts": [],
             "assets": [
@@ -181,6 +185,12 @@
     },
     "@schematics/angular:directive": {
       "prefix": "app"
+    },
+    "@angular-eslint/schematics:application": {
+      "setParserOptionsProject": true
+    },
+    "@angular-eslint/schematics:library": {
+      "setParserOptionsProject": true
     }
   },
   "cli": {

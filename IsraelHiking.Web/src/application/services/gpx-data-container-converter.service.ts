@@ -124,7 +124,7 @@ export class GpxDataContainerConverterService {
     }
 
     public canConvert(gpxXmlString: string) {
-        let subString = gpxXmlString.substr(0, 200).toLocaleLowerCase();
+        let subString = gpxXmlString.substring(0, 200).toLocaleLowerCase();
         return (subString.indexOf("<gpx") !== -1);
     }
 
