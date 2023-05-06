@@ -37,6 +37,8 @@
     color: white;
     line-height: normal;
     z-index: 2;
+    display: flex;
+    justify-content: center;
 }
 
 .circle.online {

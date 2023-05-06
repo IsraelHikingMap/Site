@@ -3,7 +3,7 @@
         <ng-lottie class="img-responsive img-center" [options]="lottiePOI"></ng-lottie>
     </div>
     <label class="w-full" *ngIf="canEdit" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
-        <a mat-button imageCapture class="w-full" (changed)="add($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
+        <a mat-button imageCapture class="w-full h-unset" (changed)="add($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
         <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
     </label>
 </div>
