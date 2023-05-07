@@ -14,15 +14,15 @@ import {
     HIKING_TRAILS,
     BICYCLE_TRAILS
 } from "../reducers/initial-state";
-import { 
-    AddBaseLayerAction, 
-    AddOverlayAction, 
-    RemoveBaseLayerAction, 
-    RemoveOverlayAction, 
-    SelectBaseLayerAction, 
-    ToggleOfflineAction, 
-    UpdateBaseLayerAction, 
-    UpdateOverlayAction 
+import {
+    AddBaseLayerAction,
+    AddOverlayAction,
+    RemoveBaseLayerAction,
+    RemoveOverlayAction,
+    SelectBaseLayerAction,
+    ToggleOfflineAction,
+    UpdateBaseLayerAction,
+    UpdateOverlayAction
 } from "../reducers/layers.reducer";
 import type {
     DataContainer,

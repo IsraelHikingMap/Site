@@ -6,7 +6,7 @@ import { Store, Select } from "@ngxs/store";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { OfflineFilesDownloadService } from "./offline-files-download.service";
-import { OfflineReducer, SetOfflineAvailableAction } from "../reducers/offline.reducer";
+import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
 import type { ApplicationState, UserInfo } from "../models/models";
 
 @Injectable()

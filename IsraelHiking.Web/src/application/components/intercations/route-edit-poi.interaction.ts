@@ -81,7 +81,7 @@ export class RouteEditPoiInteraction {
 
         let snapping = await this.getSnappingForPoint(latlng);
         if (snapping.markerData != null) {
-            markerData = { ...snapping.markerData }
+            markerData = { ...snapping.markerData };
         }
         this.addToSelectedRoute(markerData);
     }

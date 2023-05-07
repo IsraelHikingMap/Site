@@ -6,13 +6,13 @@ import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ToastService } from "../services/toast.service";
-import { 
-    ClearHistoryAction, 
-    ClearPoisAction, 
-    ClearPoisAndRouteAction, 
-    DeleteAllRoutesAction, 
-    RedoAction, 
-    ReplaceSegmentsAction, 
+import {
+    ClearHistoryAction,
+    ClearPoisAction,
+    ClearPoisAndRouteAction,
+    DeleteAllRoutesAction,
+    RedoAction,
+    ReplaceSegmentsAction,
     UndoAction
 } from "../reducers/routes.reducer";
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";

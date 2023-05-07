@@ -20,8 +20,13 @@ import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
 import { FileService } from "./file.service";
 import { ConnectionService } from "./connection.service";
-import { AddToPoiQueueAction, OfflineReducer, RemoveFromPoiQueueAction, SetPoiLastModifiedAction as SetPoisLastModifiedAction } from "../reducers/offline.reducer";
-import { AddCategoryAction, LayersReducer, RemoveCategoryAction, SetCategoriesGroupVisibilityAction, UpdateCategoryAction } from "../reducers/layers.reducer";
+import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetPoisLastModifiedAction } from "../reducers/offline.reducer";
+import {
+    AddCategoryAction,
+    RemoveCategoryAction,
+    SetCategoriesGroupVisibilityAction,
+    UpdateCategoryAction
+} from "../reducers/layers.reducer";
 import { Urls } from "../urls";
 import type {
     MarkerData,
@@ -132,7 +137,7 @@ export class PoiService {
             }
         });
 
-        this.store.select((s:ApplicationState) => s.offlineState).subscribe(offlineState => this.offlineState = offlineState);
+        this.store.select((s: ApplicationState) => s.offlineState).subscribe(offlineState => this.offlineState = offlineState);
     }
 
     public async initialize() {

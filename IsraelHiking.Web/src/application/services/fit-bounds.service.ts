@@ -4,8 +4,8 @@ import { Store } from "@ngxs/store";
 import { SidebarService } from "./sidebar.service";
 import { MapService } from "./map.service";
 import { SpatialService } from "./spatial.service";
-import { InMemoryReducer, SetPannedAction } from "../reducers/in-memory.reducer";
-import type { Bounds, LatLngAlt, ApplicationState } from "../models/models";
+import { SetPannedAction } from "../reducers/in-memory.reducer";
+import type { Bounds, LatLngAlt } from "../models/models";
 
 @Injectable()
 export class FitBoundsService {

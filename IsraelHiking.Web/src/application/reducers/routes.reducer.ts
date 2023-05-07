@@ -6,15 +6,15 @@ import { initialState } from "./initial-state";
 import type { RouteData, MarkerData, RouteSegmentData, RouteEditStateType, StateWithHistory } from "../models/models";
 
 export class UndoAction {
-    public static type = this.prototype.constructor.name
+    public static type = this.prototype.constructor.name;
 }
-  
+
 export class RedoAction {
-    public static type = this.prototype.constructor.name
+    public static type = this.prototype.constructor.name;
 }
 
 export class ClearHistoryAction {
-    public static type = this.prototype.constructor.name
+    public static type = this.prototype.constructor.name;
 }
 
 export class AddRouteAction {
@@ -32,7 +32,7 @@ export class ChangeRoutePropertiesActionAction {
     constructor(public routeId: string, public routeData: RouteData) {}
 };
 
-export class AddPrivatePoiAction { 
+export class AddPrivatePoiAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public markerData: MarkerData) {}
 };
@@ -67,7 +67,7 @@ export class DeleteSegmentAction {
     constructor(public routeId: string, public index: number) {}
 };
 
-export class ChangeVisibilityAction {
+export class ChangeRouteVisibilityAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public isVisible: boolean) {}
 };
@@ -273,8 +273,8 @@ export class RoutesReducer {
         });
     }
 
-    @Action(ChangeVisibilityAction)
-    public changeVisibility(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ChangeVisibilityAction) {
+    @Action(ChangeRouteVisibilityAction)
+    public changeVisibility(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ChangeRouteVisibilityAction) {
         this.changeState(ctx, (lastState) => {
             let route = lastState.find(r => r.id === action.routeId);
             route.state = action.isVisible ? "ReadOnly" : "Hidden";
@@ -333,9 +333,7 @@ export class RoutesReducer {
 
     @Action(DeleteAllRoutesAction)
     public deleteAllRoutes(ctx: StateContext<StateWithHistory<RouteData[]>>) {
-        this.changeState(ctx, (_) => {
-            return []
-        });
+        this.changeState(ctx, (_) => []);
     }
 
     @Action(ToggleAllRoutesAction)
@@ -351,9 +349,7 @@ export class RoutesReducer {
 
     @Action(BulkReplaceRoutesAction)
     public replaceRoutes(ctx: StateContext<StateWithHistory<RouteData[]>>, action: BulkReplaceRoutesAction) {
-        this.changeState(ctx, (_) => {
-            return action.routesData;
-        });
-        
+        this.changeState(ctx, (_) => action.routesData);
+
     }
 }

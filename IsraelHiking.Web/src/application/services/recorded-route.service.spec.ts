@@ -21,7 +21,7 @@ describe("Recorded Route Service", () => {
 
     const positionChanged = (store: Store, newPoistion: any) => {
         store.dispatch(new SetCurrentPositionAction(newPoistion));
-    }
+    };
 
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
@@ -95,7 +95,7 @@ describe("Recorded Route Service", () => {
 
     it("Should not do anything when not recording and a new position is received", done => inject([RecordedRouteService, Store],
         (service: RecordedRouteService, store: Store) => {
-            
+
             store.reset({
                 recordedRouteState: {
                     isRecording: false,
@@ -109,7 +109,7 @@ describe("Recorded Route Service", () => {
             service.initialize();
 
             positionChanged(store, { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime() });
-            
+
             setTimeout(() => {
                 expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(0);
                 done();
@@ -158,7 +158,7 @@ describe("Recorded Route Service", () => {
             });
 
             positionChanged(store, { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime()});
-            
+
             setTimeout(() => {
                 expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(1);
                 done();
@@ -223,7 +223,9 @@ describe("Recorded Route Service", () => {
                     timestamp: new Date(180000).getTime()
                 }
             ]);
-            positionChanged(store, { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(240000).getTime()})
+            positionChanged(store,
+                { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(240000).getTime()}
+            );
             setTimeout(() => {
                 expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(5);
                 done();

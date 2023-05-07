@@ -3,7 +3,7 @@ import { Direction } from "@angular/cdk/bidi";
 import { Store } from "@ngxs/store";
 
 import { GetTextCatalogService } from "./gettext-catalog.service";
-import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
+import { SetLanguageAction } from "../reducers/configuration.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, Language, LanguageCode } from "../models/models";
 

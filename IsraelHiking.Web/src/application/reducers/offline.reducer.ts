@@ -15,7 +15,7 @@ export class SetOfflineMapsLastModifiedAction {
     constructor(public lastModifiedDate: Date) {}
 };
 
-export class SetPoiLastModifiedAction {
+export class SetPoisLastModifiedAction {
     public static type = this.prototype.constructor.name;
     constructor(public lastModifiedDate: Date) {}
 };
@@ -58,8 +58,8 @@ export class OfflineReducer {
         }));
     }
 
-    @Action(SetPoiLastModifiedAction)
-    public setPoisLastModified(ctx: StateContext<OfflineState>, action: SetPoiLastModifiedAction) {
+    @Action(SetPoisLastModifiedAction)
+    public setPoisLastModified(ctx: StateContext<OfflineState>, action: SetPoisLastModifiedAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.poisLastModifiedDate = action.lastModifiedDate;
             return lastState;

@@ -48,7 +48,7 @@ export class PhotoSwpieComponent extends BaseMapComponent implements AfterViewIn
             maxZoomLevel: 8,
 
         });
-        
+
         pswp.on("destroy", () => this.closed.emit());
         pswp.init();
     }

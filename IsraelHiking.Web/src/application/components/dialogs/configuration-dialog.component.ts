@@ -9,7 +9,11 @@ import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
 import { initialState } from "application/reducers/initial-state";
-import { SetBatteryOptimizationTypeAction, ToggleAutomaticRecordingUploadAction, ToggleGotLostWarningsAction } from "../../reducers/configuration.reducer";
+import {
+    SetBatteryOptimizationTypeAction,
+    ToggleAutomaticRecordingUploadAction,
+    ToggleGotLostWarningsAction
+} from "../../reducers/configuration.reducer";
 import type { ApplicationState, BatteryOptimizationType } from "../../models/models";
 
 @Component({

@@ -24,5 +24,5 @@ export class LocationReducer {
             longitude: action.longitude || lastState.longitude,
             latitude: action.latitude || lastState.latitude
         })));
-    }        
+    }
 }

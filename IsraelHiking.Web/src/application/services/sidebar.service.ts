@@ -3,7 +3,7 @@ import { Observable } from "rxjs";
 import { Store, Select } from "@ngxs/store";
 
 import { HashService } from "./hash.service";
-import { PointsOfInterestReducer, SetSidebarAction } from "../reducers/poi.reducer";
+import { SetSidebarAction } from "../reducers/poi.reducer";
 import type { ApplicationState } from "../models/models";
 
 export type SidebarView = "info" | "layers" | "public-poi" | "";

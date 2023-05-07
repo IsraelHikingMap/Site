@@ -144,7 +144,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         this.store.dispatch(new SetUIComponentVisibilityAction(
             "search",
             !this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).searchVisible,
-            
+
         ));
     }
 

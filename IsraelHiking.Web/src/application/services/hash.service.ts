@@ -83,7 +83,7 @@ export class HashService {
     public getHref(): string {
         let inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
         if (inMemoryState.fileUrl != null) {
-            let urlTree = this.router.createUrlTree([RouteStrings.URL, inMemoryState.fileUrl], { 
+            let urlTree = this.router.createUrlTree([RouteStrings.URL, inMemoryState.fileUrl], {
                 queryParams: {
                     [RouteStrings.BASE_LAYER]: this.store.selectSnapshot((s: ApplicationState) => s.layersState).selectedBaseLayerKey
                 }

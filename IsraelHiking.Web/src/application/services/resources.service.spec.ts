@@ -26,7 +26,7 @@ describe("ResourcesService", () => {
         });
     });
 
-    it("Should faciliate language change to english and raise event", inject([ResourcesService, Store], 
+    it("Should faciliate language change to english and raise event", inject([ResourcesService, Store],
         (service: ResourcesService, store: Store) => {
 
         store.reset({

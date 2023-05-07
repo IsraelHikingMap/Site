@@ -3,7 +3,12 @@ import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { CollapseGroupAction, ExpandGroupAction, SetCategoriesGroupVisibilityAction, SetCategoryVisibilityAction } from "../../reducers/layers.reducer";
+import {
+    CollapseGroupAction,
+    ExpandGroupAction,
+    SetCategoriesGroupVisibilityAction,
+    SetCategoryVisibilityAction
+} from "../../reducers/layers.reducer";
 import type { ApplicationState, CategoriesGroup, Category } from "../../models/models";
 
 @Component({
@@ -29,7 +34,8 @@ export class CategoriesGroupComponent extends BaseMapComponent {
     }
 
     public getExpandState(): boolean {
-        return this.store.selectSnapshot((s: ApplicationState) => s.layersState).expanded.find(l => l === this.categoriesGroup.type) != null;
+        return this.store.selectSnapshot((s: ApplicationState) => s.layersState)
+            .expanded.find(l => l === this.categoriesGroup.type) != null;
     }
 
     public toggleCategory(category: Category) {

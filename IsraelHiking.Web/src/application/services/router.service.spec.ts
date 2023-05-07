@@ -74,7 +74,7 @@ describe("Router Service", () => {
                 offlineState: {
                     isOfflineAvailable: false
                 }
-            })
+            });
 
             let promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);

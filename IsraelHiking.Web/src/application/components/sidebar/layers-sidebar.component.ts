@@ -20,7 +20,7 @@ import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
 import { CollapseGroupAction, ExpandGroupAction } from "../../reducers/layers.reducer";
-import { BulkReplaceRoutesAction, ChangeVisibilityAction as ChangeRouteVisibilityAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
+import { BulkReplaceRoutesAction, ChangeRouteVisibilityAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
 import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
 

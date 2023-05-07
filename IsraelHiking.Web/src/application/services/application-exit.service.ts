@@ -12,7 +12,7 @@ import { SidebarService } from "./sidebar.service";
 import { GeoLocationService } from "./geo-location.service";
 import { RecordedRouteService } from "./recorded-route.service";
 import { ImageGalleryService } from "./image-gallery.service";
-import { PointsOfInterestReducer, SetSidebarAction } from "../reducers/poi.reducer";
+import { SetSidebarAction } from "../reducers/poi.reducer";
 import type { ApplicationState } from "../models/models";
 
 declare let navigator: Navigator;

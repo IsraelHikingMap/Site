@@ -67,14 +67,14 @@ export class DeviceOrientationService {
         if (window.screen.orientation) {
           return window.screen.orientation.type;
         }
-      
+
         // iOS/safari
         switch (+window.orientation) {
             case 0: return "portrait-primary";
             case 90: return "landscape-primary";
             case 180: return "portrait-secondary";
             case -90: return "landscape-secondary";
-            default: return "portrait-primary"
+            default: return "portrait-primary";
       }
     }
 

@@ -11,8 +11,8 @@ import { FileService } from "./file.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
-import { LayersReducer, ToggleOfflineAction } from "../reducers/layers.reducer";
-import { OfflineReducer, SetOfflineMapsLastModifiedAction as SetOfflineMapsLastModifiedAction } from "../reducers/offline.reducer";
+import { ToggleOfflineAction } from "../reducers/layers.reducer";
+import { SetOfflineMapsLastModifiedAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models/models";
 

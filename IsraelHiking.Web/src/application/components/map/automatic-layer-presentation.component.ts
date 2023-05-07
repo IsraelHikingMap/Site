@@ -90,7 +90,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 return;
             }
             this.hasInternetAccess = state.hasInternetAccess;
-            if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null 
+            if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null
                 || this.layerData.isOfflineAvailable === false) {
                 return;
             }

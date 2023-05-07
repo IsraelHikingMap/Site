@@ -8,9 +8,18 @@ import { ResourcesService } from "./resources.service";
 import { SpatialService } from "./spatial.service";
 import { RouterService } from "./router.service";
 import { MINIMAL_ANGLE, MINIMAL_DISTANCE } from "./route-statistics.service";
-import { RouteEditingReducer, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import { RecordedRouteReducer, ToggleAddingPoiAction } from "../reducers/recorded-route.reducer";
-import { AddPrivatePoiAction, AddRouteAction, ChangeEditStateAction, DeleteSegmentAction, MergeRoutesAction, ReplaceRouteAction, ReplaceSegmentsAction, RoutesReducer, SplitRouteAction, UpdateSegmentsAction } from "../reducers/routes.reducer";
+import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
+import { ToggleAddingPoiAction } from "../reducers/recorded-route.reducer";
+import { AddPrivatePoiAction,
+    AddRouteAction,
+    ChangeEditStateAction,
+    DeleteSegmentAction,
+    MergeRoutesAction,
+    ReplaceRouteAction,
+    ReplaceSegmentsAction,
+    SplitRouteAction,
+    UpdateSegmentsAction
+} from "../reducers/routes.reducer";
 import type {
     RouteData,
     ApplicationState,

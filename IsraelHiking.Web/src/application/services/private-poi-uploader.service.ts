@@ -7,8 +7,8 @@ import { ResourcesService } from "./resources.service";
 import { PoiService } from "./poi.service";
 import { ToastService } from "./toast.service";
 import { RouteStrings } from "./hash.service";
-import { PointsOfInterestReducer, SetUploadMarkerDataAction } from "../reducers/poi.reducer";
-import type { LinkData, LatLngAlt, MarkerData, ApplicationState } from "../models/models";
+import { SetUploadMarkerDataAction } from "../reducers/poi.reducer";
+import type { LinkData, LatLngAlt, MarkerData } from "../models/models";
 
 @Injectable()
 export class PrivatePoiUploaderService {

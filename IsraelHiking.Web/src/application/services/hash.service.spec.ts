@@ -64,7 +64,7 @@ describe("HashService", () => {
                 inMemoryState: {
                     fileUrl: "fileUrl"
                 },
-                layersState: { 
+                layersState: {
                     selectedBaseLayerKey: "base-layer"
                 }
             });

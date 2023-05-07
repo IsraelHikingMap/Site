@@ -7,7 +7,7 @@ import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
-import { GpsReducer, SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
+import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
 
 declare let BackgroundGeolocation: BackgroundGeolocationPlugin;

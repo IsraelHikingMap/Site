@@ -9,8 +9,8 @@ import { RouterService } from "./router.service";
 import { RoutesFactory } from "./routes.factory";
 import { RouteEditingReducer, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { ToggleAddingPoiAction } from "../reducers/recorded-route.reducer";
-import { AddRouteAction, BulkReplaceRoutesAction, ChangeEditStateAction, ReplaceRouteAction, RoutesReducer } from "../reducers/routes.reducer";
-import type { ApplicationState, RouteData } from "../models/models";
+import { AddRouteAction, BulkReplaceRoutesAction, ChangeEditStateAction, RoutesReducer } from "../reducers/routes.reducer";
+import type { RouteData } from "../models/models";
 
 
 describe("Selected Route Service", () => {

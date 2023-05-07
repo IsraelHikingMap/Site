@@ -62,7 +62,7 @@ describe("Share Urls Service", () => {
             let shareUrl = { id: "42" } as ShareUrl;
             store.dispatch = jasmine.createSpy();
             let promise = shareUrlsService.deleteShareUrl(shareUrl).then(() => {
-                
+
                 expect(store.dispatch).toHaveBeenCalled();
                 expect(databaseService.deleteShareUrlById).toHaveBeenCalled();
             });
