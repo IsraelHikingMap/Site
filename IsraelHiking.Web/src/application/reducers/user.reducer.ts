@@ -15,7 +15,7 @@ export class SetTokenAction {
     constructor(public token: string) {}
 };
 
-export class SetArgreeToTermsAction {
+export class SetAgreeToTermsAction {
     public static type = this.prototype.constructor.name;
     constructor(public agree: boolean) {}
 };
@@ -42,8 +42,8 @@ export class UserInfoReducer {
         }));
     }
 
-    @Action(SetArgreeToTermsAction)
-    public setAgreeToTerms(ctx: StateContext<UserState>, action: SetArgreeToTermsAction) {
+    @Action(SetAgreeToTermsAction)
+    public setAgreeToTerms(ctx: StateContext<UserState>, action: SetAgreeToTermsAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.agreedToTheTermsOfService = action.agree;
             return lastState;

@@ -10,9 +10,9 @@ import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
-import { ChangeRoutePropertiesActionAction, DeleteRouteAction, RoutesReducer } from "../../../reducers/routes.reducer";
-import { RouteEditingReducer, SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
-import type { DataContainer, RouteData, ApplicationState, LatLngAlt } from "../../../models/models";
+import { ChangeRoutePropertiesActionAction, DeleteRouteAction } from "../../../reducers/routes.reducer";
+import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
+import type { DataContainer, RouteData, LatLngAlt } from "../../../models/models";
 
 @Component({
     selector: "route-edit-dialog",

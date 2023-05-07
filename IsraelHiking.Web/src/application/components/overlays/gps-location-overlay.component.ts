@@ -12,9 +12,9 @@ import { SelectedRouteService } from "../../services/selected-route.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
 import { ToastService } from "../../services/toast.service";
-import { AddPrivatePoiAction, RoutesReducer } from "../../reducers/routes.reducer";
+import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import { ToggleDistanceAction } from "../../reducers/in-memory.reducer";
-import { AddRecordingPoiAction, RecordedRouteReducer } from "../../reducers/recorded-route.reducer";
+import { AddRecordingPoiAction } from "../../reducers/recorded-route.reducer";
 import type { ApplicationState, LatLngAlt, LinkData } from "../../models/models";
 
 @Component({

@@ -26,8 +26,8 @@ import { ConfigurationDialogComponent } from "./dialogs/configuration-dialog.com
 import { LanguageDialogComponent } from "./dialogs/language-dialog.component";
 import { FilesSharesDialogComponent } from "./dialogs/files-shares-dialog.component";
 import { SendReportDialogComponent } from "./dialogs/send-report-dialog.component";
-import { SetUIComponentVisibilityAction, UIComponentsReducer } from "../reducers/ui-components.reducer";
-import { SetArgreeToTermsAction as SetAgreeToTermsAction, UserInfoReducer } from "../reducers/user.reducer";
+import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
+import { SetAgreeToTermsAction } from "../reducers/user.reducer";
 import type { UserInfo, ApplicationState } from "../models/models";
 
 @Component({

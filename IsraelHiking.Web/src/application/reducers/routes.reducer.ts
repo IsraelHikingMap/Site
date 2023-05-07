@@ -123,10 +123,13 @@ export class ToggleAllRoutesAction {
 export class RoutesReducer {
 
     private changeState(ctx: StateContext<StateWithHistory<RouteData[]>>, mutate: (current: RouteData[]) => RouteData[]) {
-        ctx.setState(produce((old: StateWithHistory<RouteData[]>) => {
-            old.past.push(old.present);
-            old.present = produce(old.present, (current) => mutate(current));
-            old.future = [];
+        ctx.setState(produce((lastState: StateWithHistory<RouteData[]>) => {
+            lastState.past.push(lastState.present);
+            if (lastState.past.length > 20) {
+                lastState.past.splice(0, 1);
+            }
+            lastState.present = produce(lastState.present, (current) => mutate(current));
+            lastState.future = [];
         }));
     }
 

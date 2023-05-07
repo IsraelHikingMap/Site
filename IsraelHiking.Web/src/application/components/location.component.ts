@@ -12,10 +12,10 @@ import { SelectedRouteService } from "../services/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
-import { InMemoryReducer, SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
-import { ConfigurationReducer, StopShowingBatteryConfirmationAction } from "../reducers/configuration.reducer";
-import { ChangeEditStateAction, RoutesReducer } from "../reducers/routes.reducer";
-import { RecordedRouteReducer, ToggleAddingPoiAction } from "../reducers/recorded-route.reducer";
+import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
+import { StopShowingBatteryConfirmationAction } from "../reducers/configuration.reducer";
+import { ChangeEditStateAction } from "../reducers/routes.reducer";
+import { ToggleAddingPoiAction } from "../reducers/recorded-route.reducer";
 import type { LatLngAlt, ApplicationState } from "../models/models";
 
 @Component({

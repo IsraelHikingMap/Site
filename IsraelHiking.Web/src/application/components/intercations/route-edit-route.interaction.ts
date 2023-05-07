@@ -10,7 +10,7 @@ import { ElevationProvider } from "../../services/elevation.provider";
 import { SnappingService } from "../../services/snapping.service";
 import { GeoLocationService } from "../../services/geo-location.service";
 import { ResourcesService } from "../../services/resources.service";
-import { AddSegmentAction, RoutesReducer, UpdateSegmentsAction } from "../../reducers/routes.reducer";
+import { AddSegmentAction, UpdateSegmentsAction } from "../../reducers/routes.reducer";
 import type {
     ApplicationState,
     RouteData,

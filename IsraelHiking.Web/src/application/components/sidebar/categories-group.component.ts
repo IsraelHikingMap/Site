@@ -3,7 +3,7 @@ import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { CollapseGroupAction, ExpandGroupAction, LayersReducer, SetCategoriesGroupVisibilityAction, SetCategoryVisibilityAction } from "../../reducers/layers.reducer";
+import { CollapseGroupAction, ExpandGroupAction, SetCategoriesGroupVisibilityAction, SetCategoryVisibilityAction } from "../../reducers/layers.reducer";
 import type { ApplicationState, CategoriesGroup, Category } from "../../models/models";
 
 @Component({

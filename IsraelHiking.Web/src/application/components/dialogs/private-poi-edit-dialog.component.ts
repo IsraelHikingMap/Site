@@ -16,8 +16,8 @@ import { NavigateHereService } from "../../services/navigate-here.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { HashService } from "../../services/hash.service";
 import { ToastService } from "../../services/toast.service";
-import { DeletePrivatePoiAction, RoutesReducer, UpdatePrivatePoiAction } from "../../reducers/routes.reducer";
-import { DeleteRecordingPoiAction, RecordedRouteReducer, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
+import { DeletePrivatePoiAction, UpdatePrivatePoiAction } from "../../reducers/routes.reducer";
+import { DeleteRecordingPoiAction, UpdateRecordingPoiAction } from "../../reducers/recorded-route.reducer";
 import { Urls } from "../../urls";
 import type { LinkData, MarkerData, ApplicationState } from "../../models/models";
 

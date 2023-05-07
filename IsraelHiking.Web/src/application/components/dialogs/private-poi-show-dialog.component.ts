@@ -13,7 +13,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { ToastService } from "../../services/toast.service";
-import { AddPrivatePoiAction, RoutesReducer } from "../../reducers/routes.reducer";
+import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import type { ApplicationState, MarkerData, LinkData } from "../../models/models";
 
 interface IPrivatePoiShowDialogData {
