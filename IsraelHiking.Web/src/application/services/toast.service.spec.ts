@@ -13,7 +13,7 @@ export class ToastServiceMockCreator {
         let matDialog = { open: () => null as any } as any as MatDialog;
         let loggingService = { error: () => { }, info: () => { } } as any as LoggingService;
         this.resourcesService = new ResourcesService(new GetTextCatalogMockCreator().getTextCatalogService,
-            { getState: () => ({ configuration: { language: {code: "he" } as any}} as any)} as any);
+            { selectSnapshot: () => ({ language: {code: "he" } as any}) } as any);
         this.toastService = new ToastService(this.resourcesService, matDialog, snackBar, loggingService);
     }
 }

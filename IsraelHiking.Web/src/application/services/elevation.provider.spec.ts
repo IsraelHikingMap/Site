@@ -1,7 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/mocks";
+import { NgxsModule, Store } from "@ngxs/store";
 
 import { ElevationProvider } from "./elevation.provider";
 import { LoggingService } from "./logging.service";
@@ -14,7 +14,7 @@ describe("ElevationProvider", () => {
             imports: [
                 HttpClientModule,
                 HttpClientTestingModule,
-                MockNgReduxModule
+                NgxsModule.forRoot([])
             ],
             providers: [
                 { provide: LoggingService, useValue: { warning: () => { } } },
@@ -22,7 +22,6 @@ describe("ElevationProvider", () => {
                 ElevationProvider
             ]
         });
-        MockNgRedux.reset();
     });
 
     it("Should update height data", inject([ElevationProvider, HttpTestingController],
@@ -67,11 +66,11 @@ describe("ElevationProvider", () => {
     ));
 
     it("Should update elevation when getting an error from server and offline is available",
-        inject([ElevationProvider, HttpTestingController, DatabaseService],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, db: DatabaseService) => {
+        inject([ElevationProvider, HttpTestingController, DatabaseService, Store],
+        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
             let latlngs = [{ lat: 0, lng: 0, alt: 0 }];
 
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 offlineState: {
                     isOfflineAvailable: true,
                     lastModifiedDate: new Date()

@@ -1,5 +1,5 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/mocks";
+import { NgxsModule } from "@ngxs/store";
 
 import { SidebarService } from "./sidebar.service";
 import { HashService } from "./hash.service";
@@ -12,13 +12,12 @@ describe("SidebarService", () => {
             resetAddressbar: () => { }
         } as any as HashService;
         TestBed.configureTestingModule({
-            imports: [MockNgReduxModule],
+            imports: [NgxsModule.forRoot([])],
             providers: [
                 { provide: HashService, useValue: hashServiceMock },
                 SidebarService
             ]
         });
-        MockNgRedux.reset();
     });
 
     it("Should initialize hidden", inject([SidebarService], (service: SidebarService) => {

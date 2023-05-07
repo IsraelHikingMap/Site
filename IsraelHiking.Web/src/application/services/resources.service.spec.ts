@@ -1,5 +1,5 @@
 import { TestBed, inject } from "@angular/core/testing";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/mocks";
+import { NgxsModule, Store } from "@ngxs/store";
 
 import { ResourcesService } from "./resources.service";
 import { GetTextCatalogService } from "./gettext-catalog.service";
@@ -18,30 +18,29 @@ describe("ResourcesService", () => {
     beforeEach(() => {
         let mockCreator = new GetTextCatalogMockCreator();
         TestBed.configureTestingModule({
-            imports: [MockNgReduxModule],
+            imports: [NgxsModule.forRoot([])],
             providers: [
                 { provide: GetTextCatalogService, useValue: mockCreator.getTextCatalogService },
                 ResourcesService
             ]
         });
-        MockNgRedux.reset();
     });
 
-    it("Should faciliate language change to english and raise event", inject([ResourcesService], (service: ResourcesService) => {
-        let eventRaied = false;
+    it("Should faciliate language change to english and raise event", inject([ResourcesService, Store], 
+        (service: ResourcesService, store: Store) => {
 
-        MockNgRedux.store.getState = () => ({
+        store.reset({
             configuration: {
                 language: {
                     code: "he"
                 }
             }
         });
-        MockNgRedux.store.dispatch = jasmine.createSpy();
+        store.dispatch = jasmine.createSpy();
 
         let promise = service.setLanguage("he").then(() => {
             expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
-            expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+            expect(store.dispatch).toHaveBeenCalled();
         });
         return promise;
     }));
