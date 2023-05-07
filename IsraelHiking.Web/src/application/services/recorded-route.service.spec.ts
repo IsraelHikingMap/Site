@@ -96,7 +96,7 @@ describe("Recorded Route Service", () => {
                 }
             });
             service.initialize();
-            const positionStub = MockNgRedux.getSelectorStub((state: ApplicationState) => state.gpsState.currentPoistion);
+            const positionStub = MockNgRedux.getSelectorStub((state: ApplicationState) => state.gpsState.currentPosition);
             let spy = jasmine.createSpy();
             MockNgRedux.store.dispatch = spy;
 
@@ -117,7 +117,7 @@ describe("Recorded Route Service", () => {
             service.initialize();
             MockNgRedux.store.getState = () => ({
                 gpsState: {
-                    currentPoistion: {
+                    currentPosition: {
                         coords: {
                             latitude: 1,
                             loggitude: 2,
@@ -142,7 +142,7 @@ describe("Recorded Route Service", () => {
                     isRecording: true
                 }
             });
-            const positionStub = MockNgRedux.getSelectorStub((state: ApplicationState) => state.gpsState.currentPoistion);
+            const positionStub = MockNgRedux.getSelectorStub((state: ApplicationState) => state.gpsState.currentPosition);
             let spy = jasmine.createSpy();
             MockNgRedux.store.dispatch = spy;
 
@@ -167,7 +167,7 @@ describe("Recorded Route Service", () => {
             service.initialize();
             MockNgRedux.store.getState = () => ({
                 gpsState: {
-                    currentPoistion: {
+                    currentPosition: {
                         coords: {
                             latitude: 1,
                             loggitude: 2,
@@ -192,7 +192,7 @@ describe("Recorded Route Service", () => {
                     isRecording: true
                 }
             });
-            const positionStub = MockNgRedux.getSelectorStub((state: ApplicationState) => state.gpsState.currentPoistion);
+            const positionStub = MockNgRedux.getSelectorStub((state: ApplicationState) => state.gpsState.currentPosition);
             let spy = jasmine.createSpy();
             MockNgRedux.store.dispatch = spy;
 
@@ -237,7 +237,7 @@ describe("Recorded Route Service", () => {
             service.initialize();
             MockNgRedux.store.getState = () => ({
                 gpsState: {
-                    currentPoistion: {
+                    currentPosition: {
                         coords: {
                             latitude: 1,
                             loggitude: 2,

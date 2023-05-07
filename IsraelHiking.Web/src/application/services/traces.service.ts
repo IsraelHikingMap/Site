@@ -1,14 +1,14 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
 
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
 import { RunningContextService } from "./running-context.service";
 import { DatabaseService } from "./database.service";
-import { TracesReducer } from "../reducers/traces.reducer";
+import { AddTraceAction, RemoveTraceAction, UpdateTraceAction } from "../reducers/traces.reducer";
 import { Urls } from "../urls";
 import type { Trace, ApplicationState, DataContainer, RouteData } from "../models/models";
 
@@ -20,7 +20,7 @@ export class TracesService {
                 private readonly loggingService: LoggingService,
                 private readonly runningContextService: RunningContextService,
                 private readonly databaseService: DatabaseService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
     }
 
     public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
@@ -34,7 +34,7 @@ export class TracesService {
     }
 
     public async uploadLocalTracesIfNeeded(): Promise<void> {
-        let state = this.ngRedux.getState();
+        let state = this.store.snapshot() as ApplicationState;
         if (!state.configuration.isAutomaticRecordingUpload) {
             return;
         }
@@ -62,18 +62,14 @@ export class TracesService {
             this.loggingService.info("[Traces] Starting syncing traces");
             let response = await firstValueFrom(this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)));
             let traces = ([] as Trace[]).concat(response as Trace[] || []);
-            let existingTraces = this.ngRedux.getState().tracesState.traces;
-            for (let trace of existingTraces) {
-                // traces' date in the database are saved with strings - converting to object
-                trace.timeStamp = new Date(trace.timeStamp);
-            }
+            let existingTraces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
             for (let traceJson of traces) {
                 traceJson.timeStamp = new Date(traceJson.timeStamp);
                 let existingTrace = existingTraces.find(t => t.id === traceJson.id);
                 if (existingTrace != null) {
-                    this.ngRedux.dispatch(TracesReducer.actions.update({ traceId: traceJson.id, trace: traceJson }));
+                    this.store.dispatch(new UpdateTraceAction(traceJson.id, traceJson));
                 } else {
-                    this.ngRedux.dispatch(TracesReducer.actions.add({ trace: traceJson }));
+                    this.store.dispatch(new AddTraceAction(traceJson));
                 }
                 if (traceJson.visibility === "private") {
                     traceJson.visibility = "trackable";
@@ -86,19 +82,19 @@ export class TracesService {
             }
             for (let trace of existingTraces.filter(t => t.visibility !== "local")) {
                 if (traces.find(t => t.id === trace.id) == null) {
-                    this.ngRedux.dispatch(TracesReducer.actions.remove({ traceId: trace.id }));
+                    this.store.dispatch(new RemoveTraceAction(trace.id));
                     await this.databaseService.deleteTraceById(trace.id);
                 }
             }
             this.loggingService.info("[Traces] Finished syncing traces");
         } catch (ex) {
-            this.loggingService.error("[Traces] Unable to get user's traces.");
+            this.loggingService.error("[Traces] Unable to get user's traces. " + (ex as Error).message);
         }
     }
 
     public async getTraceById(traceId: string): Promise<Trace> {
         this.loggingService.info(`[Traces] Getting trace by id: ${traceId}`);
-        let trace = this.ngRedux.getState().tracesState.traces.find(t => t.id === traceId);
+        let trace = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces.find(t => t.id === traceId);
         if (trace == null) {
             return null;
         }
@@ -137,7 +133,7 @@ export class TracesService {
     public async updateTrace(trace: Trace): Promise<void> {
         this.loggingService.info(`[Traces] Updating a trace with id ${trace.id}`);
         await firstValueFrom(this.httpClient.put(Urls.osmTrace + trace.id, trace));
-        this.ngRedux.dispatch(TracesReducer.actions.update({ traceId: trace.id, trace }));
+        this.store.dispatch(new UpdateTraceAction(trace.id, trace));
     }
 
     public async deleteTrace(trace: Trace): Promise<void> {
@@ -145,7 +141,7 @@ export class TracesService {
         if (trace.visibility !== "local") {
             await firstValueFrom(this.httpClient.delete(Urls.osmTrace + trace.id));
         }
-        this.ngRedux.dispatch(TracesReducer.actions.remove({ traceId: trace.id }));
+        this.store.dispatch(new RemoveTraceAction(trace.id));
         await this.databaseService.deleteTraceById(trace.id);
     }
 }

@@ -1,15 +1,16 @@
 import { Component } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Observable } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { LoggingService } from "../../services/logging.service";
-import { ConfigurationReducer } from "../../reducers/configuration.reducer";
+import { SetBatteryOptimizationTypeAction, ToggleAutomaticRecordingUploadAction, ToggleGotLostWarningsAction } from "../../reducers/configuration.reducer";
 import type { ApplicationState, BatteryOptimizationType } from "../../models/models";
+import { initialState } from "application/reducers/initial-state";
 
 @Component({
     selector: "configuration-dialog",
@@ -31,7 +32,7 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
         private readonly runningContextService: RunningContextService,
         private readonly toastService: ToastService,
         private readonly logginService: LoggingService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+        private readonly store: Store) {
         super(resources);
     }
 
@@ -40,15 +41,15 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
     }
 
     public toggleAutomaticRecordingUpload() {
-        this.ngRedux.dispatch(ConfigurationReducer.actions.toggleAutomaticRecordingUpload());
+        this.store.dispatch(new ToggleAutomaticRecordingUploadAction());
     }
 
     public setBatteryOptimizationType(batteryOptimizationType: BatteryOptimizationType) {
-        this.ngRedux.dispatch(ConfigurationReducer.actions.setBatteryOptimization({ batteryOptimizationType }));
+        this.store.dispatch(new SetBatteryOptimizationTypeAction(batteryOptimizationType));
     }
 
     public toggleGotLostWarnings() {
-        this.ngRedux.dispatch(ConfigurationReducer.actions.toggleGotLostWarnings());
+        this.store.dispatch(new ToggleGotLostWarningsAction());
     }
 
     public clearData() {
@@ -57,7 +58,7 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
             message: this.resources.areYouSure,
             confirmAction: () => {
                 this.logginService.info("************** RESET DATA WAS PRESSED **************");
-                this.ngRedux.dispatch({ type: "RESET" });
+                this.store.reset(initialState);
                 this.dialogRef.close();
             }
         });

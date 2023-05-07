@@ -5,11 +5,11 @@ import { KeepAwake } from "@capacitor-community/keep-awake";
 import { ScreenBrightness } from "@capacitor-community/screen-brightness";
 import { App } from "@capacitor/app";
 import { Observable } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { RecordedRouteReducer } from "../reducers/recorded-route.reducer";
+import { ToggleAddingPoiAction } from "../reducers/recorded-route.reducer";
 import type { ApplicationState, BatteryOptimizationType } from "../models/models";
 
 @Injectable()
@@ -21,7 +21,7 @@ export class ScreenService {
     private originalBrightness: number;
 
     constructor(private readonly runningContextService: RunningContextService,
-                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly store: Store,
                 private readonly userIdleService: Idle,
                 private readonly logger: LoggingService) { }
 
@@ -49,16 +49,16 @@ export class ScreenService {
         this.userIdleService.setIdle(30);
         this.userIdleService.setTimeout(false);
         this.userIdleService.onIdleStart.subscribe(() => {
-            if (this.ngRedux.getState().recordedRouteState.isAddingPoi) {
-                this.ngRedux.dispatch(RecordedRouteReducer.actions.toggleAddingPoi());
+            if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isAddingPoi) {
+                this.store.dispatch(new ToggleAddingPoiAction());
             }
-            if (this.ngRedux.getState().configuration.batteryOptimizationType === "dark") {
+            if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).batteryOptimizationType === "dark") {
                 this.logger.info("[Screen] User is idle, setting brightness to 0.01");
                 ScreenBrightness.setBrightness({ brightness: 0.01});
             }
         });
         this.userIdleService.onIdleEnd.subscribe(() => {
-            if (this.ngRedux.getState().configuration.batteryOptimizationType === "dark") {
+            if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).batteryOptimizationType === "dark") {
                 this.logger.info(`[Screen] User is active, setting brightness to original: ${this.originalBrightness}`);
                 ScreenBrightness.setBrightness({ brightness: this.originalBrightness}); // this is just to be on the safe side...
             }
@@ -69,8 +69,9 @@ export class ScreenService {
     }
 
     private setKeepScreenOn() {
-        this.logger.info(`[Screen] Setting mode: ${this.ngRedux.getState().configuration.batteryOptimizationType}`);
-        if (this.ngRedux.getState().configuration.batteryOptimizationType !== "screen-off") {
+        let configuration = this.store.selectSnapshot((s: ApplicationState) => s.configuration);
+        this.logger.info(`[Screen] Setting mode: ${configuration.batteryOptimizationType}`);
+        if (configuration.batteryOptimizationType !== "screen-off") {
             KeepAwake.keepAwake();
         } else {
             KeepAwake.allowSleep();

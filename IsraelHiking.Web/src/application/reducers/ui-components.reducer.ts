@@ -1,30 +1,39 @@
-import { Action, AbstractReducer, ReducerActions } from "@angular-redux2/store";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
+import { initialState } from "./initial-state";
 import type { UICompoentsState } from "../models/models";
 
 export type UIComponentType = "search" | "drawing" | "statistics";
 
-export interface SetUIComponentVisibilityPayload {
-    isVisible: boolean;
-    component: UIComponentType;
+export class SetUIComponentVisibilityAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public component: UIComponentType, public isVisible: boolean) {}
 }
 
-export class UIComponentsReducer extends AbstractReducer {
-    static actions: ReducerActions<UIComponentsReducer>;
+@State<UICompoentsState>({
+    name: "uiComponentsState",
+    defaults: initialState.uiComponentsState
+})
+@Injectable()
+export class UIComponentsReducer {
 
-    @Action
-    public setVisibility(lastState: UICompoentsState, payload: SetUIComponentVisibilityPayload): UICompoentsState {
-        switch (payload.component) {
-            case "drawing":
-                lastState.drawingVisible = payload.isVisible;
-                break;
-            case "search":
-                lastState.searchVisible = payload.isVisible;
-                break;
-            case "statistics":
-                lastState.statisticsVisible = payload.isVisible;
-                break;
-        }
-        return lastState;
+    @Action(SetUIComponentVisibilityAction)
+    public setVisibility(ctx: StateContext<UICompoentsState>, action: SetUIComponentVisibilityAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            switch (action.component) {
+                case "drawing":
+                    lastState.drawingVisible = action.isVisible;
+                    break;
+                case "search":
+                    lastState.searchVisible = action.isVisible;
+                    break;
+                case "statistics":
+                    lastState.statisticsVisible = action.isVisible;
+                    break;
+            }
+            return lastState;
+        }));
     }
 }

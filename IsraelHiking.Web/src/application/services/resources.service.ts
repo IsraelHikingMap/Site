@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { GetTextCatalogService } from "./gettext-catalog.service";
-import { ConfigurationReducer } from "../reducers/configuration.reducer";
+import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, Language, LanguageCode } from "../models/models";
 
@@ -448,7 +448,7 @@ export class ResourcesService {
     public legendEmpty: string;
 
     constructor(private readonly gettextCatalog: GetTextCatalogService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         this.availableLanguages = [
             {
                 code: "he",
@@ -462,7 +462,7 @@ export class ResourcesService {
     }
 
     public async initialize() {
-        await this.setLanguageInternal(this.ngRedux.getState().configuration.language);
+        await this.setLanguageInternal(this.store.selectSnapshot((s: ApplicationState) => s.configuration).language);
     }
 
     private setRtl(rtl: boolean) {
@@ -937,7 +937,7 @@ export class ResourcesService {
 
         this.setRtl(language.rtl);
         this.gettextCatalog.setCurrentLanguage(language.code);
-        this.ngRedux.dispatch(ConfigurationReducer.actions.setLanguage({language}));
+        this.store.dispatch(new SetLanguageAction(language));
     }
 
     public async setLanguage(code: LanguageCode) {
@@ -973,7 +973,7 @@ export class ResourcesService {
     }
 
     public getCurrentLanguageCodeSimplified(): string {
-        return this.ngRedux.getState().configuration.language.code.split("-")[0];
+        return this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code.split("-")[0];
     }
 
     public getResizedImageUrl(imageUrl: string, size: number) {

@@ -1,12 +1,12 @@
 import { Injectable } from "@angular/core";
 import { InAppPurchase2 } from "@awesome-cordova-plugins/in-app-purchase-2/ngx";
 import { Observable } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { OfflineFilesDownloadService } from "./offline-files-download.service";
-import { OfflineReducer } from "../reducers/offline.reducer";
+import { OfflineReducer, SetOfflineAvailableAction } from "../reducers/offline.reducer";
 import type { ApplicationState, UserInfo } from "../models/models";
 
 @Injectable()
@@ -15,11 +15,11 @@ export class PurchaseService {
     @Select((state: ApplicationState) => state.userState.userInfo)
     private userInfo$: Observable<UserInfo>;
 
-    constructor(private readonly store: InAppPurchase2,
+    constructor(private readonly inAppPurchase: InAppPurchase2,
                 private readonly runningContextService: RunningContextService,
                 private readonly loggingService: LoggingService,
                 private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
     }
 
     public initialize() {
@@ -27,38 +27,39 @@ export class PurchaseService {
             return;
         }
 
-        this.store.log = {
+        this.inAppPurchase.log = {
             error: (message: string | unknown) => this.loggingService.error(this.logMessageToString(message)),
             warn: (message: string | unknown) => this.loggingService.warning(this.logMessageToString(message)),
             info: (message: string | unknown) => this.loggingService.info(this.logMessageToString(message)),
             debug: (message: string | unknown) => this.loggingService.debug(this.logMessageToString(message)),
         };
-        this.store.validator = "https://validator.fovea.cc/v1/validate?appName=il.org.osm.israelhiking" +
+        this.inAppPurchase.validator = "https://validator.fovea.cc/v1/validate?appName=il.org.osm.israelhiking" +
             "&apiKey=1245b587-4bbc-4fbd-a3f1-d51169a53063";
-        this.store.error((e: { code: number; message: string }) => {
+        this.inAppPurchase.error((e: { code: number; message: string }) => {
             this.loggingService.error(`[Store] error handler: ${e.message} (${e.code})`);
         });
 
-        this.store.register({
+        this.inAppPurchase.register({
             id: "offline_map",
             alias: "offline map",
-            type: this.store.PAID_SUBSCRIPTION
+            type: this.inAppPurchase.PAID_SUBSCRIPTION
         });
-        this.store.when("offline_map").owned(() => {
-            this.loggingService.debug("[Store] Product owned! Last modified: " + this.ngRedux.getState().offlineState.lastModifiedDate);
-            this.ngRedux.dispatch(OfflineReducer.actions.setOfflineAvailable({ isAvailble: true }));
+        this.inAppPurchase.when("offline_map").owned(() => {
+            let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+            this.loggingService.debug("[Store] Product owned! Last modified: " + offlineState.lastModifiedDate);
+            this.store.dispatch(new SetOfflineAvailableAction(true));
             return;
         });
-        this.store.when("offline_map").expired(() => {
+        this.inAppPurchase.when("offline_map").expired(() => {
             this.loggingService.debug("[Store] Product expired...");
-            this.ngRedux.dispatch(OfflineReducer.actions.setOfflineAvailable({ isAvailble: false }));
+            this.store.dispatch(new SetOfflineAvailableAction(false));
             return;
         });
-        this.store.when("product").approved((product: any) => {
+        this.inAppPurchase.when("product").approved((product: any) => {
             this.loggingService.debug(`[Store] Approved, verifing: ${product.id}`);
             return product.verify();
         });
-        this.store.when("product").verified((product: any) => {
+        this.inAppPurchase.when("product").verified((product: any) => {
             this.loggingService.debug(`[Store] Verified, Finishing: ${product.id}`);
             product.finish();
         });
@@ -68,12 +69,12 @@ export class PurchaseService {
                 return;
             }
             this.loggingService.info("[Store] logged in: " + userInfo.id);
-            this.store.applicationUsername = userInfo.id;
-            this.store.refresh();
+            this.inAppPurchase.applicationUsername = userInfo.id;
+            this.inAppPurchase.refresh();
             this.offlineFilesDownloadService.isExpired().then((isExpired) => {
                 if (isExpired) {
                     this.loggingService.debug("[Store] Product is expired from server");
-                    this.ngRedux.dispatch(OfflineReducer.actions.setOfflineAvailable({ isAvailble: false }));
+                    this.store.dispatch(new SetOfflineAvailableAction(false));
                 }
             });
         });
@@ -81,7 +82,7 @@ export class PurchaseService {
 
     public order() {
         this.loggingService.debug("[Store] Ordering product");
-        this.store.order("offline_map");
+        this.inAppPurchase.order("offline_map");
     }
 
     private logMessageToString(message: string | unknown): string {

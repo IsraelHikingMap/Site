@@ -30,3 +30,4 @@ export type { UICompoentsState } from "./state/ui-components-state";
 export type { GpsState, TrackingStateType } from "./state/gps-state";
 export type { RouteEditingState } from "./state/route-editing-state";
 export type { RecordedRouteState } from "./state/recorded-route-state";
+export type { StateWithHistory } from "./state/state-with-history";

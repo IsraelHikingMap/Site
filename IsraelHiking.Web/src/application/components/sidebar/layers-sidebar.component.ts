@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { Observable } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
@@ -19,9 +19,9 @@ import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
-import { LayersReducer } from "../../reducers/layers.reducer";
-import { RoutesReducer } from "../../reducers/routes.reducer";
-import { RouteEditingReducer } from "../../reducers/route-editing.reducer";
+import { CollapseGroupAction, ExpandGroupAction, LayersReducer } from "../../reducers/layers.reducer";
+import { BulkReplaceRoutesAction, ChangeVisibilityAction as ChangeRouteVisibilityAction, RoutesReducer, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
+import { RouteEditingReducer, SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
 import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
 
 @Component({
@@ -58,7 +58,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 private readonly runningContextService: RunningContextService,
                 private readonly toastService: ToastService,
                 private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         super(resources);
         this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
@@ -80,16 +80,16 @@ export class LayersSidebarComponent extends BaseMapComponent {
         dialogRef.componentInstance.setBaseLayer(layer);
     }
 
-    public expand(group: string) {
-        this.ngRedux.dispatch(LayersReducer.actions.expandGroup({ name: group }));
+    public expand(groupName: string) {
+        this.store.dispatch(new ExpandGroupAction(groupName));
     }
 
-    public collapse(group: string) {
-        this.ngRedux.dispatch(LayersReducer.actions.collapseGroup({ name: group }));
+    public collapse(groupName: string) {
+        this.store.dispatch(new CollapseGroupAction(groupName));
     }
 
-    public getExpandState(group: string): boolean {
-        return this.ngRedux.getState().layersState.expanded.find(l => l === group) != null;
+    public getExpandState(groupName: string): boolean {
+        return this.store.selectSnapshot((s: ApplicationState) => s.layersState).expanded.find(l => l === groupName) != null;
     }
 
     public addOverlay(event: Event) {
@@ -142,7 +142,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public showOfflineButton(layer: EditableLayer) {
-        let offlineState = this.ngRedux.getState().offlineState;
+        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return layer.isOfflineAvailable &&
             this.runningContextService.isCapacitor &&
             (offlineState.lastModifiedDate != null ||
@@ -151,23 +151,25 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public isOfflineDownloadAvailable() {
         return this.runningContextService.isCapacitor &&
-            this.ngRedux.getState().offlineState.isOfflineAvailable;
+            this.store.selectSnapshot((s: ApplicationState) => s.offlineState).isOfflineAvailable;
     }
 
     public isPurchaseAvailable() {
+        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return this.runningContextService.isCapacitor &&
-            !this.ngRedux.getState().offlineState.isOfflineAvailable &&
-            this.ngRedux.getState().offlineState.lastModifiedDate == null;
+            !offlineState.isOfflineAvailable &&
+            offlineState.lastModifiedDate == null;
     }
 
     public isRenewAvailable() {
+        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return this.runningContextService.isCapacitor &&
-            !this.ngRedux.getState().offlineState.isOfflineAvailable &&
-            this.ngRedux.getState().offlineState.lastModifiedDate != null;
+            !offlineState.isOfflineAvailable &&
+            offlineState.lastModifiedDate != null;
     }
 
     public orderOfflineMaps() {
-        let userInfo = this.ngRedux.getState().userState.userInfo;
+        let userInfo = this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo;
         if (userInfo == null || !userInfo.id) {
             this.toastService.warning(this.resources.loginRequired);
             return;
@@ -176,7 +178,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public async downloadOfflineMaps() {
-        let userInfo = this.ngRedux.getState().userState.userInfo;
+        let userInfo = this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo;
         if (userInfo == null || !userInfo.id) {
             this.toastService.warning(this.resources.loginRequired);
             return;
@@ -187,7 +189,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public toggleOffline(event: Event, layer: EditableLayer, isOverlay: boolean) {
         event.stopPropagation();
-        if (this.ngRedux.getState().offlineState.lastModifiedDate == null && !layer.isOfflineOn) {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null && !layer.isOfflineOn) {
             this.toastService.warning(this.resources.noOfflineFilesPleaseDownload);
             return;
         }
@@ -197,31 +199,25 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public toggleRoute(routeData: RouteData) {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null && routeData.id === selectedRoute.id && routeData.state !== "Hidden") {
-            this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({ routeId: null }));
-            this.ngRedux.dispatch(RoutesReducer.actions.changeVisibility({
-                routeId: routeData.id,
-                isVisible: false
-            }));
+            this.store.dispatch(new SetSelectedRouteAction(null));
+            this.store.dispatch(new ChangeRouteVisibilityAction(routeData.id, false));
             return;
         }
         routeData.state = selectedRoute != null && selectedRoute.state !== "Hidden" ? selectedRoute.state : "ReadOnly";
-        this.ngRedux.dispatch(RoutesReducer.actions.changeVisibility({
-            routeId: routeData.id,
-            isVisible: true
-        }));
+        this.store.dispatch(new ChangeRouteVisibilityAction(routeData.id, true));
         this.selectedRouteService.setSelectedRoute(routeData.id);
     }
 
     public toggleAllRoutes(event: Event) {
         event.stopPropagation();
-        this.ngRedux.dispatch(RoutesReducer.actions.toggleAllRoutes());
+        this.store.dispatch(new ToggleAllRoutesAction());
         if (this.isAllRoutesHidden()) {
-            this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({ routeId: null }));
+            this.store.dispatch(new SetSelectedRouteAction(null));
         }
     }
 
     public isAllRoutesHidden(): boolean {
-        return this.ngRedux.getState().routes.present.find(r => r.state !== "Hidden") == null;
+        return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.find(r => r.state !== "Hidden") == null;
     }
 
     public isRouteVisible(routeData: RouteData): boolean {
@@ -238,13 +234,13 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public isShowActive(routeData: RouteData): boolean {
-        return this.isRouteSelected(routeData) && this.ngRedux.getState().routes.present.length > 1;
+        return this.isRouteSelected(routeData) && this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length > 1;
     }
 
     public dropRoute(event: CdkDragDrop<RouteData[]>) {
-        let currentRoutes = [...this.ngRedux.getState().routes.present];
+        let currentRoutes = [...this.store.selectSnapshot((s: ApplicationState) => s.routes).present];
         moveItemInArray(currentRoutes, event.previousIndex, event.currentIndex);
-        this.ngRedux.dispatch(RoutesReducer.actions.replaceRoutes({ routesData: currentRoutes }));
+        this.store.dispatch(new BulkReplaceRoutesAction(currentRoutes));
     }
 
     public trackByGroupType(_: number, group: CategoriesGroup) {

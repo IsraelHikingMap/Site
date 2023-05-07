@@ -2,7 +2,7 @@
 
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { App } from "@capacitor/app";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
@@ -19,7 +19,7 @@ export class DeviceOrientationService {
     constructor(private readonly ngZone: NgZone,
                 private readonly loggingService: LoggingService,
                 private readonly runningContextService: RunningContextService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         this.orientationChanged = new EventEmitter();
         this.watchId = -1;
     }
@@ -29,7 +29,7 @@ export class DeviceOrientationService {
             return;
         }
         App.addListener("appStateChange", (state) => {
-            if (this.ngRedux.getState().gpsState.tracking === "disabled") {
+            if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "disabled") {
                 return;
             }
             if (state.isActive) {
@@ -38,7 +38,7 @@ export class DeviceOrientationService {
                 this.stopListeining();
             }
         });
-        if (this.ngRedux.getState().gpsState.tracking !== "disabled") {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking !== "disabled") {
             this.enable();
         }
     }

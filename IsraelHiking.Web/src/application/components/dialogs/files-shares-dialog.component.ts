@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { every } from "lodash-es";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
@@ -10,7 +10,7 @@ import { DatabaseService } from "../../services/database.service";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
-import { OfflineReducer } from "../../reducers/offline.reducer";
+import { SetOfflineMapsLastModifiedAction } from "../../reducers/offline.reducer";
 import type { ApplicationState, DataContainer } from "../../models/models";
 
 @Component({
@@ -30,7 +30,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
                 private readonly fileService: FileService,
                 private readonly toastService: ToastService,
                 private readonly databaseService: DatabaseService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         super(resources);
         this.isSaveAsOpen = false;
         this.formats = this.fileService.formats;
@@ -46,7 +46,8 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         if (!file) {
             return;
         }
-        if (file.name.endsWith(".ihm") && this.ngRedux.getState().offlineState.isOfflineAvailable) {
+        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        if (file.name.endsWith(".ihm") && offlineState.isOfflineAvailable) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             try {
                 await this.fileService.writeStyles(file);
@@ -56,13 +57,13 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             }
             return;
         }
-        if (file.name.endsWith(".mbtiles") && this.ngRedux.getState().offlineState.isOfflineAvailable) {
+        if (file.name.endsWith(".mbtiles") && offlineState.isOfflineAvailable) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             let dbFileName = file.name.replace(".mbtiles", ".db");
             await this.fileService.storeFileToCache(dbFileName, file);
             await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
-            this.ngRedux.dispatch(OfflineReducer.actions.setLastModifed({ lastModifiedDate: new Date(file.lastModified) }));
+            this.store.dispatch(new SetOfflineMapsLastModifiedAction(new Date(file.lastModified)));
             return;
         }
         try {

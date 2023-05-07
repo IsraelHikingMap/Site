@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 import { App } from "@capacitor/app";
 
 import { RunningContextService } from "./running-context.service";
@@ -12,7 +12,7 @@ import { SidebarService } from "./sidebar.service";
 import { GeoLocationService } from "./geo-location.service";
 import { RecordedRouteService } from "./recorded-route.service";
 import { ImageGalleryService } from "./image-gallery.service";
-import { PointsOfInterestReducer } from "../reducers/poi.reducer";
+import { PointsOfInterestReducer, SetSidebarAction } from "../reducers/poi.reducer";
 import type { ApplicationState } from "../models/models";
 
 declare let navigator: Navigator;
@@ -36,7 +36,7 @@ export class ApplicationExitService {
                 private readonly recordingRouteService: RecordedRouteService,
                 private readonly geoLocationService: GeoLocationService,
                 private readonly imageGalleryService: ImageGalleryService,
-                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly store: Store,
                 private readonly loggingService: LoggingService,
                 private readonly toastService: ToastService) {
 
@@ -61,10 +61,8 @@ export class ApplicationExitService {
                     this.sidebarService.hide();
                     return;
                 }
-                if (this.ngRedux.getState().poiState.isSidebarOpen) {
-                    this.ngRedux.dispatch(PointsOfInterestReducer.actions.setSidebar({
-                        isOpen: false
-                    }));
+                if (this.store.selectSnapshot((s: ApplicationState) => s.poiState).isSidebarOpen) {
+                    this.store.dispatch(new SetSidebarAction(false));
                     return;
                 }
                 if (this.recordingRouteService.isRecording()) {

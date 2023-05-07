@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { Observable } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -25,7 +25,7 @@ export class BackgroundTextComponent extends BaseMapComponent {
     public text: string;
 
     constructor(resources: ResourcesService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+        private readonly store: Store) {
         super(resources);
 
         this.text = "";
@@ -35,7 +35,7 @@ export class BackgroundTextComponent extends BaseMapComponent {
     }
 
     private updateText() {
-        let offlineState = this.ngRedux.getState().offlineState;
+        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         if (offlineState.lastModifiedDate != null) {
             this.text = this.resources.youNeedToToggleOfflineMaps;
         } else if (offlineState.isOfflineAvailable && offlineState.lastModifiedDate == null) {

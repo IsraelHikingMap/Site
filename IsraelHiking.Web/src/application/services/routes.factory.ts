@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import type { RouteData, ApplicationState } from "../models/models";
 
@@ -24,10 +24,10 @@ export class RoutesFactory {
 
     private nextColorIndex = 0;
 
-    constructor(private readonly ngRedux: NgRedux<ApplicationState>) { }
+    constructor(private readonly store: Store) { }
 
     public createRouteData(name: string, color?: string): RouteData {
-        let routeEditingState = this.ngRedux.getState().routeEditingState;
+        let routeEditingState = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState);
         let route: RouteData = {
             id: this.generateRandomId(),
             name,
@@ -44,7 +44,7 @@ export class RoutesFactory {
     }
 
     public createRouteDataAddMissingFields(routeData: RouteData, color: string): RouteData {
-        let routeEditingState = this.ngRedux.getState().routeEditingState;
+        let routeEditingState = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState);
         let route = { ...routeData };
         route.color = route.color || color;
         route.opacity = route.opacity || routeEditingState.opacity;

@@ -1,70 +1,93 @@
-import { Action, AbstractReducer, ReducerActions } from "@angular-redux2/store";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
+import { initialState } from "./initial-state";
 import type { TracesState, Trace } from "../models/models";
 
-export type AddTracePayload = {
-    trace: Trace;
+export class AddTraceAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public trace: Trace) {}
 };
 
-export type UpdateTracePayload = {
-    traceId: string;
-    trace: Trace;
+export class UpdateTraceAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public traceId: string, public trace: Trace) {}
 };
 
-export type RemoveTracePayload = {
-    traceId: string;
+export class RemoveTraceAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public traceId: string) {}
 };
 
-export type SetVisibleTracePayload = {
-    traceId: string;
+export class SetVisibleTraceAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public traceId: string) {}
 };
 
-export type SetMissingPartsPayload = {
-    missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>;
+export class SetMissingPartsAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>) {}
 };
 
-export type RemoveMissingPartPayload = {
-    missingPartIndex: number;
+export class RemoveMissingPartAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public missingPartIndex: number) {}
 };
+@State<TracesState>({
+    name: "tracesState",
+    defaults: initialState.tracesState
+})
+@Injectable()
+export class TracesReducer {
 
-export class TracesReducer extends AbstractReducer {
-    static actions: ReducerActions<TracesReducer>;
-
-    @Action
-    public add(lastState: TracesState, payload: AddTracePayload): TracesState {
-        lastState.traces.push(payload.trace);
-        return lastState;
+    @Action(AddTraceAction)
+    public add(ctx: StateContext<TracesState>, action: AddTraceAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.traces.push(action.trace);
+            return lastState;
+        }));
     }
 
-    @Action
-    public update(lastState: TracesState, payload: UpdateTracePayload): TracesState {
-        let traceToReplace = lastState.traces.find(r => r.id === payload.traceId);
-        lastState.traces.splice(lastState.traces.indexOf(traceToReplace), 1, payload.trace);
-        return lastState;
+    @Action(UpdateTraceAction)
+    public update(ctx: StateContext<TracesState>, action: UpdateTraceAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            let traceToReplace = lastState.traces.find(r => r.id === action.traceId);
+            lastState.traces.splice(lastState.traces.indexOf(traceToReplace), 1, action.trace);
+            return lastState;
+        }));
     }
 
-    @Action
-    public remove(lastState: TracesState, payload: RemoveTracePayload): TracesState {
-        let traceToRemove = lastState.traces.find(r => r.id === payload.traceId);
-        lastState.traces.splice(lastState.traces.indexOf(traceToRemove), 1);
-        return lastState;
+    @Action(RemoveTraceAction)
+    public remove(ctx: StateContext<TracesState>, action: RemoveTraceAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            let traceToRemove = lastState.traces.find(r => r.id === action.traceId);
+            lastState.traces.splice(lastState.traces.indexOf(traceToRemove), 1);
+            return lastState;
+        }));
     }
 
-    @Action
-    public setVisibleTrace(lastState: TracesState, payload: SetVisibleTracePayload): TracesState {
-        lastState.visibleTraceId = payload.traceId;
-        return lastState;
+    @Action(SetVisibleTraceAction)
+    public setVisibleTrace(ctx: StateContext<TracesState>, action: SetVisibleTraceAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.visibleTraceId = action.traceId;
+            return lastState;
+        }));
     }
 
-    @Action
-    public setMissingPart(lastState: TracesState, payload: SetMissingPartsPayload): TracesState {
-        lastState.missingParts = payload.missingParts;
-        return lastState;
+    @Action(SetMissingPartsAction)
+    public setMissingPart(ctx: StateContext<TracesState>, action: SetMissingPartsAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.missingParts = action.missingParts;
+            return lastState;
+        }));
     }
 
-    @Action
-    public removeMissingPart(lastState: TracesState, payload: RemoveMissingPartPayload): TracesState {
-        lastState.missingParts.features.splice(payload.missingPartIndex, 1);
-        return lastState;
+    @Action(RemoveMissingPartAction)
+    public removeMissingPart(ctx: StateContext<TracesState>, action: RemoveMissingPartAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.missingParts.features.splice(action.missingPartIndex, 1);
+            return lastState;
+        }));
     }
 }

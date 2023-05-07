@@ -1,39 +1,51 @@
-import { Action, AbstractReducer, ReducerActions } from "@angular-redux2/store";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
+import { initialState } from "./initial-state";
 import type { GpsState, TrackingStateType } from "../models/models";
 
-export type SetTrackingStatePayload = {
-    state: TrackingStateType;
+export class SetTrackingStateAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public state: TrackingStateType) {}
 };
 
-export type SetCurrentPositionPayload = {
-    position: GeolocationPosition;
+export class SetCurrentPositionAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public position: GeolocationPosition) {}
 };
+@State<GpsState>({
+    name: "gpsState",
+    defaults: initialState.gpsState
+})
+@Injectable()
+export class GpsReducer {
 
-export class GpsReducer extends AbstractReducer {
-    static actions: ReducerActions<GpsReducer>;
-
-    @Action
-    public setTrackingState(lastState: GpsState, payload: SetTrackingStatePayload): GpsState {
-        lastState.tracking = payload.state;
-        return lastState;
+    @Action(SetTrackingStateAction)
+    public setTrackingState(ctx: StateContext<GpsState>, action: SetTrackingStateAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.tracking = action.state;
+            return lastState;
+        }));
     }
 
-    @Action
-    public setCurrentPosition(lastState: GpsState, payload: SetCurrentPositionPayload): GpsState {
+    @Action(SetCurrentPositionAction)
+    public setCurrentPosition(ctx: StateContext<GpsState>, action: SetCurrentPositionAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
         // Clone position before setting into state since this object can't be cloned regularly
-        let currentPoistion = payload.position == null ? null : {
-            coords: {
-                accuracy: payload.position.coords.accuracy,
-                altitude: payload.position.coords.altitude,
-                latitude: payload.position.coords.latitude,
-                longitude: payload.position.coords.longitude,
-                speed: payload.position.coords.speed,
-                heading: payload.position.coords.heading
-            },
-            timestamp: payload.position.timestamp
-        } as GeolocationPosition;
-        lastState.currentPoistion = currentPoistion;
-        return lastState;
+            let currentPosition = action.position == null ? null : {
+                coords: {
+                    accuracy: action.position.coords.accuracy,
+                    altitude: action.position.coords.altitude,
+                    latitude: action.position.coords.latitude,
+                    longitude: action.position.coords.longitude,
+                    speed: action.position.coords.speed,
+                    heading: action.position.coords.heading
+                },
+                timestamp: action.position.timestamp
+            } as GeolocationPosition;
+            lastState.currentPosition = currentPosition;
+            return lastState;
+        }));
     }
 }

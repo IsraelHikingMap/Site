@@ -1,14 +1,14 @@
 import { Component } from "@angular/core";
 import { Observable } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RoutesFactory } from "../../services/routes.factory";
 import { TracesService } from "../../services/traces.service";
-import { RoutesReducer } from "../../reducers/routes.reducer";
-import { TracesReducer } from "../../reducers/traces.reducer";
+import { AddRouteAction } from "../../reducers/routes.reducer";
+import { RemoveMissingPartAction, SetMissingPartsAction, SetVisibleTraceAction } from "../../reducers/traces.reducer";
 import type { ApplicationState, LatLngAlt } from "../../models/models";
 
 @Component({
@@ -35,7 +35,7 @@ export class TracesComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
                 private readonly routesFactory: RoutesFactory,
                 private readonly tracesService: TracesService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         super(resources);
         this.isConfigOpen = false;
         this.selectedTrace = null;
@@ -113,9 +113,7 @@ export class TracesComponent extends BaseMapComponent {
     }
 
     public removeMissingPart() {
-        this.ngRedux.dispatch(TracesReducer.actions.removeMissingPart({
-            missingPartIndex: this.missingParts.features.indexOf(this.selectedFeature)
-        }));
+        this.store.dispatch(new RemoveMissingPartAction(this.missingParts.features.indexOf(this.selectedFeature)));
         this.clearSelection();
     }
 
@@ -129,24 +127,18 @@ export class TracesComponent extends BaseMapComponent {
     }
 
     public clearTrace() {
-        this.ngRedux.dispatch(TracesReducer.actions.setMissingPart({
-            missingParts: null
-        }));
-        this.ngRedux.dispatch(TracesReducer.actions.setVisibleTrace({
-            traceId: null
-        }));
+        this.store.dispatch(new SetMissingPartsAction(null));
+        this.store.dispatch(new SetVisibleTraceAction(null));
     }
 
     public async convertToRoute() {
-        let traceId = this.ngRedux.getState().tracesState.visibleTraceId;
+        let traceId = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).visibleTraceId;
         let trace = await this.tracesService.getTraceById(traceId);
         for (let route of trace.dataContainer.routes) {
             let routeToAdd = this.routesFactory.createRouteData(route.name);
             routeToAdd.segments = route.segments;
             routeToAdd.markers = route.markers;
-            this.ngRedux.dispatch(RoutesReducer.actions.addRoute({
-                routeData: routeToAdd
-            }));
+            this.store.dispatch(new AddRouteAction(routeToAdd));
         }
         this.clearTrace();
     }

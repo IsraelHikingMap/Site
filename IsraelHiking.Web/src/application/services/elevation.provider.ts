@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 
@@ -21,7 +21,7 @@ export class ElevationProvider {
     constructor(private readonly httpClient: HttpClient,
                 private readonly loggingService: LoggingService,
                 private readonly databaseService: DatabaseService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         this.elevationCache = new Map<string, Uint8ClampedArray>();
     }
 
@@ -60,7 +60,7 @@ export class ElevationProvider {
     }
 
     private async populateElevationCache(latlngs: LatLngAlt[]) {
-        let offlineState = this.ngRedux.getState().offlineState;
+        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         if (!offlineState.isOfflineAvailable || offlineState.lastModifiedDate == null) {
             throw new Error("[Elevation] Getting elevation is only supported after downloading offline data");
         }

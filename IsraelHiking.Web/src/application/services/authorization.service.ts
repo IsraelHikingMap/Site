@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { UserInfoReducer } from "../reducers/user.reducer";
+import { SetTokenAction, SetUserInfoAction } from "../reducers/user.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState, OsmUserDetails, UserState, UserInfo } from "../models/models";
 
@@ -24,7 +24,7 @@ export class AuthorizationService {
     constructor(private readonly httpClient: HttpClient,
                 private readonly runningContextService: RunningContextService,
                 private readonly loggingService: LoggingService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         this.redirectUrl = this.runningContextService.isCapacitor ? "ihm://oauth_callback/" : Urls.emptyAuthHtml;
         this.userState$.subscribe(us => this.userState = us);
     }
@@ -42,8 +42,8 @@ export class AuthorizationService {
     }
 
     public logout() {
-        this.ngRedux.dispatch(UserInfoReducer.actions.setUserInfo({ userInfo: null }));
-        this.ngRedux.dispatch(UserInfoReducer.actions.setToken({ token: null }));
+        this.store.dispatch(new SetUserInfoAction(null));
+        this.store.dispatch(new SetTokenAction(null));
     }
 
     public async login(): Promise<void> {
@@ -62,9 +62,7 @@ export class AuthorizationService {
         });
         let oauthCode = await this.getCodeFromWindow(popup, Urls.osmAuth + "/authorize?" + params.toString());
         let accessToken = await this.getAccessToken(oauthCode);
-        this.ngRedux.dispatch(UserInfoReducer.actions.setToken({
-            token: accessToken
-        }));
+        this.store.dispatch(new SetTokenAction(accessToken));
         await this.updateUserDetails();
     }
 
@@ -90,9 +88,7 @@ export class AuthorizationService {
             changeSets: detailJson.changeSetCount,
             imageUrl: detailJson.image
         };
-        this.ngRedux.dispatch(UserInfoReducer.actions.setUserInfo({
-            userInfo
-        }));
+        this.store.dispatch(new SetUserInfoAction(userInfo));
         this.loggingService.info(`[Authorization] User ${userInfo.displayName} logged-in successfully`);
     };
 

@@ -14,7 +14,7 @@ import { debounceTime, filter, tap, map } from "rxjs/operators";
 import { remove } from "lodash-es";
 import { Observable } from "rxjs";
 import { skip } from "rxjs/operators";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -26,8 +26,8 @@ import { SearchResultsProvider } from "../services/search-results.provider";
 import { RoutesFactory } from "../services/routes.factory";
 import { SpatialService } from "../services/spatial.service";
 import { GpxDataContainerConverterService } from "../services/gpx-data-container-converter.service";
-import { RouteEditingReducer } from "../reducers/route-editing.reducer";
-import { RoutesReducer } from "../reducers/routes.reducer";
+import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
+import { AddRouteAction } from "../reducers/routes.reducer";
 import type { RoutingType, ApplicationState, LatLngAlt, SearchResultsPointOfInterest, LatLngAltTime } from "../models/models";
 
 export type SearchContext = {
@@ -92,7 +92,7 @@ export class SearchComponent extends BaseMapComponent {
                 private readonly toastService: ToastService,
                 private readonly routesFactory: RoutesFactory,
                 private readonly router: Router,
-                private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly store: Store
     ) {
         super(resources);
         this.requestsQueue = [];
@@ -241,12 +241,8 @@ export class SearchComponent extends BaseMapComponent {
         let route = this.routesFactory.createRouteData(this.directional.routeTitle);
         route.segments = GpxDataContainerConverterService
             .getSegmentsFromLatlngs(this.directional.latlngs as LatLngAltTime[], this.routingType);
-        this.ngRedux.dispatch(RoutesReducer.actions.addRoute({
-            routeData: route
-        }));
-        this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({
-            routeId: route.id
-        }));
+        this.store.dispatch(new AddRouteAction(route));
+        this.store.dispatch(new SetSelectedRouteAction(route.id));
         this.clearDirectionalRoute();
     }
 

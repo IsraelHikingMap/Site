@@ -3,7 +3,7 @@ import { FormControl } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash-es";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -16,7 +16,7 @@ import { TracesService } from "../../services/traces.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { SpatialService } from "../../services/spatial.service";
 import { DataContainerService } from "../../services/data-container.service";
-import { TracesReducer } from "../../reducers/traces.reducer";
+import { SetMissingPartsAction, SetVisibleTraceAction, TracesReducer } from "../../reducers/traces.reducer";
 import type { ApplicationState, Trace, TraceVisibility } from "../../models/models";
 
 @Component({
@@ -52,7 +52,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                 private readonly tracesService: TracesService,
                 private readonly runningContextService: RunningContextService,
                 private readonly dataContainerService: DataContainerService,
-                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly store: Store,
                 @Inject(MAT_DIALOG_DATA) data: string[]
     ) {
         super(resources);
@@ -77,7 +77,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public async ngOnInit() {
-        this.loadingTraces = this.ngRedux.getState().tracesState.traces.length === 0;
+        this.loadingTraces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces.length === 0;
         await this.tracesService.syncTraces();
         this.loadingTraces = false;
     }
@@ -92,7 +92,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     private getSelectedTrace(): Trace {
-        return this.ngRedux.getState().tracesState.traces.find(t => t.id === this.selectedTraceId);
+        return this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces.find(t => t.id === this.selectedTraceId);
     }
 
     public updateTrace() {
@@ -127,8 +127,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                 return;
             }
             let trace = await this.tracesService.getTraceById(this.selectedTraceId);
-            this.ngRedux.dispatch(TracesReducer.actions.setVisibleTrace({ traceId: trace.id }));
-            this.ngRedux.dispatch(TracesReducer.actions.setMissingPart({ missingParts: geoJson }));
+            this.store.dispatch(new SetVisibleTraceAction(trace.id));
+            this.store.dispatch(new SetMissingPartsAction(geoJson));
             let bounds = SpatialService.getBoundsForFeatureCollection(geoJson);
             this.fitBoundsService.fitBounds(bounds);
             this.matDialogRef.close();
@@ -154,7 +154,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     private updateFilteredLists(searchTerm: string) {
         searchTerm = searchTerm.trim();
         this.sessionSearchTerm = searchTerm;
-        let traces = this.ngRedux.getState().tracesState.traces;
+        let traces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
         traces = orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
         if (this.specificIds.length > 0) {
             traces = traces.filter(t => this.specificIds.find(id => id === t.id) != null);
@@ -179,7 +179,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         if ((trace.tagsString || "").toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
-        if ((trace.timeStamp.toISOString() || "").toLowerCase().includes(lowerSearchTerm)) {
+        if ((new Date(trace.timeStamp).toISOString() || "").toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
         return false;
@@ -231,7 +231,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public hasNoTraces(): boolean {
-        return !this.loadingTraces && this.ngRedux.getState().tracesState.traces.length === 0;
+        return !this.loadingTraces && this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces.length === 0;
     }
 
     public getTraceDisplayName(trace: Trace) {

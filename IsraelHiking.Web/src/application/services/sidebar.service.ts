@@ -1,9 +1,9 @@
 import { Injectable, EventEmitter } from "@angular/core";
 import { Observable } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { HashService } from "./hash.service";
-import { PointsOfInterestReducer } from "../reducers/poi.reducer";
+import { PointsOfInterestReducer, SetSidebarAction } from "../reducers/poi.reducer";
 import type { ApplicationState } from "../models/models";
 
 export type SidebarView = "info" | "layers" | "public-poi" | "";
@@ -21,7 +21,7 @@ export class SidebarService {
     private isPoiSidebarOpen: boolean;
 
     constructor(private readonly hashService: HashService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         this.sideBarStateChanged = new EventEmitter();
         this.isPoiSidebarOpen = false;
         this.hideWithoutChangingAddressbar();
@@ -42,9 +42,7 @@ export class SidebarService {
     public show(viewName: SidebarView) {
         this.isVisible = true;
         this.viewName = viewName;
-        this.ngRedux.dispatch(PointsOfInterestReducer.actions.setSidebar({
-            isOpen: false
-        }));
+        this.store.dispatch(new SetSidebarAction(false));
         this.hashService.resetAddressbar();
         this.sideBarStateChanged.next();
     }

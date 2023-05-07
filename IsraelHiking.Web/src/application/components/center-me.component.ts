@@ -1,9 +1,9 @@
 import { Component } from "@angular/core";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
-import { InMemoryReducer } from "../reducers/in-memory.reducer";
+import { SetPannedAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models/models";
 
 @Component({
@@ -14,17 +14,17 @@ import type { ApplicationState } from "../models/models";
 export class CenterMeComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         super(resources);
     }
 
     public showButton() {
-        let inMemeoryState = this.ngRedux.getState().inMemoryState;
-        let tracking = this.ngRedux.getState().gpsState.tracking;
+        let inMemeoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
+        let tracking = this.store.selectSnapshot((s: ApplicationState) => s.gpsState.tracking);
         return inMemeoryState.pannedTimestamp != null && inMemeoryState.following && tracking === "tracking";
     }
 
     public centerMe() {
-        this.ngRedux.dispatch(InMemoryReducer.actions.setPanned({pannedTimestamp: null}));
+        this.store.dispatch(new SetPannedAction(null));
     }
 }

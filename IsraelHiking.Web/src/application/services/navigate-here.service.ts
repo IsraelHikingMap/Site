@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "./resources.service";
 import { GeoLocationService } from "./geo-location.service";
@@ -8,7 +8,7 @@ import { ToastService } from "./toast.service";
 import { RouterService } from "./router.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { RoutesFactory } from "./routes.factory";
-import { RoutesReducer } from "../reducers/routes.reducer";
+import { AddRouteAction } from "../reducers/routes.reducer";
 import type { ApplicationState, LatLngAlt, LatLngAltTime } from "../models/models";
 
 @Injectable()
@@ -18,16 +18,16 @@ export class NavigateHereService {
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly routerService: RouterService,
                 private readonly routesFactory: RoutesFactory,
-                private readonly ngRedux: NgRedux<ApplicationState>) { }
+                private readonly store: Store) { }
 
     public async addNavigationSegment(latlng: LatLngAlt, title: string) {
-        let currentPoistion = this.ngRedux.getState().gpsState.currentPoistion;
-        if (currentPoistion == null) {
+        let currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
+        if (currentPosition == null) {
             this.toastService.warning(this.resources.unableToFindYourLocation);
             return;
         }
-        let routingType = this.ngRedux.getState().routeEditingState.routingType;
-        let currentLocation = GeoLocationService.positionToLatLngTime(currentPoistion);
+        let routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
+        let currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
         let latlngs = await this.routerService.getRoute(currentLocation, latlng, routingType);
         let name = this.resources.route + (title ? " " + title : "");
         if (!this.selectedRouteService.isNameAvailable(name)) {
@@ -35,7 +35,7 @@ export class NavigateHereService {
         }
         let data = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
         data.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(latlngs as LatLngAltTime[], routingType);
-        this.ngRedux.dispatch(RoutesReducer.actions.addRoute({ routeData: data }));
+        this.store.dispatch(new AddRouteAction(data));
 
         if (this.selectedRouteService.getSelectedRoute() == null) {
             this.selectedRouteService.setSelectedRoute(data.id);

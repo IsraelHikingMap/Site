@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
 import { Map } from "maplibre-gl";
 import { Observable } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
-import { InMemoryReducer } from "../reducers/in-memory.reducer";
+import { SetPannedAction } from "../reducers/in-memory.reducer";
 import type { ApplicationState } from "../models/models";
 
 @Injectable()
@@ -22,7 +22,7 @@ export class MapService {
     public pannedTimestamp$: Observable<Date>;
 
     constructor(private readonly cancelableTimeoutService: CancelableTimeoutService,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+        private readonly store: Store) {
         this.initializationPromise = new Promise((resolve) => { this.resolve = resolve; });
         this.missingImagesArray = [];
     }
@@ -34,13 +34,13 @@ export class MapService {
             this.cancelableTimeoutService.clearTimeoutByGroup("panned");
             if (pannedTimestamp) {
                 this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                    this.ngRedux.dispatch(InMemoryReducer.actions.setPanned({ pannedTimestamp: null }));
+                    this.store.dispatch(new SetPannedAction(null));
                 }, MapService.NOT_FOLLOWING_TIMEOUT, "panned");
             }
         });
 
         this.map.on("dragstart", () => {
-            this.ngRedux.dispatch(InMemoryReducer.actions.setPanned({ pannedTimestamp: new Date() }));
+            this.store.dispatch(new SetPannedAction(new Date()));
         });
 
         this.map.on("styleimagemissing", (e: {id: string}) => {

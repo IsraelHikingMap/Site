@@ -1,37 +1,52 @@
-import { Action, AbstractReducer, ReducerActions} from "@angular-redux2/store";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
+import { initialState } from "./initial-state";
 import type { UserInfo, UserState } from "../models/models";
 
-export type SetUserInfoPayload = {
-    userInfo: UserInfo;
+export class SetUserInfoAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public userInfo: UserInfo) {}
 };
 
-export type SetTokenPayload = {
-    token: string;
+export class SetTokenAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public token: string) {}
 };
 
-export type SetArgreeToTermsPayload = {
-    agree: boolean;
+export class SetArgreeToTermsAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public agree: boolean) {}
 };
+@State<UserState>({
+    name: "userState",
+    defaults: initialState.userState
+})
+@Injectable()
+export class UserInfoReducer {
 
-export class UserInfoReducer extends AbstractReducer {
-    static actions: ReducerActions<UserInfoReducer>;
-
-    @Action
-    public setUserInfo(lastState: UserState, payload: SetUserInfoPayload): UserState {
-        lastState.userInfo = payload.userInfo;
-        return lastState;
+    @Action(SetUserInfoAction)
+    public setUserInfo(ctx: StateContext<UserState>, action: SetUserInfoAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.userInfo = action.userInfo;
+            return lastState;
+        }));
     }
 
-    @Action
-    public setToken(lastState: UserState, payload: SetTokenPayload): UserState {
-        lastState.token = payload.token;
-        return lastState;
+    @Action(SetTokenAction)
+    public setToken(ctx: StateContext<UserState>, action: SetTokenAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.token = action.token;
+            return lastState;
+        }));
     }
 
-    @Action
-    public setAgreeToTerms(lastState: UserState, payload: SetArgreeToTermsPayload): UserState {
-        lastState.agreedToTheTermsOfService = payload.agree;
-        return lastState;
+    @Action(SetArgreeToTermsAction)
+    public setAgreeToTerms(ctx: StateContext<UserState>, action: SetArgreeToTermsAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.agreedToTheTermsOfService = action.agree;
+            return lastState;
+        }));
     }
 }

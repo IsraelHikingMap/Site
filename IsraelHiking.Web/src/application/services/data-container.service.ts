@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { LayersService } from "./layers.service";
 import { ToastService } from "./toast.service";
@@ -12,9 +12,9 @@ import { SelectedRouteService } from "./selected-route.service";
 import { MapService } from "./map.service";
 import { RoutesFactory } from "./routes.factory";
 import { RunningContextService } from "./running-context.service";
-import { RoutesReducer } from "../reducers/routes.reducer";
-import { InMemoryReducer } from "../reducers/in-memory.reducer";
-import { RouteEditingReducer } from "../reducers/route-editing.reducer";
+import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
+import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
+import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import type { DataContainer, ApplicationState, LayerData } from "../models/models";
 
 @Injectable()
@@ -30,7 +30,7 @@ export class DataContainerService {
                 private readonly routesFactory: RoutesFactory,
                 private readonly mapService: MapService,
                 private readonly runningContextService: RunningContextService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
     }
 
     public setData(dataContainer: DataContainer, keepCurrentRoutes: boolean) {
@@ -40,16 +40,13 @@ export class DataContainerService {
             routesData.push(routeToAdd);
         }
         if (keepCurrentRoutes) {
-            routesData = [...this.ngRedux.getState().routes.present, ...routesData];
+            let currentRoutes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present;
+            routesData = [...currentRoutes, ...routesData];
         }
         this.routesFactory.regenerateDuplicateIds(routesData);
-        this.ngRedux.dispatch(RoutesReducer.actions.replaceRoutes({
-            routesData
-        }));
+        this.store.dispatch(new BulkReplaceRoutesAction(routesData));
         if (routesData.length > 0 && this.selectedRouteService.getSelectedRoute() == null) {
-            this.ngRedux.dispatch(RouteEditingReducer.actions.setSelectedRoute({
-                routeId: routesData[0].id
-            }));
+            this.store.dispatch(new SetSelectedRouteAction(routesData[0].id));
         }
         this.layersService.addExternalOverlays(dataContainer.overlays);
         this.layersService.addExternalBaseLayer(dataContainer.baseLayer);
@@ -63,7 +60,7 @@ export class DataContainerService {
         let layersContainer = this.layersService.getData();
 
         let bounds = SpatialService.getMapBounds(this.mapService.map);
-        let routes = this.ngRedux.getState().routes.present
+        let routes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present
             .filter(r => r.state !== "Hidden" || withHidden)
             .filter(r => r.segments.length > 0 || r.markers.length > 0);
         let container = {
@@ -89,10 +86,7 @@ export class DataContainerService {
     public async setFileUrlAfterNavigation(url: string, baseLayer: string) {
         try {
             let data = await this.fileService.openFromUrl(url);
-            this.ngRedux.dispatch(InMemoryReducer.actions.setFileUrlAndBaseLayer({
-                fileUrl: url,
-                baseLayer
-            }));
+            this.store.dispatch(new SetFileUrlAndBaseLayerAction(url, baseLayer));
             data.baseLayer = this.stringToBaseLayer(baseLayer);
             this.setData(data, this.runningContextService.isCapacitor);
         } catch (ex) {
@@ -134,6 +128,6 @@ export class DataContainerService {
     }
 
     public hasHiddenRoutes(): boolean {
-        return this.ngRedux.getState().routes.present.filter(r => r.state === "Hidden").length > 0;
+        return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.filter(r => r.state === "Hidden").length > 0;
     }
 }

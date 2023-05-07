@@ -1,39 +1,54 @@
-import { Action, AbstractReducer, ReducerActions } from "@angular-redux2/store";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
+import { initialState } from "./initial-state";
 import type { RoutingType, RouteEditingState } from "../models/models";
 
-export type RoutePayload = {
-    routeId: string;
+export class SetSelectedRouteAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public routeId: string) {}
 };
 
-export type SetRoutingTypePayload = {
-    routingType: RoutingType;
+export class SetRoutingTypeAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public routingType: RoutingType) {}
 };
 
-export type SetOpacityAndWeightPayload = {
-    opacity: number;
-    weight: number;
+export class SetOpacityAndWeightAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public opacity: number, public weight: number) {}
 };
 
-export class RouteEditingReducer extends AbstractReducer {
-    static actions: ReducerActions<RouteEditingReducer>;
+@State<RouteEditingState>({
+    name: "routeEditingState",
+    defaults: initialState.routeEditingState
+})
+@Injectable()
+export class RouteEditingReducer {
 
-    @Action
-    public setSelectedRoute(lastState: RouteEditingState, payload: RoutePayload): RouteEditingState {
-        lastState.selectedRouteId = payload.routeId;
-        return lastState;
+    @Action(SetSelectedRouteAction)
+    public setSelectedRoute(ctx: StateContext<RouteEditingState>, action: SetSelectedRouteAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.selectedRouteId = action.routeId;
+            return lastState;
+        }));
     }
 
-    @Action
-    public setRoutingType(lastState: RouteEditingState, payload: SetRoutingTypePayload): RouteEditingState {
-        lastState.routingType = payload.routingType;
-        return lastState;
+    @Action(SetRoutingTypeAction)
+    public setRoutingType(ctx: StateContext<RouteEditingState>, action: SetRoutingTypeAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.routingType = action.routingType;
+            return lastState;
+        }));
     }
 
-    @Action
-    public setOpacityAndWeight(lastState: RouteEditingState, payload: SetOpacityAndWeightPayload): RouteEditingState {
-        lastState.opacity = payload.opacity;
-        lastState.weight = payload.weight;
-        return lastState;
+    @Action(SetOpacityAndWeightAction)
+    public setOpacityAndWeight(ctx: StateContext<RouteEditingState>, action: SetOpacityAndWeightAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.opacity = action.opacity;
+            lastState.weight = action.weight;
+            return lastState;
+        }));
     }
 }

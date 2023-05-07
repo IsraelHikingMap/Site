@@ -1,64 +1,113 @@
-import { Action, AbstractReducer, ReducerActions } from "@angular-redux2/store";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
+import { initialState } from "./initial-state";
 import type { ConfigurationState, Language, BatteryOptimizationType } from "../models/models";
 
 
-export type SetLanguagePayload = {
-    language: Language;
+export class SetLanguageAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public language: Language) {}
 };
 
-export type SetBatteryOptimizationTypePayload = {
-    batteryOptimizationType: BatteryOptimizationType;
+export class SetBatteryOptimizationTypeAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public batteryOptimizationType: BatteryOptimizationType) {}
 };
 
-export class ConfigurationReducer extends AbstractReducer {
-    static actions: ReducerActions<ConfigurationReducer>;
+export class ToggleAutomaticRecordingUploadAction {
+    public static type = this.prototype.constructor.name;
+}
 
-    @Action
-    public setBatteryOptimization(lastState: ConfigurationState, payload: SetBatteryOptimizationTypePayload): ConfigurationState {
-        lastState.batteryOptimizationType = payload.batteryOptimizationType;
-        return lastState;
+export class ToggleGotLostWarningsAction {
+    public static type = this.prototype.constructor.name;
+}
+
+export class ToggleIsShowSlopeAction {
+    public static type = this.prototype.constructor.name;
+}
+
+export class ToggleIsShowKmMarkersAction {
+    public static type = this.prototype.constructor.name;
+}
+
+export class StopShowingBatteryConfirmationAction {
+    public static type = this.prototype.constructor.name;
+}
+
+export class StopShowingIntroAction {
+    public static type = this.prototype.constructor.name;
+}
+
+@State<ConfigurationState>({
+    name: "configuration",
+    defaults: initialState.configuration
+})
+@Injectable()
+export class ConfigurationReducer{
+
+    @Action(SetBatteryOptimizationTypeAction)
+    public setBatteryOptimization(ctx: StateContext<ConfigurationState>, action: SetBatteryOptimizationTypeAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.batteryOptimizationType = action.batteryOptimizationType;
+            return lastState;
+        }));
     }
 
-    @Action
-    public toggleAutomaticRecordingUpload(lastState: ConfigurationState): ConfigurationState {
-        lastState.isAutomaticRecordingUpload = !lastState.isAutomaticRecordingUpload;
-        return lastState;
+    @Action(ToggleAutomaticRecordingUploadAction)
+    public toggleAutomaticRecordingUpload(ctx: StateContext<ConfigurationState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isAutomaticRecordingUpload = !lastState.isAutomaticRecordingUpload;
+            return lastState;
+        }));
     }
 
-    @Action
-    public toggleGotLostWarnings(lastState: ConfigurationState): ConfigurationState {
-        lastState.isGotLostWarnings = !lastState.isGotLostWarnings;
-        return lastState;
+    @Action(ToggleGotLostWarningsAction)
+    public toggleGotLostWarnings(ctx: StateContext<ConfigurationState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isGotLostWarnings = !lastState.isGotLostWarnings;
+            return lastState;
+        }));
     }
 
-    @Action
-    public toggleIsShowSlope(lastState: ConfigurationState): ConfigurationState {
-        lastState.isShowSlope = !lastState.isShowSlope;
-        return lastState;
+    @Action(ToggleIsShowSlopeAction)
+    public toggleIsShowSlope(ctx: StateContext<ConfigurationState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isShowSlope = !lastState.isShowSlope;
+            return lastState;
+        }));
     }
 
-    @Action
-    public toggleIsShowKmMarkers(lastState: ConfigurationState): ConfigurationState {
-        lastState.isShowKmMarker = !lastState.isShowKmMarker;
-        return lastState;
+    @Action(ToggleIsShowKmMarkersAction)
+    public toggleIsShowKmMarkers(ctx: StateContext<ConfigurationState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isShowKmMarker = !lastState.isShowKmMarker;
+            return lastState;
+        }));
     }
 
-    @Action
-    public stopShowingBatteryConfirmation(lastState: ConfigurationState): ConfigurationState {
-        lastState.isShowBatteryConfirmation = false;
-        return lastState;
+    @Action(StopShowingBatteryConfirmationAction)
+    public stopShowingBatteryConfirmation(ctx: StateContext<ConfigurationState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isShowBatteryConfirmation = false;
+            return lastState;
+        }));
     }
 
-    @Action
-    public stopShowingIntro(lastState: ConfigurationState): ConfigurationState {
-        lastState.isShowIntro = false;
-        return lastState;
+    @Action(StopShowingIntroAction)
+    public stopShowingIntro(ctx: StateContext<ConfigurationState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isShowIntro = false;
+            return lastState;
+        }));
     }
 
-    @Action
-    public setLanguage(lastState: ConfigurationState, payload: SetLanguagePayload): ConfigurationState {
-        lastState.language = payload.language;
-        return lastState;
+    @Action(SetLanguageAction)
+    public setLanguage(ctx: StateContext<ConfigurationState>, action: SetLanguageAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.language = action.language;
+            return lastState;
+        }));
     }
 }

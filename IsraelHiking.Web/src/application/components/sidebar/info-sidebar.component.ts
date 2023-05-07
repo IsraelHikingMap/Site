@@ -3,7 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { Observable } from "rxjs";
-import { Select } from "@angular-redux2/store";
+import { Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";

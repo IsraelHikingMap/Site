@@ -2,7 +2,7 @@ import { Component, AfterViewInit, ViewEncapsulation } from "@angular/core";
 import { Observable } from "rxjs";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { MapLayerMouseEvent } from "maplibre-gl";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 import invert from "invert-color";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -64,7 +64,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
                 private readonly fileService: FileService,
                 private readonly mapComponent: MapComponent,
-                private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly store: Store
     ) {
         super(resources);
         this.routesGeoJson = {
@@ -237,7 +237,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routeEditRouteInteraction.setActive(false, this.mapComponent.mapInstance);
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.mapComponent.mapInstance.getCanvas().style.cursor = "";
-        if (this.ngRedux.getState().recordedRouteState.isAddingPoi ||
+        if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isAddingPoi ||
             (selectedRoute && selectedRoute.state === "Poi")) {
             this.routeEditPoiInteraction.setActive(true, this.mapComponent.mapInstance);
             this.mapComponent.mapInstance.getCanvas().style.cursor = "pointer";

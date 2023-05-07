@@ -2,7 +2,7 @@ import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, Eleme
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
 import mapliregl, { StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike } from "maplibre-gl";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { TracesDialogComponent } from "../dialogs/traces-dialog.component";
@@ -13,7 +13,7 @@ import { HashService } from "../../services/hash.service";
 import { MapService } from "../../services/map.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { DefaultStyleService } from "../../services/default-style.service";
-import { LocationReducer } from "../../reducers/location.reducer";
+import { SetLocationAction } from "../../reducers/location.reducer";
 import type { ApplicationState, LocationState } from "../../models/models";
 
 @Component({
@@ -51,11 +51,11 @@ export class MainMapComponent extends BaseMapComponent {
                 private readonly runningContextService: RunningContextService,
                 private readonly defaultStyleService: DefaultStyleService,
                 private readonly dialog: MatDialog,
-                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly store: Store,
 
     ) {
         super(resources);
-        this.location = this.ngRedux.getState().location;
+        this.location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         this.isTerrainOn = false;
         this.initialStyle = { ...this.defaultStyleService.style };
         this.initialStyle.sources = {
@@ -105,11 +105,7 @@ export class MainMapComponent extends BaseMapComponent {
             return;
         }
         let centerLatLon = this.mapComponent.mapInstance.getCenter();
-        this.ngRedux.dispatch(LocationReducer.actions.setLocation({
-            longitude: centerLatLon.lng,
-            latitude: centerLatLon.lat,
-            zoom: this.mapComponent.mapInstance.getZoom()
-        }));
+        this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, this.mapComponent.mapInstance.getZoom()));
         this.hashService.resetAddressbar();
     }
 
@@ -182,7 +178,7 @@ export class MainMapComponent extends BaseMapComponent {
             url: "https://israelhiking.osm.org.il/vector/data/TerrainRGB.json",
             tileSize: 256
         };
-        if (this.ngRedux.getState().offlineState.lastModifiedDate != null) {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate != null) {
             // Using offline source
             source = {
                 type: "raster-dem",

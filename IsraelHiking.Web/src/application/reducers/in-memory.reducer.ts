@@ -1,55 +1,79 @@
-import { Action, AbstractReducer, ReducerActions } from "@angular-redux2/store";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
+import { initialState } from "./initial-state";
 import type { ShareUrl, InMemoryState } from "../models/models";
 
-export type SetFollowingPayload = {
-    following: boolean;
+export class ToggleDistanceAction {
+    public static type = this.prototype.constructor.name;
+}
+
+export class SetFollowingAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public following: boolean) {}
 };
 
-export type SetPannedPayload = {
-    pannedTimestamp: Date;
+export class SetPannedAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public pannedTimestamp: Date) {}
 };
 
-export type SetShareUrlPayload = {
-    shareUrl: ShareUrl;
+export class SetShareUrlAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public shareUrl: ShareUrl) {}
 };
 
-export type SetFileUrlAndBaseLayerPayload = {
-    fileUrl: string;
-    baseLayer: string;
+export class SetFileUrlAndBaseLayerAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public fileUrl: string, public baseLayer: string) {}
 };
 
-export class InMemoryReducer extends AbstractReducer {
-    static actions: ReducerActions<InMemoryReducer>;
+@State({
+    name: "inMemoryState",
+    defaults: initialState.inMemoryState
+})
+@Injectable()
+export class InMemoryReducer {
 
-    @Action
-    public toggleDistance(lastState: InMemoryState): InMemoryState {
-        lastState.distance = !lastState.distance;
-        return lastState;
+    @Action(ToggleDistanceAction)
+    public toggleDistance(ctx: StateContext<InMemoryState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.distance = !lastState.distance;
+            return lastState;
+        }));
     }
 
-    @Action
-    public setFollowing(lastState: InMemoryState, payload: SetFollowingPayload): InMemoryState {
-        lastState.following = payload.following;
-        return lastState;
+    @Action(SetFollowingAction)
+    public setFollowing(ctx: StateContext<InMemoryState>, action: SetFollowingAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.following = action.following;
+            return lastState;
+        }));
     }
 
-    @Action
-    public setPanned(lastState: InMemoryState, payload: SetPannedPayload): InMemoryState {
-        lastState.pannedTimestamp = payload.pannedTimestamp;
-        return lastState;
+    @Action(SetPannedAction)
+    public setPanned(ctx: StateContext<InMemoryState>, action: SetPannedAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.pannedTimestamp = action.pannedTimestamp;
+            return lastState;
+        }));
     }
 
-    @Action
-    public setShareUrl(lastState: InMemoryState, payload: SetShareUrlPayload): InMemoryState {
-        lastState.shareUrl = payload.shareUrl;
-        return lastState;
+    @Action(SetShareUrlAction)
+    public setShareUrl(ctx: StateContext<InMemoryState>, action: SetShareUrlAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.shareUrl = action.shareUrl;
+            return lastState;
+        }));
     }
 
-    @Action
-    public setFileUrlAndBaseLayer(lastState: InMemoryState, payload: SetFileUrlAndBaseLayerPayload): InMemoryState {
-        lastState.fileUrl = payload.fileUrl;
-        lastState.baseLayer = payload.baseLayer;
-        return lastState;
+    @Action(SetFileUrlAndBaseLayerAction)
+    public setFileUrlAndBaseLayer(ctx: StateContext<InMemoryState>, action: SetFileUrlAndBaseLayerAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.fileUrl = action.fileUrl;
+            lastState.baseLayer = action.baseLayer;
+            return lastState;
+        }));
     }
 }
