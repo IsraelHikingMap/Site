@@ -10,7 +10,7 @@ import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
-import { DeleteRouteAction, ChangeRoutePropertiesActionAction } from "../../../reducers/routes.reducer";
+import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
 import type { DataContainer, RouteData, LatLngAlt } from "../../../models/models";
 
@@ -41,7 +41,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     protected saveImplementation() {
-        this.store.dispatch(new ChangeRoutePropertiesActionAction(this.routeData.id, this.routeData));
+        this.store.dispatch(new ChangeRoutePropertiesAction(this.routeData.id, this.routeData));
     }
 
     protected isRouteNameAlreadyInUse() {

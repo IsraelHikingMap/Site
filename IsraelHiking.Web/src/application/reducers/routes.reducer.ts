@@ -27,7 +27,7 @@ export class DeleteRouteAction {
     constructor(public routeId: string) {}
 };
 
-export class ChangeRoutePropertiesActionAction {
+export class ChangeRoutePropertiesAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public routeData: RouteData) {}
 };
@@ -175,8 +175,8 @@ export class RoutesReducer {
         });
     }
 
-    @Action(ChangeRoutePropertiesActionAction)
-    public changeProperties(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ChangeRoutePropertiesActionAction) {
+    @Action(ChangeRoutePropertiesAction)
+    public changeProperties(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ChangeRoutePropertiesAction) {
         this.changeState(ctx, (lastState) => {
             let route = lastState.find(r => r.id === action.routeId);
             route.name = action.routeData.name;
