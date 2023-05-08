@@ -17,7 +17,7 @@ export class ToggleAddRecordingPoiAction {
     public static type = this.prototype.constructor.name;
 }
 
-export class AddRecordingPointsAction {
+export class AddRecordingRoutePointsAction {
     public static type = this.prototype.constructor.name;
     constructor(public latlngs: LatLngAltTime[]) {}
 };
@@ -66,8 +66,8 @@ export class RecordedRouteReducer {
         }));
     }
 
-    @Action(AddRecordingPointsAction)
-    public addRecordingPoints(ctx: StateContext<RecordedRouteState>, action: AddRecordingPointsAction) {
+    @Action(AddRecordingRoutePointsAction)
+    public addRecordingPoints(ctx: StateContext<RecordedRouteState>, action: AddRecordingRoutePointsAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.route.latlngs = [...lastState.route.latlngs, ...action.latlngs];
             return lastState;

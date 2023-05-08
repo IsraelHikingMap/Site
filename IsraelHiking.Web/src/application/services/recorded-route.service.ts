@@ -10,7 +10,7 @@ import { RoutesFactory } from "./routes.factory";
 import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
-import { StopRecordingAction, StartRecordingAction, AddRecordingPointsAction } from "../reducers/recorded-route.reducer";
+import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsAction } from "../reducers/recorded-route.reducer";
 import { AddTraceAction } from "../reducers/traces.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
@@ -65,7 +65,7 @@ export class RecordedRouteService {
         let currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
         this.lastValidLocation = currentLocation;
         this.store.dispatch(new StartRecordingAction());
-        this.store.dispatch(new AddRecordingPointsAction([currentLocation]));
+        this.store.dispatch(new AddRecordingRoutePointsAction([currentLocation]));
     }
 
     public isRecording() {
@@ -151,7 +151,7 @@ export class RecordedRouteService {
         let locations = validPositions.map(p => GeoLocationService.positionToLatLngTime(p));
         setTimeout(() => {
             // This is needed when dispatching an action within a @Select subscription event
-            this.store.dispatch(new AddRecordingPointsAction(locations));
+            this.store.dispatch(new AddRecordingRoutePointsAction(locations));
         }, 0);
     }
 

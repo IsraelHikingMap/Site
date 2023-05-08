@@ -170,7 +170,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         this.dialog.open(FilesSharesDialogComponent);
     }
 
-    public async selectLegendAndAbout() {
+    public selectLegendAndAbout() {
         this.sidebarService.toggle("info");
     }
 

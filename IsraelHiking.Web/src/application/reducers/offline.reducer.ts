@@ -20,7 +20,7 @@ export class SetOfflinePoisLastModifiedDateAction {
     constructor(public lastModifiedDate: Date) {}
 };
 
-export class SetShareUrlLastModifiedDateAction {
+export class SetShareUrlsLastModifiedDateAction {
     public static type = this.prototype.constructor.name;
     constructor(public lastModifiedDate: Date) {}
 };
@@ -66,8 +66,8 @@ export class OfflineReducer {
         }));
     }
 
-    @Action(SetShareUrlLastModifiedDateAction)
-    public setShareUrlsLastModifiedDate(ctx: StateContext<OfflineState>, action: SetShareUrlLastModifiedDateAction) {
+    @Action(SetShareUrlsLastModifiedDateAction)
+    public setShareUrlsLastModifiedDate(ctx: StateContext<OfflineState>, action: SetShareUrlsLastModifiedDateAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.shareUrlsLastModifiedDate = action.lastModifiedDate;
             return lastState;
