@@ -40,7 +40,7 @@
         /// <summary>
         /// Naviguide alias in GPSBabel
         /// </summary>
-        public const string TWL_BABEL_FORMAT = "naviguide,input=trw";
+        public const string TWL_BABEL_FORMAT = "naviguide";
         /// <summary>
         /// CSV alias in GPSBabel
         /// </summary>
