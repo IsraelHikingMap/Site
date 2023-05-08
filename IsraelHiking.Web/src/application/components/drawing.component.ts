@@ -7,12 +7,12 @@ import { ResourcesService } from "../services/resources.service";
 import { SelectedRouteService } from "../services/selected-route.service";
 import { ToastService } from "../services/toast.service";
 import {
-    ClearHistoryAction,
+    ReplaceSegmentsAction,
     ClearPoisAction,
     ClearPoisAndRouteAction,
     DeleteAllRoutesAction,
+    ClearHistoryAction,
     RedoAction,
-    ReplaceSegmentsAction,
     UndoAction
 } from "../reducers/routes.reducer";
 import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";

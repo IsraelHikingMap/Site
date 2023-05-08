@@ -10,6 +10,8 @@ import * as pako from "pako";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { initialState } from "../reducers/initial-state";
+import { ClearHistoryAction } from "application/reducers/routes.reducer";
+import { SetSelectedPoiAction, SetSidebarAction } from "application/reducers/poi.reducer";
 import type { ApplicationState, ShareUrl, Trace } from "../models/models";
 
 export type ImageUrlAndData = {
@@ -115,12 +117,11 @@ export class DatabaseService {
     }
 
     public async uninitialize() {
-        let finalState = this.store.snapshot() as ApplicationState;
         // reduce database size and memory footprint
-        finalState.routes.past = [];
-        finalState.routes.future = [];
-        finalState.poiState.selectedPointOfInterest = null;
-        finalState.poiState.isSidebarOpen = false;
+        this.store.dispatch(new ClearHistoryAction());
+        this.store.dispatch(new SetSelectedPoiAction(null));
+        this.store.dispatch(new SetSidebarAction(false));
+        let finalState = this.store.snapshot() as ApplicationState;
         await this.updateState(finalState);
         for (let dbKey of this.sourceDatabases.keys()) {
             await this.closeDatabase(dbKey);
@@ -149,8 +150,6 @@ export class DatabaseService {
         if (this.updating) {
             return;
         }
-        // HM TODO: revet this!!!
-        return;
         this.updating = true;
         try {
             await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).put({

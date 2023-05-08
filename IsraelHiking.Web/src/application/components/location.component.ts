@@ -12,10 +12,10 @@ import { SelectedRouteService } from "../services/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
-import { SetFollowingAction, SetPannedAction, ToggleDistanceAction } from "../reducers/in-memory.reducer";
+import { ToggleDistanceAction, SetPannedAction, SetFollowingAction } from "../reducers/in-memory.reducer";
 import { StopShowingBatteryConfirmationAction } from "../reducers/configuration.reducer";
-import { ChangeEditStateAction } from "../reducers/routes.reducer";
-import { ToggleAddingPoiAction } from "../reducers/recorded-route.reducer";
+import { ChangeRouteStateAction } from "../reducers/routes.reducer";
+import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import type { LatLngAlt, ApplicationState } from "../models/models";
 
 @Component({
@@ -240,9 +240,9 @@ export class LocationComponent extends BaseMapComponent {
     public toggleAddRecordingPoi() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
-            this.store.dispatch(new ChangeEditStateAction(selectedRoute.id, "ReadOnly"));
+            this.store.dispatch(new ChangeRouteStateAction(selectedRoute.id, "ReadOnly"));
         }
-        this.store.dispatch(new ToggleAddingPoiAction());
+        this.store.dispatch(new ToggleAddRecordingPoiAction());
     }
 
     private handlePositionChange(position: GeolocationPosition) {

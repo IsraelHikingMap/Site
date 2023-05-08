@@ -10,17 +10,17 @@ export class SetOfflineAvailableAction {
     constructor(public isAvailble: boolean) {}
 };
 
-export class SetOfflineMapsLastModifiedAction {
+export class SetOfflineMapsLastModifiedDateAction {
     public static type = this.prototype.constructor.name;
     constructor(public lastModifiedDate: Date) {}
 };
 
-export class SetPoisLastModifiedAction {
+export class SetOfflinePoisLastModifiedDateAction {
     public static type = this.prototype.constructor.name;
     constructor(public lastModifiedDate: Date) {}
 };
 
-export class SetShareUrlLastModifiedAction {
+export class SetShareUrlLastModifiedDateAction {
     public static type = this.prototype.constructor.name;
     constructor(public lastModifiedDate: Date) {}
 };
@@ -50,24 +50,24 @@ export class OfflineReducer {
         }));
     }
 
-    @Action(SetOfflineMapsLastModifiedAction)
-    public setOfflineMpasLastModified(ctx: StateContext<OfflineState>, action: SetOfflineMapsLastModifiedAction) {
+    @Action(SetOfflineMapsLastModifiedDateAction)
+    public setOfflineMpasLastModifiedDate(ctx: StateContext<OfflineState>, action: SetOfflineMapsLastModifiedDateAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.lastModifiedDate = action.lastModifiedDate;
             return lastState;
         }));
     }
 
-    @Action(SetPoisLastModifiedAction)
-    public setPoisLastModified(ctx: StateContext<OfflineState>, action: SetPoisLastModifiedAction) {
+    @Action(SetOfflinePoisLastModifiedDateAction)
+    public setOfflinePoisLastModifiedDate(ctx: StateContext<OfflineState>, action: SetOfflinePoisLastModifiedDateAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.poisLastModifiedDate = action.lastModifiedDate;
             return lastState;
         }));
     }
 
-    @Action(SetShareUrlLastModifiedAction)
-    public setShareUrlsLastModified(ctx: StateContext<OfflineState>, action: SetShareUrlLastModifiedAction) {
+    @Action(SetShareUrlLastModifiedDateAction)
+    public setShareUrlsLastModifiedDate(ctx: StateContext<OfflineState>, action: SetShareUrlLastModifiedDateAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.shareUrlsLastModifiedDate = action.lastModifiedDate;
             return lastState;

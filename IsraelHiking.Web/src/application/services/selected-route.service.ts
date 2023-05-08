@@ -9,16 +9,17 @@ import { SpatialService } from "./spatial.service";
 import { RouterService } from "./router.service";
 import { MINIMAL_ANGLE, MINIMAL_DISTANCE } from "./route-statistics.service";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import { ToggleAddingPoiAction } from "../reducers/recorded-route.reducer";
-import { AddPrivatePoiAction,
+import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
+import {
     AddRouteAction,
-    ChangeEditStateAction,
-    DeleteSegmentAction,
-    MergeRoutesAction,
-    ReplaceRouteAction,
-    ReplaceSegmentsAction,
     SplitRouteAction,
-    UpdateSegmentsAction
+    ReplaceRouteAction,
+    MergeRoutesAction,
+    UpdateSegmentsAction,
+    DeleteSegmentAction,
+    ReplaceSegmentsAction,
+    AddPrivatePoiAction,
+    ChangeRouteStateAction
 } from "../reducers/routes.reducer";
 import type {
     RouteData,
@@ -96,7 +97,7 @@ export class SelectedRouteService {
         } else {
             let selectedRoute = this.getSelectedRoute();
             if (selectedRoute != null && selectedRoute.state !== "Hidden") {
-                this.store.dispatch(new ChangeEditStateAction(this.selectedRouteId,"ReadOnly"));
+                this.store.dispatch(new ChangeRouteStateAction(this.selectedRouteId, "ReadOnly"));
             }
 
             this.store.dispatch(new SetSelectedRouteAction(routeId));
@@ -105,9 +106,9 @@ export class SelectedRouteService {
 
     public changeRouteEditState(routeId: string, state: RouteEditStateType) {
         if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isAddingPoi) {
-            this.store.dispatch(new ToggleAddingPoiAction());
+            this.store.dispatch(new ToggleAddRecordingPoiAction());
         }
-        this.store.dispatch(new ChangeEditStateAction(routeId, state));
+        this.store.dispatch(new ChangeRouteStateAction(routeId, state));
     }
 
     public createRouteName(routeName: string = this.resources.route): string {

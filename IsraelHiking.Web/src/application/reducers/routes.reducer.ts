@@ -67,12 +67,7 @@ export class DeleteSegmentAction {
     constructor(public routeId: string, public index: number) {}
 };
 
-export class ChangeRouteVisibilityAction {
-    public static type = this.prototype.constructor.name;
-    constructor(public routeId: string, public isVisible: boolean) {}
-};
-
-export class ChangeEditStateAction {
+export class ChangeRouteStateAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public state: RouteEditStateType) {}
 };
@@ -159,6 +154,7 @@ export class RoutesReducer {
     public clearHistory(ctx: StateContext<StateWithHistory<RouteData[]>>) {
         ctx.setState(produce((lastState: StateWithHistory<RouteData[]>) => {
             lastState.past = [];
+            lastState.future = [];
         }));
     }
 
@@ -264,20 +260,11 @@ export class RoutesReducer {
         });
     }
 
-    @Action(ChangeEditStateAction)
-    public changeEditState(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ChangeEditStateAction) {
+    @Action(ChangeRouteStateAction)
+    public changeEditState(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ChangeRouteStateAction) {
         this.changeState(ctx, (lastState) => {
             let route = lastState.find(r => r.id === action.routeId);
             route.state = action.state;
-            return lastState;
-        });
-    }
-
-    @Action(ChangeRouteVisibilityAction)
-    public changeVisibility(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ChangeRouteVisibilityAction) {
-        this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
-            route.state = action.isVisible ? "ReadOnly" : "Hidden";
             return lastState;
         });
     }

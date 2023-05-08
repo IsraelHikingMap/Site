@@ -8,7 +8,7 @@ import { SpatialService } from "../../services/spatial.service";
 import { RoutesFactory } from "../../services/routes.factory";
 import { TracesService } from "../../services/traces.service";
 import { AddRouteAction } from "../../reducers/routes.reducer";
-import { RemoveMissingPartAction, SetMissingPartsAction, SetVisibleTraceAction } from "../../reducers/traces.reducer";
+import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
 import type { ApplicationState, LatLngAlt } from "../../models/models";
 
 @Component({

@@ -12,10 +12,10 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { RunningContextService } from "./running-context.service";
 import { ConnectionService } from "./connection.service";
-import { RecordedRouteReducer, StopRecordingAction } from "../reducers/recorded-route.reducer";
+import { StopRecordingAction, RecordedRouteReducer } from "../reducers/recorded-route.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
+import { SetCurrentPositionAction, GpsReducer } from "../reducers/gps.reducer";
 import type { ApplicationState, MarkerData } from "../models/models";
-import { GpsReducer, SetCurrentPositionAction } from "application/reducers/gps.reducer";
 
 describe("Recorded Route Service", () => {
 

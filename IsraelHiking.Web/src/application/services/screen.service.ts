@@ -9,7 +9,7 @@ import { Store, Select } from "@ngxs/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
-import { ToggleAddingPoiAction } from "../reducers/recorded-route.reducer";
+import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import type { ApplicationState, BatteryOptimizationType } from "../models/models";
 
 @Injectable()
@@ -50,7 +50,7 @@ export class ScreenService {
         this.userIdleService.setTimeout(false);
         this.userIdleService.onIdleStart.subscribe(() => {
             if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isAddingPoi) {
-                this.store.dispatch(new ToggleAddingPoiAction());
+                this.store.dispatch(new ToggleAddRecordingPoiAction());
             }
             if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).batteryOptimizationType === "dark") {
                 this.logger.info("[Screen] User is idle, setting brightness to 0.01");

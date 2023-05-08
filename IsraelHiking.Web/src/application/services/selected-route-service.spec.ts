@@ -7,9 +7,9 @@ import { ResourcesService } from "./resources.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { RouterService } from "./router.service";
 import { RoutesFactory } from "./routes.factory";
-import { RouteEditingReducer, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import { ToggleAddingPoiAction } from "../reducers/recorded-route.reducer";
-import { AddRouteAction, BulkReplaceRoutesAction, ChangeEditStateAction, RoutesReducer } from "../reducers/routes.reducer";
+import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
+import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
+import { AddRouteAction, ChangeRouteStateAction, BulkReplaceRoutesAction, RoutesReducer } from "../reducers/routes.reducer";
 import type { RouteData } from "../models/models";
 
 
@@ -140,7 +140,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.first().args[0]).toBeInstanceOf(ChangeEditStateAction);
+            expect(spy.calls.first().args[0]).toBeInstanceOf(ChangeRouteStateAction);
         }
     ));
 
@@ -157,8 +157,8 @@ describe("Selected Route Service", () => {
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ToggleAddingPoiAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(ChangeEditStateAction);
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ToggleAddRecordingPoiAction);
+            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(ChangeRouteStateAction);
         }
     ));
 

@@ -19,8 +19,8 @@ import { RunningContextService } from "../../services/running-context.service";
 import { ToastService } from "../../services/toast.service";
 import { PurchaseService } from "../../services/purchase.service";
 import { OfflineFilesDownloadService } from "../../services/offline-files-download.service";
-import { CollapseGroupAction, ExpandGroupAction } from "../../reducers/layers.reducer";
-import { BulkReplaceRoutesAction, ChangeRouteVisibilityAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
+import { ExpandGroupAction, CollapseGroupAction } from "../../reducers/layers.reducer";
+import { ChangeRouteStateAction, BulkReplaceRoutesAction, ToggleAllRoutesAction } from "../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../reducers/route-editing.reducer";
 import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGroup } from "../../models/models";
 
@@ -200,11 +200,11 @@ export class LayersSidebarComponent extends BaseMapComponent {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null && routeData.id === selectedRoute.id && routeData.state !== "Hidden") {
             this.store.dispatch(new SetSelectedRouteAction(null));
-            this.store.dispatch(new ChangeRouteVisibilityAction(routeData.id, false));
+            this.store.dispatch(new ChangeRouteStateAction(routeData.id, "Hidden"));
             return;
         }
-        routeData.state = selectedRoute != null && selectedRoute.state !== "Hidden" ? selectedRoute.state : "ReadOnly";
-        this.store.dispatch(new ChangeRouteVisibilityAction(routeData.id, true));
+        let newRouteState = selectedRoute != null && selectedRoute.state !== "Hidden" ? selectedRoute.state : "ReadOnly";
+        this.store.dispatch(new ChangeRouteStateAction(routeData.id, newRouteState));
         this.selectedRouteService.setSelectedRoute(routeData.id);
     }
 

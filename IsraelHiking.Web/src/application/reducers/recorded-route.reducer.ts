@@ -13,7 +13,7 @@ export class StopRecordingAction {
     public static type = this.prototype.constructor.name;
 }
 
-export class ToggleAddingPoiAction {
+export class ToggleAddRecordingPoiAction {
     public static type = this.prototype.constructor.name;
 }
 
@@ -74,8 +74,8 @@ export class RecordedRouteReducer {
         }));
     }
 
-    @Action(ToggleAddingPoiAction)
-    public toggleAddingPoi(ctx: StateContext<RecordedRouteState>) {
+    @Action(ToggleAddRecordingPoiAction)
+    public toggleAddRecordingPoi(ctx: StateContext<RecordedRouteState>) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.isAddingPoi = !lastState.isAddingPoi;
             return lastState;

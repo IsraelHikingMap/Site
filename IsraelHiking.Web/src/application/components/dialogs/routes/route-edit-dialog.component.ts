@@ -10,7 +10,7 @@ import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
-import { ChangeRoutePropertiesActionAction, DeleteRouteAction } from "../../../reducers/routes.reducer";
+import { DeleteRouteAction, ChangeRoutePropertiesActionAction } from "../../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
 import type { DataContainer, RouteData, LatLngAlt } from "../../../models/models";
 

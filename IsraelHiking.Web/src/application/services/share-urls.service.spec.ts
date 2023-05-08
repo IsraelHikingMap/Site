@@ -9,9 +9,9 @@ import { HashService } from "./hash.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
+import { ShareUrlsReducer } from "../reducers/share-urls.reducer";
 import { Urls } from "../urls";
 import type { ShareUrl, DataContainer } from "../models/models";
-import { ShareUrlsReducer } from "application/reducers/share-urls.reducer";
 
 describe("Share Urls Service", () => {
     beforeEach(() => {

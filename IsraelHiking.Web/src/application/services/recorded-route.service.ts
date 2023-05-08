@@ -10,7 +10,7 @@ import { RoutesFactory } from "./routes.factory";
 import { TracesService } from "./traces.service";
 import { SpatialService } from "./spatial.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
-import { AddRecordingPointsAction, StartRecordingAction, StopRecordingAction } from "../reducers/recorded-route.reducer";
+import { StopRecordingAction, StartRecordingAction, AddRecordingPointsAction } from "../reducers/recorded-route.reducer";
 import { AddTraceAction } from "../reducers/traces.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";

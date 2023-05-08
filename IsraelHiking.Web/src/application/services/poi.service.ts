@@ -20,12 +20,12 @@ import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
 import { FileService } from "./file.service";
 import { ConnectionService } from "./connection.service";
-import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetPoisLastModifiedAction } from "../reducers/offline.reducer";
+import { AddToPoiQueueAction, RemoveFromPoiQueueAction, SetOfflinePoisLastModifiedDateAction } from "../reducers/offline.reducer";
 import {
-    AddCategoryAction,
-    RemoveCategoryAction,
     SetCategoriesGroupVisibilityAction,
-    UpdateCategoryAction
+    AddCategoryAction,
+    UpdateCategoryAction,
+    RemoveCategoryAction
 } from "../reducers/layers.reducer";
 import { Urls } from "../urls";
 import type {
@@ -174,9 +174,8 @@ export class PoiService {
         this.uploadPoiQueue$.subscribe((items: string[]) => this.handleUploadQueueChanges(items));
         this.connectionService.monitor(false).subscribe(state => {
             this.loggingService.info(`[POIs] Connection status changed to: ${state.hasInternetAccess}`);
-            let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-            if (state.hasInternetAccess && offlineState.uploadPoiQueue.length > 0) {
-                this.handleUploadQueueChanges(offlineState.uploadPoiQueue);
+            if (state.hasInternetAccess && this.offlineState.uploadPoiQueue.length > 0) {
+                this.handleUploadQueueChanges(this.offlineState.uploadPoiQueue);
             }
         });
 
@@ -333,7 +332,7 @@ export class PoiService {
         this.loggingService.info("[POIs] Opening pois file");
         let lastModified = await this.openPoisFile(poisFile, progressCallback);
         this.loggingService.info(`[POIs] Updating last modified to: ${lastModified}`);
-        this.store.dispatch(new SetPoisLastModifiedAction(lastModified));
+        this.store.dispatch(new SetOfflinePoisLastModifiedDateAction(lastModified));
         this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
         await this.fileService.deleteFileFromCache(Urls.poisOfflineFile);
         this.loggingService.info("[POIs] Finished deleting offline pois cached file");
@@ -360,7 +359,7 @@ export class PoiService {
             this.databaseService.storeImages(imageAndData);
             let minDate = new Date(Math.min(new Date(updates.lastModified).getTime(), modifiedUntil.getTime()));
             this.loggingService.info(`[POIs] Updating last modified to: ${minDate}`);
-            this.store.dispatch(new SetPoisLastModifiedAction(minDate));
+            this.store.dispatch(new SetOfflinePoisLastModifiedDateAction(minDate));
         } while (modifiedUntil < new Date());
     }
 

@@ -247,7 +247,6 @@ const initializeApplication = (injector: Injector) => async () => {
                 GpsReducer,
                 OfflineReducer,
                 UIComponentsReducer
-
             ]),
             NgxMapLibreGLModule,
             NgIdleModule.forRoot(),

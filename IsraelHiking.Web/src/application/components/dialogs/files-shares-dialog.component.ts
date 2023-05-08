@@ -10,7 +10,7 @@ import { DatabaseService } from "../../services/database.service";
 import { FileService, FormatViewModel } from "../../services/file.service";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
-import { SetOfflineMapsLastModifiedAction } from "../../reducers/offline.reducer";
+import { SetOfflineMapsLastModifiedDateAction } from "../../reducers/offline.reducer";
 import type { ApplicationState, DataContainer } from "../../models/models";
 
 @Component({
@@ -63,7 +63,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             await this.fileService.storeFileToCache(dbFileName, file);
             await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
-            this.store.dispatch(new SetOfflineMapsLastModifiedAction(new Date(file.lastModified)));
+            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(new Date(file.lastModified)));
             return;
         }
         try {

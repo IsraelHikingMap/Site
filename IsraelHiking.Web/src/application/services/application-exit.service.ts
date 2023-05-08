@@ -15,13 +15,7 @@ import { ImageGalleryService } from "./image-gallery.service";
 import { SetSidebarAction } from "../reducers/poi.reducer";
 import type { ApplicationState } from "../models/models";
 
-declare let navigator: Navigator;
-
 declare type ExitState = "None" | "FirstClick" | "SecondClick";
-
-interface Navigator {
-    app: any;
-}
 
 @Injectable()
 export class ApplicationExitService {

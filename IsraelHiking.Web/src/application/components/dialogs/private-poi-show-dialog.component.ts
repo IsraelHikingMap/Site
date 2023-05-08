@@ -102,9 +102,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     }
 
     public addToActiveRoute() {
-        this.store.dispatch(
-            new AddPrivatePoiAction(this.selectedRouteService.getSelectedRoute().id, JSON.parse(JSON.stringify(this.marker)))
-        );
+        this.store.dispatch(new AddPrivatePoiAction(this.selectedRouteService.getSelectedRoute().id, structuredClone(this.marker)));
     }
 
     public isShowAddToActiveRoute(): boolean {

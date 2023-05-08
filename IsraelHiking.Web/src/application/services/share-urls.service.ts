@@ -11,7 +11,7 @@ import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import { AddShareUrlAction, RemoveShareUrlAction, UpdateShareUrlAction } from "../reducers/share-urls.reducer";
-import { SetShareUrlLastModifiedAction } from "../reducers/offline.reducer";
+import { SetShareUrlLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ShareUrl, DataContainer, ApplicationState } from "../models/models";
 
@@ -124,9 +124,9 @@ export class ShareUrlsService {
             sharesToGetFromServer = orderBy(sharesToGetFromServer, s => s.lastModifiedDate, "asc");
             for (let shareToGet of sharesToGetFromServer) {
                 await this.getShareFromServerAndCacheIt(shareToGet.id);
-                this.store.dispatch(new SetShareUrlLastModifiedAction(shareToGet.lastModifiedDate));
+                this.store.dispatch(new SetShareUrlLastModifiedDateAction(shareToGet.lastModifiedDate));
             }
-            this.store.dispatch(new SetShareUrlLastModifiedAction(operationStartTimeStamp));
+            this.store.dispatch(new SetShareUrlLastModifiedDateAction(operationStartTimeStamp));
             this.loggingService.info(`[Shares] Finished shares sync, last modified: ${operationStartTimeStamp.toUTCString()}`);
         } catch (ex) {
             this.loggingService.error("[Shares] Unable to sync shares: " + (ex as Error).message);

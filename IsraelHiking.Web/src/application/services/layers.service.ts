@@ -16,13 +16,13 @@ import {
 } from "../reducers/initial-state";
 import {
     AddBaseLayerAction,
-    AddOverlayAction,
-    RemoveBaseLayerAction,
-    RemoveOverlayAction,
-    SelectBaseLayerAction,
-    ToggleOfflineAction,
     UpdateBaseLayerAction,
-    UpdateOverlayAction
+    UpdateOverlayAction,
+    SelectBaseLayerAction,
+    RemoveOverlayAction,
+    RemoveBaseLayerAction,
+    AddOverlayAction,
+    ToggleOfflineAction
 } from "../reducers/layers.reducer";
 import type {
     DataContainer,

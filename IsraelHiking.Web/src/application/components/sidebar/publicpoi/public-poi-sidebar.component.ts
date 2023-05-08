@@ -22,8 +22,8 @@ import { NavigateHereService } from "../../../services/navigate-here.service";
 import { GpxDataContainerConverterService } from "../../../services/gpx-data-container-converter.service";
 import { GeoJsonParser } from "../../../services/geojson.parser";
 import { sidebarAnimate } from "../sidebar.component";
-import { AddPrivatePoiAction, AddRouteAction } from "../../../reducers/routes.reducer";
-import { SetSelectedPoiAction, SetSidebarAction, SetUploadMarkerDataAction } from "../../../reducers/poi.reducer";
+import { AddRouteAction, AddPrivatePoiAction } from "../../../reducers/routes.reducer";
+import { SetSelectedPoiAction, SetUploadMarkerDataAction, SetSidebarAction } from "../../../reducers/poi.reducer";
 import type {
     LinkData,
     LatLngAlt,

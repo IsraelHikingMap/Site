@@ -97,7 +97,6 @@ export class RouteEditPoiInteraction {
         this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, markerData));
         selectedRoute = this.selectedRouteService.getSelectedRoute();
         let index = selectedRoute.markers.length - 1;
-        console.log(index, markerData);
         PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index, selectedRoute.id);
     }
 

@@ -85,7 +85,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     private initalizeLegendSections() {
-        this.legendSections = JSON.parse(JSON.stringify(legendSectionsJson));
+        this.legendSections = structuredClone(legendSectionsJson) as LegendSection[];
         for (let section of this.legendSections) {
             section.title = this.resources[section.key] as string;
             for (let item of section.items) {

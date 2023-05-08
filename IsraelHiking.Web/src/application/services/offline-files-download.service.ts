@@ -12,7 +12,7 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { ToggleOfflineAction } from "../reducers/layers.reducer";
-import { SetOfflineMapsLastModifiedAction } from "../reducers/offline.reducer";
+import { SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models/models";
 
@@ -121,7 +121,7 @@ export class OfflineFilesDownloadService {
             }
             this.loggingService.info("[Offline Download] Finished downloading offline files, update date to: "
                 + newestFileDate.toUTCString());
-            this.store.dispatch(new SetOfflineMapsLastModifiedAction(newestFileDate));
+            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDate));
             this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
             this.sidebarService.show("layers");
         } finally {
