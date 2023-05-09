@@ -120,13 +120,13 @@ export class MainMapComponent extends BaseMapComponent {
         this.topRightControls.forEach(c => {
             this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "top-right");
         });
+        this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" as Unit}), "bottom-left");
         this.bottomLeftControls.forEach(c => {
             this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-left");
         });
         this.bottomRightControls.forEach(c => {
             this.mapComponent.mapInstance.addControl(new CustomControl(c.nativeElement), "bottom-right");
         });
-        this.mapComponent.mapInstance.addControl(new ScaleControl({ unit: "meter" as Unit}), "bottom-left");
 
         this.mapComponent.mapInstance.on("click", (e) => {
             // This is used for the personal heatmap, assuming there's a layer there called "record_lines".

@@ -42,10 +42,7 @@ export class IhmLinkComponent extends BaseMapComponent {
         }
     }
 
-    public getLogo(): string {
-        if (this.runningContextService.isOnline) {
-            return "content/logo.png";
-        }
-        return "content/logo-offline.png";
+    public isIFrameMobile() {
+        return this.runningContextService.isIFrame && this.runningContextService.isMobile;
     }
 }

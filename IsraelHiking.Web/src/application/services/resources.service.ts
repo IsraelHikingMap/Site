@@ -164,6 +164,7 @@ export class ResourcesService {
     public login: string;
     public logout: string;
     public openInANewWindow: string;
+    public openInApp: string;
     public addLink: string;
     public baseLayers: string;
     public overlays: string;
@@ -478,7 +479,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1680089205399");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1683662771407");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -625,6 +626,7 @@ export class ResourcesService {
         this.login = this.gettextCatalog.getString("Login");
         this.logout = this.gettextCatalog.getString("Logout");
         this.openInANewWindow = this.gettextCatalog.getString("Open in a new window");
+        this.openInApp = this.gettextCatalog.getString("Open in App");
         this.addLink = this.gettextCatalog.getString("Add link");
         this.baseLayers = this.gettextCatalog.getString("Base Layers");
         this.overlays = this.gettextCatalog.getString("Overlays");
