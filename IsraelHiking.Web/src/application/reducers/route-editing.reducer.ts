@@ -1,68 +1,54 @@
-import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
-import { initialState, BaseAction } from "./initial-state";
+import { initialState } from "./initial-state";
 import type { RoutingType, RouteEditingState } from "../models/models";
 
-const SET_ROUTING_TYPE = "SET_ROUTING_TYPE";
-const SET_SELECTED_ROUTE = "SET_SELECTED_ROUTE";
-const SET_OPACITY_AND_WEIGHT = "SET_OPACITY_AND_WEIGHT";
-
-export type RoutePayload = {
-    routeId: string;
+export class SetSelectedRouteAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public routeId: string) {}
 };
 
-export type SetRouteEditingStatePayload = {
-    routingType: RoutingType;
+export class SetRoutingTypeAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public routingType: RoutingType) {}
 };
 
-export type SetOpacityAndWeightPayload = {
-    opacity: number;
-    weight: number;
+export class SetOpacityAndWeightAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public opacity: number, public weight: number) {}
 };
 
-export class SetRouteEditingStateAction extends BaseAction<SetRouteEditingStatePayload> {
-    constructor(payload: SetRouteEditingStatePayload) {
-        super(SET_ROUTING_TYPE, payload);
+@State<RouteEditingState>({
+    name: "routeEditingState",
+    defaults: initialState.routeEditingState
+})
+@Injectable()
+export class RouteEditingReducer {
+
+    @Action(SetSelectedRouteAction)
+    public setSelectedRoute(ctx: StateContext<RouteEditingState>, action: SetSelectedRouteAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.selectedRouteId = action.routeId;
+            return lastState;
+        }));
+    }
+
+    @Action(SetRoutingTypeAction)
+    public setRoutingType(ctx: StateContext<RouteEditingState>, action: SetRoutingTypeAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.routingType = action.routingType;
+            return lastState;
+        }));
+    }
+
+    @Action(SetOpacityAndWeightAction)
+    public setOpacityAndWeight(ctx: StateContext<RouteEditingState>, action: SetOpacityAndWeightAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.opacity = action.opacity;
+            lastState.weight = action.weight;
+            return lastState;
+        }));
     }
 }
-
-export class SetSelectedRouteAction extends BaseAction<RoutePayload> {
-    constructor(payload: RoutePayload) {
-        super(SET_SELECTED_ROUTE, payload);
-    }
-}
-
-export class SetOpacityAndWeightAction extends BaseAction<SetOpacityAndWeightPayload> {
-    constructor(payload: SetOpacityAndWeightPayload) {
-        super(SET_OPACITY_AND_WEIGHT, payload);
-    }
-}
-
-class RouteEditingReducer {
-    @ReduxAction(SET_ROUTING_TYPE)
-    public setRoutingType(lastState: RouteEditingState, action: SetRouteEditingStateAction): RouteEditingState {
-        return {
-            ...lastState,
-            routingType: action.payload.routingType
-        };
-    }
-
-    @ReduxAction(SET_SELECTED_ROUTE)
-    public setSelectedRoute(lastState: RouteEditingState, action: SetSelectedRouteAction): RouteEditingState {
-        return {
-            ...lastState,
-            selectedRouteId: action.payload.routeId
-        };
-    }
-
-    @ReduxAction(SET_OPACITY_AND_WEIGHT)
-    public setOpacityAndWeight(lastState: RouteEditingState, action: SetOpacityAndWeightAction): RouteEditingState {
-        return {
-            ...lastState,
-            opacity: action.payload.opacity,
-            weight: action.payload.weight
-        };
-    }
-}
-
-export const routeEditingReducer = createReducerFromClass(RouteEditingReducer, initialState.routeEditingState);

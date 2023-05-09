@@ -1,59 +1,51 @@
-import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
+import { initialState } from "./initial-state";
 import type { GpsState, TrackingStateType } from "../models/models";
-import { initialState, BaseAction } from "./initial-state";
 
-const SET_TRAKING_STATE = "SET_TRAKING_STATE";
-const SET_CURRENT_LOCATION = "SET_CURRENT_LOCATION";
-
-export type SetTrackingStatePayload = {
-    state: TrackingStateType;
+export class SetTrackingStateAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public state: TrackingStateType) {}
 };
 
-export type SetCurrentPoistionPayload = {
-    position: GeolocationPosition;
+export class SetCurrentPositionAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public position: GeolocationPosition) {}
 };
-
-export class SetTrackingStateAction extends BaseAction<SetTrackingStatePayload> {
-    constructor(payload: SetTrackingStatePayload) {
-        super(SET_TRAKING_STATE, payload);
-    }
-}
-
-export class SetCurrentPositionAction extends BaseAction<SetCurrentPoistionPayload> {
-    constructor(payload: SetCurrentPoistionPayload) {
-        super(SET_CURRENT_LOCATION, payload);
-    }
-}
-
+@State<GpsState>({
+    name: "gpsState",
+    defaults: initialState.gpsState
+})
+@Injectable()
 export class GpsReducer {
-    @ReduxAction(SET_TRAKING_STATE)
-    public setTrackingState(lastState: GpsState, action: SetTrackingStateAction): GpsState {
-        return {
-            ...lastState,
-            tracking: action.payload.state
-        };
+
+    @Action(SetTrackingStateAction)
+    public setTrackingState(ctx: StateContext<GpsState>, action: SetTrackingStateAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.tracking = action.state;
+            return lastState;
+        }));
     }
 
-    @ReduxAction(SET_CURRENT_LOCATION)
-    public setCurrentPosition(lastState: GpsState, action: SetCurrentPositionAction): GpsState {
+    @Action(SetCurrentPositionAction)
+    public setCurrentPosition(ctx: StateContext<GpsState>, action: SetCurrentPositionAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
         // Clone position before setting into state since this object can't be cloned regularly
-        let currentPoistion = action.payload.position == null ? null : {
-            coords: {
-                accuracy: action.payload.position.coords.accuracy,
-                altitude: action.payload.position.coords.altitude,
-                latitude: action.payload.position.coords.latitude,
-                longitude: action.payload.position.coords.longitude,
-                speed: action.payload.position.coords.speed,
-                heading: action.payload.position.coords.heading
-            },
-            timestamp: action.payload.position.timestamp
-        } as GeolocationPosition;
-        return {
-            ...lastState,
-            currentPoistion
-        };
+            let currentPosition = action.position == null ? null : {
+                coords: {
+                    accuracy: action.position.coords.accuracy,
+                    altitude: action.position.coords.altitude,
+                    latitude: action.position.coords.latitude,
+                    longitude: action.position.coords.longitude,
+                    speed: action.position.coords.speed,
+                    heading: action.position.coords.heading
+                },
+                timestamp: action.position.timestamp
+            } as GeolocationPosition;
+            lastState.currentPosition = currentPosition;
+            return lastState;
+        }));
     }
 }
-
-export const gpsReducer = createReducerFromClass(GpsReducer, initialState.gpsState);

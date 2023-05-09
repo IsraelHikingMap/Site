@@ -1,7 +1,6 @@
 import { Component, HostListener } from "@angular/core";
 import { Observable } from "rxjs";
-import { ActionCreators } from "redux-undo";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -11,9 +10,12 @@ import {
     ReplaceSegmentsAction,
     ClearPoisAction,
     ClearPoisAndRouteAction,
-    DeleteAllRoutesAction
+    DeleteAllRoutesAction,
+    ClearHistoryAction,
+    RedoAction,
+    UndoAction
 } from "../reducers/routes.reducer";
-import { SetRouteEditingStateAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
+import { SetRoutingTypeAction, SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { SetShareUrlAction } from "../reducers/in-memory.reducer";
 import type { RoutingType, ApplicationState } from "../models/models";
 
@@ -29,7 +31,7 @@ export class DrawingComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly toastService: ToastService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         super(resources);
     }
 
@@ -58,29 +60,22 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public isShow() {
-        return this.ngRedux.getState().uiComponentsState.drawingVisible;
+        return this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).drawingVisible;
     }
 
     public clearRoute() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        this.ngRedux.dispatch(new ReplaceSegmentsAction({
-            routeId: selectedRoute.id,
-            segmentsData: []
-        }));
+        this.store.dispatch(new ReplaceSegmentsAction(selectedRoute.id, []));
     }
 
     public clearPois() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        this.ngRedux.dispatch(new ClearPoisAction({
-            routeId: selectedRoute.id
-        }));
+        this.store.dispatch(new ClearPoisAction(selectedRoute.id));
     }
 
     public clearBoth() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        this.ngRedux.dispatch(new ClearPoisAndRouteAction({
-            routeId: selectedRoute.id
-        }));
+        this.store.dispatch(new ClearPoisAndRouteAction(selectedRoute.id));
     }
 
     public isPoiEditActive() {
@@ -125,17 +120,17 @@ export class DrawingComponent extends BaseMapComponent {
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return;
         }
-        this.ngRedux.dispatch(new SetRouteEditingStateAction({ routingType }));
+        this.store.dispatch(new SetRoutingTypeAction(routingType));
     }
 
     public undo() {
-        this.ngRedux.dispatch(ActionCreators.undo());
+        this.store.dispatch(new UndoAction());
         // Undo can change the route editing state but doesn't affect the selected route...
         this.selectedRouteService.syncSelectedRouteWithEditingRoute();
     }
 
     private redo() {
-        this.ngRedux.dispatch(ActionCreators.redo());
+        this.store.dispatch(new RedoAction());
         // Undo can change the route editing state but doesn't affect the selected route...
         this.selectedRouteService.syncSelectedRouteWithEditingRoute();
     }
@@ -144,7 +139,7 @@ export class DrawingComponent extends BaseMapComponent {
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return "None";
         }
-        return this.ngRedux.getState().routeEditingState.routingType;
+        return this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
     }
 
     public getRouteColor(): string {
@@ -160,15 +155,15 @@ export class DrawingComponent extends BaseMapComponent {
             message: this.resources.areYouSureYouWantToDeleteAllRoutes,
             type: "YesNo",
             confirmAction: () => {
-                this.ngRedux.dispatch(new SetShareUrlAction({ shareUrl: null }));
-                this.ngRedux.dispatch(new SetSelectedRouteAction({routeId: null}));
-                this.ngRedux.dispatch(new DeleteAllRoutesAction());
-                this.ngRedux.dispatch(ActionCreators.clearHistory());
+                this.store.dispatch(new SetShareUrlAction(null));
+                this.store.dispatch(new SetSelectedRouteAction(null));
+                this.store.dispatch(new DeleteAllRoutesAction());
+                this.store.dispatch(new ClearHistoryAction());
             }
         });
     }
 
     public canDeleteAllRoutes() {
-        return this.ngRedux.getState().routes.present.length > 0;
+        return this.store.selectSnapshot((s: ApplicationState) => s.routes).present.length > 0;
     }
 }

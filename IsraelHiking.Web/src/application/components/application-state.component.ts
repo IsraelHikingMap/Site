@@ -2,14 +2,13 @@ import { Component, OnInit, OnDestroy } from "@angular/core";
 
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { RouteStrings } from "../services/hash.service";
 import { SidebarService } from "../services/sidebar.service";
 import { DataContainerService } from "../services/data-container.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { SetFileUrlAndBaseLayerAction, SetShareUrlAction } from "../reducers/in-memory.reducer";
-import type { ApplicationState } from "../models/models";
 
 @Component({
     selector: "application-state",
@@ -24,7 +23,7 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
                 private readonly sidebarService: SidebarService,
                 private readonly dataContainerService: DataContainerService,
                 private readonly fitBoundsService: FitBoundsService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         this.subscription = null;
     }
 
@@ -41,8 +40,8 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
                 this.dataContainerService.setFileUrlAfterNavigation(params[RouteStrings.ID],
                     this.route.snapshot.queryParamMap.get(RouteStrings.BASE_LAYER));
             } else if (this.router.url === RouteStrings.ROUTE_ROOT) {
-                this.ngRedux.dispatch(new SetFileUrlAndBaseLayerAction({ fileUrl: null, baseLayer: null }));
-                this.ngRedux.dispatch(new SetShareUrlAction({ shareUrl: null }));
+                this.store.dispatch(new SetFileUrlAndBaseLayerAction(null, null));
+                this.store.dispatch(new SetShareUrlAction(null));
                 this.sidebarService.hideWithoutChangingAddressbar();
             }
         });

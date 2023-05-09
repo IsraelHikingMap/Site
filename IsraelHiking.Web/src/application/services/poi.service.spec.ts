@@ -1,7 +1,8 @@
 import { TestBed, inject, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
 import { HttpClientModule, HttpRequest } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
+import { NgxsModule, Store } from "@ngxs/store";
+import JSZip from "jszip";
 
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
@@ -16,8 +17,9 @@ import { ToastService } from "./toast.service";
 import { MapService } from "./map.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
+import { LayersReducer } from "application/reducers/layers.reducer";
+import { AddToPoiQueueAction, OfflineReducer } from "application/reducers/offline.reducer";
 import type { ApplicationState, Category, MarkerData } from "../models/models";
-import JSZip from "jszip";
 
 describe("Poi Service", () => {
 
@@ -55,7 +57,7 @@ describe("Poi Service", () => {
             imports: [
                 HttpClientModule,
                 HttpClientTestingModule,
-                MockNgReduxModule
+                NgxsModule.forRoot([LayersReducer, OfflineReducer])
             ],
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
@@ -71,14 +73,12 @@ describe("Poi Service", () => {
                 PoiService
             ]
         });
-        MockNgRedux.reset();
-        MockNgRedux.store.dispatch = jasmine.createSpy();
     });
 
-    it("Should initialize and sync categories from server", (inject([PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
+    it("Should initialize and sync categories from server", (inject([PoiService, HttpTestingController, Store],
+        async (poiService: PoiService, mockBackend: HttpTestingController, store: Store) => {
 
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 layersState: {
                     categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
                 }
@@ -97,11 +97,11 @@ describe("Poi Service", () => {
     )));
 
     it("Should initialize and download offline pois file",
-        (inject([PoiService, HttpTestingController, RunningContextService, FileService, DatabaseService],
+        (inject([PoiService, HttpTestingController, RunningContextService, FileService, DatabaseService, Store],
             async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService,
-                fileService: FileService, databaseService: DatabaseService) => {
+                fileService: FileService, databaseService: DatabaseService, store: Store) => {
 
-                MockNgRedux.store.getState = () => ({
+                store.reset({
                     layersState: {
                         categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
                     },
@@ -109,6 +109,7 @@ describe("Poi Service", () => {
                         poisLastModifiedDate: null
                     }
                 });
+                store.dispatch = jasmine.createSpy();
                 (runningContextService as any).isCapacitor = true;
                 let zip = new JSZip();
                 zip.folder("pois");
@@ -126,7 +127,7 @@ describe("Poi Service", () => {
                     expect(getFileFromcacheSpy).toHaveBeenCalledTimes(2);
                     expect(databaseService.storePois).toHaveBeenCalled();
                     expect(databaseService.storeImages).toHaveBeenCalled();
-                    expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+                    expect(store.dispatch).toHaveBeenCalled();
                 });
                 mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
 
@@ -136,16 +137,17 @@ describe("Poi Service", () => {
     );
 
     it("Should initialize and update pois by pagination",
-        fakeAsync(inject([PoiService, HttpTestingController, RunningContextService, DatabaseService],
+        fakeAsync(inject([PoiService, HttpTestingController, RunningContextService, DatabaseService, Store],
             (poiService: PoiService, mockBackend: HttpTestingController,
-                runningContextService: RunningContextService, databaseService: DatabaseService) => {
+                runningContextService: RunningContextService, databaseService: DatabaseService, store: Store) => {
 
-                MockNgRedux.store.getState = () => ({
+                store.reset({
                     layersState: {
                         categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
                     },
                     offlineState: {
-                        poisLastModifiedDate: Date.now()
+                        poisLastModifiedDate: Date.now(),
+                        uploadPoiQueue: []
                     }
                 });
                 (runningContextService as any).isCapacitor = true;
@@ -170,9 +172,9 @@ describe("Poi Service", () => {
         ))
     );
 
-    it("Should get selectable categories", (inject([PoiService, HttpTestingController],
-        (poiService: PoiService) => {
-            MockNgRedux.store.getState = () => ({
+    it("Should get selectable categories", inject([PoiService, Store],
+        (poiService: PoiService, store: Store) => {
+            store.reset({
                 layersState: {
                     categoriesGroups: [{type: "Points of Interest", categories: [
                         {name: "iNature", items: []},
@@ -190,7 +192,7 @@ describe("Poi Service", () => {
             expect(categories.length).toBe(1);
             expect(categories[0].icons.length).toBe(1);
         }
-    )));
+    ));
 
     it("Should get a point by id and source from the server", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
@@ -278,12 +280,14 @@ describe("Poi Service", () => {
         }
     )));
 
-
     it("Should create simple point",
-        inject([PoiService],
-            async (poiService: PoiService) => {
+        inject([PoiService, Store],
+            async (poiService: PoiService, store: Store) => {
+                let spy = jasmine.createSpy();
+                store.dispatch = spy;
                 let promise = poiService.addSimplePoint({ lat: 0, lng: 0}, "Tap").then(() => {
-                    expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+                    expect(store.dispatch).toHaveBeenCalled();
+                    expect(spy.calls.first().args[0]).toBeInstanceOf(AddToPoiQueueAction);
                 });
 
                 return promise;
@@ -292,9 +296,10 @@ describe("Poi Service", () => {
     );
 
     it("Should create complex point",
-        inject([PoiService, DatabaseService],
-            async (poiService: PoiService, dbMock: DatabaseService) => {
+        inject([PoiService, DatabaseService, Store],
+            async (poiService: PoiService, dbMock: DatabaseService, store: Store) => {
                 let spy = spyOn(dbMock, "addPoiToUploadQueue");
+                store.dispatch = jasmine.createSpy();
                 let promise = poiService.addComplexPoi({
                     id: "poiId",
                     isPoint: true,
@@ -307,7 +312,7 @@ describe("Poi Service", () => {
                     urls: ["some-url"],
                     canEditTitle: true
                 }, { lat: 0, lng: 0}).then(() => {
-                    expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+                    expect(store.dispatch).toHaveBeenCalled();
                     expect(spy.calls.mostRecent().args[0].properties.poiId).not.toBeNull();
                     expect(spy.calls.mostRecent().args[0].properties.poiSource).toBe("OSM");
                     expect(spy.calls.mostRecent().args[0].properties["description:he"]).toBe("description");
@@ -323,28 +328,29 @@ describe("Poi Service", () => {
     );
 
     it("Should update complex point given a point with no description",
-        inject([PoiService, DatabaseService],
-            async (poiService: PoiService, dbMock: DatabaseService) => {
-                MockNgRedux.store.getState = () => ({
-                        poiState: {
-                            selectedPointOfInterest: {
-                                properties: {
-                                    poiSource: "OSM",
-                                    poiId: "poiId",
-                                    identifier: "id",
-                                    imageUrl: "some-old-image-url",
-                                    website: "some-old-url"
-                                } as any,
-                                geometry: {
-                                    type: "Point",
-                                    coordinates: [0, 0]
-                                }
-                            } as GeoJSON.Feature
-                        },
-                        offlineState: {
-                            uploadPoiQueue: [] as any[]
-                        }
-                    });
+        inject([PoiService, DatabaseService, Store],
+            async (poiService: PoiService, dbMock: DatabaseService, store: Store) => {
+                store.reset({
+                    poiState: {
+                        selectedPointOfInterest: {
+                            properties: {
+                                poiSource: "OSM",
+                                poiId: "poiId",
+                                identifier: "id",
+                                imageUrl: "some-old-image-url",
+                                website: "some-old-url"
+                            } as any,
+                            geometry: {
+                                type: "Point",
+                                coordinates: [0, 0]
+                            }
+                        } as GeoJSON.Feature
+                    },
+                    offlineState: {
+                        uploadPoiQueue: [] as any[]
+                    }
+                });
+                store.dispatch = jasmine.createSpy();
                 let spy = spyOn(dbMock, "addPoiToUploadQueue");
                 let promise = poiService.updateComplexPoi({
                     id: "poiId",
@@ -358,7 +364,7 @@ describe("Poi Service", () => {
                     urls: ["some-new-url"],
                     canEditTitle: true
                 }, { lat: 1, lng: 2}).then(() => {
-                    expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+                    expect(store.dispatch).toHaveBeenCalled();
                     let feature = spy.calls.mostRecent().args[0];
                     expect(feature.properties.poiId).not.toBeNull();
                     expect(feature.properties.poiSource).toBe("OSM");
@@ -386,33 +392,33 @@ describe("Poi Service", () => {
     );
 
     it("Should not update complex point when there were no changes",
-        inject([PoiService, DatabaseService],
-            async (poiService: PoiService, dbMock: DatabaseService) => {
-                MockNgRedux.store.getState = () => ({
-                        poiState: {
-                            selectedPointOfInterest: {
-                                properties: {
-                                    poiSource: "OSM",
-                                    poiId: "poiId",
-                                    identifier: "id",
-                                    imageUrl: "some-image-url",
-                                    website: "some-url",
-                                    description: "description",
-                                    poiCategory: "natural",
-                                    poiIcon: "icon-spring",
-                                    poiIconColor: "blue",
-                                    name: "title",
-                                } as any,
-                                geometry: {
-                                    type: "Point",
-                                    coordinates: [0, 0]
-                                }
-                            } as GeoJSON.Feature
-                        },
-                        offlineState: {
-                            uploadPoiQueue: [] as any[]
-                        }
-                    });
+        inject([PoiService, DatabaseService, Store],
+            async (poiService: PoiService, dbMock: DatabaseService, store: Store) => {
+                store.reset({
+                    poiState: {
+                        selectedPointOfInterest: {
+                            properties: {
+                                poiSource: "OSM",
+                                poiId: "poiId",
+                                identifier: "id",
+                                imageUrl: "some-image-url",
+                                website: "some-url",
+                                description: "description",
+                                poiCategory: "natural",
+                                poiIcon: "icon-spring",
+                                poiIconColor: "blue",
+                                name: "title",
+                            } as any,
+                            geometry: {
+                                type: "Point",
+                                coordinates: [0, 0]
+                            }
+                        } as GeoJSON.Feature
+                    },
+                    offlineState: {
+                        uploadPoiQueue: [] as any[]
+                    }
+                });
                 let spy = spyOn(dbMock, "addPoiToUploadQueue");
                 let promise = poiService.updateComplexPoi({
                     id: "poiId",
@@ -435,8 +441,8 @@ describe("Poi Service", () => {
     );
 
     it("Should add properties when update point is in the queue already",
-        inject([PoiService, DatabaseService],
-            async (poiService: PoiService, dbMock: DatabaseService) => {
+        inject([PoiService, DatabaseService, Store],
+            async (poiService: PoiService, dbMock: DatabaseService, store: Store) => {
                 let featureInQueue = {
                     properties: {
                         poiSource: "OSM",
@@ -450,26 +456,27 @@ describe("Poi Service", () => {
                 } as GeoJSON.Feature;
                 poiService.setLocation(featureInQueue, { lat: 1, lng: 2 });
                 dbMock.getPoiFromUploadQueue = () => Promise.resolve(featureInQueue);
-                MockNgRedux.store.getState = () => ({
-                        poiState: {
-                            selectedPointOfInterest: {
-                                properties: {
-                                    poiSource: "OSM",
-                                    poiId: "poiId",
-                                    identifier: "id",
-                                    poiIcon: "icon-spring",
-                                    poiIconColor: "blue",
-                                } as any,
-                                geometry: {
-                                    type: "Point",
-                                    coordinates: [0, 0]
-                                }
-                            } as GeoJSON.Feature
-                        },
-                        offlineState: {
-                            uploadPoiQueue: ["poiId"]
-                        }
-                    } as ApplicationState);
+                store.reset({
+                    poiState: {
+                        selectedPointOfInterest: {
+                            properties: {
+                                poiSource: "OSM",
+                                poiId: "poiId",
+                                identifier: "id",
+                                poiIcon: "icon-spring",
+                                poiIconColor: "blue",
+                            } as any,
+                            geometry: {
+                                type: "Point",
+                                coordinates: [0, 0]
+                            }
+                        } as GeoJSON.Feature
+                    },
+                    offlineState: {
+                        uploadPoiQueue: ["poiId"]
+                    }
+                } as ApplicationState);
+                store.dispatch = jasmine.createSpy();
                 let spy = spyOn(dbMock, "addPoiToUploadQueue");
                 let promise = poiService.updateComplexPoi({
                     id: "poiId",
@@ -483,7 +490,7 @@ describe("Poi Service", () => {
                     urls: ["some-url"],
                     canEditTitle: true
                 }).then(() => {
-                    expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+                    expect(store.dispatch).toHaveBeenCalled();
                     let feature = spy.calls.mostRecent().args[0];
                     expect(feature.properties.poiId).not.toBeNull();
                     expect(feature.properties.poiSource).toBe("OSM");
@@ -634,9 +641,9 @@ describe("Poi Service", () => {
         expect(results.waze.includes(Urls.waze)).toBeTruthy();
     }));
 
-    it("should sync categories when no categories exist", (inject([PoiService, HttpTestingController, RunningContextService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
-            MockNgRedux.store.getState = () => ({
+    it("should sync categories when no categories exist", (inject([PoiService, HttpTestingController, RunningContextService, Store],
+        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, store: Store) => {
+            store.reset({
                 layersState: {
                     categoriesGroups: [{
                         type: "my-type",
@@ -645,6 +652,8 @@ describe("Poi Service", () => {
                     }]
                 }
             });
+            let spy = jasmine.createSpy();
+            store.dispatch = spy;
             (runningContextService as any).isIFrame = false;
 
             let promise = poiService.syncCategories();
@@ -662,14 +671,13 @@ describe("Poi Service", () => {
             }] as Category[]));
 
             await promise;
-            let calls = (MockNgRedux.store.dispatch as jasmine.Spy<jasmine.Func>).calls;
-            expect(MockNgRedux.store.dispatch).toHaveBeenCalledTimes(1);
-            expect(calls.first().args[0].payload.category.name).toBe("name");
+            expect(store.dispatch).toHaveBeenCalledTimes(1);
+            expect(spy.calls.first().args[0].category.name).toBe("name");
     })));
 
-    it("should sync categories and hide on iFrame", (inject([PoiService, HttpTestingController, RunningContextService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
-            MockNgRedux.store.getState = () => ({
+    it("should sync categories and hide on iFrame", (inject([PoiService, HttpTestingController, RunningContextService, Store],
+        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, store: Store) => {
+            store.reset({
                 layersState: {
                     categoriesGroups: [{
                         type: "my-type",
@@ -678,6 +686,8 @@ describe("Poi Service", () => {
                     }]
                 }
             });
+            let spy = jasmine.createSpy();
+            store.dispatch = spy;
             (runningContextService as any).isIFrame = true;
             let promise = poiService.syncCategories();
 
@@ -694,14 +704,13 @@ describe("Poi Service", () => {
             }] as Category[]));
 
             await promise;
-            let calls = (MockNgRedux.store.dispatch as jasmine.Spy<jasmine.Func>).calls;
-            expect(MockNgRedux.store.dispatch).toHaveBeenCalledTimes(2);
-            expect(calls.first().args[0].payload.visible).toBeFalsy();
+            expect(store.dispatch).toHaveBeenCalledTimes(2);
+            expect(spy.calls.first().args[0].visible).toBeFalsy();
     })));
 
-    it("should sync categories when categories are not the same", (inject([PoiService, HttpTestingController, RunningContextService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
-            MockNgRedux.store.getState = () => ({
+    it("should sync categories when categories are not the same", (inject([PoiService, HttpTestingController, RunningContextService, Store],
+        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, store: Store) => {
+            store.reset({
                 layersState: {
                     categoriesGroups: [{
                         type: "my-type",
@@ -720,6 +729,8 @@ describe("Poi Service", () => {
                     }]
                 }
             });
+            let spy = jasmine.createSpy();
+            store.dispatch = spy;
             (runningContextService as any).isIFrame = false;
 
             let promise = poiService.syncCategories();
@@ -737,15 +748,14 @@ describe("Poi Service", () => {
             }] as Category[]));
 
             await promise;
-            let calls = (MockNgRedux.store.dispatch as jasmine.Spy<jasmine.Func>).calls;
-            expect(MockNgRedux.store.dispatch).toHaveBeenCalledTimes(1);
-            expect(calls.first().args[0].payload.category.items[0].iconColorCategory.label).toBe("label2");
+            expect(store.dispatch).toHaveBeenCalledTimes(1);
+            expect(spy.calls.first().args[0].category.items[0].iconColorCategory.label).toBe("label2");
     })));
 
     it("should sync categories when categories are not the same but ignore visibility",
-        (inject([PoiService, HttpTestingController, RunningContextService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
-            MockNgRedux.store.getState = () => ({
+        (inject([PoiService, HttpTestingController, RunningContextService, Store],
+        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, store: Store) => {
+            store.reset({
                 layersState: {
                     categoriesGroups: [{
                         type: "my-type",
@@ -764,6 +774,7 @@ describe("Poi Service", () => {
                     }]
                 }
             });
+            store.dispatch = jasmine.createSpy();
             (runningContextService as any).isIFrame = false;
 
             let promise = poiService.syncCategories();
@@ -781,12 +792,12 @@ describe("Poi Service", () => {
             }] as Category[]));
 
             await promise;
-            expect(MockNgRedux.store.dispatch).toHaveBeenCalledTimes(0);
+            expect(store.dispatch).toHaveBeenCalledTimes(0);
     })));
 
-    it("should sync categories when need to remove a category", (inject([PoiService, HttpTestingController, RunningContextService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
-            MockNgRedux.store.getState = () => ({
+    it("should sync categories when need to remove a category", (inject([PoiService, HttpTestingController, RunningContextService, Store],
+        async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService, store: Store) => {
+            store.reset({
                 layersState: {
                     categoriesGroups: [{
                         type: "my-type",
@@ -805,6 +816,8 @@ describe("Poi Service", () => {
                     }]
                 }
             });
+            let spy = jasmine.createSpy();
+            store.dispatch = spy;
             (runningContextService as any).isIFrame = false;
 
             let promise = poiService.syncCategories();
@@ -812,8 +825,7 @@ describe("Poi Service", () => {
             mockBackend.match(u => u.url.startsWith(Urls.poiCategories)).forEach(m => m.flush([]));
 
             await promise;
-            let calls = (MockNgRedux.store.dispatch as jasmine.Spy<jasmine.Func>).calls;
-            expect(MockNgRedux.store.dispatch).toHaveBeenCalledTimes(1);
-            expect(calls.first().args[0].payload.categoryName).toBe("name");
+            expect(store.dispatch).toHaveBeenCalledTimes(1);
+            expect(spy.calls.first().args[0].categoryName).toBe("name");
     })));
 });

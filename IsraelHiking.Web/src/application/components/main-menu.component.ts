@@ -5,7 +5,7 @@ import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 import platform from "platform";
 
 import { BaseMapComponent } from "./base-map.component";
@@ -69,7 +69,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 private readonly sidebarService: SidebarService,
                 private readonly loggingService: LoggingService,
                 private readonly hashService: HashService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         super(resources);
         this.isShowMore = false;
         this.userInfo = null;
@@ -113,7 +113,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public getQueueText(): string {
-        let queueLength = this.ngRedux.getState().offlineState.uploadPoiQueue.length;
+        let queueLength = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).uploadPoiQueue.length;
         return queueLength > 0 ? queueLength.toString() : "";
     }
 
@@ -122,11 +122,11 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             this.toastService.warning(this.resources.unableToLogin);
             return;
         }
-        if (!this.ngRedux.getState().userState.agreedToTheTermsOfService) {
+        if (!this.store.selectSnapshot((s: ApplicationState) => s.userState).agreedToTheTermsOfService) {
             let component = this.dialog.open(TermsOfServiceDialogComponent);
             component.afterClosed().subscribe((results: string) => {
                 if (results === "true") {
-                    this.ngRedux.dispatch(new SetAgreeToTermsAction({agree: true}));
+                    this.store.dispatch(new SetAgreeToTermsAction(true));
                 }
             });
         } else {
@@ -141,24 +141,25 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public selectSearch() {
-        this.ngRedux.dispatch(new SetUIComponentVisibilityAction({
-            component: "search",
-            isVisible: !this.ngRedux.getState().uiComponentsState.searchVisible
-        }));
+        this.store.dispatch(new SetUIComponentVisibilityAction(
+            "search",
+            !this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).searchVisible,
+
+        ));
     }
 
     public selectDrawing() {
-        this.ngRedux.dispatch(new SetUIComponentVisibilityAction({
-            component: "drawing",
-            isVisible: !this.ngRedux.getState().uiComponentsState.drawingVisible
-        }));
+        this.store.dispatch(new SetUIComponentVisibilityAction(
+            "drawing",
+            !this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).drawingVisible
+        ));
     }
 
     public selectStatistics() {
-        this.ngRedux.dispatch(new SetUIComponentVisibilityAction({
-            component: "statistics",
-            isVisible: !this.ngRedux.getState().uiComponentsState.statisticsVisible
-        }));
+        this.store.dispatch(new SetUIComponentVisibilityAction(
+            "statistics",
+            !this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).statisticsVisible
+        ));
     }
 
     public selectLayers() {
@@ -175,7 +176,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
 
     public async reportAnIssue() {
         this.toastService.info(this.resources.preparingDataForIssueReport);
-        let state = this.ngRedux.getState();
+        let layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
         let baseLayer = this.layersService.getSelectedBaseLayer();
         this.loggingService.info("--- Reporting an issue ---");
         let logs = await this.loggingService.getLog();
@@ -188,7 +189,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             `Username: ${userInfo.displayName}`,
             `Map Location: ${this.hashService.getMapAddress()}`,
             `Baselayer: ${baseLayer.key}, ${baseLayer.address}`,
-            `Visible overlays: ${JSON.stringify(state.layersState.overlays.filter(o => o.visible))}`,
+            `Visible overlays: ${JSON.stringify(layersState.overlays.filter(o => o.visible))}`,
             ""
         ].join("\n");
         let subject = "Issue reported by " + userInfo.displayName;
@@ -247,7 +248,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public getOsmAddress() {
-        let poiState = this.ngRedux.getState().poiState;
+        let poiState = this.store.selectSnapshot((s: ApplicationState) => s.poiState);
         let baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
         if (poiState.isSidebarOpen &&
             poiState.selectedPointOfInterest != null &&
@@ -255,7 +256,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             return this.authorizationService.getEditElementOsmAddress(baseLayerAddress,
                 poiState.selectedPointOfInterest.properties.identifier);
         }
-        let currentLocation = this.ngRedux.getState().location;
+        let currentLocation = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         return this.authorizationService.getEditOsmLocationAddress(baseLayerAddress,
             currentLocation.zoom + 1,
             currentLocation.latitude,

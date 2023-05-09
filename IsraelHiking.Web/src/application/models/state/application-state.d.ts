@@ -1,6 +1,4 @@
-﻿import { StateWithHistory } from "redux-undo";
-
-import type {
+﻿import type {
     RouteData,
     ConfigurationState,
     LocationState,
@@ -14,12 +12,13 @@ import type {
     InMemoryState,
     GpsState,
     OfflineState,
-    UICompoentsState
+    UICompoentsState,
+    StateWithHistory
 } from "../models";
 
 export type ApplicationState = {
     configuration: ConfigurationState;
-    location: LocationState;
+    locationState: LocationState;
     routes: StateWithHistory<RouteData[]>;
     routeEditingState: RouteEditingState;
     recordedRouteState: RecordedRouteState;

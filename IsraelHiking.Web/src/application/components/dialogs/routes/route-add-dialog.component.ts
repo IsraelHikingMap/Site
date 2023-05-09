@@ -1,5 +1,5 @@
 import { Component, ViewEncapsulation } from "@angular/core";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { ToastService } from "../../../services/toast.service";
@@ -7,7 +7,6 @@ import { RoutesFactory } from "../../../services/routes.factory";
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { AddRouteAction } from "../../../reducers/routes.reducer";
-import type { ApplicationState } from "../../../models/models";
 
 @Component({
     selector: "route-add-dialog",
@@ -20,9 +19,9 @@ export class RouteAddDialogComponent extends RouteBaseDialogComponent {
                 selectedRouteService: SelectedRouteService,
                 routesFactory: RoutesFactory,
                 toastService: ToastService,
-                ngRedux: NgRedux<ApplicationState>,
+                store: Store,
     ) {
-        super(resources, selectedRouteService, routesFactory, toastService, ngRedux);
+        super(resources, selectedRouteService, routesFactory, toastService, store);
         this.routeData = routesFactory.createRouteData(selectedRouteService.createRouteName(),
             selectedRouteService.getLeastUsedColor());
         this.isNew = true;
@@ -30,9 +29,7 @@ export class RouteAddDialogComponent extends RouteBaseDialogComponent {
     }
 
     protected saveImplementation() {
-        this.ngRedux.dispatch(new AddRouteAction({
-            routeData: this.routeData
-        }));
+        this.store.dispatch(new AddRouteAction(this.routeData));
         this.selectedRouteService.setSelectedRoute(this.routeData.id);
     }
 }

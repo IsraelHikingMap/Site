@@ -1,19 +1,11 @@
-﻿import { Action } from "redux";
-import { StateWithHistory } from "redux-undo";
-
-import { Urls } from "../urls";
-import type { ApplicationState, RouteData } from "../models/models";
+﻿import { Urls } from "../urls";
+import type { ApplicationState, RouteData, StateWithHistory } from "../models/models";
 
 export const ISRAEL_HIKING_MAP = "Israel Hiking Map";
 export const ISRAEL_MTB_MAP = "Israel MTB Map";
-export const ESRI = "ESRI";
 export const SATELLITE = "Satellite Imagery";
 export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
-
-export abstract class BaseAction<TPayload> implements Action {
-    constructor(public type: string, public payload: TPayload) { }
-}
 
 export const initialState =
     {
@@ -31,7 +23,7 @@ export const initialState =
                 rtl: true
             }
         },
-        location: {
+        locationState: {
             longitude: 35.12,
             latitude: 31.773,
             zoom: 13
@@ -144,7 +136,7 @@ export const initialState =
         },
         gpsState: {
             tracking: "disabled",
-            currentPoistion: null
+            currentPosition: null
         },
         offlineState: {
             isOfflineAvailable: false,

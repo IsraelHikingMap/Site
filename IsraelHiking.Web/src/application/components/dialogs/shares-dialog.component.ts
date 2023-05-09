@@ -4,7 +4,7 @@ import { FormControl } from "@angular/forms";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
 import { Observable, Subscription } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
@@ -48,7 +48,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
                 private readonly socialSharing: SocialSharing,
                 private readonly runningContextService: RunningContextService,
                 private readonly selectedRouteService: SelectedRouteService,
-                private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly store: Store
     ) {
         super(resources);
         this.loadingShareUrls = false;
@@ -67,7 +67,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public async ngOnInit() {
-        this.loadingShareUrls = this.ngRedux.getState().shareUrlsState.shareUrls.length === 0;
+        this.loadingShareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls.length === 0;
         this.shareUrlsService.syncShareUrls();
         this.loadingShareUrls = false;
     }
@@ -95,7 +95,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     private updateFilteredLists(searchTerm: string) {
         searchTerm = searchTerm.trim();
         this.sessionSearchTerm = searchTerm;
-        let shareUrls = this.ngRedux.getState().shareUrlsState.shareUrls;
+        let shareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls;
         shareUrls = orderBy(shareUrls.filter((s) => this.findInShareUrl(s, searchTerm)), ["lastModifiedDate"], ["desc"]);
         this.filteredShareUrls = take(shareUrls, this.page * 10);
     }
@@ -140,7 +140,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     private getSelectedShareUrl(): ShareUrl {
-        return this.ngRedux.getState().shareUrlsState.shareUrls.find(s => s.id === this.selectedShareUrlId);
+        return this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls.find(s => s.id === this.selectedShareUrlId);
     }
 
     public isShareUrlInEditMode(shareUrlId: string) {

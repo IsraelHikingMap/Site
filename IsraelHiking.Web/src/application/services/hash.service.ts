@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { MapService } from "./map.service";
 import { Urls } from "../urls";
@@ -45,15 +45,14 @@ export class HashService {
 
     constructor(private readonly router: Router,
                 private readonly mapService: MapService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
     }
 
     public resetAddressbar(): void {
-        let state = this.ngRedux.getState();
-        if (state.poiState.isSidebarOpen) {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.poiState).isSidebarOpen) {
             return;
         }
-        let inMemoryState = state.inMemoryState;
+        let inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
         if (inMemoryState.shareUrl) {
             this.router.navigate([RouteStrings.ROUTE_SHARE, inMemoryState.shareUrl.id], { replaceUrl: true });
             return;
@@ -70,22 +69,21 @@ export class HashService {
         if (this.mapService.map && this.mapService.map.isMoving()) {
             return;
         }
-        let location = this.ngRedux.getState().location;
+        let location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         this.router.navigate([
             RouteStrings.ROUTE_MAP,
             (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
             location.latitude.toFixed(HashService.PERSICION),
             location.longitude.toFixed(HashService.PERSICION)
-        ],
-            { replaceUrl: true });
+        ], { replaceUrl: true });
     }
 
     public getHref(): string {
-        let inMemoryState = this.ngRedux.getState().inMemoryState;
+        let inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
         if (inMemoryState.fileUrl != null) {
-            let urlTree = this.router.createUrlTree([RouteStrings.URL, inMemoryState.fileUrl], { 
+            let urlTree = this.router.createUrlTree([RouteStrings.URL, inMemoryState.fileUrl], {
                 queryParams: {
-                    [RouteStrings.BASE_LAYER]: this.ngRedux.getState().layersState.selectedBaseLayerKey
+                    [RouteStrings.BASE_LAYER]: this.store.selectSnapshot((s: ApplicationState) => s.layersState).selectedBaseLayerKey
                 }
             });
             return Urls.baseAddress + urlTree.toString();
@@ -97,7 +95,7 @@ export class HashService {
     }
 
     public getMapAddress() {
-        let location = this.ngRedux.getState().location;
+        let location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         let urlTree = this.router.createUrlTree([RouteStrings.MAP,
             (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
             location.latitude.toFixed(HashService.HIGH_PERSICION),

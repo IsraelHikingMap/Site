@@ -3,7 +3,7 @@ import { trigger, style, transition, animate } from "@angular/animations";
 import { Subscription, Observable, interval } from "rxjs";
 import { regressionLoess } from "d3-regression";
 import { LineLayerSpecification } from "maplibre-gl";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 import * as d3 from "d3";
 import type { Selection, ScaleContinuousNumeric } from "d3";
 
@@ -16,7 +16,7 @@ import { SidebarService } from "../services/sidebar.service";
 import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
-import { ConfigurationActions } from "../reducers/configuration.reducer";
+import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
 import type { LatLngAlt, RouteData, ApplicationState, Language, LatLngAltTime } from "../models/models";
 
 declare type DragState = "start" | "drag" | "none";
@@ -106,11 +106,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     private selectedRouteId$: Observable<string>;
 
-    @Select((state: ApplicationState) => state.location.zoom)
+    @Select((state: ApplicationState) => state.locationState.zoom)
     private zoom$: Observable<number>;
 
-    @Select((state: ApplicationState) => state.gpsState.currentPoistion)
-    private currentPoistion$: Observable<GeolocationPosition>;
+    @Select((state: ApplicationState) => state.gpsState.currentPosition)
+    private currentPosition$: Observable<GeolocationPosition>;
 
     @Select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
     public statisticsVisible$: Observable<boolean>;
@@ -139,7 +139,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 private readonly cancelableTimeoutService: CancelableTimeoutService,
                 private readonly sidebarService: SidebarService,
                 private readonly audioPlayerFactory: AudioPlayerFactory,
-                private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly store: Store
     ) {
         super(resources);
         this.isExpanded = false;
@@ -256,7 +256,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.componentSubscriptions.push(this.language$.subscribe(() => {
             this.redrawChart();
         }));
-        this.componentSubscriptions.push(this.currentPoistion$.subscribe(p => {
+        this.componentSubscriptions.push(this.currentPosition$.subscribe(p => {
             this.onGeolocationChanged(p);
         }));
         this.componentSubscriptions.push(this.isShowSlope$.subscribe(showSlope => {
@@ -270,8 +270,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }));
         this.routeChanged();
         this.componentSubscriptions.push(interval(1000).subscribe(() => {
-            if (this.ngRedux.getState().recordedRouteState.isRecording) {
-                let recordingStartTime = this.ngRedux.getState().recordedRouteState.route.latlngs[0].timestamp.getTime();
+            let recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
+            if (recordedRouteState.isRecording) {
+                let recordingStartTime = recordedRouteState.route.latlngs[0].timestamp.getTime();
                 this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
             }
         }));
@@ -733,11 +734,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public toggleKmMarker() {
-        this.ngRedux.dispatch(ConfigurationActions.toggleIsShowKmMarkersAction);
+        this.store.dispatch(new ToggleIsShowKmMarkersAction());
     }
 
     public toggleSlope() {
-        this.ngRedux.dispatch(ConfigurationActions.toggleIsShowSlopeAction);
+        this.store.dispatch(new ToggleIsShowSlopeAction());
     }
 
     private updateKmMarkers() {
@@ -870,7 +871,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private refreshLocationGroup() {
-        let currentLocation = GeoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+        let currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
+        let currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
         let point = this.getPointFromLatLng(currentLocation, this.heading);
         if (!point) {
             this.hideLocationGroup();
@@ -915,12 +917,14 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.setViewStatisticsValues(null);
             return;
         }
-        let currentLocation = GeoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+        let currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
+        let currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
         let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
 
-        if (this.ngRedux.getState().recordedRouteState.isRecording && closestRouteToGps) {
+        let recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
+        if (recordedRouteState.isRecording && closestRouteToGps) {
             this.statistics = this.routeStatisticsService.getStatisticsForRecordedRouteWithPlannedRoute(
-                this.ngRedux.getState().recordedRouteState.route.latlngs,
+                recordedRouteState.route.latlngs,
                 this.selectedRouteService.getLatlngs(closestRouteToGps),
                 currentLocation,
                 this.heading);
@@ -939,7 +943,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private getRouteForChart(): { latlngs: LatLngAltTime[]; color: string; weight: number} | null {
-        let currentLocation = GeoLocationService.positionToLatLngTime(this.ngRedux.getState().gpsState.currentPoistion);
+        let currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
+        let currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
         let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
         if (closestRouteToGps) {
             return {
@@ -948,9 +953,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 weight: closestRouteToGps.weight
             };
         }
-        if (this.ngRedux.getState().recordedRouteState.isRecording) {
+        let recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
+        if (recordedRouteState.isRecording) {
             return {
-                latlngs: this.ngRedux.getState().recordedRouteState.route.latlngs,
+                latlngs: recordedRouteState.route.latlngs,
                 color: this.resources.recordedRouteColor,
                 weight: 6
             };
@@ -980,7 +986,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             return;
         }
         this.isFollowing = newIsFollowing;
-        if (this.ngRedux.getState().configuration.isGotLostWarnings && this.isFollowing === false) {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).isGotLostWarnings && this.isFollowing === false) {
             // is following stopped - playing sound and vibration
             if (navigator.vibrate) {
                 navigator.vibrate([200, 100, 200]);

@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
-import { NgRedux } from "@angular-redux2/store";
-import { AnyAction, Dispatch, MiddlewareAPI } from "redux";
+import { Store } from "@ngxs/store";
 import { debounceTime } from "rxjs/operators";
 import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection} from "@capacitor-community/sqlite";
 import Dexie from "dexie";
@@ -11,18 +10,14 @@ import * as pako from "pako";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { initialState } from "../reducers/initial-state";
-import { rootReducer } from "../reducers/root.reducer";
+import { ClearHistoryAction } from "application/reducers/routes.reducer";
+import { SetSelectedPoiAction, SetSidebarAction } from "application/reducers/poi.reducer";
 import type { ApplicationState, ShareUrl, Trace } from "../models/models";
 
 export type ImageUrlAndData = {
     imageUrl: string;
     data: string;
 };
-
-const classToActionMiddleware = (_: MiddlewareAPI<Dispatch<AnyAction>, any>) =>
-    (next: (action: AnyAction) => void) =>
-        (action: AnyAction) =>
-            next({ ...action });
 
 @Injectable()
 export class DatabaseService {
@@ -52,7 +47,7 @@ export class DatabaseService {
 
     constructor(private readonly loggingService: LoggingService,
                 private readonly runningContext: RunningContextService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         this.updating = false;
         this.sourceDatabases = new Map<string, Promise<SQLiteDBConnection>>();
     }
@@ -86,7 +81,7 @@ export class DatabaseService {
         });
         this.initCustomTileLoadFunction();
         if (this.runningContext.isIFrame) {
-            this.ngRedux.configureStore(rootReducer, initialState, [classToActionMiddleware]);
+            this.store.reset(initialState);
             return;
         }
         let storedState = initialState;
@@ -101,8 +96,8 @@ export class DatabaseService {
             this.updateState(initialState);
         }
 
-        this.ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
-        this.ngRedux.select().pipe(debounceTime(2000)).subscribe((state: any) => {
+        this.store.reset(storedState);
+        this.store.select(s => s).pipe(debounceTime(2000)).subscribe((state: ApplicationState) => {
             this.updateState(state);
         });
     }
@@ -122,12 +117,11 @@ export class DatabaseService {
     }
 
     public async uninitialize() {
-        let finalState = this.ngRedux.getState();
         // reduce database size and memory footprint
-        finalState.routes.past = [];
-        finalState.routes.future = [];
-        finalState.poiState.selectedPointOfInterest = null;
-        finalState.poiState.isSidebarOpen = false;
+        this.store.dispatch(new ClearHistoryAction());
+        this.store.dispatch(new SetSelectedPoiAction(null));
+        this.store.dispatch(new SetSidebarAction(false));
+        let finalState = this.store.snapshot() as ApplicationState;
         await this.updateState(finalState);
         for (let dbKey of this.sourceDatabases.keys()) {
             await this.closeDatabase(dbKey);

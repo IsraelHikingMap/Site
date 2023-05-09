@@ -1,66 +1,52 @@
-import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
-import { initialState, BaseAction } from "./initial-state";
+import { initialState } from "./initial-state";
 import type { UserInfo, UserState } from "../models/models";
 
-const SET_USER_INFO = "SET_USER_INFO";
-const SET_TOKEN = "SET_TOKEN";
-const SET_AGREED_TO_TERMS = "SET_AGREED_TO_TERMS";
-
-export type SetUserInfoPayload = {
-    userInfo: UserInfo;
+export class SetUserInfoAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public userInfo: UserInfo) {}
 };
 
-export type SetTokenPayload = {
-    token: string;
+export class SetTokenAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public token: string) {}
 };
 
-export type SetArgreeToTermsPayload = {
-    agree: boolean;
+export class SetAgreeToTermsAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public agree: boolean) {}
 };
-
-export class SetUserInfoAction extends BaseAction<SetUserInfoPayload> {
-    constructor(payload: SetUserInfoPayload) {
-         super(SET_USER_INFO, payload);
-    }
-}
-
-export class SetTokenAction extends BaseAction<SetTokenPayload> {
-    constructor(payload: SetTokenPayload) {
-        super(SET_TOKEN, payload);
-    }
-}
-
-export class SetAgreeToTermsAction extends BaseAction<SetArgreeToTermsPayload> {
-    constructor(payload: SetArgreeToTermsPayload) {
-        super(SET_AGREED_TO_TERMS, payload);
-    }
-}
-
+@State<UserState>({
+    name: "userState",
+    defaults: initialState.userState
+})
+@Injectable()
 export class UserInfoReducer {
-    @ReduxAction(SET_USER_INFO)
-    public setUserInfo(lastState: UserState, action: SetUserInfoAction) {
-        return {
-            ...lastState,
-            userInfo: action.payload.userInfo
-        };
+
+    @Action(SetUserInfoAction)
+    public setUserInfo(ctx: StateContext<UserState>, action: SetUserInfoAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.userInfo = action.userInfo;
+            return lastState;
+        }));
     }
 
-    @ReduxAction(SET_TOKEN)
-    public setToken(lastState: UserState, action: SetTokenAction) {
-        return {
-            ...lastState,
-            token: action.payload.token
-        };
+    @Action(SetTokenAction)
+    public setToken(ctx: StateContext<UserState>, action: SetTokenAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.token = action.token;
+            return lastState;
+        }));
     }
 
-    @ReduxAction(SET_AGREED_TO_TERMS)
-    public setTAgreeToTerms(lastState: UserState, action: SetAgreeToTermsAction) {
-        return {
-            ...lastState,
-            agreedToTheTermsOfService: action.payload.agree
-        };
+    @Action(SetAgreeToTermsAction)
+    public setAgreeToTerms(ctx: StateContext<UserState>, action: SetAgreeToTermsAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.agreedToTheTermsOfService = action.agree;
+            return lastState;
+        }));
     }
 }
-
-export const userReducer = createReducerFromClass(UserInfoReducer, initialState.userState);

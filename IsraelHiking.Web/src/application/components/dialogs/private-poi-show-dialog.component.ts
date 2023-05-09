@@ -4,7 +4,7 @@ import {
     MatDialogRef,
     MAT_DIALOG_DATA
 } from "@angular/material/dialog";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
@@ -43,7 +43,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
                 private readonly imageGalleryService: ImageGalleryService,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly toastService: ToastService,
-                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly store: Store,
                 private readonly dialogRef: MatDialogRef<PrivatePoiShowDialogComponent>,
                 @Inject(MAT_DIALOG_DATA) data: IPrivatePoiShowDialogData) {
         super(resources);
@@ -86,7 +86,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     }
 
     public async uploadPoint() {
-        if (this.ngRedux.getState().userState.userInfo == null) {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo == null) {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
@@ -102,10 +102,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     }
 
     public addToActiveRoute() {
-        this.ngRedux.dispatch(new AddPrivatePoiAction({
-            routeId: this.selectedRouteService.getSelectedRoute().id,
-            markerData: JSON.parse(JSON.stringify(this.marker))
-        }));
+        this.store.dispatch(new AddPrivatePoiAction(this.selectedRouteService.getSelectedRoute().id, structuredClone(this.marker)));
     }
 
     public isShowAddToActiveRoute(): boolean {

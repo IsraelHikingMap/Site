@@ -1,6 +1,6 @@
-import { NgRedux, Select } from "@angular-redux2/store";
 import { Component } from "@angular/core";
-import { Observable, combineLatest, concatAll, throttleTime } from "rxjs";
+import { Observable, combineLatest, throttleTime } from "rxjs";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
@@ -23,8 +23,8 @@ export class RecordedRouteComponent extends BaseMapComponent {
     @Select((state: ApplicationState) => state.recordedRouteState.route)
     public recordedRoute$: Observable<RecordedRoute>;
 
-    @Select((state: ApplicationState) => state.gpsState.currentPoistion)
-    public currentPoistion$: Observable<GeolocationPosition>;
+    @Select((state: ApplicationState) => state.gpsState.currentPosition)
+    public currentPosition$: Observable<GeolocationPosition>;
 
     public recordedRouteSegments: GeoJSON.FeatureCollection<GeoJSON.LineString>[];
     public lastRouteSegment: GeoJSON.FeatureCollection<GeoJSON.LineString>;
@@ -34,7 +34,7 @@ export class RecordedRouteComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
-        private readonly ngRedux: NgRedux<ApplicationState>) {
+        private readonly store: Store) {
         super(resources);
 
         this.recordedRouteSegments = [];
@@ -49,12 +49,12 @@ export class RecordedRouteComponent extends BaseMapComponent {
         };
 
         // Combine streams to work when both current location and recorded route changes, added throttle to avoid a double update of the UI
-        combineLatest([this.recordedRoute$, this.currentPoistion$]).pipe(throttleTime(200, undefined, { trailing: true }))
+        combineLatest([this.recordedRoute$, this.currentPosition$]).pipe(throttleTime(200, undefined, { trailing: true }))
             .subscribe(() => this.handleRecordingChanges());
     }
 
     public isRecording() {
-        return this.ngRedux.getState().recordedRouteState.isRecording;
+        return this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording;
     }
 
     public markerDragEnd(index: number, event: any) {
@@ -66,7 +66,7 @@ export class RecordedRouteComponent extends BaseMapComponent {
     }
 
     private handleRecordingChanges() {
-        let recording = this.ngRedux.getState().recordedRouteState.route;
+        let recording = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route;
         if (recording == null || recording.latlngs.length === 0) {
             this.recordedRouteSegments = [];
             this.lastSplit = 0;
@@ -81,7 +81,7 @@ export class RecordedRouteComponent extends BaseMapComponent {
             return;
         }
         let latlngs = [...recording.latlngs];
-        let currentPosition = this.ngRedux.getState().gpsState.currentPoistion;
+        let currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
         if (currentPosition) {
             // Adding current position to the end of the presented recorded line
             latlngs.push(GeoLocationService.positionToLatLngTime(currentPosition));

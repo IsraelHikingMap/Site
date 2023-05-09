@@ -3,7 +3,7 @@ import { Router, ActivatedRoute, ParamMap } from "@angular/router";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { Subscription, Observable } from "rxjs";
 import { cloneDeep } from "lodash-es";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -80,7 +80,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 private readonly navigateHereService: NavigateHereService,
                 private readonly geoJsonParser: GeoJsonParser,
                 private readonly socialSharing: SocialSharing,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         super(resources);
         this.sidebarService.hideWithoutChangingAddressbar();
         this.isLoading = true;
@@ -138,9 +138,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     private async fillUiWithData(data: PoiRouterData) {
         try {
-            this.ngRedux.dispatch(new SetSidebarAction({
-                isOpen: true
-            }));
+            this.store.dispatch(new SetSidebarAction(true));
             if (data.source === "new") {
                 let newFeature = {
                     id: "",
@@ -162,9 +160,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 this.mergeDataIfNeededData(feature);
                 let bounds = SpatialService.getBoundsForFeature(feature);
                 this.fitBoundsService.fitBounds(bounds);
-                this.ngRedux.dispatch(new SetSelectedPoiAction({
-                    poi: originalFeature
-                }));
+                this.store.dispatch(new SetSelectedPoiAction(originalFeature));
                 if (data.source === RouteStrings.COORDINATES) {
                     this.close();
                 }
@@ -178,12 +174,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     private async mergeDataIfNeededData(feature: GeoJSON.Feature) {
-        let uploadMarkerData = this.ngRedux.getState().poiState.uploadMarkerData;
+        let uploadMarkerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
         if (uploadMarkerData != null) {
             this.poiService.mergeWithPoi(feature, uploadMarkerData);
-            this.ngRedux.dispatch(new SetUploadMarkerDataAction({
-                markerData: null
-            }));
+            this.store.dispatch(new SetUploadMarkerDataAction(null));
             if (this.poiService.getFeatureId(feature) && feature.geometry.type === "Point") {
                 this.showLocationUpdate = true;
             }
@@ -311,9 +305,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             let newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
             newRoute.description = this.info.description;
             newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
-            this.ngRedux.dispatch(new AddRouteAction({
-                routeData: newRoute
-            }));
+            this.store.dispatch(new AddRouteAction(newRoute));
             this.selectedRouteService.setSelectedRoute(newRoute.id);
         }
         this.clear();
@@ -328,16 +320,13 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             id = this.fullFeature.properties.identifier;
         }
         let urls = this.getUrls();
-        this.ngRedux.dispatch(new AddPrivatePoiAction({
-            routeId: selectedRoute.id,
-            markerData: {
-                latlng: this.latlng,
-                title: this.info.title,
-                description: this.info.description,
-                type: icon.replace("icon-", ""),
-                id,
-                urls
-            }
+        this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, {
+            latlng: this.latlng,
+            title: this.info.title,
+            description: this.info.description,
+            type: icon.replace("icon-", ""),
+            id,
+            urls
         }));
         this.clear();
     }
@@ -350,9 +339,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     public clear() {
         if (this.fullFeature) {
-            this.ngRedux.dispatch(new SetSelectedPoiAction({
-                poi: null
-            }));
+            this.store.dispatch(new SetSelectedPoiAction(null));
         }
         this.close();
     }
@@ -383,9 +370,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public close() {
-        this.ngRedux.dispatch(new SetSidebarAction({
-            isOpen: false
-        }));
+        this.store.dispatch(new SetSidebarAction(false));
         // reset address bar only after animation ends.
         setTimeout(() => this.hashService.resetAddressbar(), 500);
     }

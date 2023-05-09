@@ -1,7 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
+import { NgxsModule, Store } from "@ngxs/store";
 
 import { RouterService } from "./router.service";
 import { ResourcesService } from "./resources.service";
@@ -28,7 +28,7 @@ describe("Router Service", () => {
             imports: [
                 HttpClientModule,
                 HttpClientTestingModule,
-                MockNgReduxModule
+                NgxsModule.forRoot([])
             ],
             providers: [
                 { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
@@ -40,7 +40,6 @@ describe("Router Service", () => {
                 RouterService
             ]
         });
-        MockNgRedux.reset();
     });
 
     it("Should route between two points", inject([RouterService, HttpTestingController],
@@ -69,8 +68,13 @@ describe("Router Service", () => {
         }
     ));
 
-    it("Should return start and end points when reponse is not a geojson", inject([RouterService, HttpTestingController],
-        async (router: RouterService, mockBackend: HttpTestingController) => {
+    it("Should return start and end points when reponse is not a geojson", inject([RouterService, HttpTestingController, Store],
+        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
+            store.reset({
+                offlineState: {
+                    isOfflineAvailable: false
+                }
+            });
 
             let promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
@@ -82,9 +86,9 @@ describe("Router Service", () => {
     ));
 
     it("Should return straight route from tiles when getting error response from server and no offline subscription",
-        inject([RouterService, HttpTestingController],
-        async (router: RouterService, mockBackend: HttpTestingController) => {
-            MockNgRedux.store.getState = () => ({
+        inject([RouterService, HttpTestingController, Store],
+        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
+            store.reset({
                 offlineState: {
                     isOfflineAvailable: false
                 }
@@ -100,10 +104,10 @@ describe("Router Service", () => {
     ));
 
     it("Should return start and end points when getting error response from server and offline is missing",
-        inject([RouterService, HttpTestingController],
-        async (router: RouterService, mockBackend: HttpTestingController) => {
+        inject([RouterService, HttpTestingController, Store],
+        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
 
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 offlineState: {
                     isOfflineAvailable: true,
                     lastModifiedDate: null
@@ -120,10 +124,10 @@ describe("Router Service", () => {
     ));
 
     it("Should return start and end points when getting error response from server and the points are too far part",
-        inject([RouterService, HttpTestingController],
-        async (router: RouterService, mockBackend: HttpTestingController) => {
+        inject([RouterService, HttpTestingController, Store],
+        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
 
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 offlineState: {
                     isOfflineAvailable: true,
                     lastModifiedDate: new Date()
@@ -140,8 +144,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available",
-        inject([RouterService, HttpTestingController, DatabaseService],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService) => {
+        inject([RouterService, HttpTestingController, DatabaseService, Store],
+        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             let featureCollection = {
                 type: "FeatureCollection",
@@ -159,7 +163,7 @@ describe("Router Service", () => {
 
             db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 offlineState: {
                     isOfflineAvailable: true,
                     lastModifiedDate: new Date()
@@ -176,8 +180,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available for a multiline string",
-        inject([RouterService, HttpTestingController, DatabaseService],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService) => {
+        inject([RouterService, HttpTestingController, DatabaseService, Store],
+        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             let featureCollection = {
                 type: "FeatureCollection",
@@ -198,7 +202,7 @@ describe("Router Service", () => {
 
             db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 offlineState: {
                     isOfflineAvailable: true,
                     lastModifiedDate: new Date()
@@ -215,8 +219,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available only through one line",
-        inject([RouterService, HttpTestingController, DatabaseService],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService) => {
+        inject([RouterService, HttpTestingController, DatabaseService, Store],
+        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             let featureCollection = {
                 type: "FeatureCollection",
@@ -243,7 +247,7 @@ describe("Router Service", () => {
 
             db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 offlineState: {
                     isOfflineAvailable: true,
                     lastModifiedDate: new Date()
@@ -260,8 +264,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return srart and end point when all lines are filtered out",
-        inject([RouterService, HttpTestingController, DatabaseService],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService) => {
+        inject([RouterService, HttpTestingController, DatabaseService, Store],
+        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             let featureCollection = {
                 type: "FeatureCollection",
@@ -279,7 +283,7 @@ describe("Router Service", () => {
 
             db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 offlineState: {
                     isOfflineAvailable: true,
                     lastModifiedDate: new Date()
@@ -296,8 +300,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route between two lines when points are not exactly the same",
-        inject([RouterService, HttpTestingController, DatabaseService],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService) => {
+        inject([RouterService, HttpTestingController, DatabaseService, Store],
+        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
             let featureCollection = {
                 type: "FeatureCollection",
                 features: [{
@@ -323,7 +327,7 @@ describe("Router Service", () => {
 
             db.getTile = () =>  Promise.resolve(createTileFromFeatureCollection(featureCollection));
 
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 offlineState: {
                     isOfflineAvailable: true,
                     lastModifiedDate: new Date()

@@ -1,13 +1,13 @@
 import { Component, Input } from "@angular/core";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import {
-    ExpandGroupAction,
     CollapseGroupAction,
-    SetCategoryVisibilityAction,
-    SetCategoriesGroupVisibilityAction
+    ExpandGroupAction,
+    SetCategoriesGroupVisibilityAction,
+    SetCategoryVisibilityAction
 } from "../../reducers/layers.reducer";
 import type { ApplicationState, CategoriesGroup, Category } from "../../models/models";
 
@@ -21,35 +21,29 @@ export class CategoriesGroupComponent extends BaseMapComponent {
     public categoriesGroup: CategoriesGroup;
 
     constructor(resources: ResourcesService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         super(resources);
     }
 
     public expand() {
-        this.ngRedux.dispatch(new ExpandGroupAction({ name: this.categoriesGroup.type }));
+        this.store.dispatch(new ExpandGroupAction(this.categoriesGroup.type));
     }
 
     public collapse() {
-        this.ngRedux.dispatch(new CollapseGroupAction({ name: this.categoriesGroup.type }));
+        this.store.dispatch(new CollapseGroupAction(this.categoriesGroup.type));
     }
 
     public getExpandState(): boolean {
-        return this.ngRedux.getState().layersState.expanded.find(l => l === this.categoriesGroup.type) != null;
+        return this.store.selectSnapshot((s: ApplicationState) => s.layersState)
+            .expanded.find(l => l === this.categoriesGroup.type) != null;
     }
 
     public toggleCategory(category: Category) {
-        this.ngRedux.dispatch(new SetCategoryVisibilityAction({
-            groupType: this.categoriesGroup.type,
-            name: category.name,
-            visible: !category.visible
-        }));
+        this.store.dispatch(new SetCategoryVisibilityAction(category.name, this.categoriesGroup.type, !category.visible));
     }
 
     public toggleVisibility(event: Event) {
         event.stopPropagation();
-        this.ngRedux.dispatch(new SetCategoriesGroupVisibilityAction({
-            groupType: this.categoriesGroup.type,
-            visible: !this.categoriesGroup.visible
-        }));
+        this.store.dispatch(new SetCategoriesGroupVisibilityAction(this.categoriesGroup.type, !this.categoriesGroup.visible));
     }
 }

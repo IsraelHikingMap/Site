@@ -1,5 +1,5 @@
 import invert from "invert-color";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -7,7 +7,7 @@ import { ToastService } from "../../../services/toast.service";
 import { RoutesFactory } from "../../../services/routes.factory";
 import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SetOpacityAndWeightAction } from "../../../reducers/route-editing.reducer";
-import type { ApplicationState, RouteData } from "../../../models/models";
+import type { RouteData } from "../../../models/models";
 
 export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     public colors: string[];
@@ -21,7 +21,7 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
                 protected readonly selectedRouteService: SelectedRouteService,
                 protected readonly routesFactory: RoutesFactory,
                 protected readonly toastService: ToastService,
-                protected readonly ngRedux: NgRedux<ApplicationState>) {
+                protected readonly store: Store) {
         super(resources);
         this.colors = this.routesFactory.colors;
     }
@@ -32,10 +32,7 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
             this.toastService.warning(this.resources.routeNameAlreadyInUse);
         }
         this.saveImplementation();
-        this.ngRedux.dispatch(new SetOpacityAndWeightAction({
-            opacity: this.routeData.opacity,
-            weight: this.routeData.weight
-        }));
+        this.store.dispatch(new SetOpacityAndWeightAction(this.routeData.opacity, this.routeData.weight));
     }
 
     public getCheckIconColor(color: string) {

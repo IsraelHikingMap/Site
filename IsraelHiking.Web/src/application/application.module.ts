@@ -35,7 +35,7 @@ import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { NgIdleModule } from "@ng-idle/core";
 import { LottieModule } from "ngx-lottie";
-import { NgReduxModule } from "@angular-redux2/store";
+import { NgxsModule } from "@ngxs/store";
 import { saveAs } from "file-saver-es";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import player from "lottie-web";
@@ -162,7 +162,21 @@ import { MainMenuComponent } from "./components/main-menu.component";
 import { CenterMeComponent } from "./components/center-me.component";
 import { PhotoSwpieComponent } from "./components/photoswipe.component";
 import { BackgroundTextComponent } from "./components/background-text.component";
-
+// Reducers
+import { ConfigurationReducer } from "./reducers/configuration.reducer";
+import { UIComponentsReducer } from "./reducers/ui-components.reducer";
+import { OfflineReducer } from "./reducers/offline.reducer";
+import { GpsReducer } from "./reducers/gps.reducer";
+import { InMemoryReducer } from "./reducers/in-memory.reducer";
+import { PointsOfInterestReducer } from "./reducers/poi.reducer";
+import { UserInfoReducer } from "./reducers/user.reducer";
+import { ShareUrlsReducer } from "./reducers/share-urls.reducer";
+import { LayersReducer } from "./reducers/layers.reducer";
+import { TracesReducer } from "./reducers/traces.reducer";
+import { RecordedRouteReducer } from "./reducers/recorded-route.reducer";
+import { RouteEditingReducer } from "./reducers/route-editing.reducer";
+import { RoutesReducer } from "./reducers/routes.reducer";
+import { LocationReducer } from "./reducers/location.reducer";
 // variables and functions
 import { routes } from "./routes";
 
@@ -218,7 +232,22 @@ const initializeApplication = (injector: Injector) => async () => {
             ScrollToModule.forRoot(),
             DragDropModule,
             InfiniteScrollModule,
-            NgReduxModule,
+            NgxsModule.forRoot([
+                ConfigurationReducer,
+                LocationReducer,
+                RoutesReducer,
+                RouteEditingReducer,
+                RecordedRouteReducer,
+                TracesReducer,
+                LayersReducer,
+                ShareUrlsReducer,
+                UserInfoReducer,
+                PointsOfInterestReducer,
+                InMemoryReducer,
+                GpsReducer,
+                OfflineReducer,
+                UIComponentsReducer
+            ]),
             NgxMapLibreGLModule,
             NgIdleModule.forRoot(),
             HammerModule,

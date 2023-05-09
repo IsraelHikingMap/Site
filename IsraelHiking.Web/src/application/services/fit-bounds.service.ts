@@ -1,11 +1,11 @@
 import { Injectable } from "@angular/core";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { SidebarService } from "./sidebar.service";
 import { MapService } from "./map.service";
 import { SpatialService } from "./spatial.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
-import type { Bounds, LatLngAlt, ApplicationState } from "../models/models";
+import type { Bounds, LatLngAlt } from "../models/models";
 
 @Injectable()
 export class FitBoundsService {
@@ -14,7 +14,7 @@ export class FitBoundsService {
 
     constructor(private readonly sidebarService: SidebarService,
                 private readonly mapService: MapService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         this.isFlying = false;
     }
 
@@ -26,7 +26,7 @@ export class FitBoundsService {
         if (noPadding) {
             padding = 0;
         }
-        this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: new Date() }));
+        this.store.dispatch(new SetPannedAction(new Date()));
         if (this.sidebarService.isSidebarOpen() && window.innerWidth >= 768) {
             this.mapService.map.fitBounds(mbBounds,
                 {
@@ -50,7 +50,7 @@ export class FitBoundsService {
             // this happens due to route percision reduce which causes another map move.
             return;
         }
-        this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: new Date() }));
+        this.store.dispatch(new SetPannedAction(new Date()));
         this.mapService.map.flyTo({ center: latLng, zoom });
     }
 

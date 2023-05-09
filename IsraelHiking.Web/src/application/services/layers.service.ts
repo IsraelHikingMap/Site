@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable } from "rxjs";
 import { timeout } from "rxjs/operators";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { ResourcesService } from "./resources.service";
 import { AuthorizationService } from "./authorization.service";
@@ -11,7 +11,6 @@ import {
     ISRAEL_HIKING_MAP,
     ISRAEL_MTB_MAP,
     SATELLITE,
-    ESRI,
     HIKING_TRAILS,
     BICYCLE_TRAILS
 } from "../reducers/initial-state";
@@ -23,7 +22,7 @@ import {
     RemoveOverlayAction,
     RemoveBaseLayerAction,
     AddOverlayAction,
-    ToggleOfflineAction,
+    ToggleOfflineAction
 } from "../reducers/layers.reducer";
 import type {
     DataContainer,
@@ -71,7 +70,7 @@ export class LayersService {
                 private readonly httpClient: HttpClient,
                 private readonly toastService: ToastService,
                 private readonly loggingService: LoggingService,
-                private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly store: Store
     ) {
         this.baseLayers = [];
         this.overlays = [];
@@ -125,26 +124,22 @@ export class LayersService {
                 if (layer.isOverlay) {
                     let existingOverlay = this.overlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layer.key));
                     if (existingOverlay) {
-                        this.ngRedux.dispatch(new UpdateOverlayAction({
-                            key: layer.key,
-                            layerData: {
+                        this.store.dispatch(new UpdateOverlayAction(layer.key, {
                                 ...existingOverlay,
                                 ...layer // override
                             }
-                        }));
+                        ));
                         continue;
                     }
                     this.addOverlayFromData(layer, false);
                 } else {
                     let existingBaselayer = this.baseLayers.find((baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
                     if (existingBaselayer) {
-                        this.ngRedux.dispatch(new UpdateBaseLayerAction({
-                            key: layer.key,
-                            layerData: {
+                        this.store.dispatch(new UpdateBaseLayerAction(layer.key, {
                                 ...existingBaselayer,
                                 ...layer // override
                             }
-                        }));
+                        ));
                         continue;
                     }
                     this.addBaseLayerFromData(layer);
@@ -157,9 +152,7 @@ export class LayersService {
                 }
             }
             for (let toRemove of overlaysToRemove) {
-                this.ngRedux.dispatch(new RemoveOverlayAction({
-                    key: toRemove.key
-                }));
+                this.store.dispatch(new RemoveOverlayAction(toRemove.key));
             }
             let baselayerToRemove = [];
             for (let baselayer of this.baseLayers.filter(o => o.isEditable)) {
@@ -168,9 +161,7 @@ export class LayersService {
                 }
             }
             for (let toRemove of baselayerToRemove) {
-                this.ngRedux.dispatch(new RemoveBaseLayerAction({
-                    key: toRemove.key
-                }));
+                this.store.dispatch(new RemoveBaseLayerAction(toRemove.key));
             }
         } catch (error) {
             this.loggingService.warning("[Layers] Unable to sync user layer from server - using local layers");
@@ -194,16 +185,13 @@ export class LayersService {
             isOfflineAvailable: false,
             isOfflineOn: false
         } as EditableLayer;
-        this.ngRedux.dispatch(new AddBaseLayerAction({
-            layerData: baseLayer
-        }));
+        this.store.dispatch(new AddBaseLayerAction(baseLayer));
         return baseLayer;
     }
 
     private async addBaseLayerToDatabase(layer: EditableLayer) {
         if (layer.key === ISRAEL_HIKING_MAP ||
             layer.key === ISRAEL_MTB_MAP ||
-            layer.key === ESRI ||
             layer.key === SATELLITE) {
             return;
         }
@@ -215,11 +203,7 @@ export class LayersService {
         layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
         let response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as IUserLayer;
         layer.id = response.id;
-        this.ngRedux.dispatch(new UpdateBaseLayerAction({
-            key: layer.key,
-            layerData: layer
-        }));
-
+        this.store.dispatch(new UpdateBaseLayerAction(layer.key, layer));
     }
 
     private async updateUserLayerInDatabase(isOverlay: boolean, layer: EditableLayer) {
@@ -257,9 +241,7 @@ export class LayersService {
             isOfflineAvailable: false,
             isOfflineOn: false,
         } as Overlay;
-        this.ngRedux.dispatch(new AddOverlayAction({
-            layerData: overlay
-        }));
+        this.store.dispatch(new AddOverlayAction(overlay));
         return overlay;
     }
 
@@ -277,10 +259,7 @@ export class LayersService {
         let response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as IUserLayer;
         layer.id = response.id;
         if (layerToStore.isOverlay) {
-            this.ngRedux.dispatch(new UpdateOverlayAction({
-                key: layer.key,
-                layerData: layer
-            }));
+            this.store.dispatch(new UpdateOverlayAction(layer.key, layer));
         }
     }
 
@@ -296,59 +275,43 @@ export class LayersService {
     }
 
     public updateBaseLayer(oldLayer: EditableLayer, newLayer: EditableLayer): void {
-        this.ngRedux.dispatch(new UpdateBaseLayerAction({
-            key: oldLayer.key,
-            layerData: newLayer
-        }));
+        this.store.dispatch(new UpdateBaseLayerAction(oldLayer.key, newLayer));
         this.selectBaseLayer(newLayer.key);
         this.updateUserLayerInDatabase(false, newLayer);
     }
 
     public updateOverlay(oldLayer: Overlay, newLayer: Overlay): void {
-        this.ngRedux.dispatch(new UpdateOverlayAction({
-            key: oldLayer.key,
-            layerData: newLayer
-        }));
+        this.store.dispatch(new UpdateOverlayAction(oldLayer.key, newLayer));
         this.updateUserLayerInDatabase(true, newLayer);
     }
 
     public removeBaseLayer(baseLayer: EditableLayer) {
         if (this.compareKeys(baseLayer.key, this.selectedBaseLayerKey)) {
-            this.ngRedux.dispatch(new SelectBaseLayerAction({
-                key: this.baseLayers[0].key
-            }));
+            this.store.dispatch(new SelectBaseLayerAction(this.baseLayers[0].key));
         }
-        this.ngRedux.dispatch(new RemoveBaseLayerAction({
-            key: baseLayer.key
-        }));
+        this.store.dispatch(new RemoveBaseLayerAction(baseLayer.key));
         this.deleteUserLayerFromDatabase(baseLayer.id);
     }
 
     public removeOverlay(overlay: Overlay) {
-        this.ngRedux.dispatch(new RemoveOverlayAction({
-            key: overlay.key
-        }));
+        this.store.dispatch(new RemoveOverlayAction(overlay.key));
         this.deleteUserLayerFromDatabase(overlay.id);
     }
 
     public selectBaseLayer(key: string) {
         this.loggingService.info(`[Layers] Selecting base layer ${key}`);
-        this.ngRedux.dispatch(new SelectBaseLayerAction({
-            key
-        }));
+        this.store.dispatch(new SelectBaseLayerAction(key));
         this.warnBaselayerOverlayOverlappingIfNeeded();
     }
 
     public toggleOverlay(overlay: Overlay) {
         let newVisibility = !overlay.visible;
         this.loggingService.info(`[Layers] Changing visiblity of ${overlay.key} to ${newVisibility ? "visible" : "hidden"}`);
-        this.ngRedux.dispatch(new UpdateOverlayAction({
-            key: overlay.key,
-            layerData: {
+        this.store.dispatch(new UpdateOverlayAction(overlay.key, {
                 ...overlay,
                 visible: newVisibility
             }
-        }));
+        ));
         this.warnBaselayerOverlayOverlappingIfNeeded();
     }
 
@@ -446,9 +409,6 @@ export class LayersService {
     }
 
     public toggleOffline(layer: EditableLayer, isOverlay: boolean) {
-        this.ngRedux.dispatch(new ToggleOfflineAction({
-            key: layer.key,
-            isOverlay
-        }));
+        this.store.dispatch(new ToggleOfflineAction(layer.key, isOverlay));
     }
 }

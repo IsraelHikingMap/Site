@@ -5,13 +5,12 @@ import {
     MatDialogRef
 } from "@angular/material/dialog";
 import { AnimationOptions } from "ngx-lottie";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { ConfigurationActions } from "../../reducers/configuration.reducer";
+import { StopShowingIntroAction } from "../../reducers/configuration.reducer";
 import { RunningContextService } from "../../services/running-context.service";
-import type { ApplicationState } from "../../models/models";
 import languageAnimationData from "../../../content/lottie/dialog-language.json";
 import mapsAnimationData from "../../../content/lottie/dialog-maps.json";
 import planAnimationData from "../../../content/lottie/dialog-plan.json";
@@ -33,7 +32,7 @@ export class IntroDialogComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
             private readonly dialogRef: MatDialogRef<IntroDialogComponent>,
-            private readonly ngRedux: NgRedux<ApplicationState>) {
+            private readonly store: Store) {
         super(resources);
         this.step = 0;
     }
@@ -58,7 +57,7 @@ export class IntroDialogComponent extends BaseMapComponent {
     }
 
     public close() {
-        this.ngRedux.dispatch(ConfigurationActions.stopShowIntroAction);
+        this.store.dispatch(new StopShowingIntroAction());
         this.dialogRef.close();
     }
 

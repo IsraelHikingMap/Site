@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable } from "rxjs";
-import { Select } from "@angular-redux2/store";
+import { Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -16,7 +16,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
 
     public layerData: EditableLayer;
 
-    @Select((state: ApplicationState) => state.location)
+    @Select((state: ApplicationState) => state.locationState)
     public location: Observable<LocationState>;
 
     protected constructor(resources: ResourcesService,

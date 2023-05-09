@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { UseAppDialogComponent } from "../components/dialogs/use-app-dialog.component";
 import { FacebookWarningDialogComponent } from "../components/dialogs/facebook-warning-dialog.component";
@@ -44,7 +44,7 @@ export class ApplicationInitializeService {
                 private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
                 private readonly geoLocationService: GeoLocationService,
                 private readonly overpassTurboService: OverpassTurboService,
-                private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly store: Store
     ) {
     }
 
@@ -71,7 +71,7 @@ export class ApplicationInitializeService {
                         UseAppDialogComponent.openDialog(this.dialog);
                     }
             } else if (!this.runningContextService.isIFrame
-                && this.ngRedux.getState().configuration.isShowIntro) {
+                && this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowIntro) {
                     IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
             }
             this.poiService.initialize(); // do not wait for it to complete

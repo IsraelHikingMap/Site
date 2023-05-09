@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Observable } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -13,8 +13,8 @@ import { SpatialService } from "../services/spatial.service";
 import { DeviceOrientationService } from "../services/device-orientation.service";
 import { RecordedRouteService } from "../services/recorded-route.service";
 import { ToggleDistanceAction, SetPannedAction, SetFollowingAction } from "../reducers/in-memory.reducer";
-import { ConfigurationActions } from "../reducers/configuration.reducer";
-import { ChangeEditStateAction } from "../reducers/routes.reducer";
+import { StopShowingBatteryConfirmationAction } from "../reducers/configuration.reducer";
+import { ChangeRouteStateAction } from "../reducers/routes.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import type { LatLngAlt, ApplicationState } from "../models/models";
 
@@ -31,8 +31,8 @@ export class LocationComponent extends BaseMapComponent {
     @Select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
     public pannedTimestamp$: Observable<Date>;
 
-    @Select((state: ApplicationState) => state.gpsState.currentPoistion)
-    private currentPoistion$: Observable<GeolocationPosition>;
+    @Select((state: ApplicationState) => state.gpsState.currentPosition)
+    private currentPosition$: Observable<GeolocationPosition>;
 
     private lastSpeed: number;
     private lastSpeedTime: number;
@@ -51,7 +51,7 @@ export class LocationComponent extends BaseMapComponent {
                 private readonly recordedRouteService: RecordedRouteService,
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly deviceOrientationService: DeviceOrientationService,
-                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly store: Store,
                 private readonly mapComponent: MapComponent) {
         super(resources);
 
@@ -75,7 +75,7 @@ export class LocationComponent extends BaseMapComponent {
                 return;
             }
             if (this.showDistance) {
-                this.ngRedux.dispatch(new ToggleDistanceAction());
+                this.store.dispatch(new ToggleDistanceAction());
             }
             if (this.isFollowingLocation()) {
                 this.moveMapToGpsPosition();
@@ -97,7 +97,7 @@ export class LocationComponent extends BaseMapComponent {
                 }
             });
 
-            this.currentPoistion$.subscribe((position: GeolocationPosition) => {
+            this.currentPosition$.subscribe((position: GeolocationPosition) => {
                 if (position != null) {
                     this.handlePositionChange(position);
                 }
@@ -128,7 +128,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public isFollowingLocation(): boolean {
-        return this.ngRedux.getState().inMemoryState.following && !this.isPanned;
+        return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).following && !this.isPanned;
     }
 
     public openLocationPopup() {
@@ -168,17 +168,17 @@ export class LocationComponent extends BaseMapComponent {
         }
         // is active must be true
         if (!this.isFollowingLocation()) {
-            this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
-            this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: null }));
+            this.store.dispatch(new SetFollowingAction(true));
+            this.store.dispatch(new SetPannedAction(null));
             if (this.showDistance) {
-                this.ngRedux.dispatch(new ToggleDistanceAction());
+                this.store.dispatch(new ToggleDistanceAction());
             }
             this.moveMapToGpsPosition();
             return;
         }
         // following and not panned
         if (this.isRecording()) {
-            this.ngRedux.dispatch(new SetFollowingAction({ following: false }));
+            this.store.dispatch(new SetFollowingAction(false));
             return;
         }
         if (!this.isRecording()) {
@@ -201,17 +201,17 @@ export class LocationComponent extends BaseMapComponent {
                 message: this.resources.areYouSureYouWantToStopRecording,
                 type: "YesNo",
                 confirmAction: () => {
-                    this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
+                    this.store.dispatch(new SetFollowingAction(true));
                     this.recordedRouteService.stopRecording();
                 }
             });
         } else {
-            if (this.ngRedux.getState().configuration.isShowBatteryConfirmation) {
+            if (this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowBatteryConfirmation) {
                 this.toastService.confirm({
                     message: this.resources.makeSureBatteryOptimizationIsOff,
                     type: "Custom",
                     declineAction: () => {
-                        this.ngRedux.dispatch(ConfigurationActions.stopShowBatteryConfirmationAction);
+                        this.store.dispatch(new StopShowingBatteryConfirmationAction());
                     },
                     customConfirmText: this.resources.ok,
                     customDeclineText: this.resources.dontShowThisMessageAgain
@@ -222,32 +222,32 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public isDisabled() {
-        return this.ngRedux.getState().gpsState.tracking === "disabled";
+        return this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "disabled";
     }
 
     public isActive() {
-        return this.ngRedux.getState().gpsState.tracking === "tracking";
+        return this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "tracking";
     }
 
     public isLoading() {
-        return this.ngRedux.getState().gpsState.tracking === "searching";
+        return this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "searching";
     }
 
     public isAddingRecordingPoi() {
-        return this.ngRedux.getState().recordedRouteState.isAddingPoi;
+        return this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isAddingPoi;
     }
 
     public toggleAddRecordingPoi() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
-            this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "ReadOnly" }));
+            this.store.dispatch(new ChangeRouteStateAction(selectedRoute.id, "ReadOnly"));
         }
-        this.ngRedux.dispatch(new ToggleAddRecordingPoiAction());
+        this.store.dispatch(new ToggleAddRecordingPoiAction());
     }
 
     private handlePositionChange(position: GeolocationPosition) {
         if (this.locationFeatures.features.length === 0) {
-            this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
+            this.store.dispatch(new SetFollowingAction(true));
         }
         let validHeading = !isNaN(position.coords.heading) && position.coords.speed !== 0;
         if (validHeading) {
@@ -274,8 +274,8 @@ export class LocationComponent extends BaseMapComponent {
     private enableLocation() {
         this.geoLocationService.enable();
         this.deviceOrientationService.enable();
-        this.ngRedux.dispatch(new SetFollowingAction({ following: true }));
-        this.ngRedux.dispatch(new SetPannedAction({ pannedTimestamp: null }));
+        this.store.dispatch(new SetFollowingAction(true));
+        this.store.dispatch(new SetPannedAction(null));
     }
 
     private moveMapToGpsPosition() {

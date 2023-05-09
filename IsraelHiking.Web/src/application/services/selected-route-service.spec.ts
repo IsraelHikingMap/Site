@@ -1,5 +1,5 @@
 import { inject, TestBed } from "@angular/core/testing";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
+import { NgxsModule, Store } from "@ngxs/store";
 import { Subject } from "rxjs";
 
 import { SelectedRouteService } from "./selected-route.service";
@@ -7,28 +7,19 @@ import { ResourcesService } from "./resources.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { RouterService } from "./router.service";
 import { RoutesFactory } from "./routes.factory";
-import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
+import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
-import { AddRouteAction, ChangeEditStateAction } from "../reducers/routes.reducer";
-import type { ApplicationState, RouteData } from "../models/models";
+import { AddRouteAction, ChangeRouteStateAction, BulkReplaceRoutesAction, RoutesReducer } from "../reducers/routes.reducer";
+import type { RouteData } from "../models/models";
 
-export const getSubject = <T>(predecator: (state: ApplicationState) => T): Subject<T> => {
-    let predecatorString = predecator.toString().split("=>")[1];
-    let selectorKey = Object.keys((MockNgRedux.getSubStore() as MockNgRedux).selections).find(k => k.includes(predecatorString));
-    return MockNgRedux.getSelectorStub<ApplicationState, T>(selectorKey);
-};
 
 describe("Selected Route Service", () => {
-    const setupRoutes = (routes: RouteData[]) => {
-        const routesStub = getSubject((state: ApplicationState) => state.routes.present);
-        routesStub.next(routes);
-        return routesStub;
+    const setupRoutes = (store: Store, routes: RouteData[]) => {
+        store.dispatch(new BulkReplaceRoutesAction(routes));
     };
 
-    const setupSelectedRoute = (id: string) => {
-        const selectedRouteIdSubject = getSubject((state: ApplicationState) => state.routeEditingState.selectedRouteId);
-        selectedRouteIdSubject.next(id);
-        return selectedRouteIdSubject;
+    const setupSelectedRoute = (store: Store, id: string) => {
+        store.dispatch(new SetSelectedRouteAction(id));
     };
 
     beforeEach(() => {
@@ -37,7 +28,7 @@ describe("Selected Route Service", () => {
         let routerServiceMock = {};
         TestBed.configureTestingModule({
             imports: [
-                MockNgReduxModule
+                NgxsModule.forRoot([RoutesReducer, RouteEditingReducer])
             ],
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
@@ -46,7 +37,6 @@ describe("Selected Route Service", () => {
                 SelectedRouteService,
             ]
         });
-        MockNgRedux.reset();
     });
 
     it("Should get undefined selected route when there're no routes", inject([SelectedRouteService],
@@ -57,70 +47,69 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should sync selected route with editing route", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            MockNgRedux.store.dispatch = jasmine.createSpy();
-            setupRoutes([{ id: "42", state: "Poi" } as any]);
-            setupSelectedRoute("1");
+    it("Should sync selected route with editing route", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            store.dispatch = jasmine.createSpy();
+            setupRoutes(store, [{ id: "42", state: "Poi" } as any]);
+            setupSelectedRoute(store, "1");
 
             selectedRouteService.syncSelectedRouteWithEditingRoute();
 
-            expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+            expect(store.dispatch).toHaveBeenCalled();
         }
     ));
 
-    it("Should create a route when calling get or create and there are none", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupRoutes([]);
-            MockNgRedux.store.getState = () => ({
+    it("Should create a route when calling get or create and there are none", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, []);
+            store.reset({
+                ...store.snapshot(),
                 routeEditingState: {
                     opacity: 1,
                     weight: 10
                 }
             });
             let spy = jasmine.createSpy();
-            MockNgRedux.store.dispatch = spy;
+            store.dispatch = spy;
 
             selectedRouteService.getOrCreateSelectedRoute();
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
+            expect(spy.calls.first().args[0]).toBeInstanceOf(AddRouteAction);
         }
     ));
 
-    it("Should select the first route if selected route it null and there are routes", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupRoutes([{id: "42"} as any]);
-            const selectedRouteIdSubject = setupSelectedRoute(null);
-            MockNgRedux.store.dispatch = jasmine.createSpy().and.callFake((action) => selectedRouteIdSubject.next(action.payload.routeId));
+    it("Should select the first route if selected route it null and there are routes", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{id: "42"} as any]);
+            setupSelectedRoute(store, null);
 
             const selectedRoute = selectedRouteService.getOrCreateSelectedRoute();
 
-            expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
             expect(selectedRoute.id).toBe("42");
         }
     ));
 
-    it("Should set selected route if there's no selected route", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupSelectedRoute(null);
-            MockNgRedux.store.dispatch = jasmine.createSpy();
+    it("Should set selected route if there's no selected route", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupSelectedRoute(store, null);
+            store.dispatch = jasmine.createSpy();
 
             selectedRouteService.setSelectedRoute("42");
 
-            expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+            expect(store.dispatch).toHaveBeenCalled();
         }
     ));
 
-    it("Should unselect selected route and selected the given route", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupSelectedRoute("1");
+    it("Should unselect selected route and selected the given route", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupSelectedRoute(store, "1");
             let spy = jasmine.createSpy();
-            MockNgRedux.store.dispatch = spy;
+            store.dispatch = spy;
             selectedRouteService.setSelectedRoute("42");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SetSelectedRouteAction);
+            expect(spy.calls.first().args[0]).toBeInstanceOf(SetSelectedRouteAction);
         }
     ));
 
@@ -130,62 +119,62 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should not return empty routes where there are routes", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupRoutes([{id: "42"} as  any]);
+    it("Should not return empty routes where there are routes", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{id: "42"} as  any]);
 
             expect(selectedRouteService.areRoutesEmpty()).toBeFalsy();
         }
     ));
 
-    it("Should change route edit state when not adding recorded POI", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            MockNgRedux.store.getState = () => ({
+    it("Should change route edit state when not adding recorded POI", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            store.reset({
                 recordedRouteState: {
                     isAddingPoi: false,
                 }
             });
             let spy = jasmine.createSpy();
-            MockNgRedux.store.dispatch = spy;
+            store.dispatch = spy;
 
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
-            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ChangeEditStateAction);
+            expect(spy.calls.first().args[0]).toBeInstanceOf(ChangeRouteStateAction);
         }
     ));
 
-    it("Should change route edit state when adding recorded POI", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            MockNgRedux.store.getState = () => ({
+    it("Should change route edit state when adding recorded POI", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            store.reset({
                 recordedRouteState: {
                     isAddingPoi: true,
                 }
             });
             let spy = jasmine.createSpy();
-            MockNgRedux.store.dispatch = spy;
+            store.dispatch = spy;
 
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
 
             expect(spy).toHaveBeenCalled();
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ToggleAddRecordingPoiAction);
-            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(ChangeEditStateAction);
+            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(ChangeRouteStateAction);
         }
     ));
 
-    it("Should create route name when there's a route with that name", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
+    it("Should create route name when there's a route with that name", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
             let routeName = selectedRouteService.createRouteName();
-            setupRoutes([{id: "42", name: routeName} as any]);
+            setupRoutes(store, [{id: "42", name: routeName} as any]);
 
             expect(selectedRouteService.createRouteName()).not.toBe(routeName);
             expect(selectedRouteService.isNameAvailable(routeName)).toBeFalsy();
         }
     ));
 
-    it("Should get closet route to selected route when there are no other routes", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupRoutes([{
+    it("Should get closet route to selected route when there are no other routes", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
                 id: "1",
                 description: "",
                 markers: [],
@@ -197,16 +186,16 @@ describe("Selected Route Service", () => {
                 }],
                 state: "ReadOnly",
             }]);
-            setupSelectedRoute("1");
+            setupSelectedRoute(store, "1");
 
             const closetRoute = selectedRouteService.getClosestRouteToSelected(true);
             expect(closetRoute).toBeNull();
         }
     ));
 
-    it("Should get closet route to selected route when there is another route", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupRoutes([{
+    it("Should get closet route to selected route when there is another route", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
                 id: "1",
                 description: "",
                 markers: [],
@@ -229,7 +218,7 @@ describe("Selected Route Service", () => {
                 }],
                 state: "ReadOnly",
             }]);
-            setupSelectedRoute("1");
+            setupSelectedRoute(store, "1");
 
             const closetRoute = selectedRouteService.getClosestRouteToSelected(true);
             expect(closetRoute.id).toBe("2");
@@ -237,9 +226,9 @@ describe("Selected Route Service", () => {
     ));
 
     it("Should get closet route to selected route when there are other routes and it is near the end of the route",
-        inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupRoutes([{
+        inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
                 id: "1",
                 description: "",
                 markers: [],
@@ -277,34 +266,34 @@ describe("Selected Route Service", () => {
                 }],
                 state: "ReadOnly",
             }]);
-            setupSelectedRoute("1");
+            setupSelectedRoute(store, "1");
 
             const closetRoute = selectedRouteService.getClosestRouteToSelected(false);
             expect(closetRoute.id).toBe("3");
         }
     ));
 
-    it("Should not get closet route to GPS when there's no location", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupRoutes([]);
+    it("Should not get closet route to GPS when there's no location", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, []);
 
             const closetRoute = selectedRouteService.getClosestRouteToGPS(null, null);
             expect(closetRoute).toBeNull();
         }
     ));
 
-    it("Should not get closet route to GPS when there are no routes", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupRoutes([]);
+    it("Should not get closet route to GPS when there are no routes", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, []);
 
             const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1, lng: 1, timestamp: new Date()}, 0);
             expect(closetRoute).toBeNull();
         }
     ));
 
-    it("Should not get closet route to GPS when there are no visible routes", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupRoutes([{
+    it("Should not get closet route to GPS when there are no visible routes", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
                 id: "1",
                 description: "",
                 markers: [],
@@ -322,9 +311,9 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should get closet route to GPS when there are routes", inject([SelectedRouteService],
-        (selectedRouteService: SelectedRouteService) => {
-            setupRoutes([{
+    it("Should get closet route to GPS when there are routes", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
                 id: "1",
                 description: "",
                 markers: [],

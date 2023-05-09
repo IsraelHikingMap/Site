@@ -3,7 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { Observable } from "rxjs";
-import { Select } from "@angular-redux2/store";
+import { Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
@@ -85,7 +85,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     private initalizeLegendSections() {
-        this.legendSections = JSON.parse(JSON.stringify(legendSectionsJson));
+        this.legendSections = structuredClone(legendSectionsJson) as LegendSection[];
         for (let section of this.legendSections) {
             section.title = this.resources[section.key] as string;
             for (let item of section.items) {

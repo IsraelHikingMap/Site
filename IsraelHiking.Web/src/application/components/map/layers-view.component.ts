@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PoiService } from "../../services/poi.service";
@@ -42,7 +42,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
                 private readonly layersService: LayersService,
                 private readonly poiService: PoiService,
                 private readonly selectedRouteService: SelectedRouteService,
-                private readonly ngRedux: NgRedux<ApplicationState>
+                private readonly store: Store
     ) {
         super(resources);
         this.selectedCluster = null;
@@ -158,15 +158,12 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
             type: "star",
             urls: [] as LinkData[]
         };
-        this.ngRedux.dispatch(new AddPrivatePoiAction({
-            routeId: selectedRoute.id,
-            markerData
-        }));
+        this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, markerData));
         this.clearSelected();
     }
 
     public clearSelected() {
-        this.ngRedux.dispatch(new SetSelectedPoiAction({ poi: null }));
+        this.store.dispatch(new SetSelectedPoiAction(null));
         this.hoverFeature = null;
     }
 

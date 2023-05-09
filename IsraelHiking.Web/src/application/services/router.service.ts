@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
 import { VectorTile } from "@mapbox/vector-tile";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 import PathFinder from "geojson-path-finder";
 import Protobuf from "pbf";
 
@@ -26,7 +26,7 @@ export class RouterService {
                 private readonly databaseService: DatabaseService,
                 private readonly loggingService: LoggingService,
                 private readonly runningContextService: RunningContextService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         this.featuresCache = new Map<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>();
     }
 
@@ -42,7 +42,8 @@ export class RouterService {
                 return await this.getOffineRoute(latlngStart, latlngEnd, routinType);
             } catch (ex2) {
                 this.loggingService.error(`[Routing] failed: ${(ex as Error).message}, ${(ex2 as Error).message}`);
-                this.toastService.warning(this.ngRedux.getState().offlineState.isOfflineAvailable || !this.runningContextService.isCapacitor
+                let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+                this.toastService.warning(offlineState.isOfflineAvailable || !this.runningContextService.isCapacitor
                     ? this.resources.routingFailedTryShorterRoute
                     : this.resources.routingFailedBuySubscription
                 );
@@ -55,7 +56,7 @@ export class RouterService {
         if (routinType === "None") {
             return [latlngStart, latlngEnd];
         }
-        let offlineState = this.ngRedux.getState().offlineState;
+        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         if (!offlineState.isOfflineAvailable || offlineState.lastModifiedDate == null) {
             throw new Error("Offline routing is only supported after downloading offline data");
         }

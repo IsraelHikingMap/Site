@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, Inject } from "@angular/core";
 import { MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -12,7 +12,7 @@ import { SelectedRouteService } from "../../../services/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
 import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../../../reducers/route-editing.reducer";
-import type { DataContainer, RouteData, ApplicationState, LatLngAlt } from "../../../models/models";
+import type { DataContainer, RouteData, LatLngAlt } from "../../../models/models";
 
 @Component({
     selector: "route-edit-dialog",
@@ -27,12 +27,12 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
                 selectedRouteService: SelectedRouteService,
                 routesFactory: RoutesFactory,
                 toastService: ToastService,
-                ngRedux: NgRedux<ApplicationState>,
+                store: Store,
                 private readonly fileService: FileService,
                 private readonly fitBoundsService: FitBoundsService,
                 @Inject(MAT_DIALOG_DATA) data: RouteData
     ) {
-        super(resources, selectedRouteService, routesFactory, toastService, ngRedux);
+        super(resources, selectedRouteService, routesFactory, toastService, store);
 
         this.isNew = false;
         this.title = this.resources.routeProperties;
@@ -41,10 +41,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     protected saveImplementation() {
-        this.ngRedux.dispatch(new ChangeRoutePropertiesAction({
-            routeId: this.routeData.id,
-            routeData: this.routeData
-        }));
+        this.store.dispatch(new ChangeRoutePropertiesAction(this.routeData.id, this.routeData));
     }
 
     protected isRouteNameAlreadyInUse() {
@@ -55,11 +52,9 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     public deleteRoute() {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute && selectedRoute.id === this.routeData.id) {
-            this.ngRedux.dispatch(new SetSelectedRouteAction({routeId: null}));
+            this.store.dispatch(new SetSelectedRouteAction(null));
         }
-        this.ngRedux.dispatch(new DeleteRouteAction({
-            routeId: this.routeData.id
-        }));
+        this.store.dispatch(new DeleteRouteAction(this.routeData.id));
     }
 
     public async saveRouteToFile() {

@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
-import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { firstValueFrom } from "rxjs";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { LayersService } from "./layers.service";
 import { SidebarService } from "./sidebar.service";
@@ -12,7 +12,7 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { ToggleOfflineAction } from "../reducers/layers.reducer";
-import { SetOfflineLastModifiedAction } from "../reducers/offline.reducer";
+import { SetOfflineMapsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ApplicationState } from "../models/models";
 
@@ -26,20 +26,21 @@ export class OfflineFilesDownloadService {
                 private readonly loggingService: LoggingService,
                 private readonly httpClient: HttpClient,
                 private readonly toastService: ToastService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
     }
 
     public async initialize(): Promise<void> {
-        let offlineState = this.ngRedux.getState().offlineState;
+        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        let userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
         if (offlineState.isOfflineAvailable === true &&
             offlineState.lastModifiedDate == null &&
-            this.ngRedux.getState().userState.userInfo != null) {
+            userState.userInfo != null) {
             // In case the user has purchased the map and never downloaded them, and now starts the app
             return await this.downloadOfflineMaps(false);
         }
         if (offlineState.isOfflineAvailable === true &&
             offlineState.lastModifiedDate != null &&
-            this.ngRedux.getState().userState.userInfo != null) {
+            userState.userInfo != null) {
             // Check and migrate old databases if needed
             try {
                 let needToMigrate = await this.fileService.renameOldDatabases();
@@ -91,11 +92,11 @@ export class OfflineFilesDownloadService {
     private async downloadOfflineFilesProgressAction(reportProgress: (progressValue: number) => void, fileNames: Record<string, string>):
         Promise<void> {
         this.loggingService.info("[Offline Download] Starting downloading offline files, last update: " +
-            this.ngRedux.getState().offlineState.lastModifiedDate);
+        this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate);
         this.sidebarService.hide();
         let setBackToOffline = false;
         if (this.layersService.getSelectedBaseLayer().isOfflineOn) {
-            this.ngRedux.dispatch(new ToggleOfflineAction({ key: this.layersService.getSelectedBaseLayer().key, isOverlay: false }));
+            this.store.dispatch(new ToggleOfflineAction(this.layersService.getSelectedBaseLayer().key, false));
             setBackToOffline = true;
         }
         try {
@@ -105,7 +106,7 @@ export class OfflineFilesDownloadService {
                 let fileName = Object.keys(fileNames)[fileNameIndex];
                 let fileDate = new Date(fileNames[fileName]);
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
-                let token = this.ngRedux.getState().userState.token;
+                let token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
                 if (fileName.endsWith(".mbtiles")) {
                     let dbFileName = fileName.replace(".mbtiles", ".db");
                     await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`, dbFileName, token,
@@ -120,18 +121,18 @@ export class OfflineFilesDownloadService {
             }
             this.loggingService.info("[Offline Download] Finished downloading offline files, update date to: "
                 + newestFileDate.toUTCString());
-            this.ngRedux.dispatch(new SetOfflineLastModifiedAction({ lastModifiedDate: newestFileDate }));
+            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(newestFileDate));
             this.toastService.success(this.resources.downloadFinishedSuccessfully + " " + this.resources.useTheCloudIconToGoOffline);
             this.sidebarService.show("layers");
         } finally {
             if (setBackToOffline) {
-                this.ngRedux.dispatch(new ToggleOfflineAction({ key: this.layersService.getSelectedBaseLayer().key, isOverlay: false }));
+                this.store.dispatch(new ToggleOfflineAction(this.layersService.getSelectedBaseLayer().key, false));
             }
         }
     }
 
     private async getFilesToDownloadDictionary(): Promise<Record<string, string>> {
-        let lastModified = this.ngRedux.getState().offlineState.lastModifiedDate;
+        let lastModified = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate;
         let lastModifiedString = lastModified ? lastModified.toISOString() : null;
         let fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
             params: { lastModified: lastModifiedString }

@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { Observable } from "rxjs";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
@@ -41,7 +41,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
                 private readonly socialSharing: SocialSharing,
                 private readonly hashService: HashService,
                 private readonly toastService: ToastService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         super(resources);
         this.hideCoordinates = true;
     }
@@ -54,19 +54,14 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
             type: "star",
             urls: [] as LinkData[]
         };
-        if (this.ngRedux.getState().recordedRouteState.isRecording) {
-            this.ngRedux.dispatch(new AddRecordingPoiAction({
-                markerData
-            }));
-            let markerIndex = this.ngRedux.getState().recordedRouteState.route.markers.length - 1;
+        if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
+            this.store.dispatch(new AddRecordingPoiAction(markerData));
+            let markerIndex = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.markers.length - 1;
             PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, markerIndex);
         } else {
             let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
             let markerIndex = selectedRoute.markers.length;
-            this.ngRedux.dispatch(new AddPrivatePoiAction({
-                routeId: selectedRoute.id,
-                markerData
-            }));
+            this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, markerData));
             PrivatePoiEditDialogComponent.openDialog(
                 this.matDialog, markerData, markerIndex, selectedRoute.id);
         }
@@ -74,7 +69,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     }
 
     public openAddSimplePointDialog() {
-        if (this.ngRedux.getState().userState.userInfo == null) {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo == null) {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
@@ -89,7 +84,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     }
 
     public toggleDistance() {
-        this.ngRedux.dispatch(new ToggleDistanceAction());
+        this.store.dispatch(new ToggleDistanceAction());
         this.closed.emit();
     }
 

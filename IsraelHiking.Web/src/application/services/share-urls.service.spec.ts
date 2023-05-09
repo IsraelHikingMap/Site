@@ -1,7 +1,7 @@
 import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
+import { NgxsModule, Store } from "@ngxs/store";
 
 import { ShareUrlsService } from "./share-urls.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -9,6 +9,7 @@ import { HashService } from "./hash.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
+import { ShareUrlsReducer } from "../reducers/share-urls.reducer";
 import { Urls } from "../urls";
 import type { ShareUrl, DataContainer } from "../models/models";
 
@@ -29,7 +30,7 @@ describe("Share Urls Service", () => {
             imports: [
                 HttpClientModule,
                 HttpClientTestingModule,
-                MockNgReduxModule
+                NgxsModule.forRoot([ShareUrlsReducer])
             ],
             providers: [
                 { provide: HashService, useValue: hashService },
@@ -40,7 +41,6 @@ describe("Share Urls Service", () => {
                 ShareUrlsService
             ]
         });
-        MockNgRedux.reset();
     });
 
     it("Should update share url", inject([ShareUrlsService, HttpTestingController],
@@ -56,14 +56,14 @@ describe("Share Urls Service", () => {
             return promise;
         }));
 
-    it("Should delete share url", inject([ShareUrlsService, HttpTestingController, DatabaseService],
-        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
+    it("Should delete share url", inject([ShareUrlsService, HttpTestingController, DatabaseService, Store],
+        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService, store: Store) => {
 
             let shareUrl = { id: "42" } as ShareUrl;
-            MockNgRedux.store.dispatch = jasmine.createSpy();
-
+            store.dispatch = jasmine.createSpy();
             let promise = shareUrlsService.deleteShareUrl(shareUrl).then(() => {
-                expect(MockNgRedux.store.dispatch).toHaveBeenCalled();
+
+                expect(store.dispatch).toHaveBeenCalled();
                 expect(databaseService.deleteShareUrlById).toHaveBeenCalled();
             });
 

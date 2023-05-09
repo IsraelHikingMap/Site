@@ -1,5 +1,6 @@
 import { Injectable, NgZone } from "@angular/core";
-import { NgRedux } from "@angular-redux2/store";
+import { MatDialog } from "@angular/material/dialog";
+import { Store } from "@ngxs/store";
 import { App } from "@capacitor/app";
 
 import { RunningContextService } from "./running-context.service";
@@ -7,21 +8,14 @@ import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
 import { ToastService } from "./toast.service";
-import { MatDialog } from "@angular/material/dialog";
 import { SidebarService } from "./sidebar.service";
-import { SetSidebarAction } from "../reducers/poi.reducer";
 import { GeoLocationService } from "./geo-location.service";
 import { RecordedRouteService } from "./recorded-route.service";
 import { ImageGalleryService } from "./image-gallery.service";
+import { SetSidebarAction } from "../reducers/poi.reducer";
 import type { ApplicationState } from "../models/models";
 
-declare let navigator: Navigator;
-
 declare type ExitState = "None" | "FirstClick" | "SecondClick";
-
-interface Navigator {
-    app: any;
-}
 
 @Injectable()
 export class ApplicationExitService {
@@ -36,7 +30,7 @@ export class ApplicationExitService {
                 private readonly recordingRouteService: RecordedRouteService,
                 private readonly geoLocationService: GeoLocationService,
                 private readonly imageGalleryService: ImageGalleryService,
-                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly store: Store,
                 private readonly loggingService: LoggingService,
                 private readonly toastService: ToastService) {
 
@@ -61,10 +55,8 @@ export class ApplicationExitService {
                     this.sidebarService.hide();
                     return;
                 }
-                if (this.ngRedux.getState().poiState.isSidebarOpen) {
-                    this.ngRedux.dispatch(new SetSidebarAction({
-                        isOpen: false
-                    }));
+                if (this.store.selectSnapshot((s: ApplicationState) => s.poiState).isSidebarOpen) {
+                    this.store.dispatch(new SetSidebarAction(false));
                     return;
                 }
                 if (this.recordingRouteService.isRecording()) {

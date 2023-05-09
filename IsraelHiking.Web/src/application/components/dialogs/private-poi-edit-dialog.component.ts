@@ -5,7 +5,7 @@ import {
     MAT_DIALOG_DATA
 } from "@angular/material/dialog";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
-import { NgRedux } from "@angular-redux2/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { AddSimplePoiDialogComponent } from "./add-simple-poi-dialog.component";
@@ -65,7 +65,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
                 private readonly socialSharing: SocialSharing,
                 private readonly hashService: HashService,
                 private readonly toastService: ToastService,
-                private readonly ngRedux: NgRedux<ApplicationState>,
+                private readonly store: Store,
                 @Inject(MAT_DIALOG_DATA) data: PrivatePoiEditDialogData) {
         super(resources);
         this.showIcons = false;
@@ -157,16 +157,9 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         };
 
         if (this.routeId) {
-            this.ngRedux.dispatch(new UpdatePrivatePoiAction({
-                index: this.markerIndex,
-                routeId: this.routeId,
-                markerData: updatedMarker
-            }));
+            this.store.dispatch(new UpdatePrivatePoiAction(this.routeId, this.markerIndex, updatedMarker));
         } else {
-            this.ngRedux.dispatch(new UpdateRecordingPoiAction({
-                index: this.markerIndex,
-                markerData: updatedMarker
-            }));
+            this.store.dispatch(new UpdateRecordingPoiAction(this.markerIndex, updatedMarker));
         }
     }
 
@@ -184,7 +177,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public async uploadPoint() {
-        if (this.ngRedux.getState().userState.userInfo == null) {
+        if (this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo == null) {
             this.toastService.warning(this.resources.loginRequired);
             return;
         }
@@ -200,14 +193,9 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
 
     public remove() {
         if (this.routeId) {
-            this.ngRedux.dispatch(new DeletePrivatePoiAction({
-                index: this.markerIndex,
-                routeId: this.routeId
-            }));
+            this.store.dispatch(new DeletePrivatePoiAction(this.routeId, this.markerIndex));
         } else {
-            this.ngRedux.dispatch(new DeleteRecordingPoiAction({
-                index: this.markerIndex
-            }));
+            this.store.dispatch(new DeleteRecordingPoiAction(this.markerIndex));
         }
     }
 

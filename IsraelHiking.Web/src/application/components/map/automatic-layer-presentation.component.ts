@@ -8,7 +8,7 @@ import {
     LayerSpecification
 } from "maplibre-gl";
 import { Observable, Subscription } from "rxjs";
-import { NgRedux, Select } from "@angular-redux2/store";
+import { Store, Select } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -56,7 +56,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 private readonly fileService: FileService,
                 private readonly connectionSerive: ConnectionService,
                 private readonly mapService: MapService,
-                private readonly ngRedux: NgRedux<ApplicationState>) {
+                private readonly store: Store) {
         super(resources);
         let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
@@ -77,7 +77,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         await (this.isMainMap ? this.mapService.initializationPromise : this.mapLoadedPromise);
         await this.createLayer();
         this.sourceAdded = true;
-        this.currentLanguageCode = this.ngRedux.getState().configuration.language.code;
+        this.currentLanguageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
         this.subscriptions.push(this.language$.subscribe(async (language) => {
             if (this.sourceAdded && this.currentLanguageCode !== language.code) {
                 this.removeLayer(this.layerData.address);
@@ -90,7 +90,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 return;
             }
             this.hasInternetAccess = state.hasInternetAccess;
-            if (this.ngRedux.getState().offlineState.lastModifiedDate == null || this.layerData.isOfflineAvailable === false) {
+            if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null
+                || this.layerData.isOfflineAvailable === false) {
                 return;
             }
             if (this.layerData.isOfflineOn === true) {

@@ -1,66 +1,53 @@
-import { createReducerFromClass, Action as ReduxAction } from "@angular-redux2/store";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
-import { initialState, BaseAction } from "./initial-state";
+import { initialState } from "./initial-state";
 import type { PointsOfInterestState, MarkerData } from "../models/models";
 
-const SET_SELECTED_POI = "SET_SELECTED_POI";
-const SET_UPLOAD_MARKER_DATA = "SET_UPLOAD_MARKER_DATA";
-const SET_SIDEBAR = "SET_SIDEBAR";
 
-export type SetSelectedPoiPayload = {
-    poi: GeoJSON.Feature;
+export class SetSelectedPoiAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public poi: GeoJSON.Feature) {}
 };
 
-export type SetUploadMarkerDataPayload = {
-    markerData: MarkerData;
+export class SetUploadMarkerDataAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public markerData: MarkerData) {}
 };
 
-export type SetSidebarPayload = {
-    isOpen: boolean;
+export class SetSidebarAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public isOpen: boolean) {}
 };
-
-export class SetSelectedPoiAction extends BaseAction<SetSelectedPoiPayload> {
-    constructor(payload: SetSelectedPoiPayload) {
-        super(SET_SELECTED_POI, payload);
-    }
-}
-
-export class SetUploadMarkerDataAction extends BaseAction<SetUploadMarkerDataPayload> {
-    constructor(payload: SetUploadMarkerDataPayload) {
-        super(SET_UPLOAD_MARKER_DATA, payload);
-    }
-}
-
-export class SetSidebarAction extends BaseAction<SetSidebarPayload> {
-    constructor(payload: SetSidebarPayload) {
-        super(SET_SIDEBAR, payload);
-    }
-}
-
+@State<PointsOfInterestState>({
+    name: "poiState",
+    defaults: initialState.poiState
+})
+@Injectable()
 export class PointsOfInterestReducer {
-    @ReduxAction(SET_SELECTED_POI)
-    public setSelectedPoi(lastState: PointsOfInterestState, action: SetSelectedPoiAction): PointsOfInterestState {
-        return {
-            ...lastState,
-            selectedPointOfInterest: action.payload.poi
-        };
+
+    @Action(SetSelectedPoiAction)
+    public setSelectedPoi(ctx: StateContext<PointsOfInterestState>, action: SetSelectedPoiAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.selectedPointOfInterest = action.poi;
+            return lastState;
+        }));
     }
 
-    @ReduxAction(SET_UPLOAD_MARKER_DATA)
-    public setUploadMarkerData(lastState: PointsOfInterestState, action: SetUploadMarkerDataAction): PointsOfInterestState {
-        return {
-            ...lastState,
-            uploadMarkerData: action.payload.markerData
-        };
+    @Action(SetUploadMarkerDataAction)
+    public setUploadMarkerData(ctx: StateContext<PointsOfInterestState>, action: SetUploadMarkerDataAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.uploadMarkerData = action.markerData;
+            return lastState;
+        }));
     }
 
-    @ReduxAction(SET_SIDEBAR)
-    public setSidebar(lastState: PointsOfInterestState, action: SetSidebarAction): PointsOfInterestState {
-        return {
-            ...lastState,
-            isSidebarOpen: action.payload.isOpen
-        };
+    @Action(SetSidebarAction)
+    public setSidebar(ctx: StateContext<PointsOfInterestState>, action: SetSidebarAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isSidebarOpen =  action.isOpen;
+            return lastState;
+        }));
     }
 }
-
-export const pointsOfInterestReducer = createReducerFromClass(PointsOfInterestReducer, initialState.poiState);

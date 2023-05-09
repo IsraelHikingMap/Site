@@ -1,27 +1,28 @@
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
+import { NgxsModule, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";
 import { RoutesFactory } from "./routes.factory";
+import { RouteEditingReducer } from "application/reducers/route-editing.reducer";
 import type { RouteData } from "../models/route-data";
 
 describe("RoutesFactory", () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [
-                MockNgReduxModule,
+                NgxsModule.forRoot([RouteEditingReducer])
             ],
             providers: [
                 RoutesFactory
             ]
         });
-        MockNgRedux.reset();
     });
 
-    it("Should create an empty route with the given name", inject([RoutesFactory], (factory: RoutesFactory) => {
+    it("Should create an empty route with the given name", inject([RoutesFactory, Store], (factory: RoutesFactory, store: Store) => {
         let routeEditingState = {
             opacity: 1,
             weight: 2,
         };
-        MockNgRedux.store.getState = () => ({
+
+        store.reset({
             routeEditingState
         });
 
@@ -38,12 +39,12 @@ describe("RoutesFactory", () => {
         expect(route.segments).toEqual([]);
     }));
 
-    it("Should add missing data to a route", inject([RoutesFactory], (factory: RoutesFactory) => {
+    it("Should add missing data to a route", inject([RoutesFactory, Store], (factory: RoutesFactory, store: Store) => {
         let routeEditingState = {
             opacity: 1,
             weight: 2,
         };
-        MockNgRedux.store.getState = () => ({
+        store.reset({
             routeEditingState
         });
 

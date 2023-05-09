@@ -1,5 +1,5 @@
 import { Router } from "@angular/router";
-import { MockNgRedux, MockNgReduxModule } from "@angular-redux2/store/testing";
+import { NgxsModule, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";
 import { RouterTestingModule } from "@angular/router/testing";
 import { Subject } from "rxjs";
@@ -16,23 +16,21 @@ describe("HashService", () => {
             createUrlTree: () => { }
         };
         TestBed.configureTestingModule({
-            imports: [RouterTestingModule, MockNgReduxModule],
+            imports: [RouterTestingModule, NgxsModule.forRoot([])],
             providers: [
                 { provide: Router, useValue: routerMock },
                 { provide: MapService, useValue: null },
                 HashService
             ]
         });
-
-        MockNgRedux.reset();
     });
 
     it("Should return map address",
-        inject([HashService, Router], (hashService: HashService, routerMock: any) => {
+        inject([HashService, Router, Store], (hashService: HashService, routerMock: any, store: Store) => {
             routerMock.createUrlTree = (arr: []) => arr.join("/");
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 inMemoryState: {},
-                location: {
+                locationState: {
                     zoom: 1,
                     latitude: 2,
                     longitude: 3
@@ -45,10 +43,10 @@ describe("HashService", () => {
         }));
 
     it("Should return share url",
-        inject([HashService, Router], (hashService: HashService, routerMock: any) => {
+        inject([HashService, Router, Store], (hashService: HashService, routerMock: any, store: Store) => {
 
             routerMock.createUrlTree = () => "share-address";
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 inMemoryState: {
                     shareUrl: { id: "1" }
                 }
@@ -60,13 +58,13 @@ describe("HashService", () => {
         }));
 
     it("Should return external url",
-        inject([HashService, Router], (hashService: HashService, routerMock: any) => {
+        inject([HashService, Router, Store], (hashService: HashService, routerMock: any, store: Store) => {
             routerMock.createUrlTree = (array: [], options: any) => "file-address?" + options.queryParams.baselayer;
-            MockNgRedux.store.getState = () => ({
+            store.reset({
                 inMemoryState: {
                     fileUrl: "fileUrl"
                 },
-                layersState: { 
+                layersState: {
                     selectedBaseLayerKey: "base-layer"
                 }
             });

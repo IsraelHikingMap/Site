@@ -1,148 +1,108 @@
-import { Action } from "redux";
-import { Action as ReduxAction, createReducerFromClass } from "@angular-redux2/store";
-import { LatLngAltTime, MarkerData, RecordedRouteState } from "../models/models";
-import { BaseAction, initialState } from "./initial-state";
+import { State, Action, StateContext } from "@ngxs/store";
+import { Injectable } from "@angular/core";
+import { produce } from "immer";
 
-const START_RECORDING = "START_RECORDING";
-const STOP_RECORDING = "STOP_RECORDING";
-const ADD_RECORDING_ROUTE_POINTS = "ADD_RECORDING_ROUTE_POINTS";
-const TOGGLE_ADDING_POI = "TOGGLE_ADDING_POI";
-const ADD_RECORDING_MARKER = "ADD_RECORDING_MARKER";
-const UPDATE_RECORDING_MARKER = "UPDATE_RECORDING_MARKER";
-const DELETE_RECORDING_MARKER = "DELETE_RECORDING_MARKER";
+import { initialState } from "./initial-state";
+import type { LatLngAltTime, MarkerData, RecordedRouteState } from "../models/models";
 
-export type AddRecordingPointsPayload = {
-    latlngs: LatLngAltTime[];
+export class StartRecordingAction {
+    public static type = this.prototype.constructor.name;
+}
+
+export class StopRecordingAction {
+    public static type = this.prototype.constructor.name;
+}
+
+export class ToggleAddRecordingPoiAction {
+    public static type = this.prototype.constructor.name;
+}
+
+export class AddRecordingRoutePointsAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public latlngs: LatLngAltTime[]) {}
 };
 
-export type AddRecordingPoiPayload = {
-    markerData: MarkerData;
+export class AddRecordingPoiAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public markerData: MarkerData) {}
 };
 
-export type UpdateRecordingPoiPayload = {
-    index: number;
-    markerData: MarkerData;
+export class UpdateRecordingPoiAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public index: number, public markerData: MarkerData) {}
 };
 
-export type DeleteRecordingPoiPayload = {
-    index: number;
+export class DeleteRecordingPoiAction {
+    public static type = this.prototype.constructor.name;
+    constructor(public index: number) {}
 };
+@State<RecordedRouteState>({
+    name: "recordedRouteState",
+    defaults: initialState.recordedRouteState
+})
+@Injectable()
+export class RecordedRouteReducer {
 
-export class StartRecordingAction implements Action {
-    constructor(public type = START_RECORDING) {}
-}
-
-export class StopRecordingAction implements Action {
-    constructor(public type = STOP_RECORDING) {}
-}
-
-export class ToggleAddRecordingPoiAction implements Action {
-    constructor(public type = TOGGLE_ADDING_POI) {}
-}
-
-export class AddRecordingRoutePointsAction extends BaseAction<AddRecordingPointsPayload> {
-    constructor(payload: AddRecordingPointsPayload) {
-        super(ADD_RECORDING_ROUTE_POINTS, payload);
-    }
-}
-
-export class AddRecordingPoiAction extends BaseAction<AddRecordingPoiPayload> {
-    constructor(payload: AddRecordingPoiPayload) {
-        super(ADD_RECORDING_MARKER, payload);
-    }
-}
-
-export class UpdateRecordingPoiAction extends BaseAction<UpdateRecordingPoiPayload>{
-    constructor(payload: UpdateRecordingPoiPayload) {
-        super(UPDATE_RECORDING_MARKER, payload);
-    }
-}
-
-export class DeleteRecordingPoiAction extends BaseAction<DeleteRecordingPoiPayload>{
-    constructor(payload: DeleteRecordingPoiPayload) {
-        super(DELETE_RECORDING_MARKER, payload);
-    }
-}
-
-class RecordedRouteReducer {
-    @ReduxAction(START_RECORDING)
-    public startRecording(lastState: RecordedRouteState, _: StartRecordingAction): RecordedRouteState {
-        return {
-            ...lastState,
-            isRecording: true,
-            isAddingPoi: false,
-            route: {
+    @Action(StartRecordingAction)
+    public startRecording(ctx: StateContext<RecordedRouteState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isRecording = true;
+            lastState.isAddingPoi = false;
+            lastState.route = {
                 latlngs: [],
                 markers: []
-            }
-        };
+            };
+            return lastState;
+        }));
     }
 
-    @ReduxAction(STOP_RECORDING)
-    public stopRecording(lastState: RecordedRouteState, _: StopRecordingAction): RecordedRouteState {
-        return {
-            ...lastState,
-            isRecording: false,
-            isAddingPoi: false,
-            route: null
-        };
+    @Action(StopRecordingAction)
+    public stopRecording(ctx: StateContext<RecordedRouteState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isRecording = false;
+            lastState.isAddingPoi = false;
+            lastState.route = null;
+            return lastState;
+        }));
     }
 
-    @ReduxAction(ADD_RECORDING_ROUTE_POINTS)
-    public addRecordingRoutePoints(lastState: RecordedRouteState, action: AddRecordingRoutePointsAction): RecordedRouteState {
-        return {
-            ...lastState,
-            route: {
-                ...lastState.route,
-                latlngs: [...lastState.route.latlngs, ...action.payload.latlngs]
-            }
-        };
+    @Action(AddRecordingRoutePointsAction)
+    public addRecordingPoints(ctx: StateContext<RecordedRouteState>, action: AddRecordingRoutePointsAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.route.latlngs = [...lastState.route.latlngs, ...action.latlngs];
+            return lastState;
+        }));
     }
 
-    @ReduxAction(TOGGLE_ADDING_POI)
-    public toggleAddingPoi(lastState: RecordedRouteState, _: ToggleAddRecordingPoiAction): RecordedRouteState {
-        return {
-            ...lastState,
-            isAddingPoi: !lastState.isAddingPoi
-        };
+    @Action(ToggleAddRecordingPoiAction)
+    public toggleAddRecordingPoi(ctx: StateContext<RecordedRouteState>) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.isAddingPoi = !lastState.isAddingPoi;
+            return lastState;
+        }));
     }
 
-    @ReduxAction(ADD_RECORDING_MARKER)
-    public addRecordingPoi(lastState: RecordedRouteState, action: AddRecordingPoiAction): RecordedRouteState {
-        return {
-            ...lastState,
-            route: {
-                ...lastState.route,
-                markers: [...lastState.route.markers, action.payload.markerData]
-            }
-        };
+    @Action(AddRecordingPoiAction)
+    public addRecordingPoi(ctx: StateContext<RecordedRouteState>, action: AddRecordingPoiAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.route.markers.push(action.markerData);
+            return lastState;
+        }));
     }
 
-    @ReduxAction(UPDATE_RECORDING_MARKER)
-    public updateRecordingPoi(lastState: RecordedRouteState, action: UpdateRecordingPoiAction): RecordedRouteState {
-        let markers = [...lastState.route.markers];
-        markers.splice(action.payload.index, 1, action.payload.markerData);
-        return {
-            ...lastState,
-            route: {
-                ...lastState.route,
-                markers
-            }
-        };
+    @Action(UpdateRecordingPoiAction)
+    public updateRecordingPoi(ctx: StateContext<RecordedRouteState>, action: UpdateRecordingPoiAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.route.markers.splice(action.index, 1, action.markerData);
+            return lastState;
+        }));
     }
 
-    @ReduxAction(DELETE_RECORDING_MARKER)
-    public deleteRecordingPoi(lastState: RecordedRouteState, action: DeleteRecordingPoiAction): RecordedRouteState {
-        let markers = [...lastState.route.markers];
-        markers.splice(action.payload.index, 1);
-        return {
-            ...lastState,
-            route: {
-                ...lastState.route,
-                markers
-            }
-        };
+    @Action(DeleteRecordingPoiAction)
+    public deleteRecordingPoi(ctx: StateContext<RecordedRouteState>, action: DeleteRecordingPoiAction) {
+        ctx.setState(produce(ctx.getState(), lastState => {
+            lastState.route.markers.splice(action.index, 1);
+            return lastState;
+        }));
     }
 }
-
-export const recordedRouteReducer = createReducerFromClass(RecordedRouteReducer, initialState.recordedRouteState);
