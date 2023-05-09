@@ -93,7 +93,7 @@ describe("Recorded Route Service", () => {
         }
     ));
 
-    it("Should not do anything when not recording and a new position is received", done => inject([RecordedRouteService, Store],
+    it("Should not do anything when not recording and a new position is received", inject([RecordedRouteService, Store],
         (service: RecordedRouteService, store: Store) => {
 
             store.reset({
@@ -110,14 +110,11 @@ describe("Recorded Route Service", () => {
 
             positionChanged(store, { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime() });
 
-            setTimeout(() => {
-                expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(0);
-                done();
-            }, 10);
+            expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(0);
         }
-    )());
+    ));
 
-    it("Should add a valid location", done => inject([RecordedRouteService, Store],
+    it("Should add a valid location", inject([RecordedRouteService, Store],
         (service: RecordedRouteService, store: Store) => {
             store.reset({
                 recordedRouteState: {
@@ -159,14 +156,11 @@ describe("Recorded Route Service", () => {
 
             positionChanged(store, { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(1).getTime()});
 
-            setTimeout(() => {
-                expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(1);
-                done();
-            }, 10);
+            expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(1);
         }
-    )());
+    ));
 
-    it("Should add a valid locations when returning from background", done => inject([RecordedRouteService, GeoLocationService, Store],
+    it("Should add a valid locations when returning from background", inject([RecordedRouteService, GeoLocationService, Store],
         (service: RecordedRouteService, geoService: GeoLocationService, store: Store) => {
             store.reset({
                 recordedRouteState: {
@@ -226,14 +220,11 @@ describe("Recorded Route Service", () => {
             positionChanged(store,
                 { coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates, timestamp: new Date(240000).getTime()}
             );
-            setTimeout(() => {
-                expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(5);
-                done();
-            }, 10);
+            expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(5);
         }
-    )());
+    ));
 
-    it("Should invalidate multiple locations once", done => inject([RecordedRouteService, GeoLocationService, LoggingService, Store],
+    it("Should invalidate multiple locations once", inject([RecordedRouteService, GeoLocationService, LoggingService, Store],
         (service: RecordedRouteService, geoService: GeoLocationService,
          logginService: LoggingService, store: Store) => {
             store.reset({
@@ -311,11 +302,8 @@ describe("Recorded Route Service", () => {
             expect(spy.calls.all()[5].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
             expect(spy.calls.all()[6].args[0].startsWith("[Record] Rejecting position for rejected")).toBeTruthy();
 
-            setTimeout(() => {
-                expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(4);
-                done();
-            }, 10);
-        })());
+            expect(store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.latlngs.length).toBe(4);
+    }));
 
     it("should stop recording and send data to traces upload mechanism including one marker",
         inject([RecordedRouteService, Store], (service: RecordedRouteService, store: Store) => {

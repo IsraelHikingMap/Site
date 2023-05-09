@@ -49,7 +49,7 @@ export class RecordedRouteComponent extends BaseMapComponent {
         };
 
         // Combine streams to work when both current location and recorded route changes, added throttle to avoid a double update of the UI
-        combineLatest([this.recordedRoute$, this.currentPosition$]).pipe(throttleTime(200, undefined, { trailing: true }))
+        combineLatest([this.recordedRoute$, this.currentPosition$]).pipe(throttleTime(50, undefined, { trailing: true }))
             .subscribe(() => this.handleRecordingChanges());
     }
 
