@@ -1,8 +1,8 @@
 ﻿"use strict";
 
-var https = require("https");
-var fs = require("fs");
-var po2json = require("po2json");
+import https from "https";
+import fs from "fs";
+import po2json from "po2json";
 
 var englishFilePath = "./src/translations/en-Us.po";
 var hebrewFilePath = "./src/translations/he.po";
