@@ -151,7 +151,7 @@
               "src/application/pipes/**",
               "src/application/reducers/**"
             ],
-            "karmaConfig": "./karma.conf.js",
+            "karmaConfig": "./karma.conf.cjs",
             "polyfills": [
               "zone.js",
               "zone.js/testing"
