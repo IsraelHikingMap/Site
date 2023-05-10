@@ -34,4 +34,5 @@ export class Urls {
 
     public static readonly DEFAULT_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/IHM.json";
     public static readonly MTB_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/ilMTB.json";
+    public static readonly HEATMAP_TILES_ADDRESS = "https://raw.githubusercontent.com/IsraelHikingMap/VectorMap/master/Styles/OSM_traces.json";
 }

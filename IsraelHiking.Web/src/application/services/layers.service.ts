@@ -7,12 +7,13 @@ import { Store, Select } from "@ngxs/store";
 import { ResourcesService } from "./resources.service";
 import { AuthorizationService } from "./authorization.service";
 import { ToastService } from "./toast.service";
-import {
+import { 
     ISRAEL_HIKING_MAP,
     ISRAEL_MTB_MAP,
-    SATELLITE,
     HIKING_TRAILS,
-    BICYCLE_TRAILS
+    BICYCLE_TRAILS, 
+    SPECIAL_BASELAYERS, 
+    SPECIAL_OVERLAYS 
 } from "../reducers/initial-state";
 import {
     AddBaseLayerAction,
@@ -190,9 +191,7 @@ export class LayersService {
     }
 
     private async addBaseLayerToDatabase(layer: EditableLayer) {
-        if (layer.key === ISRAEL_HIKING_MAP ||
-            layer.key === ISRAEL_MTB_MAP ||
-            layer.key === SATELLITE) {
+        if (SPECIAL_BASELAYERS.includes(layer.key)) {
             return;
         }
         if (!this.authorizationService.isLoggedIn()) {
@@ -246,8 +245,7 @@ export class LayersService {
     }
 
     private async addOverlayToDatabase(layer: Overlay) {
-        if (layer.key === HIKING_TRAILS ||
-            layer.key === BICYCLE_TRAILS) {
+        if (SPECIAL_OVERLAYS.includes(layer.key)) {
             return;
         }
         if (!this.authorizationService.isLoggedIn()) {

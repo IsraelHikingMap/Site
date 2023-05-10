@@ -9,7 +9,7 @@ import * as pako from "pako";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import { initialState } from "../reducers/initial-state";
+import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "application/reducers/routes.reducer";
 import { SetSelectedPoiAction, SetSidebarAction } from "application/reducers/poi.reducer";
 import type { ApplicationState, ShareUrl, Trace } from "../models/models";
@@ -321,6 +321,9 @@ export class DatabaseService {
             arrayMerge: (destinationArray, sourceArray) => sourceArray == null ? destinationArray : sourceArray
         });
         storedState.inMemoryState = initialState.inMemoryState;
+        if (storedState.layersState.overlays.find(o => o.key === POPULARITY_HEATMAP) == null) {
+            storedState.layersState.overlays.push(initialState.layersState.overlays.find(o => o.key === POPULARITY_HEATMAP));
+        }
         if (!this.runningContext.isCapacitor) {
             storedState.routes = initialState.routes;
             storedState.poiState = initialState.poiState;

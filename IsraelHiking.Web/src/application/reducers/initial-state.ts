@@ -6,6 +6,11 @@ export const ISRAEL_MTB_MAP = "Israel MTB Map";
 export const SATELLITE = "Satellite Imagery";
 export const HIKING_TRAILS = "Hiking Trails";
 export const BICYCLE_TRAILS = "Bicycle Trails";
+export const POPULARITY_HEATMAP = "Popularity Heatmap";
+
+export const SPECIAL_BASELAYERS = [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE];
+export const SPECIAL_OVERLAYS =  [HIKING_TRAILS, BICYCLE_TRAILS, POPULARITY_HEATMAP]
+export const SPECIAL_LAYERS = [...SPECIAL_BASELAYERS, ...SPECIAL_OVERLAYS];
 
 export const initialState =
     {
@@ -99,7 +104,18 @@ export const initialState =
                     isOfflineOn: false,
                     visible: false,
                     isEditable: false
+                },
+                {
+                    key: POPULARITY_HEATMAP,
+                    address: Urls.HEATMAP_TILES_ADDRESS,
+                    minZoom: 7,
+                    maxZoom: 16,
+                    isOfflineAvailable: true,
+                    isOfflineOn: false,
+                    visible: false,
+                    isEditable: false
                 }
+
             ],
             selectedBaseLayerKey: ISRAEL_HIKING_MAP,
             expanded: ["Base Layers", "Overlays", "Private Routes"],

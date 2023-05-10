@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { produce } from "immer";
 import { orderBy, remove } from "lodash-es";
 
-import { initialState, ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS } from "./initial-state";
+import { initialState, SPECIAL_LAYERS } from "./initial-state";
 import type { LayersState, EditableLayer, Overlay, CategoriesGroupType, Category } from "../models/models";
 
 export class AddBaseLayerAction {
@@ -89,8 +89,7 @@ export class LayersReducer{
 
     private sort(layers: EditableLayer[]): EditableLayer[] {
         let ordered = orderBy(layers, l => l.key);
-        let specialKeys = [ISRAEL_HIKING_MAP, ISRAEL_MTB_MAP, SATELLITE, HIKING_TRAILS, BICYCLE_TRAILS];
-        let removed = remove(ordered, o => specialKeys.indexOf(o.key) !== -1);
+        let removed = remove(ordered, o => SPECIAL_LAYERS.indexOf(o.key) !== -1);
         ordered = [...removed, ...ordered];
         return ordered;
     }
