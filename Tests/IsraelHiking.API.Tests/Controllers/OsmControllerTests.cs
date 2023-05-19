@@ -68,17 +68,6 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetConfiguration_ShouldReturnIt()
-        {
-            var osmConfiguration = new OsmConfiguraionData {BaseAddress = "baseAddress"};
-            _options.OsmConfiguration = osmConfiguration;
-
-            var results = _controller.GetConfigurations();
-
-            Assert.AreEqual(osmConfiguration.BaseAddress, results.BaseAddress);
-        }
-
-        [TestMethod]
         public void PutAddUnmappedPartIntoOsm_ShouldDoIt()
         {
             var feature = new Feature(new LineString(Array.Empty<Coordinate>()), new AttributesTable());

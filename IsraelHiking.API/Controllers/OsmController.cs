@@ -65,18 +65,6 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Get the OSM server configuration
-        /// </summary>
-        /// <returns>The OSM server configurations</returns>
-        [HttpGet]
-        [Route("configuration")]
-        [Obsolete("This is not is use any more since 12.2022")]
-        public OsmConfiguraionData GetConfigurations()
-        {
-            return _options.OsmConfiguration;
-        }
-
-        /// <summary>
         /// Used to get user details from OSM
         /// </summary>
         /// <returns></returns>
