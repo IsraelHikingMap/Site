@@ -208,11 +208,16 @@ export class PoiService {
                 ? this.httpClient.post(postAddress, feature).pipe(timeout(180000))
                 : this.httpClient.put(putAddress, feature).pipe(timeout(180000));
             let poi = await firstValueFrom(poi$) as GeoJSON.Feature;
-            this.loggingService.info(`[POIs] Uploaded successfully a${feature.properties.poiIsSimple ? " simple" : ""} ` +
-                `feature with id: ${firstItemId}, ` + "removing from upload queue");
-            if (this.runningContextService.isCapacitor && !feature.properties.poiIsSimple) {
-                await this.databaseService.storePois([poi]);
-                this.rebuildPois();
+            if (feature.properties.poiIsSimple) {
+                this.loggingService.info("[POIs] Uploaded successfully a simple feature with generated id: " +
+                `${firstItemId} at: ${JSON.stringify(this.getLocation(feature))}, removing from upload queue`);
+            } else {
+                this.loggingService.info("[POIs] Uploaded successfully a feature with id:" +
+                `${this.getFeatureId(poi) ?? firstItemId}, removing from upload queue`);
+                if (this.runningContextService.isCapacitor) {
+                    await this.databaseService.storePois([poi]);
+                    this.rebuildPois();
+                }
             }
             this.databaseService.removePoiFromUploadQueue(firstItemId);
             this.queueIsProcessing = false;
