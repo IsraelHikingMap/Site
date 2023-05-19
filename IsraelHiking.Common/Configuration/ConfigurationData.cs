@@ -131,6 +131,11 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public OsmConfiguraionData OsmConfiguration { get; set; }
         /// <summary>
+        /// A list of allowed image sites
+        /// </summary>
+        public List<string> ImageUrlsAllowList { get; set; }
+        
+        /// <summary>
         /// A list of external sources - address and file name
         /// </summary>
         public Dictionary<string, string> CsvsDictionary { get; set; }
@@ -172,6 +177,12 @@ namespace IsraelHiking.Common.Configuration
                 ConsumerKey = "E8p0RX0rnQPxDaj3IijgpMNeK8lRTyy6rlKxQ8IF",
                 ConsumerSecret = "Hro40NSObALdx8Dm7Xv1mKvxjwlGITqetXUBYUwv",
                 BaseAddress = "https://www.openstreetmap.org"
+            };
+            ImageUrlsAllowList = new List<string> { 
+                "wikimedia.org", 
+                "inature.info",
+                "nakeb.co.il",
+                "jeepolog.com"
             };
             CsvsDictionary = new Dictionary<string, string>();
         }

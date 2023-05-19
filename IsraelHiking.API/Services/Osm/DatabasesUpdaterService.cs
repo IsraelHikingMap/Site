@@ -29,6 +29,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IImagesUrlsStorageExecutor _imagesUrlsStorageExecutor;
         private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
         private readonly IElevationGateway _elevationGateway;
+        private readonly IUnauthorizedImageUrlsRemover _unauthorizedImageUrlsRemover;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -47,6 +48,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="externalSourceUpdaterExecutor"></param>
         /// <param name="elevationGateway"></param>
+        /// <param name="unauthorizedImageUrlsRemover"></param>
         /// <param name="logger"></param>
         public DatabasesUpdaterService(IExternalSourcesRepository externalSourcesRepository,
             IPointsOfInterestRepository pointsOfInterestRepository,
@@ -61,6 +63,7 @@ namespace IsraelHiking.API.Services.Osm
             IPointsOfInterestProvider pointsOfInterestProvider,
             IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor,
             IElevationGateway elevationGateway,
+            IUnauthorizedImageUrlsRemover unauthorizedImageUrlsRemover,
             ILogger logger)
         {
             _externalSourcesRepository = externalSourcesRepository;
@@ -76,6 +79,7 @@ namespace IsraelHiking.API.Services.Osm
             _imagesUrlsStorageExecutor = imagesUrlsStorageExecutor;
             _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
             _elevationGateway = elevationGateway;
+            _unauthorizedImageUrlsRemover = unauthorizedImageUrlsRemover;
             _logger = logger;
         }
 
@@ -136,6 +140,7 @@ namespace IsraelHiking.API.Services.Osm
             var sources = _pointsOfInterestAdapterFactory.GetAll().Select(s => s.Source);
             var externalFeatures = sources.Select(s => _externalSourcesRepository.GetExternalPoisBySource(s)).SelectMany(t => t.Result).ToList();
             var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result, externalFeatures);
+            _unauthorizedImageUrlsRemover.RemoveImages(features);
             _logger.LogInformation("Adding deleted features to new ones");
             var exitingFeatures = await _pointsOfInterestRepository.GetAllPointsOfInterest(true);
             var newFeaturesDictionary = features.ToDictionary(f => f.GetId(), f => f);
