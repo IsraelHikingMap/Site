@@ -7,13 +7,13 @@ import { Store, Select } from "@ngxs/store";
 import { ResourcesService } from "./resources.service";
 import { AuthorizationService } from "./authorization.service";
 import { ToastService } from "./toast.service";
-import { 
+import {
     ISRAEL_HIKING_MAP,
     ISRAEL_MTB_MAP,
     HIKING_TRAILS,
-    BICYCLE_TRAILS, 
-    SPECIAL_BASELAYERS, 
-    SPECIAL_OVERLAYS 
+    BICYCLE_TRAILS,
+    SPECIAL_BASELAYERS,
+    SPECIAL_OVERLAYS
 } from "../reducers/initial-state";
 import {
     AddBaseLayerAction,
