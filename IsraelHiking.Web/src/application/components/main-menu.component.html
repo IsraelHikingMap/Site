@@ -35,7 +35,7 @@
                     <button mat-menu-item *ngIf="!isLoggedIn() && !isIFrame()" (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
                         <span><i class="fa fa-lg icon-sign-in mat-icon"></i> {{resources.login}}</span>
                     </button>
-                    <button mat-menu-item *ngif="isShowOrderButton()" (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Order">
+                    <button mat-menu-item *ngIf="isShowOrderButton()" (click)="orderOfflineMaps()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Order">
                         <span class="primary-text"><i class="fa fa-lg icon-dollar mat-icon"></i> {{resources.purchaseOfflineMapsShort}}</span>
                     </button>
                     <button mat-menu-item *ngIf="!isShowMore"  (click)="toggleShowMore($event)" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show more">

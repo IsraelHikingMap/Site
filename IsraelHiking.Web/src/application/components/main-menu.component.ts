@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
-import { Subscription, Observable } from "rxjs";
+import { Subscription, Observable, timer } from "rxjs";
 import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
@@ -181,6 +181,9 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         let layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
         let baseLayer = this.layersService.getSelectedBaseLayer();
         this.loggingService.info("--- Reporting an issue ---");
+        let subscription  = timer(8000, 8000).subscribe(() => {
+            this.toastService.info(this.resources.notYet);
+        });
         let logs = await this.loggingService.getLog();
         let userInfo = this.userInfo || {
             displayName: "non-registered user",
@@ -236,6 +239,8 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         } catch (ex) {
             alert("Ooopppss... Any chance you can take a screenshot and send it to israelhikingmap@gmail.com?" +
                 `\nSend issue failed: ${ex.toString()}`);
+        } finally {
+            subscription.unsubscribe();
         }
     }
 
