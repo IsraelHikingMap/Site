@@ -91,4 +91,18 @@ export class PurchaseService {
         }
         return `[Store] ${message}`;
     }
+
+    public isPurchaseAvailable(): boolean {
+        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        return this.runningContextService.isCapacitor &&
+            !offlineState.isOfflineAvailable &&
+            offlineState.lastModifiedDate == null;
+    }
+
+    public isRenewAvailable() {
+        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        return this.runningContextService.isCapacitor &&
+            !offlineState.isOfflineAvailable &&
+            offlineState.lastModifiedDate != null;
+    }
 }

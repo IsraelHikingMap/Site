@@ -155,17 +155,11 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public isPurchaseAvailable() {
-        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        return this.runningContextService.isCapacitor &&
-            !offlineState.isOfflineAvailable &&
-            offlineState.lastModifiedDate == null;
+        return this.purchaseService.isPurchaseAvailable();
     }
 
     public isRenewAvailable() {
-        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        return this.runningContextService.isCapacitor &&
-            !offlineState.isOfflineAvailable &&
-            offlineState.lastModifiedDate != null;
+        return this.purchaseService.isRenewAvailable();
     }
 
     public orderOfflineMaps() {

@@ -120,6 +120,7 @@
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-jsdoc": "^41.1.2",
     "eslint-plugin-prefer-arrow": "1.2.3",
+    "form-data": "^4.0.0",
     "geojson-vt": "^3.2.1",
     "gettext-extractor": "^3.7.2",
     "jasmine-core": "^4.6.0",

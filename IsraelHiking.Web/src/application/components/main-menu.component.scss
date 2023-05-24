@@ -1,3 +1,7 @@
+@use "@angular/material" as mat;
+
+$app-primary: mat.define-palette(mat.$green-palette, 600);
+
 .space-after {
     margin-left: 5px;
 }
@@ -51,4 +55,8 @@
 
 ::ng-deep .mdc-list-item__primary-text {
     width: 100%;
+}
+
+.primary-text {
+    color: mat.get-color-from-palette($app-primary)
 }

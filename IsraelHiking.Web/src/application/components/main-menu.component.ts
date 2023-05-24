@@ -19,6 +19,7 @@ import { GeoLocationService } from "../services/geo-location.service";
 import { LayersService } from "../services/layers.service";
 import { SidebarService } from "../services/sidebar.service";
 import { HashService } from "../services/hash.service";
+import { PurchaseService } from "../services/purchase.service";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
@@ -69,6 +70,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 private readonly sidebarService: SidebarService,
                 private readonly loggingService: LoggingService,
                 private readonly hashService: HashService,
+                private readonly purchaseService: PurchaseService,
                 private readonly store: Store) {
         super(resources);
         this.isShowMore = false;
@@ -273,5 +275,21 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
 
     public openConfigurationDialog() {
         this.dialog.open(ConfigurationDialogComponent, { width: "480px" } as MatDialogConfig);
+    }
+
+    public isShowOrderButton() {
+        return this.runningContextService.isCapacitor && 
+            (this.purchaseService.isPurchaseAvailable() ||
+            this.purchaseService.isRenewAvailable());
+    }
+
+    public orderOfflineMaps() {
+        let userInfo = this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo;
+        if (userInfo == null || !userInfo.id) {
+            this.toastService.warning(this.resources.loginRequired);
+            return;
+        }
+        this.purchaseService.order();
+        this.sidebarService.show("layers");
     }
 }
