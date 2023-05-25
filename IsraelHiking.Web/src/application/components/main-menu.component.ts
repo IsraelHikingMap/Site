@@ -41,16 +41,12 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     private subscriptions: Subscription[];
 
     public userInfo: UserInfo;
-    public searchVisible: boolean;
     public drawingVisible: boolean;
     public statisticsVisible: boolean;
     public isShowMore: boolean;
 
     @Select((state: ApplicationState) => state.userState.userInfo)
     public userInfo$: Observable<UserInfo>;
-
-    @Select((state: ApplicationState) => state.uiComponentsState.searchVisible)
-    public searchVisible$: Observable<boolean>;
 
     @Select((state: ApplicationState) => state.uiComponentsState.drawingVisible)
     public drawingVisible$: Observable<boolean>;
@@ -77,7 +73,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         this.userInfo = null;
         this.subscriptions = [];
         this.subscriptions.push(this.userInfo$.subscribe(userInfo => this.userInfo = userInfo));
-        this.subscriptions.push(this.searchVisible$.subscribe(v => this.searchVisible = v));
         this.subscriptions.push(this.drawingVisible$.subscribe(v => this.drawingVisible = v));
         this.subscriptions.push(this.statisticsVisible$.subscribe(v => this.statisticsVisible = v));
         if (this.runningContextService.isCapacitor) {
@@ -140,14 +135,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
 
     public logout() {
         this.authorizationService.logout();
-    }
-
-    public selectSearch() {
-        this.store.dispatch(new SetUIComponentVisibilityAction(
-            "search",
-            !this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).searchVisible,
-
-        ));
     }
 
     public selectDrawing() {

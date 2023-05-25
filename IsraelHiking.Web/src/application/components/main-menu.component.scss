@@ -2,6 +2,10 @@
 
 $app-primary: mat.define-palette(mat.$green-palette, 600);
 
+.high-button {
+    height: 44px;
+}
+
 .space-after {
     margin-left: 5px;
 }

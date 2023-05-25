@@ -163,7 +163,6 @@ export const initialState =
         },
         uiComponentsState: {
             drawingVisible: false,
-            searchVisible: false,
             statisticsVisible: false
         }
     } as ApplicationState;

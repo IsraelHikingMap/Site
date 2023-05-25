@@ -5,7 +5,7 @@ import { produce } from "immer";
 import { initialState } from "./initial-state";
 import type { UICompoentsState } from "../models/models";
 
-export type UIComponentType = "search" | "drawing" | "statistics";
+export type UIComponentType = "drawing" | "statistics";
 
 export class SetUIComponentVisibilityAction {
     public static type = this.prototype.constructor.name;
@@ -25,9 +25,6 @@ export class UIComponentsReducer {
             switch (action.component) {
                 case "drawing":
                     lastState.drawingVisible = action.isVisible;
-                    break;
-                case "search":
-                    lastState.searchVisible = action.isVisible;
                     break;
                 case "statistics":
                     lastState.statisticsVisible = action.isVisible;

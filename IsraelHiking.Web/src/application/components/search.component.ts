@@ -12,9 +12,7 @@ import { MatAutocompleteTrigger } from "@angular/material/autocomplete";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap, map } from "rxjs/operators";
 import { remove } from "lodash-es";
-import { Observable } from "rxjs";
-import { skip } from "rxjs/operators";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -28,7 +26,7 @@ import { SpatialService } from "../services/spatial.service";
 import { GpxDataContainerConverterService } from "../services/gpx-data-container-converter.service";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
-import type { RoutingType, ApplicationState, LatLngAlt, SearchResultsPointOfInterest, LatLngAltTime } from "../models/models";
+import type { RoutingType, LatLngAlt, SearchResultsPointOfInterest, LatLngAltTime } from "../models/models";
 
 export type SearchContext = {
     searchTerm: string;
@@ -63,7 +61,6 @@ type DirectionalContext = {
 })
 export class SearchComponent extends BaseMapComponent {
 
-    public isOpen: boolean;
     public fromContext: SearchContext;
     public toContext: SearchContext;
     public routingType: RoutingType;
@@ -81,9 +78,6 @@ export class SearchComponent extends BaseMapComponent {
 
     @ViewChildren(MatAutocompleteTrigger)
     public matAutocompleteTriggers: QueryList<MatAutocompleteTrigger>;
-
-    @Select((state: ApplicationState) => state.uiComponentsState.searchVisible)
-    public searchVisible$: Observable<boolean>;
 
     constructor(resources: ResourcesService,
                 private readonly searchResultsProvider: SearchResultsProvider,
@@ -104,7 +98,6 @@ export class SearchComponent extends BaseMapComponent {
             routeTitle: "",
             showResults: false,
         };
-        this.isOpen = false;
         this.routingType = "Hike";
         this.selectFirstSearchResults = false;
         this.fromContext = {
@@ -121,15 +114,6 @@ export class SearchComponent extends BaseMapComponent {
         this.searchTo = new FormControl<string | SearchResultsPointOfInterest>("");
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
-
-        this.searchVisible$.pipe(skip(1)).subscribe(visible => {
-            // ignore the first value since it always emit one and we want to get the changes only...
-            if (visible && this.isOpen) {
-                this.focusOnSearchInput();
-            } else if (visible) {
-                this.toggleOpen();
-            }
-        });
     }
 
     private configureInputFormControl(input: FormControl<string | SearchResultsPointOfInterest>, context: SearchContext) {
@@ -160,15 +144,6 @@ export class SearchComponent extends BaseMapComponent {
         this.directional.overlayLocation = null;
     }
 
-    public toggleOpen() {
-        this.isOpen = !this.isOpen;
-        if (this.isOpen) {
-            this.focusOnSearchInput();
-        } else {
-            this.matAutocompleteTriggers.forEach(trigger => trigger.closePanel());
-        }
-    }
-
     private focusOnSearchInput() {
         // ChangeDetectionRef doesn't work well for some reason...
         setTimeout(() => {
@@ -195,9 +170,6 @@ export class SearchComponent extends BaseMapComponent {
     }
 
     public moveToResults(searchResults: SearchResultsPointOfInterest) {
-        if (this.isOpen) {
-            this.toggleOpen();
-        }
         this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
@@ -257,7 +229,7 @@ export class SearchComponent extends BaseMapComponent {
         if ($event.key === "Enter") {
             return this.handleEnterKeydown();
         }
-        if ($event.ctrlKey === false) {
+        if ($event.ctrlKey === false && $event.metaKey === false) {
             return true;
         }
         if ($event.key == null) {
@@ -265,7 +237,7 @@ export class SearchComponent extends BaseMapComponent {
         }
         switch ($event.key.toLowerCase()) {
             case "f":
-                this.toggleOpen();
+                this.focusOnSearchInput();
                 break;
             default:
                 return true;

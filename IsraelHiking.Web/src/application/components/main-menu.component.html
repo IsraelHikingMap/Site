@@ -1,12 +1,12 @@
 ﻿﻿<div class="side-control maplibregl-ctrl">
     <div class="control-container">
-        <button mat-button class="pull-right" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle main menu"><i class="fa fa-lg icon-bars"></i></button>
+        <button mat-button class="pull-right high-button" [matMenuTriggerFor]="appMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle main menu"><i class="fa fa-lg icon-bars"></i></button>
         <div class="pull-right relative">
-            <button mat-button *ngIf="isLoggedIn()" [matMenuTriggerFor]="userMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle user menu">
+            <button mat-button class="high-button" *ngIf="isLoggedIn()" [matMenuTriggerFor]="userMenu" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Toggle user menu">
                 <img *ngIf="userInfo?.imageUrl" class="pull-right space-after profile-image" [src]="userInfo.imageUrl | offlineImage:true | async" alt=""/>
                 <i *ngIf="!userInfo.imageUrl" class="fa icon-user fa-lg"></i>
             </button>
-            <button mat-button *ngIf="!isLoggedIn() && !isIFrame()" (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
+            <button mat-button class="high-button" *ngIf="!isLoggedIn() && !isIFrame()" (click)="login()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Login">
                 <i class="fa icon-frown-o fa-lg"></i>
             </button>
             <span class="circle" [ngClass]="{'offline': isOffline(), 'online': !isOffline()}">{{getQueueText()}}</span>
@@ -14,10 +14,6 @@
         <mat-menu #appMenu="matMenu" xPosition="before">
             <ng-template matMenuContent>
                 <div [dir]="resources.direction">
-                    <button mat-menu-item (click)="selectSearch()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show search buttons">
-                        <span><i class="fa fa-lg icon-search mat-icon"></i> {{resources.search}}</span>
-                        <span class="eye-end"><i class="fa fa-lg mat-icon" [ngClass]="{ 'icon-eye' : searchVisible, 'icon-eye-slash': !searchVisible}"></i></span>
-                    </button>
                     <button mat-menu-item (click)="selectDrawing()" angulartics2On="click" angularticsCategory="Menu" angularticsAction="Show drawing buttons">
                         <span><i class="fa fa-lg icon-pencil mat-icon"></i> {{resources.routePlanning}}</span>
                         <span class="eye-end"><i class="fa fa-lg icon-eye mat-icon" [ngClass]="{ 'icon-eye' : drawingVisible, 'icon-eye-slash': !drawingVisible}"></i></span>

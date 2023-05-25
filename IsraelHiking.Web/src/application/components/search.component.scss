@@ -1,11 +1,16 @@
 @use '@angular/material' as mat;
 
+.align-next-to-menu {
+    top:0; 
+    right: 85px
+}
+
 .pull-left-important {
     float: left !important;
 }
 
 .search-input-container {
-    width: 200px;
+    width: calc(100vw - 178px);
     @include mat.all-component-densities(-3);
 }
 
