@@ -40,7 +40,6 @@ import { saveAs } from "file-saver-es";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import player from "lottie-web";
 // Cordova plugins
-import { InAppPurchase2 } from "@awesome-cordova-plugins/in-app-purchase-2/ngx";
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
@@ -308,7 +307,6 @@ const initializeApplication = (injector: Injector) => async () => {
             OverpassTurboService,
             ImageAttributionService,
             AudioPlayerFactory,
-            InAppPurchase2,
             FileSystemWrapper,
             // eslint-disable-next-line
             FileTransfer,
