@@ -83,7 +83,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpPut]
-        public async Task PutAddUnmappedPartIntoOsm([FromBody]Feature feature)
+        public async Task PutAddUnmappedPartIntoOsm([FromBody]IFeature feature)
         {
             var tags = feature.Attributes.GetNames().ToDictionary(n => n, n => feature.Attributes[n].ToString());
             var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);

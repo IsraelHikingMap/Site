@@ -127,7 +127,7 @@ namespace IsraelHiking.API.Controllers
         [Route("")]
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> CreatePointOfInterest([FromBody]Feature feature,
+        public async Task<IActionResult> CreatePointOfInterest([FromBody]IFeature feature,
             [FromQuery] string language)
         {
             _logger.LogInformation("Processing create point of interest request");
@@ -175,7 +175,7 @@ namespace IsraelHiking.API.Controllers
         [Route("{id}")]
         [HttpPut]
         [Authorize]
-        public async Task<IActionResult> UpdatePointOfInterest(string id, [FromBody]Feature feature,
+        public async Task<IActionResult> UpdatePointOfInterest(string id, [FromBody]IFeature feature,
             [FromQuery] string language)
         {
             _logger.LogInformation("Processing update point of interest request");
@@ -193,7 +193,7 @@ namespace IsraelHiking.API.Controllers
             return Ok(await _pointsOfInterestProvider.UpdateFeature(feature, osmGateway, language));
         }
 
-        private string ValidateFeature(Feature feature, string language) 
+        private string ValidateFeature(IFeature feature, string language) 
         {
             if (!feature.Attributes[FeatureAttributes.POI_SOURCE].ToString().Equals(Sources.OSM, StringComparison.InvariantCultureIgnoreCase))
             {

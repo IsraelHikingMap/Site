@@ -80,7 +80,7 @@ namespace IsraelHiking.API.Gpx
         public static byte[] ToBytes(this FeatureCollection featureCollection)
         {
             var options = new JsonSerializerOptions();
-            options.Converters.Add(new GeoJsonConverterFactory());
+            options.Converters.Add(GeoJsonExtensions.GeoJsonWritableFactory);
             options.Converters.Add(new DateTimeConverter());
             var serialized = JsonSerializer.Serialize(featureCollection, options);
             return Encoding.UTF8.GetBytes(serialized);
@@ -95,7 +95,7 @@ namespace IsraelHiking.API.Gpx
         {
             var stringJson = Encoding.UTF8.GetString(featureCollectionContent);
             var options = new JsonSerializerOptions();
-            options.Converters.Add(new GeoJsonConverterFactory());
+            options.Converters.Add(GeoJsonExtensions.GeoJsonWritableFactory);
             options.Converters.Add(new DateTimeConverter());
             return JsonSerializer.Deserialize<FeatureCollection>(stringJson, options);
         }

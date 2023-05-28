@@ -25,7 +25,6 @@ using Microsoft.OpenApi.Models;
 using NeoSmart.Caching.Sqlite;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO.Converters;
 using NLog.Web;
 using OsmSharp.IO.API;
 
@@ -91,7 +90,7 @@ void SetupServices(IServiceCollection services, bool isDevelopment)
     {
         options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
     }).AddJsonOptions(options => {
-        options.JsonSerializerOptions.Converters.Add(new GeoJsonConverterFactory());
+        options.JsonSerializerOptions.Converters.Add(GeoJsonExtensions.GeoJsonWritableFactory);
         options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
         options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
     });
