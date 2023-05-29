@@ -9,6 +9,8 @@ import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
 import type { ApplicationState, UserInfo } from "../models/models";
 
+const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
+
 @Injectable()
 export class PurchaseService {
 
@@ -34,39 +36,13 @@ export class PurchaseService {
         CdvPurchase.store.validator = "https://validator.fovea.cc/v1/validate?appName=il.org.osm.israelhiking" +
             "&apiKey=1245b587-4bbc-4fbd-a3f1-d51169a53063";
 
-        await CdvPurchase.store.initialize();
-        CdvPurchase.store.register([{
-            id: "offline_map",
-            type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
-            platform: CdvPurchase.Platform.GOOGLE_PLAY
-        }, {
-            id: "offline_map",
-            type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
-            platform: CdvPurchase.Platform.APPLE_APPSTORE
-        }]);
-
-        CdvPurchase.store.when().finished(() => {
-            if (CdvPurchase.store.owned("offline_map")) {
-                let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-                this.loggingService.debug("[Store] Product owned! Last modified: " + offlineState.lastModifiedDate);
-                this.store.dispatch(new SetOfflineAvailableAction(true));
-            }
-        });
-        CdvPurchase.store.when().approved((transaction) => {
-            this.loggingService.debug(`[Store] Approved, verifing: ${transaction.transactionId}`);
-            return transaction.verify();
-        });
-        CdvPurchase.store.when().verified((receipt) => {
-            this.loggingService.debug(`[Store] Verified, Finishing: ${receipt.id}`);
-            receipt.finish();
-        });
+        
         this.userInfo$.subscribe(userInfo => {
             if (userInfo == null) {
                 return;
             }
             this.loggingService.info("[Store] logged in: " + userInfo.id);
-            CdvPurchase.store.applicationUsername = userInfo.id;
-            CdvPurchase.store.update();
+            this.initializePlugin(userInfo.id);
             this.offlineFilesDownloadService.isExpired().then((isExpired) => {
                 if (isExpired) {
                     this.loggingService.debug("[Store] Product is expired from server");
@@ -74,6 +50,35 @@ export class PurchaseService {
                 }
             });
         });
+    }
+
+    private async initializePlugin(userId: string) {
+        CdvPurchase.store.applicationUsername = userId;
+        CdvPurchase.store.register([{
+            id: OFFLINE_MAPS_SUBSCRIPTION,
+            type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
+            platform: CdvPurchase.Platform.GOOGLE_PLAY
+        }, {
+            id: OFFLINE_MAPS_SUBSCRIPTION,
+            type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
+            platform: CdvPurchase.Platform.APPLE_APPSTORE
+        }]);
+        CdvPurchase.store.when().approved((transaction) => {
+            this.loggingService.debug(`[Store] Approved, verifing: ${transaction.transactionId}`);
+            return transaction.verify();
+        });
+        CdvPurchase.store.when().verified((receipt) => {
+            this.loggingService.debug(`[Store] Verified, Finishing: ${receipt.id}`);
+            if (CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)) {
+                let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+                this.loggingService.debug("[Store] Product owned! Last modified: " + offlineState.lastModifiedDate);
+                this.store.dispatch(new SetOfflineAvailableAction(true));
+            }
+            receipt.finish();
+        });
+        // HM TODO: remove this once done?
+        CdvPurchase.store.verbosity = CdvPurchase.LogLevel.DEBUG;
+        await CdvPurchase.store.initialize();
     }
 
     public order() {
