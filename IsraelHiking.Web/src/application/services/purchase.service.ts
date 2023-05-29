@@ -27,22 +27,13 @@ export class PurchaseService {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-
-        CdvPurchase.Logger.console = {
-            error: (message: string | unknown) => this.loggingService.error(this.logMessageToString(message)),
-            warn: (message: string | unknown) => this.loggingService.warning(this.logMessageToString(message)),
-            log: (message: string | unknown) => this.loggingService.info(this.logMessageToString(message))
-        };
-        CdvPurchase.store.validator = "https://validator.fovea.cc/v1/validate?appName=il.org.osm.israelhiking" +
-            "&apiKey=1245b587-4bbc-4fbd-a3f1-d51169a53063";
-
         
         this.userInfo$.subscribe(userInfo => {
             if (userInfo == null) {
                 return;
             }
-            this.loggingService.info("[Store] logged in: " + userInfo.id);
-            this.initializePlugin(userInfo.id);
+            this.loggingService.info("[Store] Logged in: " + userInfo.id);
+            this.initializeCdvStore(userInfo.id);
             this.offlineFilesDownloadService.isExpired().then((isExpired) => {
                 if (isExpired) {
                     this.loggingService.debug("[Store] Product is expired from server");
@@ -52,7 +43,14 @@ export class PurchaseService {
         });
     }
 
-    private async initializePlugin(userId: string) {
+    private async initializeCdvStore(userId: string) {
+        CdvPurchase.Logger.console = {
+            error: (message: string | unknown) => this.loggingService.error(this.logMessageToString(message)),
+            warn: (message: string | unknown) => this.loggingService.warning(this.logMessageToString(message)),
+            log: (message: string | unknown) => this.loggingService.info(this.logMessageToString(message))
+        };
+        CdvPurchase.store.validator = "https://validator.fovea.cc/v1/validate?appName=il.org.osm.israelhiking" +
+            "&apiKey=1245b587-4bbc-4fbd-a3f1-d51169a53063";
         CdvPurchase.store.applicationUsername = userId;
         CdvPurchase.store.register([{
             id: OFFLINE_MAPS_SUBSCRIPTION,
@@ -64,12 +62,15 @@ export class PurchaseService {
             platform: CdvPurchase.Platform.APPLE_APPSTORE
         }]);
         CdvPurchase.store.when().approved((transaction) => {
-            this.loggingService.debug(`[Store] Approved, verifing: ${transaction.transactionId}`);
+            this.loggingService.debug(`[Store] Approved, verifying: ${transaction.transactionId}`);
             return transaction.verify();
         });
         CdvPurchase.store.when().verified((receipt) => {
-            this.loggingService.debug(`[Store] Verified, Finishing: ${receipt.id}`);
-            if (CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)) {
+            this.loggingService.debug(`[Store] Verified, finishing: ${receipt.id}`);
+            // HM TODO: remove these logging...
+            this.loggingService.debug(`[Store] Product owned: ${CdvPurchase.store.get(OFFLINE_MAPS_SUBSCRIPTION).owned}`);
+            this.loggingService.debug(`[Store] Store owned: ${CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)}`);
+            if (CdvPurchase.store.get(OFFLINE_MAPS_SUBSCRIPTION).owned) {
                 let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
                 this.loggingService.debug("[Store] Product owned! Last modified: " + offlineState.lastModifiedDate);
                 this.store.dispatch(new SetOfflineAvailableAction(true));
@@ -83,7 +84,7 @@ export class PurchaseService {
 
     public order() {
         this.loggingService.debug("[Store] Ordering product");
-        const offer = CdvPurchase.store.get("offline_map").getOffer();
+        const offer = CdvPurchase.store.get(OFFLINE_MAPS_SUBSCRIPTION).getOffer();
         offer.order();
     }
 
