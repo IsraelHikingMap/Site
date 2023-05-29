@@ -4,11 +4,14 @@ using OsmSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NetTopologySuite.IO.Converters;
 
 namespace IsraelHiking.Common.Extensions
 {
     public static class GeoJsonExtensions
     {
+        public static GeoJsonConverterFactory GeoJsonWritableFactory = new GeoJsonConverterFactory(new GeometryFactory(), false, null, RingOrientationOption.EnforceRfc9746, true);
+
         public static void AddOrUpdate(this IAttributesTable attributes, string key, object value)
         {
             if (!attributes.Exists(key))
