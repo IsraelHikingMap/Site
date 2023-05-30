@@ -51,7 +51,7 @@
     "cordova-plugin-file": "github:mWater/cordova-plugin-file#4eb406e40235fc62acf2bacdc041c64dd857aab7",
     "cordova-plugin-file-transfer": "github:apache/cordova-plugin-file-transfer.git#ec11d2fd0e87d7d9e0ba94b1989ffb71af1c3c96",
     "cordova-plugin-oauth": "^4.0.1",
-    "cordova-plugin-purchase": "^13.4.2",
+    "cordova-plugin-purchase": "^13.4.3",
     "cordova-plugin-vibration": "^3.1.1",
     "cordova-plugin-x-socialsharing": "^6.0.4",
     "core-js": "^3.30.2",
