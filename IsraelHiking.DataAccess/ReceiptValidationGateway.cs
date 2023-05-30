@@ -11,7 +11,7 @@ namespace IsraelHiking.DataAccess
 {
     public class ReceiptValidationGateway : IReceiptValidationGateway
     {
-        private const string FOVEA_PURCHASES_API = "https://validator.fovea.cc/v2/customers/";
+        private const string VALIDATOR_URL = "https://validator.iaptic.com/v3/customers/";
 
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger _logger;
@@ -29,8 +29,8 @@ namespace IsraelHiking.DataAccess
         public async Task<bool> IsEntitled(string userId)
         {
             var client = _httpClientFactory.CreateClient();
-            // Docs: https://billing.fovea.cc/documentation/api/customer-purchases/
-            var response = await client.GetAsync(FOVEA_PURCHASES_API + userId + "/purchases?appName=il.org.osm.israelhiking&apiKey=" + _options.FoveaApiKey);
+            // Docs: https://www.iaptic.com/documentation/api/v3/#api-Customers-GetCustomerPurchases
+            var response = await client.GetAsync(VALIDATOR_URL + userId + "/purchases?appName=il.org.osm.israelhiking&apiKey=" + _options.FoveaApiKey);
             var responseStr = await response.Content.ReadAsStringAsync();
             if (response.StatusCode != HttpStatusCode.OK)
             {

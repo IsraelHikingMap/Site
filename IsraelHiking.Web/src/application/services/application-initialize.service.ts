@@ -59,7 +59,7 @@ export class ApplicationInitializeService {
             await this.resources.initialize();
             this.applicationExitService.initialize();
             this.openWithService.initialize();
-            this.purchaseService.initialize();
+            await this.purchaseService.initialize();
             this.geoLocationService.initialize();
             this.dragAndDropService.initialize();
             if (this.runningContextService.isMobile
