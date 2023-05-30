@@ -62,28 +62,25 @@ export class PurchaseService {
             platform: CdvPurchase.Platform.APPLE_APPSTORE
         }]);
         CdvPurchase.store.when().approved((transaction) => {
-            this.loggingService.debug(`[Store] Approved, verifying: ${transaction.transactionId}`);
             return transaction.verify();
         });
+        CdvPurchase.store.when().unverified((unverified) => {
+            this.loggingService.info(`[Store] Unverified: ${unverified.payload.code} ${unverified.payload.message}`);
+        });
         CdvPurchase.store.when().verified((receipt) => {
-            this.loggingService.debug(`[Store] Verified, finishing: ${receipt.id}`);
-            // HM TODO: remove these logging...
-            this.loggingService.debug(`[Store] Product owned: ${CdvPurchase.store.get(OFFLINE_MAPS_SUBSCRIPTION).owned}`);
-            this.loggingService.debug(`[Store] Store owned: ${CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)}`);
-            if (CdvPurchase.store.get(OFFLINE_MAPS_SUBSCRIPTION).owned) {
+            if (CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)) {
                 let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-                this.loggingService.debug("[Store] Product owned! Last modified: " + offlineState.lastModifiedDate);
+                this.loggingService.info("[Store] Product owned! Last modified: " + offlineState.lastModifiedDate);
                 this.store.dispatch(new SetOfflineAvailableAction(true));
             }
             receipt.finish();
         });
-        // HM TODO: remove this once done?
-        CdvPurchase.store.verbosity = CdvPurchase.LogLevel.DEBUG;
+        CdvPurchase.store.verbosity = CdvPurchase.LogLevel.WARNING;
         await CdvPurchase.store.initialize();
     }
 
     public order() {
-        this.loggingService.debug("[Store] Ordering product");
+        this.loggingService.info("[Store] Ordering product");
         const offer = CdvPurchase.store.get(OFFLINE_MAPS_SUBSCRIPTION).getOffer();
         offer.order();
     }
