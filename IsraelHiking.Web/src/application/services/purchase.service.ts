@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { Store, Select } from "@ngxs/store";
-import 'cordova-plugin-purchase';
+import "cordova-plugin-purchase";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -27,13 +27,14 @@ export class PurchaseService {
         if (!this.runningContextService.isCapacitor) {
             return;
         }
-        
+
         this.userInfo$.subscribe(userInfo => {
             if (userInfo == null) {
                 return;
             }
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
             this.initializeCdvStore(userInfo.id);
+            // HM TODO: remove this once we make sure the unverified is working as expected.
             this.offlineFilesDownloadService.isExpired().then((isExpired) => {
                 if (isExpired) {
                     this.loggingService.debug("[Store] Product is expired from server");
@@ -49,8 +50,12 @@ export class PurchaseService {
             warn: (message: string | unknown) => this.loggingService.warning(this.logMessageToString(message)),
             log: (message: string | unknown) => this.loggingService.info(this.logMessageToString(message))
         };
-        CdvPurchase.store.validator = "https://validator.iaptic.com/v1/validate?appName=il.org.osm.israelhiking" +
-            "&apiKey=1245b587-4bbc-4fbd-a3f1-d51169a53063";
+        CdvPurchase.store.validator = {
+            url: "https://validator.iaptic.com/v1/validate?appName=il.org.osm.israelhiking" +
+            "&apiKey=1245b587-4bbc-4fbd-a3f1-d51169a53063",
+            timeout: 5000,
+        };
+
         CdvPurchase.store.applicationUsername = userId;
         CdvPurchase.store.register([{
             id: OFFLINE_MAPS_SUBSCRIPTION,
@@ -61,11 +66,10 @@ export class PurchaseService {
             type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
             platform: CdvPurchase.Platform.APPLE_APPSTORE
         }]);
-        CdvPurchase.store.when().approved((transaction) => {
-            return transaction.verify();
-        });
+        CdvPurchase.store.when().approved((transaction) => transaction.verify());
         CdvPurchase.store.when().unverified((unverified) => {
-            this.loggingService.info(`[Store] Unverified: ${unverified.payload.code} ${unverified.payload.message}`);
+            this.loggingService.info(`[Store] Unverified. code: ${unverified.payload.code}, ` +
+                "status: " + unverified.payload.status + ", " + unverified.payload.message);
         });
         CdvPurchase.store.when().verified((receipt) => {
             if (CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)) {
