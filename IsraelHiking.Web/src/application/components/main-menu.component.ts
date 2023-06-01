@@ -270,7 +270,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public isShowOrderButton() {
-        return this.runningContextService.isCapacitor && 
+        return this.runningContextService.isCapacitor &&
             (this.purchaseService.isPurchaseAvailable() ||
             this.purchaseService.isRenewAvailable());
     }
