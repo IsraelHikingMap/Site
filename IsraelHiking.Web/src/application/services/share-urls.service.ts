@@ -142,13 +142,15 @@ export class ShareUrlsService {
         return createdShareUrl as ShareUrl;
     }
 
-    public updateShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
+    public async updateShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Updating share with id: ${shareUrl.id}`);
-        return firstValueFrom(this.httpClient.put(Urls.urls + shareUrl.id, shareUrl)) as Promise<ShareUrl>;
+        let updatedShareUrl = await firstValueFrom(this.httpClient.put(Urls.urls + shareUrl.id, shareUrl)) as ShareUrl;
+        this.store.dispatch(new UpdateShareUrlAction(updatedShareUrl));
+        return updatedShareUrl;
     }
 
     public async deleteShareUrl(shareUrl: ShareUrl): Promise<void> {
-        this.loggingService.info(`[Shares] Deleting share with id: ${shareUrl.id}`);
+        this.loggingService.info(`[Shares] Deleting share with id: ${shareUrl.id} ${shareUrl.title}`);
         await firstValueFrom(this.httpClient.delete(Urls.urls + shareUrl.id));
         this.store.dispatch(new RemoveShareUrlAction(shareUrl.id));
         await this.databaseService.deleteShareUrlById(shareUrl.id);

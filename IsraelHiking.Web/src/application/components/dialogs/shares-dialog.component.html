@@ -28,11 +28,11 @@
                     </div>
                     <div *ngIf="isShareUrlInEditMode(shareUrl.id)">
                         <mat-form-field>
-                            <input matInput type="text" [(ngModel)]="shareUrl.title" placeholder="{{resources.titlePlaceHolder}}" />
+                            <input matInput type="text" [(ngModel)]="shareUrlInEditMode.title" placeholder="{{resources.titlePlaceHolder}}" />
                         </mat-form-field>
                         <br />
                         <mat-form-field>
-                            <input matInput type="text" [(ngModel)]="shareUrl.description" placeholder="{{resources.descriptionPlaceHolder}}" />
+                            <input matInput type="text" [(ngModel)]="shareUrlInEditMode.description" placeholder="{{resources.descriptionPlaceHolder}}" />
                         </mat-form-field>
                     </div>
                 </div>
@@ -44,7 +44,7 @@
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
             <div class="flex-1" *ngIf="!isShareUrlInEditMode(selectedShareUrlId)">
-                <button mat-button class="w-full min-w-unset no-padding" [disabled]="!hasSelected()" (click)="shareUrlIdInEditMode = selectedShareUrlId" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Toggle edit share"><i class="fa icon-pencil"></i></button>
+                <button mat-button class="w-full min-w-unset no-padding" [disabled]="!hasSelected()" (click)="setShareUrlInEditMode()" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Toggle edit share"><i class="fa icon-pencil"></i></button>
             </div>
             <div class="flex-1" *ngIf="isShareUrlInEditMode(selectedShareUrlId)">
                 <button mat-button class="w-full min-w-unset no-padding" [disabled]="!hasSelected()" (click)="updateShareUrl()" matTooltip="{{resources.update}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Update share"><i class="fa icon-check"></i></button>

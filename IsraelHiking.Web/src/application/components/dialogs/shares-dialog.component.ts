@@ -25,7 +25,7 @@ import type { ApplicationState, ShareUrl } from "../../models/models";
 export class SharesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
 
     public filteredShareUrls: ShareUrl[];
-    public shareUrlIdInEditMode: string;
+    public shareUrlInEditMode: ShareUrl;
     public selectedShareUrlId: string;
     public loadingShareUrls: boolean;
     public searchTerm: FormControl<string>;
@@ -52,7 +52,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     ) {
         super(resources);
         this.loadingShareUrls = false;
-        this.shareUrlIdInEditMode = null;
+        this.shareUrlInEditMode = null;
         this.selectedShareUrlId = null;
         this.page = 1;
         this.subscriptions = [];
@@ -118,8 +118,8 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public deleteShareUrl() {
-        if (this.shareUrlIdInEditMode === this.selectedShareUrlId) {
-            this.shareUrlIdInEditMode = null;
+        if (this.shareUrlInEditMode?.id === this.selectedShareUrlId) {
+            this.shareUrlInEditMode = null;
         }
         let shareUrl = this.getSelectedShareUrl();
         let displayName = this.shareUrlsService.getShareUrlDisplayName(shareUrl);
@@ -144,13 +144,12 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public isShareUrlInEditMode(shareUrlId: string) {
-        return this.shareUrlIdInEditMode === shareUrlId && this.filteredShareUrls.find(s => s.id === shareUrlId);
+        return this.shareUrlInEditMode?.id === shareUrlId && this.filteredShareUrls.find(s => s.id === shareUrlId);
     }
 
     public async updateShareUrl() {
-        let shareUrl = this.filteredShareUrls.find(s => s.id === this.shareUrlIdInEditMode);
-        this.shareUrlIdInEditMode = null;
-        await this.shareUrlsService.updateShareUrl(shareUrl);
+        await this.shareUrlsService.updateShareUrl(this.shareUrlInEditMode);
+        this.shareUrlInEditMode = null;
         this.toastService.success(this.resources.dataUpdatedSuccessfully);
     }
 
@@ -177,10 +176,14 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         this.dataContainerService.setData(share.dataContainer, true);
     }
 
+    public setShareUrlInEditMode() {
+        this.shareUrlInEditMode = structuredClone(this.getSelectedShareUrl());
+    }
+
     public toggleSelectedShareUrl(shareUrl: ShareUrl) {
         if (this.selectedShareUrlId == null) {
             this.selectedShareUrlId = shareUrl.id;
-        } else if (this.selectedShareUrlId === shareUrl.id && this.shareUrlIdInEditMode !== shareUrl.id) {
+        } else if (this.selectedShareUrlId === shareUrl.id && this.shareUrlInEditMode?.id !== shareUrl.id) {
             this.selectedShareUrlId = null;
         } else {
             this.selectedShareUrlId = shareUrl.id;

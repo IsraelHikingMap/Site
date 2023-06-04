@@ -67,7 +67,7 @@ export class TracesService {
                 traceJson.timeStamp = new Date(traceJson.timeStamp);
                 let existingTrace = existingTraces.find(t => t.id === traceJson.id);
                 if (existingTrace != null) {
-                    this.store.dispatch(new UpdateTraceAction(traceJson.id, traceJson));
+                    this.store.dispatch(new UpdateTraceAction(traceJson));
                 } else {
                     this.store.dispatch(new AddTraceAction(traceJson));
                 }
@@ -133,7 +133,7 @@ export class TracesService {
     public async updateTrace(trace: Trace): Promise<void> {
         this.loggingService.info(`[Traces] Updating a trace with id ${trace.id}`);
         await firstValueFrom(this.httpClient.put(Urls.osmTrace + trace.id, trace));
-        this.store.dispatch(new UpdateTraceAction(trace.id, trace));
+        this.store.dispatch(new UpdateTraceAction(trace));
     }
 
     public async deleteTrace(trace: Trace): Promise<void> {

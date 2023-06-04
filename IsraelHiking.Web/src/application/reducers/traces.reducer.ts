@@ -12,7 +12,7 @@ export class AddTraceAction {
 
 export class UpdateTraceAction {
     public static type = this.prototype.constructor.name;
-    constructor(public traceId: string, public trace: Trace) {}
+    constructor(public trace: Trace) {}
 };
 
 export class RemoveTraceAction {
@@ -52,7 +52,7 @@ export class TracesReducer {
     @Action(UpdateTraceAction)
     public update(ctx: StateContext<TracesState>, action: UpdateTraceAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            let traceToReplace = lastState.traces.find(r => r.id === action.traceId);
+            let traceToReplace = lastState.traces.find(r => r.id === action.trace.id);
             lastState.traces.splice(lastState.traces.indexOf(traceToReplace), 1, action.trace);
             return lastState;
         }));

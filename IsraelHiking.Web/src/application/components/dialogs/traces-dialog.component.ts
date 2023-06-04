@@ -29,7 +29,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
 
     public filteredTraces: Trace[];
     public selectedTraceId: string;
-    public traceIdInEditMode: string;
+    public traceInEditMode: Trace;
     public file: File;
     public loadingTraces: boolean;
     public searchTerm: FormControl<string>;
@@ -58,7 +58,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         super(resources);
         this.loadingTraces = false;
         this.selectedTraceId = null;
-        this.traceIdInEditMode = null;
+        this.traceInEditMode = null;
         this.page = 1;
         this.searchTerm = new FormControl<string>("");
         if (data) {
@@ -95,14 +95,15 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         return this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces.find(t => t.id === this.selectedTraceId);
     }
 
-    public updateTrace() {
-        this.traceIdInEditMode = null;
-        this.tracesService.updateTrace(this.getSelectedTrace());
+    public async updateTrace() {
+        await this.tracesService.updateTrace(this.traceInEditMode);
+        this.traceInEditMode = null;
+        this.toastService.success(this.resources.dataUpdatedSuccessfully);
     }
 
     public deleteTrace() {
-        if (this.traceIdInEditMode === this.selectedTraceId) {
-            this.traceIdInEditMode = null;
+        if (this.traceInEditMode?.id === this.selectedTraceId) {
+            this.traceInEditMode = null;
         }
         let message = `${this.resources.deletionOf} ${this.getTraceDisplayName(this.getSelectedTrace())}, ${this.resources.areYouSure}`;
         this.toastService.confirm({
@@ -188,15 +189,19 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public toggleSelectedTrace(trace: Trace) {
         if (this.selectedTraceId == null) {
             this.selectedTraceId = trace.id;
-        } else if (this.selectedTraceId === trace.id && this.traceIdInEditMode !== trace.id) {
+        } else if (this.selectedTraceId === trace.id && this.traceInEditMode?.id !== trace.id) {
             this.selectedTraceId = null;
         } else {
             this.selectedTraceId = trace.id;
         }
     }
 
+    public setTraceInEditMode() {
+        this.traceInEditMode = structuredClone(this.getSelectedTrace());
+    }
+
     public isTraceInEditMode(traceId: string) {
-        return this.traceIdInEditMode === traceId && this.filteredTraces.find(t => t.id === traceId);
+        return this.traceInEditMode?.id === traceId && this.filteredTraces.find(t => t.id === traceId);
     }
 
     public hasSelected() {
