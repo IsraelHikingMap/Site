@@ -137,14 +137,16 @@ export class ShareUrlsService {
 
     public async createShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Creating share with title: ${shareUrl.title}`);
-        let createdShareUrl = await firstValueFrom(this.httpClient.post(Urls.urls, shareUrl));
-        this.store.dispatch(new AddShareUrlAction(createdShareUrl as ShareUrl));
-        return createdShareUrl as ShareUrl;
+        let createdShareUrl = await firstValueFrom(this.httpClient.post(Urls.urls, shareUrl)) as ShareUrl;
+        createdShareUrl.lastModifiedDate = new Date(createdShareUrl.lastModifiedDate);
+        this.store.dispatch(new AddShareUrlAction(createdShareUrl));
+        return createdShareUrl;
     }
 
     public async updateShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Updating share with id: ${shareUrl.id}`);
         let updatedShareUrl = await firstValueFrom(this.httpClient.put(Urls.urls + shareUrl.id, shareUrl)) as ShareUrl;
+        updatedShareUrl.lastModifiedDate = new Date(updatedShareUrl.lastModifiedDate);
         this.store.dispatch(new UpdateShareUrlAction(updatedShareUrl));
         return updatedShareUrl;
     }
