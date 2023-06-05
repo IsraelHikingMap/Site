@@ -1,7 +1,5 @@
 ﻿@use "@angular/material" as mat;
 
-$app-primary: mat.define-palette(mat.$green-palette, 600);
-
 .spinner-container {
     padding: 3px;
 }
@@ -11,5 +9,5 @@ $app-primary: mat.define-palette(mat.$green-palette, 600);
 }
 
 .following {
-    color: mat.get-color-from-palette($app-primary)
+    color: #32CD6D
 }

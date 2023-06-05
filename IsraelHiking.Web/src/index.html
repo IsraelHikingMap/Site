@@ -29,22 +29,21 @@
 
     <base href="/">
     <!-- Favicons courtesy of http://realfavicongenerator.net/ -->
-    <link rel="apple-touch-icon" sizes="57x57" href="content/favicons/apple-touch-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="content/favicons/apple-touch-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="content/favicons/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="content/favicons/apple-touch-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="content/favicons/apple-touch-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="content/favicons/apple-touch-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="content/favicons/apple-touch-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="content/favicons/apple-touch-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="content/favicons/apple-touch-icon-180x180.png">
-    <link rel="icon" type="image/png" href="content/favicons/favicon-32x32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="content/favicons/android-chrome-192x192.png" sizes="192x192">
-    <link rel="icon" type="image/png" href="content/favicons/favicon-96x96.png" sizes="96x96">
-    <link rel="icon" type="image/png" href="content/favicons/favicon-16x16.png" sizes="16x16">
-    <link rel="manifest" href="content/favicons/manifest.json">
-    <link rel="mask-icon" href="content/favicons/safari-pinned-tab.svg" color="#0a42bb">
-    <link rel="shortcut icon" href="content/favicons/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="content/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="content/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="194x194" href="content/favicons/favicon-194x194.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="content/favicons/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="content/favicons/favicon-16x16.png">
+    <link rel="manifest" href="content/favicons/site.webmanifest">
+    <link rel="mask-icon" href="content/favicons/safari-pinned-tab.svg" color="#32cd6d">
+    <link rel="shortcut icon" href="content/favicons/favicon.ico">
+    <meta name="apple-mobile-web-app-title" content="Israel Hiking Map">
+    <meta name="application-name" content="Israel Hiking Map">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="content/favicons/mstile-144x144.png">
+    <meta name="msapplication-config" content="content/favicons/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+
     <link rel="text/html" href="fonts/IsraelHikingMap.ttf">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-XBWCGLDFDR"></script>
     <script>
@@ -85,7 +84,7 @@
                 width: 11px;
                 height: 11px;
                 border-radius: 50%;
-                background: #43a047;
+                background: #32CD6D;
                 animation-timing-function: cubic-bezier(0, 1, 1, 0);
             }
 
@@ -146,7 +145,7 @@
             if (!!window.WebGLRenderingContext) {
                 var canvas = document.createElement("canvas");
                 try {
-                    var context = canvas.getContext("webgl");
+                    var context = canvas.getContext("webgl2");
                     if (context && typeof context.getParameter == "function") {
                         return true;
                     }
@@ -162,7 +161,7 @@
         }
     </script>
     <div class="preloader">
-        <img src="content/logo.png" />
+        <img src="content/logo.png" height="256px" />
         <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
     </div>
     <main-map></main-map>
