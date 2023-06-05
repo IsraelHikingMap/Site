@@ -72,6 +72,7 @@ export class PurchaseService {
                 "status: " + unverified.payload.status + ", " + unverified.payload.message);
         });
         CdvPurchase.store.when().verified((receipt) => {
+            this.loggingService.info(`[Store] Verified. ${receipt.id}, owned: ${CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)}`);
             if (CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)) {
                 let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
                 this.loggingService.info("[Store] Product owned! Last modified: " + offlineState.lastModifiedDate);
@@ -79,7 +80,7 @@ export class PurchaseService {
             }
             receipt.finish();
         });
-        CdvPurchase.store.verbosity = CdvPurchase.LogLevel.WARNING;
+        CdvPurchase.store.verbosity = CdvPurchase.LogLevel.DEBUG;
         await CdvPurchase.store.initialize();
     }
 
