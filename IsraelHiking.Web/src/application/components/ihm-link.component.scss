@@ -1,21 +1,21 @@
 .link-container {
-    position: relative;
-    bottom: 0.5em;
-    left: 0.5em;
-    margin: 0 !important;
+    text-decoration: none;
 }
 
-.ihm-text {
-    position: absolute;
-    bottom: -5px;
-    left: 0;
-    color: blue;
-    font-weight: bold;
-    white-space: nowrap;
+.open-in-app {
+    color: #082254;
+    font-size: 17px;
+    text-align: center;
+    & span {
+        max-width: 100px;
+        word-wrap: break-word;
+    }
+    & img {
+        margin-bottom: -20px;
+    }
 }
 
-.open-in-app-img {
-    background-color: #0005;
-    margin-bottom: 10px;
-    border-radius: 10px;
+.logo {
+    background-color: #fffa;
+    border-radius: 50%;
 }
