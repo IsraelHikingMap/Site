@@ -36,7 +36,7 @@ $app-background: map-get($app-theme, background);
         --mdc-snackbar-container-color: #{mat.get-color-from-palette($app-warm)};
     }
     &.confirm-snackbar {
-        --mat-mdc-snack-bar-button-color: var(--mdc-snackbar-supporting-text-color);
+        --mat-snack-bar-button-color: var(--mdc-snackbar-supporting-text-color);
     }
   }
 
