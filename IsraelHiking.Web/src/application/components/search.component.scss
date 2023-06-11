@@ -1,7 +1,7 @@
 @use '@angular/material' as mat;
 
 .align-next-to-menu {
-    top: env(safe-area-inset-top, 0); 
+    top: env(safe-area-inset-top, 0);
     right: 85px
 }
 

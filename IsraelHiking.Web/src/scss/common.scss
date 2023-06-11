@@ -44,7 +44,7 @@ $app-background: map-get($app-theme, background);
 /* added direction to fix issue with scroll bar and legend maps */
 .sidebar-wrapper {
     position: fixed;
-    top: 0;
+    top: env(safe-area-inset-top, 0);
     bottom: 0;
     left: 0;
     width: v.$app-sidebar-width;
