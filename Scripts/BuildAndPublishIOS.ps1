@@ -2,11 +2,10 @@ $env:LANG="en_US.UTF-8"
 $env:LANGUAGE="en_US.UTF-8"
 $env:LC_ALL="en_US.UTF-8"
 
-Write-Host "Using ruby 2.7.2"
-rvm use 2.7.2
 
 Write-Host "Installing cocoapods"
-sudo gem install cocoapods 
+brew install cocoapods
+pod --version
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 
