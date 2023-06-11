@@ -159,5 +159,5 @@
     "postinstall": "patch-package"
   },
   "type": "module",
-  "version": "9.17.0"
+  "version": "9.18.0"
 }
