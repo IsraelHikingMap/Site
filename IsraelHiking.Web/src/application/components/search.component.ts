@@ -195,7 +195,7 @@ export class SearchComponent extends BaseMapComponent {
             this.toastService.warning(this.resources.pleaseSelectTo);
             return;
         }
-        let latlngs = await this.routerService.getRoute(this.fromContext.selectedSearchResults.location,
+        const latlngs = await this.routerService.getRoute(this.fromContext.selectedSearchResults.location,
             this.toContext.selectedSearchResults.location,
             this.routingType);
         this.directional.showResults = true;
@@ -205,12 +205,12 @@ export class SearchComponent extends BaseMapComponent {
             " - " +
             this.toContext.selectedSearchResults.displayName;
         this.directional.overlayLocation = latlngs[0];
-        let bounds = SpatialService.getBounds(latlngs);
+        const bounds = SpatialService.getBounds(latlngs);
         this.fitBoundsService.fitBounds(bounds);
     }
 
     public convertToRoute() {
-        let route = this.routesFactory.createRouteData(this.directional.routeTitle);
+        const route = this.routesFactory.createRouteData(this.directional.routeTitle);
         route.segments = GpxDataContainerConverterService
             .getSegmentsFromLatlngs(this.directional.latlngs as LatLngAltTime[], this.routingType);
         this.store.dispatch(new AddRouteAction(route));
@@ -270,13 +270,13 @@ export class SearchComponent extends BaseMapComponent {
     }
 
     private async internalSearch(searchContext: SearchContext) {
-        let searchTerm = searchContext.searchTerm;
+        const searchTerm = searchContext.searchTerm;
         this.requestsQueue.push({
             searchTerm
         } as SearchRequestQueueItem);
         try {
-            let results = await this.searchResultsProvider.getResults(searchTerm, this.resources.hasRtlCharacters(searchTerm));
-            let queueItem = this.requestsQueue.find(itemToFind => itemToFind.searchTerm === searchTerm);
+            const results = await this.searchResultsProvider.getResults(searchTerm, this.resources.hasRtlCharacters(searchTerm));
+            const queueItem = this.requestsQueue.find(itemToFind => itemToFind.searchTerm === searchTerm);
             if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                 this.requestsQueue.splice(0, this.requestsQueue.length - 1);
                 return;

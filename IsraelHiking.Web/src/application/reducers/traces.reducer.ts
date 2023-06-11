@@ -8,32 +8,32 @@ import type { TracesState, Trace } from "../models/models";
 export class AddTraceAction {
     public static type = this.prototype.constructor.name;
     constructor(public trace: Trace) {}
-};
+}
 
 export class UpdateTraceAction {
     public static type = this.prototype.constructor.name;
     constructor(public trace: Trace) {}
-};
+}
 
 export class RemoveTraceAction {
     public static type = this.prototype.constructor.name;
     constructor(public traceId: string) {}
-};
+}
 
 export class SetVisibleTraceAction {
     public static type = this.prototype.constructor.name;
     constructor(public traceId: string) {}
-};
+}
 
 export class SetMissingPartsAction {
     public static type = this.prototype.constructor.name;
     constructor(public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>) {}
-};
+}
 
 export class RemoveMissingPartAction {
     public static type = this.prototype.constructor.name;
     constructor(public missingPartIndex: number) {}
-};
+}
 @State<TracesState>({
     name: "tracesState",
     defaults: initialState.tracesState
@@ -52,7 +52,7 @@ export class TracesReducer {
     @Action(UpdateTraceAction)
     public update(ctx: StateContext<TracesState>, action: UpdateTraceAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            let traceToReplace = lastState.traces.find(r => r.id === action.trace.id);
+            const traceToReplace = lastState.traces.find(r => r.id === action.trace.id);
             lastState.traces.splice(lastState.traces.indexOf(traceToReplace), 1, action.trace);
             return lastState;
         }));
@@ -61,7 +61,7 @@ export class TracesReducer {
     @Action(RemoveTraceAction)
     public remove(ctx: StateContext<TracesState>, action: RemoveTraceAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            let traceToRemove = lastState.traces.find(r => r.id === action.traceId);
+            const traceToRemove = lastState.traces.find(r => r.id === action.traceId);
             lastState.traces.splice(lastState.traces.indexOf(traceToRemove), 1);
             return lastState;
         }));

@@ -52,13 +52,13 @@ export class HashService {
         if (this.store.selectSnapshot((s: ApplicationState) => s.poiState).isSidebarOpen) {
             return;
         }
-        let inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
+        const inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
         if (inMemoryState.shareUrl) {
             this.router.navigate([RouteStrings.ROUTE_SHARE, inMemoryState.shareUrl.id], { replaceUrl: true });
             return;
         }
         if (inMemoryState.fileUrl) {
-            let queryParams = {} as any;
+            const queryParams = {} as any;
             if (inMemoryState.baseLayer) {
                 queryParams.baselayer = inMemoryState.baseLayer;
             }
@@ -69,7 +69,7 @@ export class HashService {
         if (this.mapService.map && this.mapService.map.isMoving()) {
             return;
         }
-        let location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
+        const location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         this.router.navigate([
             RouteStrings.ROUTE_MAP,
             (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
@@ -79,9 +79,9 @@ export class HashService {
     }
 
     public getHref(): string {
-        let inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
+        const inMemoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
         if (inMemoryState.fileUrl != null) {
-            let urlTree = this.router.createUrlTree([RouteStrings.URL, inMemoryState.fileUrl], {
+            const urlTree = this.router.createUrlTree([RouteStrings.URL, inMemoryState.fileUrl], {
                 queryParams: {
                     [RouteStrings.BASE_LAYER]: this.store.selectSnapshot((s: ApplicationState) => s.layersState).selectedBaseLayerKey
                 }
@@ -95,8 +95,8 @@ export class HashService {
     }
 
     public getMapAddress() {
-        let location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
-        let urlTree = this.router.createUrlTree([RouteStrings.MAP,
+        const location = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
+        const urlTree = this.router.createUrlTree([RouteStrings.MAP,
             (location.zoom + 1).toFixed(HashService.ZOOM_PERSICION),
             location.latitude.toFixed(HashService.HIGH_PERSICION),
             location.longitude.toFixed(HashService.HIGH_PERSICION)]);
@@ -112,13 +112,13 @@ export class HashService {
     }
 
     public getFullUrlFromPoiId(poiSourceAndId: PoiRouterData) {
-        let urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
+        const urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
             { queryParams: { language: poiSourceAndId.language } });
         return Urls.baseAddress + urlTree.toString();
     }
 
     public getFullUrlFromShareId(id: string) {
-        let urlTree = this.router.createUrlTree([RouteStrings.SHARE, id]);
+        const urlTree = this.router.createUrlTree([RouteStrings.SHARE, id]);
         return Urls.baseAddress + urlTree.toString();
     }
 }

@@ -18,10 +18,10 @@ export class FitBoundsService {
         this.isFlying = false;
     }
 
-    public async fitBounds(bounds: Bounds, noPadding: boolean = false) {
+    public async fitBounds(bounds: Bounds, noPadding = false) {
         await this.mapService.initializationPromise;
-        let maxZoom = Math.max(this.mapService.map.getZoom(), 16);
-        let mbBounds = SpatialService.boundsToMBBounds(bounds);
+        const maxZoom = Math.max(this.mapService.map.getZoom(), 16);
+        const mbBounds = SpatialService.boundsToMBBounds(bounds);
         let padding = 50;
         if (noPadding) {
             padding = 0;

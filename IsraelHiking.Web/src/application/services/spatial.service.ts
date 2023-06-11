@@ -24,7 +24,7 @@ export class SpatialService {
         }
         if (geometry.type === "MultiLineString") {
             let totalDistance = 0;
-            for (let coordinates of geometry.coordinates) {
+            for (const coordinates of geometry.coordinates) {
                 totalDistance += SpatialService.getLengthInMetersForCoordinates(coordinates);
             }
             return totalDistance;
@@ -49,7 +49,7 @@ export class SpatialService {
         if (coordinates.length <= 1) {
             return coordinates;
         }
-        let simplified = simplify(lineString(coordinates), { tolerance });
+        const simplified = simplify(lineString(coordinates), { tolerance });
         return simplified.geometry.coordinates as [number, number][];
     }
 
@@ -81,16 +81,16 @@ export class SpatialService {
         let closetLine = null;
         let nearestPoint = null;
         let minimalDistance = Infinity;
-        let coordinates = SpatialService.toCoordinate(latlng);
-        for (let line of lines) {
-            let currentNearestPoint = nearestPointOnLine(line, coordinates);
+        const coordinates = SpatialService.toCoordinate(latlng);
+        for (const line of lines) {
+            const currentNearestPoint = nearestPointOnLine(line, coordinates);
             if (currentNearestPoint.properties.dist < minimalDistance) {
                 minimalDistance = currentNearestPoint.properties.dist;
                 closetLine = line;
                 nearestPoint = currentNearestPoint;
             }
         }
-        let newCoordinates = [...closetLine.geometry.coordinates];
+        const newCoordinates = [...closetLine.geometry.coordinates];
         newCoordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
         lines.splice(lines.indexOf(closetLine), 1);
         lines.push(lineString(newCoordinates, closetLine.properties));
@@ -100,19 +100,19 @@ export class SpatialService {
     public static clipLinesToTileBoundary(lines: GeoJSON.Feature<GeoJSON.LineString>[],
         tile: { x: number; y: number},
         zoom: number): GeoJSON.Feature<GeoJSON.LineString>[] {
-        let northEast = SpatialService.fromTile(tile, zoom);
-        let southWest = SpatialService.fromTile({x: tile.x + 1, y: tile.y + 1}, zoom);
-        let tilePolygon = bboxPolygon([northEast.lng, southWest.lat, southWest.lng, northEast.lat]);
+        const northEast = SpatialService.fromTile(tile, zoom);
+        const southWest = SpatialService.fromTile({x: tile.x + 1, y: tile.y + 1}, zoom);
+        const tilePolygon = bboxPolygon([northEast.lng, southWest.lat, southWest.lng, northEast.lat]);
         // This is to overcome accuracy issues...
-        let tilePolygonTest = bboxPolygon([northEast.lng - 1e-6, southWest.lat - 1e-6, southWest.lng + 1e-6, northEast.lat + 1e-6]);
+        const tilePolygonTest = bboxPolygon([northEast.lng - 1e-6, southWest.lat - 1e-6, southWest.lng + 1e-6, northEast.lat + 1e-6]);
         let clippedLines: GeoJSON.Feature<GeoJSON.LineString>[] = [];
-        for (let line of lines) {
-            let intersectionPoints = lineIntersect(line, tilePolygon);
+        for (const line of lines) {
+            const intersectionPoints = lineIntersect(line, tilePolygon);
             if (intersectionPoints.features.length === 0) {
                 clippedLines.push(line);
                 continue;
             }
-            let splitLines = lineSplit(line, tilePolygon);
+            const splitLines = lineSplit(line, tilePolygon);
             clippedLines = clippedLines.concat(splitLines.features.filter(f => booleanWithin(f, tilePolygonTest)));
         }
         return clippedLines;
@@ -128,10 +128,10 @@ export class SpatialService {
      * @param lines - The lines to find and add juction points, these lines will be updated as part of this method.
      */
     public static addMissinIntersectionPoints(lines: GeoJSON.Feature<GeoJSON.LineString>[]) {
-        for (let lineForPoints of lines) {
-            let start = lineForPoints.geometry.coordinates[0];
-            let end = lineForPoints.geometry.coordinates[lineForPoints.geometry.coordinates.length - 1];
-            for (let lineToCheck of lines) {
+        for (const lineForPoints of lines) {
+            const start = lineForPoints.geometry.coordinates[0];
+            const end = lineForPoints.geometry.coordinates[lineForPoints.geometry.coordinates.length - 1];
+            for (const lineToCheck of lines) {
                 if (lineToCheck === lineForPoints) {
                     continue;
                 }
@@ -140,7 +140,7 @@ export class SpatialService {
                 }
                 if (start[0] >= lineToCheck.bbox[0] && start[0] <= lineToCheck.bbox[2] &&
                     start[1] >= lineToCheck.bbox[1] && start[1] <= lineToCheck.bbox[3]) {
-                    let nearestPoint = nearestPointOnLine(lineToCheck, start);
+                    const nearestPoint = nearestPointOnLine(lineToCheck, start);
                     if (nearestPoint.properties.dist < 1e-5) {
                         lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
                         continue;
@@ -148,7 +148,7 @@ export class SpatialService {
                 }
                 if (end[0] >= lineToCheck.bbox[0] && end[0] <= lineToCheck.bbox[2] &&
                     end[1] >= lineToCheck.bbox[1] && end[1] <= lineToCheck.bbox[3]) {
-                    let nearestPoint = nearestPointOnLine(lineToCheck, end);
+                    const nearestPoint = nearestPointOnLine(lineToCheck, end);
                     if (nearestPoint.properties.dist < 1e-5) {
                         lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
                         continue;
@@ -163,23 +163,23 @@ export class SpatialService {
             throw new Error("Line length should be at least 2");
         }
         let closestPointOnSegment = line[0];
-        for (let currentLatLng of line) {
+        for (const currentLatLng of line) {
             if (SpatialService.getDistance(currentLatLng, newLatlng) <
                 SpatialService.getDistance(closestPointOnSegment, newLatlng)) {
                 closestPointOnSegment = currentLatLng;
             }
         }
-        let indexOfClosestPoint = line.indexOf(closestPointOnSegment);
-        let indexToInsert = SpatialService.getIndexToInsertForSplit(indexOfClosestPoint, line, newLatlng);
+        const indexOfClosestPoint = line.indexOf(closestPointOnSegment);
+        const indexToInsert = SpatialService.getIndexToInsertForSplit(indexOfClosestPoint, line, newLatlng);
         if (indexToInsert >= line.length) {
             return { start: [...line, newLatlng], end: [newLatlng, newLatlng] };
         }
         if (indexToInsert === 0) {
             return { start: [newLatlng, newLatlng], end: [newLatlng, ...line] };
         }
-        let start = line.slice(0, indexToInsert);
-        let end = line.slice(indexToInsert);
-        let projected = SpatialService.project(newLatlng, line[indexToInsert - 1], line[indexToInsert]);
+        const start = line.slice(0, indexToInsert);
+        const end = line.slice(indexToInsert);
+        const projected = SpatialService.project(newLatlng, line[indexToInsert - 1], line[indexToInsert]);
         if (projected.projectionFactor === 0.0) {
             // no need to add a point that already exists, adding a point only to end segment
             return { start, end: [projected.latlng, ...end] };
@@ -192,21 +192,21 @@ export class SpatialService {
         let indexToInsert = indexOfClosestPoint;
 
         if (indexOfClosestPoint === 0) {
-            let firstSegment = [line[0], line[1]];
+            const firstSegment = [line[0], line[1]];
             if (SpatialService.getDistanceFromPointToLine(newLatlng, firstSegment) <
                 SpatialService.getDistanceInMeters(newLatlng, line[0])) {
                 indexToInsert = 1;
             }
         } else if (indexOfClosestPoint === line.length - 1) {
-            let lastSegment = [line[indexOfClosestPoint - 1], line[indexOfClosestPoint]];
+            const lastSegment = [line[indexOfClosestPoint - 1], line[indexOfClosestPoint]];
             if (SpatialService.getDistanceFromPointToLine(newLatlng, lastSegment) >=
                 SpatialService.getDistanceInMeters(newLatlng, line[indexOfClosestPoint])) {
                 indexToInsert += 1;
             }
         } else {
             // add in between two points:
-            let segmentBefore = [line[indexOfClosestPoint - 1], line[indexOfClosestPoint]];
-            let segmentAfter = [line[indexOfClosestPoint], line[indexOfClosestPoint + 1]];
+            const segmentBefore = [line[indexOfClosestPoint - 1], line[indexOfClosestPoint]];
+            const segmentAfter = [line[indexOfClosestPoint], line[indexOfClosestPoint + 1]];
             if (SpatialService.getDistanceFromPointToLine(newLatlng, segmentBefore) >=
                 SpatialService.getDistanceFromPointToLine(newLatlng, segmentAfter)) {
                 indexToInsert += 1;
@@ -217,11 +217,11 @@ export class SpatialService {
 
     private static project(p: LatLngAlt, a: LatLngAlt, b: LatLngAlt): { latlng: LatLngAlt; projectionFactor: number } {
 
-        let atob = { x: b.lng - a.lng, y: b.lat - a.lat, z: (a.alt != null && b.alt != null) ? b.alt - a.alt : null };
-        let atop = { x: p.lng - a.lng, y: p.lat - a.lat };
-        let len = atob.x * atob.x + atob.y * atob.y;
-        let dot = atop.x * atob.x + atop.y * atob.y;
-        let projectionFactor = Math.min(1, Math.max(0, dot / len ));
+        const atob = { x: b.lng - a.lng, y: b.lat - a.lat, z: (a.alt != null && b.alt != null) ? b.alt - a.alt : null };
+        const atop = { x: p.lng - a.lng, y: p.lat - a.lat };
+        const len = atob.x * atob.x + atob.y * atob.y;
+        const dot = atop.x * atob.x + atop.y * atob.y;
+        const projectionFactor = Math.min(1, Math.max(0, dot / len ));
 
         return {
             latlng: {
@@ -248,8 +248,8 @@ export class SpatialService {
                 southWest: latlngs[0]
             };
         }
-        let line = SpatialService.getLineString(latlngs);
-        let boundingBox = bbox(line);
+        const line = SpatialService.getLineString(latlngs);
+        const boundingBox = bbox(line);
         return SpatialService.bboxToBounds(boundingBox);
     }
 
@@ -257,8 +257,8 @@ export class SpatialService {
         if (latlngs.length === 1) {
             return latlngs[0];
         }
-        let line = SpatialService.getLineString(latlngs);
-        let centerPoint = center(line);
+        const line = SpatialService.getLineString(latlngs);
+        const centerPoint = center(line);
         return SpatialService.toLatLng(centerPoint.geometry.coordinates as [number, number]);
 
     }
@@ -314,29 +314,29 @@ export class SpatialService {
     }
 
     private static getLineString(latlngs: LatLngAlt[]): GeoJSON.Feature<GeoJSON.LineString> {
-        let coordinates = latlngs.map(l => SpatialService.toCoordinate(l));
+        const coordinates = latlngs.map(l => SpatialService.toCoordinate(l));
         return lineString(coordinates);
     }
 
     public static getMapBounds(map: Map): Bounds {
-        let bounds = map.getBounds();
+        const bounds = map.getBounds();
         return SpatialService.mBBoundsToBounds(bounds);
     }
 
     public static getCirclePolygonFeature(centerPoint: LatLngAlt, radius: number):
         GeoJSON.Feature<GeoJSON.Polygon> & { properties: { radius: number }} {
-        let options = { steps: 64, units: "meters" as Units, properties: { radius } };
+        const options = { steps: 64, units: "meters" as Units, properties: { radius } };
         return circle(SpatialService.toCoordinate(centerPoint), radius, options);
     }
 
     public static getLineBearingInDegrees(latlng1: LatLngAlt, latlng2: LatLngAlt): number {
-        let lat1Radians = latlng1.lat * Math.PI / 180;
-        let lat2Radians = latlng2.lat * Math.PI / 180;
-        let lngDiffRadians = (latlng2.lng - latlng1.lng) * Math.PI / 180;
-        let y = Math.sin(lngDiffRadians) * Math.cos(lat2Radians);
-        let x = Math.cos(lat1Radians) * Math.sin(lat2Radians) -
+        const lat1Radians = latlng1.lat * Math.PI / 180;
+        const lat2Radians = latlng2.lat * Math.PI / 180;
+        const lngDiffRadians = (latlng2.lng - latlng1.lng) * Math.PI / 180;
+        const y = Math.sin(lngDiffRadians) * Math.cos(lat2Radians);
+        const x = Math.cos(lat1Radians) * Math.sin(lat2Radians) -
                 Math.sin(lat1Radians) * Math.cos(lat2Radians) * Math.cos(lngDiffRadians);
-        let bearingRadians = Math.atan2(y, x);
+        const bearingRadians = Math.atan2(y, x);
         return (bearingRadians * 180 / Math.PI + 360) % 360; // in degrees
     }
 
@@ -356,7 +356,7 @@ export class SpatialService {
     }
 
     public static toRelativePixel(latlng: LatLngAlt, zoom: number, tileSize: number) {
-        let tile = SpatialService.toTile(latlng, zoom);
+        const tile = SpatialService.toTile(latlng, zoom);
         return {
             pixelX: Math.floor((tile.x - Math.floor(tile.x)) * tileSize),
             pixelY: Math.floor((tile.y - Math.floor(tile.y)) * tileSize)

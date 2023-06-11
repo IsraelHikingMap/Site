@@ -24,12 +24,12 @@ describe("Recorded Route Service", () => {
     };
 
     beforeEach(() => {
-        let toastMock = new ToastServiceMockCreator();
-        let loggingServiceMock = {
+        const toastMock = new ToastServiceMockCreator();
+        const loggingServiceMock = {
             debug: () => { },
             info: () => { }
         };
-        let tracesServiceMock = {
+        const tracesServiceMock = {
             uploadLocalTracesIfNeeded: () => Promise.resolve()
         };
         TestBed.configureTestingModule({
@@ -85,7 +85,7 @@ describe("Recorded Route Service", () => {
                     userInfo: null
                 }
             });
-            let spy = jasmine.createSpy();
+            const spy = jasmine.createSpy();
             store.dispatch = spy;
             service.initialize();
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(StopRecordingAction);
@@ -248,7 +248,7 @@ describe("Recorded Route Service", () => {
                     route: {}
                 },
             });
-            let spy = spyOn(logginService, "debug");
+            const spy = spyOn(logginService, "debug");
             service.startRecording();
             store.reset({
                 recordedRouteState: {
@@ -333,7 +333,7 @@ describe("Recorded Route Service", () => {
                 userInfo: null
             }
         });
-        let spy = jasmine.createSpy();
+        const spy = jasmine.createSpy();
         store.dispatch = spy;
         service.stopRecording();
 

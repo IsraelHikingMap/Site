@@ -49,29 +49,29 @@ export class ImageCaptureDirective implements OnDestroy {
     }
 
     private async getPictureFromCamera() {
-        let data = await Camera.getPhoto({
+        const data = await Camera.getPhoto({
             correctOrientation: true,
             saveToGallery: true,
             resultType: CameraResultType.DataUrl,
             source: CameraSource.Camera
         });
-        let blob = await fetch(data.dataUrl).then(r => r.blob()) as File;
+        const blob = await fetch(data.dataUrl).then(r => r.blob()) as File;
         this.raiseChangedEvent([blob]);
     }
 
     private async getPicturesFromGallery() {
-        let response = await Camera.pickImages({
+        const response = await Camera.pickImages({
             correctOrientation: true,
         });
-        let files = [];
-        for (let photo of response.photos) {
+        const files = [];
+        for (const photo of response.photos) {
             files.push(await this.fileService.getFileFromUrl(photo.path));
         }
         this.raiseChangedEvent(files);
     }
 
     private raiseChangedEvent(files: File[]) {
-        let changeEvent = {
+        const changeEvent = {
             dataTransfer: { files },
             target: {}
         };

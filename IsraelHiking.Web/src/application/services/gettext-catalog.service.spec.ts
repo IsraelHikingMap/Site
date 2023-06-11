@@ -27,7 +27,7 @@ describe("GetTextCatalogService", () => {
 
         service.setCurrentLanguage("he");
 
-        let promise = service.loadRemote("url").then(() => {
+        const promise = service.loadRemote("url").then(() => {
             expect(service.getString("word")).toBe("word's translation");
         });
 
@@ -40,7 +40,7 @@ describe("GetTextCatalogService", () => {
 
         service.setCurrentLanguage("he");
 
-        let promise = service.loadRemote("url").then(() => {
+        const promise = service.loadRemote("url").then(() => {
             expect(service.getString("word")).toBe("word");
         });
 

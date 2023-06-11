@@ -39,7 +39,7 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
     }
 
     protected internalSave(layerData: LayerData): void {
-        let overlay = {
+        const overlay = {
             ...layerData,
             id: this.layerData.id,
             isEditable: true,

@@ -10,7 +10,7 @@
     </div>
     <div mat-dialog-content>
         <div class="flex flex-row">
-            <div class="w-3/5 margin-10-reverse">
+            <div class="w-3/5 me-2">
                 <div class="flex flex-row">
                     <mat-form-field class="w-full">
                         <input matInput #titleInput class="w-full" type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.title}}" />
@@ -25,7 +25,7 @@
             <div class="w-2/5">
                 <div class="flex flex-row">
                     <label *ngIf="!imageLink">
-                        <a mat-button class="flex-center w-full h-unset" [style.color]="'black'" imageCapture (changed)="addImage($event)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
+                        <a mat-button class="w-full h-unset" [style.color]="'black'" imageCapture (changed)="addImage($event)" angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
                         <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera" />
                     </label>
                     <img *ngIf="imageLink"

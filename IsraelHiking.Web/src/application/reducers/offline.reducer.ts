@@ -8,32 +8,32 @@ import type { OfflineState } from "../models/models";
 export class SetOfflineAvailableAction {
     public static type = this.prototype.constructor.name;
     constructor(public isAvailble: boolean) {}
-};
+}
 
 export class SetOfflineMapsLastModifiedDateAction {
     public static type = this.prototype.constructor.name;
     constructor(public lastModifiedDate: Date) {}
-};
+}
 
 export class SetOfflinePoisLastModifiedDateAction {
     public static type = this.prototype.constructor.name;
     constructor(public lastModifiedDate: Date) {}
-};
+}
 
 export class SetShareUrlsLastModifiedDateAction {
     public static type = this.prototype.constructor.name;
     constructor(public lastModifiedDate: Date) {}
-};
+}
 
 export class AddToPoiQueueAction {
     public static type = this.prototype.constructor.name;
     constructor(public featureId: string) {}
-};
+}
 
 export class RemoveFromPoiQueueAction {
     public static type = this.prototype.constructor.name;
     constructor(public featureId: string) {}
-};
+}
 
 @State<OfflineState>({
     name: "offlineState",

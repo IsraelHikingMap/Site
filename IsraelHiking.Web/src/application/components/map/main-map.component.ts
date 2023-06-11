@@ -104,7 +104,7 @@ export class MainMapComponent extends BaseMapComponent {
         if (!e) {
             return;
         }
-        let centerLatLon = this.mapComponent.mapInstance.getCenter();
+        const centerLatLon = this.mapComponent.mapInstance.getCenter();
         this.store.dispatch(new SetLocationAction(centerLatLon.lng, centerLatLon.lat, this.mapComponent.mapInstance.getZoom()));
         this.hashService.resetAddressbar();
     }
@@ -134,7 +134,7 @@ export class MainMapComponent extends BaseMapComponent {
                 [e.point.x - 5, e.point.y - 5],
                 [e.point.x + 5, e.point.y + 5]
             ] as [PointLike, PointLike];
-            let features = this.mapComponent.mapInstance.queryRenderedFeatures(bbox).filter(f => f.sourceLayer === "record_lines");
+            const features = this.mapComponent.mapInstance.queryRenderedFeatures(bbox).filter(f => f.sourceLayer === "record_lines");
             if (features.length <= 0) { return; }
             this.dialog.open(TracesDialogComponent, { width: "480px", data: features.map(f => f.properties.trace_id) } as MatDialogConfig);
         });
@@ -153,7 +153,7 @@ export class MainMapComponent extends BaseMapComponent {
     }
 
     public pitchChanged() {
-        let pitch = this.mapComponent.mapInstance.getPitch();
+        const pitch = this.mapComponent.mapInstance.getPitch();
         if (pitch <= 10 && !this.isTerrainOn) {
             // Terrain is off and pitch is low, nothing to do.
             return;
@@ -187,7 +187,7 @@ export class MainMapComponent extends BaseMapComponent {
                 minzoom:7
             };
         }
-        let currentSourceTerrain = this.mapComponent.mapInstance.getSource("terrain");
+        const currentSourceTerrain = this.mapComponent.mapInstance.getSource("terrain");
         if (!currentSourceTerrain) {
             this.mapComponent.mapInstance.addSource("terrain", source);
         } else if (currentSourceTerrain && currentSourceTerrain.serialize().url !== source.url) {

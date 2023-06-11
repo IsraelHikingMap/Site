@@ -20,77 +20,77 @@ export class ClearHistoryAction {
 export class AddRouteAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeData: RouteData) {}
-};
+}
 
 export class DeleteRouteAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string) {}
-};
+}
 
 export class ChangeRoutePropertiesAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public routeData: RouteData) {}
-};
+}
 
 export class AddPrivatePoiAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public markerData: MarkerData) {}
-};
+}
 
 export class UpdatePrivatePoiAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public index: number, public markerData: MarkerData) {}
-};
+}
 
 export class DeletePrivatePoiAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public index: number) {}
-};
+}
 
 export class AddSegmentAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public segmentData: RouteSegmentData) {}
-};
+}
 
 export class UpdateSegmentsAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public indices: number[], public segmentsData: RouteSegmentData[]) {}
-};
+}
 
 export class ReplaceSegmentsAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public segmentsData: RouteSegmentData[]) {}
-};
+}
 
 export class DeleteSegmentAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public index: number) {}
-};
+}
 
 export class ChangeRouteStateAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public state: RouteEditStateType) {}
-};
+}
 
 export class ReplaceRouteAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public routeData: RouteData) {}
-};
+}
 
 export class SplitRouteAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public routeData: RouteData, public splitRouteData: RouteData) {}
-};
+}
 
 export class MergeRoutesAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string, public secondaryRouteId: string, public mergedRouteData: RouteData) {}
-};
+}
 
 export class BulkReplaceRoutesAction {
     public static type = this.prototype.constructor.name;
     constructor(public routesData: RouteData[]) {}
-};
+}
 
 export class ClearPoisAction {
     public static type = this.prototype.constructor.name;
@@ -133,7 +133,7 @@ export class RoutesReducer {
         ctx.setState(produce((lastState: StateWithHistory<RouteData[]>) => {
         if (lastState.past.length > 0) {
             lastState.future.push(lastState.present);
-            let top = lastState.past.pop() as RouteData[];
+            const top = lastState.past.pop() as RouteData[];
             lastState.present = top;
         }
         }));
@@ -144,7 +144,7 @@ export class RoutesReducer {
         ctx.setState(produce((lastState: StateWithHistory<RouteData[]>) => {
             if (lastState.future.length > 0) {
                 lastState.past.push(lastState.present);
-                let top = lastState.future.pop() as RouteData[];
+                const top = lastState.future.pop() as RouteData[];
                 lastState.present = top;
             }
         }));
@@ -169,7 +169,7 @@ export class RoutesReducer {
     @Action(DeleteRouteAction)
     public deleteRoute(ctx: StateContext<StateWithHistory<RouteData[]>>, action: DeleteRouteAction) {
         this.changeState(ctx, (lastState) => {
-            let routeToRemove = lastState.find(r => r.id === action.routeId);
+            const routeToRemove = lastState.find(r => r.id === action.routeId);
             lastState.splice(lastState.indexOf(routeToRemove), 1);
             return lastState;
         });
@@ -178,7 +178,7 @@ export class RoutesReducer {
     @Action(ChangeRoutePropertiesAction)
     public changeProperties(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ChangeRoutePropertiesAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             route.name = action.routeData.name;
             route.opacity = action.routeData.opacity || route.opacity;
             route.weight = action.routeData.weight || route.weight;
@@ -191,7 +191,7 @@ export class RoutesReducer {
     @Action(AddPrivatePoiAction)
     public addPoi(ctx: StateContext<StateWithHistory<RouteData[]>>, action: AddPrivatePoiAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             route.markers.push(action.markerData);
             return lastState;
         });
@@ -200,7 +200,7 @@ export class RoutesReducer {
     @Action(UpdatePrivatePoiAction)
     public updatePoi(ctx: StateContext<StateWithHistory<RouteData[]>>, action: UpdatePrivatePoiAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             route.markers.splice(action.index, 1, action.markerData);
             return lastState;
         });
@@ -209,7 +209,7 @@ export class RoutesReducer {
     @Action(DeletePrivatePoiAction)
     public deletePoi(ctx: StateContext<StateWithHistory<RouteData[]>>, action: DeletePrivatePoiAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             route.markers.splice(action.index, 1);
             return lastState;
         });
@@ -218,7 +218,7 @@ export class RoutesReducer {
     @Action(AddSegmentAction)
     public addSegment(ctx: StateContext<StateWithHistory<RouteData[]>>, action: AddSegmentAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             route.segments.push(action.segmentData);
             return lastState;
         });
@@ -227,7 +227,7 @@ export class RoutesReducer {
     @Action(UpdateSegmentsAction)
     public updateSegments(ctx: StateContext<StateWithHistory<RouteData[]>>, action: UpdateSegmentsAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             if (action.segmentsData.length === action.indices.length) {
                 for (let segmentIndex = 0; segmentIndex < action.indices.length; segmentIndex++) {
                     route.segments.splice(action.indices[segmentIndex], 1, action.segmentsData[segmentIndex]);
@@ -245,7 +245,7 @@ export class RoutesReducer {
     @Action(ReplaceSegmentsAction)
     public replaceSegments(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ReplaceSegmentsAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             route.segments = action.segmentsData;
             return lastState;
         });
@@ -254,7 +254,7 @@ export class RoutesReducer {
     @Action(DeleteSegmentAction)
     public deleteSegment(ctx: StateContext<StateWithHistory<RouteData[]>>, action: DeleteSegmentAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             route.segments.splice(action.index, 1);
             return lastState;
         });
@@ -263,7 +263,7 @@ export class RoutesReducer {
     @Action(ChangeRouteStateAction)
     public changeEditState(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ChangeRouteStateAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             route.state = action.state;
             return lastState;
         });
@@ -272,8 +272,8 @@ export class RoutesReducer {
     @Action(ReplaceRouteAction)
     public replaceRoute(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ReplaceRouteAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
-            let routeIndex = lastState.indexOf(route);
+            const route = lastState.find(r => r.id === action.routeId);
+            const routeIndex = lastState.indexOf(route);
             lastState.splice(routeIndex, 1, action.routeData);
             return lastState;
         });
@@ -282,7 +282,7 @@ export class RoutesReducer {
     @Action(SplitRouteAction)
     public splitRoute(ctx: StateContext<StateWithHistory<RouteData[]>>, action: SplitRouteAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             lastState.splice(lastState.indexOf(route), 1, action.routeData, action.splitRouteData);
             return lastState;
         });
@@ -291,8 +291,8 @@ export class RoutesReducer {
     @Action(MergeRoutesAction)
     public mergeRoutes(ctx: StateContext<StateWithHistory<RouteData[]>>, action: MergeRoutesAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
-            let secondaryRoute = lastState.find(r => r.id === action.secondaryRouteId);
+            const route = lastState.find(r => r.id === action.routeId);
+            const secondaryRoute = lastState.find(r => r.id === action.secondaryRouteId);
             lastState.splice(lastState.indexOf(route), 1, action.mergedRouteData);
             lastState.splice(lastState.indexOf(secondaryRoute), 1);
             return lastState;
@@ -302,7 +302,7 @@ export class RoutesReducer {
     @Action(ClearPoisAction)
     public clearPois(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ClearPoisAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             route.markers = [];
             return lastState;
         });
@@ -311,7 +311,7 @@ export class RoutesReducer {
     @Action(ClearPoisAndRouteAction)
     public clearPoisAndRoute(ctx: StateContext<StateWithHistory<RouteData[]>>, action: ClearPoisAndRouteAction) {
         this.changeState(ctx, (lastState) => {
-            let route = lastState.find(r => r.id === action.routeId);
+            const route = lastState.find(r => r.id === action.routeId);
             route.segments = [];
             route.markers = [];
             return lastState;
@@ -326,8 +326,8 @@ export class RoutesReducer {
     @Action(ToggleAllRoutesAction)
     public toggleAllRoutes(ctx: StateContext<StateWithHistory<RouteData[]>>) {
         this.changeState(ctx, (lastState) => {
-            let isAllRoutesHidden = lastState.find(r => r.state !== "Hidden") == null;
-            for (let route of lastState) {
+            const isAllRoutesHidden = lastState.find(r => r.state !== "Hidden") == null;
+            for (const route of lastState) {
                 route.state = isAllRoutesHidden ? "ReadOnly" : "Hidden";
             }
             return lastState;

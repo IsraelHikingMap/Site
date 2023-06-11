@@ -77,7 +77,7 @@ export class CoordinatesService {
     }
 
     public toItm(latLng: LatLngAlt): NorthEast {
-        let coords = this.itmConverter.forward([latLng.lng, latLng.lat]);
+        const coords = this.itmConverter.forward([latLng.lng, latLng.lat]);
         return {
             north: coords[1],
             east: coords[0]
@@ -85,7 +85,7 @@ export class CoordinatesService {
     }
 
     public fromItm(northEast: NorthEast): LatLngAlt {
-        let coords = this.itmConverter.inverse([northEast.east, northEast.north]);
+        const coords = this.itmConverter.inverse([northEast.east, northEast.north]);
         return {
             lat: coords[1],
             lng: coords[0]
@@ -93,8 +93,8 @@ export class CoordinatesService {
     }
 
     public parseCoordinates(term: string): LatLngAlt {
-        for (let item of this.coordinatesParserMap) {
-            let matchArray = term.trim().match(item.matcher);
+        for (const item of this.coordinatesParserMap) {
+            const matchArray = term.trim().match(item.matcher);
             if (matchArray && matchArray.length > 0) {
                 return item.parser(matchArray);
             }
@@ -127,12 +127,12 @@ export class CoordinatesService {
     }
 
     private parseSixNumbers(match: RegExpMatchArray): LatLngAlt {
-        let latitudeDegrees = parseFloat(match[1]);
-        let latitudeMinutes = parseFloat(match[2]);
-        let latitudeSeconds = parseFloat(match[3]);
-        let longitudeDegrees = parseFloat(match[4]);
-        let longitudeMinutes = parseFloat(match[5]);
-        let longitudeSeconds = parseFloat(match[6]);
+        const latitudeDegrees = parseFloat(match[1]);
+        const latitudeMinutes = parseFloat(match[2]);
+        const latitudeSeconds = parseFloat(match[3]);
+        const longitudeDegrees = parseFloat(match[4]);
+        const longitudeMinutes = parseFloat(match[5]);
+        const longitudeSeconds = parseFloat(match[6]);
 
         return {
             lng: longitudeDegrees + longitudeMinutes / 60 + longitudeSeconds / 3600,
@@ -167,17 +167,17 @@ export class CoordinatesService {
     }
 
     private getDegreesFromString(degreesString: string): number {
-        let decDegMatch = degreesString.match(CoordinatesService.DECIMAL_DEGREES);
+        const decDegMatch = degreesString.match(CoordinatesService.DECIMAL_DEGREES);
         if (decDegMatch)
         {
             return parseFloat(decDegMatch[1]);
         }
 
-        let degMinMatch = degreesString.match(CoordinatesService.DEGREES_MINUTES);
+        const degMinMatch = degreesString.match(CoordinatesService.DEGREES_MINUTES);
         if (degMinMatch)
         {
-            let deg = parseFloat(degMinMatch[1]);
-            let min = parseFloat(degMinMatch[2]);
+            const deg = parseFloat(degMinMatch[1]);
+            const min = parseFloat(degMinMatch[2]);
             if (min < 60)
             {
                 return min / 60.0 + deg;
@@ -185,12 +185,12 @@ export class CoordinatesService {
             return NaN;
         }
 
-        let degMinSecMatch = degreesString.match(CoordinatesService.DEGREES_MINUTES_SECONDS);
+        const degMinSecMatch = degreesString.match(CoordinatesService.DEGREES_MINUTES_SECONDS);
         if (degMinSecMatch)
         {
-            let deg = parseFloat(degMinSecMatch[1]);
-            let min = parseFloat(degMinSecMatch[2]);
-            let sec = parseFloat(degMinSecMatch[3]);
+            const deg = parseFloat(degMinSecMatch[1]);
+            const min = parseFloat(degMinSecMatch[2]);
+            const sec = parseFloat(degMinSecMatch[3]);
             if (min < 60 && sec < 60)
             {
                 return (sec / 60.0 + min) / 60.0 + deg;
@@ -200,8 +200,8 @@ export class CoordinatesService {
     }
 
     private parseDecimalLatLng(match: RegExpMatchArray): LatLngAlt {
-        let lat = parseFloat(match[1]);
-        let lng = parseFloat(match[2]);
+        const lat = parseFloat(match[1]);
+        const lng = parseFloat(match[2]);
         if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180)
         {
             return {lng, lat};

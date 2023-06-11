@@ -13,7 +13,7 @@ export class IHMTitleService {
         this.set();
     }
 
-    public set(message: string = "") {
+    public set(message = "") {
         const prefix = message ? `${message} | ` : "";
         const s = `${prefix}Israel Hiking Map`;
         this.titleService.setTitle(s);

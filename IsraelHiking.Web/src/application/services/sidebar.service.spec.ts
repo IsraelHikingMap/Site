@@ -7,7 +7,7 @@ import { HashService } from "./hash.service";
 describe("SidebarService", () => {
 
     beforeEach(() => {
-        let hashServiceMock = {
+        const hashServiceMock = {
             setApplicationState: () => { },
             resetAddressbar: () => { }
         } as any as HashService;

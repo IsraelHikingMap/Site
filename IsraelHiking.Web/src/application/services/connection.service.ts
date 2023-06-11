@@ -114,7 +114,7 @@ export class ConnectionService implements OnDestroy {
     }
 
     private setInternetAccessAndEmitIfNeeded(hasInternetAccess: boolean) {
-        let previousState = this.currentState.hasInternetAccess;
+        const previousState = this.currentState.hasInternetAccess;
         this.currentState.hasInternetAccess = hasInternetAccess;
         if (previousState !== this.currentState.hasInternetAccess) {
             this.emitEvent();
@@ -144,7 +144,7 @@ export class ConnectionService implements OnDestroy {
             this.offlineSubscription.unsubscribe();
             this.onlineSubscription.unsubscribe();
             this.httpSubscription.unsubscribe();
-        } catch (e) {
+        } catch (e) { // eslint-disable-line
         }
     }
 

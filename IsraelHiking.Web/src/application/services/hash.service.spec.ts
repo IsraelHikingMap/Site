@@ -10,7 +10,7 @@ import { MapService } from "./map.service";
 
 describe("HashService", () => {
     beforeEach(() => {
-        let routerMock = {
+        const routerMock = {
             navigate: jasmine.createSpy("navigate"),
             events: new Subject<any>(),
             createUrlTree: () => { }
@@ -37,7 +37,7 @@ describe("HashService", () => {
                 }
             });
 
-            let href = hashService.getHref();
+            const href = hashService.getHref();
 
             expect(href).toBe(Urls.baseAddress + "map/2.00/2.000000/3.000000");
         }));
@@ -52,7 +52,7 @@ describe("HashService", () => {
                 }
             });
 
-            let href = hashService.getHref();
+            const href = hashService.getHref();
 
             expect(href).toBe(Urls.baseAddress + "share-address");
         }));
@@ -68,7 +68,7 @@ describe("HashService", () => {
                     selectedBaseLayerKey: "base-layer"
                 }
             });
-            let href = hashService.getHref();
+            const href = hashService.getHref();
 
             expect(href).toBe(Urls.baseAddress + "file-address?base-layer");
         }));

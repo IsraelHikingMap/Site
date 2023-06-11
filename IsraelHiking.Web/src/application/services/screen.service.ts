@@ -69,7 +69,7 @@ export class ScreenService {
     }
 
     private setKeepScreenOn() {
-        let configuration = this.store.selectSnapshot((s: ApplicationState) => s.configuration);
+        const configuration = this.store.selectSnapshot((s: ApplicationState) => s.configuration);
         this.logger.info(`[Screen] Setting mode: ${configuration.batteryOptimizationType}`);
         if (configuration.batteryOptimizationType !== "screen-off") {
             KeepAwake.keepAwake();

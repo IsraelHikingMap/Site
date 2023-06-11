@@ -19,14 +19,14 @@ export class SnappingService {
      * This method will snap to the nearest point. markerData will be null in case there were no points near by.
      */
     public snapToPoint(latlng: LatLngAlt, points: MarkerData[]): SnappingPointResponse {
-        let response = {
+        const response = {
             latlng,
             markerData: null,
             id: null
         } as SnappingPointResponse;
-        let pointOnScreen = this.mapService.map.project(latlng);
-        for (let markerData of points) {
-            let markerPointOnScreen = this.mapService.map.project(markerData.latlng);
+        const pointOnScreen = this.mapService.map.project(latlng);
+        for (const markerData of points) {
+            const markerPointOnScreen = this.mapService.map.project(markerData.latlng);
             if (SpatialService.getDistanceForCoordinates([markerPointOnScreen.x, markerPointOnScreen.y],
                 [pointOnScreen.x, pointOnScreen.y]) < SnappingService.SENSITIVITY &&
                 response.markerData == null) {

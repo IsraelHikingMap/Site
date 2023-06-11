@@ -21,19 +21,19 @@ export class NavigateHereService {
                 private readonly store: Store) { }
 
     public async addNavigationSegment(latlng: LatLngAlt, title: string) {
-        let currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
+        const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
         if (currentPosition == null) {
             this.toastService.warning(this.resources.unableToFindYourLocation);
             return;
         }
-        let routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
-        let currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
-        let latlngs = await this.routerService.getRoute(currentLocation, latlng, routingType);
+        const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
+        const currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
+        const latlngs = await this.routerService.getRoute(currentLocation, latlng, routingType);
         let name = this.resources.route + (title ? " " + title : "");
         if (!this.selectedRouteService.isNameAvailable(name)) {
             name = this.selectedRouteService.createRouteName(name);
         }
-        let data = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
+        const data = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
         data.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(latlngs as LatLngAltTime[], routingType);
         this.store.dispatch(new AddRouteAction(data));
 

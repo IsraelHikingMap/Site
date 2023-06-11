@@ -15,7 +15,7 @@ export class OfflineImagePipe implements PipeTransform {
 
     public async transform(value: string, cache: boolean): Promise<string> {
         if (!this.runningContextService.isOnline) {
-            let data = await this.databaseService.getImageByUrl(value);
+            const data = await this.databaseService.getImageByUrl(value);
             if (data != null) {
                 return data;
             }

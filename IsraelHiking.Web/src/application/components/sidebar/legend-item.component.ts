@@ -51,7 +51,7 @@ export class LegendItemComponent extends BaseMapComponent {
     }
 
     public getImageAddress(item: ILegendItem) {
-        let styleKey = this.layersService.getSelectedBaseLayer().address.replace(".json", "").split("/").splice(-1)[0];
+        const styleKey = this.layersService.getSelectedBaseLayer().address.replace(".json", "").split("/").splice(-1)[0];
         return `content/legend/${styleKey}_${item.key}.png`;
     }
 }

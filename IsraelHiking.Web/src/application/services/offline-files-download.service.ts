@@ -30,8 +30,8 @@ export class OfflineFilesDownloadService {
     }
 
     public async initialize(): Promise<void> {
-        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
-        let userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
         if (offlineState.isOfflineAvailable === true &&
             offlineState.lastModifiedDate == null &&
             userState.userInfo != null) {
@@ -43,7 +43,7 @@ export class OfflineFilesDownloadService {
             userState.userInfo != null) {
             // Check and migrate old databases if needed
             try {
-                let needToMigrate = await this.fileService.renameOldDatabases();
+                const needToMigrate = await this.fileService.renameOldDatabases();
                 if (needToMigrate) {
                     await this.databaseService.migrateDatabasesIfNeeded();
                 }
@@ -58,7 +58,7 @@ export class OfflineFilesDownloadService {
     public async downloadOfflineMaps(showMessage = true): Promise<void> {
         this.loggingService.info("[Offline Download] Starting downloading offline files");
         try {
-            let fileNames = await this.getFilesToDownloadDictionary();
+            const fileNames = await this.getFilesToDownloadDictionary();
             if (Object.keys(fileNames).length === 0) {
                 this.toastService.success(this.resources.allFilesAreUpToDate + " " + this.resources.useTheCloudIconToGoOffline);
                 return;
@@ -70,7 +70,7 @@ export class OfflineFilesDownloadService {
                 continueText: this.resources.largeFilesUseWifi
             });
         } catch (ex) {
-            let typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
+            const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
             switch (typeAndMessage.type) {
                 case "timeout":
                     this.loggingService.error("[Offline Download] Failed to get download files list due to timeout");
@@ -101,19 +101,19 @@ export class OfflineFilesDownloadService {
         }
         try {
             let newestFileDate = new Date(0);
-            let length = Object.keys(fileNames).length;
+            const length = Object.keys(fileNames).length;
             for (let fileNameIndex = 0; fileNameIndex < length; fileNameIndex++) {
-                let fileName = Object.keys(fileNames)[fileNameIndex];
-                let fileDate = new Date(fileNames[fileName]);
+                const fileName = Object.keys(fileNames)[fileNameIndex];
+                const fileDate = new Date(fileNames[fileName]);
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
-                let token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
+                const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
                 if (fileName.endsWith(".mbtiles")) {
-                    let dbFileName = fileName.replace(".mbtiles", ".db");
+                    const dbFileName = fileName.replace(".mbtiles", ".db");
                     await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`, dbFileName, token,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
                     await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
                 } else {
-                    let fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
+                    const fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
                     await this.fileService.writeStyles(fileContent as Blob);
                 }
@@ -132,9 +132,9 @@ export class OfflineFilesDownloadService {
     }
 
     private async getFilesToDownloadDictionary(): Promise<Record<string, string>> {
-        let lastModified = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate;
-        let lastModifiedString = lastModified ? lastModified.toISOString() : null;
-        let fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
+        const lastModified = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate;
+        const lastModifiedString = lastModified ? lastModified.toISOString() : null;
+        const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
             params: { lastModified: lastModifiedString }
         }).pipe(timeout(5000)));
         this.loggingService.info(
@@ -149,7 +149,7 @@ export class OfflineFilesDownloadService {
             }).pipe(timeout(5000)));
             return false;
         } catch (ex) {
-            let typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
+            const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
             return typeAndMessage.type === "server" && typeAndMessage.statusCode === 403;
         }
 

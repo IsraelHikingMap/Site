@@ -38,7 +38,7 @@ export class IntroDialogComponent extends BaseMapComponent {
     }
 
     public static openDialog(dialog: MatDialog, runningContextSerivce: RunningContextService) {
-        let options: MatDialogConfig = {};
+        const options: MatDialogConfig = {};
         if (runningContextSerivce.isMobile) {
             options.maxWidth = "100vw";
             options.width = "100vw";

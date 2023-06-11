@@ -208,13 +208,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             const HOUR = 60 * 60;
             const MINUTE = 60;
             if (duration > HOUR) {
-                let hours = Math.floor(duration / (HOUR));
-                let minutes = Math.floor((duration % (HOUR)) / MINUTE);
+                const hours = Math.floor(duration / (HOUR));
+                const minutes = Math.floor((duration % (HOUR)) / MINUTE);
                 this.duration = this.toTwoDigits(hours) + ":" + this.toTwoDigits(minutes);
                 this.durationUnits = this.resources.hourUnit;
             } else {
-                let minutes = Math.floor(duration / MINUTE);
-                let seconds = Math.floor(duration % MINUTE);
+                const minutes = Math.floor(duration / MINUTE);
+                const seconds = Math.floor(duration % MINUTE);
                 this.duration = this.toTwoDigits(minutes) + ":" + this.toTwoDigits(seconds);
                 this.durationUnits = this.resources.minuteUnit;
             }
@@ -229,8 +229,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             speed = this.currentSpeed;
         }
         if (speed && this.statistics.remainingDistance) {
-            let timeLeftInMilliseconds = Math.floor(this.statistics.remainingDistance * 3600 / speed);
-            let finishDate = new Date(new Date().getTime() + timeLeftInMilliseconds);
+            const timeLeftInMilliseconds = Math.floor(this.statistics.remainingDistance * 3600 / speed);
+            const finishDate = new Date(new Date().getTime() + timeLeftInMilliseconds);
             this.ETA = finishDate.getHours().toString().padStart(2, "0") + ":" +
                 finishDate.getMinutes().toString().padStart(2, "0");
         } else {
@@ -270,9 +270,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }));
         this.routeChanged();
         this.componentSubscriptions.push(interval(1000).subscribe(() => {
-            let recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
+            const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
             if (recordedRouteState.isRecording) {
-                let recordingStartTime = recordedRouteState.route.latlngs[0].timestamp.getTime();
+                const recordingStartTime = recordedRouteState.route.latlngs[0].timestamp.getTime();
                 this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
             }
         }));
@@ -280,7 +280,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public ngOnDestroy() {
-        for (let subscription of this.componentSubscriptions) {
+        for (const subscription of this.componentSubscriptions) {
             subscription.unsubscribe();
         }
     }
@@ -383,12 +383,12 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.hideChartHover();
             return;
         }
-        let chartXCoordinate = this.chartElements.xScale(point.coordinate[0]);
-        let chartYCoordinate = this.chartElements.yScale(point.coordinate[1]);
+        const chartXCoordinate = this.chartElements.xScale(point.coordinate[0]);
+        const chartYCoordinate = this.chartElements.yScale(point.coordinate[1]);
         this.chartElements.hoverGroup.style("display", null);
         this.chartElements.hoverGroup.attr("transform", `translate(${chartXCoordinate}, 0)`);
         this.chartElements.hoverGroup.selectAll("circle").attr("cy", chartYCoordinate);
-        let safeDistance = 20;
+        const safeDistance = 20;
         let boxPosition = safeDistance;
         if (chartXCoordinate > +this.chartElements.svg.attr("width") / 2) {
             boxPosition = -RouteStatisticsComponent.HOVER_BOX_WIDTH - safeDistance;
@@ -422,8 +422,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private onMouseMove = (e: Event) => {
         e.stopPropagation();
-        let xPosition = this.getMouseOrTouchChartXPosition(e);
-        let point = this.routeStatisticsService.interpolateStatistics(this.statistics, xPosition);
+        const xPosition = this.getMouseOrTouchChartXPosition(e);
+        const point = this.routeStatisticsService.interpolateStatistics(this.statistics, xPosition);
         if (this.chartElements.dragState === "none") {
             this.showChartHover(point);
             this.updateSubRouteSelectionOnChart();
@@ -462,9 +462,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.chartElements.margin.right = this.isSlopeOn ? 30 : 10;
         this.chartElements.svg = d3.select(this.lineChartContainer.nativeElement).select("svg");
         this.chartElements.svg.html("");
-        let windowStyle = window.getComputedStyle(this.lineChartContainer.nativeElement);
-        let width = +windowStyle.width.replace("px", "");
-        let height = +windowStyle.height.replace("px", "");
+        const windowStyle = window.getComputedStyle(this.lineChartContainer.nativeElement);
+        const width = +windowStyle.width.replace("px", "");
+        const height = +windowStyle.height.replace("px", "");
         this.chartElements.svg.attr("height", height);
         this.chartElements.svg.attr("width", width);
         this.chartElements.width = width - this.chartElements.margin.left - this.chartElements.margin.right;
@@ -545,7 +545,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private addChartDragGroup() {
-        let dragGroup = this.chartElements.chartArea.append("g")
+        const dragGroup = this.chartElements.chartArea.append("g")
             .attr("class", "drag-group");
 
         this.chartElements.dragRect = dragGroup.append("rect")
@@ -661,7 +661,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (this.resources.direction === "rtl") {
             x = RouteStatisticsComponent.HOVER_BOX_WIDTH - x;
         }
-        let text = this.chartElements.hoverGroup.select("g")
+        const text = this.chartElements.hoverGroup.select("g")
             .append("text")
             .attr("fill", "black")
             .attr("transform", `translate(${x}, ${y})`)
@@ -673,7 +673,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .style("pointer-events", "none");
         text.append("tspan")
             .text(`${title}: `);
-        let valueSpan = text.append("tspan");
+        const valueSpan = text.append("tspan");
         if (useBidi) {
             valueSpan.attr("unicode-bidi", "embed").attr("direction", "ltr");
         }
@@ -692,11 +692,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (!this.isOpen) {
             return;
         }
-        let duration = 1000;
-        let chartTransition = this.chartElements.chartArea.transition();
+        const duration = 1000;
+        const chartTransition = this.chartElements.chartArea.transition();
         this.chartElements.xScale.domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]);
         this.chartElements.yScale.domain([d3.min(data, d => d[1]), d3.max(data, d => d[1])]);
-        let line = d3.line()
+        const line = d3.line()
             .curve(d3.curveCatmullRom)
             .x(d => this.chartElements.xScale(d[0]))
             .y(d => this.chartElements.yScale(d[1]));
@@ -715,13 +715,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 .y((d: RouteStatisticsPoint) => d.slope)
                 .bandwidth(0.03)(this.statistics.points);
         }
-        let maxAbsSlope = (slopeData.length === 0)
+        const maxAbsSlope = (slopeData.length === 0)
             ? RouteStatisticsComponent.MAX_SLOPE
             : Math.max(...slopeData.map(p => Math.abs(p[1])), RouteStatisticsComponent.MAX_SLOPE);
 
         // making the slope chart be symetric around zero
         this.chartElements.yScaleSlope.domain([-maxAbsSlope, maxAbsSlope]);
-        let slopeLine = d3.line()
+        const slopeLine = d3.line()
             .curve(d3.curveCatmullRom)
             .x(d => this.chartElements.xScale(d[0]))
             .y(d => this.chartElements.yScaleSlope(d[1]));
@@ -729,7 +729,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         chartTransition.select(".y-axis-slope")
             .call(d3.axisRight(this.chartElements.yScaleSlope).ticks(5) as any)
             .duration(duration);
-        let zeroAxisY = this.chartElements.yScaleSlope(0) || this.chartElements.height / 2;
+        const zeroAxisY = this.chartElements.yScaleSlope(0) || this.chartElements.height / 2;
         chartTransition.select(".slope-zero-axis").attr("y1", zeroAxisY).attr("y2", zeroAxisY);
     }
 
@@ -746,7 +746,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             type: "FeatureCollection",
             features: []
         };
-        let route = this.getRouteForChart();
+        const route = this.getRouteForChart();
         if (route == null) {
             return;
         }
@@ -757,8 +757,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             return;
         }
 
-        let points = this.getKmPoints(route.latlngs);
-        let features = [] as GeoJSON.Feature<GeoJSON.Point>[];
+        const points = this.getKmPoints(route.latlngs);
+        const features = [] as GeoJSON.Feature<GeoJSON.Point>[];
         for (let i = 0; i < points.length; i++) {
             features.push({
                 type: "Feature",
@@ -777,12 +777,12 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private getKmPoints(latlngs: LatLngAlt[]): LatLngAlt[] {
         let length = 0;
-        let markersDistance = this.getMarkerDistance() * 1000;
-        let start = latlngs[0];
-        let results = [start];
+        const markersDistance = this.getMarkerDistance() * 1000;
+        const start = latlngs[0];
+        const results = [start];
         let previousPoint = start;
-        for (let latlng of latlngs) {
-            let currentDistance = SpatialService.getDistanceInMeters(previousPoint, latlng);
+        for (const latlng of latlngs) {
+            const currentDistance = SpatialService.getDistanceInMeters(previousPoint, latlng);
             length += currentDistance;
             if (length < markersDistance) {
                 previousPoint = latlng;
@@ -793,10 +793,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 length -= markersDistance;
                 markersToAdd++;
             }
-            let ratio = (currentDistance - length - markersDistance * markersToAdd) / currentDistance;
+            const ratio = (currentDistance - length - markersDistance * markersToAdd) / currentDistance;
             results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, ratio));
             for (let i = 1; i <= markersToAdd; i++) {
-                let currentRatio = (i * markersDistance) / currentDistance + ratio;
+                const currentRatio = (i * markersDistance) / currentDistance + ratio;
                 results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, currentRatio));
             }
             previousPoint = latlng;
@@ -830,16 +830,16 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.clearSubRouteSelection();
             return;
         }
-        let xStart = this.chartElements.xScale(Math.min(this.subRouteRange.xStart, this.subRouteRange.xEnd));
-        let xEnd = this.chartElements.xScale(Math.max(this.subRouteRange.xStart, this.subRouteRange.xEnd));
+        const xStart = this.chartElements.xScale(Math.min(this.subRouteRange.xStart, this.subRouteRange.xEnd));
+        const xEnd = this.chartElements.xScale(Math.max(this.subRouteRange.xStart, this.subRouteRange.xEnd));
         this.chartElements.dragRect.style("display", null)
             .attr("width", xEnd - xStart)
             .attr("x", xStart);
 
-        let start = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xStart));
-        let end = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xEnd));
-        let latlngs = this.getRouteForChart() ? this.getRouteForChart().latlngs : [];
-        let statistics = this.routeStatisticsService.getStatisticsByRange(latlngs, start, end);
+        const start = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xStart));
+        const end = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xEnd));
+        const latlngs = this.getRouteForChart() ? this.getRouteForChart().latlngs : [];
+        const statistics = this.routeStatisticsService.getStatisticsByRange(latlngs, start, end);
         this.setViewStatisticsValues(statistics);
     }
 
@@ -853,7 +853,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (!this.isOpen) {
             return;
         }
-        let point = this.getPointFromLatLng(latlng, null);
+        const point = this.getPointFromLatLng(latlng, null);
         this.showChartHover(point);
     };
 
@@ -871,15 +871,15 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private refreshLocationGroup() {
-        let currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
-        let currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
-        let point = this.getPointFromLatLng(currentLocation, this.heading);
+        const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
+        const currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
+        const point = this.getPointFromLatLng(currentLocation, this.heading);
         if (!point) {
             this.hideLocationGroup();
             return;
         }
-        let chartXCoordinate = this.chartElements.xScale(point.coordinate[0]);
-        let chartYCoordinate = this.chartElements.yScale(point.coordinate[1]);
+        const chartXCoordinate = this.chartElements.xScale(point.coordinate[0]);
+        const chartYCoordinate = this.chartElements.yScale(point.coordinate[1]);
         if (isNaN(chartXCoordinate) || isNaN(chartXCoordinate)) {
             // this is the case of no data on chart
             this.hideLocationGroup();
@@ -903,7 +903,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (this.statistics == null) {
             return null;
         }
-        let x = this.routeStatisticsService.findDistanceForLatLngInKM(this.statistics, latlng, heading);
+        const x = this.routeStatisticsService.findDistanceForLatLngInKM(this.statistics, latlng, heading);
         if (x <= 0) {
             return null;
         }
@@ -911,17 +911,17 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private updateStatistics() {
-        let route = this.getRouteForChart();
+        const route = this.getRouteForChart();
         if (!route) {
             this.statistics = null;
             this.setViewStatisticsValues(null);
             return;
         }
-        let currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
-        let currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
-        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
+        const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
+        const currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
+        const closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
 
-        let recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
+        const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
         if (recordedRouteState.isRecording && closestRouteToGps) {
             this.statistics = this.routeStatisticsService.getStatisticsForRecordedRouteWithPlannedRoute(
                 recordedRouteState.route.latlngs,
@@ -943,9 +943,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private getRouteForChart(): { latlngs: LatLngAltTime[]; color: string; weight: number} | null {
-        let currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
-        let currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
-        let closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
+        const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
+        const currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
+        const closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);
         if (closestRouteToGps) {
             return {
                 latlngs: this.selectedRouteService.getLatlngs(closestRouteToGps),
@@ -953,7 +953,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 weight: closestRouteToGps.weight
             };
         }
-        let recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
+        const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
         if (recordedRouteState.isRecording) {
             return {
                 latlngs: recordedRouteState.route.latlngs,
@@ -961,7 +961,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 weight: 6
             };
         }
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute) {
             return {
                 latlngs: this.selectedRouteService.getLatlngs(selectedRoute),
@@ -981,7 +981,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private updateIsFollowing() {
-        let newIsFollowing = this.statistics.remainingDistance != null;
+        const newIsFollowing = this.statistics.remainingDistance != null;
         if (this.isFollowing === newIsFollowing) {
             return;
         }
@@ -996,7 +996,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private updateSlopeRoute() {
-        let route = this.getRouteForChart();
+        const route = this.getRouteForChart();
         this.slopeRouteSource = {
             type: "FeatureCollection",
             features: []
@@ -1019,7 +1019,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             }
         });
 
-        let stops = [0, this.routeSlopeToColor(this.statistics.points[0].slope)];
+        const stops = [0, this.routeSlopeToColor(this.statistics.points[0].slope)];
         for (let pointIndex = 1; pointIndex < this.statistics.points.length; pointIndex++) {
             stops.push(this.statistics.points[pointIndex].coordinate[0] * 1000 / this.statistics.length);
             stops.push(this.routeSlopeToColor(this.statistics.points[pointIndex].slope));
@@ -1046,20 +1046,20 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         if (slope > 5) {
             // red to yellow
-            let ratio = (slope - 5) / (RouteStatisticsComponent.MAX_SLOPE - 5);
+            const ratio = (slope - 5) / (RouteStatisticsComponent.MAX_SLOPE - 5);
             r = 255;
             g = Math.floor(255 * (1 - ratio));
             b = 0;
         }
         else if (slope > 0) {
             // yellow to green
-            let ratio = slope / 5;
+            const ratio = slope / 5;
             r = Math.floor(255 * ratio);
             g = 255;
             b = 0;
         } else {
             // green to blue
-            let ratio = slope / -RouteStatisticsComponent.MAX_SLOPE;
+            const ratio = slope / -RouteStatisticsComponent.MAX_SLOPE;
             r = 0;
             g = Math.floor(255 * (1 - ratio));
             b = Math.floor(255 * ratio);

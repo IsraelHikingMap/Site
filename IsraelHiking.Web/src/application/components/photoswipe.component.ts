@@ -33,13 +33,13 @@ export class PhotoSwpieComponent extends BaseMapComponent implements AfterViewIn
     }
 
     public ngAfterViewInit(): void {
-        let pswpElement = this.photoswipe.nativeElement;
+        const pswpElement = this.photoswipe.nativeElement;
 
-        let dataSource = this.data.imageUrls.map(imageUrl => ({
+        const dataSource = this.data.imageUrls.map(imageUrl => ({
             src: imageUrl,
         }));
 
-        let pswp = new PhotoSwipe({
+        const pswp = new PhotoSwipe({
             appendToEl: pswpElement,
             dataSource,
             index: this.data.index,

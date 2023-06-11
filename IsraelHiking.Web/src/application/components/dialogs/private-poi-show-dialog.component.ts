@@ -106,7 +106,7 @@ export class PrivatePoiShowDialogComponent extends BaseMapComponent {
     }
 
     public isShowAddToActiveRoute(): boolean {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && this.routeId !== selectedRoute.id;
     }
 }

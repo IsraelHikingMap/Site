@@ -28,7 +28,7 @@ describe("SearchResultsProvider", () => {
 
     it("Should get all kind of features in results", (inject([SearchResultsProvider, HttpTestingController],
         async (provider: SearchResultsProvider, mockBackend: HttpTestingController) => {
-            let promise = provider.getResults("searchTerm", true).then((results: SearchResultsPointOfInterest[]) => {
+            const promise = provider.getResults("searchTerm", true).then((results: SearchResultsPointOfInterest[]) => {
                 expect(results.length).toBe(1);
             }, fail);
 

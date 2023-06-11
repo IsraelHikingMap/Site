@@ -21,17 +21,17 @@ describe("ImageAttributionService", () => {
     });
 
     it("should return null when getting null", inject([ImageAttributionService], async (service: ImageAttributionService) => {
-        let response = await service.getAttributionForImage(null);
+        const response = await service.getAttributionForImage(null);
         expect(response).toBeNull();
     }));
 
     it("should return null when getting base64 image", inject([ImageAttributionService], async (service: ImageAttributionService) => {
-        let response = await service.getAttributionForImage("data:image/jpeg;base64,LzlqLzRBQ...");
+        const response = await service.getAttributionForImage("data:image/jpeg;base64,LzlqLzRBQ...");
         expect(response).toBeNull();
     }));
 
     it("should return a site when getting a site", inject([ImageAttributionService], async (service: ImageAttributionService) => {
-        let response = await service.getAttributionForImage("https://www.example.com/image.png");
+        const response = await service.getAttributionForImage("https://www.example.com/image.png");
         expect(response).not.toBeNull();
         expect(response.author).toBe("https://www.example.com");
         expect(response.url).toBe("https://www.example.com");
@@ -39,7 +39,7 @@ describe("ImageAttributionService", () => {
 
     it("should fetch data from wikipedia when getting wikimedia image", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+        const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://en.wikipedia.org/"))[0].flush({
             query: {
                 pages: {
@@ -56,7 +56,7 @@ describe("ImageAttributionService", () => {
             }
         });
 
-        let response = await promise;
+        const response = await promise;
 
         expect(response).not.toBeNull();
         expect(response.author).toBe("hello");
@@ -65,7 +65,7 @@ describe("ImageAttributionService", () => {
 
     it("should remove html tags and get the value inside", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+        const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://en.wikipedia.org/"))[0].flush({
             query: {
                 pages: {
@@ -82,7 +82,7 @@ describe("ImageAttributionService", () => {
             }
         });
 
-        let response = await promise;
+        const response = await promise;
 
         expect(response).not.toBeNull();
         expect(response.author).toBe("hello");
@@ -91,7 +91,7 @@ describe("ImageAttributionService", () => {
 
     it("should remove html tags and get the value inside for multiple html tags", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+        const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://en.wikipedia.org/"))[0].flush({
             query: {
                 pages: {
@@ -115,7 +115,7 @@ describe("ImageAttributionService", () => {
             }
         });
 
-        let response = await promise;
+        const response = await promise;
 
         expect(response).not.toBeNull();
         expect(response.author).toBe("Sources for historical series of maps as follows:\n");
@@ -124,7 +124,7 @@ describe("ImageAttributionService", () => {
 
     it("should return null when getting wikimedia image without artist", inject([ImageAttributionService, HttpTestingController],
         async (service: ImageAttributionService, mockBackend: HttpTestingController) => {
-        let promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
+        const promise = service.getAttributionForImage("https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/IHM_Image.jpeg");
         mockBackend.match(r => r.url.startsWith("https://en.wikipedia.org/"))[0].flush({
             query: {
                 pages: {
@@ -139,7 +139,7 @@ describe("ImageAttributionService", () => {
             }
         });
 
-        let response = await promise;
+        const response = await promise;
 
         expect(response).toBeNull();
     }));

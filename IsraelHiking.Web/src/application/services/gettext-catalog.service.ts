@@ -20,12 +20,12 @@ export class GetTextCatalogService {
         return this.baseLanguage;
     }
 
-    public getString(word: string, scope?: any, context?: string): string {
+    public getString(word: string): string {
         return this.strings[word] as string || word || "";
     }
 
     public async loadRemote(url: string): Promise<void> {
-        let response = await firstValueFrom(this.httpClient.get(url)) as Record<string, string>;
+        const response = await firstValueFrom(this.httpClient.get(url)) as Record<string, string>;
         this.strings = response;
     }
 }

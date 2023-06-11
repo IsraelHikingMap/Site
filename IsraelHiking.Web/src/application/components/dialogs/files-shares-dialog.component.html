@@ -28,12 +28,12 @@
             </button>
         </div>
         <div *ngIf="showHiddenWarning" class="flex flex-row">
-            <mat-hint class="text-small">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
+            <mat-hint class="text-sm">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
         </div>
         <div *ngIf="isSaveAsOpen">
             <div class="flex flex-row" *ngFor="let format of formats">
                 <button mat-button (click)="saveAs(format)" matDialogClose angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as format {{format.label}}">
-                    <span class="text-small" dir="ltr">{{format.label}}</span>
+                    <span class="text-sm" dir="ltr">{{format.label}}</span>
                 </button>
             </div>
         </div>

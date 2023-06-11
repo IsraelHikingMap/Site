@@ -1,7 +1,7 @@
 ﻿﻿<div [dir]="resources.direction">
     <mat-card-header *ngIf="!info.canEditTitle">
         <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
-            <span class="text-large" [dir]="resources.getDirection(info.title)">{{info.title}}</span>
+            <span class="text-xl" [dir]="resources.getDirection(info.title)">{{info.title}}</span>
         </mat-card-title>
     </mat-card-header>
     <div class="flex flex-row">
@@ -22,7 +22,7 @@
             </mat-form-field>
         </div>
         <div class="w-1/12">
-            <button mat-button class="w-full !h-full min-w-unset no-padding" (click)="removeUrl(i)"><i class="fa icon-trash"></i></button>
+            <button mat-button class="w-full !h-full min-w-unset !p-0" (click)="removeUrl(i)"><i class="fa icon-trash"></i></button>
         </div>
     </div>
     <br />
@@ -31,7 +31,7 @@
             {{resources.addLink}}
         </div>
         <div class="w-1/12">
-            <button mat-button class="w-full !h-full min-w-unset no-padding"><i class="fa icon-plus"></i></button>
+            <button mat-button class="w-full !h-full min-w-unset !p-0"><i class="fa icon-plus"></i></button>
         </div>
     </div>
     <div *ngIf="isPoint()">
