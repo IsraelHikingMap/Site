@@ -125,17 +125,6 @@ overlay.overlay-shown {
 }
 // end photoswipe
 
-.cursor-default {
-    cursor: default !important;
-}
-
-.cursor-pointer {
-    cursor: pointer;
-}
-
-.cursor-zoom-in {
-    cursor: zoom-in;
-}
 
 .stack-icon-top {
     top: -2px;
@@ -153,18 +142,6 @@ overlay.overlay-shown {
     width: 24px;
     text-align: center;
     margin: 0 !important;
-}
-
-.text-small {
-    font-size: small;
-}
-
-.text-large {
-    font-size: large;
-}
-
-.no-padding {
-    padding: 0 !important;
 }
 
 .min-w-unset {
@@ -195,18 +172,6 @@ overlay.overlay-shown {
     word-wrap: break-word;
 }
 
-.text-right {
-    text-align: right !important;
-}
-
-.text-center {
-    text-align: center !important;
-}
-
-.text-left {
-    text-align: left !important;
-}
-
 .img-responsive {
     max-width: 100%;
 }
@@ -228,12 +193,6 @@ overlay.overlay-shown {
     position: relative;
     width: 100%;
     height: 200px;
-}
-
-.flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .break-lines {
@@ -276,28 +235,6 @@ overlay.overlay-shown {
     box-shadow: 0 0 10px mat.get-color-from-palette($app-primary), 0 0 5px mat.get-color-from-palette($app-primary) !important
 }
 /* Progressbar override */
-
-/* Margins*/
-.margin-10 {
-    margin-left: 10px;
-    margin-right: 0;
-}
-
-[dir=rtl] .margin-10 {
-    margin-right: 10px;
-    margin-left: 0;
-}
-
-.margin-10-reverse {
-    margin-left: 0 !important;
-    margin-right: 10px !important;
-}
-
-[dir=rtl] .margin-10-reverse {
-    margin-right: 0 !important;
-    margin-left: 10px !important;
-}
-/* Margins*/
 
 @media print {
     .mat-mdc-tooltip,

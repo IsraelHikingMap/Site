@@ -25,7 +25,7 @@
                 <mat-checkbox color="primary" [(ngModel)]="unhideRoutes">{{resources.unhideHiddenRoutes}}</mat-checkbox>
             </div>
             <div class="flex flex-row" *ngIf="showUnhide && !unhideRoutes">
-                <mat-hint class="text-small">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
+                <mat-hint class="text-sm">⚠️ {{resources.hiddenRoutesWillNotBeSaved}}</mat-hint>
             </div>
             <div class="flex flex-row" *ngIf="canUpdate">
                 <mat-checkbox color="primary" [(ngModel)]="updateCurrentShare">{{resources.updateCurrentShare}}</mat-checkbox>

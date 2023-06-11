@@ -19,34 +19,38 @@
             </label>
         </div>
         <div *ngFor="let trace of filteredTraces" class="item">
-            <div class="flex flex-row" [ngClass]="{'active': selectedTraceId === trace.id}" (click)="toggleSelectedTrace(trace)">
-                <div class="item-image">
-                    <secured-image [src]="trace.imageUrl" alt="" class="w-full"></secured-image>
-                </div>
-                <div class="margin-10" >
-                    <div *ngIf="!isTraceInEditMode(trace.id)">
+            <div [ngClass]="{'active': selectedTraceId === trace.id}" (click)="toggleSelectedTrace(trace)">
+                <div class="flex flex-row" *ngIf="!isTraceInEditMode(trace.id)">
+                    <div class="item-image">
+                        <secured-image [src]="trace.imageUrl" alt="" class="w-full"></secured-image>
+                    </div>
+                    <div class="ms-2">
                         {{getTraceDisplayName(trace)}}<br />
                         {{trace.timeStamp | date:'dd/MM/yyyy'}}<br />
                         {{getVisibilityTranslation(trace.visibility)}}<br />
                         {{trace.tagsString}}
                     </div>
-                    <div *ngIf="isTraceInEditMode(trace.id)">
-                        <mat-form-field>
-                            <input matInput type="text" [(ngModel)]="traceInEditMode.description" placeholder="{{resources.description}}" />
+                </div>
+                <ng-container *ngIf="isTraceInEditMode(trace.id)">
+                    <div class="flex flex-row">
+                        <mat-form-field class="w-full">
+                            <textarea matInput type="text" [(ngModel)]="traceInEditMode.description" placeholder="{{resources.description}}"></textarea>
                         </mat-form-field>
-                        <br />
-                        <mat-form-field>
+                    </div>
+                    <div class="flex flex-row">
+                        <mat-form-field class="w-full">
                             <input matInput type="text" [(ngModel)]="traceInEditMode.tagsString" placeholder="{{resources.tags}}" />
                         </mat-form-field>
-                        <br />
-                        <mat-form-field>
+                    </div>
+                    <div class="flex flex-row">
+                        <mat-form-field class="w-full">
                             <mat-select [(ngModel)]="trace.visibility">
                                 <mat-option value="trackable">{{resources.private}}</mat-option>
                                 <mat-option value="identifiable">{{resources.public}}</mat-option>
                             </mat-select>
                         </mat-form-field>
                     </div>
-                </div>
+                </ng-container>
             </div>
         </div>
         <mat-spinner *ngIf="loadingTraces"></mat-spinner>
@@ -55,25 +59,25 @@
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
             <div class="flex-1">
-                <button mat-button class="w-full no-padding min-w-unset" [disabled]="!hasSelected() || canUploadToOsm()" (click)="findUnmappedRoutes()" matTooltip="{{resources.findUnmappedRoutes}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Find unmapped trace parts"><i class="fa icon-search"></i></button>
+                <button mat-button class="w-full !p-0 min-w-unset" [disabled]="!hasSelected() || canUploadToOsm()" (click)="findUnmappedRoutes()" matTooltip="{{resources.findUnmappedRoutes}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Find unmapped trace parts"><i class="fa icon-search"></i></button>
             </div>
             <div class="flex-1" *ngIf="!isTraceInEditMode(selectedTraceId)">
-                <button mat-button class="w-full no-padding min-w-unset" [disabled]="!hasSelected() || canUploadToOsm()" (click)="setTraceInEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace start"><i class="fa icon-pencil"></i></button>
+                <button mat-button class="w-full !p-0 min-w-unset" [disabled]="!hasSelected() || canUploadToOsm()" (click)="setTraceInEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace start"><i class="fa icon-pencil"></i></button>
             </div>
             <div class="flex-1" *ngIf="isTraceInEditMode(selectedTraceId)">
-                <button mat-button class="w-full no-padding min-w-unset" [disabled]="!hasSelected()" (click)="updateTrace()" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace end"><i class="fa icon-check"></i></button>
+                <button mat-button class="w-full !p-0 min-w-unset" [disabled]="!hasSelected()" (click)="updateTrace()" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace end"><i class="fa icon-check"></i></button>
             </div>
             <div class="flex-1">
-                <button mat-button class="w-full no-padding min-w-unset" [disabled]="!hasSelected()" (click)="deleteTrace()" matTooltip="{{resources.delete}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-trash"></i></button>
+                <button mat-button class="w-full !p-0 min-w-unset" [disabled]="!hasSelected()" (click)="deleteTrace()" matTooltip="{{resources.delete}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-trash"></i></button>
             </div>
             <div class="flex-1">
-                <button mat-button class="w-full no-padding min-w-unset" [disabled]="!hasSelected()" matDialogClose (click)="addTraceToRoutes()" matTooltip="{{resources.addToRoutes}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Add OSM trace to routes"><i class="fa icon-plus"></i></button>
+                <button mat-button class="w-full !p-0 min-w-unset" [disabled]="!hasSelected()" matDialogClose (click)="addTraceToRoutes()" matTooltip="{{resources.addToRoutes}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Add OSM trace to routes"><i class="fa icon-plus"></i></button>
             </div>
             <div class="flex-1" *ngIf="hasSelected() && canUploadToOsm()">
-                <button mat-button class="w-full no-padding min-w-unset" (click)="uploadRecordingToOsm()" matTooltip="{{resources.uploadFileToOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload locally recorded route"><i class="fa icon-cloud-upload"></i></button>
+                <button mat-button class="w-full !p-0 min-w-unset" (click)="uploadRecordingToOsm()" matTooltip="{{resources.uploadFileToOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload locally recorded route"><i class="fa icon-cloud-upload"></i></button>
             </div>
             <div class="flex-1" *ngIf="!isMobile()">
-                <button mat-button class="w-full no-padding min-w-unset" [disabled]="!hasSelected() || canUploadToOsm()" (click)="editInOsm()" matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace in OSM"><i class="fa icon-map-editing fa-lg"></i></button>
+                <button mat-button class="w-full !p-0 min-w-unset" [disabled]="!hasSelected() || canUploadToOsm()" (click)="editInOsm()" matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace in OSM"><i class="fa icon-map-editing fa-lg"></i></button>
             </div>
         </div>
     </div>

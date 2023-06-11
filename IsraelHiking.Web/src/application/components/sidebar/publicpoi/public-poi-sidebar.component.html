@@ -2,22 +2,22 @@
     <div [dir]="resources.direction">
         <div class="flex flex-row">
             <div class="flex-1" *ngIf="!isHideEditMode()">
-                <button mat-button class="w-full min-w-unset no-padding" (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
+                <button mat-button class="w-full min-w-unset !p-0" (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
             </div>
             <div class="flex-1" *ngIf="!isEditMode()">
-                <button mat-button class="w-full min-w-unset no-padding" (click)="navigateHere()" matTooltip="{{resources.navigateHere}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Navigate here"><i class="fa icon-recordings"></i></button>
+                <button mat-button class="w-full min-w-unset !p-0" (click)="navigateHere()" matTooltip="{{resources.navigateHere}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Navigate here"><i class="fa icon-recordings"></i></button>
             </div>
             <div class="flex-1" *ngIf="isEditMode()">
-                <button mat-button class="w-full min-w-unset no-padding" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
+                <button mat-button class="w-full min-w-unset !p-0" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
             </div>
             <div class="flex-1" *ngIf="isRoute() && !isEditMode()">
-                <button mat-button class="w-full min-w-unset no-padding" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
+                <button mat-button class="w-full min-w-unset !p-0" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
             </div>
             <div class="flex-1" *ngIf="!isRoute() && !isEditMode()">
-                <button mat-button class="w-full min-w-unset no-padding" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
+                <button mat-button class="w-full min-w-unset !p-0" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
             </div>
             <div class="flex-1" *ngIf="!isEditMode()">
-                <button mat-button class="w-full min-w-unset no-padding" (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
+                <button mat-button class="w-full min-w-unset !p-0" (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
             </div>
             <div class="flex-1" *ngIf="shareLinks.poiLink && !isEditMode()">
                 <mat-menu #appMenu="matMenu" [dir]="resources.direction">
@@ -31,10 +31,10 @@
                         </div>
                     </div>
                 </mat-menu>
-                <button mat-button class="w-full min-w-unset no-padding" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
+                <button mat-button class="w-full min-w-unset !p-0" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
             </div>
             <div class="flex-1">
-                <button mat-button class="w-full min-w-unset no-padding" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>
+                <button mat-button class="w-full min-w-unset !p-0" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>
             </div>
         </div>
         <mat-spinner *ngIf="isLoading"></mat-spinner>
@@ -47,10 +47,10 @@
             </mat-card>
             <div class="flex flex-row">
                 <div class="w-1/2">
-                    <button mat-button class="w-full min-w-unset no-padding" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
+                    <button mat-button class="w-full min-w-unset !p-0" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
                 </div>
                 <div class="w-1/2">
-                    <button mat-button class="w-full min-w-unset no-padding" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>
+                    <button mat-button class="w-full min-w-unset !p-0" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>
                 </div>
             </div>
         </div>
@@ -59,9 +59,9 @@
                 <mat-card-header>
                     <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
                         <a *ngIf="hasUrl()" [href]="getUrl()" [target]="'_blank'" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site from title">
-                            <span class="text-large">{{info.title}}</span>
+                            <span class="text-xl">{{info.title}}</span>
                         </a>
-                        <span *ngIf="!hasUrl()" class="text-large">{{info.title}}</span>
+                        <span *ngIf="!hasUrl()" class="text-xl">{{info.title}}</span>
                     </mat-card-title>
                 </mat-card-header>
                 <mat-card-content>
@@ -76,10 +76,10 @@
                         <h4>{{resources.seeAlso}}</h4>
                     </div>
                     <div class="flex flex-row">
-                        <a *ngIf="getElementOsmAddress()" [href]="getElementOsmAddress()" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View element in OSM">
+                        <a *ngIf="getElementOsmAddress()" [href]="getElementOsmAddress()" [target]="'_blank'" class="me-2" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View element in OSM">
                             <img src="content/openstreetmap-logo.png" height="32" width="32" />
                         </a>
-                        <a *ngFor="let urlPair of sourceImageUrls" [href]="urlPair.url" [target]="'_blank'" class="margin-10-reverse" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site">
+                        <a *ngFor="let urlPair of sourceImageUrls" [href]="urlPair.url" [target]="'_blank'" class="me-2" angulartics2On="click" angularticsCategory="POI" angularticsAction="View extended POI data outside site">
                             <div *ngIf="!urlPair.imageUrl" style="width: 32px; height: 32px">
                                 <i class="fa fa-2x icon-external-link"></i>
                             </div>
