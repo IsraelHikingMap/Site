@@ -85,26 +85,26 @@ export class FileService {
     }
 
     public getFileFromEvent(e: any): File {
-        let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
+        const file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
         if (!file) {
             return null;
         }
-        let target = e.target || e.srcElement;
+        const target = e.target || e.srcElement;
         target.value = "";
         return file;
     }
 
     public getFilesFromEvent(e: any): File[] {
-        let files: FileList = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+        const files: FileList = e.dataTransfer ? e.dataTransfer.files : e.target.files;
         if (!files || files.length === 0) {
             return [];
         }
-        let filesToReturn = [];
+        const filesToReturn = [];
         // eslint-disable-next-line @typescript-eslint/prefer-for-of
         for (let i = 0; i < files.length; i++) {
             filesToReturn.push(files[i]);
         }
-        let target = e.target || e.srcElement;
+        const target = e.target || e.srcElement;
         target.value = ""; // this will reset files so we need to clone the array.
         return filesToReturn;
     }
@@ -116,8 +116,8 @@ export class FileService {
     public async getStyleJsonContent(url: string, isOffline: boolean): Promise<StyleSpecification> {
         try {
             if (isOffline || (this.runningContextService.isCapacitor && url.startsWith("."))) {
-                let styleFileName = last(url.split("/"));
-                let styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
+                const styleFileName = last(url.split("/"));
+                const styleText = await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.dataDirectory, styleFileName);
                 return JSON.parse(styleText) as StyleSpecification;
             }
             return await firstValueFrom(this.httpClient.get(url)) as StyleSpecification;
@@ -131,43 +131,43 @@ export class FileService {
         }
     }
 
-    private async base64StringToBlob(base64: string, type: string = "application/octet-stream"): Promise<Blob> {
-        let response = await fetch(`data:${type};base64,${base64}`);
+    private async base64StringToBlob(base64: string, type = "application/octet-stream"): Promise<Blob> {
+        const response = await fetch(`data:${type};base64,${base64}`);
         return response.blob();
     }
 
     public async saveToFile(fileName: string, format: string, dataContainer: DataContainer) {
-        let responseData = format === "gpx"
+        const responseData = format === "gpx"
             ? await this.gpxDataContainerConverterService.toGpx(dataContainer)
             : await firstValueFrom(this.httpClient.post(Urls.files + "?format=" + format, dataContainer)) as string;
 
         if (!this.runningContextService.isCapacitor) {
-            let blobToSave = await this.base64StringToBlob(responseData);
+            const blobToSave = await this.base64StringToBlob(responseData);
             this.saveAs(blobToSave, fileName, { autoBom: false });
             return;
         }
         fileName = fileName.replace(/[/\\?%*:|"<>]/g, "-");
-        let contentType = format === "gpx" ? "application/gpx+xml" : "application/octet-stream";
+        const contentType = format === "gpx" ? "application/gpx+xml" : "application/octet-stream";
         this.socialSharing.shareWithOptions({
             files: [`df:${fileName};data:${contentType};base64,${responseData}`]
         });
     }
 
     public async saveToZipFile(fileName: string, content: string) {
-        let zip = new JSZip();
+        const zip = new JSZip();
         zip.file("log.txt", content);
-        let blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
+        const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
         this.saveAs(blob, fileName, { autoBom: false });
     }
 
     public async getFileFromUrl(url: string, type?: string): Promise<File> {
-        let entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
-        let file = await new Promise((resolve, reject) => {
+        const entry = await this.fileSystemWrapper.resolveLocalFilesystemUrl(url) as FileEntry;
+        const file = await new Promise((resolve, reject) => {
             entry.file((fileContent) => {
-                let reader = new FileReader();
+                const reader = new FileReader();
                 reader.onload = (event: any) => {
                     type = type || this.getTypeFromUrl(url);
-                    let blob = new Blob([event.target.result], { type }) as any;
+                    const blob = new Blob([event.target.result], { type }) as any;
                     blob.name = entry.name;
                     if (blob.name.indexOf(".") === -1) {
                         blob.name += this.getExtensionFromType(type);
@@ -181,7 +181,7 @@ export class FileService {
     }
 
     private getTypeFromUrl(url: string): string {
-        let fileExtension = url.split("/").pop().split(".").pop().toLocaleLowerCase();
+        const fileExtension = url.split("/").pop().split(".").pop().toLocaleLowerCase();
         if (fileExtension === "gpx") {
             return "application/gpx+xml";
         }
@@ -212,11 +212,11 @@ export class FileService {
         if (file.type === ImageResizeService.JPEG) {
             dataContainer = await this.imageResizeService.resizeImageAndConvert(file);
         } else {
-            let fileConent = await this.getFileContent(file);
+            const fileConent = await this.getFileContent(file);
             if (this.gpxDataContainerConverterService.canConvert(fileConent)) {
                 dataContainer = await this.gpxDataContainerConverterService.toDataContainer(fileConent);
             } else {
-                let formData = new FormData();
+                const formData = new FormData();
                 formData.append("file", file, file.name);
                 dataContainer = await firstValueFrom(this.httpClient.post(Urls.openFile, formData)) as DataContainer;
             }
@@ -233,7 +233,7 @@ export class FileService {
     }
 
     public async addRoutesFromUrl(url: string) {
-        let container = await this.openFromUrl(url);
+        const container = await this.openFromUrl(url);
         this.addRoutesFromContainer(container);
     }
 
@@ -243,11 +243,11 @@ export class FileService {
     }
 
     public async writeStyles(blob: Blob) {
-        let zip = new JSZip();
+        const zip = new JSZip();
         await zip.loadAsync(blob);
-        let styles = Object.keys(zip.files).filter(name => name.startsWith("styles/") && name.endsWith(".json"));
-        for (let styleFileName of styles) {
-            let styleText = (await zip.file(styleFileName).async("text")).trim();
+        const styles = Object.keys(zip.files).filter(name => name.startsWith("styles/") && name.endsWith(".json"));
+        for (const styleFileName of styles) {
+            const styleText = (await zip.file(styleFileName).async("text")).trim();
             await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName.replace("styles/", ""), styleText,
                 { append: false, replace: true, truncate: 0 });
             this.loggingService.info(`[Files] Write style finished succefully: ${styleFileName}`);
@@ -255,11 +255,11 @@ export class FileService {
     }
 
     public async compressTextToBase64Zip(contents: {name: string; text: string}[]): Promise<string> {
-        let zip = new JSZip();
-        for (let content of contents) {
+        const zip = new JSZip();
+        for (const content of contents) {
             zip.file(content.name, content.text);
         }
-        let data = await zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });
+        const data = await zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });
         return data;
     }
 
@@ -274,7 +274,7 @@ export class FileService {
 
     private getFileContent(file: File): Promise<string> {
         return new Promise((resolve, _) => {
-            let reader = new FileReader();
+            const reader = new FileReader();
             reader.onload = (event: any) => {
                 resolve(event.target.result);
             };
@@ -317,8 +317,8 @@ export class FileService {
     }
 
     public async downloadFileToCache(url: string, progressCallback: (value: number) => void) {
-        let fileTransferObject = this.fileTransfer.create();
-        let path = this.fileSystemWrapper.cacheDirectory + url.split("/").pop();
+        const fileTransferObject = this.fileTransfer.create();
+        const path = this.fileSystemWrapper.cacheDirectory + url.split("/").pop();
         fileTransferObject.onProgress((event) => {
             progressCallback(event.loaded / event.total);
         });
@@ -328,7 +328,7 @@ export class FileService {
 
     public async getFileFromCache(url: string): Promise<Blob> {
         try {
-            let fileBuffer = await this.fileSystemWrapper.readAsArrayBuffer(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
+            const fileBuffer = await this.fileSystemWrapper.readAsArrayBuffer(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
             return new Blob([fileBuffer]);
         } catch {
             return null;
@@ -340,7 +340,7 @@ export class FileService {
     }
 
     public async downloadDatabaseFile(url: string, dbFileName: string, token: string, progressCallback: (value: number) => void) {
-        let fileTransferObject = this.fileTransfer.create();
+        const fileTransferObject = this.fileTransfer.create();
         fileTransferObject.onProgress((event) => {
             progressCallback(event.loaded / event.total);
         });
@@ -358,21 +358,21 @@ export class FileService {
             return false;
         }
         let filesExist = false;
-        let filePrefix = this.runningContextService.isIos ? "" : "databases/";
-        let originFolder = this.runningContextService.isIos
+        const filePrefix = this.runningContextService.isIos ? "" : "databases/";
+        const originFolder = this.runningContextService.isIos
             ? this.fileSystemWrapper.documentsDirectory
             : this.fileSystemWrapper.applicationStorageDirectory;
-        for (let fileName of ["Contour.mbtiles", "IHM.mbtiles", "TerrainRGB.mbtiles"]) {
-            let fullFileName = filePrefix + fileName;
+        for (const fileName of ["Contour.mbtiles", "IHM.mbtiles", "TerrainRGB.mbtiles"]) {
+            const fullFileName = filePrefix + fileName;
             this.loggingService.info(`[Files] Checking if database file exists: ${fullFileName}`);
             try {
-                let fileExists = await this.fileSystemWrapper.checkFile(originFolder, fullFileName);
+                const fileExists = await this.fileSystemWrapper.checkFile(originFolder, fullFileName);
                 if (!fileExists) { continue; }
                 this.loggingService.info(`[Files] Statring renaming database: ${fullFileName}`);
                 await this.fileSystemWrapper.moveFile(originFolder, fullFileName, originFolder, fullFileName.replace(".mbtiles", ".db"));
                 this.loggingService.info(`[Files] Finished renaming database: ${fullFileName}`);
                 filesExist = true;
-            } catch { }
+            } catch { } // eslint-disable-line
         }
         return filesExist;
     }

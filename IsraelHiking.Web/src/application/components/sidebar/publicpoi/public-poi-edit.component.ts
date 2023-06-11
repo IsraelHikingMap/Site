@@ -27,8 +27,8 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
     }
 
     private initializeCategories() {
-        let categories = this.poiService.getSelectableCategories();
-        for (let category of categories) {
+        const categories = this.poiService.getSelectableCategories();
+        for (const category of categories) {
             this.categories.push(category);
         }
     }
@@ -40,8 +40,8 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
         }
         let selectedIcon = null;
         let selectedCategory = null;
-        for (let category of this.categories) {
-            let icon = category.icons.find(iconToFind => iconToFind.icon === this.info.icon);
+        for (const category of this.categories) {
+            const icon = category.icons.find(iconToFind => iconToFind.icon === this.info.icon);
             if (icon) {
                 selectedCategory = category;
                 selectedIcon = icon;

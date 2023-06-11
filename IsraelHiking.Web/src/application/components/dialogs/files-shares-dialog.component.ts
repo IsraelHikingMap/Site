@@ -42,11 +42,11 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
     }
 
     public async open(e: any) {
-        let file = this.fileService.getFileFromEvent(e);
+        const file = this.fileService.getFileFromEvent(e);
         if (!file) {
             return;
         }
-        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         if (file.name.endsWith(".ihm") && offlineState.isOfflineAvailable) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
             try {
@@ -59,7 +59,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         }
         if (file.name.endsWith(".mbtiles") && offlineState.isOfflineAvailable) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
-            let dbFileName = file.name.replace(".mbtiles", ".db");
+            const dbFileName = file.name.replace(".mbtiles", ".db");
             await this.fileService.storeFileToCache(dbFileName, file);
             await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
@@ -75,7 +75,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
     }
 
     public async save() {
-        let data = this.dataContainerService.getDataForFileExport();
+        const data = this.dataContainerService.getDataForFileExport();
         if (!this.isDataSaveable(data)) {
             return;
         }
@@ -96,7 +96,7 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
         if (!this.isDataSaveable(data)) {
             return;
         }
-        let name = this.getName(data);
+        const name = this.getName(data);
         try {
             await this.fileService.saveToFile(`${name}.${format.extension}`, outputFormat, data);
         } catch (ex) {

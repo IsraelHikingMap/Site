@@ -8,7 +8,7 @@ describe("GeoJsonParser", () => {
     });
 
     it("Should convert geoJson point to marker data", () => {
-        let feature = {
+        const feature = {
             type: "Feature",
             properties: {
                 name: "point"
@@ -19,13 +19,13 @@ describe("GeoJsonParser", () => {
             } as GeoJSON.Point
         } as GeoJSON.Feature<GeoJSON.Point>;
 
-        let data = geoJsonParser.toMarkerData(feature);
+        const data = geoJsonParser.toMarkerData(feature);
         expect(data.latlng.lng).toBe(1);
         expect(data.latlng.lat).toBe(2);
     });
 
     it("Should convert linestring to route", () => {
-        let feature = {
+        const feature = {
             type: "Feature",
             properties: {
                 name: "LineString"
@@ -36,13 +36,13 @@ describe("GeoJsonParser", () => {
             } as GeoJSON.LineString
         } as GeoJSON.Feature<GeoJSON.LineString>;
 
-        let data = geoJsonParser.toRoutes(feature);
+        const data = geoJsonParser.toRoutes(feature);
         expect(data.length).toBe(1);
         expect(data[0].latlngs.length).toBe(4);
     });
 
     it("Should parse empty linestring", () => {
-        let feature = {
+        const feature = {
             type: "Feature",
             properties: {
                 name: "LineString"
@@ -53,12 +53,12 @@ describe("GeoJsonParser", () => {
             } as GeoJSON.LineString
         } as GeoJSON.Feature<GeoJSON.LineString>;
 
-        let data = geoJsonParser.toRoutes(feature);
+        const data = geoJsonParser.toRoutes(feature);
         expect(data.length).toBe(1);
     });
 
     it("Should convert geoJson MultilineString to different routes", () => {
-        let feature = {
+        const feature = {
             type: "Feature",
             properties: {
                 name: "multilinestring"
@@ -69,7 +69,7 @@ describe("GeoJsonParser", () => {
             } as GeoJSON.MultiLineString
         } as GeoJSON.Feature<GeoJSON.MultiLineString>;
 
-        let data = geoJsonParser.toRoutes(feature);
+        const data = geoJsonParser.toRoutes(feature);
         expect(data.length).toBe(2);
         expect(data[0].latlngs.length).toBe(2);
         expect(data[1].name.endsWith("1")).toBeTruthy();

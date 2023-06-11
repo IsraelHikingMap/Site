@@ -9,12 +9,12 @@ import type { ConfigurationState, Language, BatteryOptimizationType } from "../m
 export class SetLanguageAction {
     public static type = this.prototype.constructor.name;
     constructor(public language: Language) {}
-};
+}
 
 export class SetBatteryOptimizationTypeAction {
     public static type = this.prototype.constructor.name;
     constructor(public batteryOptimizationType: BatteryOptimizationType) {}
-};
+}
 
 export class ToggleAutomaticRecordingUploadAction {
     public static type = this.prototype.constructor.name;

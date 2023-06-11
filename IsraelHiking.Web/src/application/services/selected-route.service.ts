@@ -60,12 +60,12 @@ export class SelectedRouteService {
     }
 
     public getSelectedRoute(): RouteData {
-        let route = this.getRouteById(this.selectedRouteId);
+        const route = this.getRouteById(this.selectedRouteId);
         return route;
     }
 
     public syncSelectedRouteWithEditingRoute() {
-        let editingRoute = this.routes.find(r => r.state === "Poi" || r.state === "Route");
+        const editingRoute = this.routes.find(r => r.state === "Poi" || r.state === "Route");
         if (editingRoute != null && editingRoute.id !== this.selectedRouteId) {
             this.store.dispatch(new SetSelectedRouteAction(editingRoute.id));
         }
@@ -84,7 +84,7 @@ export class SelectedRouteService {
             this.store.dispatch(new SetSelectedRouteAction(this.routes[0].id));
         }
         if (this.routes.length === 0) {
-            let data = this.routesFactory.createRouteData(this.createRouteName(), this.getLeastUsedColor());
+            const data = this.routesFactory.createRouteData(this.createRouteName(), this.getLeastUsedColor());
             this.store.dispatch(new AddRouteAction(data));
             this.setSelectedRoute(data.id);
         }
@@ -95,7 +95,7 @@ export class SelectedRouteService {
         if (this.selectedRouteId == null) {
             this.store.dispatch(new SetSelectedRouteAction(routeId));
         } else {
-            let selectedRoute = this.getSelectedRoute();
+            const selectedRoute = this.getSelectedRoute();
             if (selectedRoute != null && selectedRoute.state !== "Hidden") {
                 this.store.dispatch(new ChangeRouteStateAction(this.selectedRouteId, "ReadOnly"));
             }
@@ -125,8 +125,8 @@ export class SelectedRouteService {
     public getLeastUsedColor() {
         let colorCount = Number.POSITIVE_INFINITY;
         let selectedColor = this.routesFactory.colors[0];
-        for (let color of this.routesFactory.colors) {
-            let currentColorCount = this.routes.filter(r => r.color === color).length;
+        for (const color of this.routesFactory.colors) {
+            const currentColorCount = this.routes.filter(r => r.color === color).length;
             if (currentColorCount < colorCount) {
                 selectedColor = color;
                 colorCount = currentColorCount;
@@ -136,7 +136,7 @@ export class SelectedRouteService {
     }
 
     public isNameAvailable(name: string) {
-        let route = this.routes.find((routeToFind) => routeToFind.name === name);
+        const route = this.routes.find((routeToFind) => routeToFind.name === name);
         return route == null && name != null && name !== "";
     }
 
@@ -146,17 +146,17 @@ export class SelectedRouteService {
      * @param checkAgainstHead use to signal the method if to check against the beginning or the end of the selected route.
      */
     public getClosestRouteToSelected(checkAgainstHead: boolean): RouteData {
-        let latLngToCheck = checkAgainstHead
+        const latLngToCheck = checkAgainstHead
             ? this.getSelectedRoute().segments[0].latlngs[0]
             : this.getLastLatLng(this.getSelectedRoute());
-        for (let routeData of this.routes) {
+        for (const routeData of this.routes) {
             if (routeData.id === this.selectedRouteId || routeData.segments.length <= 0 || routeData.state === "Hidden") {
                 continue;
             }
             if (SpatialService.getDistanceInMeters(this.getLastLatLng(routeData), latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
                 return routeData;
             }
-            let firstLatLng = routeData.segments[0].latlngs[0];
+            const firstLatLng = routeData.segments[0].latlngs[0];
             if (SpatialService.getDistanceInMeters(firstLatLng, latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
                 return routeData;
             }
@@ -173,13 +173,13 @@ export class SelectedRouteService {
         if (heading !== null) {
             minimalWeight += MINIMAL_ANGLE;
         }
-        for (let routeData of this.routes) {
+        for (const routeData of this.routes) {
             if (routeData.segments.length <= 0 || routeData.state === "Hidden") {
                 continue;
             }
             let previousLatLng = routeData.segments[0].latlngs[0];
-            for (let segment of routeData.segments) {
-                for (let latLng of segment.latlngs) {
+            for (const segment of routeData.segments) {
+                for (const latLng of segment.latlngs) {
                     if (latLng === previousLatLng) {
                         continue;
                     }
@@ -203,30 +203,30 @@ export class SelectedRouteService {
     }
 
     private getLastLatLng(routeData: RouteData): LatLngAltTime {
-        let lastSegmentLatLngs = this.getLastSegment(routeData).latlngs;
+        const lastSegmentLatLngs = this.getLastSegment(routeData).latlngs;
         return lastSegmentLatLngs[lastSegmentLatLngs.length - 1];
     }
 
     public splitRoute(segmentIndex: number) {
-        let selectedRoute = this.getSelectedRoute();
-        let segments = [...selectedRoute.segments];
-        let postfixSegments = segments.splice(segmentIndex + 1) as RouteSegmentData[];
-        let startPoint = postfixSegments[0].latlngs[0];
+        const selectedRoute = this.getSelectedRoute();
+        const segments = [...selectedRoute.segments];
+        const postfixSegments = segments.splice(segmentIndex + 1) as RouteSegmentData[];
+        const startPoint = postfixSegments[0].latlngs[0];
         postfixSegments.splice(0, 0,
             {
                 latlngs: [startPoint, startPoint],
                 routePoint: startPoint,
                 routingType: postfixSegments[0].routingType
             } as RouteSegmentData);
-        let newRouteName = selectedRoute.name.indexOf(this.resources.split) === -1
+        const newRouteName = selectedRoute.name.indexOf(this.resources.split) === -1
             ? selectedRoute.name + " " + this.resources.split
             : selectedRoute.name;
-        let splitRouteData =
+        const splitRouteData =
             this.routesFactory.createRouteData(
                 this.createRouteName(newRouteName),
                 this.getLeastUsedColor());
         splitRouteData.segments = postfixSegments;
-        let routeData = {
+        const routeData = {
             ...selectedRoute,
             segments
         };
@@ -235,15 +235,15 @@ export class SelectedRouteService {
 
     public mergeRoutes(isSelectedRouteSecond: boolean) {
         let closestRoute = this.getClosestRouteToSelected(isSelectedRouteSecond);
-        let selectedRoute = this.getSelectedRoute();
-        let mergedRoute = {
+        const selectedRoute = this.getSelectedRoute();
+        const mergedRoute = {
             ...selectedRoute,
             markers: [...selectedRoute.markers, ...closestRoute.markers]
         };
-        let latLngToCheck = isSelectedRouteSecond
+        const latLngToCheck = isSelectedRouteSecond
             ? selectedRoute.segments[0].latlngs[0]
             : this.getLastLatLng(selectedRoute);
-        let closestRouteLatLngToCheck = isSelectedRouteSecond
+        const closestRouteLatLngToCheck = isSelectedRouteSecond
             ? closestRoute.segments[0].latlngs[0]
             : this.getLastLatLng(closestRoute);
 
@@ -251,13 +251,13 @@ export class SelectedRouteService {
             closestRoute = this.reverseRouteInternal(closestRoute);
         }
         if (isSelectedRouteSecond) {
-            let segments = [...selectedRoute.segments];
+            const segments = [...selectedRoute.segments];
             segments.splice(0, 1);
             segments.splice(0, 0, ...closestRoute.segments);
             mergedRoute.segments = segments;
         } else {
             // remove first segment:
-            let segments = [...closestRoute.segments];
+            const segments = [...closestRoute.segments];
             segments.splice(0, 1);
             segments.splice(0, 0, ...selectedRoute.segments);
             mergedRoute.segments = segments;
@@ -268,14 +268,14 @@ export class SelectedRouteService {
     private reverseRouteInternal(route: RouteData): RouteData {
         let segments = [];
         for (let segmentIndex = 0; segmentIndex < route.segments.length - 1; segmentIndex++) {
-            let currentSegment = { ...route.segments[segmentIndex] };
-            let nextSegment = { ...route.segments[segmentIndex + 1] };
+            const currentSegment = { ...route.segments[segmentIndex] };
+            const nextSegment = { ...route.segments[segmentIndex + 1] };
             currentSegment.latlngs = [...nextSegment.latlngs].reverse();
             currentSegment.routingType = nextSegment.routingType;
             segments.push(currentSegment);
         }
-        let lastSegment = { ...route.segments[route.segments.length - 1] };
-        let lastPoint = lastSegment.latlngs[lastSegment.latlngs.length - 1];
+        const lastSegment = { ...route.segments[route.segments.length - 1] };
+        const lastPoint = lastSegment.latlngs[lastSegment.latlngs.length - 1];
         lastSegment.latlngs = [lastPoint, lastPoint];
         segments.push(lastSegment);
         segments = segments.reverse();
@@ -286,13 +286,13 @@ export class SelectedRouteService {
     }
 
     public reverseRoute(routeId?: string) {
-        let route = routeId ? this.getRouteById(routeId) : this.getSelectedRoute();
-        let revered = this.reverseRouteInternal(route);
+        const route = routeId ? this.getRouteById(routeId) : this.getSelectedRoute();
+        const revered = this.reverseRouteInternal(route);
         this.store.dispatch(new ReplaceRouteAction(revered.id, revered));
     }
 
     public async removeSegment(segmentIndex: number) {
-        let selectedRoute = this.getSelectedRoute();
+        const selectedRoute = this.getSelectedRoute();
         if (selectedRoute.segments.length - 1 === segmentIndex) {
             this.store.dispatch(new DeleteSegmentAction(selectedRoute.id, selectedRoute.segments.length - 1));
         } else {
@@ -301,11 +301,11 @@ export class SelectedRouteService {
                 selectedRoute.segments[segmentIndex + 1].routePoint
             ];
             if (segmentIndex !== 0) {
-                let startLatLng = selectedRoute.segments[segmentIndex].latlngs[0];
-                let endLatLng = selectedRoute.segments[segmentIndex + 1].routePoint;
+                const startLatLng = selectedRoute.segments[segmentIndex].latlngs[0];
+                const endLatLng = selectedRoute.segments[segmentIndex + 1].routePoint;
                 latlngs = await this.routerService.getRoute(startLatLng, endLatLng, selectedRoute.segments[segmentIndex + 1].routingType);
             }
-            let updatedSegment = {
+            const updatedSegment = {
                 ...selectedRoute.segments[segmentIndex + 1],
                 latlngs
             } as RouteSegmentData;
@@ -314,17 +314,17 @@ export class SelectedRouteService {
     }
 
     public makeAllPointsEditable(routeId: string) {
-        let route = this.getRouteById(routeId);
+        const route = this.getRouteById(routeId);
         if (!route || route.segments.length === 0) {
             return;
         }
-        let segments = [];
-        for (let segment of route.segments) {
+        const segments = [];
+        for (const segment of route.segments) {
             if (segment.latlngs.length === 0) {
                 continue;
             }
             let previousPoint = segment.latlngs[0];
-            for (let latLng of segment.latlngs) {
+            for (const latLng of segment.latlngs) {
                 if (previousPoint.lat === latLng.lat && previousPoint.lng === latLng.lng) {
                     continue;
                 }
@@ -345,7 +345,7 @@ export class SelectedRouteService {
         }
         if (routes.length === 1 && routes[0].segments.length === 0 && this.routes.length > 0) {
             // this is the case when the layer has markers only
-            for (let marker of routes[0].markers) {
+            for (const marker of routes[0].markers) {
                 this.store.dispatch(new AddPrivatePoiAction(this.selectedRouteId || this.routes[0].id, marker));
             }
             if (this.selectedRouteId == null) {
@@ -353,11 +353,11 @@ export class SelectedRouteService {
             }
             return;
         }
-        for (let routeData of routes) {
+        for (const routeData of routes) {
             if (this.isNameAvailable(routeData.name) === false) {
                 routeData.name = this.createRouteName(routeData.name);
             }
-            let routeToAdd = this.routesFactory.createRouteDataAddMissingFields(routeData, this.getLeastUsedColor());
+            const routeToAdd = this.routesFactory.createRouteDataAddMissingFields(routeData, this.getLeastUsedColor());
             this.store.dispatch(new AddRouteAction(routeToAdd));
             if (routes.indexOf(routeData) === 0) {
                 this.setSelectedRoute(routeToAdd.id);
@@ -370,6 +370,6 @@ export class SelectedRouteService {
     }
 
     public getLatlngs(route: RouteData): LatLngAltTime[] {
-        return route ? [].concat.apply([], route.segments.map(s => s.latlngs) as any) : null;// flatten
+        return route ? [].concat(...route.segments.map(s => s.latlngs)) : null;// flatten
     }
 }

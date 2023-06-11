@@ -26,12 +26,12 @@ export class PrivatePoiUploaderService {
         description: string,
         markerType: string
     ) {
-        let results = await this.poiService.getClosestPoint(latLng, "OSM");
+        const results = await this.poiService.getClosestPoint(latLng, "OSM");
         let urls = [] as LinkData[];
         if (imageLink) {
             urls = [imageLink];
         }
-        let markerData = {
+        const markerData = {
             description: description ? description.substring(0, 255) : "",
             title,
             latlng: latLng,
@@ -48,11 +48,11 @@ export class PrivatePoiUploaderService {
         }
         let message = `${this.resources.wouldYouLikeToUpdate} ${results.title || this.resources.translate(results.type)}?`;
         if (!results.title) {
-            let categories = this.poiService.getSelectableCategories();
-            let iconWithLabel = flatten(categories.map(c => c.icons))
+            const categories = this.poiService.getSelectableCategories();
+            const iconWithLabel = flatten(categories.map(c => c.icons))
                 .find(i => i.icon === `icon-${results.type}`);
             if (iconWithLabel) {
-                let type = this.resources.translate(iconWithLabel.label);
+                const type = this.resources.translate(iconWithLabel.label);
                 message = `${this.resources.wouldYouLikeToUpdate} ${type}?`;
             } else {
                 message = this.resources.wouldYouLikeToUpdateThePointWithoutTheTitle;

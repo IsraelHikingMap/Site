@@ -6,14 +6,14 @@ import type { LatLngAlt, MarkerData } from "../models/models";
 @Injectable()
 export class GeoJsonParser {
     public toMarkerData(feature: GeoJSON.Feature<GeoJSON.Point>, language?: string): MarkerData {
-        let id = feature.properties.identifier;
-        let icon = feature.properties.icon;
-        let website = feature.properties.website;
-        let image = feature.properties.image;
-        let point = feature.geometry as GeoJSON.Point;
-        let name = this.getPropertyValue(feature.properties, "name", language);
-        let description = this.getPropertyValue(feature.properties, "description", language);
-        let marker = this.createMarker(point.coordinates, id, name, icon, description);
+        const id = feature.properties.identifier;
+        const icon = feature.properties.icon;
+        const website = feature.properties.website;
+        const image = feature.properties.image;
+        const point = feature.geometry as GeoJSON.Point;
+        const name = this.getPropertyValue(feature.properties, "name", language);
+        const description = this.getPropertyValue(feature.properties, "description", language);
+        const marker = this.createMarker(point.coordinates, id, name, icon, description);
         if (website) {
             marker.urls.push({ mimeType: "text/html", text: marker.title, url: website });
         }
@@ -29,13 +29,13 @@ export class GeoJsonParser {
 
     public toRoutes(feature: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>, language?: string):
         {latlngs: LatLngAlt[]; name: string}[] {
-        let name = this.getPropertyValue(feature.properties, "name", language);
-        let routes = [];
+        const name = this.getPropertyValue(feature.properties, "name", language);
+        const routes = [];
         if (feature.geometry.type === "LineString") {
             routes.push({ latlngs: feature.geometry.coordinates.map(c => SpatialService.toLatLng(c)), name });
         } else {
             for (let i = 0; i < feature.geometry.coordinates.length; i++) {
-                let prefix = i > 0 ? " " + i : "";
+                const prefix = i > 0 ? " " + i : "";
                 routes.push({ latlngs: feature.geometry.coordinates[i].map(c => SpatialService.toLatLng(c)), name: `${name}${prefix}` });
             }
         }

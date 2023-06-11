@@ -50,7 +50,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     public deleteRoute() {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute && selectedRoute.id === this.routeData.id) {
             this.store.dispatch(new SetSelectedRouteAction(null));
         }
@@ -58,12 +58,12 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     public async saveRouteToFile() {
-        let latLngs = this.getLatlngs();
+        const latLngs = this.getLatlngs();
         if (latLngs.length === 0) {
             this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
-        let data = {
+        const data = {
             routes: [this.routeData]
         } as DataContainer;
         try {
@@ -75,12 +75,12 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
 
     // override base
     public moveToRoute = () => {
-        let latLngs = this.getLatlngs();
+        const latLngs = this.getLatlngs();
         if (latLngs.length === 0) {
             this.toastService.error(new Error("Route data is empty"), this.resources.pleaseAddPointsToRoute);
             return;
         }
-        let bounds = SpatialService.getBounds(latLngs);
+        const bounds = SpatialService.getBounds(latLngs);
         if (this.routeData.state === "Hidden") {
             this.toastService.warning(this.resources.routeIsHidden);
         }
@@ -89,10 +89,10 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
 
     private getLatlngs(): LatLngAlt[] {
         let latLngs: LatLngAlt[] = [];
-        for (let segment of this.routeData.segments) {
+        for (const segment of this.routeData.segments) {
             latLngs = latLngs.concat(segment.latlngs);
         }
-        for (let markers of this.routeData.markers) {
+        for (const markers of this.routeData.markers) {
             latLngs.push(markers.latlng);
         }
         return latLngs;

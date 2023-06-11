@@ -61,7 +61,7 @@
             <ng-template matMenuContent>
                 <div [dir]="resources.direction">
                     <div class="flex flex-row" class="margin-sides">
-                        <span class="text-large">{{userInfo?.displayName}}</span>
+                        <span class="text-xl">{{userInfo?.displayName}}</span>
                     </div>
                     <button mat-menu-item (click)="openTraces()" angulartics2On="click" angularticsCategory="User Menu" angularticsAction="User traces open">
                         <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>

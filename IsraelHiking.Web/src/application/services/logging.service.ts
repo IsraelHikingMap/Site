@@ -40,11 +40,11 @@ export class LoggingService {
     }
 
     private async reduceStoredLogLinesIfNeeded() {
-        let lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).count();
+        const lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME).count();
         if (lines <= LoggingService.MAX_LOG_LINES) {
             return;
         }
-        let keysToDelete = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
+        const keysToDelete = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
             .orderBy("date")
             .primaryKeys();
         // keep only last MAX_LOG_LINES - 10% to reduce the need to do it every time.
@@ -61,7 +61,7 @@ export class LoggingService {
     }
 
     public info(message: string) {
-        let logLine = {
+        const logLine = {
             date: new Date(),
             level: "info",
             message
@@ -71,7 +71,7 @@ export class LoggingService {
     }
 
     public debug(message: string) {
-        let logLine = {
+        const logLine = {
             date: new Date(),
             level: "debug",
             message
@@ -84,7 +84,7 @@ export class LoggingService {
     }
 
     public error(message: string) {
-        let logLine = {
+        const logLine = {
             date: new Date(),
             level: "error",
             message
@@ -94,7 +94,7 @@ export class LoggingService {
     }
 
     public warning(message: string) {
-        let logLine = {
+        const logLine = {
             date: new Date(),
             level: "warn",
             message
@@ -105,20 +105,20 @@ export class LoggingService {
 
 
     public async getLog(): Promise<string> {
-        let lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
+        const lines = await this.loggingDatabase.table(LoggingService.LOGGING_TABLE_NAME)
             .orderBy("date")
             .reverse().limit(LoggingService.MAX_LOG_LINES).toArray();
         return lines.map(l => this.logLineToString(l)).join("\n");
     }
 
     private logLineToString(logLine: LogLine) {
-        let dateString = new Date(logLine.date.getTime() - (logLine.date.getTimezoneOffset() * 60 * 1000))
+        const dateString = new Date(logLine.date.getTime() - (logLine.date.getTimezoneOffset() * 60 * 1000))
             .toISOString().replace(/T/, " ").replace(/\..+/, "");
         return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;
     }
 
     public getErrorTypeAndMessage(ex: any): ErrorTypeAndMessage {
-        let typeAndMessage = {
+        const typeAndMessage = {
             type: "server",
             message: (ex as Error).message
         } as ErrorTypeAndMessage;

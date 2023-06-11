@@ -8,17 +8,17 @@ import type { UserInfo, UserState } from "../models/models";
 export class SetUserInfoAction {
     public static type = this.prototype.constructor.name;
     constructor(public userInfo: UserInfo) {}
-};
+}
 
 export class SetTokenAction {
     public static type = this.prototype.constructor.name;
     constructor(public token: string) {}
-};
+}
 
 export class SetAgreeToTermsAction {
     public static type = this.prototype.constructor.name;
     constructor(public agree: boolean) {}
-};
+}
 @State<UserState>({
     name: "userState",
     defaults: initialState.userState

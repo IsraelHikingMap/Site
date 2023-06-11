@@ -2,8 +2,10 @@ $env:LANG="en_US.UTF-8"
 $env:LANGUAGE="en_US.UTF-8"
 $env:LC_ALL="en_US.UTF-8"
 
-Write-Host "Installing cocoapods 1.11.3" #later version is not compatible with the ruby installed in the CI (2.3.2023)
-sudo gem install cocoapods -v 1.11.3
+
+Write-Host "Installing cocoapods"
+brew install cocoapods > /dev/null
+pod --version
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
 

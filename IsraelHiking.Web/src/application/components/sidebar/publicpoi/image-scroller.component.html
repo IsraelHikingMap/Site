@@ -34,6 +34,6 @@
         <button mat-button class="w-full" (click)="next()" [disabled]="!hasNext()"><i class="fa icon-chevron-{{resources.end}}"></i></button>
     </div>
 </div>
-<div class="flex flex-row" *ngIf="!canEdit && currentImageAttribution" class="text-center text-small">
+<div class="flex flex-row" *ngIf="!canEdit && currentImageAttribution" class="text-center text-sm">
     <div class="w-full truncate" [dir]="resources.direction">{{resources.imageBy}} <a [href]="currentImageAttribution.url" target="_blank">{{currentImageAttribution.author}}</a></div>
 </div>

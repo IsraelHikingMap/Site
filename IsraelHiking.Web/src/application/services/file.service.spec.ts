@@ -62,7 +62,7 @@ describe("FileService", () => {
     it("Should save to file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-            let promise = fileService.saveToFile("file.name", "format", {} as DataContainer).then(() => {
+            const promise = fileService.saveToFile("file.name", "format", {} as DataContainer).then(() => {
                 expect(saveAsSpy).toHaveBeenCalled();
             });
 
@@ -73,7 +73,7 @@ describe("FileService", () => {
     it("Should open from file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-            let promise = fileService.openFromUrl("someurl").then((res) => {
+            const promise = fileService.openFromUrl("someurl").then((res) => {
                 expect(res).not.toBeNull();
             }, fail);
 
@@ -84,7 +84,7 @@ describe("FileService", () => {
     it("Should open from url by uploading", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-            let promise = fileService.addRoutesFromFile(new Blob([""]) as File).then(() => {
+            const promise = fileService.addRoutesFromFile(new Blob([""]) as File).then(() => {
                 expect(selectedRouteService.addRoutes).toHaveBeenCalled();
             }, fail);
 
@@ -103,41 +103,41 @@ describe("FileService", () => {
 
     it("Should open jpeg file and resize it", inject([FileService, HttpTestingController],
         async (fileService: FileService) => {
-            let file = new Blob([""], { type: ImageResizeService.JPEG }) as File;
+            const file = new Blob([""], { type: ImageResizeService.JPEG }) as File;
             await fileService.addRoutesFromFile(file);
             expect(selectedRouteService.addRoutes).toHaveBeenCalled();
         }));
 
     it("Should not get a file from event when there's no files", inject([FileService], (fileService: FileService) => {
-        let file = fileService.getFileFromEvent({ target: { files: [] } });
+        const file = fileService.getFileFromEvent({ target: { files: [] } });
 
         expect(file).toBe(null);
     }));
 
     it("Should get a file from event and clear input", inject([FileService], (fileService: FileService) => {
-        let event = {
+        const event = {
             target: { files: [{}], value: "123" },
         };
-        let file = fileService.getFileFromEvent(event);
+        const file = fileService.getFileFromEvent(event);
 
         expect(file).not.toBe(null);
         expect(event.target.value).toBe("");
     }));
 
     it("Should not get a files from event", inject([FileService], (fileService: FileService) => {
-        let event = {
+        const event = {
             target: { dataTransfer: [] as any[] },
         };
-        let files = fileService.getFilesFromEvent(event);
+        const files = fileService.getFilesFromEvent(event);
 
         expect(files.length).toBe(0);
     }));
 
     it("Should get a files from event and clear input", inject([FileService], (fileService: FileService) => {
-        let event = {
+        const event = {
             target: { files: [{}], value: "123" },
         };
-        let files = fileService.getFilesFromEvent(event);
+        const files = fileService.getFilesFromEvent(event);
 
         expect(files.length).toBe(1);
         expect(event.target.value).toBe("");

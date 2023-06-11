@@ -91,7 +91,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     private buildFeatureCollections() {
         let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
         let editingFeatures = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
-        for (let route of this.routes) {
+        for (const route of this.routes) {
             if (route.state === "Hidden") {
                 continue;
             }
@@ -99,7 +99,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
                 editingFeatures = this.createFeaturesForEditingRoute(route);
                 continue;
             }
-            let latlngs = this.selectedRouteService.getLatlngs(route);
+            const latlngs = this.selectedRouteService.getLatlngs(route);
             features = features.concat(this.createFeaturesForRoute(latlngs, this.routeToProperties(route)));
         }
         this.routesGeoJson = {
@@ -111,15 +111,15 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             features: editingFeatures
         };
         this.routeEditRouteInteraction.setData(this.editingRouteGeoJson);
-    };
+    }
 
     private handleRoutePointClick = (pointIndex: number) => {
         if (pointIndex == null || (this.routePointPopupData != null && this.routePointPopupData.segmentIndex === pointIndex)) {
             this.routePointPopupData = null;
             return;
         }
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        let segment = selectedRoute.segments[pointIndex];
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const segment = selectedRoute.segments[pointIndex];
         setTimeout(() => {
             // allow angular to draw this as it seems not to do it without this timeout...
             this.routePointPopupData = {
@@ -134,9 +134,9 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     private createFeaturesForEditingRoute(route: RouteData): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
-        let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
+        const features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
         for (let segmentIndex = 0; segmentIndex < route.segments.length; segmentIndex++) {
-            let segmentFeature = {
+            const segmentFeature = {
                 type: "Feature",
                 id: RouteEditRouteInteraction.createSegmentId(route, segmentIndex),
                 properties: this.routeToProperties(route),
@@ -147,7 +147,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             } as GeoJSON.Feature<GeoJSON.LineString>;
             segmentFeature.properties.id = RouteEditRouteInteraction.createSegmentId(route, segmentIndex);
             features.push(segmentFeature);
-            let segmentPointFeature = {
+            const segmentPointFeature = {
                 type: "Feature",
                 id: RouteEditRouteInteraction.createSegmentPointId(route, segmentIndex),
                 properties: this.routeToProperties(route),
@@ -170,8 +170,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     private createFeaturesForRoute(
         latlngs: LatLngAlt[],
         routeProperties: RouteViewProperties): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
-        let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];;
-        let routeCoordinates = latlngs.map(l => SpatialService.toCoordinate(l));
+        const features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
+        const routeCoordinates = latlngs.map(l => SpatialService.toCoordinate(l));
         if (routeCoordinates.length < 2) {
             return features;
         }
@@ -213,11 +213,11 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     private routeToProperties(route: RouteData): RouteViewProperties {
-        let color = route.color;
-        let opacity = route.opacity || 1.0;
-        let width = route.weight;
-        let iconColor = opacity > 0.5 ? invert(color, true) : color;
-        let iconSize = width < 10 ? 0.5 : 0.5 * width / 10.0;
+        const color = route.color;
+        const opacity = route.opacity || 1.0;
+        const width = route.weight;
+        const iconColor = opacity > 0.5 ? invert(color, true) : color;
+        const iconSize = width < 10 ? 0.5 : 0.5 * width / 10.0;
         return {
             color,
             iconColor,
@@ -235,7 +235,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         }
         this.routeEditPoiInteraction.setActive(false, this.mapComponent.mapInstance);
         this.routeEditRouteInteraction.setActive(false, this.mapComponent.mapInstance);
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.mapComponent.mapInstance.getCanvas().style.cursor = "";
         if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isAddingPoi ||
             (selectedRoute && selectedRoute.state === "Poi")) {
@@ -254,7 +254,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     public ngAfterViewInit(): void {
         this.mapComponent.mapLoad.subscribe(async () => {
             this.setInteractionAccordingToState();
-            let fullUrl = this.fileService.getFullUrl("content/arrow.png");
+            const fullUrl = this.fileService.getFullUrl("content/arrow.png");
             this.mapComponent.mapInstance.loadImage(fullUrl, (_: Error, image: HTMLImageElement | ImageBitmap) => {
                 this.mapComponent.mapInstance.addImage("arrow", image, { sdf: true });
             });
@@ -262,7 +262,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     private isEditMode(): boolean {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route");
     }
 
@@ -271,7 +271,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public isRouteInEditPoiMode(route: RouteData) {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && selectedRoute.id === route.id && selectedRoute.state === "Poi";
     }
 
@@ -281,7 +281,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public routeLineMouseOver(event: any) {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
             return;
         }
@@ -305,8 +305,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         if (event.features == null || event.features.length === 0) {
             return;
         }
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
-        let clickedRoute = this.selectedRouteService.getRouteById(event.features[0].properties.id);
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const clickedRoute = this.selectedRouteService.getRouteById(event.features[0].properties.id);
         if (clickedRoute != null && clickedRoute !== selectedRoute && !this.isEditMode()) {
             this.selectedRouteService.setSelectedRoute(clickedRoute.id);
         }
@@ -317,8 +317,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         if (this.isEditMode()) {
             return;
         }
-        let pointId = event.features[0].properties.id as string;
-        let routeId = pointId.replace("_start", "").replace("_end", "");
+        const pointId = event.features[0].properties.id as string;
+        const routeId = pointId.replace("_start", "").replace("_end", "");
         this.nonEditRoutePointPopupData = {
             latlng: event.lngLat,
             wazeAddress: `${Urls.waze}${event.lngLat.lat},${event.lngLat.lng}`,

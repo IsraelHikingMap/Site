@@ -19,8 +19,8 @@ export class CenterMeComponent extends BaseMapComponent {
     }
 
     public showButton() {
-        let inMemeoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
-        let tracking = this.store.selectSnapshot((s: ApplicationState) => s.gpsState.tracking);
+        const inMemeoryState = this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState);
+        const tracking = this.store.selectSnapshot((s: ApplicationState) => s.gpsState.tracking);
         return inMemeoryState.pannedTimestamp != null && inMemeoryState.following && tracking === "tracking";
     }
 

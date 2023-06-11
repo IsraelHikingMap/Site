@@ -15,15 +15,15 @@ import geojsonVt from "geojson-vt";
 import vtpbf from "vt-pbf";
 
 const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureCollection): ArrayBuffer => {
-    let tileindex = geojsonVt(featureCollection);
-    let tile = tileindex.getTile(14, 8192, 8191);
+    const tileindex = geojsonVt(featureCollection);
+    const tile = tileindex.getTile(14, 8192, 8191);
     return vtpbf.fromGeojsonVt({ geojsonLayer: tile });
 
 };
 
 describe("Router Service", () => {
     beforeEach(() => {
-        let toastMockCreator = new ToastServiceMockCreator();
+        const toastMockCreator = new ToastServiceMockCreator();
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -44,7 +44,7 @@ describe("Router Service", () => {
 
     it("Should route between two points", inject([RouterService, HttpTestingController],
         async (router: RouterService, mockBackend: HttpTestingController) => {
-            let promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
                 expect(data.length).toBe(3);
             }, fail);
 
@@ -76,7 +76,7 @@ describe("Router Service", () => {
                 }
             });
 
-            let promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -94,7 +94,7 @@ describe("Router Service", () => {
                 }
             });
 
-            let promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 1.001, lng: 1.001 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 1.001, lng: 1.001 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -114,7 +114,7 @@ describe("Router Service", () => {
                 }
             });
 
-            let promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 1.001, lng: 1.001 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 1.001, lng: 1.001 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -134,7 +134,7 @@ describe("Router Service", () => {
                 }
             });
 
-            let promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -147,7 +147,7 @@ describe("Router Service", () => {
         inject([RouterService, HttpTestingController, DatabaseService, Store],
         async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
-            let featureCollection = {
+            const featureCollection = {
                 type: "FeatureCollection",
                 features: [{
                     type: "Feature",
@@ -170,7 +170,7 @@ describe("Router Service", () => {
                 }
             });
 
-            let promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0001 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0001 }, "Hike").then((data) => {
                 expect(data.length).toBe(3);
             }, fail);
 
@@ -183,7 +183,7 @@ describe("Router Service", () => {
         inject([RouterService, HttpTestingController, DatabaseService, Store],
         async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
-            let featureCollection = {
+            const featureCollection = {
                 type: "FeatureCollection",
                 features: [{
                     type: "Feature",
@@ -209,7 +209,7 @@ describe("Router Service", () => {
                 }
             });
 
-            let promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Hike").then((data) => {
                 expect(data.length).toBe(5);
             }, fail);
 
@@ -222,7 +222,7 @@ describe("Router Service", () => {
         inject([RouterService, HttpTestingController, DatabaseService, Store],
         async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
-            let featureCollection = {
+            const featureCollection = {
                 type: "FeatureCollection",
                 features: [{
                     type: "Feature",
@@ -254,7 +254,7 @@ describe("Router Service", () => {
                 }
             });
 
-            let promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Bike").then((data) => {
+            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Bike").then((data) => {
                 expect(data.length).toBe(3);
             }, fail);
 
@@ -267,7 +267,7 @@ describe("Router Service", () => {
         inject([RouterService, HttpTestingController, DatabaseService, Store],
         async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
-            let featureCollection = {
+            const featureCollection = {
                 type: "FeatureCollection",
                 features: [{
                     type: "Feature",
@@ -290,7 +290,7 @@ describe("Router Service", () => {
                 }
             });
 
-            let promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "4WD").then((data) => {
+            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "4WD").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -302,7 +302,7 @@ describe("Router Service", () => {
     it("Should return a route between two lines when points are not exactly the same",
         inject([RouterService, HttpTestingController, DatabaseService, Store],
         async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
-            let featureCollection = {
+            const featureCollection = {
                 type: "FeatureCollection",
                 features: [{
                     type: "Feature",
@@ -334,7 +334,7 @@ describe("Router Service", () => {
                 }
             });
 
-            let promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Bike").then((data) => {
+            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Bike").then((data) => {
                 expect(data.length).toBe(5);
             }, fail);
 

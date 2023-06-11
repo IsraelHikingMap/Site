@@ -1,6 +1,5 @@
 import { inject, TestBed } from "@angular/core/testing";
 import { NgxsModule, Store } from "@ngxs/store";
-import { Subject } from "rxjs";
 
 import { SelectedRouteService } from "./selected-route.service";
 import { ResourcesService } from "./resources.service";
@@ -23,9 +22,9 @@ describe("Selected Route Service", () => {
     };
 
     beforeEach(() => {
-        let toastMock = new ToastServiceMockCreator();
+        const toastMock = new ToastServiceMockCreator();
         toastMock.resourcesService.route = "route";
-        let routerServiceMock = {};
+        const routerServiceMock = {};
         TestBed.configureTestingModule({
             imports: [
                 NgxsModule.forRoot([RoutesReducer, RouteEditingReducer])
@@ -41,7 +40,7 @@ describe("Selected Route Service", () => {
 
     it("Should get undefined selected route when there're no routes", inject([SelectedRouteService],
         (selectedRouteService: SelectedRouteService) => {
-            let selectedRoute = selectedRouteService.getSelectedRoute();
+            const selectedRoute = selectedRouteService.getSelectedRoute();
 
             expect(selectedRoute).toBeUndefined();
         }
@@ -69,7 +68,7 @@ describe("Selected Route Service", () => {
                     weight: 10
                 }
             });
-            let spy = jasmine.createSpy();
+            const spy = jasmine.createSpy();
             store.dispatch = spy;
 
             selectedRouteService.getOrCreateSelectedRoute();
@@ -104,7 +103,7 @@ describe("Selected Route Service", () => {
     it("Should unselect selected route and selected the given route", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupSelectedRoute(store, "1");
-            let spy = jasmine.createSpy();
+            const spy = jasmine.createSpy();
             store.dispatch = spy;
             selectedRouteService.setSelectedRoute("42");
 
@@ -134,7 +133,7 @@ describe("Selected Route Service", () => {
                     isAddingPoi: false,
                 }
             });
-            let spy = jasmine.createSpy();
+            const spy = jasmine.createSpy();
             store.dispatch = spy;
 
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
@@ -151,7 +150,7 @@ describe("Selected Route Service", () => {
                     isAddingPoi: true,
                 }
             });
-            let spy = jasmine.createSpy();
+            const spy = jasmine.createSpy();
             store.dispatch = spy;
 
             selectedRouteService.changeRouteEditState("42", "ReadOnly");
@@ -164,7 +163,7 @@ describe("Selected Route Service", () => {
 
     it("Should create route name when there's a route with that name", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
-            let routeName = selectedRouteService.createRouteName();
+            const routeName = selectedRouteService.createRouteName();
             setupRoutes(store, [{id: "42", name: routeName} as any]);
 
             expect(selectedRouteService.createRouteName()).not.toBe(routeName);

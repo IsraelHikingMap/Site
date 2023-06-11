@@ -12,22 +12,22 @@ export class ToggleDistanceAction {
 export class SetFollowingAction {
     public static type = this.prototype.constructor.name;
     constructor(public following: boolean) {}
-};
+}
 
 export class SetPannedAction {
     public static type = this.prototype.constructor.name;
     constructor(public pannedTimestamp: Date) {}
-};
+}
 
 export class SetShareUrlAction {
     public static type = this.prototype.constructor.name;
     constructor(public shareUrl: ShareUrl) {}
-};
+}
 
 export class SetFileUrlAndBaseLayerAction {
     public static type = this.prototype.constructor.name;
     constructor(public fileUrl: string, public baseLayer: string) {}
-};
+}
 
 @State({
     name: "inMemoryState",

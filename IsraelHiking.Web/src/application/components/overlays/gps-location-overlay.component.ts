@@ -47,7 +47,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     }
 
     public addPointToRoute() {
-        let markerData = {
+        const markerData = {
             latlng: { ...this.latlng },
             title: "",
             description: "",
@@ -56,11 +56,11 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
         };
         if (this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
             this.store.dispatch(new AddRecordingPoiAction(markerData));
-            let markerIndex = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.markers.length - 1;
+            const markerIndex = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.markers.length - 1;
             PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, markerIndex);
         } else {
-            let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
-            let markerIndex = selectedRoute.markers.length;
+            const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+            const markerIndex = selectedRoute.markers.length;
             this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, markerData));
             PrivatePoiEditDialogComponent.openDialog(
                 this.matDialog, markerData, markerIndex, selectedRoute.id);
@@ -93,7 +93,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     }
 
     public shareMyLocation() {
-        let ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.latlng);
+        const ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.latlng);
         this.socialSharing.shareWithOptions({
             message: `geo:${this.latlng.lat},${this.latlng.lng}\n${ihmCoordinateUrl}`
         });

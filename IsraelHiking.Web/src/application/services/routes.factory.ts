@@ -27,8 +27,8 @@ export class RoutesFactory {
     constructor(private readonly store: Store) { }
 
     public createRouteData(name: string, color?: string): RouteData {
-        let routeEditingState = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState);
-        let route: RouteData = {
+        const routeEditingState = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState);
+        const route: RouteData = {
             id: this.generateRandomId(),
             name,
             description: "",
@@ -44,8 +44,8 @@ export class RoutesFactory {
     }
 
     public createRouteDataAddMissingFields(routeData: RouteData, color: string): RouteData {
-        let routeEditingState = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState);
-        let route = { ...routeData };
+        const routeEditingState = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState);
+        const route = { ...routeData };
         route.color = route.color || color;
         route.opacity = route.opacity || routeEditingState.opacity;
         route.weight = route.weight || routeEditingState.weight;
@@ -59,8 +59,8 @@ export class RoutesFactory {
     }
 
     public regenerateDuplicateIds(routesData: RouteData[]) {
-        let ids = [] as string[];
-        for (let routeData of routesData) {
+        const ids = [] as string[];
+        for (const routeData of routesData) {
             if (ids.includes(routeData.id)) {
                 routeData.id = this.generateRandomId();
             } else {

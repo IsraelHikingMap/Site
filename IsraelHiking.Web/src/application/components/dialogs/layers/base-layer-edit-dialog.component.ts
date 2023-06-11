@@ -36,7 +36,7 @@ export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
     }
 
     protected internalSave(layerData: LayerData): void {
-        let baseLayer = {
+        const baseLayer = {
             ...layerData,
             id: this.backupBaseLayer.id,
             isEditable: true

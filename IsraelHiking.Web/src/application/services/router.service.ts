@@ -31,18 +31,18 @@ export class RouterService {
     }
 
     public async getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
-        let address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng +
+        const address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng +
             "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
         try {
-            let geojson = await firstValueFrom(this.httpClient.get(address).pipe(timeout(4500)));
-            let data = geojson as GeoJSON.FeatureCollection<GeoJSON.LineString>;
+            const geojson = await firstValueFrom(this.httpClient.get(address).pipe(timeout(4500)));
+            const data = geojson as GeoJSON.FeatureCollection<GeoJSON.LineString>;
             return data.features[0].geometry.coordinates.map(c => SpatialService.toLatLng(c));
         } catch (ex) {
             try {
                 return await this.getOffineRoute(latlngStart, latlngEnd, routinType);
             } catch (ex2) {
                 this.loggingService.error(`[Routing] failed: ${(ex as Error).message}, ${(ex2 as Error).message}`);
-                let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+                const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
                 this.toastService.warning(offlineState.isOfflineAvailable || !this.runningContextService.isCapacitor
                     ? this.resources.routingFailedTryShorterRoute
                     : this.resources.routingFailedBuySubscription
@@ -56,12 +56,12 @@ export class RouterService {
         if (routinType === "None") {
             return [latlngStart, latlngEnd];
         }
-        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         if (!offlineState.isOfflineAvailable || offlineState.lastModifiedDate == null) {
             throw new Error("Offline routing is only supported after downloading offline data");
         }
         const zoom = 14; // this is the max zoom for these tiles
-        let tiles = [latlngStart, latlngEnd].map(latlng => SpatialService.toTile(latlng, zoom));
+        const tiles = [latlngStart, latlngEnd].map(latlng => SpatialService.toTile(latlng, zoom));
         let tileXmax = Math.max(...tiles.map(tile => Math.floor(tile.x)));
         const tileXmin = Math.min(...tiles.map(tile => Math.floor(tile.x)));
         let tileYmax = Math.max(...tiles.map(tile => Math.floor(tile.y)));
@@ -72,10 +72,10 @@ export class RouterService {
         // increase the chance of getting a route by adding more tiles
         if (tileXmax === tileXmin) {
             tileXmax += 1;
-        };
+        }
         if (tileYmax === tileYmin) {
             tileYmax += 1;
-        };
+        }
         let features = await this.updateCacheAndGetFeatures(tileXmin, tileXmax, tileYmin, tileYmax, zoom);
         if (routinType === "4WD") {
             features = features.filter(f =>
@@ -90,15 +90,15 @@ export class RouterService {
                 f.properties.ihm_class !== "pedestrian" &&
                 f.properties.ihm_class !== "steps");
         }
-        let startFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngStart, features);
-        let endFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngEnd, features);
+        const startFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngStart, features);
+        const endFeature = SpatialService.insertProjectedPointToClosestLineAndReplaceIt(latlngEnd, features);
 
-        let collection = {
+        const collection = {
             type: "FeatureCollection",
             features
         } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
-        let pathFinder = new PathFinder(collection, {tolerance: 2e-5});
-        let route = pathFinder.findPath(startFeature, endFeature);
+        const pathFinder = new PathFinder(collection, {tolerance: 2e-5});
+        const route = pathFinder.findPath(startFeature, endFeature);
         if (!route) {
             throw new Error("[Routing] No route found... :-(");
         }
@@ -112,33 +112,33 @@ export class RouterService {
         tileYmin: number,
         tileYmax: number,
         zoom: number): Promise<GeoJSON.Feature<GeoJSON.LineString>[]> {
-        let allCollection = [];
+        const allCollection = [];
         for (let tileX = tileXmin; tileX <= tileXmax; tileX++) {
             for (let tileY = tileYmin; tileY <= tileYmax; tileY++) {
-                let key = `${tileX}/${tileY}`;
+                const key = `${tileX}/${tileY}`;
                 if (this.featuresCache.has(key)) {
                     allCollection.push(this.featuresCache.get(key));
                     continue;
                 }
-                let collection = {
+                const collection = {
                     type: "FeatureCollection",
                     features: []
                 } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
-                let arrayBuffer = await this.databaseService.getTile(`custom://IHM/${zoom}/${tileX}/${tileY}.pbf`);
-                let tile = new VectorTile(new Protobuf(arrayBuffer));
-                for (let layerKey of Object.keys(tile.layers)) {
-                    let layer = tile.layers[layerKey];
+                const arrayBuffer = await this.databaseService.getTile(`custom://IHM/${zoom}/${tileX}/${tileY}.pbf`);
+                const tile = new VectorTile(new Protobuf(arrayBuffer));
+                for (const layerKey of Object.keys(tile.layers)) {
+                    const layer = tile.layers[layerKey];
                     for (let featureIndex=0; featureIndex < layer.length; featureIndex++) {
-                        let feature = layer.feature(featureIndex);
-                        let isHighway = Object.keys(feature.properties).find(k => k === "ihm_class") != null;
+                        const feature = layer.feature(featureIndex);
+                        const isHighway = Object.keys(feature.properties).find(k => k === "ihm_class") != null;
                         if (!isHighway) {
                             continue;
                         }
-                        let geojsonFeature = feature.toGeoJSON(tileX, tileY, zoom);
+                        const geojsonFeature = feature.toGeoJSON(tileX, tileY, zoom);
                         if (geojsonFeature.geometry.type === "LineString") {
                             collection.features.push(geojsonFeature as GeoJSON.Feature<GeoJSON.LineString>);
                         } else if (geojsonFeature.geometry.type === "MultiLineString") {
-                            let multiLines = geojsonFeature.geometry.coordinates.map(coordinates => ({
+                            const multiLines = geojsonFeature.geometry.coordinates.map(coordinates => ({
                                 type: "Feature",
                                 geometry: {
                                     type: "LineString",

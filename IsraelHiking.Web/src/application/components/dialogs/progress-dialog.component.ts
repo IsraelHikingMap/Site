@@ -38,7 +38,7 @@ export class ProgressDialogComponent extends BaseMapComponent {
         this.progressPersentage = 0;
         this.text = "";
         this.isContinue = data.showContinueButton;
-        let wrappedAction = () => {
+        const wrappedAction = () => {
             data.action((value, text) => {
                 this.progressPersentage = value;
                 this.text = text;

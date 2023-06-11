@@ -83,7 +83,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public ngOnDestroy(): void {
-        for (let subscription of this.subscriptions) {
+        for (const subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
     }
@@ -110,7 +110,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public getQueueText(): string {
-        let queueLength = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).uploadPoiQueue.length;
+        const queueLength = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).uploadPoiQueue.length;
         return queueLength > 0 ? queueLength.toString() : "";
     }
 
@@ -120,7 +120,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             return;
         }
         if (!this.store.selectSnapshot((s: ApplicationState) => s.userState).agreedToTheTermsOfService) {
-            let component = this.dialog.open(TermsOfServiceDialogComponent);
+            const component = this.dialog.open(TermsOfServiceDialogComponent);
             component.afterClosed().subscribe((results: string) => {
                 if (results === "true") {
                     this.store.dispatch(new SetAgreeToTermsAction(true));
@@ -165,14 +165,14 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
 
     public async reportAnIssue() {
         this.toastService.info(this.resources.preparingDataForIssueReport);
-        let layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-        let baseLayer = this.layersService.getSelectedBaseLayer();
+        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
+        const baseLayer = this.layersService.getSelectedBaseLayer();
         this.loggingService.info("--- Reporting an issue ---");
-        let subscription  = timer(8000, 8000).subscribe(() => {
+        const subscription  = timer(8000, 8000).subscribe(() => {
             this.toastService.info(this.resources.notYet);
         });
-        let logs = await this.loggingService.getLog();
-        let userInfo = this.userInfo || {
+        const logs = await this.loggingService.getLog();
+        const userInfo = this.userInfo || {
             displayName: "non-registered user",
             id: "----"
         } as UserInfo;
@@ -184,7 +184,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
             `Visible overlays: ${JSON.stringify(layersState.overlays.filter(o => o.visible))}`,
             ""
         ].join("\n");
-        let subject = "Issue reported by " + userInfo.displayName;
+        const subject = "Issue reported by " + userInfo.displayName;
         try {
             if (!this.runningContextService.isCapacitor) {
 
@@ -197,7 +197,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 SendReportDialogComponent.openDialog(this.dialog, subject);
                 return;
             }
-            let info = await Device.getInfo();
+            const info = await Device.getInfo();
             infoString += [
                 `Manufacture: ${info.manufacturer}`,
                 `Model: ${info.model}`,
@@ -205,12 +205,12 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                 `OS version: ${info.osVersion}`,
                 `App version: ${(await App.getInfo()).version}`
             ].join("\n");
-            let geoLocationLogs = await this.geoLocationService.getLog();
-            let logBase64zipped = await this.fileService.compressTextToBase64Zip([
+            const geoLocationLogs = await this.geoLocationService.getLog();
+            const logBase64zipped = await this.fileService.compressTextToBase64Zip([
                 { name: "log.txt", text: logs},
                 { name: "geolocation.txt", text: geoLocationLogs}
             ]);
-            let infoBase64 = encode(await new Response(infoString).arrayBuffer());
+            const infoBase64 = encode(await new Response(infoString).arrayBuffer());
             this.toastService.info(this.resources.pleaseFillReport);
             this.socialSharing.shareViaEmail(
                 this.resources.reportAnIssueInstructions,
@@ -242,15 +242,15 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public getOsmAddress() {
-        let poiState = this.store.selectSnapshot((s: ApplicationState) => s.poiState);
-        let baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
+        const poiState = this.store.selectSnapshot((s: ApplicationState) => s.poiState);
+        const baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
         if (poiState.isSidebarOpen &&
             poiState.selectedPointOfInterest != null &&
             poiState.selectedPointOfInterest.properties.poiSource.toLocaleLowerCase() === "osm") {
             return this.authorizationService.getEditElementOsmAddress(baseLayerAddress,
                 poiState.selectedPointOfInterest.properties.identifier);
         }
-        let currentLocation = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
+        const currentLocation = this.store.selectSnapshot((s: ApplicationState) => s.locationState);
         return this.authorizationService.getEditOsmLocationAddress(baseLayerAddress,
             currentLocation.zoom + 1,
             currentLocation.latitude,
@@ -276,7 +276,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     }
 
     public orderOfflineMaps() {
-        let userInfo = this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo;
+        const userInfo = this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo;
         if (userInfo == null || !userInfo.id) {
             this.toastService.warning(this.resources.loginRequired);
             return;

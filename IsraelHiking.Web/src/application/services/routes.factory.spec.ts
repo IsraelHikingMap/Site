@@ -17,7 +17,7 @@ describe("RoutesFactory", () => {
     });
 
     it("Should create an empty route with the given name", inject([RoutesFactory, Store], (factory: RoutesFactory, store: Store) => {
-        let routeEditingState = {
+        const routeEditingState = {
             opacity: 1,
             weight: 2,
         };
@@ -26,7 +26,7 @@ describe("RoutesFactory", () => {
             routeEditingState
         });
 
-        let route = factory.createRouteData("hello");
+        const route = factory.createRouteData("hello");
 
         expect(route.id).toBeDefined();
         expect(route.name).toBe("hello");
@@ -40,7 +40,7 @@ describe("RoutesFactory", () => {
     }));
 
     it("Should add missing data to a route", inject([RoutesFactory, Store], (factory: RoutesFactory, store: Store) => {
-        let routeEditingState = {
+        const routeEditingState = {
             opacity: 1,
             weight: 2,
         };
@@ -58,19 +58,19 @@ describe("RoutesFactory", () => {
     }));
 
     it("Should do nothing if the list is empty", inject([RoutesFactory], (factory: RoutesFactory) => {
-        let routes = [] as RouteData[];
+        const routes = [] as RouteData[];
         factory.regenerateDuplicateIds(routes);
         expect(routes).toEqual([]);
     }));
 
     it("Should do nothing if the list does not have duplicate ids", inject([RoutesFactory], (factory: RoutesFactory) => {
-        let routes = [{id: "1"}, {id: "2"}] as RouteData[];
+        const routes = [{id: "1"}, {id: "2"}] as RouteData[];
         factory.regenerateDuplicateIds(routes);
         expect(routes).toEqual([{id: "1"}, {id: "2"}] as RouteData[]);
     }));
 
     it("Should do regenerate id if the list has duplicate ids", inject([RoutesFactory], (factory: RoutesFactory) => {
-        let routes = [{id: "1"}, {id: "2"}, {id: "1"}] as RouteData[];
+        const routes = [{id: "1"}, {id: "2"}, {id: "1"}] as RouteData[];
         factory.regenerateDuplicateIds(routes);
         expect(routes[2].id).not.toBe("1");
     }));

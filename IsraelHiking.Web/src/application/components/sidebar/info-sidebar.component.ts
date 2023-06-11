@@ -86,9 +86,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
     private initalizeLegendSections() {
         this.legendSections = structuredClone(legendSectionsJson) as LegendSection[];
-        for (let section of this.legendSections) {
+        for (const section of this.legendSections) {
             section.title = this.resources[section.key] as string;
-            for (let item of section.items) {
+            for (const item of section.items) {
                 item.title = this.resources[item.key] as string;
             }
         }
@@ -158,7 +158,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     private removeItemInSection(sectionTitle: string, title: string) {
-        let section = this.legendSections.find(sectionToFind => sectionToFind.title === sectionTitle);
+        const section = this.legendSections.find(sectionToFind => sectionToFind.title === sectionTitle);
         if (section) {
             remove(section.items, itemToRemove => itemToRemove.title === title);
         }

@@ -74,7 +74,7 @@ export class PurchaseService {
         CdvPurchase.store.when().verified((receipt) => {
             this.loggingService.info(`[Store] Verified. ${receipt.id}, owned: ${CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)}`);
             if (CdvPurchase.store.owned(OFFLINE_MAPS_SUBSCRIPTION)) {
-                let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+                const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
                 this.loggingService.info("[Store] Product owned! Last modified: " + offlineState.lastModifiedDate);
                 this.store.dispatch(new SetOfflineAvailableAction(true));
             }
@@ -98,14 +98,14 @@ export class PurchaseService {
     }
 
     public isPurchaseAvailable(): boolean {
-        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return this.runningContextService.isCapacitor &&
             !offlineState.isOfflineAvailable &&
             offlineState.lastModifiedDate == null;
     }
 
     public isRenewAvailable() {
-        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return this.runningContextService.isCapacitor &&
             !offlineState.isOfflineAvailable &&
             offlineState.lastModifiedDate != null;

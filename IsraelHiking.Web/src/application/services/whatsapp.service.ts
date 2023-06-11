@@ -10,7 +10,7 @@ export class WhatsAppService {
                 private readonly runningContextService: RunningContextService) { }
 
     public getUrl(title: string, escaped: string): SafeUrl {
-        let titleAndLink = `${title}: ${escaped}`;
+        const titleAndLink = `${title}: ${escaped}`;
         if (this.runningContextService.isMobile) {
             return this.sanitizer.bypassSecurityTrustUrl(`whatsapp://send?text=${titleAndLink}`);
         }

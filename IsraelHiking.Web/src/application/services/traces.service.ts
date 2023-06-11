@@ -25,7 +25,7 @@ export class TracesService {
 
     public getMissingParts(traceId: string): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
         this.loggingService.info(`[Traces] Getting missing parts for ${traceId}`);
-        let missingParts$ = this.httpClient.post(Urls.osm + "?traceId=" + traceId, null);
+        const missingParts$ = this.httpClient.post(Urls.osm + "?traceId=" + traceId, null);
         return firstValueFrom(missingParts$) as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     }
 
@@ -34,7 +34,7 @@ export class TracesService {
     }
 
     public async uploadLocalTracesIfNeeded(): Promise<void> {
-        let state = this.store.snapshot() as ApplicationState;
+        const state = this.store.snapshot() as ApplicationState;
         if (!state.configuration.isAutomaticRecordingUpload) {
             return;
         }
@@ -44,12 +44,12 @@ export class TracesService {
         if (state.userState.userInfo == null) {
             return;
         }
-        let localTraces = state.tracesState.traces.filter(t => t.visibility === "local");
+        const localTraces = state.tracesState.traces.filter(t => t.visibility === "local");
         if (localTraces.length === 0) {
             return;
         }
         this.loggingService.info(`[Traces] There are ${localTraces.length} local traces that are about to be uploaded`);
-        for (let localTrace of localTraces) {
+        for (const localTrace of localTraces) {
             await this.uploadRouteAsTrace(localTrace.dataContainer.routes[0]);
             await this.deleteTrace(localTrace);
         }
@@ -60,12 +60,12 @@ export class TracesService {
     public async syncTraces(): Promise<void> {
         try {
             this.loggingService.info("[Traces] Starting syncing traces");
-            let response = await firstValueFrom(this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)));
-            let traces = ([] as Trace[]).concat(response as Trace[] || []);
-            let existingTraces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
-            for (let traceJson of traces) {
+            const response = await firstValueFrom(this.httpClient.get(Urls.osmTrace).pipe(timeout(20000)));
+            const traces = ([] as Trace[]).concat(response as Trace[] || []);
+            const existingTraces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces;
+            for (const traceJson of traces) {
                 traceJson.timeStamp = new Date(traceJson.timeStamp);
-                let existingTrace = existingTraces.find(t => t.id === traceJson.id);
+                const existingTrace = existingTraces.find(t => t.id === traceJson.id);
                 if (existingTrace != null) {
                     this.store.dispatch(new UpdateTraceAction(traceJson));
                 } else {
@@ -80,7 +80,7 @@ export class TracesService {
                     this.updateTrace(traceJson);
                 }
             }
-            for (let trace of existingTraces.filter(t => t.visibility !== "local")) {
+            for (const trace of existingTraces.filter(t => t.visibility !== "local")) {
                 if (traces.find(t => t.id === trace.id) == null) {
                     this.store.dispatch(new RemoveTraceAction(trace.id));
                     await this.databaseService.deleteTraceById(trace.id);
@@ -98,7 +98,7 @@ export class TracesService {
         if (trace == null) {
             return null;
         }
-        let storedTrace = await this.databaseService.getTraceById(traceId);
+        const storedTrace = await this.databaseService.getTraceById(traceId);
         if (storedTrace != null) {
             this.loggingService.info(`[Traces] Got trace from database: ${traceId}`);
             return {
@@ -106,7 +106,7 @@ export class TracesService {
                 dataContainer: storedTrace.dataContainer
             };
         }
-        let dataContainer = await firstValueFrom(this.httpClient.get(Urls.osmTrace + traceId)) as DataContainer;
+        const dataContainer = await firstValueFrom(this.httpClient.get(Urls.osmTrace + traceId)) as DataContainer;
         this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
         trace = {
             ...trace,
@@ -117,7 +117,7 @@ export class TracesService {
     }
 
     public uploadTrace(file: File): Promise<any> {
-        let formData = new FormData();
+        const formData = new FormData();
         formData.append("file", file, file.name);
         this.loggingService.info(`[Traces] Uploading a trace with file name ${file.name}`);
         return firstValueFrom(this.httpClient.post(Urls.osmTrace, formData).pipe(timeout(3 * 60 * 1000)));

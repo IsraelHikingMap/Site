@@ -51,7 +51,7 @@ export type RouteStatistics = {
 @Injectable()
 export class RouteStatisticsService {
     public getStatisticsByRange(latlngs: LatLngAltTime[], start: RouteStatisticsPoint, end: RouteStatisticsPoint): RouteStatistics {
-        let routeStatistics = {
+        const routeStatistics = {
             points: [] as RouteStatisticsPoint[],
             length: 0,
             gain: 0,
@@ -67,10 +67,10 @@ export class RouteStatisticsService {
         // convert to route statistic points
         let previousLatlng = latlngs[0];
         routeStatistics.points.push(start || { coordinate: [0, previousLatlng.alt], latlng: previousLatlng, slope: 0 });
-        for (let latlng of latlngs) {
-            let distance = SpatialService.getDistanceInMeters(previousLatlng, latlng);
+        for (const latlng of latlngs) {
+            const distance = SpatialService.getDistanceInMeters(previousLatlng, latlng);
             routeStatistics.length += distance;
-            let point = {
+            const point = {
                 coordinate: [(routeStatistics.length / 1000), latlng.alt],
                 latlng,
                 slope: 0
@@ -88,8 +88,8 @@ export class RouteStatisticsService {
         // filter invalid points for the rest of the calculations
         routeStatistics.points = routeStatistics.points.filter(p => !isNaN(p.latlng.alt) && p.latlng.alt != null);
         for (let pointIndex = routeStatistics.points.length - 1; pointIndex > 0; pointIndex--) {
-            let prevPoint = routeStatistics.points[pointIndex - 1];
-            let currentPoint = routeStatistics.points[pointIndex];
+            const prevPoint = routeStatistics.points[pointIndex - 1];
+            const currentPoint = routeStatistics.points[pointIndex];
             if (currentPoint.coordinate[0] - prevPoint.coordinate[0] < 0.001) {
                 routeStatistics.points.splice(pointIndex, 1);
             }
@@ -100,13 +100,13 @@ export class RouteStatisticsService {
 
         // calculate slope
         for (let pointIndex = 1; pointIndex < routeStatistics.points.length; pointIndex++) {
-            let prevPoint = routeStatistics.points[pointIndex - 1];
-            let currentPoint = routeStatistics.points[pointIndex];
+            const prevPoint = routeStatistics.points[pointIndex - 1];
+            const currentPoint = routeStatistics.points[pointIndex];
             currentPoint.slope = (currentPoint.coordinate[1] - prevPoint.coordinate[1]) * 0.1 /
                 (currentPoint.coordinate[0] - prevPoint.coordinate[0]);
         }
 
-	    this.updateGainAndLoss(routeStatistics);
+        this.updateGainAndLoss(routeStatistics);
 
         return routeStatistics;
     }
@@ -127,17 +127,17 @@ export class RouteStatisticsService {
      */
     private updateGainAndLoss(routeStatistics: RouteStatistics) {
         // resample coordinates along route at uniform resolution
-        let coordinates = routeStatistics.points.map(p => p.coordinate);
-        let linterp = linearInterpolator(coordinates);
-        let resamplingResolutionKm = 0.01;
-        let interpolatedCoordinates = [];
+        const coordinates = routeStatistics.points.map(p => p.coordinate);
+        const linterp = linearInterpolator(coordinates);
+        const resamplingResolutionKm = 0.01;
+        const interpolatedCoordinates = [];
         for (let x = coordinates[0][0]; x <= coordinates[coordinates.length - 1][0]; x += resamplingResolutionKm) {
             interpolatedCoordinates.push([x, linterp(x)]);
         }
 
         // pad interpolated coordinates towards applying moving median filter
-        let medianFilterSize = 19;
-        let halfMedianFilter = Math.floor(medianFilterSize / 2);
+        const medianFilterSize = 19;
+        const halfMedianFilter = Math.floor(medianFilterSize / 2);
         let paddedInterpolatedCoordinates = [];
         for (let i = 0; i < halfMedianFilter; i++) {
             paddedInterpolatedCoordinates.push(interpolatedCoordinates[0]);
@@ -147,17 +147,17 @@ export class RouteStatisticsService {
             {paddedInterpolatedCoordinates.push(interpolatedCoordinates[interpolatedCoordinates.length - 1]);}
 
         // apply moving median filter to remove outliers
-        let filteredCoordinates = [] as [number, number][];
+        const filteredCoordinates = [] as [number, number][];
         for (let i = halfMedianFilter; i < paddedInterpolatedCoordinates.length-halfMedianFilter; i++)
         {
-            let window = paddedInterpolatedCoordinates.slice(i - halfMedianFilter, i+halfMedianFilter + 1);
+            const window = paddedInterpolatedCoordinates.slice(i - halfMedianFilter, i+halfMedianFilter + 1);
             filteredCoordinates.push([paddedInterpolatedCoordinates[i][0], this.median(window.map(x => x[1]))]);
         }
 
         // compute total route gain & loss
         let previousFilteredCoordinate = filteredCoordinates[0];
-        for (let filteredCoordinate of filteredCoordinates) {
-            let elevationDiff = filteredCoordinate[1] - previousFilteredCoordinate[1];
+        for (const filteredCoordinate of filteredCoordinates) {
+            const elevationDiff = filteredCoordinate[1] - previousFilteredCoordinate[1];
             if (elevationDiff >= 0) {
                 routeStatistics.gain += elevationDiff;
             } else {
@@ -168,7 +168,7 @@ export class RouteStatisticsService {
     }
 
     public getStatisticsForStandAloneRoute(latlngs: LatLngAltTime[]): RouteStatistics {
-        let routeStatistics = this.getStatisticsByRange(latlngs, null, null);
+        const routeStatistics = this.getStatisticsByRange(latlngs, null, null);
         this.addDurationAndAverageSpeed(latlngs, routeStatistics.length, routeStatistics);
         return routeStatistics;
     }
@@ -178,7 +178,7 @@ export class RouteStatisticsService {
         currentLatlng: LatLngAltTime,
         heading: number
         ): RouteStatistics {
-        let closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
+        const closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
         closestRouteStatistics.traveledDistance = (this.findDistanceForLatLngInKM(closestRouteStatistics, currentLatlng, heading) * 1000);
         closestRouteStatistics.remainingDistance = closestRouteStatistics.length - closestRouteStatistics.traveledDistance;
         this.addDurationAndAverageSpeed(closestRouteToRecordingLatlngs, closestRouteStatistics.length, closestRouteStatistics);
@@ -189,8 +189,8 @@ export class RouteStatisticsService {
         closestRouteToRecordingLatlngs: LatLngAltTime[],
         currentLatlng: LatLngAltTime,
         heading: number) {
-        let recordedRouteStatistics = this.getStatisticsByRange(recordedRouteLatlngs, null, null);
-        let closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
+        const recordedRouteStatistics = this.getStatisticsByRange(recordedRouteLatlngs, null, null);
+        const closestRouteStatistics = this.getStatisticsByRange(closestRouteToRecordingLatlngs, null, null);
         closestRouteStatistics.remainingDistance =
             closestRouteStatistics.length - (this.findDistanceForLatLngInKM(closestRouteStatistics, currentLatlng, heading) * 1000);
         this.addDurationAndAverageSpeed(recordedRouteLatlngs, recordedRouteStatistics.length, closestRouteStatistics);
@@ -202,8 +202,8 @@ export class RouteStatisticsService {
         if (latlngs.length === 0) {
             return;
         }
-        let start = latlngs[0];
-        let end = latlngs[latlngs.length - 1];
+        const start = latlngs[0];
+        const end = latlngs[latlngs.length - 1];
         if (start.timestamp != null && end.timestamp != null) {
             fullStatistics.duration = (new Date(end.timestamp).getTime() - new Date(start.timestamp).getTime()) / 1000;
             fullStatistics.averageSpeed = length / fullStatistics.duration * 3.6; // convert m/sec to km/hr
@@ -218,7 +218,7 @@ export class RouteStatisticsService {
         if (x <= 0) {
             return previousPoint;
         }
-        for (let currentPoint of statistics.points) {
+        for (const currentPoint of statistics.points) {
             if (currentPoint.coordinate[0] < x) {
                 previousPoint = currentPoint;
                 continue;
@@ -227,8 +227,8 @@ export class RouteStatisticsService {
                 previousPoint = currentPoint;
                 continue;
             }
-            let ratio = (x - previousPoint.coordinate[0]) / (currentPoint.coordinate[0] - previousPoint.coordinate[0]);
-            let point = { coordinate: [x, 0] } as RouteStatisticsPoint;
+            const ratio = (x - previousPoint.coordinate[0]) / (currentPoint.coordinate[0] - previousPoint.coordinate[0]);
+            const point = { coordinate: [x, 0] } as RouteStatisticsPoint;
             point.coordinate[1] = this.getInterpolatedValue(previousPoint.coordinate[1], currentPoint.coordinate[1], ratio);
             point.slope = this.getInterpolatedValue(previousPoint.slope, currentPoint.slope, ratio);
             point.latlng = SpatialService.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio, point.coordinate[1]);
@@ -251,7 +251,7 @@ export class RouteStatisticsService {
             minimalWeight += MINIMAL_ANGLE;
         }
         let previousPoint = statistics.points[0];
-        for (let point of statistics.points) {
+        for (const point of statistics.points) {
             if (point === statistics.points[0]) {
                 continue;
             }

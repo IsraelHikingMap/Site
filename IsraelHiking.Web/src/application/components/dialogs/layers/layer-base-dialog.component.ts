@@ -52,7 +52,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     }
 
     public saveLayer() {
-        let layerData = {
+        const layerData = {
             ...this.layerData,
             minZoom: +this.layerData.minZoom, // fix issue with variable saved as string...
             maxZoom: +this.layerData.maxZoom,
@@ -71,7 +71,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
         try {
             let address = `${this.layerData.address}/?f=json`;
             address = address.replace("//?f", "/?f"); // in case the address the user set ends with "/".
-            let response = await firstValueFrom(this.http.get(address)) as { name: string };
+            const response = await firstValueFrom(this.http.get(address)) as { name: string };
             if (response && response.name) {
                 this.layerData.key = response.name;
             }

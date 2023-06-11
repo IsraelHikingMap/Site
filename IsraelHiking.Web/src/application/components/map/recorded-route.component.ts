@@ -66,7 +66,7 @@ export class RecordedRouteComponent extends BaseMapComponent {
     }
 
     private handleRecordingChanges() {
-        let recording = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route;
+        const recording = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route;
         if (recording == null || recording.latlngs.length === 0) {
             this.recordedRouteSegments = [];
             this.lastSplit = 0;
@@ -80,8 +80,8 @@ export class RecordedRouteComponent extends BaseMapComponent {
             };
             return;
         }
-        let latlngs = [...recording.latlngs];
-        let currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
+        const latlngs = [...recording.latlngs];
+        const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
         if (currentPosition) {
             // Adding current position to the end of the presented recorded line
             latlngs.push(GeoLocationService.positionToLatLngTime(currentPosition));
@@ -99,7 +99,7 @@ export class RecordedRouteComponent extends BaseMapComponent {
 
         // Refresh the last segment with current data
         latlngs.splice(0, this.lastSplit);
-        let currentSegment = {
+        const currentSegment = {
             type: "FeatureCollection",
             features: [{
                 type: "Feature",

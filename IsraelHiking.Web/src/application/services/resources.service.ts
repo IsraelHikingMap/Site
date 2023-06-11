@@ -949,7 +949,7 @@ export class ResourcesService {
     }
 
     public async setLanguage(code: LanguageCode) {
-        let language = this.availableLanguages.find((l) => l.code === code);
+        const language = this.availableLanguages.find((l) => l.code === code);
         await this.setLanguageInternal(language);
     }
 
@@ -988,15 +988,15 @@ export class ResourcesService {
         if (!imageUrl) {
             return imageUrl;
         }
-        let regex = /(http.*\/\/upload\.wikimedia\.org\/wikipedia\/(commons|he|en)\/)(.*\/)(.*)/;
+        const regex = /(http.*\/\/upload\.wikimedia\.org\/wikipedia\/(commons|he|en)\/)(.*\/)(.*)/;
         if (regex.test(imageUrl)) {
-            let url = imageUrl.replace(regex, `$1thumb/$3$4/${size}px-$4`);
+            const url = imageUrl.replace(regex, `$1thumb/$3$4/${size}px-$4`);
             return url.endsWith(".svg") ? url + ".png" : url;
         }
         if (imageUrl.includes("//i.imgur.com/")) {
-            let split = imageUrl.split(".");
-            let extenstion = split.pop();
-            let prefix = split.join(".");
+            const split = imageUrl.split(".");
+            const extenstion = split.pop();
+            const prefix = split.join(".");
             return prefix + this.getImgurPostfix(size) + "." + extenstion;
         }
         if (imageUrl.startsWith("File:")) {

@@ -91,9 +91,9 @@
         </mat-expansion-panel>
     </mat-accordion>
     <div class="flex flex-row" *ngIf="isOfflineDownloadAvailable() && (lastModified | async)">
-        <div class="w-full margin-10">{{resources.lastUpdatedOn}} {{lastModified | async | date:'dd/MM/yyyy'}}</div>
+        <div class="w-full ms-2">{{resources.lastUpdatedOn}} {{lastModified | async | date:'dd/MM/yyyy'}}</div>
     </div>
-    <p class="margin-10" *ngIf="isOfflineDownloadAvailable()">
+    <p class="ms-2" *ngIf="isOfflineDownloadAvailable()">
         {{resources.offlinePurchaseGraditude}}<br/>
         <a [href]="manageSubscriptions" target="_blank" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Manage subscriptions">{{resources.manageSubscriptions}}</a>
     </p>

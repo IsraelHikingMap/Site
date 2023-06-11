@@ -25,12 +25,12 @@ export class ImageAttributionService {
         if (this.attributionImageCache.has(imageUrl)) {
             return this.attributionImageCache.get(imageUrl);
         }
-        let url = new URL(imageUrl);
+        const url = new URL(imageUrl);
         if (!url.hostname) {
             return null;
         }
         if (!url.hostname.includes("upload.wikimedia")) {
-            let imageAttribution = {
+            const imageAttribution = {
                 author: url.origin,
                 url: url.origin
             };
@@ -38,27 +38,27 @@ export class ImageAttributionService {
             return imageAttribution;
         }
 
-        let imageName = imageUrl.split("/").pop();
-        let language = this.resources.getCurrentLanguageCodeSimplified();
-        let address = `https://${language}.wikipedia.org/w/api.php?action=query&prop=imageinfo&iiprop=extmetadata&format=json&origin=*` +
+        const imageName = imageUrl.split("/").pop();
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        const address = `https://${language}.wikipedia.org/w/api.php?action=query&prop=imageinfo&iiprop=extmetadata&format=json&origin=*` +
             `&titles=File:${imageName}`;
         try {
-            let response: any = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000)));
-            let extmetadata = response.query.pages[-1].imageinfo[0].extmetadata;
+            const response: any = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000)));
+            const extmetadata = response.query.pages[-1].imageinfo[0].extmetadata;
             if (extmetadata?.Artist.value) {
                 const match = extmetadata.Artist.value.match(/<[^>]*>([^<]*)<\/[^>]*>/);
                 let author = extmetadata.Artist.value as string;
                 if (match) {
                     author = match[1]; // Extract the content between the opening and closing tags
                 }
-                let imageAttribution = {
+                const imageAttribution = {
                     author,
                     url: `https://${language}.wikipedia.org/wiki/File:${imageName}`
                 };
                 this.attributionImageCache.set(imageUrl, imageAttribution);
                 return imageAttribution;
             }
-        } catch {}
+        } catch {} // eslint-disable-line
         return null;
     }
 }
