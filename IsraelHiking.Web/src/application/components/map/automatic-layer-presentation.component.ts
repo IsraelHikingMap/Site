@@ -58,7 +58,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 private readonly mapService: MapService,
                 private readonly store: Store) {
         super(resources);
-        let layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
+        const layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
         this.rasterSourceId = `raster-source-${layerIndex}`;
         this.sourceAdded = false;
@@ -105,7 +105,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     public ngOnDestroy() {
-        for (let subscription of this.subscriptions) {
+        for (const subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
         if (this.sourceAdded) {
@@ -116,7 +116,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
 
     async ngOnChanges(changes: SimpleChanges) {
         if (this.sourceAdded) {
-            let addressToRemove = changes.layerData ? changes.layerData.previousValue.address : this.layerData.address;
+            const addressToRemove = changes.layerData ? changes.layerData.previousValue.address : this.layerData.address;
             this.removeLayer(addressToRemove);
             await this.createLayer();
         }
@@ -135,7 +135,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             address = address.replace("{-y}", "{y}");
             scheme = "tms";
         }
-        let source = {
+        const source = {
             type: "raster",
             tiles: [address],
             minzoom: Math.max(this.layerData.minZoom - 1, 0),
@@ -145,7 +145,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             attribution: AutomaticLayerPresentationComponent.ATTRIBUTION
         } as RasterSourceSpecification;
         this.mapComponent.mapInstance.addSource(this.rasterSourceId, source);
-        let layer = {
+        const layer = {
             id: this.rasterLayerId,
             type: "raster",
             source: this.rasterSourceId,
@@ -165,18 +165,18 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     private async createJsonLayer() {
-        let getOfflineStyleFile = this.layerData.isOfflineAvailable && (this.layerData.isOfflineOn || !this.hasInternetAccess);
-        let response = await this.fileService.getStyleJsonContent(this.layerData.address, getOfflineStyleFile);
-        let language = this.resources.getCurrentLanguageCodeSimplified();
-        let styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as StyleSpecification;
+        const getOfflineStyleFile = this.layerData.isOfflineAvailable && (this.layerData.isOfflineOn || !this.hasInternetAccess);
+        const response = await this.fileService.getStyleJsonContent(this.layerData.address, getOfflineStyleFile);
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        const styleJson = JSON.parse(JSON.stringify(response).replace(/name:he/g, `name:${language}`)) as StyleSpecification;
         this.updateSourcesAndLayers(styleJson.sources, styleJson.layers);
     }
 
     private updateSourcesAndLayers(sources: {[_: string]: SourceSpecification}, layers: LayerSpecification[]) {
         let attributiuonUpdated = false;
         for (let sourceKey of Object.keys(sources)) {
-            if (sources.hasOwnProperty(sourceKey) && this.visible) {
-                let source = sources[sourceKey];
+            if (Object.prototype.hasOwnProperty.call(sources, sourceKey) && this.visible) {
+                const source = sources[sourceKey];
                 if (!this.isBaselayer) {
                     sourceKey = this.layerData.key + "_" + sourceKey;
                 }
@@ -189,7 +189,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 this.jsonSourcesIds.push(sourceKey);
             }
         }
-        for (let layer of layers) {
+        for (const layer of layers) {
             if (!this.visible || (!this.isBaselayer && layer.metadata && !(layer.metadata as any)["IHM:overlay"])) {
                 continue;
             }
@@ -203,11 +203,11 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     }
 
     private removeJsonLayer() {
-        for (let layerId of this.jsonLayersIds) {
+        for (const layerId of this.jsonLayersIds) {
             this.mapComponent.mapInstance.removeLayer(layerId);
         }
         this.jsonLayersIds = [];
-        for (let sourceId of this.jsonSourcesIds) {
+        for (const sourceId of this.jsonSourcesIds) {
             this.mapComponent.mapInstance.removeSource(sourceId);
         }
         this.jsonSourcesIds = [];

@@ -35,7 +35,7 @@ export class BackgroundTextComponent extends BaseMapComponent {
     }
 
     private updateText() {
-        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         if (offlineState.lastModifiedDate != null) {
             this.text = this.resources.youNeedToToggleOfflineMaps;
         } else if (offlineState.isOfflineAvailable && offlineState.lastModifiedDate == null) {

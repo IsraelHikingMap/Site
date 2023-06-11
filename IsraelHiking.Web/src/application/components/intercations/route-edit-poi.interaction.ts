@@ -35,10 +35,10 @@ export class RouteEditPoiInteraction {
 
     private handleClick = (event: MapMouseEvent) => {
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "tracking") {
-            let latLng = event.lngLat;
-            let point = event.target.project(latLng);
-            let th = 10;
-            let gpsMarker = event.target.queryRenderedFeatures([[point.x - th, point.y - th], [point.x + th, point.y + th]],
+            const latLng = event.lngLat;
+            const point = event.target.project(latLng);
+            const th = 10;
+            const gpsMarker = event.target.queryRenderedFeatures([[point.x - th, point.y - th], [point.x + th, point.y + th]],
                 {
                     layers: [this.resources.locationIcon],
                 });
@@ -53,14 +53,14 @@ export class RouteEditPoiInteraction {
     };
 
     public handleDragEnd(latlng: LatLngAlt, index: number) {
-        let recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
+        const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
         if (recordedRouteState.isAddingPoi) {
-            let markerData = { ...recordedRouteState.route.markers[index] };
+            const markerData = { ...recordedRouteState.route.markers[index] };
             markerData.latlng = latlng;
             this.store.dispatch(new UpdateRecordingPoiAction(index, markerData));
         } else {
-            let routeData = this.selectedRouteService.getSelectedRoute();
-            let markerData = { ...routeData.markers[index] } as MarkerData;
+            const routeData = this.selectedRouteService.getSelectedRoute();
+            const markerData = { ...routeData.markers[index] } as MarkerData;
             markerData.latlng = latlng;
             this.store.dispatch(new UpdatePrivatePoiAction(routeData.id, index, markerData));
         }
@@ -79,7 +79,7 @@ export class RouteEditPoiInteraction {
             return;
         }
 
-        let snapping = await this.getSnappingForPoint(latlng);
+        const snapping = await this.getSnappingForPoint(latlng);
         if (snapping.markerData != null) {
             markerData = { ...snapping.markerData };
         }
@@ -96,21 +96,21 @@ export class RouteEditPoiInteraction {
         }
         this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, markerData));
         selectedRoute = this.selectedRouteService.getSelectedRoute();
-        let index = selectedRoute.markers.length - 1;
+        const index = selectedRoute.markers.length - 1;
         PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index, selectedRoute.id);
     }
 
     private addToRecording(markerData: MarkerData) {
         this.store.dispatch(new AddRecordingPoiAction(markerData));
-        let index = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.markers.length - 1;
+        const index = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route.markers.length - 1;
         PrivatePoiEditDialogComponent.openDialog(this.matDialog, markerData, index);
     }
 
     private async getSnappingForPoint(latlng: LatLngAlt): Promise<SnappingPointResponse> {
-        let gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
+        const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
         if (gpsState.tracking === "tracking") {
-            let currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
-            let snappingPointResponse = this.snappingService.snapToPoint(latlng,
+            const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
+            const snappingPointResponse = this.snappingService.snapToPoint(latlng,
                 [
                     {
                         latlng: currentLocation,
@@ -125,7 +125,7 @@ export class RouteEditPoiInteraction {
             }
         }
 
-        let markerData = await this.poiService.getClosestPoint(latlng, "", this.resources.getCurrentLanguageCodeSimplified());
+        const markerData = await this.poiService.getClosestPoint(latlng, "", this.resources.getCurrentLanguageCodeSimplified());
         return this.snappingService.snapToPoint(latlng, markerData ? [markerData] : []);
     }
 }

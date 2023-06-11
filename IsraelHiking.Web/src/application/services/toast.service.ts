@@ -62,7 +62,7 @@ export class ToastService {
     }
 
     public confirm(options: IConfirmOptions) {
-        let componentRef = this.snackbar.openFromComponent(ConfirmDialogComponent, { panelClass: ["confirm-snackbar"]});
+        const componentRef = this.snackbar.openFromComponent(ConfirmDialogComponent, { panelClass: ["confirm-snackbar"]});
         componentRef.instance.confirmMessage = options.message;
         componentRef.instance.confirmAction = () => {
             if (options.confirmAction != null) {
@@ -101,7 +101,7 @@ export class ToastService {
     }
 
     public progress(config: IProgressDialogConfig): Promise<any> {
-        let dialogRef = ProgressDialogComponent.openDialog(this.matDialog, config);
+        const dialogRef = ProgressDialogComponent.openDialog(this.matDialog, config);
         return firstValueFrom(dialogRef.afterClosed());
     }
 }

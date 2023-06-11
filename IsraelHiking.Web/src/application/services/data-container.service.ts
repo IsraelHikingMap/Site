@@ -35,12 +35,12 @@ export class DataContainerService {
 
     public setData(dataContainer: DataContainer, keepCurrentRoutes: boolean) {
         let routesData = [];
-        for (let route of dataContainer.routes) {
-            let routeToAdd = this.routesFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
+        for (const route of dataContainer.routes) {
+            const routeToAdd = this.routesFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
             routesData.push(routeToAdd);
         }
         if (keepCurrentRoutes) {
-            let currentRoutes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present;
+            const currentRoutes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present;
             routesData = [...currentRoutes, ...routesData];
         }
         this.routesFactory.regenerateDuplicateIds(routesData);
@@ -57,13 +57,13 @@ export class DataContainerService {
     }
 
     public getData(withHidden: boolean): DataContainer {
-        let layersContainer = this.layersService.getData();
+        const layersContainer = this.layersService.getData();
 
-        let bounds = SpatialService.getMapBounds(this.mapService.map);
-        let routes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present
+        const bounds = SpatialService.getMapBounds(this.mapService.map);
+        const routes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present
             .filter(r => r.state !== "Hidden" || withHidden)
             .filter(r => r.segments.length > 0 || r.markers.length > 0);
-        let container = {
+        const container = {
             routes,
             baseLayer: layersContainer.baseLayer,
             overlays: layersContainer.overlays,
@@ -74,7 +74,7 @@ export class DataContainerService {
     }
 
     public getDataForFileExport(): DataContainer {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
             return this.getData(false);
         }
@@ -85,7 +85,7 @@ export class DataContainerService {
 
     public async setFileUrlAfterNavigation(url: string, baseLayer: string) {
         try {
-            let data = await this.fileService.openFromUrl(url);
+            const data = await this.fileService.openFromUrl(url);
             this.store.dispatch(new SetFileUrlAndBaseLayerAction(url, baseLayer));
             data.baseLayer = this.stringToBaseLayer(baseLayer);
             this.setData(data, this.runningContextService.isCapacitor);

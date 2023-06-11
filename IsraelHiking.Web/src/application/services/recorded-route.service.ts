@@ -61,8 +61,8 @@ export class RecordedRouteService {
     public startRecording() {
         this.loggingService.info("[Record] Starting recording");
         this.rejectedPosition = null;
-        let gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
-        let currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
+        const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
+        const currentLocation = GeoLocationService.positionToLatLngTime(gpsState.currentPosition);
         this.lastValidLocation = currentLocation;
         this.store.dispatch(new StartRecordingAction());
         this.store.dispatch(new AddRecordingRoutePointsAction([currentLocation]));
@@ -74,7 +74,7 @@ export class RecordedRouteService {
 
     public stopRecording(withToast = true) {
         this.loggingService.info("[Record] Stop recording");
-        let recordedRoute = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route;
+        const recordedRoute = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).route;
         this.store.dispatch(new StopRecordingAction());
         this.addRecordingToTraces(recordedRoute);
         if (withToast === false) {
@@ -90,29 +90,29 @@ export class RecordedRouteService {
     }
 
     private recordedRouteToRouteData(route: RecordedRoute): RouteData {
-        let date = new Date();
-        let dateString = date.toISOString().split("T")[0] +
+        const date = new Date();
+        const dateString = date.toISOString().split("T")[0] +
             ` ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-        let name = this.resources.route + " " + dateString;
-        let routeData = this.routesFactory.createRouteData(name);
-        let routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
+        const name = this.resources.route + " " + dateString;
+        const routeData = this.routesFactory.createRouteData(name);
+        const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
         routeData.markers = route.markers;
         routeData.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs, routingType);
         return routeData;
     }
 
     private async addRecordingToTraces(route: RecordedRoute) {
-        let latLngs = route.latlngs;
-        let northEast = { lat: Math.max(...latLngs.map(l => l.lat)), lng: Math.max(...latLngs.map(l => l.lng)) };
-        let southWest = { lat: Math.min(...latLngs.map(l => l.lat)), lng: Math.min(...latLngs.map(l => l.lng)) };
-        let routeData = this.recordedRouteToRouteData(route);
-        let container = {
+        const latLngs = route.latlngs;
+        const northEast = { lat: Math.max(...latLngs.map(l => l.lat)), lng: Math.max(...latLngs.map(l => l.lng)) };
+        const southWest = { lat: Math.min(...latLngs.map(l => l.lat)), lng: Math.min(...latLngs.map(l => l.lng)) };
+        const routeData = this.recordedRouteToRouteData(route);
+        const container = {
             routes: [routeData],
             northEast,
             southWest
         } as DataContainer;
 
-        let trace = {
+        const trace = {
             name: routeData.name,
             description: routeData.description,
             id: routeData.id,
@@ -138,8 +138,8 @@ export class RecordedRouteService {
         if (!this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState).isRecording) {
             return;
         }
-        let validPositions = [];
-        for (let position of positions) {
+        const validPositions = [];
+        for (const position of positions) {
             if (this.validateRecordingAndUpdateState(position)) {
                 validPositions.push(position);
                 this.lastValidLocation = GeoLocationService.positionToLatLngTime(position);
@@ -148,7 +148,7 @@ export class RecordedRouteService {
         if (validPositions.length === 0) {
             return;
         }
-        let locations = validPositions.map(p => GeoLocationService.positionToLatLngTime(p));
+        const locations = validPositions.map(p => GeoLocationService.positionToLatLngTime(p));
         this.store.dispatch(new AddRecordingRoutePointsAction(locations));
     }
 
@@ -180,8 +180,8 @@ export class RecordedRouteService {
     }
 
     private isValid(test: LatLngAltTime, position: GeolocationPosition): string {
-        let distance = SpatialService.getDistanceInMeters(test, GeoLocationService.positionToLatLngTime(position));
-        let timeDifference = Math.abs(position.timestamp - test.timestamp.getTime()) / 1000;
+        const distance = SpatialService.getDistanceInMeters(test, GeoLocationService.positionToLatLngTime(position));
+        const timeDifference = Math.abs(position.timestamp - test.timestamp.getTime()) / 1000;
         if (timeDifference === 0) {
             return "Time difference is 0";
         }

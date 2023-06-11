@@ -18,10 +18,10 @@ export class SearchResultsProvider {
     }
 
     public async getResults(searchTerm: string, isHebrew: boolean): Promise<SearchResultsPointOfInterest[]> {
-        let searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ");
-        let latlng = this.coordinatesService.parseCoordinates(searchWithoutBadCharacters);
+        const searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ");
+        const latlng = this.coordinatesService.parseCoordinates(searchWithoutBadCharacters);
         if (latlng) {
-            let id = getIdFromLatLng(latlng);
+            const id = getIdFromLatLng(latlng);
             return [{
                 id,
                 displayName: searchWithoutBadCharacters || id,
@@ -34,9 +34,9 @@ export class SearchResultsProvider {
             }];
         }
         try {
-            let language = isHebrew ? "he" : "en";
-            let params = new HttpParams().set("language", language);
-            let response = await firstValueFrom(this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
+            const language = isHebrew ? "he" : "en";
+            const params = new HttpParams().set("language", language);
+            const response = await firstValueFrom(this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
                 params
             }).pipe(timeout(3000)));
             return response as SearchResultsPointOfInterest[];

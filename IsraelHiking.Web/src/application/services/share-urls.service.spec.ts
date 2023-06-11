@@ -15,15 +15,15 @@ import type { ShareUrl, DataContainer } from "../models/models";
 
 describe("Share Urls Service", () => {
     beforeEach(() => {
-        let hashService = {
+        const hashService = {
             getFullUrlFromShareId: jasmine.createSpy("getFullUrlFromShareId")
         };
-        let databaseService = {
+        const databaseService = {
             getShareUrlById: () => {},
             storeShareUrl: () => {},
             deleteShareUrlById: jasmine.createSpy()
         };
-        let loggingService = {
+        const loggingService = {
             info: () => {}
         };
         TestBed.configureTestingModule({
@@ -46,9 +46,9 @@ describe("Share Urls Service", () => {
     it("Should update share url", inject([ShareUrlsService, HttpTestingController],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
 
-            let shareUrl = { id: "42" } as ShareUrl;
+            const shareUrl = { id: "42" } as ShareUrl;
 
-            let promise = shareUrlsService.updateShareUrl(shareUrl).then((res) => {
+            const promise = shareUrlsService.updateShareUrl(shareUrl).then((res) => {
                 expect(res).not.toBeNull();
             });
 
@@ -59,9 +59,9 @@ describe("Share Urls Service", () => {
     it("Should delete share url", inject([ShareUrlsService, HttpTestingController, DatabaseService, Store],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService, store: Store) => {
 
-            let shareUrl = { id: "42" } as ShareUrl;
+            const shareUrl = { id: "42" } as ShareUrl;
             store.dispatch = jasmine.createSpy();
-            let promise = shareUrlsService.deleteShareUrl(shareUrl).then(() => {
+            const promise = shareUrlsService.deleteShareUrl(shareUrl).then(() => {
 
                 expect(store.dispatch).toHaveBeenCalled();
                 expect(databaseService.deleteShareUrlById).toHaveBeenCalled();
@@ -72,8 +72,8 @@ describe("Share Urls Service", () => {
         }));
 
     it("Should get image for share url", inject([ShareUrlsService], (shareUrlsService: ShareUrlsService) => {
-        let shareUrl = { id: "42" } as ShareUrl;
-        let imageUrl = shareUrlsService.getImageFromShareId(shareUrl);
+        const shareUrl = { id: "42" } as ShareUrl;
+        const imageUrl = shareUrlsService.getImageFromShareId(shareUrl);
 
         expect(imageUrl).toContain(shareUrl.id);
     }));
@@ -82,7 +82,7 @@ describe("Share Urls Service", () => {
         inject([ShareUrlsService, HttpTestingController],
             async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
 
-            let promise = shareUrlsService.getImagePreview({} as DataContainer).then((res) => {
+            const promise = shareUrlsService.getImagePreview({} as DataContainer).then((res) => {
                 expect(res).not.toBeNull();
             });
 

@@ -158,7 +158,7 @@ export class PoiService {
             .pipe(
                 throttleTime(500, undefined, { trailing: true }),
                 filter(() => {
-                    let lastLocationPoint = this.mapService.map.project(lastLocation);
+                    const lastLocationPoint = this.mapService.map.project(lastLocation);
                     return lastLocationPoint.dist(this.mapService.map.project(this.mapService.map.getCenter())) > 200;
                 }),
             ).subscribe(() => {
@@ -191,10 +191,10 @@ export class PoiService {
             return;
         }
         this.queueIsProcessing = true;
-        let firstItemId = items[0];
+        const firstItemId = items[0];
         this.loggingService.info(`[POIs] Upload queue changed, items in queue: ${items.length}, first item id: ${firstItemId}`);
 
-        let feature = await this.databaseService.getPoiFromUploadQueue(firstItemId);
+        const feature = await this.databaseService.getPoiFromUploadQueue(firstItemId);
         if (feature == null) {
             this.loggingService.info(`[POIs] Upload queue has element which is not in the database, removing item: ${firstItemId}`);
             this.queueIsProcessing = false;
@@ -202,12 +202,12 @@ export class PoiService {
             return;
         }
         try {
-            let postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-            let putAddress = Urls.poi + this.getFeatureId(feature) + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-            let poi$ = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(this.getFeatureId(feature))
+            const postAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+            const putAddress = Urls.poi + this.getFeatureId(feature) + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+            const poi$ = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(this.getFeatureId(feature))
                 ? this.httpClient.post(postAddress, feature).pipe(timeout(180000))
                 : this.httpClient.put(putAddress, feature).pipe(timeout(180000));
-            let poi = await firstValueFrom(poi$) as GeoJSON.Feature;
+            const poi = await firstValueFrom(poi$) as GeoJSON.Feature;
             if (feature.properties.poiIsSimple) {
                 this.loggingService.info("[POIs] Uploaded successfully a simple feature with generated id: " +
                 `${firstItemId} at: ${JSON.stringify(this.getLocation(feature))}, removing from upload queue`);
@@ -224,7 +224,7 @@ export class PoiService {
             this.store.dispatch(new RemoveFromPoiQueueAction(firstItemId));
         } catch (ex) {
             this.queueIsProcessing = false;
-            let typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
+            const typeAndMessage = this.loggingService.getErrorTypeAndMessage(ex);
             switch (typeAndMessage.type) {
                 case "timeout":
                     this.loggingService.error(`[POIs] Failed to upload feature with id: ${firstItemId}, but will try later due to ` +
@@ -244,25 +244,25 @@ export class PoiService {
     }
 
     private async getPoisFromServer(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
-        let visibleCategories = this.getVisibleCategories();
+        const visibleCategories = this.getVisibleCategories();
         if (this.mapService.map.getZoom() <= 10) {
             return [];
         }
-        let bounds = SpatialService.getMapBounds(this.mapService.map);
+        const bounds = SpatialService.getMapBounds(this.mapService.map);
         // Adding half a screen padding:
         bounds.northEast.lng += (bounds.northEast.lng - bounds.southWest.lng) / 2.0;
         bounds.northEast.lat += (bounds.northEast.lat - bounds.southWest.lat) / 2.0;
         bounds.southWest.lng -= (bounds.northEast.lng - bounds.southWest.lng) / 2.0;
         bounds.southWest.lat -= (bounds.northEast.lat - bounds.southWest.lat) / 2.0;
 
-        let language = this.resources.getCurrentLanguageCodeSimplified();
-        let params = new HttpParams()
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        const params = new HttpParams()
             .set("northEast", bounds.northEast.lat + "," + bounds.northEast.lng)
             .set("southWest", bounds.southWest.lat + "," + bounds.southWest.lng)
             .set("categories", visibleCategories.join(","))
             .set("language", language);
         try {
-            let features$ = this.httpClient.get(Urls.poi, { params }).pipe(timeout(10000));
+            const features$ = this.httpClient.get(Urls.poi, { params }).pipe(timeout(10000));
             this.poisGeojson.features = await firstValueFrom(features$) as GeoJSON.Feature<GeoJSON.Point>[];
             return this.poisGeojson.features;
         } catch {
@@ -271,10 +271,10 @@ export class PoiService {
     }
 
     private getPoisFromMemory(): GeoJSON.Feature<GeoJSON.Point>[] {
-        let visibleFeatures = [];
-        let visibleCategories = this.getVisibleCategories();
-        let language = this.resources.getCurrentLanguageCodeSimplified();
-        for (let feature of this.poisGeojson.features) {
+        const visibleFeatures = [];
+        const visibleCategories = this.getVisibleCategories();
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        for (const feature of this.poisGeojson.features) {
             if (feature.properties.poiLanguage !== "all" && feature.properties.poiLanguage !== language) {
                 continue;
             }
@@ -323,7 +323,7 @@ export class PoiService {
 
     private async downlodOfflineFileAndUpdateDatabase(progressCallback: (value: number, text?: string) => void): Promise<void> {
         progressCallback(1, this.resources.downloadingPoisForOfflineUsage);
-        let poiIdsToDelete = this.poisGeojson.features.map(f => this.getFeatureId(f));
+        const poiIdsToDelete = this.poisGeojson.features.map(f => this.getFeatureId(f));
         this.loggingService.info(`[POIs] Deleting exiting pois: ${poiIdsToDelete.length}`);
         await this.databaseService.deletePois(poiIdsToDelete);
         this.loggingService.info("[POIs] Getting cached offline pois file");
@@ -335,7 +335,7 @@ export class PoiService {
             poisFile = await this.fileService.getFileFromCache(Urls.poisOfflineFile);
         }
         this.loggingService.info("[POIs] Opening pois file");
-        let lastModified = await this.openPoisFile(poisFile, progressCallback);
+        const lastModified = await this.openPoisFile(poisFile, progressCallback);
         this.loggingService.info(`[POIs] Updating last modified to: ${lastModified}`);
         this.store.dispatch(new SetOfflinePoisLastModifiedDateAction(lastModified));
         this.loggingService.info(`[POIs] Finished downloading file and updating database, last modified: ${lastModified.toUTCString()}`);
@@ -349,27 +349,27 @@ export class PoiService {
             lastModified = modifiedUntil;
             modifiedUntil = new Date(lastModified.getTime() + 3 * 24 * 60 * 60 * 1000); // last modified + 3 days
             this.loggingService.info(`[POIs] Getting POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()}`);
-            let updates$ = this.httpClient.get(`${Urls.poiUpdates}${lastModified.toISOString()}/${modifiedUntil.toISOString()}`)
+            const updates$ = this.httpClient.get(`${Urls.poiUpdates}${lastModified.toISOString()}/${modifiedUntil.toISOString()}`)
                 .pipe(timeout(60000));
-            let updates = await firstValueFrom(updates$) as UpdatesResponse;
+            const updates = await firstValueFrom(updates$) as UpdatesResponse;
             this.loggingService.info(`[POIs] Storing POIs for: ${lastModified.toUTCString()} - ${modifiedUntil.toUTCString()},` +
                 `got: ${ updates.features.length }`);
-            let deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => this.getFeatureId(f));
+            const deletedIds = updates.features.filter(f => f.properties.poiDeleted).map(f => this.getFeatureId(f));
             do {
                 await this.databaseService.storePois(updates.features.splice(0, 500));
             } while (updates.features.length > 0);
             this.databaseService.deletePois(deletedIds);
-            let imageAndData = this.imageItemToUrl(updates.images);
+            const imageAndData = this.imageItemToUrl(updates.images);
             this.loggingService.info(`[POIs] Storing images: ${imageAndData.length}`);
             this.databaseService.storeImages(imageAndData);
-            let minDate = new Date(Math.min(new Date(updates.lastModified).getTime(), modifiedUntil.getTime()));
+            const minDate = new Date(Math.min(new Date(updates.lastModified).getTime(), modifiedUntil.getTime()));
             this.loggingService.info(`[POIs] Updating last modified to: ${minDate}`);
             this.store.dispatch(new SetOfflinePoisLastModifiedDateAction(minDate));
         } while (modifiedUntil < new Date());
     }
 
     public async openPoisFile(blob: Blob, progressCallback: (percentage: number, text?: string) => void): Promise<Date> {
-        let zip = new JSZip();
+        const zip = new JSZip();
         await zip.loadAsync(blob);
         await this.writeImages(zip, progressCallback);
         this.loggingService.info("[POIs] Finished saving images to database");
@@ -378,11 +378,11 @@ export class PoiService {
 
     private async writePois(zip: JSZip, progressCallback: (percentage: number, content: string) => void): Promise<Date> {
         let lastModified = new Date(0);
-        let poisFileNames = Object.keys(zip.files).filter(name => name.startsWith("pois/") && name.endsWith(".geojson"));
+        const poisFileNames = Object.keys(zip.files).filter(name => name.startsWith("pois/") && name.endsWith(".geojson"));
         for (let poiFileIndex = 0; poiFileIndex < poisFileNames.length; poiFileIndex++) {
-            let poisFileName = poisFileNames[poiFileIndex];
-            let poisJson = JSON.parse((await zip.file(poisFileName).async("text")).trim()) as GeoJSON.FeatureCollection;
-            let chunkLastModified = this.getLastModifiedFromFeatures(poisJson.features);
+            const poisFileName = poisFileNames[poiFileIndex];
+            const poisJson = JSON.parse((await zip.file(poisFileName).async("text")).trim()) as GeoJSON.FeatureCollection;
+            const chunkLastModified = this.getLastModifiedFromFeatures(poisJson.features);
             if (chunkLastModified > lastModified) {
                 lastModified = chunkLastModified;
             }
@@ -394,11 +394,11 @@ export class PoiService {
     }
 
     private async writeImages(zip: JSZip, progressCallback: (percentage: number, content: string) => void) {
-        let imagesFileNames = Object.keys(zip.files).filter(name => name.startsWith("images/") && name.endsWith(".json"));
+        const imagesFileNames = Object.keys(zip.files).filter(name => name.startsWith("images/") && name.endsWith(".json"));
         for (let imagesFileIndex = 0; imagesFileIndex < imagesFileNames.length; imagesFileIndex++) {
-            let imagesFile = imagesFileNames[imagesFileIndex];
-            let imagesJson = JSON.parse(await zip.file(imagesFile).async("text") as string) as ImageItem[];
-            let imagesUrl = this.imageItemToUrl(imagesJson);
+            const imagesFile = imagesFileNames[imagesFileIndex];
+            const imagesJson = JSON.parse(await zip.file(imagesFile).async("text") as string) as ImageItem[];
+            const imagesUrl = this.imageItemToUrl(imagesJson);
             await this.databaseService.storeImages(imagesUrl);
             progressCallback((imagesFileIndex + 1) * 40.0 / imagesFileNames.length + 50, this.resources.downloadingPoisForOfflineUsage);
             this.loggingService.debug(`[POIs] Stored images ${imagesFile} ${imagesFileIndex}/${imagesFileNames.length}`);
@@ -407,8 +407,8 @@ export class PoiService {
 
     private getLastModifiedFromFeatures(features: GeoJSON.Feature[]): Date {
         let lastModified = null;
-        for (let feature of features) {
-            let dateValue = new Date(feature.properties.poiLastModified);
+        for (const feature of features) {
+            const dateValue = new Date(feature.properties.poiLastModified);
             if (lastModified == null || dateValue > lastModified) {
                 lastModified = dateValue;
             }
@@ -417,9 +417,9 @@ export class PoiService {
     }
 
     private imageItemToUrl(images: ImageItem[]): ImageUrlAndData[] {
-        let imageAndData = [] as ImageUrlAndData[];
-        for (let image of images) {
-            for (let imageUrl of image.imageUrls) {
+        const imageAndData = [] as ImageUrlAndData[];
+        for (const image of images) {
+            for (const imageUrl of image.imageUrls) {
                 imageAndData.push({ imageUrl, data: image.thumbnail });
             }
         }
@@ -427,12 +427,12 @@ export class PoiService {
     }
 
     public async getSerchResults(searchTerm: string): Promise<SearchResultsPointOfInterest[]> {
-        let ids = this.miniSearch.search(searchTerm).map(r => r.id);
-        let results = [] as SearchResultsPointOfInterest[];
-        for (let id of uniq(ids)) {
-            let feature = await this.databaseService.getPoiById(id);
-            let title = this.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
-            let point = {
+        const ids = this.miniSearch.search(searchTerm).map(r => r.id);
+        const results = [] as SearchResultsPointOfInterest[];
+        for (const id of uniq(ids)) {
+            const feature = await this.databaseService.getPoiById(id);
+            const title = this.getTitle(feature, this.resources.getCurrentLanguageCodeSimplified());
+            const point = {
                 description: feature.properties.description,
                 title,
                 displayName: title,
@@ -451,9 +451,9 @@ export class PoiService {
     }
 
     private getVisibleCategories(): string[] {
-        let visibleCategories = [];
-        let layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-        for (let categoriesGroup of layersState.categoriesGroups) {
+        const visibleCategories = [];
+        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
+        for (const categoriesGroup of layersState.categoriesGroups) {
             visibleCategories.push(...categoriesGroup.categories
                 .filter(c => c.visible)
                 .map(c => c.name));
@@ -463,7 +463,7 @@ export class PoiService {
 
     private async updatePois(fromServer: boolean) {
         await this.mapService.initializationPromise;
-        let visibleCategories = this.getVisibleCategories();
+        const visibleCategories = this.getVisibleCategories();
         if (visibleCategories.length === 0) {
             this.poiGeojsonFiltered = {
                 type: "FeatureCollection",
@@ -472,7 +472,7 @@ export class PoiService {
             this.poisChanged.next();
             return;
         }
-        let visibleFeatures = fromServer ? await this.getPoisFromServer() : this.getPoisFromMemory();
+        const visibleFeatures = fromServer ? await this.getPoisFromServer() : this.getPoisFromMemory();
         this.poiGeojsonFiltered = {
             type: "FeatureCollection",
             features: visibleFeatures
@@ -482,25 +482,25 @@ export class PoiService {
 
     public async syncCategories(): Promise<void> {
         try {
-            let layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-            for (let categoriesGroup of layersState.categoriesGroups) {
-                let categories$ = this.httpClient.get(Urls.poiCategories + categoriesGroup.type).pipe(timeout(10000));
-                let categories = await firstValueFrom(categories$) as Category[];
+            const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
+            for (const categoriesGroup of layersState.categoriesGroups) {
+                const categories$ = this.httpClient.get(Urls.poiCategories + categoriesGroup.type).pipe(timeout(10000));
+                const categories = await firstValueFrom(categories$) as Category[];
                 let visibility = categoriesGroup.visible;
                 if (this.runningContextService.isIFrame) {
                     this.store.dispatch(new SetCategoriesGroupVisibilityAction(categoriesGroup.type, false));
                     visibility = false;
                 }
-                for (let category of categories) {
+                for (const category of categories) {
                     category.visible = visibility;
-                    let exsitingCategory = categoriesGroup.categories.find(c => c.name === category.name);
+                    const exsitingCategory = categoriesGroup.categories.find(c => c.name === category.name);
                     if (exsitingCategory == null) {
                         this.store.dispatch(new AddCategoryAction(categoriesGroup.type, category));
                     } else if (!isEqualWith(category, exsitingCategory, (_v1, _v2, key) => key === "visible" ? true : undefined)) {
                         this.store.dispatch(new UpdateCategoryAction(categoriesGroup.type, category));
                     }
                 }
-                for (let exsitingCategory of categoriesGroup.categories) {
+                for (const exsitingCategory of categoriesGroup.categories) {
                     if (categories.find(c => c.name === exsitingCategory.name) == null) {
                         this.store.dispatch(new RemoveCategoryAction(categoriesGroup.type, exsitingCategory.name));
                     }
@@ -513,10 +513,10 @@ export class PoiService {
     }
 
     public getSelectableCategories(): ISelectableCategory[] {
-        let layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
-        let categoriesGroup = layersState.categoriesGroups.find(g => g.type === "Points of Interest");
-        let selectableCategories = [] as ISelectableCategory[];
-        for (let category of categoriesGroup.categories) {
+        const layersState = this.store.selectSnapshot((s: ApplicationState) => s.layersState);
+        const categoriesGroup = layersState.categoriesGroups.find(g => g.type === "Points of Interest");
+        const selectableCategories = [] as ISelectableCategory[];
+        for (const category of categoriesGroup.categories) {
             if (category.name === "Wikipedia" || category.name === "iNature") {
                 continue;
             }
@@ -535,7 +535,7 @@ export class PoiService {
     }
 
     public async getPoint(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
-        let itemInCache = this.poisCache.find(f => this.getFeatureId(f) === id && f.properties.source === source);
+        const itemInCache = this.poisCache.find(f => this.getFeatureId(f) === id && f.properties.source === source);
         if (itemInCache) {
             return cloneDeep(itemInCache);
         }
@@ -543,13 +543,13 @@ export class PoiService {
             return this.getFeatureFromCoordinatesId(id, language);
         }
         try {
-            let params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-            let poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
-            let poi = await firstValueFrom(poi$) as GeoJSON.Feature;
+            const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
+            const poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
+            const poi = await firstValueFrom(poi$) as GeoJSON.Feature;
             this.poisCache.splice(0, 0, poi);
             return cloneDeep(poi);
         } catch {
-            let feature = await this.databaseService.getPoiById(`${source}_${id}`);
+            const feature = await this.databaseService.getPoiById(`${source}_${id}`);
             if (feature == null) {
                 throw new Error("Failed to load POI from offline database.");
             }
@@ -559,13 +559,13 @@ export class PoiService {
     }
 
     public getLatLngFromId(id: string): LatLngAlt {
-        let split = id.split("_");
+        const split = id.split("_");
         return { lat: +split[0], lng: +split[1] };
     }
 
     public getFeatureFromCoordinatesId(id: string, language: string): GeoJSON.Feature {
-        let latlng = this.getLatLngFromId(id);
-        let feature = {
+        const latlng = this.getLatLngFromId(id);
+        const feature = {
             type: "Feature",
             id: `${RouteStrings.COORDINATES}_${id}`,
             properties: {
@@ -593,14 +593,14 @@ export class PoiService {
     }
 
     public getPoiSocialLinks(feature: GeoJSON.Feature): PoiSocialLinks {
-        let language = this.resources.getCurrentLanguageCodeSimplified();
-        let poiLink = this.hashService.getFullUrlFromPoiId({
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        const poiLink = this.hashService.getFullUrlFromPoiId({
             source: feature.properties.poiSource,
             id: feature.properties.identifier,
             language
         } as PoiRouterData);
-        let escaped = encodeURIComponent(poiLink);
-        let location = this.getLocation(feature);
+        const escaped = encodeURIComponent(poiLink);
+        const location = this.getLocation(feature);
         return {
             poiLink,
             facebook: `${Urls.facebook}${escaped}`,
@@ -610,7 +610,7 @@ export class PoiService {
     }
 
     public mergeWithPoi(feature: GeoJSON.Feature, markerData: MarkerData) {
-        let language = this.resources.getCurrentLanguageCodeSimplified();
+        const language = this.resources.getCurrentLanguageCodeSimplified();
         this.setTitle(feature, feature.properties["name:" + language] || markerData.title, language);
         this.setDescription(feature, feature.properties["description:" + language] || markerData.description, language);
         this.setLocation(feature, markerData.latlng);
@@ -697,7 +697,7 @@ export class PoiService {
     public async getClosestPoint(location: LatLngAlt, source?: string, language?: string): Promise<MarkerData> {
         let feature = null;
         try {
-            let feature$ = this.httpClient.get(Urls.poiClosest, { params: {
+            const feature$ = this.httpClient.get(Urls.poiClosest, { params: {
                 location: location.lat + "," + location.lng,
                 source,
                 language
@@ -713,8 +713,8 @@ export class PoiService {
     }
 
     public addSimplePoint(latlng: LatLngAlt, pointType: SimplePointType): Promise<any> {
-        let id = uuidv4();
-        let feature = {
+        const id = uuidv4();
+        const feature = {
             id,
             type: "Feature",
             properties: {
@@ -733,9 +733,9 @@ export class PoiService {
     }
 
     public addComplexPoi(info: EditablePublicPointData, location: LatLngAlt): Promise<void> {
-        let feature = this.getFeatureFromEditableData(info);
+        const feature = this.getFeatureFromEditableData(info);
         this.setLocation(feature, location);
-        let id = uuidv4();
+        const id = uuidv4();
         feature.id = id;
         feature.properties.poiId = id;
         feature.properties.poiSource = "OSM";
@@ -747,10 +747,10 @@ export class PoiService {
     }
 
     public async updateComplexPoi(info: EditablePublicPointData, newLocation?: LatLngAlt) {
-        let originalFeature = this.store.selectSnapshot((s: ApplicationState) => s.poiState).selectedPointOfInterest;
-        let editableDataBeforeChanges = this.getEditableDataFromFeature(originalFeature);
+        const originalFeature = this.store.selectSnapshot((s: ApplicationState) => s.poiState).selectedPointOfInterest;
+        const editableDataBeforeChanges = this.getEditableDataFromFeature(originalFeature);
         let hasChages = false;
-        let originalId = this.getFeatureId(originalFeature);
+        const originalId = this.getFeatureId(originalFeature);
         let featureContainingOnlyChanges = {
             id: originalId,
             type: "Feature",
@@ -764,7 +764,7 @@ export class PoiService {
 
         if (this.offlineState.uploadPoiQueue.indexOf(originalId) !== -1) {
             // this is the case where there was a previous update request but this hs not been uploaded to the server yet...
-            let featureFromDatabase = await this.databaseService.getPoiFromUploadQueue(originalId);
+            const featureFromDatabase = await this.databaseService.getPoiFromUploadQueue(originalId);
             if (featureFromDatabase != null) {
                 featureContainingOnlyChanges = featureFromDatabase;
                 hasChages = true;
@@ -775,7 +775,7 @@ export class PoiService {
             this.setLocation(featureContainingOnlyChanges, newLocation);
             hasChages = true;
         }
-        let language = this.resources.getCurrentLanguageCodeSimplified();
+        const language = this.resources.getCurrentLanguageCodeSimplified();
         if (info.title !== editableDataBeforeChanges.title) {
             this.setTitle(featureContainingOnlyChanges, info.title, language);
             hasChages = true;
@@ -790,22 +790,22 @@ export class PoiService {
             featureContainingOnlyChanges.properties.poiCategory = info.category;
             hasChages = true;
         }
-        let addedImages = info.imagesUrls.filter(u => u && !editableDataBeforeChanges.imagesUrls.includes(u));
+        const addedImages = info.imagesUrls.filter(u => u && !editableDataBeforeChanges.imagesUrls.includes(u));
         if (addedImages.length > 0) {
             featureContainingOnlyChanges.properties.poiAddedImages = addedImages;
             hasChages = true;
         }
-        let removedImages = editableDataBeforeChanges.imagesUrls.filter(u => u && !info.imagesUrls.includes(u));
+        const removedImages = editableDataBeforeChanges.imagesUrls.filter(u => u && !info.imagesUrls.includes(u));
         if (removedImages.length > 0) {
             featureContainingOnlyChanges.properties.poiRemovedImages = removedImages;
             hasChages = true;
         }
-        let addedUrls = info.urls.filter(u => u && !editableDataBeforeChanges.urls.includes(u));
+        const addedUrls = info.urls.filter(u => u && !editableDataBeforeChanges.urls.includes(u));
         if (addedUrls.length > 0) {
             featureContainingOnlyChanges.properties.poiAddedUrls = addedUrls;
             hasChages = true;
         }
-        let removedUrls = editableDataBeforeChanges.urls.filter(u => u && !info.urls.includes(u));
+        const removedUrls = editableDataBeforeChanges.urls.filter(u => u && !info.urls.includes(u));
         if (removedUrls.length > 0) {
             featureContainingOnlyChanges.properties.poiRemovedUrls = removedUrls;
             hasChages = true;
@@ -819,7 +819,7 @@ export class PoiService {
     }
 
     public getEditableDataFromFeature(feature: GeoJSON.Feature): EditablePublicPointData {
-        let language = this.resources.getCurrentLanguageCodeSimplified();
+        const language = this.resources.getCurrentLanguageCodeSimplified();
         return {
             id: this.getFeatureId(feature),
             category: feature.properties.poiCategory,
@@ -838,7 +838,7 @@ export class PoiService {
     }
 
     public getFeatureFromEditableData(info: EditablePublicPointData): GeoJSON.Feature {
-        let feature = {
+        const feature = {
             id: info.id,
             type: "Feature",
             properties: {
@@ -849,18 +849,18 @@ export class PoiService {
             } as any
         } as GeoJSON.Feature;
         let index = 0;
-        for (let imageUrl of info.imagesUrls) {
-            let key = index === 0 ? "image" : `image${index}`;
+        for (const imageUrl of info.imagesUrls) {
+            const key = index === 0 ? "image" : `image${index}`;
             feature.properties[key] = imageUrl;
             index++;
         }
         index = 0;
-        for (let url of info.urls) {
-            let key = index === 0 ? "website" : `website${index}`;
+        for (const url of info.urls) {
+            const key = index === 0 ? "website" : `website${index}`;
             feature.properties[key] = url;
             index++;
         }
-        let language = this.resources.getCurrentLanguageCodeSimplified();
+        const language = this.resources.getCurrentLanguageCodeSimplified();
         this.setDescription(feature, info.description, language);
         this.setTitle(feature, info.title, language);
         return feature;

@@ -53,22 +53,22 @@ export class AuthorizationService {
         this.loggingService.info("[Authorization] User initiated login");
         this.logout();
         // this has to be here in order to support safari on desktop since it can only open a window on click event
-        let popup = this.openWindow();
-        let params = new URLSearchParams({
+        const popup = this.openWindow();
+        const params = new URLSearchParams({
             client_id: "jqxu2hhG-gUa-XUxiepzkQPZQf7iQguMC0sTVSRpaKE",
             redirect_uri: this.redirectUrl,
             response_type: "code",
             scope: "read_prefs write_api read_gpx write_gpx"
         });
-        let oauthCode = await this.getCodeFromWindow(popup, Urls.osmAuth + "/authorize?" + params.toString());
-        let accessToken = await this.getAccessToken(oauthCode);
+        const oauthCode = await this.getCodeFromWindow(popup, Urls.osmAuth + "/authorize?" + params.toString());
+        const accessToken = await this.getAccessToken(oauthCode);
         this.store.dispatch(new SetTokenAction(accessToken));
         await this.updateUserDetails();
     }
 
     private async getAccessToken(oauthCode: string): Promise<string> {
-        let accessTokenUrl =  Urls.osmAuth + "/token";
-        let response = await firstValueFrom(this.httpClient.post(accessTokenUrl, null, {
+        const accessTokenUrl =  Urls.osmAuth + "/token";
+        const response = await firstValueFrom(this.httpClient.post(accessTokenUrl, null, {
             params: {
                 client_id: "jqxu2hhG-gUa-XUxiepzkQPZQf7iQguMC0sTVSRpaKE",
                 grant_type: "authorization_code",
@@ -81,8 +81,8 @@ export class AuthorizationService {
     }
 
     private updateUserDetails = async () => {
-        let detailJson = await firstValueFrom(this.httpClient.get(Urls.osmUser)) as OsmUserDetails;
-        let userInfo = {
+        const detailJson = await firstValueFrom(this.httpClient.get(Urls.osmUser)) as OsmUserDetails;
+        const userInfo = {
             displayName: detailJson.displayName,
             id: detailJson.id,
             changeSets: detailJson.changeSetCount,
@@ -97,9 +97,9 @@ export class AuthorizationService {
             return null;
         }
         // Create a 600x550 popup window in the center of the screen
-        let w = 600;
-        let h = 550;
-        let settings = [
+        const w = 600;
+        const h = 550;
+        const settings = [
             ["width", w], ["height", h],
             ["left", screen.width / 2 - w / 2],
             ["top", screen.height / 2 - h / 2]
@@ -117,9 +117,9 @@ export class AuthorizationService {
                 }
                 setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
             } else {
-                let callback = (event: MessageEvent) => {
+                const callback = (event: MessageEvent) => {
                     if (event.data.match(/^oauth::/)) {
-                        let data = JSON.parse(event.data.substring(7));
+                        const data = JSON.parse(event.data.substring(7));
                         window.removeEventListener("message", callback);
                         resolve(data[AuthorizationService.OAUTH_CODE]);
                     }
@@ -139,34 +139,34 @@ export class AuthorizationService {
             }
             if (popup.location.href.startsWith(this.redirectUrl)) {
                 popup.close();
-                let redirectedUrl = new URL(popup.location.href);
+                const redirectedUrl = new URL(popup.location.href);
                 resolve(redirectedUrl.searchParams.get(AuthorizationService.OAUTH_CODE));
                 return;
             }
-        } catch { }
+        } catch { } // eslint-disable-line
         setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
     }
 
     public getEditOsmLocationAddress(baseLayerAddress: string, zoom: number, latitude: number, longitude: number): string {
-        let background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
+        const background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
         return `${Urls.osmBase}/edit#${background}&map=${zoom}/${latitude}/${longitude}`;
     }
 
     public getEditOsmGpxAddress(baseLayerAddress: string, gpxId: string) {
-        let background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
+        const background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
         return `${Urls.osmBase}/edit?gpx=${gpxId}#${background}`;
     }
 
     public getEditElementOsmAddress(baseLayerAddress: string, id: string) {
-        let elementType = id.split("_")[0];
-        let elementId = id.split("_")[1];
-        let background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
+        const elementType = id.split("_")[0];
+        const elementId = id.split("_")[1];
+        const background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
         return `${Urls.osmBase}/edit?${elementType}=${elementId}#${background}`;
     }
 
     public getElementOsmAddress(id: string) {
-        let elementType = id.split("_")[0];
-        let elementId = id.split("_")[1];
+        const elementType = id.split("_")[0];
+        const elementId = id.split("_")[1];
         return `${Urls.osmBase}/${elementType}/${elementId}`;
     }
 
@@ -176,7 +176,7 @@ export class AuthorizationService {
             if (baseLayerAddress.startsWith("/")) {
                 baseLayerAddress = Urls.baseTilesAddress + baseLayerAddress;
             }
-            let address = baseLayerAddress.replace("{s}", "s");
+            const address = baseLayerAddress.replace("{s}", "s");
             background = `background=custom:${encodeURIComponent(address)}`;
         }
         return background;

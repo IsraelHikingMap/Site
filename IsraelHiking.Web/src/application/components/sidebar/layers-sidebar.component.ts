@@ -76,7 +76,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public editBaseLayer(e: Event, layer: EditableLayer) {
         e.stopPropagation();
-        let dialogRef = this.dialog.open(BaseLayerEditDialogComponent);
+        const dialogRef = this.dialog.open(BaseLayerEditDialogComponent);
         dialogRef.componentInstance.setBaseLayer(layer);
     }
 
@@ -99,7 +99,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public editOverlay(e: Event, layer: Overlay) {
         e.stopPropagation();
-        let dialogRef = this.dialog.open(OverlayEditDialogComponent);
+        const dialogRef = this.dialog.open(OverlayEditDialogComponent);
         dialogRef.componentInstance.setOverlay(layer);
     }
 
@@ -142,7 +142,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public showOfflineButton(layer: EditableLayer) {
-        let offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         return layer.isOfflineAvailable &&
             this.runningContextService.isCapacitor &&
             (offlineState.lastModifiedDate != null ||
@@ -163,7 +163,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public orderOfflineMaps() {
-        let userInfo = this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo;
+        const userInfo = this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo;
         if (userInfo == null || !userInfo.id) {
             this.toastService.warning(this.resources.loginRequired);
             return;
@@ -172,7 +172,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public async downloadOfflineMaps() {
-        let userInfo = this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo;
+        const userInfo = this.store.selectSnapshot((s: ApplicationState) => s.userState).userInfo;
         if (userInfo == null || !userInfo.id) {
             this.toastService.warning(this.resources.loginRequired);
             return;
@@ -191,13 +191,13 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public toggleRoute(routeData: RouteData) {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null && routeData.id === selectedRoute.id && routeData.state !== "Hidden") {
             this.store.dispatch(new SetSelectedRouteAction(null));
             this.store.dispatch(new ChangeRouteStateAction(routeData.id, "Hidden"));
             return;
         }
-        let newRouteState = selectedRoute != null && selectedRoute.state !== "Hidden" ? selectedRoute.state : "ReadOnly";
+        const newRouteState = selectedRoute != null && selectedRoute.state !== "Hidden" ? selectedRoute.state : "ReadOnly";
         this.store.dispatch(new ChangeRouteStateAction(routeData.id, newRouteState));
         this.selectedRouteService.setSelectedRoute(routeData.id);
     }
@@ -219,7 +219,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public isRouteSelected(routeData: RouteData): boolean {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && selectedRoute.id === routeData.id;
     }
 
@@ -232,7 +232,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public dropRoute(event: CdkDragDrop<RouteData[]>) {
-        let currentRoutes = [...this.store.selectSnapshot((s: ApplicationState) => s.routes).present];
+        const currentRoutes = [...this.store.selectSnapshot((s: ApplicationState) => s.routes).present];
         moveItemInArray(currentRoutes, event.previousIndex, event.currentIndex);
         this.store.dispatch(new BulkReplaceRoutesAction(currentRoutes));
     }

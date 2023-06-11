@@ -21,10 +21,10 @@ export class DragAndDropService {
         document.addEventListener("drop", (e: DragEvent) => {
             e.stopPropagation();
             e.preventDefault();
-            let files = Array.prototype.slice.apply(e.dataTransfer.files) as File[];
+            const files = Array.prototype.slice.apply(e.dataTransfer.files) as File[];
             if (files && files.length > 0) {
                 setTimeout(async () => {
-                    for (let file of files) {
+                    for (const file of files) {
                         try {
                             await this.fileService.addRoutesFromFile(file);
                         } catch (ex) {
@@ -35,7 +35,7 @@ export class DragAndDropService {
                 return;
             }
 
-            let url = e.dataTransfer.getData("text");
+            const url = e.dataTransfer.getData("text");
             if (url) {
                 this.fileService.addRoutesFromUrl(url).then(() => { }, (ex) => {
                     this.toastService.error(ex, this.resources.unableToLoadFromUrl + `: ${url}`);

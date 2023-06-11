@@ -7,7 +7,7 @@ import type { LatLngAlt } from "../models/models";
 describe("SnappingService", () => {
 
     beforeEach(() => {
-        let mapServiceMock = {
+        const mapServiceMock = {
             map: {
                 project: (lngLat: LatLngAlt) => ({ x: lngLat.lng, y: lngLat.lat })
             }
@@ -22,7 +22,7 @@ describe("SnappingService", () => {
 
     it("Should snap to a given point", inject([SnappingService], (snappingService: SnappingService) => {
 
-            let snap = snappingService.snapToPoint({ lat: 2, lng: 1 }, [{
+            const snap = snappingService.snapToPoint({ lat: 2, lng: 1 }, [{
                 title: "title",
                 type: "star",
                 description: "",

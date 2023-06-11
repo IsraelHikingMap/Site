@@ -85,7 +85,7 @@ export class DatabaseService {
             return;
         }
         let storedState = initialState;
-        let dbState = await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).get(DatabaseService.STATE_DOC_ID);
+        const dbState = await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).get(DatabaseService.STATE_DOC_ID);
         if (dbState != null) {
             storedState = this.initialStateUpgrade(dbState.state);
         } else {
@@ -108,7 +108,7 @@ export class DatabaseService {
                 if (tileBuffer) {
                     callback(null, tileBuffer, null, null);
                 } else {
-                    let message = `Tile is not in DB: ${params.url}`;
+                    const message = `Tile is not in DB: ${params.url}`;
                     callback(new Error(message));
                 }
             });
@@ -121,9 +121,9 @@ export class DatabaseService {
         this.store.dispatch(new ClearHistoryAction());
         this.store.dispatch(new SetSelectedPoiAction(null));
         this.store.dispatch(new SetSidebarAction(false));
-        let finalState = this.store.snapshot() as ApplicationState;
+        const finalState = this.store.snapshot() as ApplicationState;
         await this.updateState(finalState);
-        for (let dbKey of this.sourceDatabases.keys()) {
+        for (const dbKey of this.sourceDatabases.keys()) {
             await this.closeDatabase(dbKey);
         }
     }
@@ -135,7 +135,7 @@ export class DatabaseService {
             return;
         }
         try {
-            let db = await this.sourceDatabases.get(dbKey);
+            const db = await this.sourceDatabases.get(dbKey);
             await db.close();
             this.loggingService.info("[Database] Closed succefully: " + dbKey);
             await this.sqlite.closeConnection(dbKey + ".db", true);
@@ -168,20 +168,20 @@ export class DatabaseService {
     }
 
     public async getTile(url: string): Promise<ArrayBuffer> {
-        let splitUrl = url.split("/");
-        let dbName = this.getSourceNameFromUrl(url);
-        let z = +splitUrl[splitUrl.length - 3];
-        let x = +splitUrl[splitUrl.length - 2];
-        let y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
+        const splitUrl = url.split("/");
+        const dbName = this.getSourceNameFromUrl(url);
+        const z = +splitUrl[splitUrl.length - 3];
+        const x = +splitUrl[splitUrl.length - 2];
+        const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
 
         return this.getTileFromDatabase(dbName, z, x, y);
     }
 
     private async getTileFromDatabase(dbName: string, z: number, x: number, y: number): Promise<ArrayBuffer> {
-        let db = await this.getDatabase(dbName);
+        const db = await this.getDatabase(dbName);
 
-        let params = [z, x, Math.pow(2, z) - y - 1];
-        let queryresults = await db.query("SELECT HEX(tile_data) as tile_data_hex FROM tiles " +
+        const params = [z, x, Math.pow(2, z) - y - 1];
+        const queryresults = await db.query("SELECT HEX(tile_data) as tile_data_hex FROM tiles " +
                 "WHERE zoom_level = ? AND tile_column = ? AND tile_row = ? limit 1",
                 params);
         if (queryresults.values.length !== 1) {
@@ -189,7 +189,7 @@ export class DatabaseService {
         }
         const hexData = queryresults.values[0].tile_data_hex;
         let binData = new Uint8Array(hexData.match(/.{1,2}/g).map((byte: string) => parseInt(byte, 16)));
-        let isGzipped = binData[0] === 0x1f && binData[1] === 0x8b;
+        const isGzipped = binData[0] === 0x1f && binData[1] === 0x8b;
         if (isGzipped) {
             binData = pako.inflate(binData);
         }
@@ -199,27 +199,29 @@ export class DatabaseService {
     private async getDatabase(dbName: string): Promise<SQLiteDBConnection> {
         if (this.sourceDatabases.has(dbName)) {
             try {
-                let db = await this.sourceDatabases.get(dbName);
+                const db = await this.sourceDatabases.get(dbName);
                 return db;
             } catch (ex) {
                 this.loggingService.error(`[Database] There's a problem with the connection to ${dbName}, ${(ex as Error).message}`);
             }
         }
         this.loggingService.info(`[Database] Creating connection to ${dbName}`);
-        this.sourceDatabases.set(dbName, new Promise(async (resolve, reject) => {
-            try {
-                let dbPromise = this.sqlite.createConnection(dbName + ".db", false, "no-encryption", 1, true);
-                let db = await dbPromise;
-                this.loggingService.info(`[Database] Connection created succefully to ${dbName}`);
-                await db.open();
-                this.loggingService.info(`[Database] Connection opened succefully: ${dbName}`);
-                resolve(db);
-            } catch (ex) {
-                this.loggingService.error(`[Database] Failed opening ${dbName}, ${(ex as Error).message}`);
-                reject(ex);
-            }
-        }));
+        this.sourceDatabases.set(dbName, this.createConnection(dbName));
         return this.sourceDatabases.get(dbName);
+    }
+
+    private async createConnection(dbName: string) {
+        try {
+            const dbPromise = this.sqlite.createConnection(dbName + ".db", false, "no-encryption", 1, true);
+            const db = await dbPromise;
+            this.loggingService.info(`[Database] Connection created succefully to ${dbName}`);
+            await db.open();
+            this.loggingService.info(`[Database] Connection opened succefully: ${dbName}`);
+            return db;
+        } catch (ex) {
+            this.loggingService.error(`[Database] Failed opening ${dbName}, ${(ex as Error).message}`);
+            throw ex;
+        }
     }
 
     public async moveDownloadedDatabaseFile(dbFileName: string) {
@@ -241,7 +243,7 @@ export class DatabaseService {
         this.loggingService.debug("[Database] Startting getting pois for clustering in chunks");
         let features = [] as GeoJSON.Feature<GeoJSON.Point>[];
         let index = 0;
-        let size = 2000;
+        const size = 2000;
         let currentFeatures = [];
         do {
             currentFeatures = await this.poisDatabase.table(DatabaseService.POIS_TABLE_NAME).offset(index * size).limit(size).toArray();
@@ -249,9 +251,9 @@ export class DatabaseService {
             index++;
         } while (currentFeatures.length !== 0);
         this.loggingService.debug("[Database] Finished getting pois for clustering in chunks: " + features.length);
-        let pointFeatures = features.map((feature: GeoJSON.Feature) => {
-            let geoLocation = feature.properties.poiGeolocation;
-            let pointFeature = {
+        const pointFeatures = features.map((feature: GeoJSON.Feature) => {
+            const geoLocation = feature.properties.poiGeolocation;
+            const pointFeature = {
                 type: "Feature",
                 geometry: {
                     type: "Point",
@@ -285,7 +287,7 @@ export class DatabaseService {
     }
 
     public async getImageByUrl(imageUrl: string): Promise<string> {
-        let imageAndData = await this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).get(imageUrl) as ImageUrlAndData;
+        const imageAndData = await this.imagesDatabase.table(DatabaseService.IMAGES_TABLE_NAME).get(imageUrl) as ImageUrlAndData;
         if (imageAndData != null) {
             return imageAndData.data;
         }
@@ -317,7 +319,7 @@ export class DatabaseService {
     }
 
     private initialStateUpgrade(dbState: ApplicationState): ApplicationState {
-        let storedState = deepmerge(initialState, dbState, {
+        const storedState = deepmerge(initialState, dbState, {
             arrayMerge: (destinationArray, sourceArray) => sourceArray == null ? destinationArray : sourceArray
         });
         storedState.inMemoryState = initialState.inMemoryState;
@@ -335,7 +337,7 @@ export class DatabaseService {
     public async migrateDatabasesIfNeeded(): Promise<void> {
         this.loggingService.info("[Database] Starting migrating old databases using sqlite plugin");
         await this.sqlite.moveDatabasesAndAddSuffix("default", ["Contour.db", "IHM.db", "TerrainRGB.db"]);
-        let databases = await this.sqlite.getDatabaseList();
+        const databases = await this.sqlite.getDatabaseList();
         this.loggingService.info("[Database] Finished migrating old databases using sqlite plugin, " + JSON.stringify(databases.values));
     }
 }

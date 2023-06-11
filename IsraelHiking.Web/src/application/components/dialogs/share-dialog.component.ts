@@ -54,7 +54,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.facebookShareAddress = "";
         this.nakebCreateHikeAddress = "";
         this.lastShareUrl = null;
-        let shareUrl = this.shareUrlsService.getSelectedShareUrl();
+        const shareUrl = this.shareUrlsService.getSelectedShareUrl();
         this.updateCurrentShare = false;
         this.shareOverlays = false;
         this.canUpdate = false;
@@ -65,7 +65,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
             this.canUpdate = this.authorizationService.isLoggedIn() &&
                 shareUrl.osmUserId.toString() === this.authorizationService.getUserInfo().id.toString();
         }
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null) {
             if (shareUrl == null || (!this.title && !this.description)) {
                 this.title = selectedRoute.name;
@@ -76,8 +76,8 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     }
 
     public async ngAfterViewInit(): Promise<void> {
-        let dataToPreview = this.getDataFiltered();
-        let imageUrl = await this.shareUrlsService.getImagePreview(dataToPreview);
+        const dataToPreview = this.getDataFiltered();
+        const imageUrl = await this.shareUrlsService.getImagePreview(dataToPreview);
         this.imageUrl = this.sanitizer.bypassSecurityTrustUrl(imageUrl) as string;
     }
 
@@ -93,17 +93,17 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
 
     public async uploadShareUrl() {
         this.isLoading = true;
-        let shareUrlToSend = this.createShareUrlObject();
+        const shareUrlToSend = this.createShareUrlObject();
 
         try {
-            let shareUrl = this.updateCurrentShare
+            const shareUrl = this.updateCurrentShare
                 ? await this.shareUrlsService.updateShareUrl(shareUrlToSend)
                 : await this.shareUrlsService.createShareUrl(shareUrlToSend);
 
             this.lastShareUrl = shareUrl;
             this.shareUrlsService.setShareUrl(shareUrl);
             this.imageUrl = this.shareUrlsService.getImageFromShareId(shareUrl);
-            let links = this.shareUrlsService.getShareSocialLinks(shareUrl);
+            const links = this.shareUrlsService.getShareSocialLinks(shareUrl);
             this.toastService.success(this.resources.dataUpdatedSuccessfully);
             this.shareAddress = links.ihm;
             this.whatsappShareAddress = links.whatsapp;
@@ -118,9 +118,9 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
 
     private getDataFiltered(): DataContainer {
         // clone:
-        let filteredData = structuredClone(this.dataContainerService.getData(this.unhideRoutes));
+        const filteredData = structuredClone(this.dataContainerService.getData(this.unhideRoutes));
         for (let routeIndex = filteredData.routes.length - 1; routeIndex >= 0; routeIndex--) {
-            let route = filteredData.routes[routeIndex];
+            const route = filteredData.routes[routeIndex];
             if (route.state === "Hidden") {
                 route.state = "ReadOnly";
             }
@@ -132,9 +132,9 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     }
 
     private createShareUrlObject(): ShareUrl {
-        let selectedShare = this.shareUrlsService.getSelectedShareUrl();
-        let id = selectedShare ? selectedShare.id : "";
-        let shareUrl = {
+        const selectedShare = this.shareUrlsService.getSelectedShareUrl();
+        const id = selectedShare ? selectedShare.id : "";
+        const shareUrl = {
             id,
             title: this.title,
             description: this.description,

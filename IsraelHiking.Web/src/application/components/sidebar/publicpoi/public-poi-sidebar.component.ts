@@ -94,8 +94,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
                 return;
             }
-            let snapshot = this.route.snapshot;
-            let poiSourceAndId = this.getDataFromRoute(snapshot.paramMap, snapshot.queryParamMap);
+            const snapshot = this.route.snapshot;
+            const poiSourceAndId = this.getDataFromRoute(snapshot.paramMap, snapshot.queryParamMap);
             if (snapshot.queryParamMap.get(RouteStrings.EDIT) !== "true" || poiSourceAndId.source === "new") {
                 await this.fillUiWithData(poiSourceAndId);
             }
@@ -104,9 +104,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
                 return;
             }
-            let editMode = params[RouteStrings.EDIT] === "true";
-            let snapshot = this.route.snapshot;
-            let poiSourceAndId = this.getDataFromRoute(snapshot.paramMap, snapshot.queryParamMap);
+            const editMode = params[RouteStrings.EDIT] === "true";
+            const snapshot = this.route.snapshot;
+            const poiSourceAndId = this.getDataFromRoute(snapshot.paramMap, snapshot.queryParamMap);
             if (editMode && poiSourceAndId.source !== "new") {
                 await this.fillUiWithData(poiSourceAndId);
             }
@@ -127,7 +127,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public ngOnDestroy() {
         this.titleService.clear();
 
-        for (let subscription of this.subscriptions) {
+        for (const subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
     }
@@ -140,7 +140,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         try {
             this.store.dispatch(new SetSidebarAction(true));
             if (data.source === "new") {
-                let newFeature = {
+                const newFeature = {
                     id: "",
                     type: "Feature",
                     properties: {
@@ -155,10 +155,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 } as GeoJSON.Feature;
                 this.mergeDataIfNeededData(newFeature);
             } else {
-                let feature = await this.poiService.getPoint(data.id, data.source, data.language);
-                let originalFeature = cloneDeep(feature);
+                const feature = await this.poiService.getPoint(data.id, data.source, data.language);
+                const originalFeature = cloneDeep(feature);
                 this.mergeDataIfNeededData(feature);
-                let bounds = SpatialService.getBoundsForFeature(feature);
+                const bounds = SpatialService.getBoundsForFeature(feature);
                 this.fitBoundsService.fitBounds(bounds);
                 this.store.dispatch(new SetSelectedPoiAction(originalFeature));
                 if (data.source === RouteStrings.COORDINATES) {
@@ -174,7 +174,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     private async mergeDataIfNeededData(feature: GeoJSON.Feature) {
-        let uploadMarkerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
+        const uploadMarkerData = this.store.selectSnapshot((s: ApplicationState) => s.poiState).uploadMarkerData;
         if (uploadMarkerData != null) {
             this.poiService.mergeWithPoi(feature, uploadMarkerData);
             this.store.dispatch(new SetUploadMarkerDataAction(null));
@@ -208,7 +208,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 } else if (url.includes("ibt.org.il")) {
                     imageUrl = "http://www.ibt.org.il/images/logo.png";
                 } else {
-                    let domain = new URL(url).hostname;
+                    const domain = new URL(url).hostname;
                     imageUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
                 }
             }
@@ -233,8 +233,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (!this.fullFeature) {
             return "";
         }
-        let language = this.resources.getCurrentLanguageCodeSimplified();
-        let description = this.poiService.getDescription(this.fullFeature, language) ||
+        const language = this.resources.getCurrentLanguageCodeSimplified();
+        const description = this.poiService.getDescription(this.fullFeature, language) ||
             this.poiService.getExternalDescription(this.fullFeature, language);
         if (description) {
             return description;
@@ -299,10 +299,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public convertToRoute() {
-        let routes = this.geoJsonParser.toRoutes(this.fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
-        for (let route of routes) {
-            let name = this.selectedRouteService.createRouteName(route.name);
-            let newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
+        const routes = this.geoJsonParser.toRoutes(this.fullFeature as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString>);
+        for (const route of routes) {
+            const name = this.selectedRouteService.createRouteName(route.name);
+            const newRoute = this.routesFactory.createRouteData(name, this.selectedRouteService.getLeastUsedColor());
             newRoute.description = this.info.description;
             newRoute.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs as LatLngAltTime[], "Hike");
             this.store.dispatch(new AddRouteAction(newRoute));
@@ -312,14 +312,14 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public async addPointToRoute() {
-        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         let icon = "icon-star";
         let id = "";
         if (this.fullFeature) {
             icon = this.fullFeature.properties.poiIcon;
             id = this.fullFeature.properties.identifier;
         }
-        let urls = this.getUrls();
+        const urls = this.getUrls();
         this.store.dispatch(new AddPrivatePoiAction(selectedRoute.id, {
             latlng: this.latlng,
             title: this.info.title,
@@ -332,8 +332,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public navigateHere() {
-        let location = this.poiService.getLocation(this.fullFeature);
-        let title = this.poiService.getTitle(this.fullFeature, this.resources.getCurrentLanguageCodeSimplified());
+        const location = this.poiService.getLocation(this.fullFeature);
+        const title = this.poiService.getTitle(this.fullFeature, this.resources.getCurrentLanguageCodeSimplified());
         this.navigateHereService.addNavigationSegment(location, title);
     }
 
@@ -345,8 +345,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     private getUrls(): LinkData[] {
-        let urls = [] as LinkData[];
-        for (let url of this.info.urls) {
+        const urls = [] as LinkData[];
+        for (const url of this.info.urls) {
             urls.push({
                 mimeType: "text/html",
                 text: this.info.title,
@@ -356,10 +356,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (!this.fullFeature) {
             return urls;
         }
-        let imageUrls = Object.keys(this.fullFeature.properties)
+        const imageUrls = Object.keys(this.fullFeature.properties)
             .filter(k => k.startsWith("image"))
             .map(k => this.fullFeature.properties[k]);
-        for (let imageUrl of imageUrls) {
+        for (const imageUrl of imageUrls) {
             urls.push({
                 mimeType: `image/${imageUrl.split(".").pop().replace("jpg", "jpeg")}`,
                 text: "",
@@ -403,7 +403,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     private isBadWikipediaUrl(url: string) {
-        let language = this.resources.getCurrentLanguageCodeSimplified();
+        const language = this.resources.getCurrentLanguageCodeSimplified();
         return url == null || (url.includes("wikipedia") && !url.includes(language + ".wikipedia"));
     }
 }

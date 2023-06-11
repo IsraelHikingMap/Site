@@ -35,8 +35,8 @@ export class OpenWithService {
                 return;
             }
             if (data.url.startsWith("geo")) {
-                let coordsRegExp = /:(-?\d+\.\d+),(-?\d+\.\d+)/;
-                let coords = coordsRegExp.exec(data.url);
+                const coordsRegExp = /:(-?\d+\.\d+),(-?\d+\.\d+)/;
+                const coords = coordsRegExp.exec(data.url);
                 this.moveToCoordinates(coords);
                 return;
             }
@@ -50,33 +50,33 @@ export class OpenWithService {
 
     private handleIHMUrl(url: URL) {
         this.logAndCloseDialogs(url);
-        let pathname = url.pathname;
+        const pathname = url.pathname;
         if (pathname.startsWith("/share")) {
-            let shareId = pathname.replace("/share/", "");
+            const shareId = pathname.replace("/share/", "");
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_SHARE, shareId]);
             });
         } else if (pathname.startsWith("/poi")) {
-            let sourceAndId = pathname.replace("/poi/", "");
-            let source = sourceAndId.split("/")[0];
-            let id = sourceAndId.split("/")[1];
-            let language = new URLSearchParams(url.search).get("language");
+            const sourceAndId = pathname.replace("/poi/", "");
+            const source = sourceAndId.split("/")[0];
+            const id = sourceAndId.split("/")[1];
+            const language = new URLSearchParams(url.search).get("language");
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_POI, source, id],
                     { queryParams: { language } });
             });
         } else if (pathname.startsWith("/url")) {
-            let urlData = pathname.replace("/url/", "");
-            let baseLayer = new URLSearchParams(url.search).get("baselayer");;
+            const urlData = pathname.replace("/url/", "");
+            const baseLayer = new URLSearchParams(url.search).get("baselayer");
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_URL, urlData],
                     { queryParams: { baseLayer } });
             });
         } else if (pathname.startsWith("/map")) {
-            let mapLocation = pathname.replace("/map/", "");
-            let zoom = mapLocation.split("/")[0];
-            let lat = mapLocation.split("/")[1];
-            let lng = mapLocation.split("/")[2];
+            const mapLocation = pathname.replace("/map/", "");
+            const zoom = mapLocation.split("/")[0];
+            const lat = mapLocation.split("/")[1];
+            const lng = mapLocation.split("/")[2];
             this.ngZone.run(() => {
                 this.router.navigate([RouteStrings.ROUTE_MAP, zoom, lat, lng]);
             });
@@ -84,14 +84,14 @@ export class OpenWithService {
             this.ngZone.run(() => {
                 this.router.navigate(["/"]);
             });
-        };
+        }
     }
 
     private handleFileUrl(url: string) {
         this.loggingService.info("[OpenWith] Opening a file shared with the app " + url);
         setTimeout(async () => {
             try {
-                let file = await this.fileService.getFileFromUrl(url);
+                const file = await this.fileService.getFileFromUrl(url);
                 this.fileService.addRoutesFromFile(file);
             } catch (ex) {
                 this.toastService.error(ex, this.resources.unableToLoadFromFile);
@@ -100,21 +100,21 @@ export class OpenWithService {
     }
 
     private handleHttpUrl(href: string) {
-        let url = new URL(href);
+        const url = new URL(href);
         if (url.host.toLocaleLowerCase() === "israelhiking.osm.org.il") {
             this.handleIHMUrl(url);
             return;
         }
         this.loggingService.info("[OpenWith] Opening an external url: " + href);
         if (url.href.indexOf("maps?q=") !== -1) {
-            let coordsRegExp = /q=(\d+\.\d+),(\d+\.\d+)&z=/;
-            let coords = coordsRegExp.exec(decodeURIComponent(href));
+            const coordsRegExp = /q=(\d+\.\d+),(\d+\.\d+)&z=/;
+            const coords = coordsRegExp.exec(decodeURIComponent(href));
             this.moveToCoordinates(coords);
             return;
         }
         if (url.href.indexOf("maps/place") !== -1) {
-            let coordsRegExp = /\@(\d+\.\d+),(\d+\.\d+),/;
-            let coords = coordsRegExp.exec(href);
+            const coordsRegExp = /@(\d+\.\d+),(\d+\.\d+),/;
+            const coords = coordsRegExp.exec(href);
             this.moveToCoordinates(coords);
             return;
         }
@@ -129,7 +129,7 @@ export class OpenWithService {
     }
 
     private moveToCoordinates(coords: string[]) {
-        let latLng = SpatialService.toLatLng([+coords[2], +coords[1]]);
+        const latLng = SpatialService.toLatLng([+coords[2], +coords[1]]);
         this.router.navigate([RouteStrings.ROUTE_POI, RouteStrings.COORDINATES, getIdFromLatLng(latLng)],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }

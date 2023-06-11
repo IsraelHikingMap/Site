@@ -53,8 +53,8 @@ export class DownloadDialogComponent extends BaseMapComponent {
             fileName += "16";
         }
         fileName += extension;
-        let tilesFolder = this.resources.getCurrentLanguageCodeSimplified() === "he" ? "/Hebrew" : "/English";
-        let href = `${protocol}israelhiking.osm.org.il${tilesFolder}/${filesFolder}/${fileName}`;
+        const tilesFolder = this.resources.getCurrentLanguageCodeSimplified() === "he" ? "/Hebrew" : "/English";
+        const href = `${protocol}israelhiking.osm.org.il${tilesFolder}/${filesFolder}/${fileName}`;
         return this.sanitizer.bypassSecurityTrustUrl(href);
     }
 

@@ -93,7 +93,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
             this.isShowCoordinatesPopup = !this.isShowCoordinatesPopup;
             return;
         }
-        let sourceAndId = this.getSourceAndId(this.poiService.getFeatureId(feature));
+        const sourceAndId = this.getSourceAndId(this.poiService.getFeatureId(feature));
         this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
 
@@ -112,8 +112,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     }
 
     private getSourceAndId(sourceAndId: string): { source: string; id: string } {
-        let poiSource = sourceAndId.split("_")[0];
-        let id = sourceAndId.replace(poiSource + "_", "");
+        const poiSource = sourceAndId.split("_")[0];
+        const id = sourceAndId.replace(poiSource + "_", "");
         return {
             source: poiSource,
             id
@@ -150,8 +150,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     }
 
     public addPointToRoute() {
-        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
-        let markerData = {
+        const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        const markerData = {
             latlng: this.getSelectedFeatureLatlng(),
             title: "",
             description: "",

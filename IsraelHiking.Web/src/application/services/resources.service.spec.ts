@@ -16,7 +16,7 @@ export class GetTextCatalogMockCreator {
 describe("ResourcesService", () => {
 
     beforeEach(() => {
-        let mockCreator = new GetTextCatalogMockCreator();
+        const mockCreator = new GetTextCatalogMockCreator();
         TestBed.configureTestingModule({
             imports: [NgxsModule.forRoot([])],
             providers: [
@@ -38,7 +38,7 @@ describe("ResourcesService", () => {
         });
         store.dispatch = jasmine.createSpy();
 
-        let promise = service.setLanguage("he").then(() => {
+        const promise = service.setLanguage("he").then(() => {
             expect(service.getCurrentLanguageCodeSimplified()).toBe("he");
             expect(store.dispatch).toHaveBeenCalled();
         });

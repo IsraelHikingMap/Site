@@ -18,9 +18,9 @@ export class SendReportDialogComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
         @Inject(MAT_DIALOG_DATA) data: SendReportDialogData) {
         super(resources);
-        let body = encodeURIComponent(this.resources.reportAnIssueInstructions);
-        let to = "israelhikingmap@gmail.com";
-        let subject = encodeURIComponent(data.subject);
+        const body = encodeURIComponent(this.resources.reportAnIssueInstructions);
+        const to = "israelhikingmap@gmail.com";
+        const subject = encodeURIComponent(data.subject);
         this.mailToLink = `mailto:${to}?subject=${subject}&body=${body}`;
     }
 

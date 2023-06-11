@@ -8,7 +8,7 @@ import type { LocationState } from "../models/models";
 export class SetLocationAction {
     public static type = this.prototype.constructor.name;
     constructor(public longitude: number, public latitude: number, public zoom: number) {}
-};
+}
 
 @State({
     name: "locationState",

@@ -78,8 +78,8 @@ interface Gpx {
 @Injectable()
 export class GpxDataContainerConverterService {
     public static getSegmentsFromLatlngs(latlngs: LatLngAltTime[], routingType: RoutingType): RouteSegmentData[] {
-        let segments = [];
-        let firstLatlng = latlngs[0];
+        const segments = [];
+        const firstLatlng = latlngs[0];
         segments.push({
             latlngs: [firstLatlng, firstLatlng],
             routePoint: firstLatlng,
@@ -97,8 +97,8 @@ export class GpxDataContainerConverterService {
         if (segments.length > 2) {
             return segments;
         }
-        let newSegments = [];
-        for (let segment of segments) {
+        const newSegments = [];
+        for (const segment of segments) {
             if (segment.latlngs.length < 3) {
                 newSegments.push(segment);
                 continue;
@@ -109,10 +109,10 @@ export class GpxDataContainerConverterService {
                 if (pointsInSegment >= latlngs.length) {
                     pointsInSegment = latlngs.length - 1;
                 }
-                let segmentEndLatLng = latlngs[pointsInSegment];
-                let start = latlngs.slice(0, pointsInSegment + 1);
+                const segmentEndLatLng = latlngs[pointsInSegment];
+                const start = latlngs.slice(0, pointsInSegment + 1);
                 latlngs = latlngs.slice(pointsInSegment);
-                let routeSegment = {
+                const routeSegment = {
                     routePoint: segmentEndLatLng,
                     latlngs: start,
                     routingType: segments[0].routingType
@@ -124,7 +124,7 @@ export class GpxDataContainerConverterService {
     }
 
     public canConvert(gpxXmlString: string) {
-        let subString = gpxXmlString.substring(0, 200).toLocaleLowerCase();
+        const subString = gpxXmlString.substring(0, 200).toLocaleLowerCase();
         return (subString.indexOf("<gpx") !== -1);
     }
 
@@ -135,10 +135,10 @@ export class GpxDataContainerConverterService {
      * @returns a base64 encoded gpx xml string
      */
     public async toGpx(dataContainer: DataContainer): Promise<string> {
-        let options = { rootName: "gpx" };
+        const options = { rootName: "gpx" };
 
-        let builder = new Builder(options);
-        let gpx = {
+        const builder = new Builder(options);
+        const gpx = {
             $: {
                 version: "1.1",
                 creator: "IsraelHikingMap",
@@ -151,11 +151,11 @@ export class GpxDataContainerConverterService {
             rte: [],
             trk: []
         } as Gpx;
-        let containerRoutes = dataContainer.routes || [];
-        let nonEmptyRoutes = containerRoutes.filter(r => r.segments.find(s => s.latlngs.length > 0) != null);
-        for (let route of containerRoutes) {
+        const containerRoutes = dataContainer.routes || [];
+        const nonEmptyRoutes = containerRoutes.filter(r => r.segments.find(s => s.latlngs.length > 0) != null);
+        for (const route of containerRoutes) {
             gpx.wpt = gpx.wpt.concat(route.markers.map(m => {
-                let wpt = {
+                const wpt = {
                     $: {
                         lat: m.latlng.lat.toString(),
                         lon: m.latlng.lng.toString()
@@ -177,7 +177,7 @@ export class GpxDataContainerConverterService {
                 return wpt;
             }));
         }
-        for (let route of nonEmptyRoutes) {
+        for (const route of nonEmptyRoutes) {
             gpx.trk.push({
                 name: escape(route.name),
                 desc: escape(route.description),
@@ -203,7 +203,7 @@ export class GpxDataContainerConverterService {
                 },
                 trkseg: route.segments.map(s => ({
                         trkpt: s.latlngs.map(l => {
-                            let wpt = {
+                            const wpt = {
                                 $: {
                                     lat: l.lat.toString(),
                                     lon: l.lng.toString()
@@ -248,9 +248,9 @@ export class GpxDataContainerConverterService {
     }
 
     public async toDataContainer(gpxXmlString: string): Promise<DataContainer> {
-        let gpxJsonObject: Gpx = await new Promise<Gpx>((resolve, reject) => {
+        const gpxJsonObject: Gpx = await new Promise<Gpx>((resolve, reject) => {
             // removing namespace since they can be invalid
-            gpxXmlString = gpxXmlString.replace(/xmlns=\"(.*?)\"/g, "");
+            gpxXmlString = gpxXmlString.replace(/xmlns="(.*?)"/g, "");
             parseString(gpxXmlString, { explicitArray: false, }, (err, res) => {
                 if (err) {
                     reject(err);
@@ -260,13 +260,13 @@ export class GpxDataContainerConverterService {
         });
         this.convertToArrays(gpxJsonObject);
         this.updateBoundingBox(gpxJsonObject);
-        let dataContainer = {
+        const dataContainer = {
             overlays: [],
             baseLayer: null,
             routes: this.convertRoutesToRoutesData(gpxJsonObject.rte)
         } as DataContainer;
         dataContainer.routes = dataContainer.routes.concat(this.convertTracksToRouteData(gpxJsonObject.trk));
-        let markers = gpxJsonObject.wpt.map(p => ({
+        const markers = gpxJsonObject.wpt.map(p => ({
         description: typeof p.desc === "string" ? p.desc : JSON.stringify(p.desc),
         latlng: { lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele },
         title: p.name,
@@ -275,7 +275,7 @@ export class GpxDataContainerConverterService {
         } as MarkerData));
         if (markers.length > 0) {
         if (dataContainer.routes.length === 0) {
-            let name = (markers.length === 1 ? markers[0].title : "Markers") || "Markers";
+            const name = (markers.length === 1 ? markers[0].title : "Markers") || "Markers";
             dataContainer.routes.push({ name, description: markers[0].description, segments: [] } as RouteData);
         }
         dataContainer.routes[0].markers = markers;
@@ -287,11 +287,11 @@ export class GpxDataContainerConverterService {
         if (gpxJsonObject.$.creator === "IsraelHikingMap") {
             return dataContainer;
         }
-        for (let route of dataContainer.routes) {
+        for (const route of dataContainer.routes) {
             if (route.segments.length === 0 || route.segments[0].latlngs.length === 0) {
                 continue;
             }
-            let firstLatlng = route.segments[0].latlngs[0];
+            const firstLatlng = route.segments[0].latlngs[0];
             route.segments.splice(0, 0, {
                 latlngs: [firstLatlng, firstLatlng],
                 routePoint: firstLatlng as LatLngAlt,
@@ -310,7 +310,7 @@ export class GpxDataContainerConverterService {
         if (!Array.isArray(gpx.rte)) {
             gpx.rte = [gpx.rte];
         }
-        for (let rte of gpx.rte) {
+        for (const rte of gpx.rte) {
             if (rte.rtept && !Array.isArray(rte.rtept)) {
                 rte.rtept = [rte.rtept];
             }
@@ -321,7 +321,7 @@ export class GpxDataContainerConverterService {
         if (!Array.isArray(gpx.wpt)) {
             gpx.wpt = [gpx.wpt];
         }
-        for (let wpt of gpx.wpt) {
+        for (const wpt of gpx.wpt) {
             if (!wpt.link) {
                 wpt.link = [];
             }
@@ -335,7 +335,7 @@ export class GpxDataContainerConverterService {
         if (!Array.isArray(gpx.trk)) {
             gpx.trk = [gpx.trk];
         }
-        for (let trk of gpx.trk) {
+        for (const trk of gpx.trk) {
             if (trk.trkseg && !Array.isArray(trk.trkseg)) {
                 trk.trkseg = [trk.trkseg];
             }
@@ -387,7 +387,7 @@ export class GpxDataContainerConverterService {
 
     private convertTracksToRouteData(trks: Trk[]): RouteData[] {
         return trks.filter(t => t.trkseg != null && t.trkseg.length > 0).map(t => {
-            let extensions = this.convertExtensionAfterXmlnsRemoval(t.extensions, {
+            const extensions = this.convertExtensionAfterXmlnsRemoval(t.extensions, {
                 Color: { _: null },
                 Opacity: { _: null },
                 Weight: { _: null }
@@ -420,7 +420,7 @@ export class GpxDataContainerConverterService {
 
     private convertExtensionAfterXmlnsRemoval<T>(extensions: any, defaultValue: T): T {
         extensions = Object.assign(defaultValue, extensions);
-        for (let key in extensions) {
+        for (const key in extensions) {
             if (typeof extensions[key] === "string") {
                 extensions[key] = { _: extensions[key] };
             }

@@ -8,12 +8,12 @@ import type { GpsState, TrackingStateType } from "../models/models";
 export class SetTrackingStateAction {
     public static type = this.prototype.constructor.name;
     constructor(public state: TrackingStateType) {}
-};
+}
 
 export class SetCurrentPositionAction {
     public static type = this.prototype.constructor.name;
     constructor(public position: GeolocationPosition) {}
-};
+}
 @State<GpsState>({
     name: "gpsState",
     defaults: initialState.gpsState
@@ -33,7 +33,7 @@ export class GpsReducer {
     public setCurrentPosition(ctx: StateContext<GpsState>, action: SetCurrentPositionAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
         // Clone position before setting into state since this object can't be cloned regularly
-            let currentPosition = action.position == null ? null : {
+            const currentPosition = action.position == null ? null : {
                 coords: {
                     accuracy: action.position.coords.accuracy,
                     altitude: action.position.coords.altitude,

@@ -71,13 +71,13 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         this.showIcons = false;
         this.showCoordinates = false;
         this.iconsGroups = [];
-        let icons = [
+        const icons = [
             "star", "arrow-left", "arrow-right", "tint",
             "automobile", "bike", "hike", "four-by-four",
             "bed", "viewpoint", "fire", "flag",
             "coffee", "cutlery", "shopping-cart", "tree"
         ];
-        let groups = icons.length / PrivatePoiEditDialogComponent.NUMBER_OF_ICONS_PER_ROW;
+        const groups = icons.length / PrivatePoiEditDialogComponent.NUMBER_OF_ICONS_PER_ROW;
         for (let iconTypeIndex = 0;
             iconTypeIndex < groups;
             iconTypeIndex++) {
@@ -140,7 +140,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public save() {
-        let urls = [];
+        const urls = [];
         if (this.imageLink) {
             urls.push(this.imageLink);
         }
@@ -148,7 +148,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
             this.url.text = this.title;
             urls.push(this.url);
         }
-        let updatedMarker = {
+        const updatedMarker = {
             title: this.title,
             description: this.description,
             latlng: this.marker.latlng,
@@ -164,11 +164,11 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public async addImage(e: any) {
-        let file = this.fileService.getFileFromEvent(e);
+        const file = this.fileService.getFileFromEvent(e);
         if (!file) {
             return;
         }
-        let container = await this.imageResizeService.resizeImageAndConvert(file, false);
+        const container = await this.imageResizeService.resizeImageAndConvert(file, false);
         this.imageLink = container.routes[0].markers[0].urls[0];
     }
 
@@ -224,7 +224,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public shareLocation() {
-        let ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.marker.latlng);
+        const ihmCoordinateUrl = this.hashService.getFullUrlFromLatLng(this.marker.latlng);
         this.socialSharing.shareWithOptions({
             message: `geo:${this.marker.latlng.lat},${this.marker.latlng.lng}\n${ihmCoordinateUrl}`
         });

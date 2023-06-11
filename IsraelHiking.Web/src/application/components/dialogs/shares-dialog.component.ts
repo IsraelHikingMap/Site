@@ -73,7 +73,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public ngOnDestroy() {
-        for (let subscription of this.subscriptions) {
+        for (const subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
     }
@@ -104,7 +104,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         if (!searchTerm) {
             return true;
         }
-        let lowerSearchTerm = searchTerm.toLowerCase();
+        const lowerSearchTerm = searchTerm.toLowerCase();
         if ((shareUrl.description || "").toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
@@ -121,9 +121,9 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         if (this.shareUrlInEditMode?.id === this.selectedShareUrlId) {
             this.shareUrlInEditMode = null;
         }
-        let shareUrl = this.getSelectedShareUrl();
-        let displayName = this.shareUrlsService.getShareUrlDisplayName(shareUrl);
-        let message = `${this.resources.deletionOf} ${displayName}, ${this.resources.areYouSure}`;
+        const shareUrl = this.getSelectedShareUrl();
+        const displayName = this.shareUrlsService.getShareUrlDisplayName(shareUrl);
+        const message = `${this.resources.deletionOf} ${displayName}, ${this.resources.areYouSure}`;
         this.toastService.confirm({
             message,
             confirmAction: async () => {
@@ -155,14 +155,14 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
 
     public async showShareUrl() {
         if (this.selectedRouteService.areRoutesEmpty()) {
-            let share = await this.shareUrlsService.setShareUrlById(this.selectedShareUrlId);
+            const share = await this.shareUrlsService.setShareUrlById(this.selectedShareUrlId);
             this.dataContainerService.setData(share.dataContainer, false);
             return;
         }
         this.toastService.confirm({
             message: this.resources.thisWillDeteleAllCurrentRoutesAreYouSure,
             confirmAction: async () => {
-                let share = await this.shareUrlsService.setShareUrlById(this.selectedShareUrlId);
+                const share = await this.shareUrlsService.setShareUrlById(this.selectedShareUrlId);
                 this.dataContainerService.setData(share.dataContainer, false);
             },
             type: "YesNo"
@@ -170,7 +170,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public async addShareUrlToRoutes() {
-        let share = await this.shareUrlsService.getShareUrl(this.selectedShareUrlId);
+        const share = await this.shareUrlsService.getShareUrl(this.selectedShareUrlId);
         share.dataContainer.overlays = [];
         share.dataContainer.baseLayer = null;
         this.dataContainerService.setData(share.dataContainer, true);

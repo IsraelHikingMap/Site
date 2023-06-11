@@ -77,7 +77,7 @@ export class GeoLocationService {
     }
 
     public async uninitialize() {
-        let stateBefore = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking;
+        const stateBefore = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking;
         await this.disable();
         this.store.dispatch(new SetTrackingStateAction(stateBefore));
     }
@@ -106,7 +106,7 @@ export class GeoLocationService {
     }
 
     public canRecord(): boolean {
-        let gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
+        const gpsState = this.store.selectSnapshot((s: ApplicationState) => s.gpsState);
         return gpsState.tracking === "tracking"
             && gpsState.currentPosition != null && this.runningContextService.isCapacitor;
     }
@@ -208,9 +208,9 @@ export class GeoLocationService {
             return;
         }
         this.gettingLocations = true;
-        let locations = await BackgroundGeolocation.getValidLocationsAndDelete();
+        const locations = await BackgroundGeolocation.getValidLocationsAndDelete();
         this.gettingLocations = false;
-        let positions = locations.map((l) => this.locationToPosition(l));
+        const positions = locations.map((l) => this.locationToPosition(l));
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
         } else if (positions.length === 1) {
@@ -268,9 +268,9 @@ export class GeoLocationService {
     }
 
     public async getLog(): Promise<string> {
-        let logEntries = await BackgroundGeolocation.getLogEntries(10000, 0, BackgroundGeolocation.LOG_TRACE);
+        const logEntries = await BackgroundGeolocation.getLogEntries(10000, 0, BackgroundGeolocation.LOG_TRACE);
         return logEntries.map((logLine) => {
-            let dateString = new Date(logLine.timestamp - new Date().getTimezoneOffset() * 60 * 1000)
+            const dateString = new Date(logLine.timestamp - new Date().getTimezoneOffset() * 60 * 1000)
                 .toISOString().replace(/T/, " ").replace(/\..+/, "");
             return dateString + " | " + logLine.level.padStart(5).toUpperCase() + " | " + logLine.message;
         }).join("\n");

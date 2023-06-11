@@ -86,9 +86,9 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
         if (this.canEdit === false) {
             return;
         }
-        let files = this.fileService.getFilesFromEvent(e);
-        for (let file of files) {
-            let data = await this.imageResizeService.resizeImage(file);
+        const files = this.fileService.getFilesFromEvent(e);
+        for (const file of files) {
+            const data = await this.imageResizeService.resizeImage(file);
             this.images.push(data);
             this.currentIndex = this.images.length - 1;
             this.currentImageChanged.next(this.getCurrentValue());
@@ -103,7 +103,7 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
     }
 
     public getCurrentImage() {
-        let imageUrl = this.getCurrentValue();
+        const imageUrl = this.getCurrentValue();
         if (imageUrl == null) {
             return null;
         }
@@ -113,7 +113,7 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
     }
 
     private async updateCurrentImageAttribution(): Promise<void> {
-        let imageUrl = this.getCurrentValue();
+        const imageUrl = this.getCurrentValue();
         if (imageUrl == null) {
             this.currentImageAttribution = null;
             return;
@@ -125,9 +125,9 @@ export class ImageScrollerComponent extends BaseMapComponent implements OnChange
         if (!this.runningContextService.isOnline) {
             return;
         }
-        let imagesUrls = [];
-        for (let imageUrl of this.images) {
-            let imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1600);
+        const imagesUrls = [];
+        for (const imageUrl of this.images) {
+            const imageUrlToPush = this.resources.getResizedImageUrl(imageUrl, 1600);
             imagesUrls.push(imageUrlToPush);
         }
         this.imageGalleryService.open(imagesUrls, this.currentIndex);

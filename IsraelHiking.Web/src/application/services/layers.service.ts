@@ -92,19 +92,19 @@ export class LayersService {
     }
 
     public getSelectedBaseLayerAddressForOSM(): string {
-        let baseLayerAddress = this.getSelectedBaseLayer().address;
+        const baseLayerAddress = this.getSelectedBaseLayer().address;
         if (baseLayerAddress.indexOf("{x}") !== -1) {
             return baseLayerAddress;
         }
-        let defaultAddress = Urls.baseTilesAddress + "/Hebrew/Tiles/{z}/{x}/{y}.png";
+        const defaultAddress = Urls.baseTilesAddress + "/Hebrew/Tiles/{z}/{x}/{y}.png";
         // using the same logic that the server is using in ImageCreationService + language
         if (!baseLayerAddress) {
             return defaultAddress;
         }
-        let language = this.resources.getCurrentLanguageCodeSimplified() === "he" ? "Hebrew" : "English";
+        const language = this.resources.getCurrentLanguageCodeSimplified() === "he" ? "Hebrew" : "English";
         let tiles = "Tiles";
         if (baseLayerAddress.endsWith(".json")) {
-            let styleKey = baseLayerAddress.replace(".json", "").split("/").splice(-1)[0];
+            const styleKey = baseLayerAddress.replace(".json", "").split("/").splice(-1)[0];
             if (styleKey === "ilMTB") {
                 tiles = "mtbTiles";
             }
@@ -117,13 +117,13 @@ export class LayersService {
             return;
         }
         try {
-            let data = await firstValueFrom(this.httpClient.get(Urls.userLayers).pipe(timeout(10000))) as any as IUserLayer[];
+            const data = await firstValueFrom(this.httpClient.get(Urls.userLayers).pipe(timeout(10000))) as any as IUserLayer[];
             if (data == null) {
                 return;
             }
-            for (let layer of data) {
+            for (const layer of data) {
                 if (layer.isOverlay) {
-                    let existingOverlay = this.overlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layer.key));
+                    const existingOverlay = this.overlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layer.key));
                     if (existingOverlay) {
                         this.store.dispatch(new UpdateOverlayAction(layer.key, {
                                 ...existingOverlay,
@@ -134,7 +134,7 @@ export class LayersService {
                     }
                     this.addOverlayFromData(layer, false);
                 } else {
-                    let existingBaselayer = this.baseLayers.find((baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
+                    const existingBaselayer = this.baseLayers.find((baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
                     if (existingBaselayer) {
                         this.store.dispatch(new UpdateBaseLayerAction(layer.key, {
                                 ...existingBaselayer,
@@ -146,22 +146,22 @@ export class LayersService {
                     this.addBaseLayerFromData(layer);
                 }
             }
-            let overlaysToRemove = [];
-            for (let overlay of this.overlays.filter(o => o.isEditable)) {
+            const overlaysToRemove = [];
+            for (const overlay of this.overlays.filter(o => o.isEditable)) {
                 if (data.find(l => l.key === overlay.key) == null) {
                     overlaysToRemove.push(overlay);
                 }
             }
-            for (let toRemove of overlaysToRemove) {
+            for (const toRemove of overlaysToRemove) {
                 this.store.dispatch(new RemoveOverlayAction(toRemove.key));
             }
-            let baselayerToRemove = [];
-            for (let baselayer of this.baseLayers.filter(o => o.isEditable)) {
+            const baselayerToRemove = [];
+            for (const baselayer of this.baseLayers.filter(o => o.isEditable)) {
                 if (data.find(l => l.key === baselayer.key) == null) {
                     baselayerToRemove.push(baselayer);
                 }
             }
-            for (let toRemove of baselayerToRemove) {
+            for (const toRemove of baselayerToRemove) {
                 this.store.dispatch(new RemoveBaseLayerAction(toRemove.key));
             }
         } catch (error) {
@@ -180,7 +180,7 @@ export class LayersService {
     }
 
     private addBaseLayerFromData(layerData: LayerData): EditableLayer {
-        let baseLayer = {
+        const baseLayer = {
             ...layerData,
             isEditable: true,
             isOfflineAvailable: false,
@@ -197,21 +197,21 @@ export class LayersService {
         if (!this.authorizationService.isLoggedIn()) {
             return;
         }
-        let layerToStore = { ...layer } as LayerData as IUserLayer;
+        const layerToStore = { ...layer } as LayerData as IUserLayer;
         layerToStore.isOverlay = false;
         layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
-        let response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as IUserLayer;
+        const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as IUserLayer;
         layer.id = response.id;
         this.store.dispatch(new UpdateBaseLayerAction(layer.key, layer));
     }
 
     private async updateUserLayerInDatabase(isOverlay: boolean, layer: EditableLayer) {
         if (this.authorizationService.isLoggedIn()) {
-            let layerToStore = { ...layer } as LayerData as IUserLayer;
+            const layerToStore = { ...layer } as LayerData as IUserLayer;
             layerToStore.isOverlay = isOverlay;
             layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
             layerToStore.id = layer.id;
-            let response = await firstValueFrom(this.httpClient.put(Urls.userLayers + layerToStore.id, layerToStore)) as IUserLayer;
+            const response = await firstValueFrom(this.httpClient.put(Urls.userLayers + layerToStore.id, layerToStore)) as IUserLayer;
             layer.id = response.id;
         }
     }
@@ -233,7 +233,7 @@ export class LayersService {
     }
 
     private addOverlayFromData(layerData: LayerData, visible: boolean): Overlay {
-        let overlay = {
+        const overlay = {
             ...layerData,
             visible,
             isEditable: true,
@@ -251,10 +251,10 @@ export class LayersService {
         if (!this.authorizationService.isLoggedIn()) {
             return;
         }
-        let layerToStore = { ...layer } as LayerData as IUserLayer;
+        const layerToStore = { ...layer } as LayerData as IUserLayer;
         layerToStore.isOverlay = true;
         layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
-        let response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as IUserLayer;
+        const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as IUserLayer;
         layer.id = response.id;
         if (layerToStore.isOverlay) {
             this.store.dispatch(new UpdateOverlayAction(layer.key, layer));
@@ -262,7 +262,7 @@ export class LayersService {
     }
 
     public isNameAvailable(key: string, newName: string, isOverlay: boolean): boolean {
-        let layers: EditableLayer[] = isOverlay ? this.overlays : this.baseLayers;
+        const layers: EditableLayer[] = isOverlay ? this.overlays : this.baseLayers;
         if (newName === key) {
             return true;
         }
@@ -303,7 +303,7 @@ export class LayersService {
     }
 
     public toggleOverlay(overlay: Overlay) {
-        let newVisibility = !overlay.visible;
+        const newVisibility = !overlay.visible;
         this.loggingService.info(`[Layers] Changing visiblity of ${overlay.key} to ${newVisibility ? "visible" : "hidden"}`);
         this.store.dispatch(new UpdateOverlayAction(overlay.key, {
                 ...overlay,
@@ -325,8 +325,8 @@ export class LayersService {
     }
 
     public hideAllOverlays() {
-        let visibleOverlays = this.overlays.filter(o => o.visible);
-        for (let overlay of visibleOverlays) {
+        const visibleOverlays = this.overlays.filter(o => o.visible);
+        for (const overlay of visibleOverlays) {
             this.toggleOverlay(overlay);
         }
     }
@@ -335,7 +335,7 @@ export class LayersService {
         if (layerData == null || (layerData.address === "" && layerData.key === "")) {
             return;
         }
-        let baseLayer = this.baseLayers.find((baseLayerToFind) =>
+        const baseLayer = this.baseLayers.find((baseLayerToFind) =>
             baseLayerToFind.address.toLocaleLowerCase() === layerData.address.toLocaleLowerCase() ||
             this.compareKeys(baseLayerToFind.key, layerData.key));
         if (baseLayer != null) {
@@ -373,15 +373,15 @@ export class LayersService {
         if (!overlays || overlays.length === 0) {
             return;
         }
-        for (let overlay of overlays) {
-            let addedOverlay = this.addOverlay(overlay);
+        for (const overlay of overlays) {
+            const addedOverlay = this.addOverlay(overlay);
             if (!addedOverlay.visible) {
                 this.toggleOverlay(addedOverlay);
             }
         }
         // hide overlays that are not part of the share:
-        for (let overlay of this.overlays) {
-            let externalOverlay = overlays.find(o => o.key === overlay.key || o.address === overlay.address);
+        for (const overlay of this.overlays) {
+            const externalOverlay = overlays.find(o => o.key === overlay.key || o.address === overlay.address);
             if (externalOverlay == null && overlay.visible) {
                 this.toggleOverlay(overlay);
             }
@@ -389,14 +389,14 @@ export class LayersService {
     }
 
     public getData(): DataContainer {
-        let container = {
+        const container = {
             baseLayer: null,
             overlays: []
         } as DataContainer;
 
         container.baseLayer = this.getSelectedBaseLayer();
-        let visibleOverlays = this.overlays.filter(overlay => overlay.visible);
-        for (let overlay of visibleOverlays) {
+        const visibleOverlays = this.overlays.filter(overlay => overlay.visible);
+        for (const overlay of visibleOverlays) {
             container.overlays.push(overlay);
         }
         return container;

@@ -28,7 +28,7 @@ export class ImageGalleryService {
               positionStrategy: this.overlay.position().global().centerHorizontally().centerVertically(),
               scrollStrategy: this.overlay.scrollStrategies.block()
         });
-        let injector = Injector.create({
+        const injector = Injector.create({
             providers: [
                 { provide: OverlayRef, useValue: this.overlayRef },
                 { provide: PHOTO_SWIPE_DATA, useValue: {
@@ -38,9 +38,9 @@ export class ImageGalleryService {
             ]
         });
 
-        let photoSwpieComponent = new ComponentPortal(PhotoSwpieComponent, null, injector);
+        const photoSwpieComponent = new ComponentPortal(PhotoSwpieComponent, null, injector);
 
-        let componentRef = this.overlayRef.attach(photoSwpieComponent);
+        const componentRef = this.overlayRef.attach(photoSwpieComponent);
         componentRef.instance.closed.subscribe(() => this.close());
     }
 

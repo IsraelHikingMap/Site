@@ -52,15 +52,15 @@ export class TracesComponent extends BaseMapComponent {
                 this.clearTraceSource();
                 return;
             }
-            let visibleTrace = await this.tracesService.getTraceById(id);
+            const visibleTrace = await this.tracesService.getTraceById(id);
             let traceCoordinates = [] as [number, number][];
-            let points: GeoJSON.Feature<GeoJSON.Point>[] = [];
+            const points: GeoJSON.Feature<GeoJSON.Point>[] = [];
             this.visibleTraceName = visibleTrace.name;
-            for (let route of visibleTrace.dataContainer.routes) {
-                for (let segment of route.segments) {
+            for (const route of visibleTrace.dataContainer.routes) {
+                for (const segment of route.segments) {
                     traceCoordinates = traceCoordinates.concat(segment.latlngs.map(l => SpatialService.toCoordinate(l)));
                 }
-                for (let marker of route.markers) {
+                for (const marker of route.markers) {
                     points.push({
                         type: "Feature",
                         properties: {
@@ -132,10 +132,10 @@ export class TracesComponent extends BaseMapComponent {
     }
 
     public async convertToRoute() {
-        let traceId = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).visibleTraceId;
-        let trace = await this.tracesService.getTraceById(traceId);
-        for (let route of trace.dataContainer.routes) {
-            let routeToAdd = this.routesFactory.createRouteData(route.name);
+        const traceId = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).visibleTraceId;
+        const trace = await this.tracesService.getTraceById(traceId);
+        for (const route of trace.dataContainer.routes) {
+            const routeToAdd = this.routesFactory.createRouteData(route.name);
             routeToAdd.segments = route.segments;
             routeToAdd.markers = route.markers;
             this.store.dispatch(new AddRouteAction(routeToAdd));

@@ -18,8 +18,8 @@ export class OverpassTurboService {
     }
 
     private async getGeoJson(url: string): Promise<GeoJSON.FeatureCollection> {
-        let body = decodeURIComponent(url);
-        let text = await firstValueFrom(this.httpClient
+        const body = decodeURIComponent(url);
+        const text = await firstValueFrom(this.httpClient
             .post("https://overpass-api.de/api/interpreter", body, {responseType: "text"})
         ) as string;
         const parser = new DOMParser();

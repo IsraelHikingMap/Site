@@ -8,17 +8,17 @@ import type { RoutingType, RouteEditingState } from "../models/models";
 export class SetSelectedRouteAction {
     public static type = this.prototype.constructor.name;
     constructor(public routeId: string) {}
-};
+}
 
 export class SetRoutingTypeAction {
     public static type = this.prototype.constructor.name;
     constructor(public routingType: RoutingType) {}
-};
+}
 
 export class SetOpacityAndWeightAction {
     public static type = this.prototype.constructor.name;
     constructor(public opacity: number, public weight: number) {}
-};
+}
 
 @State<RouteEditingState>({
     name: "routeEditingState",

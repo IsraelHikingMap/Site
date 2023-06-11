@@ -8,15 +8,10 @@
       "files": [
         "*.ts"
       ],
-      "parserOptions": {
-        "project": [
-          "tsconfig.json"
-        ],
-        "createDefaultProgram": true
-      },
       "extends": [
-        "plugin:@angular-eslint/ng-cli-compat",
-        "plugin:@angular-eslint/ng-cli-compat--formatting-add-on",
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@angular-eslint/recommended",
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
@@ -24,36 +19,25 @@
           "error",
           {
             "type": "element",
-            "prefix": "kebab-case"
+            "style": "kebab-case"
           }
         ],
         "@angular-eslint/directive-selector": [
           "error",
           {
             "type": "attribute",
-            "prefix": "camelCase"
+            "style": "camelCase"
           }
         ],
-        "@typescript-eslint/explicit-member-accessibility": [
-          "off",
-          {
-            "accessibility": "explicit"
-          }
-        ],
-        "arrow-parens": [
-          "off",
-          "always"
-        ],
-        "import/order": "off",
-        "no-multiple-empty-lines": "error",
-        "prefer-const": "off",
-        "quotes": "off",
-        "@typescript-eslint/quotes": [
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-empty-function": "off",
+        "@typescript-eslint/no-unused-vars": [
           "error",
-          "double"
-        ],
-        "@typescript-eslint/member-ordering": ["error", { "default": ["signature", "field", "constructor", "static-method", "method"] }],
-        "@typescript-eslint/naming-convention": "off"
+          { 
+            "argsIgnorePattern": "^_"
+          }
+        ]
+        
       }
     },
     {

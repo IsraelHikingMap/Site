@@ -79,7 +79,7 @@ export class LocationComponent extends BaseMapComponent {
             }
             if (this.isFollowingLocation()) {
                 this.moveMapToGpsPosition();
-                let selectedRoute = this.selectedRouteService.getSelectedRoute();
+                const selectedRoute = this.selectedRouteService.getSelectedRoute();
                 if (selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
                     this.toastService.warning(this.resources.editingRouteWhileTracking);
                 }
@@ -111,8 +111,8 @@ export class LocationComponent extends BaseMapComponent {
                     return;
                 }
                 this.lastSpeed = null;
-                let center = this.getCenterFromLocationFeatureCollection();
-                let radius = this.getRadiusFromLocationFeatureCollection();
+                const center = this.getCenterFromLocationFeatureCollection();
+                const radius = this.getRadiusFromLocationFeatureCollection();
                 this.updateLocationFeatureCollection(center, radius, bearing);
                 if (!this.mapComponent.mapInstance.isMoving() && this.isFollowingLocation()) {
                     this.moveMapToGpsPosition();
@@ -136,7 +136,7 @@ export class LocationComponent extends BaseMapComponent {
             this.locationLatLng = null;
             return;
         }
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute != null && selectedRoute.state === "Route") {
             return;
         }
@@ -238,7 +238,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public toggleAddRecordingPoi() {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
             this.store.dispatch(new ChangeRouteStateAction(selectedRoute.id, "ReadOnly"));
         }
@@ -249,12 +249,12 @@ export class LocationComponent extends BaseMapComponent {
         if (this.locationFeatures.features.length === 0) {
             this.store.dispatch(new SetFollowingAction(true));
         }
-        let validHeading = !isNaN(position.coords.heading) && position.coords.speed !== 0;
+        const validHeading = !isNaN(position.coords.heading) && position.coords.speed !== 0;
         if (validHeading) {
             this.lastSpeed = position.coords.speed;
             this.lastSpeedTime = new Date().getTime();
         }
-        let heading = validHeading ? position.coords.heading : this.getBrearingFromLocationFeatureCollection();
+        const heading = validHeading ? position.coords.heading : this.getBrearingFromLocationFeatureCollection();
         this.updateLocationFeatureCollection({
             lat: position.coords.latitude,
             lng: position.coords.longitude,
@@ -282,28 +282,28 @@ export class LocationComponent extends BaseMapComponent {
         if (this.locationFeatures.features.length === 0) {
             return;
         }
-        let center = this.getCenterFromLocationFeatureCollection();
-        let bearing = this.isKeepNorthUp
+        const center = this.getCenterFromLocationFeatureCollection();
+        const bearing = this.isKeepNorthUp
             ? 0
             : this.getBrearingFromLocationFeatureCollection();
         this.fitBoundsService.moveTo(center, this.mapComponent.mapInstance.getZoom(), bearing);
     }
 
     private getCenterFromLocationFeatureCollection(): LatLngAlt {
-        let pointGeometry = this.locationFeatures.features.map(f => f.geometry).find(g => g.type === "Point") as GeoJSON.Point;
-        let coordinates = pointGeometry.coordinates as [number, number];
+        const pointGeometry = this.locationFeatures.features.map(f => f.geometry).find(g => g.type === "Point") as GeoJSON.Point;
+        const coordinates = pointGeometry.coordinates as [number, number];
         return SpatialService.toLatLng(coordinates);
     }
 
     private getBrearingFromLocationFeatureCollection(): number {
-        let pointFeature = this.locationFeatures.features.find(f => f.geometry.type === "Point");
+        const pointFeature = this.locationFeatures.features.find(f => f.geometry.type === "Point");
         return pointFeature == null
             ? this.mapComponent.mapInstance.getBearing()
             : pointFeature.properties.heading;
     }
 
     private getRadiusFromLocationFeatureCollection(): number {
-        let radiusFeature = this.locationFeatures.features.find(f => f.geometry.type === "Polygon");
+        const radiusFeature = this.locationFeatures.features.find(f => f.geometry.type === "Polygon");
         if (radiusFeature == null) {
             return null;
         }
@@ -319,7 +319,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     private updateLocationFeatureCollection(center: LatLngAlt, radius: number, heading: number) {
-        let features: GeoJSON.Feature<GeoJSON.Geometry>[] = [{
+        const features: GeoJSON.Feature<GeoJSON.Geometry>[] = [{
             type: "Feature",
             properties: { heading },
             geometry: {
@@ -350,9 +350,9 @@ export class LocationComponent extends BaseMapComponent {
             return;
         }
 
-        let center = this.mapComponent.mapInstance.getCenter();
-        let gps = this.getCenterFromLocationFeatureCollection();
-        let distance = SpatialService.getDistanceInMeters(center, gps);
+        const center = this.mapComponent.mapInstance.getCenter();
+        const gps = this.getCenterFromLocationFeatureCollection();
+        const distance = SpatialService.getDistanceInMeters(center, gps);
         this.distanceFeatures = {
             type: "FeatureCollection",
             features: [{

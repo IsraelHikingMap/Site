@@ -1,8 +1,8 @@
 diff --git a/node_modules/@capacitor/camera/android/src/main/java/com/capacitorjs/plugins/camera/CameraPlugin.java b/node_modules/@capacitor/camera/android/src/main/java/com/capacitorjs/plugins/camera/CameraPlugin.java
-index 7e2869d..a8ab635 100644
+index 2fd96d8..efe56f0 100644
 --- a/node_modules/@capacitor/camera/android/src/main/java/com/capacitorjs/plugins/camera/CameraPlugin.java
 +++ b/node_modules/@capacitor/camera/android/src/main/java/com/capacitorjs/plugins/camera/CameraPlugin.java
-@@ -285,7 +285,7 @@ public class CameraPlugin extends Plugin {
+@@ -321,7 +321,7 @@ public class CameraPlugin extends Plugin {
  
      private void openPhotos(final PluginCall call, boolean multiple, boolean skipPermission) {
          if (skipPermission || checkPhotosPermissions(call)) {

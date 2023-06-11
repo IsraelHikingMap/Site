@@ -12,12 +12,12 @@ export class CancelableTimeoutService {
         if (!this.idsByGroup.has(type)) {
             this.idsByGroup.set(type, []);
         }
-        let id = setTimeout(action, timeout);
+        const id = setTimeout(action, timeout);
         this.idsByGroup.get(type).push(id as any);
     }
 
     public clearTimeoutByGroup(type: string) {
-        for (let id of this.idsByGroup.get(type) || []) {
+        for (const id of this.idsByGroup.get(type) || []) {
             clearTimeout(id);
         }
     }

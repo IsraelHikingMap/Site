@@ -14,8 +14,8 @@ import type { Trace } from "../models/models";
 
 describe("Traces Service", () => {
     beforeEach(() => {
-        let mock = new ToastServiceMockCreator();
-        let loggignMock = {
+        const mock = new ToastServiceMockCreator();
+        const loggignMock = {
             info: () => { }
         };
         TestBed.configureTestingModule({
@@ -37,9 +37,9 @@ describe("Traces Service", () => {
     it("Should get missing parts", inject([TracesService, HttpTestingController],
         async (tracesService: TracesService, mockBackend: HttpTestingController) => {
 
-            let trace = { id: "123" } as Trace;
+            const trace = { id: "123" } as Trace;
 
-            let promise = tracesService.getMissingParts(trace.id).then((res) => {
+            const promise = tracesService.getMissingParts(trace.id).then((res) => {
                 expect(res).not.toBeNull();
             });
 

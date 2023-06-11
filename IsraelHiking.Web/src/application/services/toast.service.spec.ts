@@ -9,9 +9,9 @@ export class ToastServiceMockCreator {
     public toastService: ToastService;
     public resourcesService: ResourcesService;
     constructor() {
-        let snackBar = { open: () => null as any } as any as MatSnackBar;
-        let matDialog = { open: () => null as any } as any as MatDialog;
-        let loggingService = { error: () => { }, info: () => { } } as any as LoggingService;
+        const snackBar = { open: () => null as any } as any as MatSnackBar;
+        const matDialog = { open: () => null as any } as any as MatDialog;
+        const loggingService = { error: () => { }, info: () => { } } as any as LoggingService;
         this.resourcesService = new ResourcesService(new GetTextCatalogMockCreator().getTextCatalogService,
             { selectSnapshot: () => ({ language: {code: "he" } as any}) } as any);
         this.toastService = new ToastService(this.resourcesService, matDialog, snackBar, loggingService);
@@ -20,7 +20,7 @@ export class ToastServiceMockCreator {
 
 describe("ToastService", () => {
     it("should raise toast", () => {
-        let service = new ToastServiceMockCreator().toastService;
+        const service = new ToastServiceMockCreator().toastService;
 
         expect(() => service.error(new Error(""), "")).not.toThrow();
         expect(() => service.warning("")).not.toThrow();

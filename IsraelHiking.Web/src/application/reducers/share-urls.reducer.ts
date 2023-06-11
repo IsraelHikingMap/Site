@@ -45,7 +45,7 @@ export class ShareUrlsReducer {
     @Action(UpdateShareUrlAction)
     public updateShareUrl(ctx: StateContext<ShareUrlsState>, action: UpdateShareUrlAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
-            let shareUrlIndex = lastState.shareUrls.findIndex(s => s.id === action.shareUrl.id);
+            const shareUrlIndex = lastState.shareUrls.findIndex(s => s.id === action.shareUrl.id);
             lastState.shareUrls.splice(shareUrlIndex, 1, action.shareUrl);
             return lastState;
         }));

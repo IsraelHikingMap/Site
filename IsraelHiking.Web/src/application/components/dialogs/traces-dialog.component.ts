@@ -87,7 +87,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public async addTraceToRoutes() {
-        let trace = await this.tracesService.getTraceById(this.selectedTraceId);
+        const trace = await this.tracesService.getTraceById(this.selectedTraceId);
         this.dataContainerService.setData(trace.dataContainer, true);
     }
 
@@ -105,7 +105,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         if (this.traceInEditMode?.id === this.selectedTraceId) {
             this.traceInEditMode = null;
         }
-        let message = `${this.resources.deletionOf} ${this.getTraceDisplayName(this.getSelectedTrace())}, ${this.resources.areYouSure}`;
+        const message = `${this.resources.deletionOf} ${this.getTraceDisplayName(this.getSelectedTrace())}, ${this.resources.areYouSure}`;
         this.toastService.confirm({
             message,
             type: "YesNo",
@@ -116,21 +116,21 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public editInOsm() {
-        let baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
+        const baseLayerAddress = this.layersService.getSelectedBaseLayerAddressForOSM();
         window.open(this.authorizationService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTraceId));
     }
 
     public async findUnmappedRoutes(): Promise<void> {
         try {
-            let geoJson = await this.tracesService.getMissingParts(this.selectedTraceId);
+            const geoJson = await this.tracesService.getMissingParts(this.selectedTraceId);
             if (geoJson.features.length === 0) {
                 this.toastService.confirm({ message: this.resources.noUnmappedRoutes, type: "Ok" });
                 return;
             }
-            let trace = await this.tracesService.getTraceById(this.selectedTraceId);
+            const trace = await this.tracesService.getTraceById(this.selectedTraceId);
             this.store.dispatch(new SetVisibleTraceAction(trace.id));
             this.store.dispatch(new SetMissingPartsAction(geoJson));
-            let bounds = SpatialService.getBoundsForFeatureCollection(geoJson);
+            const bounds = SpatialService.getBoundsForFeatureCollection(geoJson);
             this.fitBoundsService.fitBounds(bounds);
             this.matDialogRef.close();
         } catch (ex) {
@@ -139,7 +139,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public async uploadToOsm(e: any) {
-        let file = this.fileService.getFileFromEvent(e);
+        const file = this.fileService.getFileFromEvent(e);
         if (!file) {
             return;
         }
@@ -167,7 +167,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         if (!searchTerm) {
             return true;
         }
-        let lowerSearchTerm = searchTerm.toLowerCase();
+        const lowerSearchTerm = searchTerm.toLowerCase();
         if ((trace.description || "").toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
@@ -222,8 +222,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public async uploadRecordingToOsm() {
-        let trace = this.getSelectedTrace();
-        let route = trace.dataContainer.routes[0];
+        const trace = this.getSelectedTrace();
+        const route = trace.dataContainer.routes[0];
         this.selectedTraceId = null;
         try {
             await this.tracesService.uploadRouteAsTrace(route);

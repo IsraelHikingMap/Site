@@ -55,8 +55,8 @@ export class ShareUrlsService {
                 nakeb: ""
             };
         }
-        let ihm = this.hashService.getFullUrlFromShareId(shareUrl.id);
-        let escaped = encodeURIComponent(ihm);
+        const ihm = this.hashService.getFullUrlFromShareId(shareUrl.id);
+        const escaped = encodeURIComponent(ihm);
         return {
             ihm,
             facebook: `${Urls.facebook}${escaped}`,
@@ -67,13 +67,13 @@ export class ShareUrlsService {
 
     private async getShareFromServerAndCacheIt(shareUrlId: string): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Getting share by id ${shareUrlId}`);
-        let shareUrl = await firstValueFrom(this.httpClient.get(Urls.urls + shareUrlId).pipe(timeout(60000)));
+        const shareUrl = await firstValueFrom(this.httpClient.get(Urls.urls + shareUrlId).pipe(timeout(60000)));
         this.databaseService.storeShareUrl(shareUrl as ShareUrl);
         return shareUrl as ShareUrl;
     }
 
     public async getShareUrl(shareUrlId: string): Promise<ShareUrl> {
-        let shareUrl = await this.databaseService.getShareUrlById(shareUrlId);
+        const shareUrl = await this.databaseService.getShareUrlById(shareUrlId);
         if (shareUrl == null) {
             return await this.getShareFromServerAndCacheIt(shareUrlId);
         }
@@ -95,16 +95,16 @@ export class ShareUrlsService {
         }
         this.syncying = true;
         try {
-            let sharesLastSuccessfullSync = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).shareUrlsLastModifiedDate;
-            let operationStartTimeStamp = new Date();
+            const sharesLastSuccessfullSync = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).shareUrlsLastModifiedDate;
+            const operationStartTimeStamp = new Date();
             let sharesToGetFromServer = [] as ShareUrl[];
             this.loggingService.info("[Shares] Starting shares sync, last modified:" +
                 (sharesLastSuccessfullSync || new Date(0)).toUTCString());
-            let shareUrls$ = this.httpClient.get(Urls.urls).pipe(timeout(20000));
-            let shareUrls = await firstValueFrom(shareUrls$) as ShareUrl[];
+            const shareUrls$ = this.httpClient.get(Urls.urls).pipe(timeout(20000));
+            const shareUrls = await firstValueFrom(shareUrls$) as ShareUrl[];
             this.loggingService.info("[Shares] Got the list of shares, statring to compare against exiting list");
-            let exitingShareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls;
-            for (let shareUrl of shareUrls) {
+            const exitingShareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls;
+            for (const shareUrl of shareUrls) {
                 shareUrl.lastModifiedDate = new Date(shareUrl.lastModifiedDate);
                 if (exitingShareUrls.find(s => s.id === shareUrl.id) != null) {
                     this.store.dispatch(new UpdateShareUrlAction(shareUrl));
@@ -115,14 +115,14 @@ export class ShareUrlsService {
                     sharesToGetFromServer.push(shareUrl);
                 }
             }
-            for (let shareUrl of exitingShareUrls) {
+            for (const shareUrl of exitingShareUrls) {
                 if (shareUrls.find(s => s.id === shareUrl.id) == null) {
                     this.store.dispatch(new RemoveShareUrlAction(shareUrl.id));
                     await this.databaseService.deleteShareUrlById(shareUrl.id);
                 }
             }
             sharesToGetFromServer = orderBy(sharesToGetFromServer, s => s.lastModifiedDate, "asc");
-            for (let shareToGet of sharesToGetFromServer) {
+            for (const shareToGet of sharesToGetFromServer) {
                 await this.getShareFromServerAndCacheIt(shareToGet.id);
                 this.store.dispatch(new SetShareUrlsLastModifiedDateAction(shareToGet.lastModifiedDate));
             }
@@ -137,7 +137,7 @@ export class ShareUrlsService {
 
     public async createShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Creating share with title: ${shareUrl.title}`);
-        let createdShareUrl = await firstValueFrom(this.httpClient.post(Urls.urls, shareUrl)) as ShareUrl;
+        const createdShareUrl = await firstValueFrom(this.httpClient.post(Urls.urls, shareUrl)) as ShareUrl;
         createdShareUrl.lastModifiedDate = new Date(createdShareUrl.lastModifiedDate);
         this.store.dispatch(new AddShareUrlAction(createdShareUrl));
         return createdShareUrl;
@@ -145,7 +145,7 @@ export class ShareUrlsService {
 
     public async updateShareUrl(shareUrl: ShareUrl): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Updating share with id: ${shareUrl.id}`);
-        let updatedShareUrl = await firstValueFrom(this.httpClient.put(Urls.urls + shareUrl.id, shareUrl)) as ShareUrl;
+        const updatedShareUrl = await firstValueFrom(this.httpClient.put(Urls.urls + shareUrl.id, shareUrl)) as ShareUrl;
         updatedShareUrl.lastModifiedDate = new Date(updatedShareUrl.lastModifiedDate);
         this.store.dispatch(new UpdateShareUrlAction(updatedShareUrl));
         return updatedShareUrl;
@@ -167,7 +167,7 @@ export class ShareUrlsService {
     }
 
     public async getImagePreview(dataContainer: DataContainer) {
-        let image = await firstValueFrom(this.httpClient.post(Urls.images, dataContainer, { responseType: "blob" }));
+        const image = await firstValueFrom(this.httpClient.post(Urls.images, dataContainer, { responseType: "blob" }));
         return window.URL.createObjectURL(image);
     }
 
@@ -176,7 +176,7 @@ export class ShareUrlsService {
     }
 
     public async setShareUrlById(shareId: string): Promise<ShareUrl> {
-        let shareUrl = await this.getShareUrl(shareId);
+        const shareUrl = await this.getShareUrl(shareId);
         this.setShareUrl(shareUrl);
         return shareUrl;
     }

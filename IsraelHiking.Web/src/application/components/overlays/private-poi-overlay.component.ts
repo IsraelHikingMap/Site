@@ -48,7 +48,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
             return;
         }
 
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
             return;
         }

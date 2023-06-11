@@ -64,27 +64,27 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public clearRoute() {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.store.dispatch(new ReplaceSegmentsAction(selectedRoute.id, []));
     }
 
     public clearPois() {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.store.dispatch(new ClearPoisAction(selectedRoute.id));
     }
 
     public clearBoth() {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.store.dispatch(new ClearPoisAndRouteAction(selectedRoute.id));
     }
 
     public isPoiEditActive() {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute && selectedRoute.state === "Poi";
     }
 
     public isRouteEditActive() {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && selectedRoute.state === "Route";
     }
 
@@ -93,7 +93,7 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public toggleEditRoute() {
-        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         switch (selectedRoute.state) {
             case "Route":
                 this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
@@ -105,7 +105,7 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public toggleEditPoi() {
-        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         switch (selectedRoute.state) {
             case "Poi":
                 this.selectedRouteService.changeRouteEditState(selectedRoute.id, "ReadOnly");
@@ -143,7 +143,7 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public getRouteColor(): string {
-        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        const selectedRoute = this.selectedRouteService.getSelectedRoute();
         if (selectedRoute == null) {
             return "black";
         }
