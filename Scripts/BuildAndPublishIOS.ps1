@@ -4,7 +4,7 @@ $env:LC_ALL="en_US.UTF-8"
 
 
 Write-Host "Installing cocoapods"
-brew install cocoapods
+brew install cocoapods > /dev/null
 pod --version
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)/IsraelHiking.Web"
