@@ -1,7 +1,5 @@
 @use "@angular/material" as mat;
 
-$app-primary: mat.define-palette(mat.$green-palette, 600);
-
 .high-button {
     height: 44px;
 }
@@ -62,5 +60,5 @@ $app-primary: mat.define-palette(mat.$green-palette, 600);
 }
 
 .primary-text {
-    color: mat.get-color-from-palette($app-primary)
+    color: #32CD6D
 }

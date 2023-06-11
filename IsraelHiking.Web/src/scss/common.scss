@@ -26,7 +26,7 @@ $app-background: map-get($app-theme, background);
 
 .mat-mdc-snack-bar-container {
     &.success-snackbar {
-        --mdc-snackbar-container-color: #{mat.get-color-from-palette($app-primary)};
+        --mdc-snackbar-container-color: #32CD6D;
     }
     &.warn-snackbar {
         --mdc-snackbar-container-color: #{mat.get-color-from-palette($app-accent)};
@@ -114,7 +114,7 @@ body {
 }
 
 .active {
-    outline: 2px solid mat.get-color-from-palette($app-primary) !important;
+    outline: 2px solid #32CD6D !important;
 }
 // photoswipe, used for placing overlay at the right z-index
 overlay.overlay-shown {
@@ -223,16 +223,16 @@ overlay.overlay-shown {
 
 /* Progressbar override */
 .ng-bar {
-    background-color: mat.get-color-from-palette($app-primary) !important;
+    background-color: #32CD6D !important;
 }
 
 .ng-spinner-icon {
-    border-top-color: mat.get-color-from-palette($app-primary) !important;
-    border-left-color: mat.get-color-from-palette($app-primary) !important;
+    border-top-color: #32CD6D !important;
+    border-left-color: #32CD6D !important;
 }
 
 .ng-meteor {
-    box-shadow: 0 0 10px mat.get-color-from-palette($app-primary), 0 0 5px mat.get-color-from-palette($app-primary) !important
+    box-shadow: 0 0 10px #32CD6D, 0 0 5px #32CD6D !important
 }
 /* Progressbar override */
 
