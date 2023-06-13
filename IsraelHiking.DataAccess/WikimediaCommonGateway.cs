@@ -103,11 +103,11 @@ namespace IsraelHiking.DataAccess
                    $"|description={description}" + Environment.NewLine +
                    "|source={{own}}" + Environment.NewLine +
                    $"|author=[//www.openstreetmap.org/user/{Uri.EscapeDataString(author)} {author}]" + Environment.NewLine +
-                   "|permission=" + Environment.NewLine +
+                   "|permission=public domain" + Environment.NewLine +
                    "|other versions=" + Environment.NewLine +
                    "}}" + Environment.NewLine + Environment.NewLine +
                    "=={{int:license-header}}==" + Environment.NewLine +
-                   "{{self|cc-by-sa-4.0}}" + Environment.NewLine + Environment.NewLine +
+                   "{{PD-self}}" + Environment.NewLine + Environment.NewLine +
                    $"{{{{Location|1={location.Y}|2={location.X}}}}}" + Environment.NewLine + Environment.NewLine +
                    "[[Category:Israel Hiking Map]]";
         }
