@@ -131,8 +131,10 @@ export class TracesService {
     }
 
     public async updateTrace(trace: Trace): Promise<void> {
-        this.loggingService.info(`[Traces] Updating a trace with id ${trace.id}`);
-        await firstValueFrom(this.httpClient.put(Urls.osmTrace + trace.id, trace));
+        this.loggingService.info(`[Traces] Updating a trace with id ${trace.id}, visibility: ${trace.visibility}`);
+        if (trace.visibility !== "local") {
+            await firstValueFrom(this.httpClient.put(Urls.osmTrace + trace.id, trace));
+        }
         this.store.dispatch(new UpdateTraceAction(trace));
     }
 
