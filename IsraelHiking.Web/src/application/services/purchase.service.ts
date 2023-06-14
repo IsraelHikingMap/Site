@@ -34,7 +34,6 @@ export class PurchaseService {
             }
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
             this.initializeCdvStore(userInfo.id);
-            // HM TODO: remove this once we make sure the unverified is working as expected.
             this.offlineFilesDownloadService.isExpired().then((isExpired) => {
                 if (isExpired) {
                     this.loggingService.debug("[Store] Product is expired from server");
@@ -80,7 +79,7 @@ export class PurchaseService {
             }
             receipt.finish();
         });
-        CdvPurchase.store.verbosity = CdvPurchase.LogLevel.DEBUG;
+        CdvPurchase.store.verbosity = CdvPurchase.LogLevel.WARNING;
         await CdvPurchase.store.initialize();
     }
 
