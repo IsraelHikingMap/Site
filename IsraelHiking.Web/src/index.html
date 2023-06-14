@@ -140,7 +140,7 @@
             if (!!window.WebGLRenderingContext) {
                 var canvas = document.createElement("canvas");
                 try {
-                    var context = canvas.getContext("webgl2");
+                    var context = canvas.getContext("webgl2") || canvas.getContext("webgl");
                     if (context && typeof context.getParameter == "function") {
                         return true;
                     }
@@ -152,7 +152,7 @@
             return false;
         }
         if (!isWebglSupported()) {
-            alert("נראה שיש בעיה... אנא נסו לעדכן את גרסת הכרום ו/או גרסת Android System Webview");
+            alert("נראה שיש בעיה... אנא נסו לעדכן את גרסת הכרום ו/או גרסת Android System Webview, למידע נוסף בקרו ב- https://get.webgl.org/webgl2/");
         }
     </script>
     <div class="preloader">
