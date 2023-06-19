@@ -175,8 +175,8 @@ namespace IsraelHiking.API.Executors
             var closestHighway = closestHighways.First();
             var closestNodeCoordinate = closestHighway.Geometry.Coordinates.OrderBy(n => n.Distance(coordinate)).FirstOrDefault();
             var closetNodeIndex = Array.FindIndex(closestHighway.Geometry.Coordinates.ToArray(), n => n.Equals(closestNodeCoordinate));
-            var nodeId = long.Parse(((List<object>)closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[closetNodeIndex].ToString() ?? string.Empty);
-            var isJunction = closestHighways.Skip(1).Any(f => ((List<object>)f.Attributes[FeatureAttributes.POI_OSM_NODES]).Any(nId => nId.ToString() == nodeId.ToString()));
+            var nodeId = long.Parse(((IEnumerable<object>)closestHighway.Attributes[FeatureAttributes.POI_OSM_NODES]).ElementAt(closetNodeIndex).ToString() ?? string.Empty);
+            var isJunction = closestHighways.Skip(1).Any(f => ((IEnumerable<object>)f.Attributes[FeatureAttributes.POI_OSM_NODES]).Any(nId => nId.ToString() == nodeId.ToString()));
             return (closestNodeCoordinate, closetNodeIndex, nodeId, isJunction);
         }
 

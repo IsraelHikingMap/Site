@@ -374,7 +374,7 @@ namespace IsraelHiking.API.Services.Osm
 
         private Node CreateNodeFromExistingHighway(IFeature closetHighway, int indexOnWay)
         {
-            var closestNodeId = long.Parse(((List<object>)closetHighway.Attributes[FeatureAttributes.POI_OSM_NODES])[indexOnWay].ToString());
+            var closestNodeId = long.Parse(((IEnumerable<object>)closetHighway.Attributes[FeatureAttributes.POI_OSM_NODES]).ElementAt(indexOnWay).ToString());
             return new Node
             {
                 Id = closestNodeId,
