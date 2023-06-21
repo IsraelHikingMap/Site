@@ -69,6 +69,10 @@ namespace IsraelHiking.DataAccess
                 try
                 {
                     await imagePage.RefreshAsync(PageQueryOptions.None).ConfigureAwait(false);
+                    if (imagePage.LastFileRevision == null)
+                    {
+                        break;
+                    }
                 }
                 catch
                 {
@@ -195,14 +199,14 @@ namespace IsraelHiking.DataAccess
 
         public async Task<List<IFeature>> GetUpdates(DateTime lastUpdated)
         {
-            var recentChangesGEnerator = new RecentChangesGenerator(_wikiSite)
+            var recentChangesGenerator = new RecentChangesGenerator(_wikiSite)
             {
                 StartTime = DateTime.Now,
                 EndTime = lastUpdated,
                 LastRevisionsOnly = true,
                 TypeFilters = RecentChangesFilterTypes.Create | RecentChangesFilterTypes.Edit
             };
-            var titles = await recentChangesGEnerator.EnumItemsAsync().ToListAsync().ConfigureAwait(false);
+            var titles = await recentChangesGenerator.EnumItemsAsync().ToListAsync().ConfigureAwait(false);
             _logger.LogInformation($"Got {titles.Count} updated pages from iNature, fetching their content and images");
             return await GetFeaturesFromTitles(titles.Select(i => i.Title).ToArray());
         }
