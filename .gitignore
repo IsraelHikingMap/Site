@@ -192,8 +192,6 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 /.vs/config
-*.sqlite
-*.sqlite-*
 *.DS_Store
 /IsraelHiking.Web/wwwroot/**/*.*
 /IsraelHiking.Web/src/translations/*.po
@@ -201,9 +199,8 @@ ModelManifest.xml
 /IsraelHiking.Web/coverage
 /IsraelHiking.Web/TESTS-*
 /IsraelHiking.Web/www
-/IsraelHiking.Web/platforms
-/IsraelHiking.Web/plugins
 /IsraelHiking.Web/ul_web_hooks/android
 /IsraelHiking.Web/.angular/
+/IsraelHiking.Web/Cache
 *.swp
 elevation-cache
