@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Controllers
     public class RoutingController : ControllerBase
     {
         private readonly IGraphHopperGateway _graphHopperGateway;
-        private readonly IElevationGateway _elevationGateway;
+        private readonly IElevationSetterExecutor _elevationSetterExecutor;
         private readonly GeometryFactory _geometryFactory;
         private readonly MathTransform _wgs84ItmMathTransform;
 
@@ -28,22 +28,22 @@ namespace IsraelHiking.API.Controllers
         /// Controller's constructor
         /// </summary>
         /// <param name="graphHopperGateway"></param>
-        /// <param name="elevationGateway"></param>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="elevationSetterExecutor"></param>
+        /// <param name="itmWgs84MathTransformFactory"></param>
         /// <param name="geometryFactory"></param>
         public RoutingController(IGraphHopperGateway graphHopperGateway,
-            IElevationGateway elevationGateway,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            IElevationSetterExecutor elevationSetterExecutor,
+            IItmWgs84MathTransformFactory itmWgs84MathTransformFactory,
             GeometryFactory geometryFactory)
         {
             _graphHopperGateway = graphHopperGateway;
-            _elevationGateway = elevationGateway;
+            _elevationSetterExecutor = elevationSetterExecutor;
             _geometryFactory = geometryFactory;
-            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
+            _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
         }
 
         /// <summary>
-        /// Creates a route bwteeen the given points according to routing type
+        /// Creates a route between the given points according to routing type
         /// </summary>
         /// <param name="from">The start point of the route</param>
         /// <param name="to">The end point of the route</param>
@@ -54,15 +54,14 @@ namespace IsraelHiking.API.Controllers
         [ProducesResponseType(typeof(FeatureCollection), 200)]
         public async Task<IActionResult> GetRouting(string from, string to, string type)
         {
-            
             var profile = ConvertProfile(type);
-            var pointFrom = await GetGeographicPosition(from);
-            var pointTo = await GetGeographicPosition(to);
+            var pointFrom = GetGeographicPosition(from);
+            var pointTo = GetGeographicPosition(to);
             if (ModelState.IsValid == false)
             {
                 return BadRequest(ModelState);
             }
-            Feature feature = profile == ProfileType.None 
+            var feature = profile == ProfileType.None 
                 ? GetDenseStraightLine(pointFrom, pointTo)
                 : await _graphHopperGateway.GetRouting(new RoutingGatewayRequest
                 {
@@ -70,7 +69,6 @@ namespace IsraelHiking.API.Controllers
                     To = pointTo,
                     Profile = profile,
                 });
-            ElevationSetterHelper.SetMissingElevation(feature.Geometry, _elevationGateway);
             feature.Attributes.AddOrUpdate("Name", $"Routing from {@from} to {to} profile type: {profile}");
             feature.Attributes.AddOrUpdate("Creator", "IsraelHikingMap");
             return Ok(new FeatureCollection{ feature });
@@ -88,23 +86,22 @@ namespace IsraelHiking.API.Controllers
             };
         }
 
-        private async Task<Coordinate> GetGeographicPosition(string position)
+        private Coordinate GetGeographicPosition(string position)
         {
-            var splitted = position.Split(',');
-            if (splitted.Length != 2)
+            var split = position.Split(',');
+            if (split.Length != 2)
             {
                 ModelState.AddModelError("Position", $"Invalid position: {position} format should be number,number");
                 return null;
             }
-            var lat = double.Parse(splitted.First());
-            var lng = double.Parse(splitted.Last());
-            var elevation = await _elevationGateway.GetElevation(position.ToCoordinate());
-            return new CoordinateZ(lng, lat, elevation);
+            var lat = double.Parse(split.First());
+            var lng = double.Parse(split.Last());
+            return new CoordinateZ(lng, lat);
         }
 
         /// <summary>
         /// Getting a straight line between two points.
-        /// Since the elevation resultion is 30 meters there's no need to sample distances that are
+        /// Since the elevation resolution is 30 meters there's no need to sample distances that are
         /// less than 30 meters. Maximal total points is 30 to limit the response size.
         /// </summary>
         /// <param name="from"></param>
@@ -122,9 +119,10 @@ namespace IsraelHiking.API.Controllers
             var coordinates = Enumerable.Range(0, samples + 1).Select(s => new CoordinateZ(
                 (to.X - from.X) * s / samples + from.X,
                 (to.Y - from.Y) * s / samples + from.Y,
-                0)
-            );
-            var lineString = _geometryFactory.CreateLineString(coordinates.ToArray());
+                0) as Coordinate
+            ).ToArray();
+            Geometry lineString = _geometryFactory.CreateLineString(coordinates);
+            lineString = _elevationSetterExecutor.GeometryTo3D(lineString);
             return new Feature(lineString, new AttributesTable());
         }
     }

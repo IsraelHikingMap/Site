@@ -21,6 +21,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
+using IsraelHiking.API.Gpx;
 
 namespace IsraelHiking.API.Tests.Services.Poi
 {
@@ -44,7 +46,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _clientsFactory = Substitute.For<IClientsFactory>();
             _tagsHelper = new TagsHelper(_options);
             _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(),
-                ElevationGateway,
+                _elevationGateway,
                 new OsmGeoJsonConverter(new GeometryFactory()), _tagsHelper);
             _osmRepository = Substitute.For<IOsmRepository>();
             _latestFileGateway = Substitute.For<IOsmLatestFileGateway>();
@@ -52,7 +54,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _imagesUrlsStorageExecutor = Substitute.For<IImagesUrlsStorageExecutor>();
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
             _adapter = new PointsOfInterestProvider(_pointsOfInterestRepository,
-                ElevationGateway,
+                new ElevationSetterExecutor(_elevationGateway),
                 _osmGeoJsonPreprocessorExecutor,
                 _osmRepository,
                 _latestFileGateway,
@@ -184,6 +186,38 @@ namespace IsraelHiking.API.Tests.Services.Poi
 
             Assert.IsNotNull(result);
             Assert.AreEqual(PointsOfInterestProvider.SEARCH_ICON, result.Attributes[FeatureAttributes.POI_ICON]);
+        }
+        
+        [TestMethod]
+        public void GetFeatureById_NoElevation_ShouldAddIt()
+        {
+            var someId = "some-id";
+            var featureStr =
+                "{ " +
+                "\"type\": \"FeatureCollection\"," +
+                "\"features\": [" +
+                "   { " +
+                "       \"type\": \"Feature\", " +
+                "       \"properties\": {}, " +
+                "       \"geometry\": {" +
+                "           \"type\": \"LineString\", " +
+                "           \"coordinates\": [[0,0], [0,1]] " +
+                "       } " +
+                "   }]" +
+                "}";
+            var col = Encoding.UTF8.GetBytes(featureStr).ToFeatureCollection();
+            col.First().Attributes[FeatureAttributes.ID] = "42";
+            col.First().Attributes[FeatureAttributes.POI_SOURCE] = Sources.OSM;
+            col.First().Attributes[FeatureAttributes.POI_ICON] = null;
+
+            var feature = col.First();
+            
+            _pointsOfInterestRepository.GetPointOfInterestById(someId, Sources.OSM).Returns(feature);
+
+            var result = _adapter.GetFeatureById(Sources.OSM, someId).Result;
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Geometry.Coordinates.First().Z);
         }
 
         [TestMethod]

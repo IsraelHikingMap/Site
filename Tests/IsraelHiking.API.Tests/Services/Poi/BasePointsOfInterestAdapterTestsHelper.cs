@@ -14,17 +14,15 @@ namespace IsraelHiking.API.Tests.Services.Poi
 {
     public abstract class BasePointsOfInterestAdapterTestsHelper
     {
-        protected IElevationGateway ElevationGateway;
+        protected IElevationGateway _elevationGateway;
         protected IDataContainerConverterService _dataContainerConverterService;
-        protected IItmWgs84MathTransfromFactory _itmWgs84MathTransfromFactory;
         protected IOptions<ConfigurationData> _options;
 
         protected void InitializeSubstitutes()
         {
-            _itmWgs84MathTransfromFactory = new ItmWgs84MathTransfromFactory();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            ElevationGateway = Substitute.For<IElevationGateway>();
-            ElevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
+            _elevationGateway = Substitute.For<IElevationGateway>();
+            _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
             _options = Substitute.For<IOptions<ConfigurationData>>();
             _options.Value.Returns(new ConfigurationData());
         }

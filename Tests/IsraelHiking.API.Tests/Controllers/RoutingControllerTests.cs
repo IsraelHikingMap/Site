@@ -25,7 +25,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
             _elevationGateway = Substitute.For<IElevationGateway>();
             _elevationGateway.GetElevation(Arg.Any<Coordinate[]>()).Returns(info => Enumerable.Repeat(1.0, info.Arg<Coordinate[]>().Length).ToArray());
-            _controller = new RoutingController(_graphHopperGateway, _elevationGateway, new ItmWgs84MathTransfromFactory(), new GeometryFactory());
+            _controller = new RoutingController(_graphHopperGateway, new ElevationSetterExecutor(_elevationGateway), new ItmWgs84MathTransformFactory(), new GeometryFactory());
         }
 
         [TestMethod]

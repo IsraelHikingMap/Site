@@ -20,7 +20,7 @@ namespace IsraelHiking.API
         /// </summary>
         /// <param name="services">The <see cref="IServiceCollection"/> to use for registration</param>
         /// <returns></returns>
-        public static IServiceCollection AddIHMApi(this IServiceCollection services)
+        public static void AddIHMApi(this IServiceCollection services)
         {
             services.AddTransient<IGpxGeoJsonConverter, GpxGeoJsonConverter>();
             services.AddTransient<IGpxDataContainerConverter, GpxDataContainerConverter>();
@@ -41,6 +41,7 @@ namespace IsraelHiking.API
             services.AddTransient<IExternalSourceUpdaterExecutor, ExternalSourceUpdaterExecutor>();
             services.AddTransient<ISimplePointAdderExecutor, SimplePointAdderExecutor>();
             services.AddTransient<IUnauthorizedImageUrlsRemover, UnauthorizedImageUrlsRemover>();
+            services.AddTransient<IElevationSetterExecutor, ElevationSetterExecutor>();
 
             // registration here is what determines the order of which to merge points:
             services.AddTransient<IPointsOfInterestAdapter, NakebPointsOfInterestAdapter>();
@@ -62,7 +63,6 @@ namespace IsraelHiking.API
             services.AddTransient<IConverterFlowItem, GpxVersion1ToGpxVersion11ConverterFlow>();
             services.AddTransient<IConverterFlowItem, GpxBz2ToGpxConverterFlow>();
             services.AddTransient<IConverterFlowItem, JpgToGpxConverterFlow>();
-            return services;
         }
     }
 }

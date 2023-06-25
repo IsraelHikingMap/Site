@@ -76,7 +76,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 _pointsOfInterestProvider,
                 _externalSourceUpdaterExecutor,
                 _elevationGateway,
-                Substitute.For<IUnauthorizedImageUrlsRemover>(),
+                Substitute.For<IUnauthorizedImageUrlsRemover>(), Substitute.For<IElevationSetterExecutor>(),
                 Substitute.For<ILogger>());
         }
 

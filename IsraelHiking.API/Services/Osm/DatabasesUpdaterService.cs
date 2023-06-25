@@ -30,6 +30,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IExternalSourceUpdaterExecutor _externalSourceUpdaterExecutor;
         private readonly IElevationGateway _elevationGateway;
         private readonly IUnauthorizedImageUrlsRemover _unauthorizedImageUrlsRemover;
+        private readonly IElevationSetterExecutor _elevationSetterExecutor;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -49,6 +50,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="externalSourceUpdaterExecutor"></param>
         /// <param name="elevationGateway"></param>
         /// <param name="unauthorizedImageUrlsRemover"></param>
+        /// <param name="elevationSetterExecutor"></param>
         /// <param name="logger"></param>
         public DatabasesUpdaterService(IExternalSourcesRepository externalSourcesRepository,
             IPointsOfInterestRepository pointsOfInterestRepository,
@@ -64,6 +66,7 @@ namespace IsraelHiking.API.Services.Osm
             IExternalSourceUpdaterExecutor externalSourceUpdaterExecutor,
             IElevationGateway elevationGateway,
             IUnauthorizedImageUrlsRemover unauthorizedImageUrlsRemover,
+            IElevationSetterExecutor elevationSetterExecutor,
             ILogger logger)
         {
             _externalSourcesRepository = externalSourcesRepository;
@@ -80,6 +83,7 @@ namespace IsraelHiking.API.Services.Osm
             _externalSourceUpdaterExecutor = externalSourceUpdaterExecutor;
             _elevationGateway = elevationGateway;
             _unauthorizedImageUrlsRemover = unauthorizedImageUrlsRemover;
+            _elevationSetterExecutor = elevationSetterExecutor;
             _logger = logger;
         }
 
@@ -204,7 +208,7 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation($"Starting rebuilding offline pois file for date: {context.StartTime.ToInvariantString()}");
             var features = await _pointsOfInterestRepository.GetAllPointsOfInterest(false);
             features = features.Where(f => f.GetLastModified() <= context.StartTime).ToList();
-            ElevationSetterHelper.SetElevation(features, _elevationGateway);
+            _elevationSetterExecutor.GeometryTo3D(features);
             _pointsOfInterestFilesCreatorExecutor.CreateOfflinePoisFile(features);
             _logger.LogInformation("Finished rebuilding offline pois file.");
         }

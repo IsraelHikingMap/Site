@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IOsmRepository _osmRepository;
         private readonly ITagsHelper _tagsHelper;
         private readonly IOsmLatestFileGateway _latestFileGateway;
-        private readonly IElevationGateway _elevationGateway;
+        private readonly IElevationSetterExecutor _elevationSetterExecutor;
         private readonly IPointsOfInterestRepository _pointsOfInterestRepository;
         private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
@@ -51,7 +51,7 @@ namespace IsraelHiking.API.Services.Poi
         /// Class constructor
         /// </summary>
         /// <param name="pointsOfInterestRepository"></param>
-        /// <param name="elevationGateway"></param>
+        /// <param name="elevationSetterExecutor"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>
         /// <param name="latestFileGateway"></param>
@@ -62,7 +62,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="options"></param>
         /// <param name="logger"></param>
         public PointsOfInterestProvider(IPointsOfInterestRepository pointsOfInterestRepository,
-            IElevationGateway elevationGateway,
+            IElevationSetterExecutor elevationSetterExecutor,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
             IOsmLatestFileGateway latestFileGateway,
@@ -77,7 +77,7 @@ namespace IsraelHiking.API.Services.Poi
             _osmRepository = osmRepository;
             _tagsHelper = tagsHelper;
             _latestFileGateway = latestFileGateway;
-            _elevationGateway = elevationGateway;
+            _elevationSetterExecutor = elevationSetterExecutor;
             _options = options.Value;
             _pointsOfInterestRepository = pointsOfInterestRepository;
             _wikimediaCommonGateway = wikimediaCommonGateway;
@@ -277,8 +277,7 @@ namespace IsraelHiking.API.Services.Poi
                 ? throw new ArgumentException("Last modified date must be higher than 2010", nameof(lastModifiedDate))
                 : await _pointsOfInterestRepository.GetPointsOfInterestUpdates(lastModifiedDate, modifiedUntil);
             var lastModified = await _pointsOfInterestRepository.GetLastSuccessfulRebuildTime();
-            // HM TODO: think about performance here
-            ElevationSetterHelper.SetElevation(results, _elevationGateway);
+            _elevationSetterExecutor.GeometryTo3D(results);
             return new UpdatesResponse
             {
                 Features = results.ToArray(),
@@ -292,7 +291,7 @@ namespace IsraelHiking.API.Services.Poi
         {
             var feature = await _pointsOfInterestRepository.GetPointOfInterestById(id, source);
             if (feature != null) {
-                ElevationSetterHelper.SetElevation(feature.Geometry, _elevationGateway);
+                feature.Geometry = _elevationSetterExecutor.GeometryTo3D(feature.Geometry);
                 if (string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_ICON]?.ToString()))
                 {
                     feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, SEARCH_ICON);
