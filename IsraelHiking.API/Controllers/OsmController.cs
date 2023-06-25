@@ -48,7 +48,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="geometryFactory"></param>
         public OsmController(IClientsFactory clientsFactory,
             IDataContainerConverterService dataContainerConverterService,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransformFactory,
+            IItmWgs84MathTransformFactory itmWgs84MathTransformFactory,
             IAddibleGpxLinesFinderService addibleGpxLinesFinderService,
             IOsmLineAdderService osmLineAdderService,
             IOptions<ConfigurationData> options,

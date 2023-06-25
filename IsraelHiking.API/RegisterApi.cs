@@ -50,7 +50,7 @@ namespace IsraelHiking.API
             services.AddSingleton<IPointsOfInterestAdapterFactory, PointsOfInterestAdapterFactory>();
             // last one is the least important
 
-            services.AddSingleton<IItmWgs84MathTransfromFactory, ItmWgs84MathTransfromFactory>();
+            services.AddSingleton<IItmWgs84MathTransformFactory, ItmWgs84MathTransformFactory>();
             services.AddTransient<IDatabasesUpdaterService, DatabasesUpdaterService>();
             services.AddTransient<IBase64ImageStringToFileConverter, Base64ImageStringToFileConverter>();
             services.AddTransient<IConverterFlowItem, GeoJsonGpxConverterFlow>();

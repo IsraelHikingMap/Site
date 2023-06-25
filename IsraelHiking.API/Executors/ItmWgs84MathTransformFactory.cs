@@ -5,14 +5,14 @@ using System.Collections.Generic;
 namespace IsraelHiking.API.Executors
 {
     /// <inheritdoc />
-    public class ItmWgs84MathTransfromFactory : IItmWgs84MathTransfromFactory
+    public class ItmWgs84MathTransformFactory : IItmWgs84MathTransformFactory
     {
         private readonly ProjectedCoordinateSystem _itm;
 
         /// <summary>
         /// Factory's constructor
         /// </summary>
-        public ItmWgs84MathTransfromFactory()
+        public ItmWgs84MathTransformFactory()
         {
             var coordinateSystemFactory = new CoordinateSystemFactory();
             var itmParameters = new List<ProjectionParameter>

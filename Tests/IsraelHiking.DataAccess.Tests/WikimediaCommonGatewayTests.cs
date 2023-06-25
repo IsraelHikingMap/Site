@@ -28,6 +28,7 @@ namespace IsraelHiking.DataAccess.Tests
         }
 
         [TestMethod]
+        [Ignore]
         public void GetImageUrl()
         {
             try

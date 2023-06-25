@@ -14,7 +14,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetItmCoordinates_ShouldConvertToNorthEast()
         {
             var northEast = new Coordinate { Y = 656336, X = 200138 };
-            _itmGridController = new ItmGridController(new ItmWgs84MathTransfromFactory());
+            _itmGridController = new ItmGridController(new ItmWgs84MathTransformFactory());
 
             var response = _itmGridController.GetItmCoordinates(32, 35);
 

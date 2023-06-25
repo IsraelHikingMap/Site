@@ -82,7 +82,7 @@ namespace IsraelHiking.DataAccess
             };
             var fromStr = $"{request.From.Y},{request.From.X}";
             var toStr = $"{request.To.Y},{request.To.X}";
-            var requestAddress = $"{$"{_options.GraphhopperServerAddress}route?instructions=false&points_encoded=false&elevation=true&details=track_type&details=road_class&point="}{fromStr}&point={toStr}&profile={profile}";
+            var requestAddress = $"{_options.GraphhopperServerAddress}route?instructions=false&points_encoded=false&elevation=true&details=track_type&details=road_class&point={fromStr}&point={toStr}&profile={profile}";
             var response = await httpClient.GetAsync(requestAddress);
             var content = await response.Content.ReadAsStringAsync();
             var jsonResponse = JsonSerializer.Deserialize<JsonGraphHopperResponse>(content);
@@ -95,9 +95,9 @@ namespace IsraelHiking.DataAccess
             if (path.Points.Coordinates.Count == 1)
             {
                 var jsonCoordinates = path.Points.Coordinates.First();
-                var convertedCoordiates = new CoordinateZ(jsonCoordinates[0], jsonCoordinates[1], jsonCoordinates.Count > 2 ? jsonCoordinates[2] : 0.0);
+                var convertedCoordinates = new CoordinateZ(jsonCoordinates[0], jsonCoordinates[1], jsonCoordinates.Count > 2 ? jsonCoordinates[2] : 0.0);
                 _logger.LogWarning($"Problem with routing response: got only one point back from graphhopper...");
-                return LineStringToFeature(new LineString(new[] { convertedCoordiates, convertedCoordiates }));
+                return LineStringToFeature(new LineString(new[] { convertedCoordinates, convertedCoordinates }));
             }
             var lineString = new LineString(path.Points.Coordinates.Select(c => new CoordinateZ(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());
             var table = new AttributesTable { { "details", path.Details } };

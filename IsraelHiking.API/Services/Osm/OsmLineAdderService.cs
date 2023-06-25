@@ -38,7 +38,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="geoJsonPreprocessorExecutor"></param>
         /// <param name="geometryFactory"></param>
         public OsmLineAdderService(IHighwaysRepository highwaysRepository,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransformFactory,
+            IItmWgs84MathTransformFactory itmWgs84MathTransformFactory,
             IOptions<ConfigurationData> options,
             IOsmGeoJsonPreprocessorExecutor geoJsonPreprocessorExecutor,
             GeometryFactory geometryFactory)

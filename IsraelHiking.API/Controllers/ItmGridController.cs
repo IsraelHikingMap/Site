@@ -18,7 +18,7 @@ namespace IsraelHiking.API.Controllers
         /// Controller's constructor
         /// </summary>
         /// <param name="itmWgs84MathTransformFactory"></param>
-        public ItmGridController(IItmWgs84MathTransfromFactory itmWgs84MathTransformFactory)
+        public ItmGridController(IItmWgs84MathTransformFactory itmWgs84MathTransformFactory)
         {
             _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
         }

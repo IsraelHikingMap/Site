@@ -63,7 +63,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(_options);
-            _controller = new OsmController(_clientsFactory, _dataContainerConverterService, new ItmWgs84MathTransfromFactory(), 
+            _controller = new OsmController(_clientsFactory, _dataContainerConverterService, new ItmWgs84MathTransformFactory(), 
                 _addibleGpxLinesFinderService, _osmLineAdderService, optionsProvider, new GeometryFactory());
         }
 

@@ -32,14 +32,14 @@ namespace IsraelHiking.API.Services
         /// </summary>
         /// <param name="gpxLoopsSplitterExecutor"></param>
         /// <param name="gpxProlongerExecutor"></param>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="itmWgs84MathTransformFactory"></param>
         /// <param name="highwaysRepository"></param>
         /// <param name="options"></param>
         /// <param name="geometryFactory"></param>
         /// <param name="logger"></param>
         public AddibleGpxLinesFinderService(IGpxLoopsSplitterExecutor gpxLoopsSplitterExecutor,
             IGpxProlongerExecutor gpxProlongerExecutor,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            IItmWgs84MathTransformFactory itmWgs84MathTransformFactory,
             IHighwaysRepository highwaysRepository,
             IOptions<ConfigurationData> options,
             GeometryFactory geometryFactory,
@@ -47,8 +47,8 @@ namespace IsraelHiking.API.Services
         {
             _gpxLoopsSplitterExecutor = gpxLoopsSplitterExecutor;
             _gpxProlongerExecutor = gpxProlongerExecutor;
-            _itmWgs84MathTransform = itmWgs84MathTransfromFactory.Create();
-            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
+            _itmWgs84MathTransform = itmWgs84MathTransformFactory.Create();
+            _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
             _highwaysRepository = highwaysRepository;
             _geometryFactory = geometryFactory;
             _logger = logger;

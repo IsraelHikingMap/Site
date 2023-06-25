@@ -21,12 +21,12 @@ namespace IsraelHiking.API.Services
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="itmWgs84MathTransformFactory"></param>
         /// <param name="options"></param>
-        public RouteDataSplitterService(IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+        public RouteDataSplitterService(IItmWgs84MathTransformFactory itmWgs84MathTransformFactory,
             IOptions<ConfigurationData> options)
         {
-            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
+            _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
             _options = options.Value;
         }
 

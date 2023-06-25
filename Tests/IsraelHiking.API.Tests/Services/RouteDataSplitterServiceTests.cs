@@ -307,7 +307,7 @@ namespace IsraelHiking.API.Tests.Services
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
             
-            _service = new RouteDataSplitterService(new ItmWgs84MathTransfromFactory(), optionsProvider);
+            _service = new RouteDataSplitterService(new ItmWgs84MathTransformFactory(), optionsProvider);
         }
 
         [TestMethod]
