@@ -258,7 +258,6 @@ namespace IsraelHiking.API.Controllers
                 imageUrls.AddRange(currentImageUrls.ToList());
             }
             response.Images = await _imageUrlStoreExecutor.GetAllImagesForUrls(imageUrls.ToArray());
-            _logger.LogInformation($"Finished getting POIs updates for {lastModified} - {modifiedUntil}. Features: {response.Features.Length}, Images: {response.Images.Length}");
             return response;
         }
 

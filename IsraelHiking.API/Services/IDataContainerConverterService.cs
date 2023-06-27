@@ -30,5 +30,11 @@ namespace IsraelHiking.API.Services
         /// <param name="outputFileExtension">The output file format</param>
         /// <returns>Converted data</returns>
         Task<byte[]> Convert(byte[] content, string inputFileNameOrFormat, string outputFileExtension);
+        /// <summary>
+        /// Checks if the given input is a valid format
+        /// </summary>
+        /// <param name="inputFileNameOrFormat">The input file format</param>
+        /// <returns>Converted data</returns>
+        bool IsValidFormat(string inputFileNameOrFormat);
     }
 }

@@ -106,6 +106,20 @@ namespace IsraelHiking.API.Services
             return Task.FromResult(convertersList.Aggregate(content, (current, converter) => converter.Transform(current)));
         }
 
+        ///<inheritdoc />
+        public bool IsValidFormat(string inputFileNameOrFormat)
+        {
+            try
+            {
+                GetGpsBabelFormat(inputFileNameOrFormat);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// This method created a list containig the converters needed in order to get from input to output.
         /// It uses recursive calls to find them.

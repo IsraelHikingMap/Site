@@ -467,5 +467,17 @@ namespace IsraelHiking.API.Tests.Services
             var feautreCollection = _converterService.ToAnyFormat(dataContainer, FlowFormats.GEOJSON).Result;
             Assert.IsNotNull(feautreCollection);
         }
+
+        [TestMethod]
+        public void CheckIsValid_ShouldReturnFalse()
+        {
+            Assert.IsFalse(_converterService.IsValidFormat("false"));
+        }
+        
+        [TestMethod]
+        public void CheckIsValid_GPX_ShouldReturnTrue()
+        {
+            Assert.IsTrue(_converterService.IsValidFormat(FlowFormats.GPX));
+        }
     }
 }

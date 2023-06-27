@@ -88,6 +88,14 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
+        public void PostConvertFile_InvalidFileFormat_ShouldReturnBadRequest()
+        {
+            var result = _controller.PostConvertFile("42", new DataContainerPoco()).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(result);
+        }
+        
+        [TestMethod]
         public void PostConvertFile_ConvertToGpx_ShouldReturnByteArray()
         {
             var dataContainer = new DataContainerPoco
@@ -113,16 +121,26 @@ namespace IsraelHiking.API.Tests.Controllers
             };
             var expectedGpx = _gpxDataContainerConverter.ToGpx(dataContainer);
 
-            var bytes = _controller.PostConvertFile("gpx", dataContainer).Result;
+            var result = _controller.PostConvertFile("gpx", dataContainer).Result as OkObjectResult;
 
-            
-            CollectionAssert.AreEqual(expectedGpx.ToBytes(), bytes);
+            CollectionAssert.AreEqual(expectedGpx.ToBytes(), result.Value as byte[]);
         }
 
         [TestMethod]
         public void PostOpenFile_NoFile_ShouldReturnBadRequest()
         {
             var results = _controller.PostOpenFile(null).Result as BadRequestResult;
+
+            Assert.IsNotNull(results);
+        }
+        
+        [TestMethod]
+        public void PostOpenFile_FileWithBadExtension_ShouldReturnBadRequest()
+        {
+            var file = Substitute.For<IFormFile>();
+            file.FileName.Returns("someFile.nope!");
+            
+            var results = _controller.PostOpenFile(file).Result as BadRequestResult;
 
             Assert.IsNotNull(results);
         }

@@ -72,9 +72,13 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A byte representation of file in the converted format</returns>
         [HttpPost]
         // POST api/files?format=gpx
-        public Task<byte[]> PostConvertFile(string format, [FromBody]DataContainerPoco dataContainer)
+        public async Task<IActionResult> PostConvertFile(string format, [FromBody]DataContainerPoco dataContainer)
         {
-            return _dataContainerConverterService.ToAnyFormat(dataContainer, format);
+            if (!_dataContainerConverterService.IsValidFormat(format))
+            {
+                return BadRequest($"Unsupported format {format}");
+            }
+            return Ok(await _dataContainerConverterService.ToAnyFormat(dataContainer, format));
         }
 
         /// <summary>
@@ -86,7 +90,7 @@ namespace IsraelHiking.API.Controllers
         [ProducesResponseType(typeof(DataContainerPoco), 200)]
         public async Task<IActionResult> PostOpenFile(IFormFile file)
         {
-            if (file == null)
+            if (file == null || !_dataContainerConverterService.IsValidFormat(file.FileName))
             {
                 return BadRequest();
             }
