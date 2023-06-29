@@ -15,9 +15,10 @@ if ($env:PASSWORD -eq $null) {
 }
 
 Write-Host "Decrypting files"
-Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/appveyor.mobileprovision.enc -d -a -out ./signing/appveyor.mobileprovision"
-Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer"
-Invoke-Expression "& openssl aes-256-cbc -k $env:PASSWORD -in ./signing/ihm-dist.p12.enc -d -a -out ./signing/ihm-dist.p12"
+openssl version
+Invoke-Expression "& openssl aes-256-cbc -md sha512 -pbkdf2 -iter 100000 -k $env:PASSWORD -in ./signing/appveyor.mobileprovision.enc -d -a -out ./signing/appveyor.mobileprovision"
+Invoke-Expression "& openssl aes-256-cbc -md sha512 -pbkdf2 -iter 100000 -k $env:PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer"
+Invoke-Expression "& openssl aes-256-cbc -md sha512 -pbkdf2 -iter 100000 -k $env:PASSWORD -in ./signing/ihm-dist.p12.enc -d -a -out ./signing/ihm-dist.p12"
 
 Write-Host "Create a custom keychain"
 security create-keychain -p appveyor ios-build.keychain
