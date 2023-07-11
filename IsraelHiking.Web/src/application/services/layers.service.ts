@@ -190,30 +190,32 @@ export class LayersService {
         return baseLayer;
     }
 
-    private async addBaseLayerToDatabase(layer: EditableLayer) {
+    private async addBaseLayerToDatabase(layer: Immutable<EditableLayer>) {
         if (SPECIAL_BASELAYERS.includes(layer.key)) {
             return;
         }
         if (!this.authorizationService.isLoggedIn()) {
             return;
         }
-        const layerToStore = { ...layer } as LayerData as UserLayer;
+        const layerToStore = { ...layer } as UserLayer;
         layerToStore.isOverlay = false;
         layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
         const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as UserLayer;
-        layer.id = response.id;
-        this.store.dispatch(new UpdateBaseLayerAction(layer.key, layer));
+        this.store.dispatch(new UpdateBaseLayerAction(layer.key, {
+            ...layer,
+            id: response.id
+        }));
     }
 
-    private async updateUserLayerInDatabase(isOverlay: boolean, layer: EditableLayer) {
-        if (this.authorizationService.isLoggedIn()) {
-            const layerToStore = { ...layer } as LayerData as UserLayer;
-            layerToStore.isOverlay = isOverlay;
-            layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
-            layerToStore.id = layer.id;
-            const response = await firstValueFrom(this.httpClient.put(Urls.userLayers + layerToStore.id, layerToStore)) as UserLayer;
-            layer.id = response.id;
+    private async updateUserLayerInDatabase(isOverlay: boolean, layer: Immutable<EditableLayer>) {
+        if (!this.authorizationService.isLoggedIn()) {
+            return;
         }
+        const layerToStore = { ...layer } as UserLayer;
+        layerToStore.isOverlay = isOverlay;
+        layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
+        layerToStore.id = layer.id;
+        await firstValueFrom(this.httpClient.put(Urls.userLayers + layerToStore.id, layerToStore));
     }
 
     private async deleteUserLayerFromDatabase(id: string) {
@@ -244,21 +246,21 @@ export class LayersService {
         return overlay;
     }
 
-    private async addOverlayToDatabase(layer: Overlay) {
+    private async addOverlayToDatabase(layer: Immutable<Overlay>) {
         if (SPECIAL_OVERLAYS.includes(layer.key)) {
             return;
         }
         if (!this.authorizationService.isLoggedIn()) {
             return;
         }
-        const layerToStore = { ...layer } as LayerData as UserLayer;
+        const layerToStore = { ...layer } as UserLayer;
         layerToStore.isOverlay = true;
         layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
         const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as UserLayer;
-        layer.id = response.id;
-        if (layerToStore.isOverlay) {
-            this.store.dispatch(new UpdateOverlayAction(layer.key, layer));
-        }
+        this.store.dispatch(new UpdateOverlayAction(layer.key, {
+            ...layer,
+            id: response.id
+        }));
     }
 
     public isNameAvailable(key: string, newName: string, isOverlay: boolean): boolean {
