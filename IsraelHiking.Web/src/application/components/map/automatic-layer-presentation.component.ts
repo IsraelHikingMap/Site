@@ -9,6 +9,7 @@ import {
 } from "maplibre-gl";
 import { Observable, Subscription } from "rxjs";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -49,7 +50,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private currentLanguageCode: LanguageCode;
 
     @Select((state: ApplicationState) => state.configuration.language)
-    private language$: Observable<Language>;
+    private language$: Observable<Immutable<Language>>;
 
     constructor(resources: ResourcesService,
                 private readonly mapComponent: MapComponent,

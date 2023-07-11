@@ -3,6 +3,7 @@ import { minBy, maxBy, flatten, last, escape } from "lodash-es";
 import { parseString, Builder } from "isomorphic-xml2js";
 import { encode } from "base64-arraybuffer";
 import XmlBeautify from "xml-beautify";
+import type { Immutable } from "immer";
 
 import type {
     DataContainer,
@@ -77,7 +78,7 @@ interface Gpx {
 
 @Injectable()
 export class GpxDataContainerConverterService {
-    public static getSegmentsFromLatlngs(latlngs: LatLngAltTime[], routingType: RoutingType): RouteSegmentData[] {
+    public static getSegmentsFromLatlngs(latlngs: Immutable<LatLngAltTime[]>, routingType: RoutingType): RouteSegmentData[] {
         const segments = [];
         const firstLatlng = latlngs[0];
         segments.push({

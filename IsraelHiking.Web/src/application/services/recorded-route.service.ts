@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
@@ -14,7 +15,7 @@ import { StopRecordingAction, StartRecordingAction, AddRecordingRoutePointsActio
 import { AddTraceAction } from "../reducers/traces.reducer";
 import { AddRouteAction } from "../reducers/routes.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime, RecordedRoute } from "../models/models";
+import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLngAltTime, RecordedRoute, MarkerData } from "../models/models";
 
 @Injectable()
 export class RecordedRouteService {
@@ -26,7 +27,7 @@ export class RecordedRouteService {
     private lastValidLocation: LatLngAltTime;
 
     @Select((state: ApplicationState) => state.gpsState.currentPosition)
-    private currentPosition$: Observable<GeolocationPosition>;
+    private currentPosition$: Observable<Immutable<GeolocationPosition>>;
 
     constructor(private readonly resources: ResourcesService,
                 private readonly geoLocationService: GeoLocationService,
@@ -89,19 +90,19 @@ export class RecordedRouteService {
         }
     }
 
-    private recordedRouteToRouteData(route: RecordedRoute): RouteData {
+    private recordedRouteToRouteData(route: Immutable<RecordedRoute>): RouteData {
         const date = new Date();
         const dateString = date.toISOString().split("T")[0] +
             ` ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
         const name = "Recorded using IHM at " + dateString;
         const routeData = this.routesFactory.createRouteData(name);
         const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
-        routeData.markers = route.markers;
+        routeData.markers = structuredClone(route.markers) as MarkerData[];
         routeData.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(route.latlngs, routingType);
         return routeData;
     }
 
-    private async addRecordingToTraces(route: RecordedRoute) {
+    private async addRecordingToTraces(route: Immutable<RecordedRoute>) {
         const latLngs = route.latlngs;
         const northEast = { lat: Math.max(...latLngs.map(l => l.lat)), lng: Math.max(...latLngs.map(l => l.lng)) };
         const southWest = { lat: Math.min(...latLngs.map(l => l.lat)), lng: Math.min(...latLngs.map(l => l.lng)) };

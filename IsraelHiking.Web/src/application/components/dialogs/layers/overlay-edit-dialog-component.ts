@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import type { Immutable } from "immer";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
@@ -13,7 +14,7 @@ import type { LayerData, Overlay } from "../../../models/models";
     templateUrl: "./layer-properties-dialog.component.html"
 })
 export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
-    private backupOverlay: Overlay;
+    private backupOverlay: Immutable<Overlay>;
 
     constructor(resources: ResourcesService,
                 mapService: MapService,
@@ -26,7 +27,7 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
         this.isOverlay = true;
     }
 
-    public setOverlay(layer: Overlay) {
+    public setOverlay(layer: Immutable<Overlay>) {
         this.layerData = {
             ...layer,
             opacity: layer.opacity || 1.0

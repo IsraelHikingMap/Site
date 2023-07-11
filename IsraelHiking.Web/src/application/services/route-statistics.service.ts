@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import linearInterpolator from "linear-interpolator";
+import type { Immutable } from "immer";
 
 import { SpatialService } from "./spatial.service";
 import type { LatLngAlt, LatLngAltTime } from "../models/models";
@@ -50,7 +51,7 @@ export type RouteStatistics = {
 
 @Injectable()
 export class RouteStatisticsService {
-    public getStatisticsByRange(latlngs: LatLngAltTime[], start: RouteStatisticsPoint, end: RouteStatisticsPoint): RouteStatistics {
+    public getStatisticsByRange(latlngs: Immutable<LatLngAltTime[]>, start: RouteStatisticsPoint, end: RouteStatisticsPoint): RouteStatistics {
         const routeStatistics = {
             points: [] as RouteStatisticsPoint[],
             length: 0,
@@ -167,7 +168,7 @@ export class RouteStatisticsService {
         }
     }
 
-    public getStatisticsForStandAloneRoute(latlngs: LatLngAltTime[]): RouteStatistics {
+    public getStatisticsForStandAloneRoute(latlngs: Immutable<LatLngAltTime[]>): RouteStatistics {
         const routeStatistics = this.getStatisticsByRange(latlngs, null, null);
         this.addDurationAndAverageSpeed(latlngs, routeStatistics.length, routeStatistics);
         return routeStatistics;
@@ -185,7 +186,7 @@ export class RouteStatisticsService {
         return closestRouteStatistics;
     }
 
-    public getStatisticsForRecordedRouteWithPlannedRoute(recordedRouteLatlngs: LatLngAltTime[],
+    public getStatisticsForRecordedRouteWithPlannedRoute(recordedRouteLatlngs: Immutable<LatLngAltTime[]>,
         closestRouteToRecordingLatlngs: LatLngAltTime[],
         currentLatlng: LatLngAltTime,
         heading: number) {
@@ -198,7 +199,7 @@ export class RouteStatisticsService {
         return closestRouteStatistics;
     }
 
-    private addDurationAndAverageSpeed(latlngs: LatLngAltTime[], length: number, fullStatistics: RouteStatistics) {
+    private addDurationAndAverageSpeed(latlngs: Immutable<LatLngAltTime[]>, length: number, fullStatistics: RouteStatistics) {
         if (latlngs.length === 0) {
             return;
         }

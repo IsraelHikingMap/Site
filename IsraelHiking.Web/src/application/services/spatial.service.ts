@@ -12,13 +12,14 @@ import pointToLineDistance from "@turf/point-to-line-distance";
 import lineSplit from "@turf/line-split";
 import lineIntersect from "@turf/line-intersect";
 import booleanWithin from "@turf/boolean-within";
+import type { Immutable } from "immer";
 
 import type { LatLngAlt, Bounds } from "../models/models";
 
 @Injectable()
 export class SpatialService {
 
-    public static getLengthInMetersForGeometry(geometry: GeoJSON.Geometry) {
+    public static getLengthInMetersForGeometry(geometry: Immutable<GeoJSON.Geometry>) {
         if (geometry.type === "LineString") {
             return SpatialService.getLengthInMetersForCoordinates(geometry.coordinates);
         }
@@ -32,10 +33,10 @@ export class SpatialService {
         return 0;
     }
 
-    private static getLengthInMetersForCoordinates(coordinates: number[][]) {
+    private static getLengthInMetersForCoordinates(coordinates: Immutable<number[][]>) {
         let totalDistance = 0;
         for (let coordinateIndex = 1; coordinateIndex < coordinates.length; coordinateIndex++) {
-            totalDistance += distance(coordinates[coordinateIndex - 1], coordinates[coordinateIndex], { units: "meters" });
+            totalDistance += distance(coordinates[coordinateIndex - 1] as number[], coordinates[coordinateIndex] as number[], { units: "meters" });
         }
         return totalDistance;
     }

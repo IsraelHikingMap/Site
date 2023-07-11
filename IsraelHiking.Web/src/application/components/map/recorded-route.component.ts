@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { Observable, combineLatest, throttleTime } from "rxjs";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
@@ -21,10 +22,10 @@ export class RecordedRouteComponent extends BaseMapComponent {
     public isAddingPoi$: Observable<boolean>;
 
     @Select((state: ApplicationState) => state.recordedRouteState.route)
-    public recordedRoute$: Observable<RecordedRoute>;
+    public recordedRoute$: Observable<Immutable<RecordedRoute>>;
 
     @Select((state: ApplicationState) => state.gpsState.currentPosition)
-    public currentPosition$: Observable<GeolocationPosition>;
+    public currentPosition$: Observable<Immutable<GeolocationPosition>>;
 
     public recordedRouteSegments: GeoJSON.FeatureCollection<GeoJSON.LineString>[];
     public lastRouteSegment: GeoJSON.FeatureCollection<GeoJSON.LineString>;

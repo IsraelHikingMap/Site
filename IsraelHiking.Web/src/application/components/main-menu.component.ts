@@ -7,6 +7,7 @@ import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
 import { Store, Select } from "@ngxs/store";
 import platform from "platform";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -46,7 +47,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     public isShowMore: boolean;
 
     @Select((state: ApplicationState) => state.userState.userInfo)
-    public userInfo$: Observable<UserInfo>;
+    public userInfo$: Observable<Immutable<UserInfo>>;
 
     @Select((state: ApplicationState) => state.uiComponentsState.drawingVisible)
     public drawingVisible$: Observable<boolean>;

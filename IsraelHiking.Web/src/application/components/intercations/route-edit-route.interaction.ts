@@ -2,6 +2,7 @@ import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { MapMouseEvent, Map, GeoJSONSource } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 import type Point from "@mapbox/point-geometry";
+import type { Immutable } from "immer";
 
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
@@ -54,11 +55,11 @@ export class RouteEditRouteInteraction {
         this.mouseDownPoint = null;
     }
 
-    public static createSegmentId(route: RouteData, index: number) {
+    public static createSegmentId(route: Immutable<RouteData>, index: number) {
         return route.id + SEGMENT + index;
     }
 
-    public static createSegmentPointId(route: RouteData, index: number) {
+    public static createSegmentPointId(route: Immutable<RouteData>, index: number) {
         return route.id + SEGMENT_POINT + index;
     }
 
@@ -324,9 +325,9 @@ export class RouteEditRouteInteraction {
         const index = this.getPointIndex();
         const routeData = this.selectedRouteService.getSelectedRoute();
         const routingType = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState).routingType;
-        const segment = { ...routeData.segments[index] };
+        const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
         if (index === 0) {
-            const nextSegment = { ...routeData.segments[index + 1] };
+            const nextSegment = structuredClone(routeData.segments[index + 1]) as RouteSegmentData;
             await this.runRouting(latlng, nextSegment);
             const snappedLatLng = this.getSnappingForRoute(latlng, [nextSegment.latlngs[0]]) as LatLngAltTime;
             await this.elevationProvider.updateHeights([snappedLatLng]);
@@ -346,7 +347,7 @@ export class RouteEditRouteInteraction {
             segment.routePoint = latlng;
             segment.routingType = routingType;
             await this.runRouting(previousSegment.routePoint, segment);
-            const nextSegment = { ...routeData.segments[index + 1] };
+            const nextSegment = structuredClone(routeData.segments[index + 1]) as RouteSegmentData;
             await this.runRouting(segment.routePoint, nextSegment);
             this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index, index + 1], [segment, nextSegment]));
         }
@@ -355,7 +356,7 @@ export class RouteEditRouteInteraction {
     private async updateRouteSegment(latlng: LatLngAlt) {
         const index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         const routeData = this.selectedRouteService.getSelectedRoute();
-        const segment = { ...routeData.segments[index] };
+        const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
         const middleSegment = this.createRouteSegment(latlng, []);
         await this.runRouting(segment.latlngs[0], middleSegment);
         await this.runRouting(middleSegment.routePoint, segment);
@@ -366,7 +367,7 @@ export class RouteEditRouteInteraction {
     private splitRouteSegment(latlng: LatLngAlt) {
         const index = this.getSegmentIndex(this.selectedRouteSegments[0]);
         const routeData = this.selectedRouteService.getSelectedRoute();
-        const segment = { ...routeData.segments[index] };
+        const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
         const newLatlngs = SpatialService.splitLine(latlng, segment.latlngs);
         segment.latlngs = newLatlngs.end as LatLngAltTime[];
         const middleSegment = this.createRouteSegment(latlng, newLatlngs.start);
@@ -396,7 +397,7 @@ export class RouteEditRouteInteraction {
             urls: [],
             title: "",
             description: "",
-        } as MarkerData)).concat(this.selectedRouteService.getSelectedRoute().markers);
+        } as Immutable<MarkerData>)).concat(this.selectedRouteService.getSelectedRoute().markers);
         const snappingPointResponse = this.snappingService.snapToPoint(latlng, points);
         return snappingPointResponse.latlng;
     }

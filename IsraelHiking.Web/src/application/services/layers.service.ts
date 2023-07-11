@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable } from "rxjs";
 import { timeout } from "rxjs/operators";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { ResourcesService } from "./resources.service";
 import { AuthorizationService } from "./authorization.service";
@@ -34,13 +35,12 @@ import type {
     UserInfo
 } from "../models/models";
 import { Urls } from "../urls";
-
 import { LoggingService } from "./logging.service";
 
-interface IUserLayer extends LayerData {
+
+type UserLayer = (EditableLayer | Overlay) & {
     isOverlay: boolean;
     osmUserId: string;
-    id: string;
 }
 
 @Injectable()
@@ -50,21 +50,21 @@ export class LayersService {
 
     private static CUSTOM_LAYER = "Custom Layer";
 
-    private baseLayers: EditableLayer[];
-    private overlays: Overlay[];
+    private baseLayers: Immutable<EditableLayer[]>;
+    private overlays: Immutable<Overlay[]>;
     private selectedBaseLayerKey: string;
 
     @Select((state: ApplicationState) => state.layersState.baseLayers)
-    public baseLayers$: Observable<EditableLayer[]>;
+    public baseLayers$: Observable<Immutable<EditableLayer[]>>;
 
     @Select((state: ApplicationState) => state.layersState.overlays)
-    public overlays$: Observable<Overlay[]>;
+    public overlays$: Observable<Immutable<Overlay[]>>;
 
     @Select((state: ApplicationState) => state.layersState.selectedBaseLayerKey)
     public selectedBaseLayerKey$: Observable<string>;
 
     @Select((state: ApplicationState) => state.userState.userInfo)
-    public userInfo$: Observable<UserInfo>;
+    public userInfo$: Observable<Immutable<UserInfo>>;
 
     constructor(private readonly resources: ResourcesService,
                 private readonly authorizationService: AuthorizationService,
@@ -117,7 +117,7 @@ export class LayersService {
             return;
         }
         try {
-            const data = await firstValueFrom(this.httpClient.get(Urls.userLayers).pipe(timeout(10000))) as any as IUserLayer[];
+            const data = await firstValueFrom(this.httpClient.get(Urls.userLayers).pipe(timeout(10000))) as any as UserLayer[];
             if (data == null) {
                 return;
             }
@@ -179,7 +179,7 @@ export class LayersService {
         this.addBaseLayerToDatabase(layer);
     }
 
-    private addBaseLayerFromData(layerData: LayerData): EditableLayer {
+    private addBaseLayerFromData(layerData: LayerData): Immutable<EditableLayer> {
         const baseLayer = {
             ...layerData,
             isEditable: true,
@@ -197,21 +197,21 @@ export class LayersService {
         if (!this.authorizationService.isLoggedIn()) {
             return;
         }
-        const layerToStore = { ...layer } as LayerData as IUserLayer;
+        const layerToStore = { ...layer } as LayerData as UserLayer;
         layerToStore.isOverlay = false;
         layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
-        const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as IUserLayer;
+        const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as UserLayer;
         layer.id = response.id;
         this.store.dispatch(new UpdateBaseLayerAction(layer.key, layer));
     }
 
     private async updateUserLayerInDatabase(isOverlay: boolean, layer: EditableLayer) {
         if (this.authorizationService.isLoggedIn()) {
-            const layerToStore = { ...layer } as LayerData as IUserLayer;
+            const layerToStore = { ...layer } as LayerData as UserLayer;
             layerToStore.isOverlay = isOverlay;
             layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
             layerToStore.id = layer.id;
-            const response = await firstValueFrom(this.httpClient.put(Urls.userLayers + layerToStore.id, layerToStore)) as IUserLayer;
+            const response = await firstValueFrom(this.httpClient.put(Urls.userLayers + layerToStore.id, layerToStore)) as UserLayer;
             layer.id = response.id;
         }
     }
@@ -232,7 +232,7 @@ export class LayersService {
         return overlay;
     }
 
-    private addOverlayFromData(layerData: LayerData, visible: boolean): Overlay {
+    private addOverlayFromData(layerData: LayerData, visible: boolean): Immutable<Overlay> {
         const overlay = {
             ...layerData,
             visible,
@@ -251,10 +251,10 @@ export class LayersService {
         if (!this.authorizationService.isLoggedIn()) {
             return;
         }
-        const layerToStore = { ...layer } as LayerData as IUserLayer;
+        const layerToStore = { ...layer } as LayerData as UserLayer;
         layerToStore.isOverlay = true;
         layerToStore.osmUserId = this.authorizationService.getUserInfo().id;
-        const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as IUserLayer;
+        const response = await firstValueFrom(this.httpClient.post(Urls.userLayers, layerToStore)) as UserLayer;
         layer.id = response.id;
         if (layerToStore.isOverlay) {
             this.store.dispatch(new UpdateOverlayAction(layer.key, layer));
@@ -262,7 +262,7 @@ export class LayersService {
     }
 
     public isNameAvailable(key: string, newName: string, isOverlay: boolean): boolean {
-        const layers: EditableLayer[] = isOverlay ? this.overlays : this.baseLayers;
+        const layers: Immutable<EditableLayer[]> = isOverlay ? this.overlays : this.baseLayers;
         if (newName === key) {
             return true;
         }
@@ -278,7 +278,7 @@ export class LayersService {
         this.updateUserLayerInDatabase(false, newLayer);
     }
 
-    public updateOverlay(oldLayer: Overlay, newLayer: Overlay): void {
+    public updateOverlay(oldLayer: Immutable<Overlay>, newLayer: Overlay): void {
         this.store.dispatch(new UpdateOverlayAction(oldLayer.key, newLayer));
         this.updateUserLayerInDatabase(true, newLayer);
     }
@@ -369,7 +369,7 @@ export class LayersService {
         } as EditableLayer);
     }
 
-    public addExternalOverlays(overlays: LayerData[]) {
+    public addExternalOverlays(overlays: Immutable<LayerData[]>) {
         if (!overlays || overlays.length === 0) {
             return;
         }

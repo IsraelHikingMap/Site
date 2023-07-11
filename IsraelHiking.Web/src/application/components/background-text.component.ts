@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { Observable } from "rxjs";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -20,7 +21,7 @@ export class BackgroundTextComponent extends BaseMapComponent {
     public lastModifiedDate$: Observable<boolean>;
 
     @Select((state: ApplicationState) => state.configuration.language)
-    public language$: Observable<Language>;
+    public language$: Observable<Immutable<Language>>;
 
     public text: string;
 

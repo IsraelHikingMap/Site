@@ -4,6 +4,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
 import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash-es";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -27,7 +28,7 @@ import type { ApplicationState, Trace, TraceVisibility } from "../../models/mode
 })
 export class TracesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
 
-    public filteredTraces: Trace[];
+    public filteredTraces: Immutable<Trace[]>;
     public selectedTraceId: string;
     public traceInEditMode: Trace;
     public file: File;
@@ -35,7 +36,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public searchTerm: FormControl<string>;
 
     @Select((state: ApplicationState) => state.tracesState.traces)
-    public traces$: Observable<Trace[]>;
+    public traces$: Observable<Immutable<Trace[]>>;
 
     private sessionSearchTerm = "";
     private page: number;
@@ -91,7 +92,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.dataContainerService.setData(trace.dataContainer, true);
     }
 
-    private getSelectedTrace(): Trace {
+    private getSelectedTrace(): Immutable<Trace> {
         return this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces.find(t => t.id === this.selectedTraceId);
     }
 
@@ -163,7 +164,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.filteredTraces = take(traces, this.page * 10);
     }
 
-    private findInTrace(trace: Trace, searchTerm: string) {
+    private findInTrace(trace: Immutable<Trace>, searchTerm: string) {
         if (!searchTerm) {
             return true;
         }
@@ -197,7 +198,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public setTraceInEditMode() {
-        this.traceInEditMode = structuredClone(this.getSelectedTrace());
+        this.traceInEditMode = structuredClone(this.getSelectedTrace()) as Trace;
     }
 
     public isTraceInEditMode(traceId: string) {
@@ -239,7 +240,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         return !this.loadingTraces && this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces.length === 0;
     }
 
-    public getTraceDisplayName(trace: Trace) {
+    public getTraceDisplayName(trace: Immutable<Trace>) {
         return (trace.visibility === "local") ? trace.name : trace.description;
     }
 

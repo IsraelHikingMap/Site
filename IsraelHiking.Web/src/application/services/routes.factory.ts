@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import type { RouteData, ApplicationState } from "../models/models";
 
@@ -43,9 +44,9 @@ export class RoutesFactory {
         return route;
     }
 
-    public createRouteDataAddMissingFields(routeData: RouteData, color: string): RouteData {
+    public createRouteDataAddMissingFields(routeData: Immutable<RouteData>, color: string): RouteData {
         const routeEditingState = this.store.selectSnapshot((s: ApplicationState) => s.routeEditingState);
-        const route = { ...routeData };
+        const route = structuredClone(routeData) as RouteData;
         route.color = route.color || color;
         route.opacity = route.opacity || routeEditingState.opacity;
         route.weight = route.weight || routeEditingState.weight;

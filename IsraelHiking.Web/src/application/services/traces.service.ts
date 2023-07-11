@@ -3,6 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
+import type { Immutable } from "immer";
 
 import { LoggingService } from "./logging.service";
 import { ResourcesService } from "./resources.service";
@@ -94,7 +95,7 @@ export class TracesService {
 
     public async getTraceById(traceId: string): Promise<Trace> {
         this.loggingService.info(`[Traces] Getting trace by id: ${traceId}`);
-        let trace = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces.find(t => t.id === traceId);
+        const trace = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces.find(t => t.id === traceId);
         if (trace == null) {
             return null;
         }
@@ -108,12 +109,12 @@ export class TracesService {
         }
         const dataContainer = await firstValueFrom(this.httpClient.get(Urls.osmTrace + traceId)) as DataContainer;
         this.loggingService.info(`[Traces] Got trace from server: ${traceId}`);
-        trace = {
+        const traceToStore = {
             ...trace,
             dataContainer
         };
-        await this.databaseService.storeTrace(trace);
-        return trace;
+        await this.databaseService.storeTrace(traceToStore);
+        return traceToStore;
     }
 
     public uploadTrace(file: File): Promise<any> {
@@ -123,7 +124,7 @@ export class TracesService {
         return firstValueFrom(this.httpClient.post(Urls.osmTrace, formData).pipe(timeout(3 * 60 * 1000)));
     }
 
-    public async uploadRouteAsTrace(route: RouteData): Promise<any> {
+    public async uploadRouteAsTrace(route: Immutable<RouteData>): Promise<any> {
         this.loggingService.info(`[Traces] Uploading a route as trace with name ${route.name}`);
         return firstValueFrom(this.httpClient.post(Urls.osmTraceRoute, route, {
             params: { language: this.resources.getCurrentLanguageCodeSimplified() }
@@ -138,7 +139,7 @@ export class TracesService {
         this.store.dispatch(new UpdateTraceAction(trace));
     }
 
-    public async deleteTrace(trace: Trace): Promise<void> {
+    public async deleteTrace(trace: Immutable<Trace>): Promise<void> {
         this.loggingService.info(`[Traces] Deleting a trace with name ${trace.name} and id ${trace.id}, visibility: ${trace.visibility}`);
         if (trace.visibility !== "local") {
             await firstValueFrom(this.httpClient.delete(Urls.osmTrace + trace.id));

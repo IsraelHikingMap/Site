@@ -1,4 +1,6 @@
-﻿import type {
+﻿import {Immutable} from "immer"
+
+import type {
     RouteData,
     ConfigurationState,
     LocationState,
@@ -16,7 +18,9 @@
     StateWithHistory
 } from "../models";
 
-export type ApplicationState = {
+export type ApplicationState = Immutable<MutableApplicationState>;
+
+export type MutableApplicationState = {
     configuration: ConfigurationState;
     locationState: LocationState;
     routes: StateWithHistory<RouteData[]>;
@@ -31,4 +35,4 @@ export type ApplicationState = {
     gpsState: GpsState;
     offlineState: OfflineState;
     uiComponentsState: UICompoentsState;
-};
+}

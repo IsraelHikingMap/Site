@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { LayersService } from "./layers.service";
 import { ToastService } from "./toast.service";
@@ -15,7 +16,7 @@ import { RunningContextService } from "./running-context.service";
 import { BulkReplaceRoutesAction } from "../reducers/routes.reducer";
 import { SetFileUrlAndBaseLayerAction } from "../reducers/in-memory.reducer";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
-import type { DataContainer, ApplicationState, LayerData } from "../models/models";
+import type { DataContainer, ApplicationState, LayerData, RouteData } from "../models/models";
 
 @Injectable()
 export class DataContainerService {
@@ -33,14 +34,14 @@ export class DataContainerService {
                 private readonly store: Store) {
     }
 
-    public setData(dataContainer: DataContainer, keepCurrentRoutes: boolean) {
-        let routesData = [];
+    public setData(dataContainer: Immutable<DataContainer>, keepCurrentRoutes: boolean) {
+        let routesData: RouteData[] = [];
         for (const route of dataContainer.routes) {
             const routeToAdd = this.routesFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
             routesData.push(routeToAdd);
         }
         if (keepCurrentRoutes) {
-            const currentRoutes = this.store.selectSnapshot((s: ApplicationState) => s.routes).present;
+            const currentRoutes = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.routes).present) as RouteData[];
             routesData = [...currentRoutes, ...routesData];
         }
         this.routesFactory.regenerateDuplicateIds(routesData);

@@ -2,6 +2,7 @@ import { Injectable, EventEmitter } from "@angular/core";
 import { Observable } from "rxjs";
 import { some } from "lodash-es";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "./resources.service";
@@ -34,11 +35,11 @@ import type {
 export class SelectedRouteService {
     private static MERGE_THRESHOLD = 50; // meter.
 
-    private routes: RouteData[];
+    private routes: Immutable<RouteData[]>;
     private selectedRouteId: string;
 
     @Select((state: ApplicationState) => state.routes.present)
-    private routes$: Observable<RouteData[]>;
+    private routes$: Observable<Immutable<RouteData[]>>;
 
     @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     private selectedRouteId$: Observable<string>;
@@ -59,9 +60,8 @@ export class SelectedRouteService {
         });
     }
 
-    public getSelectedRoute(): RouteData {
-        const route = this.getRouteById(this.selectedRouteId);
-        return route;
+    public getSelectedRoute(): Immutable<RouteData> {
+        return this.getRouteById(this.selectedRouteId);
     }
 
     public syncSelectedRouteWithEditingRoute() {
@@ -75,11 +75,11 @@ export class SelectedRouteService {
         return this.routes.length === 0;
     }
 
-    public getRouteById(id: string): RouteData {
+    public getRouteById(id: string): Immutable<RouteData> {
         return this.routes.find((r) => r.id === id);
     }
 
-    public getOrCreateSelectedRoute(): RouteData {
+    public getOrCreateSelectedRoute(): Immutable<RouteData> {
         if (this.selectedRouteId === null && this.routes.length > 0) {
             this.store.dispatch(new SetSelectedRouteAction(this.routes[0].id));
         }
@@ -145,7 +145,7 @@ export class SelectedRouteService {
      *
      * @param checkAgainstHead use to signal the method if to check against the beginning or the end of the selected route.
      */
-    public getClosestRouteToSelected(checkAgainstHead: boolean): RouteData {
+    public getClosestRouteToSelected(checkAgainstHead: boolean): Immutable<RouteData> {
         const latLngToCheck = checkAgainstHead
             ? this.getSelectedRoute().segments[0].latlngs[0]
             : this.getLastLatLng(this.getSelectedRoute());
@@ -164,7 +164,7 @@ export class SelectedRouteService {
         return null;
     }
 
-    public getClosestRouteToGPS(currentLocation: LatLngAltTime, heading: number): RouteData {
+    public getClosestRouteToGPS(currentLocation: LatLngAltTime, heading: number): Immutable<RouteData> {
         if (currentLocation == null) {
             return null;
         }
@@ -198,11 +198,11 @@ export class SelectedRouteService {
         return routeToReturn;
     }
 
-    private getLastSegment(routeData: RouteData): RouteSegmentData {
+    private getLastSegment(routeData: Immutable<RouteData>): Immutable<RouteSegmentData> {
         return routeData.segments[routeData.segments.length - 1];
     }
 
-    private getLastLatLng(routeData: RouteData): LatLngAltTime {
+    private getLastLatLng(routeData: Immutable<RouteData>): LatLngAltTime {
         const lastSegmentLatLngs = this.getLastSegment(routeData).latlngs;
         return lastSegmentLatLngs[lastSegmentLatLngs.length - 1];
     }
@@ -229,7 +229,7 @@ export class SelectedRouteService {
         const routeData = {
             ...selectedRoute,
             segments
-        };
+        } as RouteData;
         this.store.dispatch(new SplitRouteAction(selectedRoute.id, routeData, splitRouteData));
     }
 
@@ -239,7 +239,7 @@ export class SelectedRouteService {
         const mergedRoute = {
             ...selectedRoute,
             markers: [...selectedRoute.markers, ...closestRoute.markers]
-        };
+        } as RouteData;
         const latLngToCheck = isSelectedRouteSecond
             ? selectedRoute.segments[0].latlngs[0]
             : this.getLastLatLng(selectedRoute);
@@ -251,21 +251,21 @@ export class SelectedRouteService {
             closestRoute = this.reverseRouteInternal(closestRoute);
         }
         if (isSelectedRouteSecond) {
-            const segments = [...selectedRoute.segments];
+            const segments = [...selectedRoute.segments] as RouteSegmentData[];
             segments.splice(0, 1);
-            segments.splice(0, 0, ...closestRoute.segments);
+            segments.splice(0, 0, ...structuredClone(closestRoute.segments) as RouteSegmentData[]);
             mergedRoute.segments = segments;
         } else {
             // remove first segment:
-            const segments = [...closestRoute.segments];
+            const segments = [...closestRoute.segments] as RouteSegmentData[];
             segments.splice(0, 1);
-            segments.splice(0, 0, ...selectedRoute.segments);
+            segments.splice(0, 0, ...structuredClone(closestRoute.segments) as RouteSegmentData[]);
             mergedRoute.segments = segments;
         }
         this.store.dispatch(new MergeRoutesAction(selectedRoute.id, closestRoute.id, mergedRoute));
     }
 
-    private reverseRouteInternal(route: RouteData): RouteData {
+    private reverseRouteInternal(route: Immutable<RouteData>): RouteData {
         let segments = [];
         for (let segmentIndex = 0; segmentIndex < route.segments.length - 1; segmentIndex++) {
             const currentSegment = { ...route.segments[segmentIndex] };
@@ -369,7 +369,7 @@ export class SelectedRouteService {
         this.selectedRouteHover.emit(latLng);
     }
 
-    public getLatlngs(route: RouteData): LatLngAltTime[] {
-        return route ? [].concat(...route.segments.map(s => s.latlngs)) : null;// flatten
+    public getLatlngs(route: Immutable<RouteData>): LatLngAltTime[] {
+        return route ? route.segments.map(s => s.latlngs).flat() : null;
     }
 }

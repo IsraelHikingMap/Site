@@ -5,6 +5,7 @@ import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
 import { Observable, Subscription } from "rxjs";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ShareDialogComponent } from "./share-dialog.component";
@@ -24,17 +25,17 @@ import type { ApplicationState, ShareUrl } from "../../models/models";
 })
 export class SharesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
 
-    public filteredShareUrls: ShareUrl[];
+    public filteredShareUrls: Immutable<ShareUrl[]>;
     public shareUrlInEditMode: ShareUrl;
     public selectedShareUrlId: string;
     public loadingShareUrls: boolean;
     public searchTerm: FormControl<string>;
 
     @Select((state: ApplicationState) => state.shareUrlsState.shareUrls)
-    public shareUrls$: Observable<ShareUrl[]>;
+    public shareUrls$: Observable<Immutable<ShareUrl[]>>;
 
     @Select((state: ApplicationState) => state.inMemoryState.shareUrl)
-    public shownShareUrl$: Observable<ShareUrl>;
+    public shownShareUrl$: Observable<Immutable<ShareUrl>>;
 
     private sessionSearchTerm = "";
     private page: number;
@@ -100,7 +101,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         this.filteredShareUrls = take(shareUrls, this.page * 10);
     }
 
-    private findInShareUrl(shareUrl: ShareUrl, searchTerm: string) {
+    private findInShareUrl(shareUrl: Immutable<ShareUrl>, searchTerm: string) {
         if (!searchTerm) {
             return true;
         }
@@ -139,7 +140,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         });
     }
 
-    private getSelectedShareUrl(): ShareUrl {
+    private getSelectedShareUrl(): Immutable<ShareUrl> {
         return this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls.find(s => s.id === this.selectedShareUrlId);
     }
 
@@ -177,7 +178,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public setShareUrlInEditMode() {
-        this.shareUrlInEditMode = structuredClone(this.getSelectedShareUrl());
+        this.shareUrlInEditMode = structuredClone(this.getSelectedShareUrl()) as ShareUrl;
     }
 
     public toggleSelectedShareUrl(shareUrl: ShareUrl) {

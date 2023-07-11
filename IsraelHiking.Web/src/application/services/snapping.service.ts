@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import type { Immutable } from "immer";
 
 import { SpatialService } from "./spatial.service";
 import { MapService } from "./map.service";
@@ -6,7 +7,7 @@ import type { LatLngAlt, MarkerData } from "../models/models";
 
 export type SnappingPointResponse = {
     latlng: LatLngAlt;
-    markerData: MarkerData;
+    markerData: Immutable<MarkerData>;
 };
 
 @Injectable()
@@ -18,7 +19,7 @@ export class SnappingService {
     /**
      * This method will snap to the nearest point. markerData will be null in case there were no points near by.
      */
-    public snapToPoint(latlng: LatLngAlt, points: MarkerData[]): SnappingPointResponse {
+    public snapToPoint(latlng: LatLngAlt, points: Immutable<MarkerData[]>): SnappingPointResponse {
         const response = {
             latlng,
             markerData: null,

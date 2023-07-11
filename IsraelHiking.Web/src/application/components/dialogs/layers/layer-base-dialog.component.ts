@@ -8,6 +8,7 @@ import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers.service";
 import type { LayerData, ApplicationState, EditableLayer, LocationState } from "../../../models/models";
+import type { Immutable } from "immer";
 
 export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     public title: string;
@@ -17,7 +18,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     public layerData: EditableLayer;
 
     @Select((state: ApplicationState) => state.locationState)
-    public location: Observable<LocationState>;
+    public location: Observable<Immutable<LocationState>>;
 
     protected constructor(resources: ResourcesService,
                           protected readonly mapService: MapService,

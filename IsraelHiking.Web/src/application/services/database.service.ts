@@ -12,7 +12,7 @@ import { RunningContextService } from "./running-context.service";
 import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "application/reducers/routes.reducer";
 import { SetSelectedPoiAction, SetSidebarAction } from "application/reducers/poi.reducer";
-import type { ApplicationState, ShareUrl, Trace } from "../models/models";
+import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models/models";
 
 export type ImageUrlAndData = {
     imageUrl: string;
@@ -318,7 +318,7 @@ export class DatabaseService {
         return this.tracesDatabase.table(DatabaseService.TRACES_TABLE_NAME).delete(id);
     }
 
-    private initialStateUpgrade(dbState: ApplicationState): ApplicationState {
+    private initialStateUpgrade(dbState: MutableApplicationState): MutableApplicationState {
         const storedState = deepmerge(initialState, dbState, {
             arrayMerge: (destinationArray, sourceArray) => sourceArray == null ? destinationArray : sourceArray
         });

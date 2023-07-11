@@ -19,7 +19,7 @@ import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
 import { LayersReducer } from "application/reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "application/reducers/offline.reducer";
-import type { ApplicationState, Category, MarkerData } from "../models/models";
+import type { Category, MarkerData } from "../models/models";
 
 describe("Poi Service", () => {
 
@@ -475,7 +475,7 @@ describe("Poi Service", () => {
                     offlineState: {
                         uploadPoiQueue: ["poiId"]
                     }
-                } as ApplicationState);
+                });
                 store.dispatch = jasmine.createSpy();
                 const spy = spyOn(dbMock, "addPoiToUploadQueue");
                 const promise = poiService.updateComplexPoi({

@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { Store, Select } from "@ngxs/store";
 import "cordova-plugin-purchase";
+import type { Immutable } from "immer";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -15,7 +16,7 @@ const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 export class PurchaseService {
 
     @Select((state: ApplicationState) => state.userState.userInfo)
-    private userInfo$: Observable<UserInfo>;
+    private userInfo$: Observable<Immutable<UserInfo>>;
 
     constructor(private readonly runningContextService: RunningContextService,
                 private readonly loggingService: LoggingService,

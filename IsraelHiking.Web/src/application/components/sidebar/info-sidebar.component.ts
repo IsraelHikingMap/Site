@@ -4,6 +4,7 @@ import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
 import { Observable } from "rxjs";
 import { Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
@@ -33,7 +34,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     private selectedSection: LegendSection;
 
     @Select((state: ApplicationState) => state.configuration.language)
-    private language$: Observable<Language>;
+    private language$: Observable<Immutable<Language>>;
 
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,

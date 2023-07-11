@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Store, Select } from "@ngxs/store";
 import JSZip from "jszip";
 import MiniSearch from "minisearch";
+import type { Immutable } from "immer";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
@@ -77,19 +78,19 @@ export class PoiService {
     private miniSearch: MiniSearch;
     private queueIsProcessing: boolean;
     private moveEndSubsription: Subscription;
-    private offlineState: OfflineState;
+    private offlineState: Immutable<OfflineState>;
 
     public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public poisChanged: EventEmitter<void>;
 
     @Select((state: ApplicationState) => state.layersState.categoriesGroups)
-    private categoriesGroups: Observable<CategoriesGroup[]>;
+    private categoriesGroups: Observable<Immutable<CategoriesGroup[]>>;
 
     @Select((state: ApplicationState) => state.configuration.language)
-    private language$: Observable<Language>;
+    private language$: Observable<Immutable<Language>>;
 
     @Select((state: ApplicationState) => state.offlineState.uploadPoiQueue)
-    private uploadPoiQueue$: Observable<string[]>;
+    private uploadPoiQueue$: Observable<Immutable<string[]>>;
 
     constructor(private readonly resources: ResourcesService,
                 private readonly httpClient: HttpClient,
@@ -171,7 +172,7 @@ export class PoiService {
         if (this.runningContextService.isCapacitor) {
             await this.updateOfflinePois();
         }
-        this.uploadPoiQueue$.subscribe((items: string[]) => this.handleUploadQueueChanges(items));
+        this.uploadPoiQueue$.subscribe((items: Immutable<string[]>) => this.handleUploadQueueChanges(items));
         this.connectionService.monitor(false).subscribe(state => {
             this.loggingService.info(`[POIs] Connection status changed to: ${state.hasInternetAccess}`);
             if (state.hasInternetAccess && this.offlineState.uploadPoiQueue.length > 0) {
@@ -181,7 +182,7 @@ export class PoiService {
 
     }
 
-    private async handleUploadQueueChanges(items: string[]) {
+    private async handleUploadQueueChanges(items: Immutable<string[]>) {
         if (items.length === 0) {
             this.loggingService.info("[POIs] Upload queue changed and now it is empty");
             return;
@@ -609,7 +610,7 @@ export class PoiService {
         };
     }
 
-    public mergeWithPoi(feature: GeoJSON.Feature, markerData: MarkerData) {
+    public mergeWithPoi(feature: GeoJSON.Feature, markerData: Immutable<MarkerData>) {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         this.setTitle(feature, feature.properties["name:" + language] || markerData.title, language);
         this.setDescription(feature, feature.properties["description:" + language] || markerData.description, language);
@@ -643,7 +644,7 @@ export class PoiService {
         };
     }
 
-    public getTitle(feature: GeoJSON.Feature, language: string): string {
+    public getTitle(feature: Immutable<GeoJSON.Feature>, language: string): string {
         if (feature.properties["name:" + language]) {
             return feature.properties["name:" + language];
         }
@@ -659,7 +660,7 @@ export class PoiService {
         return "";
     }
 
-    public getDescription(feature: GeoJSON.Feature, language: string): string {
+    public getDescription(feature: Immutable<GeoJSON.Feature>, language: string): string {
         return feature.properties["description:" + language] || feature.properties.description;
     }
 
@@ -818,7 +819,7 @@ export class PoiService {
         await this.addPointToUploadQueue(featureContainingOnlyChanges);
     }
 
-    public getEditableDataFromFeature(feature: GeoJSON.Feature): EditablePublicPointData {
+    public getEditableDataFromFeature(feature: Immutable<GeoJSON.Feature>): EditablePublicPointData {
         const language = this.resources.getCurrentLanguageCodeSimplified();
         return {
             id: this.getFeatureId(feature),
@@ -866,7 +867,7 @@ export class PoiService {
         return feature;
     }
 
-    public getFeatureId(feature: GeoJSON.Feature): string {
+    public getFeatureId(feature: Immutable<GeoJSON.Feature>): string {
         if (feature.id) {
             return feature.id.toString();
         }

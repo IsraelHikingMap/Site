@@ -55,12 +55,12 @@ export class RouteEditPoiInteraction {
     public handleDragEnd(latlng: LatLngAlt, index: number) {
         const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
         if (recordedRouteState.isAddingPoi) {
-            const markerData = { ...recordedRouteState.route.markers[index] };
+            const markerData = structuredClone(recordedRouteState.route.markers[index]) as MarkerData;
             markerData.latlng = latlng;
             this.store.dispatch(new UpdateRecordingPoiAction(index, markerData));
         } else {
             const routeData = this.selectedRouteService.getSelectedRoute();
-            const markerData = { ...routeData.markers[index] } as MarkerData;
+            const markerData = structuredClone(routeData.markers[index]) as MarkerData;
             markerData.latlng = latlng;
             this.store.dispatch(new UpdatePrivatePoiAction(routeData.id, index, markerData));
         }
@@ -81,7 +81,7 @@ export class RouteEditPoiInteraction {
 
         const snapping = await this.getSnappingForPoint(latlng);
         if (snapping.markerData != null) {
-            markerData = { ...snapping.markerData };
+            markerData = structuredClone(snapping.markerData) as MarkerData;
         }
         this.addToSelectedRoute(markerData);
     }

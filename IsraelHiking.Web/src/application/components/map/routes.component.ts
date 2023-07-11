@@ -4,6 +4,7 @@ import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { MapLayerMouseEvent } from "maplibre-gl";
 import { Store, Select } from "@ngxs/store";
 import invert from "invert-color";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
 import { SelectedRouteService } from "../../services/selected-route.service";
@@ -42,10 +43,10 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     private static readonly END_COLOR = "red";
 
     @Select((state: ApplicationState) => state.routes.present)
-    public routes$: Observable<RouteData[]>;
+    public routes$: Observable<Immutable<RouteData[]>>;
 
     @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
-    public selectedRouteId$: Observable<RouteData[]>;
+    public selectedRouteId$: Observable<Immutable<RouteData[]>>;
 
     @Select((state: ApplicationState) => state.recordedRouteState.isAddingPoi)
     public isAddingPoi$: Observable<boolean>;
@@ -56,7 +57,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     public editingRouteGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
 
-    private routes: RouteData[];
+    private routes: Immutable<RouteData[]>;
 
     constructor(resources: ResourcesService,
                 private readonly selectedRouteService: SelectedRouteService,
@@ -82,7 +83,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.isAddingPoi$.subscribe(() => this.setInteractionAccordingToState());
     }
 
-    private handleRoutesChanges = (routes: RouteData[]) => {
+    private handleRoutesChanges = (routes: Immutable<RouteData[]>) => {
         this.routes = routes;
         this.setInteractionAccordingToState();
         this.buildFeatureCollections();
@@ -133,7 +134,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routePointPopupData = null;
     }
 
-    private createFeaturesForEditingRoute(route: RouteData): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
+    private createFeaturesForEditingRoute(route: Immutable<RouteData>): GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[] {
         const features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];
         for (let segmentIndex = 0; segmentIndex < route.segments.length; segmentIndex++) {
             const segmentFeature = {
@@ -212,7 +213,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         return features;
     }
 
-    private routeToProperties(route: RouteData): RouteViewProperties {
+    private routeToProperties(route: Immutable<RouteData>): RouteViewProperties {
         const color = route.color;
         const opacity = route.opacity || 1.0;
         const width = route.weight;

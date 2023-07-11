@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom, Observable } from "rxjs";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -17,7 +18,7 @@ export class AuthorizationService {
     private readonly redirectUrl: string;
 
     @Select((state: ApplicationState) => state.userState)
-    private userState$: Observable<UserState>;
+    private userState$: Observable<Immutable<UserState>>;
 
     private userState: UserState;
 

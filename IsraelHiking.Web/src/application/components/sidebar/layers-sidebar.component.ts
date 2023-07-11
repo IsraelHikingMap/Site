@@ -3,6 +3,7 @@ import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { Observable } from "rxjs";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
@@ -33,16 +34,16 @@ import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGro
 export class LayersSidebarComponent extends BaseMapComponent {
 
     @Select((state: ApplicationState) => state.layersState.baseLayers)
-    public baseLayers: Observable<EditableLayer[]>;
+    public baseLayers: Observable<Immutable<EditableLayer[]>>;
 
     @Select((state: ApplicationState) => state.layersState.overlays)
-    public overlays: Observable<Overlay[]>;
+    public overlays: Observable<Immutable<Overlay[]>>;
 
     @Select((state: ApplicationState) => state.layersState.categoriesGroups)
-    public categoriesGroups: Observable<CategoriesGroup>;
+    public categoriesGroups: Observable<Immutable<CategoriesGroup>>;
 
     @Select((state: ApplicationState) => state.routes.present)
-    public routes: Observable<RouteData[]>;
+    public routes: Observable<Immutable<RouteData[]>>;
 
     @Select((state: ApplicationState) => state.offlineState.lastModifiedDate)
     public lastModified: Observable<Date>;
@@ -74,7 +75,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.dialog.open(BaseLayerAddDialogComponent);
     }
 
-    public editBaseLayer(e: Event, layer: EditableLayer) {
+    public editBaseLayer(e: Event, layer: Immutable<EditableLayer>) {
         e.stopPropagation();
         const dialogRef = this.dialog.open(BaseLayerEditDialogComponent);
         dialogRef.componentInstance.setBaseLayer(layer);
@@ -97,7 +98,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.dialog.open(OverlayAddDialogComponent);
     }
 
-    public editOverlay(e: Event, layer: Overlay) {
+    public editOverlay(e: Event, layer: Immutable<Overlay>) {
         e.stopPropagation();
         const dialogRef = this.dialog.open(OverlayEditDialogComponent);
         dialogRef.componentInstance.setOverlay(layer);
@@ -232,7 +233,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public dropRoute(event: CdkDragDrop<RouteData[]>) {
-        const currentRoutes = [...this.store.selectSnapshot((s: ApplicationState) => s.routes).present];
+        const currentRoutes = [...this.store.selectSnapshot((s: ApplicationState) => s.routes).present] as RouteData[];
         moveItemInArray(currentRoutes, event.previousIndex, event.currentIndex);
         this.store.dispatch(new BulkReplaceRoutesAction(currentRoutes));
     }

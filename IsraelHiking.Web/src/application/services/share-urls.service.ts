@@ -4,6 +4,7 @@ import { timeout } from "rxjs/operators";
 import { orderBy } from "lodash-es";
 import { Store } from "@ngxs/store";
 import { firstValueFrom } from "rxjs";
+import type { Immutable } from "immer";
 
 import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
@@ -42,11 +43,11 @@ export class ShareUrlsService {
         this.syncShareUrls();
     }
 
-    public getShareUrlDisplayName(shareUrl: ShareUrl): string {
+    public getShareUrlDisplayName(shareUrl: Immutable<ShareUrl>): string {
         return shareUrl.description ? `${shareUrl.title} - ${shareUrl.description}` : shareUrl.title;
     }
 
-    public getShareSocialLinks(shareUrl: ShareUrl): IShareUrlSocialLinks {
+    public getShareSocialLinks(shareUrl: Immutable<ShareUrl>): IShareUrlSocialLinks {
         if (shareUrl == null) {
             return {
                 ihm: "",
@@ -151,7 +152,7 @@ export class ShareUrlsService {
         return updatedShareUrl;
     }
 
-    public async deleteShareUrl(shareUrl: ShareUrl): Promise<void> {
+    public async deleteShareUrl(shareUrl: Immutable<ShareUrl>): Promise<void> {
         this.loggingService.info(`[Shares] Deleting share with id: ${shareUrl.id} ${shareUrl.title}`);
         await firstValueFrom(this.httpClient.delete(Urls.urls + shareUrl.id));
         this.store.dispatch(new RemoveShareUrlAction(shareUrl.id));
@@ -181,7 +182,7 @@ export class ShareUrlsService {
         return shareUrl;
     }
 
-    public getSelectedShareUrl(): ShareUrl {
+    public getSelectedShareUrl(): Immutable<ShareUrl> {
         return this.store.selectSnapshot((s: ApplicationState) => s.inMemoryState).shareUrl;
     }
 }

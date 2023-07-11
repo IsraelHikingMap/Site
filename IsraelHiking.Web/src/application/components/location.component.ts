@@ -2,6 +2,7 @@ import { Component } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Observable } from "rxjs";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -32,7 +33,7 @@ export class LocationComponent extends BaseMapComponent {
     public pannedTimestamp$: Observable<Date>;
 
     @Select((state: ApplicationState) => state.gpsState.currentPosition)
-    private currentPosition$: Observable<GeolocationPosition>;
+    private currentPosition$: Observable<Immutable<GeolocationPosition>>;
 
     private lastSpeed: number;
     private lastSpeedTime: number;

@@ -6,6 +6,7 @@ import { LineLayerSpecification } from "maplibre-gl";
 import { Store, Select } from "@ngxs/store";
 import * as d3 from "d3";
 import type { Selection, ScaleContinuousNumeric } from "d3";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/selected-route.service";
@@ -101,7 +102,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public lineChartContainer: ElementRef;
 
     @Select((state: ApplicationState) => state.routes.present)
-    private routes$: Observable<RouteData[]>;
+    private routes$: Observable<Immutable<RouteData[]>>;
 
     @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
     private selectedRouteId$: Observable<string>;
@@ -110,13 +111,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     private zoom$: Observable<number>;
 
     @Select((state: ApplicationState) => state.gpsState.currentPosition)
-    private currentPosition$: Observable<GeolocationPosition>;
+    private currentPosition$: Observable<Immutable<GeolocationPosition>>;
 
     @Select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
     public statisticsVisible$: Observable<boolean>;
 
     @Select((state: ApplicationState) => state.configuration.language)
-    public language$: Observable<Language>;
+    public language$: Observable<Immutable<Language>>;
 
     @Select((state: ApplicationState) => state.configuration.isShowSlope)
     public isShowSlope$: Observable<boolean>;
@@ -775,7 +776,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         };
     }
 
-    private getKmPoints(latlngs: LatLngAlt[]): LatLngAlt[] {
+    private getKmPoints(latlngs: Immutable<LatLngAlt[]>): LatLngAlt[] {
         let length = 0;
         const markersDistance = this.getMarkerDistance() * 1000;
         const start = latlngs[0];
@@ -942,7 +943,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.setViewStatisticsValues(this.statistics);
     }
 
-    private getRouteForChart(): { latlngs: LatLngAltTime[]; color: string; weight: number} | null {
+    private getRouteForChart(): { latlngs: Immutable<LatLngAltTime[]>; color: string; weight: number} | null {
         const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
         const currentLocation = GeoLocationService.positionToLatLngTime(currentPosition);
         const closestRouteToGps = this.selectedRouteService.getClosestRouteToGPS(currentLocation, this.heading);

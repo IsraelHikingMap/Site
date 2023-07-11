@@ -3,6 +3,7 @@ import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
 import { PoiService } from "../../services/poi.service";
@@ -25,17 +26,17 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
 
     public poiGeoJsonData: GeoJSON.FeatureCollection<GeoJSON.Point>;
     public selectedPoiFeature: GeoJSON.Feature<GeoJSON.Point>;
-    public selectedPoiGeoJson: GeoJSON.FeatureCollection;
+    public selectedPoiGeoJson: Immutable<GeoJSON.FeatureCollection>;
     public selectedCluster: GeoJSON.Feature<GeoJSON.Point>;
     public clusterFeatures: GeoJSON.Feature<GeoJSON.Point>[];
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point>;
     public isShowCoordinatesPopup: boolean;
 
     @Select((state: ApplicationState) => state.layersState.overlays)
-    public overlays: Observable<Overlay[]>;
+    public overlays: Observable<Immutable<Overlay[]>>;
 
     @Select((state: ApplicationState) => state.poiState.selectedPointOfInterest)
-    public selectedPoi$: Observable<GeoJSON.Feature>;
+    public selectedPoi$: Observable<Immutable<GeoJSON.Feature>>;
 
     constructor(resources: ResourcesService,
                 private readonly router: Router,
@@ -67,7 +68,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         this.selectedPoi$.subscribe((poi) => this.onSelectedPoiChanged(poi));
     }
 
-    private onSelectedPoiChanged(poi: GeoJSON.Feature) {
+    private onSelectedPoiChanged(poi: Immutable<GeoJSON.Feature>) {
         this.selectedPoiFeature = !poi ? null : {
             type: "Feature",
             properties: poi.properties,
@@ -138,7 +139,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         return this.poiService.hasExtraData(feature, this.resources.getCurrentLanguageCodeSimplified());
     }
 
-    public isCoordinatesFeature(feature: GeoJSON.Feature) {
+    public isCoordinatesFeature(feature: Immutable<GeoJSON.Feature>) {
         if (!feature) {
             return false;
         }

@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { Observable } from "rxjs";
 import { Store, Select } from "@ngxs/store";
+import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -22,7 +23,7 @@ export class TracesComponent extends BaseMapComponent {
     public selectedTraceStart: LatLngAlt;
     public selectedFeature: GeoJSON.Feature<GeoJSON.LineString>;
     public missingCoordinates: LatLngAlt;
-    public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>;
+    public missingParts: Immutable<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     public selectedFeatureSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public isConfigOpen: boolean;
 
@@ -30,7 +31,7 @@ export class TracesComponent extends BaseMapComponent {
     private visibleTraceId$: Observable<string>;
 
     @Select((state: ApplicationState) => state.tracesState.missingParts)
-    private missingParts$: Observable<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
+    private missingParts$: Observable<Immutable<GeoJSON.FeatureCollection<GeoJSON.LineString>>>;
 
     constructor(resources: ResourcesService,
                 private readonly routesFactory: RoutesFactory,
