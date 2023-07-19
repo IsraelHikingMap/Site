@@ -1,26 +1,26 @@
 PODS:
-  - Capacitor (5.0.5):
+  - Capacitor (5.1.1):
     - CapacitorCordova
-  - CapacitorApp (5.0.3):
+  - CapacitorApp (5.0.5):
     - Capacitor
-  - CapacitorCamera (5.0.4):
+  - CapacitorCamera (5.0.5):
     - Capacitor
   - CapacitorCommunityKeepAwake (4.0.0):
     - Capacitor
   - CapacitorCommunityScreenBrightness (5.0.0):
     - Capacitor
-  - CapacitorCommunitySqlite (5.0.2):
+  - CapacitorCommunitySqlite (5.0.5-2):
     - Capacitor
     - SQLCipher
     - ZIPFoundation
-  - CapacitorCordova (5.0.5)
-  - CapacitorDevice (5.0.4):
+  - CapacitorCordova (5.1.1)
+  - CapacitorDevice (5.0.5):
     - Capacitor
-  - CapacitorTextZoom (5.0.4):
+  - CapacitorTextZoom (5.0.5):
     - Capacitor
-  - CapgoNativeAudio (6.0.10):
+  - CapgoNativeAudio (6.0.13):
     - Capacitor
-  - CordovaPlugins (5.0.5):
+  - CordovaPlugins (5.1.1):
     - CapacitorCordova
   - SQLCipher (4.5.3):
     - SQLCipher/standard (= 4.5.3)
@@ -72,17 +72,17 @@ EXTERNAL SOURCES:
     :path: "../capacitor-cordova-ios-plugins"
 
 SPEC CHECKSUMS:
-  Capacitor: b1248915663add1bd6567e2b67c1c1fa3abcf5e8
-  CapacitorApp: 7a5dec8b33573707164b293475d5c89ba684364a
-  CapacitorCamera: 9b5c8e809c1042f263994f97ba846aa37e974f12
+  Capacitor: 55956e1199b63efcd7f2dedffa5c6b9129c45aae
+  CapacitorApp: 9d91a5a400e4ad8cafe66a02cc9d8073c864d7bb
+  CapacitorCamera: 834aade2952a06bd1e46c078d1068a980f37f8c9
   CapacitorCommunityKeepAwake: f3442e3e9b666dd0162522fbd053da1fe81ede20
   CapacitorCommunityScreenBrightness: b2d9c6fffee6b684994cd69f727f2090e2f05c6d
-  CapacitorCommunitySqlite: a75c9a813ff822d121bb273b8fe517f66a336e2c
-  CapacitorCordova: f8c06b897c74ee8f7701fe10e6443b40822bc83a
-  CapacitorDevice: eb4b5e3b42ac35d2527f20aad296b59e0785dc8d
-  CapacitorTextZoom: b1fb624a67d3a487a4b5783d18aaa7b2898bab77
-  CapgoNativeAudio: 8d28bab3a4dc95c1bb25fe6275e6fc7ae8e1a2cd
-  CordovaPlugins: dbee95cce92d56d288137a7038d8ced441a8db09
+  CapacitorCommunitySqlite: 409b6d635462e9e409c2a9f3b3ce2fa9538d0055
+  CapacitorCordova: b31a46ad379c93a5c04e0598a6164e8cb90c2bb2
+  CapacitorDevice: 4c78eeaa553c7a46bc07372c6eb03a5665459885
+  CapacitorTextZoom: a0a325e33c8c67cb85afe8c0e8991ed9f9a7efc0
+  CapgoNativeAudio: 3cf6582984eacc721801be7e4c2abb5de7060fdb
+  CordovaPlugins: 1ca1daf54e40a8385e57d76df8fd2a46bf38b68a
   SQLCipher: 57fa9f863fa4a3ed9dd3c90ace52315db8c0fdca
   ZIPFoundation: d170fa8e270b2a32bef9dcdcabff5b8f1a5deced
 
