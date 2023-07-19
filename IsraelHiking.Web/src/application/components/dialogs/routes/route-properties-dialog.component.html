@@ -56,19 +56,19 @@
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
             <mat-menu #appMenu="matMenu" overlapTrigger="false" [xPosition]="'before'">
-                <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="saveRouteToFile()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Save route to file">
+                <button mat-menu-item (click)="saveRouteToFile()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Save route to file">
                     <i class="fa fa-lg icon-external-link-square"></i>
                     <span class="ms-2">{{resources.saveRouteToFile}}</span>
                 </button>
-                <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="moveToRoute()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Move to route">
+                <button mat-menu-item (click)="moveToRoute()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Move to route">
                     <i class="fa fa-lg icon-crosshairs"></i>
                     <span class="ms-2">{{resources.moveToRoute}}</span>
                 </button>
-                <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="makeAllPointsEditable()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Make all points editable">
+                <button mat-menu-item (click)="makeAllPointsEditable()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Make all points editable">
                     <i class="fa fa-lg icon-map-marker-group"></i>
                     <span class="ms-2">{{resources.generateMarkersForAllPoints}}</span>
                 </button>
-                <button mat-menu-item [ngClass]="resources.getTextAlignment()" (click)="reverseRoute()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Reverse route">
+                <button mat-menu-item (click)="reverseRoute()" angulartics2On="click" angularticsCategory="Route" angularticsAction="Reverse route">
                     <i class="fa fa-lg icon-arrows-h"></i>
                     <span class="ms-2">{{resources.reverseRoute}}</span>
                 </button>
