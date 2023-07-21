@@ -190,9 +190,10 @@ namespace IsraelHiking.API.Controllers
                     continue;
                 }
                 container.SetTitles();
-                return language == "he"
-                    ? defaultDescription.Replace("מסלול", "מסלול ב" + container.GetTitle(language))
-                    : defaultDescription.Replace("Route", "A route in " + container.GetTitle(language));
+                var replacementTarget = language == "he"
+                    ? "מסלול ב" + container.GetTitle(language)
+                    : "A route in " + container.GetTitle(language);
+                return defaultDescription.Replace("מסלול", replacementTarget).Replace("Route", replacementTarget).Replace("Recorded using IHM at", replacementTarget);
             }
 
             return defaultDescription;

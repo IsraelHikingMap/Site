@@ -185,6 +185,50 @@ namespace IsraelHiking.API.Tests.Controllers
 
             osmGateWay.Received(1).CreateTrace(Arg.Is<GpxFile>(f => f.Description.Contains("A route in")), Arg.Any<Stream>());
         }
+        
+        [TestMethod]
+        public void PostUploadRouteData_RecordedUsingName_ShouldCreateTraceAndUpdateDescriptionToMatchArea()
+        {
+            _controller.SetupIdentity();
+            var osmGateWay = SetupOAuthClient();
+            var routeData = new RouteData
+            {
+                Id = "42",
+                Name = "Recorded using IHM at 2000-01-01",
+                Segments = new List<RouteSegmentData>
+                {
+                    new()
+                    {
+                        Latlngs = new List<LatLngTime>
+                        {
+                            new(0, 0),
+                            new(1, 1),
+                            new(2, 2)
+                        }
+                    }
+                }
+            };
+            var containingFeature = new Feature(new Polygon(new LinearRing(new[]
+            {
+                new Coordinate(-1, -1),
+                new Coordinate(-1, 3),
+                new Coordinate(3, 3),
+                new Coordinate(3, -1),
+                new Coordinate(-1, -1)
+            })), new AttributesTable
+            {
+                {FeatureAttributes.NAME, "area"},
+                {FeatureAttributes.ID, "42"},
+                {FeatureAttributes.POI_ID, "42"}
+            });
+            containingFeature.SetTitles();
+            _searchRepository.GetContainers(Arg.Any<Coordinate>()).Returns(new List<IFeature> {containingFeature});
+            _distributedCache.Get(Arg.Any<string>()).Returns((byte[])null);
+            
+            _controller.PostUploadRouteData(routeData, Languages.ENGLISH).Wait();
+
+            osmGateWay.Received(1).CreateTrace(Arg.Is<GpxFile>(f => f.Description.Contains("A route in area") && f.Name.Contains("Recorded using IHM")), Arg.Any<Stream>());
+        }
 
         [TestMethod]
         public void PutGpsTrace_ShouldUpdate()
