@@ -56,7 +56,8 @@ namespace IsraelHiking.API.Services
             waterCategory.Items.Add(new IconAndTags(springIcon, new List<KeyValuePair<string, string>>
             {
                 new("natural", "spring"),
-                new("water", "pond")
+                new("water", "pond"),
+                new("water", "reservoir")
             }));
             var waterfallIcon = new IconColorCategory
             {
