@@ -125,5 +125,91 @@ namespace IsraelHiking.API.Tests.Services
             Assert.AreEqual("icon-bike", iconColorCategory.Icon);
             Assert.AreEqual(Categories.ROUTE_BIKE, iconColorCategory.Category);
         }
+        
+        [TestMethod]
+        public void River_ShouldReturnHighFactor()
+        {
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            {
+                {"waterway", "river"}
+            });
+
+            Assert.AreEqual(1, factor);
+            Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
+        }
+        
+        [TestMethod]
+        public void Stream_ShouldReturnHighFactor()
+        {
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            {
+                {"waterway", "stream"}
+            });
+
+            Assert.AreEqual(1, factor);
+            Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
+        }
+        
+        [TestMethod]
+        public void Wadi_ShouldReturnHighFactor()
+        {
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            {
+                {"waterway", "wadi"}
+            });
+
+            Assert.AreEqual(1, factor);
+            Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
+        }
+        
+        [TestMethod]
+        public void Farm_ShouldReturnHighFactor()
+        {
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            {
+                {"landuse", "farmyard"}
+            });
+
+            Assert.AreEqual(1, factor);
+            Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
+        }
+        
+        [TestMethod]
+        public void Peak_WithNoDescription_ShouldReturnNoneCategory()
+        {
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            {
+                {"natural", "peak"},
+            });
+
+            Assert.AreEqual(1, factor);
+            Assert.AreEqual(Categories.NONE, iconColorCategory.Category);
+        }
+        
+        [TestMethod]
+        public void Peak_WithDescription_ShouldReturnNaturalCategory()
+        {
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            {
+                {"natural", "peak"},
+                {FeatureAttributes.DESCRIPTION, "desc"}
+            });
+
+            Assert.AreEqual(1, factor);
+            Assert.AreEqual(Categories.NATURAL, iconColorCategory.Category);
+        }
+        
+        [TestMethod]
+        public void Peak_WithImage_ShouldReturnNaturalCategory()
+        {
+            var (factor, iconColorCategory) = _tagsHelper.GetInfo(new AttributesTable
+            {
+                {"natural", "peak"},
+                {FeatureAttributes.IMAGE_URL, "image_url"}
+            });
+
+            Assert.AreEqual(1, factor);
+            Assert.AreEqual(Categories.NATURAL, iconColorCategory.Category);
+        }
     }
 }
