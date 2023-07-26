@@ -58,7 +58,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.updateCurrentShare = false;
         this.shareOverlays = false;
         this.canUpdate = false;
-        this.unhideRoutes = true;
+        this.unhideRoutes = false;
         if (shareUrl != null) {
             this.title = shareUrl.title;
             this.description = shareUrl.description;
