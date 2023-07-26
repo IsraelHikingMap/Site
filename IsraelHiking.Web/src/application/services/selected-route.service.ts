@@ -250,18 +250,18 @@ export class SelectedRouteService {
         if (SpatialService.getDistanceInMeters(closestRouteLatLngToCheck, latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
             closestRoute = this.reverseRouteInternal(closestRoute);
         }
-        if (isSelectedRouteSecond) {
-            const segments = [...selectedRoute.segments] as RouteSegmentData[];
-            segments.splice(0, 1);
-            segments.splice(0, 0, ...structuredClone(closestRoute.segments) as RouteSegmentData[]);
-            mergedRoute.segments = segments;
-        } else {
-            // remove first segment:
-            const segments = [...closestRoute.segments] as RouteSegmentData[];
-            segments.splice(0, 1);
-            segments.splice(0, 0, ...structuredClone(closestRoute.segments) as RouteSegmentData[]);
-            mergedRoute.segments = segments;
+        const firstPart = structuredClone(isSelectedRouteSecond ? closestRoute.segments : selectedRoute.segments) as RouteSegmentData[]; 
+        const secondPart = structuredClone(isSelectedRouteSecond ? selectedRoute.segments : closestRoute.segments) as RouteSegmentData[];
+
+        // remove first segment (which is a signle point):
+        secondPart.splice(0, 1);
+        const lastSegmentLatlngs = firstPart[firstPart.length - 1].latlngs;
+        const lastLatlngOfFirstPart = lastSegmentLatlngs[lastSegmentLatlngs.length - 1];
+        if (lastLatlngOfFirstPart.lat !== secondPart[0].latlngs[0].lat && 
+            lastLatlngOfFirstPart.lng !== secondPart[0].latlngs[0].lng) {
+                secondPart[0].latlngs.splice(0, 0, lastLatlngOfFirstPart);
         }
+        mergedRoute.segments = firstPart.concat(secondPart);
         this.store.dispatch(new MergeRoutesAction(selectedRoute.id, closestRoute.id, mergedRoute));
     }
 

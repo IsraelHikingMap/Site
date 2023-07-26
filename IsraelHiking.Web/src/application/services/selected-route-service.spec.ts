@@ -8,7 +8,7 @@ import { RouterService } from "./router.service";
 import { RoutesFactory } from "./routes.factory";
 import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
-import { AddRouteAction, ChangeRouteStateAction, BulkReplaceRoutesAction, RoutesReducer } from "../reducers/routes.reducer";
+import { AddRouteAction, ChangeRouteStateAction, BulkReplaceRoutesAction, RoutesReducer, MergeRoutesAction } from "../reducers/routes.reducer";
 import type { RouteData } from "../models/models";
 
 
@@ -330,4 +330,239 @@ describe("Selected Route Service", () => {
             expect(closetRoute.id).toBe("1");
         }
     ));
+
+    it("Should merge routes with the same direction", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 1, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }, {
+                id: "2",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 2, lng: 2, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 2, lng: 2, timestamp: new Date()},
+                        {lat: 3, lng: 3, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.mergeRoutes(false);
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
+    }));
+
+    it("Should merge routes with the same direction when selected route is second", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 1, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }, {
+                id: "2",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 2, lng: 2, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 2, lng: 2, timestamp: new Date()},
+                        {lat: 3, lng: 3, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "2");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.mergeRoutes(true);
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
+    }));
+
+    it("Should merge routes with oposite direction", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 1, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }, {
+                id: "2",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 3, lng: 3, timestamp: new Date()},
+                        {lat: 3, lng: 3, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 3, lng: 3, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.mergeRoutes(false);
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(3);
+    }));
+
+    it("Should merge routes with a gap and remove the gap", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 1, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }, {
+                id: "2",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 2.0001, lng: 2.0001, timestamp: new Date()},
+                        {lat: 2.0001, lng: 2.0001, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2.0001, lng: 2.0001},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 2.0001, lng: 2.0001, timestamp: new Date()},
+                        {lat: 3, lng: 3, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.mergeRoutes(false);
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(MergeRoutesAction);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments.length).toBe(3);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[0].latlngs[0].lat).toBe(1);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[1].latlngs[1].lat).toBe(2);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[0].lat).toBe(2);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(2.0001);
+            expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[2].lat).toBe(3);
+    }));
 });
