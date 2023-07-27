@@ -63,7 +63,8 @@ void SetupApplication(WebApplication app)
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Israel Hiking Map API V1");
     });
     // This should be the last middleware
-    app.UseMiddleware<NonApiMiddleware>();
+    app.UseMiddleware<CrawlersMiddleware>();
+    app.MapFallbackToFile("index.html");
     InitializeServices(app.Services);
 }
 

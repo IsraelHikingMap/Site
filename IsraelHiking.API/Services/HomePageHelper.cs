@@ -18,17 +18,12 @@ namespace IsraelHiking.API.Services
         private readonly string _fileFooter;
 
         /// <summary>
-        /// Returns the index.html FileInfo
-        /// </summary>
-        public IFileInfo IndexFileInfo { get; }
-        
-        /// <summary>
         /// Constructor
         /// </summary>
         public HomePageHelper(IWebHostEnvironment environment)
         {
-            IndexFileInfo = environment.WebRootFileProvider.GetFileInfo("/index.html");
-            using var reader = new StreamReader(IndexFileInfo.CreateReadStream());
+            var indexFileInfo = environment.WebRootFileProvider.GetFileInfo("/index.html");
+            using var reader = new StreamReader(indexFileInfo.CreateReadStream());
             var fileContents = reader.ReadToEnd();
             var parts = Regex.Split(fileContents, SPLIT_PATTERN);
             _fileHeader = parts[0];

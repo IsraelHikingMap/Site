@@ -12,15 +12,14 @@ using NSubstitute;
 using System;
 using System.IO;
 using System.Text;
-using Microsoft.Extensions.FileProviders;
 using Wangkanai.Detection.Services;
 
 namespace IsraelHiking.API.Tests.Services
 {
     [TestClass]
-    public class NonApiMiddlewareTests
+    public class CrawlersMiddlewareTests
     {
-        private NonApiMiddleware _middleware;
+        private CrawlersMiddleware _middleware;
         private IServiceProvider _serviceProvider;
         private IShareUrlsRepository _repository;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
@@ -38,7 +37,7 @@ namespace IsraelHiking.API.Tests.Services
             var config = new ConfigurationData();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(config);
-            _middleware = new NonApiMiddleware(_next, _homePageHelper, _repository,
+            _middleware = new CrawlersMiddleware(_next, _homePageHelper, _repository,
                 _pointsOfInterestProvider);
         }
 
@@ -56,12 +55,17 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void TestAPI_ShouldPassThrough()
         {
-            var context = new DefaultHttpContext();
-            context.Request.Path = new PathString($"/api/something");
-            context.Request.Host = new HostString("israelhiking.osm.org.il");
-            context.Request.QueryString = QueryString.Empty;
-            context.Request.PathBase = PathString.Empty;
-            context.Request.Scheme = "http";
+            var context = new DefaultHttpContext
+            {
+                Request =
+                {
+                    Path = new PathString("/api/something"),
+                    Host = new HostString("israelhiking.osm.org.il"),
+                    QueryString = QueryString.Empty,
+                    PathBase = PathString.Empty,
+                    Scheme = "http"
+                }
+            };
 
             _middleware.InvokeAsync(context, null).Wait();
 
@@ -69,19 +73,61 @@ namespace IsraelHiking.API.Tests.Services
         }
         
         [TestMethod]
+        public void TestNonCrawler_ShouldPassThrough()
+        {
+            var context = new DefaultHttpContext
+            {
+                Request =
+                {
+                    Path = new PathString("/something"),
+                    Host = new HostString("israelhiking.osm.org.il"),
+                    QueryString = QueryString.Empty,
+                    PathBase = PathString.Empty,
+                    Scheme = "http"
+                }
+            };
+
+            var detectionService = Substitute.For<IDetectionService>();
+            var crawlerService = Substitute.For<ICrawlerService>();
+            crawlerService.IsCrawler.Returns(false);
+            detectionService.Crawler.Returns(crawlerService);
+            _serviceProvider.GetService(typeof(IDetectionService)).Returns(detectionService);
+
+            _middleware.InvokeAsync(context, detectionService).Wait();
+
+            _next.Received().Invoke(context);
+        }
+        
+        [TestMethod]
+        public void TestCrawler_NotExpected_ShouldPassThrough()
+        {
+            var context = new DefaultHttpContext
+            {
+                Request =
+                {
+                    Path = new PathString($"/somthing")
+                }
+            };
+            var detectionService = SetupDetectionService();
+
+            _middleware.InvokeAsync(context, detectionService).Wait();
+
+            _next.Received().Invoke(context);
+        }
+        
+        [TestMethod]
         public void TestCrawler_Poi()
         {
-            var source = "source";
-            var id = "id";
+            const string source = "source";
+            const string id = "id";
             var context = new DefaultHttpContext();
             using var stream = new MemoryStream();
             context.Response.Body = stream;
             context.Request.Path = new PathString($"/poi/{source}/{id}");
 
-            var name = "name";
-            var description = "description";
-            var url =
-                "https://upload.wikimedia.org/wikipedia/commons/6/66/Israel_Hiking_Map_%D7%A2%D7%99%D7%9F_%D7%A0%D7%98%D7%A3.jpeg";
+            const string name = "name";
+            const string description = "description";
+            const string url = "https://upload.wikimedia.org/wikipedia/commons/6/66/Israel_Hiking_Map_%D7%A2%D7%99%D7%9F_%D7%A0%D7%98%D7%A3.jpeg";
             
             _pointsOfInterestProvider.GetFeatureById(source, id).Returns(new Feature(new Point(0, 0),
                 new AttributesTable
@@ -101,41 +147,39 @@ namespace IsraelHiking.API.Tests.Services
         }
         
         [TestMethod]
-        public void TestCrawler_NotExistingPoi_ShouldReturnDefault()
+        public void TestCrawler_NotExistingPoi_ShouldCallNext()
         {
-            var source = "source";
-            var id = "id";
-            var context = new DefaultHttpContext();
-            using var stream = new MemoryStream();
-            context.Response.Body = stream;
-            context.Request.Path = new PathString($"/poi/{source}/{id}");
+            const string source = "source";
+            const string id = "id";
+            var context = new DefaultHttpContext
+            {
+                Request =
+                {
+                    Path = new PathString($"/poi/{source}/{id}")
+                }
+            };
             var detectionService = SetupDetectionService();
-            var fileInfo = Substitute.For<IFileInfo>();
-            fileInfo.CreateReadStream().Returns(new MemoryStream(new byte[] {1}));
-            _homePageHelper.IndexFileInfo.Returns(fileInfo);
             _pointsOfInterestProvider.GetFeatureById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
             
             _middleware.InvokeAsync(context, detectionService).Wait();
             
             _homePageHelper.DidNotReceive().Render(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
-            
-            CollectionAssert.AreEqual(new byte[] { 1 }, stream.ToArray());
+            _next.Received().Invoke(context);
         }
         
         [TestMethod]
         public void TestCrawler_PoiWithExternalDescription_ShouldReturnExternal()
         {
-            var source = "source";
-            var id = "id";
+            const string source = "source";
+            const string id = "id";
             var context = new DefaultHttpContext();
             var stream = new MemoryStream();
             context.Response.Body = stream;
             context.Request.Path = new PathString($"/poi/{source}/{id}");
 
-            var name = "Jabel Wadi";
-            var externalDescription = "This feature only has an external description";
-            var url =
-                "https://upload.wikimedia.org/wikipedia/commons/6/66/Israel_Hiking_Map_%D7%A2%D7%99%D7%9F_%D7%A0%D7%98%D7%A3.jpeg";
+            const string name = "Jabel Wadi";
+            const string externalDescription = "This feature only has an external description";
+            const string url = "https://upload.wikimedia.org/wikipedia/commons/6/66/Israel_Hiking_Map_%D7%A2%D7%99%D7%9F_%D7%A0%D7%98%D7%A3.jpeg";
             
             _pointsOfInterestProvider.GetFeatureById(source, id).Returns(new Feature(new Point(0, 0),
                 new AttributesTable
@@ -153,9 +197,30 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
+        public void TestCrawler_NonExistingShare()
+        {
+            const string id = "id";
+            var context = new DefaultHttpContext();
+            var stream = new MemoryStream();
+            context.Response.Body = stream;
+            context.Request.Path = new PathString($"/share/{id}");
+            context.Request.Host = new HostString("israelhiking.osm.org.il");
+            context.Request.QueryString = QueryString.Empty;
+            context.Request.PathBase = PathString.Empty;
+            context.Request.Scheme = "http";
+            _repository.GetUrlById(id).Returns((ShareUrl)null);
+            var detectionService = SetupDetectionService();
+
+            _middleware.InvokeAsync(context, detectionService).Wait();
+
+            _next.Received().Invoke(context);
+            _homePageHelper.DidNotReceive().Render(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
+        }
+        
+        [TestMethod]
         public void TestCrawler_Share()
         {
-            var id = "id";
+            const string id = "id";
             var context = new DefaultHttpContext();
             var stream = new MemoryStream();
             context.Response.Body = stream;
