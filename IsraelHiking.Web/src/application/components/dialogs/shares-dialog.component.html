@@ -6,7 +6,8 @@
     <div matDialogTitle>
         <div class="flex flex-row w-full">
             <mat-form-field hintLabel="{{resources.searchPlaceHolder}}" class="w-full">
-                <input matInput type="text" class="w-full" [formControl]="searchTerm" placeholder="{{resources.search}}" />
+                <mat-label>{{resources.search}}</mat-label>
+                <input matInput type="text" class="w-full" [formControl]="searchTerm" />
             </mat-form-field>
         </div>
         <button type="button" mat-button matDialogClose tabindex="-1" class="flex flex-col justify-start items-start"><i class="fa icon-close"></i></button>
@@ -30,12 +31,14 @@
                 <ng-container *ngIf="isShareUrlInEditMode(shareUrl.id)">
                     <div class="flex flex-row">
                         <mat-form-field class="w-full">
-                            <textarea matInput type="text" [(ngModel)]="shareUrlInEditMode.title" placeholder="{{resources.titlePlaceHolder}}"></textarea>
+                            <mat-label>{{resources.titlePlaceHolder}}</mat-label>
+                            <textarea matInput type="text" [(ngModel)]="shareUrlInEditMode.title"></textarea>
                         </mat-form-field>
                     </div>
                     <div class="flex flex-row">
                         <mat-form-field class="w-full">
-                            <textarea matInput  type="text" [(ngModel)]="shareUrlInEditMode.description" placeholder="{{resources.descriptionPlaceHolder}}"></textarea>
+                            <mat-label>{{resources.descriptionPlaceHolder}}</mat-label>
+                            <textarea matInput  type="text" [(ngModel)]="shareUrlInEditMode.description"></textarea>
                         </mat-form-field>
                     </div>
                 </ng-container>

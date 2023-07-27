@@ -10,12 +10,14 @@
         <div *ngIf="!shareAddress">
             <div class="flex flex-row">
                 <mat-form-field class="w-full" hintLabel="{{resources.titlePlaceHolder}}">
-                    <input matInput class="w-full" type="text" [(ngModel)]="title" placeholder="{{resources.title}}" />
+                    <mat-lable>{{resources.title}}</mat-lable>
+                    <input matInput class="w-full" type="text" [(ngModel)]="title" />
                 </mat-form-field>
             </div>
             <div class="flex flex-row">
                 <mat-form-field class="w-full" hintLabel="{{resources.descriptionPlaceHolder}}">
-                    <textarea matInput class="w-full" rows="2" type="text" [(ngModel)]="description" placeholder="{{resources.description}}"></textarea>
+                    <mat-label>{{resources.description}}</mat-label>
+                    <textarea matInput class="w-full" rows="2" type="text" [(ngModel)]="description"></textarea>
                 </mat-form-field>
             </div>
             <div class="flex flex-row">

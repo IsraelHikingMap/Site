@@ -9,10 +9,12 @@
     </div>
     <div mat-dialog-content>
         <mat-form-field class="w-full">
-            <input matInput type="text" class="w-full" [(ngModel)]="routeData.name" placeholder="{{resources.name}}" required=""/>
+            <mat-label>{{resources.name}}</mat-label>
+            <input matInput type="text" class="w-full" [(ngModel)]="routeData.name" required=""/>
         </mat-form-field>
         <mat-form-field class="w-full">
-            <textarea matInput rows="2" type="text" class="w-full" [dir]="resources.getDirection(routeData.description)" [(ngModel)]="routeData.description" placeholder="{{resources.description}}"></textarea>
+            <mat-label>{{resources.description}}</mat-label>
+            <textarea matInput rows="2" type="text" class="w-full" [dir]="resources.getDirection(routeData.description)" [(ngModel)]="routeData.description"></textarea>
         </mat-form-field>
         
         <div class="flex flex-row flex-wrap justify-between items-stretch">

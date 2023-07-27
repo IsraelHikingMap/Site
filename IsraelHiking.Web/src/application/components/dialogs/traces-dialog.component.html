@@ -6,7 +6,8 @@
     <div matDialogTitle>
         <div class="flex flex-row w-full">
             <mat-form-field hintLabel="{{resources.searchPlaceHolder}}" class="w-full">
-                <input matInput type="text" class="w-full" [formControl]="searchTerm" placeholder="{{resources.search}}" />
+                <mat-label>{{resources.search}}</mat-label>
+                <input matInput type="text" class="w-full" [formControl]="searchTerm" />
             </mat-form-field>
         </div>
         <button type="button" mat-button class="flex flex-col justify-start items-start" matDialogClose tabindex="-1"><i class="fa icon-close"></i></button>
@@ -34,12 +35,14 @@
                 <ng-container *ngIf="isTraceInEditMode(trace.id)">
                     <div class="flex flex-row">
                         <mat-form-field class="w-full">
-                            <textarea matInput type="text" [(ngModel)]="traceInEditMode.description" placeholder="{{resources.description}}"></textarea>
+                            <mat-label>{{resources.description}}</mat-label>
+                            <textarea matInput type="text" [(ngModel)]="traceInEditMode.description"></textarea>
                         </mat-form-field>
                     </div>
                     <div class="flex flex-row">
                         <mat-form-field class="w-full">
-                            <input matInput type="text" [(ngModel)]="traceInEditMode.tagsString" placeholder="{{resources.tags}}" />
+                            <mat-label>{{resources.tags}}</mat-label>
+                            <input matInput type="text" [(ngModel)]="traceInEditMode.tagsString" />
                         </mat-form-field>
                     </div>
                     <div class="flex flex-row">
