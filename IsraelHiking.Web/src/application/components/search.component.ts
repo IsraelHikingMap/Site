@@ -144,9 +144,10 @@ export class SearchComponent extends BaseMapComponent {
         this.directional.overlayLocation = null;
     }
 
-    private focusOnSearchInput() {
+    public focusOnSearchInput() {
         // ChangeDetectionRef doesn't work well for some reason...
-        setTimeout(() => {
+        setTimeout(() => {            
+            this.hasFocus = true;
             this.searchFromInput.nativeElement.focus();
             this.searchFromInput.nativeElement.select();
         }, 100);
