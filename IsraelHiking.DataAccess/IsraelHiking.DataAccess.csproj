@@ -21,18 +21,11 @@
 
   <ItemGroup>
     <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.7.5" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
     <PackageReference Include="NEST" Version="7.17.5" />
     <PackageReference Include="NetTopologySuite" Version="2.5.0" />
-    <PackageReference Include="NetTopologySuite.IO.GeoJSON4STJ" Version="3.1.0-pre.193970619" />
-    <PackageReference Include="OAuth.DotNetCore" Version="3.0.1" />
     <PackageReference Include="OsmSharp" Version="7.0.0-pre022" />
-    <PackageReference Include="ProjNet" Version="2.0.0" />
-    <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
-    <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
-    <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

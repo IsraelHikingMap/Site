@@ -25,30 +25,6 @@ namespace IsraelHiking.DataAccess
             File.WriteAllBytes(filePath, content);
         }
 
-        public void WriteAllText(string filePath, string content)
-        {
-            File.WriteAllText(filePath, content);
-        }
-
-        public string GetCurrentDirectory()
-        {
-            return Directory.GetCurrentDirectory();
-        }
-
-        public void CreateDirectory(string path)
-        {
-            Directory.CreateDirectory(path);
-        }
-
-        public void Move(string sourceFileName, string targetFileName)
-        {
-            if (File.Exists(targetFileName))
-            {
-                File.Delete(targetFileName);
-            }
-            File.Move(sourceFileName, targetFileName);
-        }
-
         public Stream CreateWriteStream(string filePath)
         {
             return File.Create(filePath);

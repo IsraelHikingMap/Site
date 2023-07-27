@@ -78,18 +78,12 @@
     <PackageReference Include="Codecov" Version="1.13.0" />
     <PackageReference Include="LazyCache.AspNetCore" Version="2.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.9" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.2" />
-    <PackageReference Include="OAuth.DotNetCore" Version="3.0.1" />
     <PackageReference Include="OsmSharp.IO.API" Version="1.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
-    <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
     <PackageReference Include="Wangkanai.Detection" Version="7.4.0" />
     <PackageReference Include="NeoSmart.Caching.Sqlite" Version="6.1.0" />
   </ItemGroup>
