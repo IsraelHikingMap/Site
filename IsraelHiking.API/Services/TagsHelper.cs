@@ -5,6 +5,7 @@ using NetTopologySuite.Features;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using IsraelHiking.Common.Extensions;
 
 namespace IsraelHiking.API.Services
 {
@@ -33,9 +34,6 @@ namespace IsraelHiking.API.Services
             _categories.Add(CreateWikipediaCategory());
             _categories.Add(CreateINatureCategory());
             _categories.AddRange(CreateRoutesCategories());
-
-            // For search but not as POI
-            _categories.Add(CreateNoneCategory());
         }
 
         private Category CreateWaterCategory()
@@ -252,27 +250,6 @@ namespace IsraelHiking.API.Services
             return iNatureCategory;
         }
 
-        private Category CreateNoneCategory()
-        {
-            var noneCategory = new Category
-            {
-                Icon = "",
-                Name = Categories.NONE,
-                Color = ""
-            };
-            var peakIcon = new IconColorCategory("icon-peak");
-            noneCategory.Items.Add(new IconAndTags(peakIcon, "natural", "peak"));
-
-            noneCategory.Items.Add(new IconAndTags(new IconColorCategory(), new List<KeyValuePair<string, string>>
-            {
-                new("landuse", "farmyard"),
-                new("waterway", "stream"),
-                new("waterway", "river"),
-                new("waterway", "wadi")
-            }));
-            return noneCategory;
-        }
-
         private Category[] CreateRoutesCategories()
         {
             var hikeCategory = new Category
@@ -324,11 +301,30 @@ namespace IsraelHiking.API.Services
             }
             var iconTags = _categories.SelectMany(c => c.Items)
                 .FirstOrDefault(i => i.Tags
-                    .Any(t => attributesTable.Exists(t.Key) && attributesTable[t.Key].ToString() == t.Value));
+                    .Any(t => attributesTable.Has(t.Key, t.Value)));
             if (iconTags != null)
             {
                 return (1, iconTags.IconColorCategory);
             }
+
+            if (attributesTable.Has("landuse", "farmyard") ||
+                attributesTable.Has("waterway", "stream") ||
+                attributesTable.Has("waterway", "river") ||
+                attributesTable.Has("waterway", "wadi"))
+            {
+                return (1, new IconColorCategory());
+            }
+            
+            if (attributesTable.Has("natural", "peak"))
+            {
+                var category = attributesTable.GetNames().Any(n =>
+                    n.StartsWith(FeatureAttributes.DESCRIPTION) || n.StartsWith(FeatureAttributes.IMAGE_URL))
+                    ? Categories.NATURAL
+                    : Categories.NONE;
+                return (1, new IconColorCategory("icon-peak", category));
+                
+            }
+
             if (attributesTable.GetNames().Any(k => k.StartsWith(FeatureAttributes.WIKIPEDIA)))
             {
                 return (1, new IconColorCategory("icon-wikipedia-w", Categories.WIKIPEDIA));
@@ -374,4 +370,3 @@ namespace IsraelHiking.API.Services
         }
     }
 }
-;
