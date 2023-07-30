@@ -9,7 +9,7 @@ import { RoutesFactory } from "./routes.factory";
 import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
 import { AddRouteAction, ChangeRouteStateAction, BulkReplaceRoutesAction, RoutesReducer, MergeRoutesAction, SplitRouteAction, ReplaceRouteAction, UpdateSegmentsAction, DeleteSegmentAction, ReplaceSegmentsAction, AddPrivatePoiAction } from "../reducers/routes.reducer";
-import type { MarkerData, RouteData } from "../models/models";
+import type { RouteData } from "../models/models";
 
 
 describe("Selected Route Service", () => {
@@ -373,7 +373,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.splitRoute(1);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SplitRouteAction);
-            let action = spy.calls.all()[0].args[0] as SplitRouteAction;
+            const action = spy.calls.all()[0].args[0] as SplitRouteAction;
             expect(action.routeId).toBe("1");
             expect(action.routeData.segments.length).toBe(2);
             expect(action.routeData.segments[0].latlngs[0].lat).toBe(1);
@@ -425,7 +425,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.splitRoute(1);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SplitRouteAction);
-            let action = spy.calls.all()[0].args[0] as SplitRouteAction;
+            const action = spy.calls.all()[0].args[0] as SplitRouteAction;
             expect(action.splitRouteData.name).toBe("name split 2");
     }));
 
@@ -703,7 +703,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.reverseRoute("1");
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ReplaceRouteAction);
-            let action = spy.calls.all()[0].args[0] as ReplaceRouteAction;
+            const action = spy.calls.all()[0].args[0] as ReplaceRouteAction;
             expect(action.routeId).toBe("1");
             expect(action.routeData.segments.length).toBe(3);
             expect(action.routeData.segments[0].latlngs[0].lat).toBe(3);
@@ -751,7 +751,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.removeSegment(0);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateSegmentsAction);
-            let action = spy.calls.all()[0].args[0] as UpdateSegmentsAction;
+            const action = spy.calls.all()[0].args[0] as UpdateSegmentsAction;
             expect(action.routeId).toBe("1");
             expect(action.indices).toEqual([0, 1]);
             expect(action.segmentsData[0].latlngs[0].lat).toBe(2);
@@ -797,7 +797,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.removeSegment(2);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(DeleteSegmentAction);
-            let action = spy.calls.all()[0].args[0] as DeleteSegmentAction;
+            const action = spy.calls.all()[0].args[0] as DeleteSegmentAction;
             expect(action.routeId).toBe("1");
             expect(action.index).toBe(2);
     }));
@@ -841,7 +841,7 @@ describe("Selected Route Service", () => {
             await selectedRouteService.removeSegment(1);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateSegmentsAction);
-            let action = spy.calls.all()[0].args[0] as UpdateSegmentsAction;
+            const action = spy.calls.all()[0].args[0] as UpdateSegmentsAction;
             expect(action.routeId).toBe("1");
             expect(action.indices).toEqual([1, 2]);
             expect(action.segmentsData[0].routePoint.lat).toBe(3);
@@ -890,7 +890,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.makeAllPointsEditable("1");
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ReplaceSegmentsAction);
-            let action = spy.calls.all()[0].args[0] as ReplaceSegmentsAction;
+            const action = spy.calls.all()[0].args[0] as ReplaceSegmentsAction;
             expect(action.routeId).toBe("1");
             expect(action.segmentsData.length).toBe(3);
             expect(action.segmentsData[0].latlngs[0].lat).toBe(1);
@@ -928,7 +928,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.addRoutes([{ segments: [], markers: [{ title: "title"}]} as RouteData]);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddPrivatePoiAction);
-            let action = spy.calls.all()[0].args[0] as AddPrivatePoiAction;
+            const action = spy.calls.all()[0].args[0] as AddPrivatePoiAction;
             expect(action.routeId).toBe("1");
             expect(action.markerData.title).toBe("title");
     }));
@@ -951,7 +951,7 @@ describe("Selected Route Service", () => {
             selectedRouteService.addRoutes([{ name: "name", segments: [{}], markers: [{ title: "title"}]} as RouteData]);
 
             expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
-            let action = spy.calls.all()[0].args[0] as AddRouteAction;
+            const action = spy.calls.all()[0].args[0] as AddRouteAction;
             expect(action.routeData.name).toBe("name 1");
     }));
 });
