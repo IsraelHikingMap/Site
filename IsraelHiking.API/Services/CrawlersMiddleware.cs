@@ -6,6 +6,7 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
 using Wangkanai.Detection.Services;
 
 namespace IsraelHiking.API.Services
@@ -55,7 +56,7 @@ namespace IsraelHiking.API.Services
             var isCrawler = detectionService.Crawler.IsCrawler;
             if (!isCrawler)
             {
-                await _next.Invoke(context);
+                await SendDefaultFile(context);
                 return;
             }
             var isWhatsApp = detectionService.Crawler.Name == Wangkanai.Detection.Models.Crawler.WhatsApp;
@@ -63,17 +64,16 @@ namespace IsraelHiking.API.Services
             {
                 var url = await _shareUrlsRepository.GetUrlById(context.Request.Path.Value.Split("/").Last());
                 if (url == null) {
-                    await _next.Invoke(context);
+                    await SendDefaultFile(context);
                     return;
                 }
-                
+
                 var title = string.IsNullOrWhiteSpace(url.Title) ? Branding.ROUTE_SHARE_DEFAULT_TITLE : url.Title;
                 var thumbnailUrl = "https://israelhiking.osm.org.il/api/images/" + url.Id;
                 if (isWhatsApp)
                 {
                     thumbnailUrl += "?width=256&height=256";
                 }
-
                 await WriteHomePage(context, title, thumbnailUrl, url.Description);
                 return;
             }
@@ -85,7 +85,7 @@ namespace IsraelHiking.API.Services
                 var feature = await _pointsOfInterestProvider.GetFeatureById(split[split.Length - 2], split.Last());
                 if (feature == null)
                 {
-                    await _next.Invoke(context);
+                    await SendDefaultFile(context);
                     return;
                 }
                 var thumbnailUrl = feature.Attributes.GetNames()
@@ -99,7 +99,18 @@ namespace IsraelHiking.API.Services
                 feature.SetTitles();
                 await WriteHomePage(context, feature.GetTitle(language), thumbnailUrl, feature.GetDescriptionWithExternal(language), language);
             }
-            await _next.Invoke(context);
+            await SendDefaultFile(context);
+        }
+
+        private async Task SendDefaultFile(HttpContext context) {
+            await SendFile(context, _homePageHelper.IndexFileInfo);
+        }
+
+        private Task SendFile(HttpContext context, IFileInfo file)
+        {
+            context.Response.ContentType = "text/html";
+            context.Response.ContentLength = file.Length;
+            return context.Response.SendFileAsync(file);
         }
 
         private Task WriteHomePage(HttpContext context, string title, string thumbnailUrl, string description, string language="")
