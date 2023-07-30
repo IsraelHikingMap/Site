@@ -4,6 +4,8 @@ import { HttpClientTestingModule, HttpTestingController } from "@angular/common/
 import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
+import { StyleSpecification } from "maplibre-gl";
+import JSZip from "jszip";
 
 import { FileService, SaveAsFactory } from "./file.service";
 import { ImageResizeService } from "./image-resize.service";
@@ -37,6 +39,10 @@ describe("FileService", () => {
         fitBoundsService = {
             fitBounds: jasmine.createSpy("fitBounds")
         } as any as FitBoundsService;
+        const loggingServiceMock = {
+            info: () => { },
+            error: () => { },
+        };
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -44,12 +50,12 @@ describe("FileService", () => {
             ],
             providers: [
                 RunningContextService,
-                LoggingService,
                 FileSystemWrapper,
                 // eslint-disable-next-line
                 FileTransfer,
                 SocialSharing,
                 GpxDataContainerConverterService,
+                { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: SelectedRouteService, useValue: selectedRouteService },
                 { provide: ImageResizeService, useValue: imageResizeService },
@@ -141,5 +147,130 @@ describe("FileService", () => {
 
         expect(files.length).toBe(1);
         expect(event.target.value).toBe("");
+    }));
+
+    it("Should get full URL", inject([FileService], (fileService: FileService) => {
+        const url = fileService.getFullUrl("123");
+
+        expect(url).toContain("/123");
+    }));
+
+    it("Should get style json content from remote source", inject([FileService, HttpTestingController], 
+        async (fileService: FileService, mockBackend: HttpTestingController) => {
+        let promise = fileService.getStyleJsonContent("s.json", false);
+
+        mockBackend.expectOne("s.json").flush({});
+
+        let response = await promise;
+        expect(response).toEqual({} as StyleSpecification);
+    }));
+
+    it("Should get style json content from local when offline", inject([FileService, FileSystemWrapper], async (fileService: FileService, fileSystemWrapper: FileSystemWrapper) => {
+        let spy = jasmine.createSpy();
+        fileSystemWrapper.readAsText = spy.and.returnValue(Promise.resolve("{}"));
+
+        let promise = fileService.getStyleJsonContent("./style.json", true);
+
+        let response = await promise;
+        expect(spy).toHaveBeenCalled();
+        expect(response).toEqual({} as StyleSpecification);
+    }));
+
+    it("Should get empty style json on failure", inject([FileService, FileSystemWrapper], 
+        async (fileService: FileService, fileSystemWrapper: FileSystemWrapper) => {
+        let spy = jasmine.createSpy();
+        fileSystemWrapper.readAsText = spy.and.returnValue(Promise.resolve({}));
+
+        let promise = fileService.getStyleJsonContent("./style.json", true);
+
+        let response = await promise;
+        expect(spy).toHaveBeenCalled();
+        expect(response.layers.length).toBe(0);
+        expect(response.sources).toEqual({});
+    }));
+
+    it("Should save log to zip file", inject([FileService], async (fileService: FileService) => {
+        let spy = jasmine.createSpy();
+
+        await fileService.saveLogToZipFile("something.zip", "some text");
+        
+        expect(saveAsSpy).toHaveBeenCalled();
+    }));
+
+    it("Should get gpx file from URL", inject([FileService, FileSystemWrapper], 
+        async (fileService: FileService, fileSystemWrapper: FileSystemWrapper) => {
+        let spy = jasmine.createSpy();
+        fileSystemWrapper.resolveLocalFilesystemUrl = spy.and.returnValue(Promise.resolve({
+            file: (cb: any) => { cb(new Blob([]))},
+            name: "file.gpx"
+        }))
+
+        let file = await fileService.getFileFromUrl("some-file.gpx");
+        
+        expect(file.name).toBe("file.gpx");
+        expect(file.type).toBe("application/gpx+xml");
+    }));
+
+    it("Should get kml file from URL", inject([FileService, FileSystemWrapper], 
+        async (fileService: FileService, fileSystemWrapper: FileSystemWrapper) => {
+        let spy = jasmine.createSpy();
+        fileSystemWrapper.resolveLocalFilesystemUrl = spy.and.returnValue(Promise.resolve({
+            file: (cb: any) => { cb(new Blob([]))},
+            name: "file.kml"
+        }))
+
+        let file = await fileService.getFileFromUrl("some-file.kml");
+        
+        expect(file.name).toBe("file.kml");
+        expect(file.type).toBe("application/kml+xml");
+    }));
+
+    it("Should get jpg file from URL", inject([FileService, FileSystemWrapper], 
+        async (fileService: FileService, fileSystemWrapper: FileSystemWrapper) => {
+        let spy = jasmine.createSpy();
+        fileSystemWrapper.resolveLocalFilesystemUrl = spy.and.returnValue(Promise.resolve({
+            file: (cb: any) => { cb(new Blob([]))},
+            name: "file.jpg"
+        }))
+
+        let file = await fileService.getFileFromUrl("some-file.jpg");
+        
+        expect(file.name).toBe("file.jpg");
+        expect(file.type).toBe("image/jpeg");
+    }));
+
+    it("Should get file extention type from URL", inject([FileService, FileSystemWrapper], 
+        async (fileService: FileService, fileSystemWrapper: FileSystemWrapper) => {
+        let spy = jasmine.createSpy();
+        fileSystemWrapper.resolveLocalFilesystemUrl = spy.and.returnValue(Promise.resolve({
+            file: (cb: any) => { cb(new Blob([]))},
+            name: "file.something"
+        }))
+
+        let file = await fileService.getFileFromUrl("some-file.something");
+        
+        expect(file.name).toBe("file.something");
+        expect(file.type).toBe("application/something");
+    }));
+
+    it("Should write styles that are sent in a zip", inject([FileService, FileSystemWrapper], 
+        async (fileService: FileService, fileSystemWrapper: FileSystemWrapper) => {
+        let spy = jasmine.createSpy();
+        fileSystemWrapper.writeFile = spy;
+
+        const zip = new JSZip();
+        zip.folder("styles");
+        zip.file("styles/style.json", JSON.stringify({}));
+        const zipOutput = await zip.generateAsync({type: "blob"});
+
+        await fileService.writeStyles(zipOutput);
+        
+        expect(spy).toHaveBeenCalled();
+    }));
+
+    it("Should compress text to base 64 zip", inject([FileService], 
+        async (fileService: FileService) => {
+
+        expect(async () => await fileService.compressTextToBase64Zip([{ name: "log.txt.", text: "some text" }])).not.toThrow();
     }));
 });

@@ -153,7 +153,7 @@ export class FileService {
         });
     }
 
-    public async saveToZipFile(fileName: string, content: string) {
+    public async saveLogToZipFile(fileName: string, content: string) {
         const zip = new JSZip();
         zip.file("log.txt", content);
         const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
@@ -191,7 +191,7 @@ export class FileService {
         if (fileExtension === "jpg" || fileExtension === "jpeg") {
             return ImageResizeService.JPEG;
         }
-        return "appliction/" + fileExtension;
+        return "application/" + fileExtension;
     }
 
     private getExtensionFromType(type: string): string {
@@ -259,8 +259,7 @@ export class FileService {
         for (const content of contents) {
             zip.file(content.name, content.text);
         }
-        const data = await zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });
-        return data;
+        return zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });
     }
 
     public async getCachedFile(fileName: string): Promise<string> {

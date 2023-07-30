@@ -194,7 +194,7 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
                     `OS: ${platform.os}`,
                     ""
                 ].join("\n");
-                await this.fileService.saveToZipFile(`support-${userInfo.id}.zip`, infoString + "\n" + logs);
+                await this.fileService.saveLogToZipFile(`support-${userInfo.id}.zip`, infoString + "\n" + logs);
                 SendReportDialogComponent.openDialog(this.dialog, subject);
                 return;
             }
