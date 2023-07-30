@@ -67,13 +67,14 @@ namespace IsraelHiking.API.Services.Middleware
                     await _next.Invoke(context);
                     return;
                 }
-
+                
                 var title = string.IsNullOrWhiteSpace(url.Title) ? Branding.ROUTE_SHARE_DEFAULT_TITLE : url.Title;
                 var thumbnailUrl = "https://israelhiking.osm.org.il/api/images/" + url.Id;
                 if (isWhatsApp)
                 {
                     thumbnailUrl += "?width=256&height=256";
                 }
+
                 await WriteHomePage(context, title, thumbnailUrl, url.Description);
                 return;
             }
@@ -101,7 +102,7 @@ namespace IsraelHiking.API.Services.Middleware
             }
             await _next.Invoke(context);
         }
-        
+
         private Task WriteHomePage(HttpContext context, string title, string thumbnailUrl, string description, string language="")
         {
             string text = _homePageHelper.Render(title, description, thumbnailUrl,language);
