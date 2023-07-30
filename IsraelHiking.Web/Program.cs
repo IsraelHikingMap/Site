@@ -65,7 +65,7 @@ void SetupApplication(WebApplication app)
     });
     app.UseMiddleware<CrawlersMiddleware>();
     // This should be the last middleware
-    app.MapFallbackToFile("/index.html");
+    app.UseMiddleware<SpaDefaultHtmlMiddleware>();
     InitializeServices(app.Services);
 }
 
