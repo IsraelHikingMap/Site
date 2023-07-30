@@ -318,7 +318,7 @@ export class SelectedRouteService {
         if (!route || route.segments.length === 0) {
             return;
         }
-        const segments = [];
+        const segments = [structuredClone(route.segments[0]) as RouteSegmentData];
         for (const segment of route.segments) {
             if (segment.latlngs.length === 0) {
                 continue;

@@ -8,8 +8,8 @@ import { RouterService } from "./router.service";
 import { RoutesFactory } from "./routes.factory";
 import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
-import { AddRouteAction, ChangeRouteStateAction, BulkReplaceRoutesAction, RoutesReducer, MergeRoutesAction } from "../reducers/routes.reducer";
-import type { RouteData } from "../models/models";
+import { AddRouteAction, ChangeRouteStateAction, BulkReplaceRoutesAction, RoutesReducer, MergeRoutesAction, SplitRouteAction, ReplaceRouteAction, UpdateSegmentsAction, DeleteSegmentAction, ReplaceSegmentsAction, AddPrivatePoiAction } from "../reducers/routes.reducer";
+import type { MarkerData, RouteData } from "../models/models";
 
 
 describe("Selected Route Service", () => {
@@ -24,7 +24,10 @@ describe("Selected Route Service", () => {
     beforeEach(() => {
         const toastMock = new ToastServiceMockCreator();
         toastMock.resourcesService.route = "route";
-        const routerServiceMock = {};
+        toastMock.resourcesService.split = "split";
+        const routerServiceMock = {
+            getRoute: () => Promise.resolve([])
+        };
         TestBed.configureTestingModule({
             imports: [
                 NgxsModule.forRoot([RoutesReducer, RouteEditingReducer])
@@ -331,6 +334,101 @@ describe("Selected Route Service", () => {
         }
     ));
 
+    it("Should split a route at the middle and add 'split' to name", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 1, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 2, lng: 2, timestamp: new Date()},
+                        {lat: 3, lng: 3, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.splitRoute(1);
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SplitRouteAction);
+            let action = spy.calls.all()[0].args[0] as SplitRouteAction;
+            expect(action.routeId).toBe("1");
+            expect(action.routeData.segments.length).toBe(2);
+            expect(action.routeData.segments[0].latlngs[0].lat).toBe(1);
+            expect(action.routeData.segments[0].latlngs[1].lat).toBe(1);
+            expect(action.routeData.segments[1].latlngs[1].lat).toBe(2);
+            expect(action.splitRouteData.name).toBe("name split 1");
+            expect(action.splitRouteData.segments.length).toBe(2);
+            expect(action.splitRouteData.segments[0].latlngs[0].lat).toBe(2);
+            expect(action.splitRouteData.segments[0].latlngs[1].lat).toBe(2);
+            expect(action.splitRouteData.segments[1].latlngs[1].lat).toBe(3);
+    }));
+
+    it("Should split a route at the middle and add not split word", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name split 1",
+                segments: [{
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 1, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 2, lng: 2, timestamp: new Date()},
+                        {lat: 3, lng: 3, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.splitRoute(1);
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(SplitRouteAction);
+            let action = spy.calls.all()[0].args[0] as SplitRouteAction;
+            expect(action.splitRouteData.name).toBe("name split 2");
+    }));
+
     it("Should merge routes with the same direction", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [{
@@ -564,5 +662,296 @@ describe("Selected Route Service", () => {
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[0].lat).toBe(2);
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[1].lat).toBe(2.0001);
             expect(spy.calls.all()[0].args[0].mergedRouteData.segments[2].latlngs[2].lat).toBe(3);
+    }));
+
+    it("Should revese a route", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 1, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 2, lng: 2, timestamp: new Date()},
+                        {lat: 3, lng: 3, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.reverseRoute("1");
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ReplaceRouteAction);
+            let action = spy.calls.all()[0].args[0] as ReplaceRouteAction;
+            expect(action.routeId).toBe("1");
+            expect(action.routeData.segments.length).toBe(3);
+            expect(action.routeData.segments[0].latlngs[0].lat).toBe(3);
+            expect(action.routeData.segments[0].latlngs[1].lng).toBe(3);
+            expect(action.routeData.segments[2].latlngs[0].lat).toBe(2);
+            expect(action.routeData.segments[2].latlngs[1].lng).toBe(1);
+    }));
+
+    it("Should remove the first segement", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 1, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 2, lng: 2, timestamp: new Date()},
+                        {lat: 3, lng: 3, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.removeSegment(0);
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateSegmentsAction);
+            let action = spy.calls.all()[0].args[0] as UpdateSegmentsAction;
+            expect(action.routeId).toBe("1");
+            expect(action.indices).toEqual([0, 1]);
+            expect(action.segmentsData[0].latlngs[0].lat).toBe(2);
+            expect(action.segmentsData[0].latlngs[1].lng).toBe(2);
+    }));
+
+    it("Should remove the last segement", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 1, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 2, lng: 2, timestamp: new Date()},
+                        {lat: 3, lng: 3, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.removeSegment(2);
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(DeleteSegmentAction);
+            let action = spy.calls.all()[0].args[0] as DeleteSegmentAction;
+            expect(action.routeId).toBe("1");
+            expect(action.index).toBe(2);
+    }));
+
+    it("Should remove a middle segement", inject([SelectedRouteService, Store],
+        async (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 1, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 2, lng: 2},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 2, lng: 2, timestamp: new Date()},
+                        {lat: 3, lng: 3, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            await selectedRouteService.removeSegment(1);
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateSegmentsAction);
+            let action = spy.calls.all()[0].args[0] as UpdateSegmentsAction;
+            expect(action.routeId).toBe("1");
+            expect(action.indices).toEqual([1, 2]);
+            expect(action.segmentsData[0].routePoint.lat).toBe(3);
+    }));
+
+    it("Should make all points editable for not exiting route", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.makeAllPointsEditable("1");
+
+            expect(spy).not.toHaveBeenCalled();
+    }));
+
+    it("Should make all points editable", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 1, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }, {
+                    latlngs: [
+                        {lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 2, lng: 2, timestamp: new Date()},
+                        {lat: 3, lng: 3, timestamp: new Date()}
+                    ],
+                    routePoint: {lat: 3, lng: 3},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.makeAllPointsEditable("1");
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(ReplaceSegmentsAction);
+            let action = spy.calls.all()[0].args[0] as ReplaceSegmentsAction;
+            expect(action.routeId).toBe("1");
+            expect(action.segmentsData.length).toBe(3);
+            expect(action.segmentsData[0].latlngs[0].lat).toBe(1);
+            expect(action.segmentsData[1].latlngs[0].lat).toBe(1);
+            expect(action.segmentsData[1].latlngs[1].lat).toBe(2);
+            expect(action.segmentsData[2].latlngs[0].lat).toBe(2);
+            expect(action.segmentsData[2].latlngs[1].lat).toBe(3);
+    }));
+
+    it("Add external empty route should not fail", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.addRoutes([]);
+
+            expect(spy).not.toHaveBeenCalled();
+    }));
+
+    it("Add external route with only markers to first route", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.addRoutes([{ segments: [], markers: [{ title: "title"}]} as RouteData]);
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddPrivatePoiAction);
+            let action = spy.calls.all()[0].args[0] as AddPrivatePoiAction;
+            expect(action.routeId).toBe("1");
+            expect(action.markerData.title).toBe("title");
+    }));
+
+    it("Add external route to routes", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [],
+                state: "ReadOnly",
+            }]);
+            setupSelectedRoute(store, "1");
+
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+
+            selectedRouteService.addRoutes([{ name: "name", segments: [{}], markers: [{ title: "title"}]} as RouteData]);
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(AddRouteAction);
+            let action = spy.calls.all()[0].args[0] as AddRouteAction;
+            expect(action.routeData.name).toBe("name 1");
     }));
 });
