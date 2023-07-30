@@ -8,10 +8,10 @@ using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Http;
 using Wangkanai.Detection.Services;
 
-namespace IsraelHiking.API.Services
+namespace IsraelHiking.API.Services.Middleware
 {
     /// <summary>
-    /// This middleware is responsible in returning the index.html file or a simple page with info for the crawlers
+    /// This middleware is responsible in returning a simple page with info for the crawlers
     /// </summary>
     public class CrawlersMiddleware
     {
