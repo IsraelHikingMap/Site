@@ -8,11 +8,6 @@ namespace IsraelHiking.API.Services
     public interface IHomePageHelper
     {
         /// <summary>
-        /// Returns the index.html FileInfo
-        /// </summary>
-        public IFileInfo IndexFileInfo { get; }
-        
-        /// <summary>
         /// Renders the home page with specified data
         /// </summary>
         /// <param name="title"></param>

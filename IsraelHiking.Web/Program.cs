@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using IsraelHiking.API;
 using IsraelHiking.API.Services;
+using IsraelHiking.API.Services.Middleware;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.Extensions;
@@ -54,7 +55,7 @@ void SetupApplication(WebApplication app)
     {
         ContentTypeProvider = new FileExtensionContentTypeProvider
         {
-            Mappings = { {".pbf", "application/x-protobuf"} } // for the fonts files
+            Mappings = { { ".pbf", "application/x-protobuf" } } // for the fonts files
         }
     });
     app.UseSwagger();
@@ -62,8 +63,10 @@ void SetupApplication(WebApplication app)
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Israel Hiking Map API V1");
     });
-    // This should be the last middleware
     app.UseMiddleware<CrawlersMiddleware>();
+    // This should be the last middleware
+    app.MapFallbackToFile("/index.html");
+    //app.UseMiddleware<SpaDefaultHtmlMiddleware>();
     InitializeServices(app.Services);
 }
 

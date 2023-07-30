@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.FileProviders;
 using Wangkanai.Detection.Services;
 
-namespace IsraelHiking.API.Services
+namespace IsraelHiking.API.Services.Middleware
 {
     /// <summary>
-    /// This middleware is responsible in returning the index.html file or a simple page with info for the crawlers
+    /// This middleware is responsible in returning a simple page with info for the crawlers
     /// </summary>
     public class CrawlersMiddleware
     {
@@ -56,7 +56,7 @@ namespace IsraelHiking.API.Services
             var isCrawler = detectionService.Crawler.IsCrawler;
             if (!isCrawler)
             {
-                await SendDefaultFile(context);
+                await _next.Invoke(context);
                 return;
             }
             var isWhatsApp = detectionService.Crawler.Name == Wangkanai.Detection.Models.Crawler.WhatsApp;
@@ -64,7 +64,7 @@ namespace IsraelHiking.API.Services
             {
                 var url = await _shareUrlsRepository.GetUrlById(context.Request.Path.Value.Split("/").Last());
                 if (url == null) {
-                    await SendDefaultFile(context);
+                    await _next.Invoke(context);
                     return;
                 }
 
@@ -85,7 +85,7 @@ namespace IsraelHiking.API.Services
                 var feature = await _pointsOfInterestProvider.GetFeatureById(split[split.Length - 2], split.Last());
                 if (feature == null)
                 {
-                    await SendDefaultFile(context);
+                    await _next.Invoke(context);
                     return;
                 }
                 var thumbnailUrl = feature.Attributes.GetNames()
@@ -99,20 +99,9 @@ namespace IsraelHiking.API.Services
                 feature.SetTitles();
                 await WriteHomePage(context, feature.GetTitle(language), thumbnailUrl, feature.GetDescriptionWithExternal(language), language);
             }
-            await SendDefaultFile(context);
+            await _next.Invoke(context);
         }
-
-        private async Task SendDefaultFile(HttpContext context) {
-            await SendFile(context, _homePageHelper.IndexFileInfo);
-        }
-
-        private Task SendFile(HttpContext context, IFileInfo file)
-        {
-            context.Response.ContentType = "text/html";
-            context.Response.ContentLength = file.Length;
-            return context.Response.SendFileAsync(file);
-        }
-
+        
         private Task WriteHomePage(HttpContext context, string title, string thumbnailUrl, string description, string language="")
         {
             string text = _homePageHelper.Render(title, description, thumbnailUrl,language);
