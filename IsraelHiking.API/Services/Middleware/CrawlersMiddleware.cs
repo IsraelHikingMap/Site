@@ -6,7 +6,6 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.FileProviders;
 using Wangkanai.Detection.Services;
 
 namespace IsraelHiking.API.Services.Middleware
