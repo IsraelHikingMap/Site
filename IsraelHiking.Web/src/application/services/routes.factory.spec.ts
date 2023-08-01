@@ -1,7 +1,7 @@
 import { NgxsModule, Store } from "@ngxs/store";
 import { TestBed, inject } from "@angular/core/testing";
 import { RoutesFactory } from "./routes.factory";
-import { RouteEditingReducer } from "application/reducers/route-editing.reducer";
+import { RouteEditingReducer } from "../reducers/route-editing.reducer";
 import type { RouteData } from "../models/route-data";
 
 describe("RoutesFactory", () => {

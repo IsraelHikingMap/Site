@@ -10,8 +10,8 @@ import * as pako from "pako";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
-import { ClearHistoryAction } from "application/reducers/routes.reducer";
-import { SetSelectedPoiAction, SetSidebarAction } from "application/reducers/poi.reducer";
+import { ClearHistoryAction } from "../reducers/routes.reducer";
+import { SetSelectedPoiAction, SetSidebarAction } from "../reducers/poi.reducer";
 import type { ApplicationState, MutableApplicationState, ShareUrl, Trace } from "../models/models";
 
 export type ImageUrlAndData = {

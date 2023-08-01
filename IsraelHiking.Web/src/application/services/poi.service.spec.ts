@@ -17,8 +17,8 @@ import { ToastService } from "./toast.service";
 import { MapService } from "./map.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
-import { LayersReducer } from "application/reducers/layers.reducer";
-import { AddToPoiQueueAction, OfflineReducer } from "application/reducers/offline.reducer";
+import { LayersReducer } from "../reducers/layers.reducer";
+import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
 import type { Category, MarkerData } from "../models/models";
 
 describe("Poi Service", () => {
