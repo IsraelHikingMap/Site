@@ -9,7 +9,8 @@ import { HashService } from "./hash.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
-import { ShareUrlsReducer } from "../reducers/share-urls.reducer";
+import { AddShareUrlAction, RemoveShareUrlAction, ShareUrlsReducer, UpdateShareUrlAction } from "../reducers/share-urls.reducer";
+import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
 import type { ShareUrl, DataContainer } from "../models/models";
 
@@ -24,7 +25,9 @@ describe("Share Urls Service", () => {
             deleteShareUrlById: jasmine.createSpy()
         };
         const loggingService = {
-            info: () => {}
+            info: () => { },
+            error: () => { },
+            warning: () => { }
         };
         TestBed.configureTestingModule({
             imports: [
@@ -43,6 +46,141 @@ describe("Share Urls Service", () => {
         });
     });
 
+    it("Should not do anything in initialization if user is not logged in", inject([ShareUrlsService, HttpTestingController, Store],
+        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, store: Store) => {
+
+            store.reset({
+                userState: {
+                    userInfo: null
+                }
+            })
+
+            await shareUrlsService.initialize();
+
+            expect(() => mockBackend.expectNone(Urls.urls)).not.toThrow();
+    }));
+
+    it("Should sync urls when initializing", inject([ShareUrlsService, HttpTestingController, Store],
+        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, store: Store) => {
+            const spy = jasmine.createSpy();
+            store.dispatch = spy;
+            store.reset({
+                userState: {
+                    userInfo: {}
+                },
+                offlineState: {
+                    shareUrlsLastModifiedDate: null
+                },
+                shareUrlsState: {
+                    shareUrls: [{
+                        id: "1"
+                    }, {
+                        id: "2"
+                    }]
+                }
+            })
+            const promise = shareUrlsService.initialize();
+
+            mockBackend.expectOne(Urls.urls).flush([{
+                id: "2"
+            }, {
+                id: "3"
+            }]);
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(Urls.urls + "2").flush({});
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(Urls.urls + "3").flush({});
+
+            expect(spy.calls.all()[0].args[0]).toBeInstanceOf(UpdateShareUrlAction);
+            expect(spy.calls.all()[1].args[0]).toBeInstanceOf(AddShareUrlAction);
+            expect(spy.calls.all()[2].args[0]).toBeInstanceOf(RemoveShareUrlAction);
+            expect(spy.calls.all()[3].args[0]).toBeInstanceOf(SetShareUrlsLastModifiedDateAction);
+
+            return promise;
+    }));
+
+    it("Should get display name only for the title", inject([ShareUrlsService], (shareUrlService: ShareUrlsService) => {
+        expect(shareUrlService.getShareUrlDisplayName({title: "title"} as ShareUrl)).toBe("title");
+    }));
+
+    it("Should get display name for title and description", inject([ShareUrlsService], (shareUrlService: ShareUrlsService) => {
+        const displayName = shareUrlService.getShareUrlDisplayName({title: "title", description: "desc"} as ShareUrl);
+        expect(displayName).toContain("title");
+        expect(displayName).toContain("desc");
+    }));
+
+    it("Should get social links", inject([ShareUrlsService, HashService], (shareUrlService: ShareUrlsService, hashService: HashService) => {
+        const fullUrl = "http://full-url";
+        hashService.getFullUrlFromShareId = () => fullUrl;
+        const links = shareUrlService.getShareSocialLinks({title: "title", description: "desc"} as ShareUrl);
+        expect(links.facebook).toContain(encodeURIComponent(fullUrl));
+        expect(links.ihm).toBe(fullUrl);
+    }));
+
+    it("Should get share url from database when already cached and don't refresh it if it's not newer", inject([ShareUrlsService, HttpTestingController, DatabaseService],
+        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
+
+            databaseService.getShareUrlById = () => Promise.resolve({} as ShareUrl);
+            
+            const promise = shareUrlsService.getShareUrl("42");
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(Urls.urls + "42/timestamp").flush(new Date().toISOString());
+
+            expect(() => mockBackend.expectNone(Urls.urls)).not.toThrow();
+            return promise;
+    }));
+
+    it("Should get share url server if not cached", inject([ShareUrlsService, HttpTestingController, DatabaseService],
+        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
+
+            databaseService.getShareUrlById = () => null;
+            
+            const promise = shareUrlsService.getShareUrl("42");
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(Urls.urls + "42").flush({});
+
+            const response = await promise;
+            expect(response).toBeDefined();
+            return promise;
+    }));
+
+    it("Should get share url from database when already cached refresh it afterwards since it's newer", inject([ShareUrlsService, HttpTestingController, DatabaseService],
+        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
+
+            databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100)} as ShareUrl);
+            
+            const promise = shareUrlsService.getShareUrl("42");
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(Urls.urls + "42/timestamp").flush(new Date(200).toISOString());
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            expect(() => mockBackend.expectOne(Urls.urls + "42")).not.toThrow();
+            return promise;
+    }));
+
+    it("Should create share url", inject([ShareUrlsService, HttpTestingController],
+        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
+
+            const shareUrl = { id: "42" } as ShareUrl;
+
+            const promise = shareUrlsService.createShareUrl(shareUrl).then((res) => {
+                expect(res).not.toBeNull();
+            });
+
+            mockBackend.expectOne(Urls.urls).flush({});
+            return promise;
+    }));
+
     it("Should update share url", inject([ShareUrlsService, HttpTestingController],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
 
@@ -54,7 +192,7 @@ describe("Share Urls Service", () => {
 
             mockBackend.expectOne(Urls.urls + shareUrl.id).flush({});
             return promise;
-        }));
+    }));
 
     it("Should delete share url", inject([ShareUrlsService, HttpTestingController, DatabaseService, Store],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService, store: Store) => {

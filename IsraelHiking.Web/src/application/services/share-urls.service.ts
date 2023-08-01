@@ -25,7 +25,7 @@ interface IShareUrlSocialLinks {
 
 @Injectable()
 export class ShareUrlsService {
-    private syncying: boolean;
+    private syncing: boolean;
 
     constructor(private readonly httpClient: HttpClient,
                 private readonly whatsAppService: WhatsAppService,
@@ -33,7 +33,7 @@ export class ShareUrlsService {
                 private readonly loggingService: LoggingService,
                 private readonly databaseService: DatabaseService,
                 private readonly store: Store) {
-            this.syncying = false;
+            this.syncing = false;
     }
 
     public async initialize() {
@@ -79,7 +79,6 @@ export class ShareUrlsService {
             return await this.getShareFromServerAndCacheIt(shareUrlId);
         }
         // Refresh it in the background if needed...
-
         firstValueFrom(this.httpClient.get(Urls.urls + shareUrlId + "/timestamp").pipe(timeout(2000))).then((timestamp: any) => {
             if (new Date(timestamp as string) > new Date(shareUrl.lastModifiedDate)) {
                 this.loggingService.warning("[Shares] Cached share is outdated, fetching it again...");
@@ -90,11 +89,11 @@ export class ShareUrlsService {
     }
 
     public async syncShareUrls(): Promise<any> {
-        if (this.syncying) {
+        if (this.syncing) {
             this.loggingService.info("[Shares] Already syncing...");
             return;
         }
-        this.syncying = true;
+        this.syncing = true;
         try {
             const sharesLastSuccessfullSync = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).shareUrlsLastModifiedDate;
             const operationStartTimeStamp = new Date();
@@ -132,7 +131,7 @@ export class ShareUrlsService {
         } catch (ex) {
             this.loggingService.error("[Shares] Unable to sync shares: " + (ex as Error).message);
         } finally {
-            this.syncying = false;
+            this.syncing = false;
         }
     }
 

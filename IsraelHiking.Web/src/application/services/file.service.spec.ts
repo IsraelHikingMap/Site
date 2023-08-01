@@ -50,11 +50,11 @@ describe("FileService", () => {
             ],
             providers: [
                 RunningContextService,
-                FileSystemWrapper,
                 // eslint-disable-next-line
                 FileTransfer,
                 SocialSharing,
                 GpxDataContainerConverterService,
+                { provide: FileSystemWrapper, useValue: {} },
                 { provide: LoggingService, useValue: loggingServiceMock },
                 { provide: FitBoundsService, useValue: fitBoundsService },
                 { provide: SelectedRouteService, useValue: selectedRouteService },
