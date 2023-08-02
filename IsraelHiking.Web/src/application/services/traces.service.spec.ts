@@ -203,4 +203,67 @@ describe("Traces Service", () => {
 
             return promise;
     }));
+
+    it("Should return null get a trace by id when there's no trace", inject([TracesService, Store],
+        async (tracesService: TracesService, store: Store) => {
+            store.reset({
+                tracesState: {
+                    traces: []
+                }
+            });
+            const trace = await tracesService.getTraceById("42");
+
+            expect(trace).toBeNull();
+    }));
+
+    it("Should return a trace store in DB", inject([TracesService, Store, DatabaseService],
+        async (tracesService: TracesService, store: Store, databaseService: DatabaseService) => {
+            databaseService.getTraceById = () => { return Promise.resolve({} as Trace) };
+
+            store.reset({
+                tracesState: {
+                    traces: [{
+                        id: "1"
+                    }]
+                }
+            });
+            const trace = await tracesService.getTraceById("1");
+
+            expect(trace.id).toBe("1");
+    }));
+
+    it("Should get a trace from server when it's not in the DB", inject([TracesService, Store, DatabaseService, HttpTestingController],
+        async (tracesService: TracesService, store: Store, databaseService: DatabaseService, mockBackend: HttpTestingController) => {
+            databaseService.getTraceById = () => { return Promise.resolve(null as Trace) };
+            databaseService.storeTrace = () => { return Promise.resolve() };
+
+            store.reset({
+                tracesState: {
+                    traces: [{
+                        id: "1"
+                    }]
+                }
+            });
+            const promise = tracesService.getTraceById("1");
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(Urls.osmTrace + "1").flush({id: "1"});
+
+            const trace = await promise;
+            expect(trace.id).toBe("1");
+    }));
+
+    it("Should upload a trace", inject([TracesService, DatabaseService, HttpTestingController],
+        async (tracesService: TracesService, databaseService: DatabaseService, mockBackend: HttpTestingController) => {
+            const file = new File([""], "file.txt");
+            const promise = tracesService.uploadTrace(file);
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(Urls.osmTrace).flush({ id: "1"});
+
+            const trace = await promise;
+            expect(trace.id).toBe("1");
+    }));
 });
