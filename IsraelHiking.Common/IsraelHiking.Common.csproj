@@ -11,7 +11,7 @@
     <Authors>HarelM</Authors>
     <Company>IsraelHikingMap</Company>
     <Product>IsraelHikingMap</Product>
-    <PackageLicenseUrl>https://github.com/IsraelHikingMap/Site/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageLicenseUrl>https://github.com/IsraelHikingMap/Site/blob/main/LICENSE.md</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/IsraelHikingMap/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/IsraelHikingMap/site</RepositoryUrl>
   </PropertyGroup>
