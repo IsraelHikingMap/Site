@@ -81,7 +81,7 @@ describe("ResourcesService", () => {
     }));
 
     it("Should alter wikimedia url and resize it", inject([ResourcesService], (service: ResourcesService) => {
-        let url = service.getResizedImageUrl("https://upload.wikimedia.org/wikipedia/commons/4/5/7.svg", 123);
+        const url = service.getResizedImageUrl("https://upload.wikimedia.org/wikipedia/commons/4/5/7.svg", 123);
         expect(url).toContain("123");
         expect(url).toContain("png");
     }));
