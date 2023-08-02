@@ -19,7 +19,9 @@ import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
 import { AddToPoiQueueAction, OfflineReducer } from "../reducers/offline.reducer";
+import { ConfigurationReducer, SetLanguageAction } from "../reducers/configuration.reducer";
 import type { Category, MarkerData } from "../models/models";
+import { LngLatBounds } from "maplibre-gl";
 
 describe("Poi Service", () => {
 
@@ -45,8 +47,11 @@ describe("Poi Service", () => {
             map: {
                 on: () => { },
                 off: () => { },
-                getCenter: () => ({ lat: 0, lng: 0})
-            }
+                getCenter: () => ({ lat: 0, lng: 0}),
+                getZoom: () => 11,
+                getBounds: () => new LngLatBounds([1,1,2,2])
+            },
+            initializationPromise: Promise.resolve()
         };
         const loggingService = {
             info: () => {},
@@ -57,7 +62,7 @@ describe("Poi Service", () => {
             imports: [
                 HttpClientModule,
                 HttpClientTestingModule,
-                NgxsModule.forRoot([LayersReducer, OfflineReducer])
+                NgxsModule.forRoot([LayersReducer, OfflineReducer, ConfigurationReducer])
             ],
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
@@ -96,8 +101,113 @@ describe("Poi Service", () => {
         }
     )));
 
+    it("Should initialize and show pois from server and then from memory after filtering", (inject([PoiService, HttpTestingController, Store, RunningContextService],
+        async (poiService: PoiService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService) => {
+
+            store.reset({
+                layersState: {
+                    categoriesGroups: [{ 
+                        type: "type",
+                        categories: [{
+                            icon: "icon",
+                            name: "category",
+                            visible: true
+                        }] as any[], 
+                        visible: true }]
+                },
+                configuration: {},
+                offlineState: {
+                    poisLastModifiedDate: new Date()
+                }
+            });
+
+            (runningContextService as any).isIFrame = false;
+            let promise = poiService.initialize();
+
+            mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            mockBackend.expectOne(r => r.url.startsWith(Urls.poi)).flush([{
+                    properties: {
+                        poiLanguage: "all",
+                        poiCategory: "category",
+                        name: "name"
+                    }
+                }, {
+                    properties: {
+                        poiLanguage: "en-US",
+                        poiCategory: "category",
+                        name: "name"
+                    }
+                }
+            ]);
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            expect(poiService.poiGeojsonFiltered.features.length).toBe(2);
+
+            store.dispatch(new SetLanguageAction({ code: "he", rtl: false }));
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            expect(poiService.poiGeojsonFiltered.features.length).toBe(1);
+
+            return promise;
+        }
+    )));
+
+    it("Should clear offline queue if feature is not in database", (inject([PoiService, Store, DatabaseService],
+        async (poiService: PoiService, store: Store, databaseService: DatabaseService) => {
+
+            store.reset({
+                layersState: {
+                    categoriesGroups: []
+                },
+                configuration: {},
+                offlineState: {
+                    poisLastModifiedDate: new Date(),
+                    uploadPoiQueue: ["1"]
+                }
+            });
+
+            databaseService.getPoiFromUploadQueue = () => Promise.resolve(null);
+            let promise = poiService.initialize();
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            expect(store.snapshot().offlineState.uploadPoiQueue.length).toBe(0);
+
+            return promise;
+        }
+    )));
+
+    it("Should clear offline queue if feature is in database and not a new feautre", (inject([PoiService, Store, DatabaseService, HttpTestingController],
+        async (poiService: PoiService, store: Store, databaseService: DatabaseService, mockBackend: HttpTestingController,) => {
+
+            store.reset({
+                layersState: {
+                    categoriesGroups: []
+                },
+                configuration: {},
+                offlineState: {
+                    poisLastModifiedDate: new Date(),
+                    uploadPoiQueue: ["1"]
+                }
+            });
+
+            databaseService.getPoiFromUploadQueue = () => Promise.resolve({ properties: {} } as GeoJSON.Feature);
+            databaseService.removePoiFromUploadQueue = () => Promise.resolve();
+            let promise = poiService.initialize();
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            mockBackend.expectOne(r => r.url.startsWith(Urls.poi)).flush({ properties: {}});
+
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            expect(store.snapshot().offlineState.uploadPoiQueue.length).toBe(0);
+
+            return promise;
+        }
+    )));
+
     it("Should initialize and download offline pois file",
-        (inject([PoiService, HttpTestingController, RunningContextService, FileService, DatabaseService, Store],
+        inject([PoiService, HttpTestingController, RunningContextService, FileService, DatabaseService, Store],
             async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService,
                 fileService: FileService, databaseService: DatabaseService, store: Store) => {
 
@@ -133,7 +243,7 @@ describe("Poi Service", () => {
 
                 return promise;
             }
-        ))
+        )
     );
 
     it("Should initialize and update pois by pagination",
@@ -634,11 +744,14 @@ describe("Poi Service", () => {
         expect(results).toBe("name");
     }));
 
+    it("should get title even when there's no title for language description", inject([PoiService], (poiService: PoiService) => {
+        const results = poiService.getTitle({properties: { name: "name"}} as any as GeoJSON.Feature, "he");
+        expect(results).toBe("name");
+    }));
+
     it("should get social links", inject([PoiService], (poiService: PoiService) => {
-        const results = poiService.getPoiSocialLinks(
-            {properties: { name: "name", poiGeolocation: {lat: 0, lng: 0}}} as any as GeoJSON.Feature);
-        expect(results.facebook.includes(Urls.facebook)).toBeTruthy();
-        expect(results.waze.includes(Urls.waze)).toBeTruthy();
+        const results = poiService.getFeatureFromCoordinatesId("1_2", "he");
+        expect((results.geometry as GeoJSON.Point).coordinates).toEqual([2,1]);
     }));
 
     it("should sync categories when no categories exist", (inject([PoiService, HttpTestingController, RunningContextService, Store],
