@@ -27,16 +27,22 @@ export class LoggingService {
     private static readonly MAX_LOG_LINES = 50000;
 
     private loggingDatabase: Dexie;
+    private logToConsole: boolean;
 
     constructor(private readonly runningContextService: RunningContextService) {
         this.loggingDatabase = null;
     }
 
-    public async initialize() {
+    public async initialize(logToConsole = true) {
         this.loggingDatabase = new Dexie(LoggingService.LOGGING_DB_NAME);
         this.loggingDatabase.version(1).stores({
             logging: "++, date"
         });
+        this.logToConsole = logToConsole;
+    }
+
+    public uninitialize() {
+        this.loggingDatabase.close();
     }
 
     private async reduceStoredLogLinesIfNeeded() {
@@ -66,7 +72,7 @@ export class LoggingService {
             level: "info",
             message
         } as LogLine;
-        console.log(this.logLineToString(logLine));
+        if (this.logToConsole) console.log(this.logLineToString(logLine));
         this.writeToStorage(logLine);
     }
 
@@ -76,7 +82,7 @@ export class LoggingService {
             level: "debug",
             message
         } as LogLine;
-        if (!this.runningContextService.isProduction) {
+        if (!this.runningContextService.isProduction && this.logToConsole) {
             // eslint-disable-next-line
             console.debug(this.logLineToString(logLine));
         }
@@ -89,7 +95,7 @@ export class LoggingService {
             level: "error",
             message
         } as LogLine;
-        console.error(this.logLineToString(logLine));
+        if (this.logToConsole) console.error(this.logLineToString(logLine));
         this.writeToStorage(logLine);
     }
 
@@ -99,7 +105,7 @@ export class LoggingService {
             level: "warn",
             message
         } as LogLine;
-        console.warn(this.logLineToString(logLine));
+        if (this.logToConsole) console.warn(this.logLineToString(logLine));
         this.writeToStorage(logLine);
     }
 
