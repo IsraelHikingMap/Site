@@ -1,35 +1,7 @@
 import { Injectable } from "@angular/core";
-import piexif from "piexifjs";
+import piexif, { type PiexifObject } from "piexifjs";
 
 import type { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models/models";
-
-export interface IPiexifGPSHelper {
-    dmsRationalToDeg(dmsArray: number[], ref: string): number;
-}
-
-export type IPiexifGPSIFD = {
-    GPSLatitude: string;
-    GPSLatitudeRef: string;
-    GPSLongitude: string;
-    GPSLongitudeRef: string;
-};
-
-export type PiexifObject = {
-    GPS: any[];
-};
-
-export type PiexifImageIFD = {
-    Orientation: number;
-};
-
-export interface IPiexif {
-    GPSHelper: IPiexifGPSHelper;
-    GPSIFD: IPiexifGPSIFD;
-    ImageIFD: PiexifImageIFD;
-    load(binaryStringData: string): PiexifObject;
-    dump(exifObject: PiexifObject): any[];
-    insert(exifBytes: any[], binaryStringData: string): string;
-}
 
 @Injectable()
 export class ImageResizeService {
@@ -49,7 +21,7 @@ export class ImageResizeService {
         return new Promise<TReturn>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (event: any) => {
-                let exifData = null as any;
+                let exifData: PiexifObject = null;
                 if (file.type === ImageResizeService.JPEG) {
                     exifData = piexif.load(event.target.result);
                 }
@@ -69,7 +41,7 @@ export class ImageResizeService {
         });
     }
 
-    private getGeoLocation(exifData: any): LatLngAlt {
+    private getGeoLocation(exifData: PiexifObject): LatLngAlt {
         if (exifData == null || exifData.GPS == null ||
             Object.keys(exifData.GPS).length === 0 ||
             !Object.prototype.hasOwnProperty.call(exifData.GPS, piexif.GPSIFD.GPSLatitude) ||
@@ -86,7 +58,7 @@ export class ImageResizeService {
         return { lat, lng };
     }
 
-    private resizeImageWithExif(image: HTMLImageElement, exifData: any): string {
+    private resizeImageWithExif(image: HTMLImageElement, exifData: PiexifObject): string {
         const canvas = document.createElement("canvas") as HTMLCanvasElement;
 
         const maxSize = 1600; // in px for both height and width maximal size

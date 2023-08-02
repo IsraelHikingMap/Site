@@ -125,11 +125,11 @@ describe("Share Urls Service", () => {
 
             databaseService.getShareUrlById = () => Promise.resolve({} as ShareUrl);
             
-            const promise = shareUrlsService.getShareUrl("42");
+            const promise = shareUrlsService.getShareUrl("5");
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(Urls.urls + "42/timestamp").flush(new Date().toISOString());
+            mockBackend.expectOne(Urls.urls + "5/timestamp").flush(new Date().toISOString());
 
             expect(() => mockBackend.expectNone(Urls.urls)).not.toThrow();
             return promise;
@@ -140,11 +140,11 @@ describe("Share Urls Service", () => {
 
             databaseService.getShareUrlById = () => null;
             
-            const promise = shareUrlsService.getShareUrl("42");
+            const promise = shareUrlsService.getShareUrl("6");
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(Urls.urls + "42").flush({});
+            mockBackend.expectOne(Urls.urls + "6").flush({});
 
             const response = await promise;
             expect(response).toBeDefined();
@@ -156,15 +156,15 @@ describe("Share Urls Service", () => {
 
             databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100)} as ShareUrl);
             
-            const promise = shareUrlsService.getShareUrl("42");
+            const promise = shareUrlsService.getShareUrl("7");
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(Urls.urls + "42/timestamp").flush(new Date(200).toISOString());
+            mockBackend.expectOne(Urls.urls + "7/timestamp").flush(new Date(200).toISOString());
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            expect(() => mockBackend.expectOne(Urls.urls + "42")).not.toThrow();
+            expect(() => mockBackend.expectOne(Urls.urls + "7").flush({})).not.toThrow();
             return promise;
     }));
 
