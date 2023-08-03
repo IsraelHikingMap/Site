@@ -15,6 +15,7 @@ import { LoggingService } from "./logging.service";
 import { FileService } from "./file.service";
 import { ToastService } from "./toast.service";
 import { MapService } from "./map.service";
+import { ConnectionService } from "./connection.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
 import { LayersReducer } from "../reducers/layers.reducer";
@@ -72,6 +73,7 @@ describe("Poi Service", () => {
                 { provide: DatabaseService, useValue: databaseServiceMock },
                 { provide: MapService, useValue: mapServiceMosk },
                 { provide: LoggingService, useValue: loggingService },
+                ConnectionService,
                 GeoJsonParser,
                 RunningContextService,
                 WhatsAppService,

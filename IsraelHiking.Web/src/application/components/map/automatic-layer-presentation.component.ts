@@ -86,11 +86,11 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
             }
             this.currentLanguageCode = language.code;
         }));
-        this.subscriptions.push(this.connectionSerive.monitor(true).subscribe(async (state) => {
-            if (state.hasInternetAccess === this.hasInternetAccess) {
+        this.subscriptions.push(this.connectionSerive.stateChanged.subscribe(async (online) => {
+            if (online === this.hasInternetAccess) {
                 return;
             }
-            this.hasInternetAccess = state.hasInternetAccess;
+            this.hasInternetAccess = online;
             if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate == null
                 || this.layerData.isOfflineAvailable === false) {
                 return;

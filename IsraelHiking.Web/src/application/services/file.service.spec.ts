@@ -14,6 +14,7 @@ import { SelectedRouteService } from "./selected-route.service";
 import { FitBoundsService } from "./fit-bounds.service";
 import { GpxDataContainerConverterService } from "./gpx-data-container-converter.service";
 import { LoggingService } from "./logging.service";
+import { ConnectionService } from "./connection.service";
 import { Urls } from "../urls";
 import type { DataContainer, MarkerData, RouteData } from "../models/models";
 
@@ -53,6 +54,7 @@ describe("FileService", () => {
                 // eslint-disable-next-line
                 FileTransfer,
                 GpxDataContainerConverterService,
+                ConnectionService,
                 { provide: SocialSharing, useValue: {}},
                 { provide: FileSystemWrapper, useValue: {} },
                 { provide: LoggingService, useValue: loggingServiceMock },

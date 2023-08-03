@@ -173,9 +173,9 @@ export class PoiService {
             await this.updateOfflinePois();
         }
         this.uploadPoiQueue$.subscribe((items: Immutable<string[]>) => this.handleUploadQueueChanges(items));
-        this.connectionService.monitor(false).subscribe(state => {
-            this.loggingService.info(`[POIs] Connection status changed to: ${state.hasInternetAccess}`);
-            if (state.hasInternetAccess && this.offlineState.uploadPoiQueue.length > 0) {
+        this.connectionService.stateChanged.subscribe(online => {
+            this.loggingService.info(`[POIs] Connection status changed to: ${online}`);
+            if (online && this.offlineState.uploadPoiQueue.length > 0) {
                 this.handleUploadQueueChanges(this.offlineState.uploadPoiQueue);
             }
         });

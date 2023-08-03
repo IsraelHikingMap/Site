@@ -35,6 +35,6 @@ export class RunningContextService {
         }
         /* eslint-enable */
         this.isFacebook = agent.indexOf("FBAN") !== -1 || agent.indexOf("FBAV") !== -1;
-        this.connectionService.monitor(true).subscribe(state => this.isOnline = state.hasInternetAccess);
+        this.connectionService.stateChanged.subscribe(online => this.isOnline = online);
     }
 }

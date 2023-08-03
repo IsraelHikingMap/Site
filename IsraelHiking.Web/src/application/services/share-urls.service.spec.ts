@@ -9,6 +9,7 @@ import { HashService } from "./hash.service";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { DatabaseService } from "./database.service";
+import { ConnectionService } from "./connection.service";
 import { AddShareUrlAction, RemoveShareUrlAction, ShareUrlsReducer, UpdateShareUrlAction } from "../reducers/share-urls.reducer";
 import { SetShareUrlsLastModifiedDateAction } from "../reducers/offline.reducer";
 import { Urls } from "../urls";
@@ -39,6 +40,7 @@ describe("Share Urls Service", () => {
                 { provide: HashService, useValue: hashService },
                 { provide: LoggingService, useValue: loggingService },
                 { provide: DatabaseService, useValue: databaseService },
+                ConnectionService,
                 RunningContextService,
                 WhatsAppService,
                 ShareUrlsService
