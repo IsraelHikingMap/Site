@@ -38,7 +38,7 @@ describe("MapService", () => {
     it("Should should not do anything when missing image addres does not start with http", inject([MapService], 
         async (service: MapService) => {
             const spy = jasmine.createSpy();
-            let mapMock = {
+            const mapMock = {
                 loadImage: spy,
                 on: (event: string, callback: (e: any) => void) => {
                     if (event == "styleimagemissing") callback({ id: "123"});
@@ -52,12 +52,10 @@ describe("MapService", () => {
     it("Should load image when missing", inject([MapService], 
         async (service: MapService) => {
             const spy = jasmine.createSpy();
-            let storedCallback = (e: any) => {};
-            let mapMock = {
+            const mapMock = {
                 loadImage: spy,
                 on: (event: string, callback: (e: any) => void) => {
                     if (event == "styleimagemissing") {
-                        storedCallback = callback;
                         callback({ id: "http://123.png"});
                     }
                 } 
@@ -70,8 +68,8 @@ describe("MapService", () => {
     it("Should not call twice on the same missing", inject([MapService], 
         async (service: MapService) => {
             const spy = jasmine.createSpy();
-            let storedCallback = (e: any) => {};
-            let mapMock = {
+            let storedCallback = (_e: any) => {};
+            const mapMock = {
                 loadImage: spy,
                 on: (event: string, callback: (e: any) => void) => {
                     if (event == "styleimagemissing") {

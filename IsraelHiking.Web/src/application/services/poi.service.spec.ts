@@ -122,7 +122,7 @@ describe("Poi Service", () => {
             });
 
             (runningContextService as any).isIFrame = false;
-            let promise = poiService.initialize();
+            const promise = poiService.initialize();
 
             mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
@@ -168,7 +168,7 @@ describe("Poi Service", () => {
             });
 
             databaseService.getPoiFromUploadQueue = () => Promise.resolve(null);
-            let promise = poiService.initialize();
+            const promise = poiService.initialize();
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
             expect(store.snapshot().offlineState.uploadPoiQueue.length).toBe(0);
@@ -193,7 +193,7 @@ describe("Poi Service", () => {
 
             databaseService.getPoiFromUploadQueue = () => Promise.resolve({ properties: {} } as GeoJSON.Feature);
             databaseService.removePoiFromUploadQueue = () => Promise.resolve();
-            let promise = poiService.initialize();
+            const promise = poiService.initialize();
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 

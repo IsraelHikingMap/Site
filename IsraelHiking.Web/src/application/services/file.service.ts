@@ -262,15 +262,6 @@ export class FileService {
         return zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });
     }
 
-    public async getCachedFile(fileName: string): Promise<string> {
-        try {
-            return await this.fileSystemWrapper.readAsText(this.fileSystemWrapper.cacheDirectory, fileName);
-        } catch (ex) {
-            this.loggingService.warning("[Files] Unable to get file from cache: " + (ex as Error).message);
-            return null;
-        }
-    }
-
     private getFileContent(file: File): Promise<string> {
         return new Promise((resolve, _) => {
             const reader = new FileReader();
@@ -339,7 +330,7 @@ export class FileService {
             progressCallback(event.loaded / event.total);
         });
         this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
-        let options = !token ? undefined : {
+        const options = !token ? undefined : {
             headers: {
                 Authorization: `Bearer ${token}`
             }

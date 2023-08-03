@@ -268,10 +268,10 @@ export class GpxDataContainerConverterService {
         } as DataContainer;
         dataContainer.routes = dataContainer.routes.concat(this.convertTracksToRouteData(gpxJsonObject.trk));
         const markers = gpxJsonObject.wpt.map(p => ({
-        description: typeof p.desc === "string" ? p.desc : JSON.stringify(p.desc),
-        latlng: { lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele },
-        title: p.name,
-        type: p.type || "",
+            description: typeof p.desc === "string" ? p.desc : JSON.stringify(p.desc),
+            latlng: { lat: +p.$.lat, lng: +p.$.lon, alt: +p.ele },
+            title: p.name,
+            type: p.type || "",
             urls: p.link.map(l => ({ mimeType: l.type || "text/html", text: l.text, url: l.$.href } as LinkData))
         } as MarkerData));
         if (markers.length > 0) {
