@@ -315,15 +315,6 @@ export class FileService {
         });
     }
 
-    public async downloadFileToCache(url: string, progressCallback: (value: number) => void) {
-        const fileTransferObject = this.fileTransfer.create();
-        const path = this.fileSystemWrapper.cacheDirectory + url.split("/").pop();
-        fileTransferObject.onProgress((event) => {
-            progressCallback(event.loaded / event.total);
-        });
-        await fileTransferObject.download(url, path, true);
-        return path;
-    }
 
     public async getFileFromCache(url: string): Promise<Blob> {
         try {
@@ -335,21 +326,26 @@ export class FileService {
     }
 
     public async deleteFileFromCache(url: string): Promise<void> {
-        this.fileSystemWrapper.removeFile(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
+        await this.fileSystemWrapper.removeFile(this.fileSystemWrapper.cacheDirectory, url.split("/").pop());
     }
 
-    public async downloadDatabaseFile(url: string, dbFileName: string, token: string, progressCallback: (value: number) => void) {
+    public downloadFileToCache(url: string, progressCallback: (value: number) => void) {
+        return this.downloadFileToCacheAuthenticated(url, url.split("/").pop(), null, progressCallback);
+    }
+
+    public async downloadFileToCacheAuthenticated(url: string, fileName: string, token: string, progressCallback: (value: number) => void) {
         const fileTransferObject = this.fileTransfer.create();
         fileTransferObject.onProgress((event) => {
             progressCallback(event.loaded / event.total);
         });
-        this.loggingService.info(`[Files] Starting downloading and writing database file to temporary file name ${dbFileName}`);
-        await fileTransferObject.download(url, this.fileSystemWrapper.cacheDirectory + dbFileName, true, {
+        this.loggingService.info(`[Files] Starting downloading and writing file to cache, file name ${fileName}`);
+        let options = !token ? undefined : {
             headers: {
                 Authorization: `Bearer ${token}`
             }
-        });
-        this.loggingService.info(`[Files] Finished downloading and writing database file to temporary file name ${dbFileName}`);
+        };
+        await fileTransferObject.download(url, this.fileSystemWrapper.cacheDirectory + fileName, true, options);
+        this.loggingService.info(`[Files] Finished downloading and writing file to cache, file name ${fileName}`);
     }
 
     public async renameOldDatabases(): Promise<boolean> {

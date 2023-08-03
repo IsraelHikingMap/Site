@@ -109,7 +109,7 @@ export class OfflineFilesDownloadService {
                 const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
                 if (fileName.endsWith(".mbtiles")) {
                     const dbFileName = fileName.replace(".mbtiles", ".db");
-                    await this.fileService.downloadDatabaseFile(`${Urls.offlineFiles}/${fileName}`, dbFileName, token,
+                    await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}`, dbFileName, token,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
                     await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
                 } else {
