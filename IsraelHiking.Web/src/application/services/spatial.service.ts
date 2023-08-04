@@ -363,4 +363,9 @@ export class SpatialService {
             pixelY: Math.floor((tile.y - Math.floor(tile.y)) * tileSize)
         };
     }
+
+    public static isInIsrael(latlng: LatLngAlt): boolean {
+        return latlng.lat > 29 && latlng.lat < 34 &&
+                latlng.lng > 34 && latlng.lng < 36;
+    }
 }

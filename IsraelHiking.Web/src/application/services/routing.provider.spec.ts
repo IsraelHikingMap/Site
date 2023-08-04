@@ -3,7 +3,7 @@ import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
 
-import { RouterService } from "./router.service";
+import { RoutingProvider } from "./routing.provider";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
@@ -21,7 +21,7 @@ const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureColle
 
 };
 
-describe("Router Service", () => {
+describe("RoutingProvider", () => {
     beforeEach(() => {
         const toastMockCreator = new ToastServiceMockCreator();
         TestBed.configureTestingModule({
@@ -37,13 +37,13 @@ describe("Router Service", () => {
                 { provide: LoggingService, useValue: { error: () => {} } },
                 { provide: RunningContextService, useValue: {} },
                 GeoJsonParser,
-                RouterService
+                RoutingProvider
             ]
         });
     });
 
-    it("Should route between two points", inject([RouterService, HttpTestingController],
-        async (router: RouterService, mockBackend: HttpTestingController) => {
+    it("Should route between two points", inject([RoutingProvider, HttpTestingController],
+        async (router: RoutingProvider, mockBackend: HttpTestingController) => {
             const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
                 expect(data.length).toBe(3);
             }, fail);
@@ -68,8 +68,8 @@ describe("Router Service", () => {
         }
     ));
 
-    it("Should return start and end points when reponse is not a geojson", inject([RouterService, HttpTestingController, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
+    it("Should return start and end points when reponse is not a geojson", inject([RoutingProvider, HttpTestingController, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
                 offlineState: {
                     isOfflineAvailable: false
@@ -86,8 +86,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return straight route from tiles when getting error response from server and no offline subscription",
-        inject([RouterService, HttpTestingController, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
                 offlineState: {
                     isOfflineAvailable: false
@@ -104,8 +104,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return start and end points when getting error response from server and offline is missing",
-        inject([RouterService, HttpTestingController, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
 
             store.reset({
                 offlineState: {
@@ -124,8 +124,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return start and end points when getting error response from server and the points are too far part",
-        inject([RouterService, HttpTestingController, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
 
             store.reset({
                 offlineState: {
@@ -144,8 +144,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available",
-        inject([RouterService, HttpTestingController, DatabaseService, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -180,8 +180,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available for a multiline string",
-        inject([RouterService, HttpTestingController, DatabaseService, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -219,8 +219,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available only through one line",
-        inject([RouterService, HttpTestingController, DatabaseService, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -264,8 +264,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return srart and end point when all lines are filtered out",
-        inject([RouterService, HttpTestingController, DatabaseService, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -300,8 +300,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route between two lines when points are not exactly the same",
-        inject([RouterService, HttpTestingController, DatabaseService, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
             const featureCollection = {
                 type: "FeatureCollection",
                 features: [{

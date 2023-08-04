@@ -4,7 +4,7 @@ import { NgxsModule, Store } from "@ngxs/store";
 import { SelectedRouteService } from "./selected-route.service";
 import { ResourcesService } from "./resources.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
-import { RouterService } from "./router.service";
+import { RoutingProvider } from "./routing.provider";
 import { RoutesFactory } from "./routes.factory";
 import { SetSelectedRouteAction, RouteEditingReducer } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
@@ -25,7 +25,7 @@ describe("Selected Route Service", () => {
         const toastMock = new ToastServiceMockCreator();
         toastMock.resourcesService.route = "route";
         toastMock.resourcesService.split = "split";
-        const routerServiceMock = {
+        const routingProviderMock = {
             getRoute: () => Promise.resolve([])
         };
         TestBed.configureTestingModule({
@@ -34,7 +34,7 @@ describe("Selected Route Service", () => {
             ],
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
-                { provide: RouterService, useValue: routerServiceMock },
+                { provide: RoutingProvider, useValue: routingProviderMock },
                 RoutesFactory,
                 SelectedRouteService,
             ]

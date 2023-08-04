@@ -17,7 +17,7 @@ import { Urls } from "../urls";
 import type { ApplicationState, LatLngAlt, RoutingType } from "../models/models";
 
 @Injectable()
-export class RouterService {
+export class RoutingProvider {
     private featuresCache: Map<string, GeoJSON.FeatureCollection<GeoJSON.LineString>>;
 
     constructor(private readonly httpClient: HttpClient,
@@ -31,6 +31,10 @@ export class RouterService {
     }
 
     public async getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
+
+        if (routinType !== "None" && (!SpatialService.isInIsrael(latlngStart) || !SpatialService.isInIsrael(latlngEnd))) {
+            return this.getRouteOutsideIsrael(latlngStart, latlngEnd, routinType);
+        }
         const address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng +
             "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
         try {
@@ -50,6 +54,19 @@ export class RouterService {
                 return [latlngStart, latlngEnd];
             }
         }
+    }
+
+    private async getRouteOutsideIsrael(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
+        let osrmRoutingType = "car";
+        switch (routinType) {
+            case "Hike":
+                osrmRoutingType = "foot";
+                break;
+            case "Bike":
+                osrmRoutingType = "bike";
+        }
+        let response = await firstValueFrom(this.httpClient.get(`http://router.project-osrm.org/route/v1/${osrmRoutingType}/${latlngStart.lng},${latlngStart.lat};${latlngEnd.lng},${latlngEnd.lat}?alternatives=false&steps=false&geometries=geojson&overview=full&annotations=false`)) as any;
+        return response.routes[0].geometry.coordinates.map((c: [number, number]) => SpatialService.toLatLng(c));
     }
 
     private async getOffineRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {

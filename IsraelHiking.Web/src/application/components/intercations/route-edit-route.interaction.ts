@@ -6,7 +6,7 @@ import type { Immutable } from "immer";
 
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
-import { RouterService } from "../../services/router.service";
+import { RoutingProvider } from "../../services/routing.provider";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { SnappingService } from "../../services/snapping.service";
 import { GeoLocationService } from "../../services/geo-location.service";
@@ -42,7 +42,7 @@ export class RouteEditRouteInteraction {
 
     constructor(private readonly resources: ResourcesService,
                 private readonly selectedRouteService: SelectedRouteService,
-                private readonly routerService: RouterService,
+                private readonly routingProvider: RoutingProvider,
                 private readonly elevationProvider: ElevationProvider,
                 private readonly snappingService: SnappingService,
                 private readonly ngZone: NgZone,
@@ -314,7 +314,7 @@ export class RouteEditRouteInteraction {
 
     private runRouting = async (startLatLng: LatLngAlt, segment: RouteSegmentData): Promise<void> => {
         segment.routePoint = this.getSnappingForRoute(segment.routePoint, []);
-        const latLngs =  await this.routerService.getRoute(startLatLng, segment.routePoint, segment.routingType);
+        const latLngs =  await this.routingProvider.getRoute(startLatLng, segment.routePoint, segment.routingType);
         await this.elevationProvider.updateHeights(latLngs);
         segment.latlngs = latLngs as LatLngAltTime[];
         const last = latLngs[latLngs.length - 1];
