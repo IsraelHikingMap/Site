@@ -1,26 +1,26 @@
 PODS:
-  - Capacitor (5.1.1):
+  - Capacitor (5.2.1):
     - CapacitorCordova
-  - CapacitorApp (5.0.5):
+  - CapacitorApp (5.0.6):
     - Capacitor
-  - CapacitorCamera (5.0.5):
+  - CapacitorCamera (5.0.6):
     - Capacitor
   - CapacitorCommunityKeepAwake (4.0.0):
     - Capacitor
   - CapacitorCommunityScreenBrightness (5.0.0):
     - Capacitor
-  - CapacitorCommunitySqlite (5.0.5-2):
+  - CapacitorCommunitySqlite (5.0.5):
     - Capacitor
     - SQLCipher
     - ZIPFoundation
-  - CapacitorCordova (5.1.1)
-  - CapacitorDevice (5.0.5):
+  - CapacitorCordova (5.2.1)
+  - CapacitorDevice (5.0.6):
     - Capacitor
-  - CapacitorTextZoom (5.0.5):
+  - CapacitorTextZoom (5.0.6):
     - Capacitor
   - CapgoNativeAudio (6.0.13):
     - Capacitor
-  - CordovaPlugins (5.1.1):
+  - CordovaPlugins (5.2.1):
     - CapacitorCordova
   - SQLCipher (4.5.3):
     - SQLCipher/standard (= 4.5.3)
@@ -72,17 +72,17 @@ EXTERNAL SOURCES:
     :path: "../capacitor-cordova-ios-plugins"
 
 SPEC CHECKSUMS:
-  Capacitor: 55956e1199b63efcd7f2dedffa5c6b9129c45aae
-  CapacitorApp: 9d91a5a400e4ad8cafe66a02cc9d8073c864d7bb
-  CapacitorCamera: 834aade2952a06bd1e46c078d1068a980f37f8c9
+  Capacitor: 36510199454641113344c2e5ef43bf3f54b5af79
+  CapacitorApp: 024e1b1bea5f883d79f6330d309bc441c88ad04a
+  CapacitorCamera: 4a95204d13a05b0b726bf9086b44124349ab1952
   CapacitorCommunityKeepAwake: f3442e3e9b666dd0162522fbd053da1fe81ede20
   CapacitorCommunityScreenBrightness: b2d9c6fffee6b684994cd69f727f2090e2f05c6d
-  CapacitorCommunitySqlite: 409b6d635462e9e409c2a9f3b3ce2fa9538d0055
-  CapacitorCordova: b31a46ad379c93a5c04e0598a6164e8cb90c2bb2
-  CapacitorDevice: 4c78eeaa553c7a46bc07372c6eb03a5665459885
-  CapacitorTextZoom: a0a325e33c8c67cb85afe8c0e8991ed9f9a7efc0
+  CapacitorCommunitySqlite: 01807c8103abce4316368e59ad7703f838fe28c4
+  CapacitorCordova: d173eeb1635e62aa95a20874a5d5cbbf0aa1e0df
+  CapacitorDevice: 2c968f98a1ec4d22357418c1521e7ddc46c675e6
+  CapacitorTextZoom: bd623313a291bc1f38cdc01bd94c39b2b48d794a
   CapgoNativeAudio: 3cf6582984eacc721801be7e4c2abb5de7060fdb
-  CordovaPlugins: 1ca1daf54e40a8385e57d76df8fd2a46bf38b68a
+  CordovaPlugins: eb26ba06854430a04a01a3c740afbd471ceec72c
   SQLCipher: 57fa9f863fa4a3ed9dd3c90ace52315db8c0fdca
   ZIPFoundation: d170fa8e270b2a32bef9dcdcabff5b8f1a5deced
 

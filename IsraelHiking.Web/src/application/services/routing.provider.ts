@@ -65,7 +65,7 @@ export class RoutingProvider {
             case "Bike":
                 osrmRoutingType = "bike";
         }
-        let response = await firstValueFrom(this.httpClient.get(`http://router.project-osrm.org/route/v1/${osrmRoutingType}/${latlngStart.lng},${latlngStart.lat};${latlngEnd.lng},${latlngEnd.lat}?alternatives=false&steps=false&geometries=geojson&overview=full&annotations=false`)) as any;
+        let response = await firstValueFrom(this.httpClient.get(`https://router.project-osrm.org/route/v1/${osrmRoutingType}/${latlngStart.lng},${latlngStart.lat};${latlngEnd.lng},${latlngEnd.lat}?alternatives=false&steps=false&geometries=geojson&overview=full&annotations=false`)) as any;
         return response.routes[0].geometry.coordinates.map((c: [number, number]) => SpatialService.toLatLng(c));
     }
 
