@@ -119,7 +119,9 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         if (this.sourceAdded) {
             const addressToRemove = changes.layerData ? changes.layerData.previousValue.address : this.layerData.address;
             this.removeLayer(addressToRemove);
+            this.sourceAdded = false;
             await this.createLayer();
+            this.sourceAdded = true;
         }
     }
 
