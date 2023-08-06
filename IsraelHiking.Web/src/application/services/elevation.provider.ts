@@ -44,12 +44,12 @@ export class ElevationProvider {
             return;
         }
         if (!isInIsrael) {
-            let body = {
+            const body = {
                 id: "valhalla_height",
                 range: false,
                 shape: missingElevation.map(l => ({ lat: l.lat, lon: l.lng}))
             };
-            let response = await firstValueFrom(this.httpClient.post("https://valhalla1.openstreetmap.de/height", body)) as { height: number[]};;
+            const response = await firstValueFrom(this.httpClient.post("https://valhalla1.openstreetmap.de/height", body)) as { height: number[]};
             for (let index = 0; index < relevantIndexes.length; index++) {
                 latlngs[relevantIndexes[index]].alt = response.height[index];
             }
@@ -63,7 +63,7 @@ export class ElevationProvider {
         }
 
         try {
-            let points = missingElevation.map(latlng => `${latlng.lat.toFixed(6)},${latlng.lng.toFixed(6)}`);
+            const points = missingElevation.map(latlng => `${latlng.lat.toFixed(6)},${latlng.lng.toFixed(6)}`);
             const params = new HttpParams().set("points", points.join("|"));
             const response = await firstValueFrom(this.httpClient.get(Urls.elevation, { params }).pipe(timeout(1000)));
             for (let index = 0; index < relevantIndexes.length; index++) {
