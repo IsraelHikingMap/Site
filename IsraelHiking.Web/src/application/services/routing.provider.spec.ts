@@ -11,12 +11,21 @@ import { ToastServiceMockCreator } from "./toast.service.spec";
 import { DatabaseService } from "./database.service";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
+import { SpatialService } from "./spatial.service";
 import geojsonVt from "geojson-vt";
 import vtpbf from "vt-pbf";
 
 const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureCollection): ArrayBuffer => {
     const tileindex = geojsonVt(featureCollection);
-    const tile = tileindex.getTile(14, 8192, 8191);
+    const feature = featureCollection.features[0];
+    let coordinate = [0, 0];
+    if (feature.geometry.type === "LineString") {
+        coordinate = feature.geometry.coordinates[0];
+    } else if (feature.geometry.type === "MultiLineString") {
+        coordinate = feature.geometry.coordinates[0][0];
+    }
+    const xy = SpatialService.toTile(SpatialService.toLatLng(coordinate), 14)
+    const tile = tileindex.getTile(14, Math.floor(xy.x), Math.floor(xy.y));
     return vtpbf.fromGeojsonVt({ geojsonLayer: tile });
 
 };
@@ -44,7 +53,7 @@ describe("RoutingProvider", () => {
 
     it("Should route between two points", inject([RoutingProvider, HttpTestingController],
         async (router: RoutingProvider, mockBackend: HttpTestingController) => {
-            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
                 expect(data.length).toBe(3);
             }, fail);
 
@@ -76,7 +85,7 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -94,7 +103,7 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 1.001, lng: 1.001 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -114,7 +123,7 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 1.001, lng: 1.001 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -134,7 +143,7 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -153,7 +162,7 @@ describe("RoutingProvider", () => {
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]]
+                        coordinates: [[35.0001,32.0001], [35.0001,32.0002], [35.0001,32.0003]]
                     },
                     properties: {
                         ihm_class: "track"
@@ -170,7 +179,7 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0001 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0001 }, "Hike").then((data) => {
                 expect(data.length).toBe(3);
             }, fail);
 
@@ -190,8 +199,8 @@ describe("RoutingProvider", () => {
                     geometry: {
                         type: "MultiLineString",
                         coordinates: [
-                            [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]],
-                            [[0.0001,0.0003], [0.0002,0.0003], [0.0003,0.0003]]
+                            [[35.0001,32.0001], [35.0001,32.0002], [35.0001,32.0003]],
+                            [[35.0001,32.0003], [35.0002,32.0003], [35.0003,32.0003]]
                         ]
                     },
                     properties: {
@@ -209,7 +218,7 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Hike").then((data) => {
                 expect(data.length).toBe(5);
             }, fail);
 
@@ -228,7 +237,7 @@ describe("RoutingProvider", () => {
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]]
+                        coordinates: [[35.0001,32.0001], [35.0001,32.0002], [35.0001,32.0003]]
                     },
                     properties: {
                         ihm_class: "track"
@@ -237,7 +246,7 @@ describe("RoutingProvider", () => {
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.0003], [0.0002,0.0003], [0.0003,0.0003]]
+                        coordinates: [[35.0001,32.0003], [35.0002,32.0003], [35.0003,32.0003]]
                     },
                     properties: {
                         ihm_class: "steps"
@@ -254,7 +263,7 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Bike").then((data) => {
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike").then((data) => {
                 expect(data.length).toBe(3);
             }, fail);
 
@@ -273,7 +282,7 @@ describe("RoutingProvider", () => {
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.0003], [0.0002,0.0003], [0.0003,0.0003]]
+                        coordinates: [[35.0001,32.0003], [35.0002,32.0003], [35.0003,32.0003]]
                     },
                     properties: {
                         ihm_class: "path"
@@ -290,7 +299,7 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "4WD").then((data) => {
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "4WD").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -308,7 +317,7 @@ describe("RoutingProvider", () => {
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]]
+                        coordinates: [[35.0001,32.0001], [35.0001,32.0002], [35.0001,32.0003]]
                     },
                     properties: {
                         ihm_class: "major"
@@ -317,7 +326,7 @@ describe("RoutingProvider", () => {
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.000305], [0.0002,0.0003], [0.0003,0.0003]]
+                        coordinates: [[35.0001,32.000305], [35.0002,32.0003], [35.0003,32.0003]]
                     },
                     properties: {
                         ihm_class: "minor"
@@ -334,7 +343,7 @@ describe("RoutingProvider", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Bike").then((data) => {
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike").then((data) => {
                 expect(data.length).toBe(5);
             }, fail);
 
