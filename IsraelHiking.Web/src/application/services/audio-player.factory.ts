@@ -20,7 +20,7 @@ export class AudioPlayerFactory {
 
         this.loggingService.info("[Audio] Initializing audio file");
 
-        await NativeAudio.configure({focus: false});
+        NativeAudio.configure({focus: false});
 
         await NativeAudio.preload({
             assetId: "uh-oh",
