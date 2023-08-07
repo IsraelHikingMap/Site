@@ -365,7 +365,7 @@ export class SpatialService {
     }
 
     public static isInIsrael(latlng: LatLngAlt): boolean {
-        return latlng.lat > 29 && latlng.lat < 34 &&
-                latlng.lng > 34 && latlng.lng < 36;
+        return latlng.lat > 29.37711 && latlng.lat < 33.35091 &&
+                latlng.lng > 34.07929 && latlng.lng < 35.91531;
     }
 }
