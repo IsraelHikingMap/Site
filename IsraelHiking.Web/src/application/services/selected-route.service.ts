@@ -7,7 +7,7 @@ import type { Immutable } from "immer";
 import { RoutesFactory } from "./routes.factory";
 import { ResourcesService } from "./resources.service";
 import { SpatialService } from "./spatial.service";
-import { RouterService } from "./router.service";
+import { RoutingProvider } from "./routing.provider";
 import { MINIMAL_ANGLE, MINIMAL_DISTANCE } from "./route-statistics.service";
 import { SetSelectedRouteAction } from "../reducers/route-editing.reducer";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
@@ -48,7 +48,7 @@ export class SelectedRouteService {
 
     constructor(private readonly resources: ResourcesService,
                 private readonly routesFactory: RoutesFactory,
-                private readonly routerService: RouterService,
+                private readonly routingProvider: RoutingProvider,
                 private readonly store: Store) {
         this.routes = [];
         this.selectedRouteHover = new EventEmitter();
@@ -303,7 +303,7 @@ export class SelectedRouteService {
             if (segmentIndex !== 0) {
                 const startLatLng = selectedRoute.segments[segmentIndex].latlngs[0];
                 const endLatLng = selectedRoute.segments[segmentIndex + 1].routePoint;
-                latlngs = await this.routerService.getRoute(startLatLng, endLatLng, selectedRoute.segments[segmentIndex + 1].routingType);
+                latlngs = await this.routingProvider.getRoute(startLatLng, endLatLng, selectedRoute.segments[segmentIndex + 1].routingType);
             }
             const updatedSegment = {
                 ...selectedRoute.segments[segmentIndex + 1],

@@ -24,10 +24,10 @@ describe("ElevationProvider", () => {
         });
     });
 
-    it("Should update height data", inject([ElevationProvider, HttpTestingController],
+    it("Should update height data inside Israel", inject([ElevationProvider, HttpTestingController],
         async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
 
-            const latlngs = [{ lat: 0, lng: 0, alt: 0 }];
+            const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             const promise = elevationProvider.updateHeights(latlngs).then(() => {
                 expect(latlngs[0].alt).toBe(1);
@@ -38,10 +38,24 @@ describe("ElevationProvider", () => {
         }
     ));
 
+    it("Should update height data outside Israel", inject([ElevationProvider, HttpTestingController],
+        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
+
+            const latlngs = [{ lat: 0, lng: 0, alt: 0 }];
+
+            const promise = elevationProvider.updateHeights(latlngs).then(() => {
+                expect(latlngs[0].alt).toBe(1);
+            });
+
+            mockBackend.expectOne(u => u.url.startsWith("https://valhalla")).flush({height: [1]});
+            return promise;
+        }
+    ));
+
     it("Should not call provider bacause all coordinates has elevation", inject([ElevationProvider],
         async (elevationProvider: ElevationProvider) => {
 
-            const latlngs = [{ lat: 0, lng: 0, alt: 1 }];
+            const latlngs = [{ lat: 32, lng: 35, alt: 1 }];
 
             elevationProvider.updateHeights(latlngs).then(() => {
                 expect(latlngs[0].alt).toBe(1);
@@ -53,7 +67,7 @@ describe("ElevationProvider", () => {
         inject([ElevationProvider, HttpTestingController],
         async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
 
-            const latlngs = [{ lat: 0, lng: 0, alt: 0 }];
+            const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             const promise = elevationProvider.updateHeights(latlngs);
             promise.then(() => {
@@ -68,7 +82,7 @@ describe("ElevationProvider", () => {
     it("Should update elevation when getting an error from server and offline is available",
         inject([ElevationProvider, HttpTestingController, DatabaseService, Store],
         async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
-            const latlngs = [{ lat: 0, lng: 0, alt: 0 }];
+            const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             store.reset({
                 offlineState: {

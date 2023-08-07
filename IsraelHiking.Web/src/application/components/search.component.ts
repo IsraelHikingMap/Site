@@ -17,7 +17,7 @@ import { Store } from "@ngxs/store";
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStrings } from "../services/hash.service";
-import { RouterService } from "../services/router.service";
+import { RoutingProvider } from "../services/routing.provider";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider } from "../services/search-results.provider";
@@ -81,7 +81,7 @@ export class SearchComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
                 private readonly searchResultsProvider: SearchResultsProvider,
-                private readonly routerService: RouterService,
+                private readonly routingProvider: RoutingProvider,
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly toastService: ToastService,
                 private readonly routesFactory: RoutesFactory,
@@ -196,7 +196,7 @@ export class SearchComponent extends BaseMapComponent {
             this.toastService.warning(this.resources.pleaseSelectTo);
             return;
         }
-        const latlngs = await this.routerService.getRoute(this.fromContext.selectedSearchResults.location,
+        const latlngs = await this.routingProvider.getRoute(this.fromContext.selectedSearchResults.location,
             this.toContext.selectedSearchResults.location,
             this.routingType);
         this.directional.showResults = true;

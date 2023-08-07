@@ -55,7 +55,7 @@ import { HashService } from "./services/hash.service";
 import { LayersService } from "./services/layers.service";
 import { DataContainerService } from "./services/data-container.service";
 import { RoutesFactory } from "./services/routes.factory";
-import { RouterService } from "./services/router.service";
+import { RoutingProvider } from "./services/routing.provider";
 import { SnappingService } from "./services/snapping.service";
 import { FitBoundsService } from "./services/fit-bounds.service";
 import { RouteStatisticsService } from "./services/route-statistics.service";
@@ -267,7 +267,7 @@ const initializeApplication = (injector: Injector) => async () => {
             LayersService,
             DataContainerService,
             RoutesFactory,
-            RouterService,
+            RoutingProvider,
             SnappingService,
             FitBoundsService,
             RouteStatisticsService,

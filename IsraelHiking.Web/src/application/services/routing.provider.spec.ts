@@ -2,8 +2,11 @@ import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
+import geojsonVt from "geojson-vt";
+import vtpbf from "vt-pbf";
+import polyline from "@mapbox/polyline";
 
-import { RouterService } from "./router.service";
+import { RoutingProvider } from "./routing.provider";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
@@ -11,17 +14,24 @@ import { ToastServiceMockCreator } from "./toast.service.spec";
 import { DatabaseService } from "./database.service";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
-import geojsonVt from "geojson-vt";
-import vtpbf from "vt-pbf";
+import { SpatialService } from "./spatial.service";
 
 const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureCollection): ArrayBuffer => {
     const tileindex = geojsonVt(featureCollection);
-    const tile = tileindex.getTile(14, 8192, 8191);
+    const feature = featureCollection.features[0];
+    let coordinate = [0, 0];
+    if (feature.geometry.type === "LineString") {
+        coordinate = feature.geometry.coordinates[0];
+    } else if (feature.geometry.type === "MultiLineString") {
+        coordinate = feature.geometry.coordinates[0][0];
+    }
+    const xy = SpatialService.toTile(SpatialService.toLatLng(coordinate), 14)
+    const tile = tileindex.getTile(14, Math.floor(xy.x), Math.floor(xy.y));
     return vtpbf.fromGeojsonVt({ geojsonLayer: tile });
 
 };
 
-describe("Router Service", () => {
+describe("RoutingProvider", () => {
     beforeEach(() => {
         const toastMockCreator = new ToastServiceMockCreator();
         TestBed.configureTestingModule({
@@ -37,14 +47,14 @@ describe("Router Service", () => {
                 { provide: LoggingService, useValue: { error: () => {} } },
                 { provide: RunningContextService, useValue: {} },
                 GeoJsonParser,
-                RouterService
+                RoutingProvider
             ]
         });
     });
 
-    it("Should route between two points", inject([RouterService, HttpTestingController],
-        async (router: RouterService, mockBackend: HttpTestingController) => {
-            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
+    it("Should route between two points inside Israel", inject([RoutingProvider, HttpTestingController],
+        async (router: RoutingProvider, mockBackend: HttpTestingController) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
                 expect(data.length).toBe(3);
             }, fail);
 
@@ -68,15 +78,32 @@ describe("Router Service", () => {
         }
     ));
 
-    it("Should return start and end points when reponse is not a geojson", inject([RouterService, HttpTestingController, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
+    it("Should route between two points outside Israel", inject([RoutingProvider, HttpTestingController],
+        async (router: RoutingProvider, mockBackend: HttpTestingController) => {
+            const promise = router.getRoute({ lat: 0, lng: 0 }, { lat: 1, lng: 1 }, "Hike").then((data) => {
+                expect(data.length).toBe(3);
+            }, fail);
+
+            mockBackend.expectOne(u => u.url.startsWith("https://valhalla")).flush({
+                trip: {
+                    legs:[{
+                        shape: polyline.encode([[1, 1], [1.5, 1.5], [2, 2]], 6)
+                    }]
+                }
+            });
+            return promise;
+        }
+    ));
+
+    it("Should return start and end points when reponse is not a geojson", inject([RoutingProvider, HttpTestingController, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
                 offlineState: {
                     isOfflineAvailable: false
                 }
             });
 
-            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -86,15 +113,15 @@ describe("Router Service", () => {
     ));
 
     it("Should return straight route from tiles when getting error response from server and no offline subscription",
-        inject([RouterService, HttpTestingController, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
             store.reset({
                 offlineState: {
                     isOfflineAvailable: false
                 }
             });
 
-            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 1.001, lng: 1.001 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -104,8 +131,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return start and end points when getting error response from server and offline is missing",
-        inject([RouterService, HttpTestingController, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
 
             store.reset({
                 offlineState: {
@@ -114,7 +141,7 @@ describe("Router Service", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 1.001, lng: 1.001 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 32.001, lng: 35.001 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -124,8 +151,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return start and end points when getting error response from server and the points are too far part",
-        inject([RouterService, HttpTestingController, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, store: Store) => {
 
             store.reset({
                 offlineState: {
@@ -134,7 +161,7 @@ describe("Router Service", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 1, lng: 1 }, { lat: 2, lng: 2 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32, lng: 35 }, { lat: 33, lng: 35 }, "Hike").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -144,8 +171,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available",
-        inject([RouterService, HttpTestingController, DatabaseService, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -153,7 +180,7 @@ describe("Router Service", () => {
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]]
+                        coordinates: [[35.0001,32.0001], [35.0001,32.0002], [35.0001,32.0003]]
                     },
                     properties: {
                         ihm_class: "track"
@@ -170,7 +197,7 @@ describe("Router Service", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0001 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0001 }, "Hike").then((data) => {
                 expect(data.length).toBe(3);
             }, fail);
 
@@ -180,8 +207,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available for a multiline string",
-        inject([RouterService, HttpTestingController, DatabaseService, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -190,8 +217,8 @@ describe("Router Service", () => {
                     geometry: {
                         type: "MultiLineString",
                         coordinates: [
-                            [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]],
-                            [[0.0001,0.0003], [0.0002,0.0003], [0.0003,0.0003]]
+                            [[35.0001,32.0001], [35.0001,32.0002], [35.0001,32.0003]],
+                            [[35.0001,32.0003], [35.0002,32.0003], [35.0003,32.0003]]
                         ]
                     },
                     properties: {
@@ -209,7 +236,7 @@ describe("Router Service", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Hike").then((data) => {
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Hike").then((data) => {
                 expect(data.length).toBe(5);
             }, fail);
 
@@ -219,8 +246,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route when getting error response from server and offline is available only through one line",
-        inject([RouterService, HttpTestingController, DatabaseService, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -228,7 +255,7 @@ describe("Router Service", () => {
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]]
+                        coordinates: [[35.0001,32.0001], [35.0001,32.0002], [35.0001,32.0003]]
                     },
                     properties: {
                         ihm_class: "track"
@@ -237,7 +264,7 @@ describe("Router Service", () => {
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.0003], [0.0002,0.0003], [0.0003,0.0003]]
+                        coordinates: [[35.0001,32.0003], [35.0002,32.0003], [35.0003,32.0003]]
                     },
                     properties: {
                         ihm_class: "steps"
@@ -254,7 +281,7 @@ describe("Router Service", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Bike").then((data) => {
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike").then((data) => {
                 expect(data.length).toBe(3);
             }, fail);
 
@@ -264,8 +291,8 @@ describe("Router Service", () => {
     ));
 
     it("Should return srart and end point when all lines are filtered out",
-        inject([RouterService, HttpTestingController, DatabaseService, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
 
             const featureCollection = {
                 type: "FeatureCollection",
@@ -273,7 +300,7 @@ describe("Router Service", () => {
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.0003], [0.0002,0.0003], [0.0003,0.0003]]
+                        coordinates: [[35.0001,32.0003], [35.0002,32.0003], [35.0003,32.0003]]
                     },
                     properties: {
                         ihm_class: "path"
@@ -290,7 +317,7 @@ describe("Router Service", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "4WD").then((data) => {
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "4WD").then((data) => {
                 expect(data.length).toBe(2);
             }, fail);
 
@@ -300,15 +327,15 @@ describe("Router Service", () => {
     ));
 
     it("Should return a route between two lines when points are not exactly the same",
-        inject([RouterService, HttpTestingController, DatabaseService, Store],
-        async (router: RouterService, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([RoutingProvider, HttpTestingController, DatabaseService, Store],
+        async (router: RoutingProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
             const featureCollection = {
                 type: "FeatureCollection",
                 features: [{
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.0001], [0.0001,0.0002], [0.0001,0.0003]]
+                        coordinates: [[35.0001,32.0001], [35.0001,32.0002], [35.0001,32.0003]]
                     },
                     properties: {
                         ihm_class: "major"
@@ -317,7 +344,7 @@ describe("Router Service", () => {
                     type: "Feature",
                     geometry: {
                         type: "LineString",
-                        coordinates: [[0.0001,0.000305], [0.0002,0.0003], [0.0003,0.0003]]
+                        coordinates: [[35.0001,32.000305], [35.0002,32.0003], [35.0003,32.0003]]
                     },
                     properties: {
                         ihm_class: "minor"
@@ -334,7 +361,7 @@ describe("Router Service", () => {
                 }
             });
 
-            const promise = router.getRoute({ lat: 0.0001, lng: 0.0001 }, { lat: 0.0005, lng: 0.0005 }, "Bike").then((data) => {
+            const promise = router.getRoute({ lat: 32.0001, lng: 35.0001 }, { lat: 32.0005, lng: 35.0005 }, "Bike").then((data) => {
                 expect(data.length).toBe(5);
             }, fail);
 
