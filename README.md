@@ -10,17 +10,17 @@ This repository holds the main server side module the web and mobile clients int
 
 # Technology stack
 The technology stack of this site is based on the following frameworks:
-* [Typescript](http://www.typescriptlang.org/) - for sanity
+* [Typescript](https://www.typescriptlang.org/) - for sanity
 * [Angular](https://angular.io/) and [Angular-Material](https://material.angular.io/) - for UI framework and components 
 * [MapLibre](https://docs.maplibre.org/) using [ngx-maplibre-gl](https://github.com/maplibre/ngx-maplibre-gl/) - for map presentation and interaction
-* [Jasmine](http://jasmine.github.io/) and [Karma](https://karma-runner.github.io/) - for unit testing.
+* [Jasmine](https://jasmine.github.io/) and [Karma](https://karma-runner.github.io/) - for unit testing.
 * [Asp.Net core](https://docs.microsoft.com/en-us/aspnet/core/) - for server side
-* [NSubstitute](http://nsubstitute.github.io/) - for mocking server side tests
+* [NSubstitute](https://nsubstitute.github.io/) - for mocking server side tests
 * [GraphHopper](https://graphhopper.com/) - for routing between points
 * [Elastic Search and NEST](https://www.elastic.co/) - for database and search capabilities
 * [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite) - for server side spatial mathmatics
 * [Turf](https://turfjs.org/) - for client side spatial mathematics
-* [OsmSharp](http://www.osmsharp.com/) - for OSM capabilities
+* [OsmSharp](https://www.osmsharp.com/) - for OSM capabilities
 * [Wikipedia using Wiki client library](https://github.com/CXuesong/WikiClientLibrary) - for Wikipedia data and upload images to Wikimedia common
 * [Imgur](https://imgur.com/) - for uploading anonymous images
 * [Cordova](https://cordova.apache.org/) - for wrapping the site as a mobile application and add some native capabilities
