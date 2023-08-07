@@ -53,12 +53,6 @@ export class ElevationProvider {
             for (let index = 0; index < relevantIndexes.length; index++) {
                 latlngs[relevantIndexes[index]].alt = response.height[index];
             }
-            // HM TODO: remove this?
-            //let points = missingElevation.map(latlng => `latitude=${latlng.lat.toFixed(6)}&longitude=${latlng.lng.toFixed(6)}`)
-            //let response = await firstValueFrom(this.httpClient.get(`https://api.open-meteo.com/v1/elevation?${points.join("&")}`)) as { elevation: number[]};
-            //for (let index = 0; index < relevantIndexes.length; index++) {
-            //    latlngs[relevantIndexes[index]].alt = response.elevation[index];
-            //}
             return;
         }
 

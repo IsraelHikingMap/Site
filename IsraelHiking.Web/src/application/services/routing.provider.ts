@@ -157,18 +157,6 @@ export class RoutingProvider {
         const response = await firstValueFrom(this.httpClient.get(`https://valhalla1.openstreetmap.de/route?json=${JSON.stringify(json)}`)) as any;
         const linestring = polyline.toGeoJSON(response.trip.legs[0].shape, 6);
         return linestring.coordinates.map((c: GeoJSON.Position) => SpatialService.toLatLng(c));
-
-        // HM TODO: remove this?
-        //let osrmRoutingType = "car";
-        //switch (routinType) {
-        //    case "Hike":
-        //        osrmRoutingType = "foot";
-        //        break;
-        //    case "Bike":
-        //        osrmRoutingType = "bike";
-        //}
-        //let response = await firstValueFrom(this.httpClient.get(`https://router.project-osrm.org/route/v1/${osrmRoutingType}/${latlngStart.lng},${latlngStart.lat};${latlngEnd.lng},${latlngEnd.lat}?alternatives=false&steps=false&geometries=geojson&overview=full&annotations=false`)) as any;
-        //return response.routes[0].geometry.coordinates.map((c: [number, number]) => SpatialService.toLatLng(c));
     }
 
     private async getOffineRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<LatLngAlt[]> {
