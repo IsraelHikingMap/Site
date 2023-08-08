@@ -11,14 +11,14 @@ In order to release a version the following steps need to be made:
 ```md
 The major changes in this version are:
   -
-  - Various bug fixes.
+  - Various bug fixes
 
-The full list can be found at https://github.com/IsraelHikingMap/Site/milestone/39?closed=1 <- **REPLACE WITH ACTUAL VERSION AND LINK**
+The full list can be found at https://github.com/IsraelHikingMap/Site/milestone/66?closed=1
 
 השינויים המרכזיים בגרסה הם:
   - 
-  - תיקוני באגים שונים.
-הרשימה המלאה מופיעה בקישור https://github.com/IsraelHikingMap/Site/milestone/41?closed=1 <- **REPLACE WITH ACTUAL VERSION AND LINK**
+  - תיקוני באגים שונים
+הרשימה המלאה מופיעה בקישור https://github.com/IsraelHikingMap/Site/milestone/66?closed=1
 ```
 
 #### Android

@@ -81,7 +81,7 @@ $fileXml.Save($filePath)
 (Get-Content -path $filePath -Raw) -replace '"\[\]>', '">' | Set-Content -Path $filePath
 
 Write-Host "Archiving..."
-xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive
+xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet
 
 Write-Host "Exporting..."
 xcodebuild -exportArchive -archivePath App.xcarchive -exportPath ./ -exportOptionsPlist exportOptions.plist
