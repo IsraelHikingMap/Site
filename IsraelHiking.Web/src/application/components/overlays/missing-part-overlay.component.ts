@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { Component, Input, Output, EventEmitter, ViewEncapsulation } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
 
@@ -11,7 +11,8 @@ import type { LatLngAlt } from "../../models/models";
 @Component({
     selector: "missing-part-overlay",
     templateUrl: "./missing-part-overlay.component.html",
-    styleUrls: ["./missing-part-overlay.component.scss"]
+    styleUrls: ["./missing-part-overlay.component.scss"],
+    encapsulation: ViewEncapsulation.None
 })
 export class MissingPartOverlayComponent extends ClosableOverlayComponent {
     @Input()

@@ -1,13 +1,17 @@
 .symbol-button {
-    padding: 10px;
+    padding: 0px;
     border: 1px solid black;
     min-width: unset;
+    position: relative;
+    & .mdc-button__label {
+        position: unset;
+    }
 }
 
 .middle-line {
-    width:100%;
-    display:inline-block;
-    position:absolute;
+    width: 100%;
+    display: inline-block;
+    position: absolute;
     top: 0;
     height: 100%;
     left: 33%;
