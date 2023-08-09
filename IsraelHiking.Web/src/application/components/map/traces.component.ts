@@ -23,7 +23,7 @@ export class TracesComponent extends BaseMapComponent {
     public selectedTraceStart: LatLngAlt;
     public selectedFeature: GeoJSON.Feature<GeoJSON.LineString>;
     public missingCoordinates: LatLngAlt;
-    public missingParts: Immutable<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
+    public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public selectedFeatureSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public isConfigOpen: boolean;
 
@@ -95,7 +95,7 @@ export class TracesComponent extends BaseMapComponent {
         });
         this.missingParts$.subscribe(m => {
             if (m != null) {
-                this.missingParts = m;
+                this.missingParts = structuredClone(m) as GeoJSON.FeatureCollection<GeoJSON.LineString>;
             } else {
                 this.missingParts = {
                     type: "FeatureCollection",
@@ -130,6 +130,7 @@ export class TracesComponent extends BaseMapComponent {
     public clearTrace() {
         this.store.dispatch(new SetMissingPartsAction(null));
         this.store.dispatch(new SetVisibleTraceAction(null));
+        this.clearSelection();
     }
 
     public async convertToRoute() {
