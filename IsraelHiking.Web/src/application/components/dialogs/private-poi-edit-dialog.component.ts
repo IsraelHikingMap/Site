@@ -87,7 +87,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         }
         this.routeId = data.routeId;
         this.markerIndex = data.index;
-        this.marker = {...data}.marker;
+        this.marker = structuredClone(data.marker);
         this.markerType = this.marker.type;
         this.title = this.marker.title;
         this.description = this.marker.description;
