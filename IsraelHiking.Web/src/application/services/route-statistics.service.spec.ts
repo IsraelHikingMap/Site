@@ -101,6 +101,24 @@ describe("RouteStatisticsService", () => {
         expect(statistics.remainingDistance).toBeCloseTo(statisticsOfFullRoute.length / 2, -2);
     });
 
+    it("Should get statistics on route when gps is close by but heading is oposite to route direction", () => {
+        const gpsLatLng = { lat: 1, lng: 0.0001, alt: 20, timestamp: new Date() };
+        const routeData = [
+            { lat: 1, lng: 1, alt: 10 },
+            { lat: 1, lng: 0, alt: 20 },
+            { lat: 1, lng: -1, alt: 30 }
+        ]as any as LatLngAltTime[];
+
+        const statistics = service.getStatisticsForRouteWithLocation(routeData, gpsLatLng, 90);
+        const statisticsOfFullRoute = service.getStatisticsForStandAloneRoute(routeData);
+
+        expect(statistics.length).not.toBe(0);
+        expect(statistics.points.length).toBe(3);
+        expect(statistics.averageSpeed).toBeNull();
+        expect(statistics.remainingDistance).toBeCloseTo(statistics.traveledDistance, -2);
+        expect(statistics.remainingDistance).toBeCloseTo(statisticsOfFullRoute.length / 2, -2);
+    });
+
     it("Should get simplified statistics on route", () => {
         const routeData = [{ lat: 1, lng: 1, alt: 1 }, { lat: 4, lng: 4, alt: 4 },
             { lat: 4, lng: 4, alt: 4 }, { lat: 1, lng: 1, alt: 1 }
@@ -262,7 +280,7 @@ describe("RouteStatisticsService", () => {
         expect(distance).not.toBe(0);
     });
 
-    it("Should return 0 distance for wrong direction", () => {
+    it("Should not return 0 distance for wrong direction", () => {
         const distance = service.findDistanceForLatLngInKM({
             points: [
                 {
@@ -284,7 +302,7 @@ describe("RouteStatisticsService", () => {
             ]
         } as RouteStatistics, { lat: 0, lng: 0.00015 }, 0);
 
-        expect(distance).toBe(0);
+        expect(distance).not.toBe(0);
     });
 
     it("Should get simplified statistics on actual route", () => {

@@ -246,6 +246,16 @@ export class RouteStatisticsService {
         if (statistics.points.length < 2) {
             return 0;
         }
+        let bestPoint = this.findDistanceForLatLngInKMInternal(statistics, latLng, heading);
+        if (bestPoint == null && heading != null) {
+            bestPoint = this.findDistanceForLatLngInKMInternal(statistics, latLng, null);
+        }
+        return bestPoint 
+            ? bestPoint.coordinate[0] + SpatialService.getDistanceInMeters(bestPoint.latlng, latLng) / 1000
+            : 0;
+    }
+
+    private findDistanceForLatLngInKMInternal(statistics: RouteStatistics, latLng: LatLngAlt, heading: number): RouteStatisticsPoint {
         let bestPoint = null;
         let minimalWeight = MINIMAL_DISTANCE;
         if (heading != null) {
@@ -266,8 +276,6 @@ export class RouteStatisticsService {
             }
             previousPoint = point;
         }
-        return bestPoint
-            ? bestPoint.coordinate[0] + SpatialService.getDistanceInMeters(bestPoint.latlng, latLng) / 1000
-            : 0;
+        return bestPoint;
     }
 }

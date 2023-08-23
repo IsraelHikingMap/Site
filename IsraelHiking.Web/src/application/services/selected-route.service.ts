@@ -164,10 +164,27 @@ export class SelectedRouteService {
         return null;
     }
 
+    /**
+     * This will find the closest route to the GPS position,
+     * It will start with trying to find the closest route with the best direction
+     * and fall back to only distance if no route was found
+     * @param currentLocation - the currecnt GPS location
+     * @param heading - the current GPS heading, null when standing still
+     * @returns the closest route
+     */
     public getClosestRouteToGPS(currentLocation: LatLngAltTime, heading: number): Immutable<RouteData> {
         if (currentLocation == null) {
             return null;
         }
+        let routeToReturn = this.getClosestRouteToGPSInternal(currentLocation, heading);
+        if (routeToReturn == null && heading != null) {
+            // In case there is no closest route, ignore heading and fallback to just distance based.
+            routeToReturn = this.getClosestRouteToGPSInternal(currentLocation, null);
+        }
+        return routeToReturn
+    }
+
+    private getClosestRouteToGPSInternal(currentLocation: LatLngAltTime, heading: number): Immutable<RouteData> {
         let routeToReturn = null;
         let minimalWeight = MINIMAL_DISTANCE;
         if (heading !== null) {

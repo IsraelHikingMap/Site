@@ -334,6 +334,26 @@ describe("Selected Route Service", () => {
         }
     ));
 
+    it("Should get closet route to GPS when there are routes when heading is opposite", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [{lat: 1, lng: 1, timestamp: new Date()},
+                        {lat: 1, lng: 0, timestamp: new Date()}],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }]);
+            const closetRoute = selectedRouteService.getClosestRouteToGPS({ lat: 1.0001, lng: 1, timestamp: new Date()}, 90);
+            expect(closetRoute.id).toBe("1");
+        }
+    ));
+
     it("Should split a route at the middle and add 'split' to name", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [{
