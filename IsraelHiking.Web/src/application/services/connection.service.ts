@@ -3,6 +3,7 @@ import { BehaviorSubject, firstValueFrom, interval } from "rxjs";
 import { switchMap, tap, timeout } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
 
+import { LoggingService } from "./logging.service";
 import { Urls } from "../urls";
 
 @Injectable()
@@ -20,7 +21,8 @@ export class ConnectionService {
     private isOnline: boolean;
     private monitorInterval$ = new BehaviorSubject<number>(ConnectionService.HEART_BREAK_INTERVAL);
 
-    constructor(private readonly http: HttpClient) {
+    constructor(private readonly http: HttpClient,
+        private readonly loggingService: LoggingService) {
         this.stateChanged = new EventEmitter();
         this.isOnline = true;
         window.addEventListener("online", () => this.updateInternetAccessAndEmitIfNeeded())
@@ -54,6 +56,7 @@ export class ConnectionService {
         const previousState = this.isOnline;
         this.isOnline = await this.getInternetStatusNow();
         if (previousState !== this.isOnline) {
+            this.loggingService.info("[Connection] Online state changed, online is: " + this.isOnline);
             this.stateChanged.next(this.isOnline);
             this.monitorInterval$.next(this.isOnline 
                 ? ConnectionService.HEART_BREAK_INTERVAL
