@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { BehaviorSubject, firstValueFrom, interval } from "rxjs";
 import { switchMap, tap, timeout } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
@@ -17,13 +17,13 @@ export class ConnectionService {
      */
     private static readonly HEART_BREAK_INTERVAL = 30000;
 
-    public stateChanged: EventEmitter<boolean>;
+    public stateChanged: BehaviorSubject<boolean>;
     private isOnline: boolean;
     private monitorInterval$ = new BehaviorSubject<number>(ConnectionService.HEART_BREAK_INTERVAL);
 
     constructor(private readonly http: HttpClient,
         private readonly loggingService: LoggingService) {
-        this.stateChanged = new EventEmitter();
+        this.stateChanged = new BehaviorSubject(true);
         this.isOnline = true;
         window.addEventListener("online", () => this.updateInternetAccessAndEmitIfNeeded())
         window.addEventListener("offline", () => this.updateInternetAccessAndEmitIfNeeded())
