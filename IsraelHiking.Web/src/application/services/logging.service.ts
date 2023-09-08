@@ -2,7 +2,7 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import Dexie from "dexie";
 
-import { RunningContextService } from "./running-context.service";
+import { environment } from "../../environments/environment";
 
 type LogLevel = "debug" | "info" | "error" | "warn";
 
@@ -29,7 +29,7 @@ export class LoggingService {
     private loggingDatabase: Dexie;
     private logToConsole: boolean;
 
-    constructor(private readonly runningContextService: RunningContextService) {
+    constructor() {
         this.loggingDatabase = null;
     }
 
@@ -82,7 +82,7 @@ export class LoggingService {
             level: "debug",
             message
         } as LogLine;
-        if (!this.runningContextService.isProduction && this.logToConsole) {
+        if (!environment.production && this.logToConsole) {
             // eslint-disable-next-line
             console.debug(this.logLineToString(logLine));
         }
