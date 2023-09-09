@@ -88,6 +88,9 @@ describe("Poi Service", () => {
             store.reset({
                 layersState: {
                     categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
+                },
+                offlineState: {
+                    uploadPoiQueue: []
                 }
             });
             let changed = false;
@@ -119,7 +122,8 @@ describe("Poi Service", () => {
                 },
                 configuration: {},
                 offlineState: {
-                    poisLastModifiedDate: new Date()
+                    poisLastModifiedDate: new Date(),
+                    uploadPoiQueue: []
                 }
             });
 
@@ -218,7 +222,8 @@ describe("Poi Service", () => {
                         categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
                     },
                     offlineState: {
-                        poisLastModifiedDate: null
+                        poisLastModifiedDate: null,
+                        uploadPoiQueue: []
                     }
                 });
                 store.dispatch = jasmine.createSpy();
