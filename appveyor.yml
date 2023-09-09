@@ -25,14 +25,14 @@ environment:
         secure: oSccSp70X/744XBpfRV4UVJZKxN1jMYHxn3OHFsTSVE=
     - job_name: Docker image build and publish
       PRODUCT: docker
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       DOCKERHUB_TOKEN:
         secure: nMbMKtO7V4z3JZjzmZxaleXFP++3NP2DSotTilHMiNLJ2klymxBAFYst6YFmhvE8
       DOCKERHUB_USER:
         secure: lwvYYDM7byt4+oDjoxO4+A==
     - job_name: Tests
       PRODUCT: tests
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
     
 for:
   -
