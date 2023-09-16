@@ -119,7 +119,7 @@ namespace IsraelHiking.API.Executors
         public async Task StoreImage(MD5 md5, byte[] content, string imageUrl)
         {
             var hash = md5.ComputeHash(content).ToHashString();
-            var image = Image.Load(content, out var _);
+            var image = Image.Load(content);
             var imageItemInDatabase = await _imagesRepository.GetImageByHash(hash);
             if (imageItemInDatabase != null && !imageItemInDatabase.ImageUrls.Contains(imageUrl))
             {
