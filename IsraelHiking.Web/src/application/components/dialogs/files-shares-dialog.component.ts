@@ -66,6 +66,13 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(new Date(file.lastModified)));
             return;
         }
+        if (file.name.endsWith(".pmtiles")) {
+            this.toastService.info(this.resources.openingAFilePleaseWait);
+            await this.fileService.storeFileToCache(file.name, file);
+            this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
+            this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(new Date(file.lastModified)));
+            return;
+        }
         try {
             await this.fileService.addRoutesFromFile(file);
             this.matDialogRef.close();

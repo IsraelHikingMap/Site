@@ -22,6 +22,7 @@ import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
+import { PmTilesService } from "./pmtiles.service";
 import type { ApplicationState } from "../models/models";
 
 @Injectable()
@@ -44,6 +45,7 @@ export class ApplicationInitializeService {
                 private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
                 private readonly geoLocationService: GeoLocationService,
                 private readonly overpassTurboService: OverpassTurboService,
+                private readonly pmTilesService: PmTilesService,
                 private readonly store: Store
     ) {
     }
@@ -80,6 +82,7 @@ export class ApplicationInitializeService {
             this.tracesService.initialize(); // no need to wait for it to complete
             this.shareUrlsService.initialize(); // no need to wait for it to complete
             this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
+            this.pmTilesService.initialize();
             await this.loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
             if (this.runningContextService.isIFrame) {

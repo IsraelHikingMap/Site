@@ -263,11 +263,14 @@ export class FileService {
     }
 
     private getFileContent(file: File): Promise<string> {
-        return new Promise((resolve, _) => {
+        return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (event: any) => {
                 resolve(event.target.result);
             };
+            reader.onerror = () => {
+                reject(new Error("Unable to read the contect of the text file: " + file.name));
+            }
             reader.readAsText(file);
         });
     }
