@@ -174,6 +174,9 @@ export class FileService {
                     }
                     resolve(blob);
                 };
+                reader.onerror = () => {
+                    reject(new Error("Unable to read file from url: " + url));
+                }
                 reader.readAsArrayBuffer(fileContent);
             }, reject);
         }) as File;
@@ -213,11 +216,13 @@ export class FileService {
             dataContainer = await this.imageResizeService.resizeImageAndConvert(file);
         } else {
             const fileConent = await this.getFileContent(file);
+            this.loggingService.info(`[Files] Finished reading file: ${file.name}`);
             if (this.gpxDataContainerConverterService.canConvert(fileConent)) {
                 dataContainer = await this.gpxDataContainerConverterService.toDataContainer(fileConent);
             } else {
                 const formData = new FormData();
                 formData.append("file", file, file.name);
+                this.loggingService.info(`[Files] The file is not a GPX file, sending it to server for conversion: ${file.name}`);
                 dataContainer = await firstValueFrom(this.httpClient.post(Urls.openFile, formData)) as DataContainer;
             }
         }
