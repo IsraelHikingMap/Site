@@ -5,7 +5,8 @@ import { File as FileSystemWrapper } from "@awesome-cordova-plugins/file/ngx";
 import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { StyleSpecification } from "maplibre-gl";
-import JSZip from "jszip";
+import { decode } from "base64-arraybuffer";
+import { strToU8, zipSync, unzipSync, strFromU8 } from "fflate";
 
 import { FileService, SaveAsFactory } from "./file.service";
 import { ImageResizeService } from "./image-resize.service";
@@ -296,20 +297,22 @@ describe("FileService", () => {
         const spy = jasmine.createSpy();
         fileSystemWrapper.writeFile = spy;
 
-        const zip = new JSZip();
-        zip.folder("styles");
-        zip.file("styles/style.json", JSON.stringify({}));
-        const zipOutput = await zip.generateAsync({type: "blob"});
-
-        await service.writeStyles(zipOutput);
+        const result = zipSync({
+            "styles/style.json": strToU8(JSON.stringify({}))
+        });
+        await service.writeStyles(new Blob([result]));
         
         expect(spy).toHaveBeenCalled();
     }));
 
     it("Should compress text to base 64 zip", inject([FileService], 
         async (service: FileService) => {
-
-        expect(async () => await service.compressTextToBase64Zip([{ name: "log.txt.", text: "some text" }])).not.toThrow();
+            const contents = [{ name: "log.txt", text: "some text" }];
+            let compressed = await service.compressTextToBase64Zip(contents);
+            
+            let files = unzipSync(new Uint8Array(decode(compressed)));
+            expect(Object.keys(files)).toEqual([contents[0].name]);
+            expect(strFromU8(files[contents[0].name])).toEqual(contents[0].text);
     }));
 
     it("Should store file to cache", inject([FileService, FileSystemWrapper], 

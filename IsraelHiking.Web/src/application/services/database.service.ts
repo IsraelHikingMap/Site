@@ -2,10 +2,10 @@ import { Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { debounceTime } from "rxjs/operators";
 import { CapacitorSQLite, SQLiteDBConnection, SQLiteConnection} from "@capacitor-community/sqlite";
+import { gunzipSync } from "fflate";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
 import maplibregl from "maplibre-gl";
-import * as pako from "pako";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
@@ -191,7 +191,7 @@ export class DatabaseService {
         let binData = new Uint8Array(hexData.match(/.{1,2}/g).map((byte: string) => parseInt(byte, 16)));
         const isGzipped = binData[0] === 0x1f && binData[1] === 0x8b;
         if (isGzipped) {
-            binData = pako.inflate(binData);
+            binData = gunzipSync(binData);
         }
         return binData.buffer;
     }
