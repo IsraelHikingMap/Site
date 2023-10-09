@@ -6,8 +6,9 @@ import { FileTransfer } from "@awesome-cordova-plugins/file-transfer/ngx";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { last } from "lodash-es";
 import { firstValueFrom } from "rxjs";
+import { zipSync, strToU8, unzipSync, strFromU8, Zippable } from 'fflate';
+import { encode } from "base64-arraybuffer";
 import type { saveAs as saveAsForType } from "file-saver";
-import JSZip from "jszip";
 
 import { ImageResizeService } from "./image-resize.service";
 import { RunningContextService } from "./running-context.service";
@@ -154,10 +155,9 @@ export class FileService {
     }
 
     public async saveLogToZipFile(fileName: string, content: string) {
-        const zip = new JSZip();
-        zip.file("log.txt", content);
-        const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
-        this.saveAs(blob, fileName, { autoBom: false });
+        const result = zipSync({ 'log.txt': strToU8(content) });
+        const resultBlob = new Blob([result]);
+        this.saveAs(resultBlob, fileName, { autoBom: false });
     }
 
     public async getFileFromUrl(url: string, type?: string): Promise<File> {
@@ -243,11 +243,13 @@ export class FileService {
     }
 
     public async writeStyles(blob: Blob) {
-        const zip = new JSZip();
-        await zip.loadAsync(blob);
-        const styles = Object.keys(zip.files).filter(name => name.startsWith("styles/") && name.endsWith(".json"));
-        for (const styleFileName of styles) {
-            const styleText = (await zip.file(styleFileName).async("text")).trim();
+        const zipData = new Uint8Array(await blob.arrayBuffer());
+        const files = unzipSync(zipData, {
+            filter: file => file.name.startsWith("styles/") && file.name.endsWith(".json")
+        });
+
+        for (const styleFileName in files) {
+            const styleText = strFromU8(files[styleFileName]);
             await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName.replace("styles/", ""), styleText,
                 { append: false, replace: true, truncate: 0 });
             this.loggingService.info(`[Files] Write style finished succefully: ${styleFileName}`);
@@ -255,11 +257,12 @@ export class FileService {
     }
 
     public async compressTextToBase64Zip(contents: {name: string; text: string}[]): Promise<string> {
-        const zip = new JSZip();
+        let zippable: Zippable = {};
         for (const content of contents) {
-            zip.file(content.name, content.text);
+            zippable[content.name] = strToU8(content.text);
         }
-        return zip.generateAsync({ type: "base64", compression: "DEFLATE", compressionOptions: { level: 6 } });
+        const result = zipSync(zippable);
+        return encode(await new Response(result).arrayBuffer());
     }
 
     private getFileContent(file: File): Promise<string> {
