@@ -1,26 +1,26 @@
 PODS:
-  - Capacitor (5.2.1):
+  - Capacitor (5.4.2):
     - CapacitorCordova
   - CapacitorApp (5.0.6):
     - Capacitor
-  - CapacitorCamera (5.0.6):
+  - CapacitorCamera (5.0.7):
     - Capacitor
   - CapacitorCommunityKeepAwake (4.0.0):
     - Capacitor
   - CapacitorCommunityScreenBrightness (5.0.0):
     - Capacitor
-  - CapacitorCommunitySqlite (5.0.5):
+  - CapacitorCommunitySqlite (5.4.0):
     - Capacitor
     - SQLCipher
     - ZIPFoundation
-  - CapacitorCordova (5.2.1)
+  - CapacitorCordova (5.4.2)
   - CapacitorDevice (5.0.6):
     - Capacitor
   - CapacitorTextZoom (5.0.6):
     - Capacitor
-  - CapgoNativeAudio (6.0.13):
+  - CapgoNativeAudio (6.0.21):
     - Capacitor
-  - CordovaPlugins (5.2.1):
+  - CordovaPlugins (5.4.2):
     - CapacitorCordova
   - SQLCipher (4.5.3):
     - SQLCipher/standard (= 4.5.3)
@@ -72,17 +72,17 @@ EXTERNAL SOURCES:
     :path: "../capacitor-cordova-ios-plugins"
 
 SPEC CHECKSUMS:
-  Capacitor: 36510199454641113344c2e5ef43bf3f54b5af79
+  Capacitor: 8a9db42d105f55843cd8ed2a3cb54e2b78e7f102
   CapacitorApp: 024e1b1bea5f883d79f6330d309bc441c88ad04a
-  CapacitorCamera: 4a95204d13a05b0b726bf9086b44124349ab1952
+  CapacitorCamera: 084b0b228bba7d00587910337b1c89e93b1d32ab
   CapacitorCommunityKeepAwake: f3442e3e9b666dd0162522fbd053da1fe81ede20
   CapacitorCommunityScreenBrightness: b2d9c6fffee6b684994cd69f727f2090e2f05c6d
-  CapacitorCommunitySqlite: 01807c8103abce4316368e59ad7703f838fe28c4
-  CapacitorCordova: d173eeb1635e62aa95a20874a5d5cbbf0aa1e0df
+  CapacitorCommunitySqlite: b1436663feae8354cfa29720428bc9d9029f3a8c
+  CapacitorCordova: cfcc06b698481da655415985eeb2b8da363f8451
   CapacitorDevice: 2c968f98a1ec4d22357418c1521e7ddc46c675e6
   CapacitorTextZoom: bd623313a291bc1f38cdc01bd94c39b2b48d794a
-  CapgoNativeAudio: 3cf6582984eacc721801be7e4c2abb5de7060fdb
-  CordovaPlugins: eb26ba06854430a04a01a3c740afbd471ceec72c
+  CapgoNativeAudio: a16cca262ee9c5ad11c752e14942ba54812ec0c1
+  CordovaPlugins: ff237a5fad1b7d53d42f6b2e125b767e0350ed9e
   SQLCipher: 57fa9f863fa4a3ed9dd3c90ace52315db8c0fdca
   ZIPFoundation: d170fa8e270b2a32bef9dcdcabff5b8f1a5deced
 
