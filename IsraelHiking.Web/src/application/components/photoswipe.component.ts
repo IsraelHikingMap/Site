@@ -46,10 +46,22 @@ export class PhotoSwpieComponent extends BaseMapComponent implements AfterViewIn
             closeOnVerticalDrag: false,
             pinchToClose: false,
             maxZoomLevel: 8,
-
         });
 
         pswp.on("destroy", () => this.closed.emit());
+        pswp.on("beforeOpen", () => {
+            const ds = pswp?.options?.dataSource as any[];
+              for (let idx = 0; idx < ds.length; idx++) {
+                const item = ds[idx];
+                const img = new Image();
+                img.onload = () => {
+                  item.width = img.naturalWidth;
+                  item.height = img.naturalHeight;
+                  pswp?.refreshSlideContent(idx);
+                };
+                img.src = item.src;
+            }
+        });
         pswp.init();
     }
 }
