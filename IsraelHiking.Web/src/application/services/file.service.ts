@@ -255,14 +255,18 @@ export class FileService {
 
         for (const styleFileName in files) {
             const styleText = strFromU8(files[styleFileName]);
-            await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName.replace("styles/", ""), styleText,
-                { append: false, replace: true, truncate: 0 });
-            this.loggingService.info(`[Files] Write style finished succefully: ${styleFileName}`);
+            this.writeStyle(styleFileName.replace("styles/", ""), styleText);
         }
     }
 
+    public async writeStyle(styleFileName: string, styleText: string) {
+        await this.fileSystemWrapper.writeFile(this.fileSystemWrapper.dataDirectory, styleFileName, styleText,
+            { append: false, replace: true, truncate: 0 });
+        this.loggingService.info(`[Files] Write style finished succefully: ${styleFileName}`);
+    }
+
     public async compressTextToBase64Zip(contents: {name: string; text: string}[]): Promise<string> {
-        let zippable: Zippable = {};
+        const zippable: Zippable = {};
         for (const content of contents) {
             zippable[content.name] = strToU8(content.text);
         }
@@ -270,7 +274,7 @@ export class FileService {
         return encode(await new Response(result).arrayBuffer());
     }
 
-    private getFileContent(file: File): Promise<string> {
+    public getFileContent(file: File): Promise<string> {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (event: any) => {

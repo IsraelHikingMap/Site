@@ -73,6 +73,12 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(new Date(file.lastModified)));
             return;
         }
+        if (file.name.endsWith(".json")) {
+            this.toastService.info(this.resources.openingAFilePleaseWait);
+            await this.fileService.writeStyle(file.name, await this.fileService.getFileContent(file));
+            this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
+            return;
+        }
         try {
             await this.fileService.addRoutesFromFile(file);
             this.matDialogRef.close();
