@@ -174,7 +174,7 @@ describe("Selected Route Service", () => {
         }
     ));
 
-    it("Should get closet route to selected route when there are no other routes", inject([SelectedRouteService, Store],
+    it("Should not get closet route to selected route when there are no other routes", inject([SelectedRouteService, Store],
         (selectedRouteService: SelectedRouteService, store: Store) => {
             setupRoutes(store, [{
                 id: "1",
@@ -224,6 +224,50 @@ describe("Selected Route Service", () => {
 
             const closetRoute = selectedRouteService.getClosestRouteToSelected(true);
             expect(closetRoute.id).toBe("2");
+        }
+    ));
+
+    it("Should get the closet route to selected route when there are multiple close by routes", inject([SelectedRouteService, Store],
+        (selectedRouteService: SelectedRouteService, store: Store) => {
+            setupRoutes(store, [{
+                id: "1",
+                description: "",
+                markers: [],
+                name: "name",
+                segments: [{
+                    latlngs: [{lat: 1, lng: 1, timestamp: new Date()}],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }, {
+                id: "2",
+                description: "",
+                markers: [],
+                name: "clost but not the closest",
+                segments: [{
+                    latlngs: [{lat: 1.00001, lng: 1.00001, timestamp: new Date()}],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }, {
+                id: "3",
+                description: "",
+                markers: [],
+                name: "closest",
+                segments: [{
+                    latlngs: [{lat: 1.00001, lng: 1, timestamp: new Date()}],
+                    routePoint: {lat: 1, lng: 1},
+                    routingType: "Hike"
+                }],
+                state: "ReadOnly",
+            }
+            ]);
+            setupSelectedRoute(store, "1");
+
+            const closetRoute = selectedRouteService.getClosestRouteToSelected(true);
+            expect(closetRoute.id).toBe("3");
         }
     ));
 

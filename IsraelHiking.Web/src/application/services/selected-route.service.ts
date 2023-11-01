@@ -123,7 +123,7 @@ export class SelectedRouteService {
     }
 
     public getLeastUsedColor() {
-        let colorCount = Number.POSITIVE_INFINITY;
+        let colorCount = Infinity;
         let selectedColor = this.routesFactory.colors[0];
         for (const color of this.routesFactory.colors) {
             const currentColorCount = this.routes.filter(r => r.color === color).length;
@@ -149,19 +149,22 @@ export class SelectedRouteService {
         const latLngToCheck = checkAgainstHead
             ? this.getSelectedRoute().segments[0].latlngs[0]
             : this.getLastLatLng(this.getSelectedRoute());
+        let closetRoute = null;
+        let minimalDistance = Infinity;
         for (const routeData of this.routes) {
             if (routeData.id === this.selectedRouteId || routeData.segments.length <= 0 || routeData.state === "Hidden") {
                 continue;
             }
-            if (SpatialService.getDistanceInMeters(this.getLastLatLng(routeData), latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
-                return routeData;
-            }
             const firstLatLng = routeData.segments[0].latlngs[0];
-            if (SpatialService.getDistanceInMeters(firstLatLng, latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
-                return routeData;
+            const distanceToEnd = SpatialService.getDistanceInMeters(this.getLastLatLng(routeData), latLngToCheck);
+            const distanceToStart = SpatialService.getDistanceInMeters(firstLatLng, latLngToCheck);
+            const distance = Math.min(distanceToEnd, distanceToStart);
+            if (distance < SelectedRouteService.MERGE_THRESHOLD && distance < minimalDistance) {
+                closetRoute = routeData;
+                minimalDistance = distance;
             }
         }
-        return null;
+        return closetRoute;
     }
 
     /**
