@@ -125,13 +125,13 @@ describe("Share Urls Service", () => {
     it("Should get share url from database when already cached and don't refresh it if it's not newer", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
 
-            databaseService.getShareUrlById = () => Promise.resolve({} as ShareUrl);
+            databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date() } as ShareUrl);
             
             const promise = shareUrlsService.getShareUrl("5");
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            mockBackend.expectOne(Urls.urls + "5/timestamp").flush(new Date().toISOString());
+            mockBackend.expectOne(Urls.urls + "5/timestamp").flush(new Date(0).toISOString());
 
             expect(() => mockBackend.expectNone(Urls.urls)).not.toThrow();
             return promise;
@@ -153,7 +153,7 @@ describe("Share Urls Service", () => {
             return promise;
     }));
 
-    it("Should get share url from database when already cached refresh it afterwards since it's newer", inject([ShareUrlsService, HttpTestingController, DatabaseService],
+    it("Should get share url from database when already cached and try to refresh it since it's newer", inject([ShareUrlsService, HttpTestingController, DatabaseService],
         async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
 
             databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100)} as ShareUrl);
@@ -164,6 +164,22 @@ describe("Share Urls Service", () => {
 
             mockBackend.expectOne(Urls.urls + "7/timestamp").flush(new Date(200).toISOString());
 
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+
+            expect(() => mockBackend.expectOne(Urls.urls + "7").flush({})).not.toThrow();
+            return promise;
+    }));
+
+    it("Should get share url from database when already cached and try to refresh twice it since it's newer and first fast refresh failed", inject([ShareUrlsService, HttpTestingController, DatabaseService],
+        async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController, databaseService: DatabaseService) => {
+
+            databaseService.getShareUrlById = () => Promise.resolve({ lastModifiedDate: new Date(100)} as ShareUrl);
+            
+            const promise = shareUrlsService.getShareUrl("7");
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            mockBackend.expectOne(Urls.urls + "7/timestamp").flush(new Date(200).toISOString());
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            mockBackend.expectOne(Urls.urls + "7").flush(null, { status: 500, statusText: "Internal Server Error" });
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
             expect(() => mockBackend.expectOne(Urls.urls + "7").flush({})).not.toThrow();

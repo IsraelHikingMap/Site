@@ -80,7 +80,7 @@ namespace IsraelHiking.API.Tests.Services.Middleware
             {
                 Request =
                 {
-                    Path = new PathString("/something"),
+                    Path = new PathString("/share"),
                     Host = new HostString("israelhiking.osm.org.il"),
                     QueryString = QueryString.Empty,
                     PathBase = PathString.Empty,
@@ -145,6 +145,7 @@ namespace IsraelHiking.API.Tests.Services.Middleware
 
             var bodyString = Encoding.UTF8.GetString(stream.ToArray());
             Assert.AreEqual("OUT", bodyString);
+            _next.DidNotReceive().Invoke(context);
         }
         
         [TestMethod]
@@ -195,6 +196,7 @@ namespace IsraelHiking.API.Tests.Services.Middleware
 
             var checkUrl = Arg.Is<string>(x => x.Contains("200px-"));
             _homePageHelper.Received().Render(name, externalDescription, checkUrl, "he");
+            _next.DidNotReceive().Invoke(context);
         }
 
         [TestMethod]
@@ -243,6 +245,7 @@ namespace IsraelHiking.API.Tests.Services.Middleware
 
             var checkUrl = Arg.Is<string>(x => x.EndsWith(shareUrl.Id + "?width=256&height=256"));
             _homePageHelper.Received().Render(shareUrl.Title, shareUrl.Description, checkUrl);
+            _next.DidNotReceive().Invoke(context);
         }
     }
 }

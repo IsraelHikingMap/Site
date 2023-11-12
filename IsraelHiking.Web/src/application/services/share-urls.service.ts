@@ -66,26 +66,32 @@ export class ShareUrlsService {
         };
     }
 
-    private async getShareFromServerAndCacheIt(shareUrlId: string): Promise<ShareUrl> {
+    private async getShareFromServerAndCacheIt(shareUrlId: string, timeToWait = 60000): Promise<ShareUrl> {
         this.loggingService.info(`[Shares] Getting share by id ${shareUrlId}`);
-        const shareUrl = await firstValueFrom(this.httpClient.get(Urls.urls + shareUrlId).pipe(timeout(60000)));
+        const shareUrl = await firstValueFrom(this.httpClient.get(Urls.urls + shareUrlId).pipe(timeout(timeToWait)));
         this.databaseService.storeShareUrl(shareUrl as ShareUrl);
         return shareUrl as ShareUrl;
     }
 
     public async getShareUrl(shareUrlId: string): Promise<ShareUrl> {
-        const shareUrl = await this.databaseService.getShareUrlById(shareUrlId);
+        let shareUrl = await this.databaseService.getShareUrlById(shareUrlId);
         if (shareUrl == null) {
             return await this.getShareFromServerAndCacheIt(shareUrlId);
         }
         // Refresh it in the background if needed...
-        firstValueFrom(this.httpClient.get(Urls.urls + shareUrlId + "/timestamp").pipe(timeout(2000))).then((timestamp: any) => {
-            if (new Date(timestamp as string) > new Date(shareUrl.lastModifiedDate)) {
-                this.loggingService.warning("[Shares] Cached share is outdated, fetching it again...");
-                this.getShareFromServerAndCacheIt(shareUrlId);
+        try {
+            const timestamp = await firstValueFrom(this.httpClient.get(Urls.urls + shareUrlId + "/timestamp").pipe(timeout(2000)));
+            if (new Date(timestamp as string) < new Date(shareUrl.lastModifiedDate)) {
+                return shareUrl;
             }
-        });
-        return shareUrl;
+            this.loggingService.warning(`[Shares] Cached share is outdated ${shareUrlId}, fetching it again...`);
+            shareUrl = await this.getShareFromServerAndCacheIt(shareUrlId, 5000);
+            return shareUrl;
+        } catch (ex) {
+            this.loggingService.error(`[Shares] Failed to get share fast ${shareUrlId}, refreshing in the background`);
+            this.getShareFromServerAndCacheIt(shareUrlId); // don't wait for it...
+            return shareUrl;
+        }
     }
 
     public async syncShareUrls(): Promise<any> {

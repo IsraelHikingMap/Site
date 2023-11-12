@@ -52,6 +52,12 @@ namespace IsraelHiking.API.Services.Middleware
                 await _next.Invoke(context);
                 return;
             }
+            if (!context.Request.Path.StartsWithSegments("/share") &&
+                !context.Request.Path.StartsWithSegments("/poi"))
+            {
+                await _next.Invoke(context);
+                return;
+            }
             var isCrawler = detectionService.Crawler.IsCrawler;
             if (!isCrawler)
             {
@@ -59,6 +65,10 @@ namespace IsraelHiking.API.Services.Middleware
                 return;
             }
             var isWhatsApp = detectionService.Crawler.Name == Wangkanai.Detection.Models.Crawler.WhatsApp;
+            string title = string.Empty;
+            string thumbnailUrl = string.Empty;
+            string description = string.Empty;
+            string language = string.Empty;
             if (context.Request.Path.StartsWithSegments("/share"))
             {
                 var url = await _shareUrlsRepository.GetUrlById(context.Request.Path.Value.Split("/").Last());
@@ -67,28 +77,24 @@ namespace IsraelHiking.API.Services.Middleware
                     return;
                 }
                 
-                var title = string.IsNullOrWhiteSpace(url.Title) ? Branding.ROUTE_SHARE_DEFAULT_TITLE : url.Title;
-                var thumbnailUrl = "https://israelhiking.osm.org.il/api/images/" + url.Id;
+                title = string.IsNullOrWhiteSpace(url.Title) ? Branding.ROUTE_SHARE_DEFAULT_TITLE : url.Title;
+                description = url.Description;
+                thumbnailUrl = "https://israelhiking.osm.org.il/api/images/" + url.Id;
                 if (isWhatsApp)
                 {
                     thumbnailUrl += "?width=256&height=256";
                 }
-
-                await WriteHomePage(context, title, thumbnailUrl, url.Description);
-                return;
             }
-            if (context.Request.Path.StartsWithSegments("/poi"))
+            else if (context.Request.Path.StartsWithSegments("/poi"))
             {
                 var split = context.Request.Path.Value.Split("/");
-                context.Request.Query.TryGetValue("language", out var languages);
-                var language = languages.FirstOrDefault() ?? Languages.HEBREW;
                 var feature = await _pointsOfInterestProvider.GetFeatureById(split[split.Length - 2], split.Last());
                 if (feature == null)
                 {
                     await _next.Invoke(context);
                     return;
                 }
-                var thumbnailUrl = feature.Attributes.GetNames()
+                thumbnailUrl = feature.Attributes.GetNames()
                     .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
                     .Select(p => feature.Attributes[p].ToString())
                     .FirstOrDefault() ?? string.Empty;
@@ -97,12 +103,15 @@ namespace IsraelHiking.API.Services.Middleware
                     thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/200px-$3");
                 }
                 feature.SetTitles();
-                await WriteHomePage(context, feature.GetTitle(language), thumbnailUrl, feature.GetDescriptionWithExternal(language), language);
+                context.Request.Query.TryGetValue("language", out var languages);
+                language = languages.FirstOrDefault() ?? Languages.HEBREW;
+                title = feature.GetTitle(language);
+                description = feature.GetDescriptionWithExternal(language);
             }
-            await _next.Invoke(context);
+            await WriteHomePage(context, title, thumbnailUrl, description, language);
         }
 
-        private Task WriteHomePage(HttpContext context, string title, string thumbnailUrl, string description, string language="")
+        private Task WriteHomePage(HttpContext context, string title, string thumbnailUrl, string description, string language)
         {
             string text = _homePageHelper.Render(title, description, thumbnailUrl,language);
             context.Response.ContentType = "text/html";

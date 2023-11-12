@@ -328,6 +328,7 @@ export class RouteEditRouteInteraction {
         const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
         if (index === 0) {
             const nextSegment = structuredClone(routeData.segments[index + 1]) as RouteSegmentData;
+            nextSegment.routingType = routingType;
             await this.runRouting(latlng, nextSegment);
             const snappedLatLng = this.getSnappingForRoute(latlng, [nextSegment.latlngs[0]]) as LatLngAltTime;
             await this.elevationProvider.updateHeights([snappedLatLng]);
@@ -348,6 +349,7 @@ export class RouteEditRouteInteraction {
             segment.routingType = routingType;
             await this.runRouting(previousSegment.routePoint, segment);
             const nextSegment = structuredClone(routeData.segments[index + 1]) as RouteSegmentData;
+            nextSegment.routingType = routingType;
             await this.runRouting(segment.routePoint, nextSegment);
             this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index, index + 1], [segment, nextSegment]));
         }
