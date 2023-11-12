@@ -6,31 +6,38 @@ This repository holds the main server side module the web and mobile clients int
 [![Codecov](https://img.shields.io/codecov/c/github/israelhikingmap/site/main.svg)](https://codecov.io/gh/IsraelHikingMap/Site/)
 
 ## Architecture Diagram
-![image](https://user-images.githubusercontent.com/3269297/147603985-883f216d-f7b6-48bc-b5ca-bfbee2ca14bb.png)
+![image](https://github.com/IsraelHikingMap/Site/assets/3269297/1c110959-05b2-49eb-bb1d-9b5eb3c9b412)
 
 # Technology stack
 The technology stack of this site is based on the following frameworks:
+
+## Server Side
+* [Asp.Net core](https://docs.microsoft.com/en-us/aspnet/core/) - infrastructure
+* [NSubstitute](https://nsubstitute.github.io/) - for mocking in tests
+* [GraphHopper](https://graphhopper.com/) - for routing between points
+* [Elastic Search and NEST](https://www.elastic.co/) - for database and search capabilities
+* [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite) - for spatial mathmatics
+* [OsmSharp](https://www.osmsharp.com/) - for OSM capabilities
+* [NeoSmart.Caching.Sqlite](https://github.com/neosmart/SqliteCache) - for persistant cache, mainly to allow idempotent operations
+* [Wikipedia using Wiki client library](https://github.com/CXuesong/WikiClientLibrary) - for Wikipedia data and upload images to Wikimedia common
+* [Imgur](https://imgur.com/) - for uploading anonymous images
+* [Docker](https://www.docker.com/) - for image creation and microservices architecture
+
+## Client Side
 * [Typescript](https://www.typescriptlang.org/) - for sanity
 * [Angular](https://angular.io/) and [Angular-Material](https://material.angular.io/) - for UI framework and components 
 * [MapLibre](https://docs.maplibre.org/) using [ngx-maplibre-gl](https://github.com/maplibre/ngx-maplibre-gl/) - for map presentation and interaction
-* [Jasmine](https://jasmine.github.io/) and [Karma](https://karma-runner.github.io/) - for unit testing.
-* [Asp.Net core](https://docs.microsoft.com/en-us/aspnet/core/) - for server side
-* [NSubstitute](https://nsubstitute.github.io/) - for mocking server side tests
-* [GraphHopper](https://graphhopper.com/) - for routing between points
-* [Elastic Search and NEST](https://www.elastic.co/) - for database and search capabilities
-* [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite) - for server side spatial mathmatics
-* [Turf](https://turfjs.org/) - for client side spatial mathematics
-* [OsmSharp](https://www.osmsharp.com/) - for OSM capabilities
-* [Wikipedia using Wiki client library](https://github.com/CXuesong/WikiClientLibrary) - for Wikipedia data and upload images to Wikimedia common
-* [Imgur](https://imgur.com/) - for uploading anonymous images
-* [Cordova](https://cordova.apache.org/) - for wrapping the site as a mobile application and add some native capabilities
-* [Redux](https://redux.js.org/) and [angular-redux2](https://github.com/angular-redux2/store) - for state management in the client
-* [Dexie](https://dexie.org/) - for client side storage
-* [Docker](https://www.docker.com/) - for image creation and micro-server architecture
-* [D3](https://d3js.org/) and [ngx-d3](https://github.com/ZeevKatz/ngx-d3) - for advanced client side chart capablilities
+* [Jasmine](https://jasmine.github.io/) and [Karma](https://karma-runner.github.io/) - for unit testing
+* [Capacitor](https://capacitorjs.com/) - for wrapping the site as a mobile application and add some native capabilities
+* [Turf](https://turfjs.org/) - for spatial mathematics
+* [NGXS](https://www.ngxs.io/) - for state management
+* [Dexie](https://dexie.org/) - for database storage
+* [D3](https://d3js.org/) - for advanced chart capablilities
 * [Lottie](https://github.com/airbnb/lottie-web) and [ngx-lottie](https://github.com/ngx-lottie/ngx-lottie) - for image animations
+* [MiniSearch](https://lucaong.github.io/minisearch/) - for in memory search
+* [GeoJSON Path Finder](https://www.liedman.net/geojson-path-finder/) - for in memory small area routing
 
-# Architecture and folder stucture of UI
+# Architecture and folder stucture of the client side
 The architecture is based heavily on Angular:
 * application - where all the application code is, topmost folder.
   * components - this layer handles the UI calls and bindings along with the relevant css and html files.
@@ -45,7 +52,7 @@ The architecture is based heavily on Angular:
 * scss - used for global style files
 * translations - all relevant data related to i18n.
  
-# Architecture of Server
+# Architecture and folder stucture of the server side
 The architecture is based on layers:
 * Contollers - the topmost layer to catch all the requests
 * Services - responsible for orchestrating executors
