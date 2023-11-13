@@ -308,9 +308,9 @@ describe("FileService", () => {
     it("Should compress text to base 64 zip", inject([FileService], 
         async (service: FileService) => {
             const contents = [{ name: "log.txt", text: "some text" }];
-            let compressed = await service.compressTextToBase64Zip(contents);
+            const compressed = await service.compressTextToBase64Zip(contents);
             
-            let files = unzipSync(new Uint8Array(decode(compressed)));
+            const files = unzipSync(new Uint8Array(decode(compressed)));
             expect(Object.keys(files)).toEqual([contents[0].name]);
             expect(strFromU8(files[contents[0].name])).toEqual(contents[0].text);
     }));

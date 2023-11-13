@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, firstValueFrom, interval } from "rxjs";
-import { switchMap, tap, timeout } from "rxjs/operators";
+import { BehaviorSubject, firstValueFrom } from "rxjs";
+import { timeout } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
 
 import { LoggingService } from "./logging.service";
@@ -19,7 +19,7 @@ export class ConnectionService {
 
     public stateChanged: BehaviorSubject<boolean>;
     private isOnline: boolean;
-    private monitorInterval$ = new BehaviorSubject<number>(ConnectionService.HEART_BREAK_INTERVAL);
+    private intervalId: ReturnType<typeof setInterval>;
 
     constructor(private readonly http: HttpClient,
         private readonly loggingService: LoggingService) {
@@ -27,7 +27,7 @@ export class ConnectionService {
         this.isOnline = true;
         window.addEventListener("online", () => this.updateInternetAccessAndEmitIfNeeded())
         window.addEventListener("offline", () => this.updateInternetAccessAndEmitIfNeeded())
-        this.InitializeDynamicTimer();
+        this.initializeDynamicTimer(ConnectionService.HEART_BREAK_INTERVAL);
         this.updateInternetAccessAndEmitIfNeeded();
     }
 
@@ -45,20 +45,20 @@ export class ConnectionService {
         }
     }
 
-    private InitializeDynamicTimer() {
-        this.monitorInterval$.pipe(
-            switchMap(value => interval(value)),
-            tap(() => this.updateInternetAccessAndEmitIfNeeded())
-        ).subscribe();
+    private initializeDynamicTimer(interval: number) {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
+        this.intervalId = setInterval(() => this.updateInternetAccessAndEmitIfNeeded(), interval);
     }
 
     private async updateInternetAccessAndEmitIfNeeded() {
-        const previousState = this.isOnline;
-        this.isOnline = await this.getInternetStatusNow();
-        if (previousState !== this.isOnline) {
+        const currentResponse = await this.getInternetStatusNow();
+        if (currentResponse !== this.isOnline) {
+            this.isOnline = currentResponse;
             this.loggingService.info("[Connection] Online state changed, online is: " + this.isOnline);
             this.stateChanged.next(this.isOnline);
-            this.monitorInterval$.next(this.isOnline 
+            this.initializeDynamicTimer(this.isOnline 
                 ? ConnectionService.HEART_BREAK_INTERVAL
                 : ConnectionService.HEART_BREAK_RETRY_INTERVAL);
             
