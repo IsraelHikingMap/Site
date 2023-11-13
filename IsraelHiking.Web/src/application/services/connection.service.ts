@@ -18,7 +18,7 @@ export class ConnectionService {
 
     public stateChanged: BehaviorSubject<boolean>;
     private isOnline: boolean;
-    private intervalId: number;
+    private intervalId: ReturnType<typeof setInterval>;
 
     constructor(private readonly http: HttpClient,
         private readonly loggingService: LoggingService) {
@@ -44,7 +44,7 @@ export class ConnectionService {
         }
     }
 
-    private initializeDynamicTimer() {
+    private initializeDynamicTimer(interval: number) {
         if (this.intervalId) {
             clearInterval(this.intervalId);
         }
