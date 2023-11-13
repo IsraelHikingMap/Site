@@ -257,7 +257,7 @@ export class FileService {
     }
 
     public async compressTextToBase64Zip(contents: {name: string; text: string}[]): Promise<string> {
-        let zippable: Zippable = {};
+        const zippable: Zippable = {};
         for (const content of contents) {
             zippable[content.name] = strToU8(content.text);
         }
