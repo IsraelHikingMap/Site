@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, firstValueFrom } from "rxjs";
+import { timeout } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
 
 import { LoggingService } from "./logging.service";
