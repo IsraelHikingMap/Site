@@ -112,45 +112,85 @@ describe("Spatial service", () => {
         expect(() => SpatialService.splitLine({lat: 0, lng: 0.5}, [])).toThrowError();
     });
 
-    it("Should split a line in the start", () => {
-        const split = SpatialService.splitLine({lat: 0, lng: -0.5}, [{lat: 0, lng: 0}, { lat: 0, lng: 1}]);
+    it("Should split a line in the start when point is before the start", () => {
+        const split = SpatialService.splitLine({lat: 0, lng: -0.5}, [{lat: 0, lng: 0, alt: 0, timestamp: null}, { lat: 0, lng: 1, alt: 2, timestamp: null}]);
         expect(split.start.length).toBe(2);
-        expect(split.end.length).toBe(3);
+        expect(split.start[0].alt).toBe(0);
+        expect(split.start[0].lng).toBe(0);
+        expect(split.end.length).toBe(2);
+        expect(split.end[0].lng).toBe(0);
+        expect(split.end[1].lng).toBe(1);
+        expect(split.end[1].alt).toBe(2);
     });
 
-    it("Should split a line in the end", () => {
-        const split = SpatialService.splitLine({lat: 0, lng: 1.5}, [{lat: 0, lng: 0}, { lat: 0, lng: 1}]);
-        expect(split.start.length).toBe(3);
+    it("Should split a line in the end when point is after the end", () => {
+        const split = SpatialService.splitLine({lat: 0, lng: 1.5}, [{lat: 0, lng: 0, alt: 0, timestamp: null}, { lat: 0, lng: 1, alt: 2, timestamp: null}]);
+        expect(split.start.length).toBe(2);
+        expect(split.start[0].alt).toBe(0);
+        expect(split.start[0].lng).toBe(0);
         expect(split.end.length).toBe(2);
+        expect(split.end[0].lng).toBe(1);
+        expect(split.end[1].lng).toBe(1);
+        expect(split.end[1].alt).toBe(2);
     });
 
     it("Should split a line in the middle but not add a new point if the point already exists", () => {
-        const split = SpatialService.splitLine({lat: 0, lng: 1}, [{lat: 0, lng: 0}, { lat: 0, lng: 1}, { lat: 0, lng: 2}]);
+        const split = SpatialService.splitLine({lat: 0, lng: 1}, [{lat: 0, lng: 0, timestamp: null}, { lat: 0, lng: 1, timestamp: null}, { lat: 0, lng: 2, timestamp: null}]);
         expect(split.start.length).toBe(2);
         expect(split.start[1].lng).toBe(1);
         expect(split.end.length).toBe(2);
     });
 
     it("Should split a line in the middle and add a new projected point", () => {
-        const split = SpatialService.splitLine({lat: 0.1, lng: 0.5}, [{lat: 0, lng: 0}, { lat: 0, lng: 1}]);
+        const split = SpatialService.splitLine({lat: 0.1, lng: 0.5}, [{lat: 0, lng: 0, timestamp: null}, { lat: 0, lng: 1, timestamp: null}]);
         expect(split.start.length).toBe(2);
         expect(split.start[1].lng).toBe(0.5);
         expect(split.start[1].lat).toBe(0);
         expect(split.end.length).toBe(2);
     });
 
-    it("Should split a line in the middle and add a new projected point with altitude", () => {
-        const split = SpatialService.splitLine({lat: 0, lng: 0.5, alt: 1}, [{lat: 0, lng: 0, alt: 0}, { lat: 0, lng: 1, alt: 2}]);
+    it("Should split a line in the middle and add a new projected point when new point is just after the middle point", () => {
+        const split = SpatialService.splitLine({lat: 0, lng: 1.1}, [{lat: 0, lng: 0, timestamp: null}, { lat: 0, lng: 1, timestamp: null}, {lat: 0, lng: 2, timestamp: null}]);
+        expect(split.start.length).toBe(3);
+        expect(split.start[2].lng).toBe(1.1);
+        expect(split.start[2].lat).toBe(0);
+        expect(split.start[1].lng).toBe(1);
+        expect(split.start[1].lat).toBe(0);
+        expect(split.end.length).toBe(2);
+    });
+
+    it("Should split a line in the middle and add a new projected point when new point is just before the middle point", () => {
+        const split = SpatialService.splitLine({lat: 0, lng: 0.9}, [{lat: 0, lng: 0, timestamp: null}, { lat: 0, lng: 1, timestamp: null}, {lat: 0, lng: 2, timestamp: null}]);
+        expect(split.start.length).toBe(2);
+        expect(split.start[1].lng).toBe(0.9);
+        expect(split.start[1].lat).toBe(0);
+        expect(split.end.length).toBe(3);
+        expect(split.end[0].lng).toBe(0.9);
+        expect(split.end[0].lat).toBe(0);
+    });
+
+    it("Should split a line in the middle and don't add a projected point since the new point is exatly on the middle point", () => {
+        const split = SpatialService.splitLine({lat: 0, lng: 1}, [{lat: 0, lng: 0, timestamp: null}, { lat: 0, lng: 1, timestamp: null}, {lat: 0, lng: 2, timestamp: null}]);
+        expect(split.start.length).toBe(2);
+        expect(split.start[1].lng).toBe(1.0);
+        expect(split.start[1].lat).toBe(0);
+        expect(split.end.length).toBe(2);
+        expect(split.end[0].lng).toBe(1.0);
+        expect(split.end[0].lat).toBe(0);
+    });
+
+    it("Should split a line in the middle and add a new projected point with altitude and time", () => {
+        const split = SpatialService.splitLine({lat: 0, lng: 0.5}, [{lat: 0, lng: 0, alt: 0, timestamp: new Date(0)}, { lat: 0, lng: 1, alt: 2, timestamp: new Date(4)}]);
         expect(split.start.length).toBe(2);
         expect(split.start[1].lng).toBe(0.5);
         expect(split.start[1].lat).toBe(0);
         expect(split.start[1].alt).toBe(1);
+        expect(new Date(split.start[1].timestamp).getTime()).toBe(2);
         expect(split.end.length).toBe(2);
     });
 
     it("Should get interpolated value", () => {
-        const interpolated = SpatialService.getLatlngInterpolatedValue({lat: 0, lng: 0}, { lat: 1, lng: 1}, 0.5, 2);
-        expect(interpolated.alt).toBe(2);
+        const interpolated = SpatialService.getLatlngInterpolatedValue({lat: 0, lng: 0}, { lat: 1, lng: 1}, 0.5);
         expect(interpolated.lat).toBe(0.5);
         expect(interpolated.lng).toBe(0.5);
     });

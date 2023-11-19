@@ -117,7 +117,7 @@ export class RecordedRouteService {
             name: routeData.name,
             description: routeData.description,
             id: routeData.id,
-            timeStamp: route.latlngs[0].timestamp,
+            timeStamp: new Date(route.latlngs[0].timestamp),
             dataContainer: container,
             tags: [] as string[],
             tagsString: "",
@@ -182,7 +182,7 @@ export class RecordedRouteService {
 
     private isValid(test: LatLngAltTime, position: GeolocationPosition): string {
         const distance = SpatialService.getDistanceInMeters(test, GeoLocationService.positionToLatLngTime(position));
-        const timeDifference = Math.abs(position.timestamp - test.timestamp.getTime()) / 1000;
+        const timeDifference = Math.abs(position.timestamp - new Date(test.timestamp).getTime()) / 1000;
         if (timeDifference === 0) {
             return "Time difference is 0";
         }
