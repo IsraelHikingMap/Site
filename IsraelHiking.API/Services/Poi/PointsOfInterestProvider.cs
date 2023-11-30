@@ -209,13 +209,13 @@ namespace IsraelHiking.API.Services.Poi
             for (int i = tags.Count - 1; i >= 0; i--)
             {
                 var currentTag = tags.ElementAt(i);
-                var valueWithOutExtraSpaces = Regex.Replace(currentTag.Value, @"\s+", " ", RegexOptions.Multiline).Trim();
-                if (string.IsNullOrWhiteSpace(valueWithOutExtraSpaces))
+                if (string.IsNullOrWhiteSpace(currentTag.Value))
                 {
                     tags.RemoveKeyValue(currentTag);
                 }
                 else
                 {
+                    var valueWithOutExtraSpaces = Regex.Replace(currentTag.Value, @"\s+", " ", RegexOptions.Multiline).Trim();
                     currentTag.Value = valueWithOutExtraSpaces;
                     tags.AddOrReplace(currentTag);
                 }
