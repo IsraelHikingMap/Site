@@ -204,14 +204,20 @@ namespace IsraelHiking.API.Services.Poi
             }
         }
 
-        private void RemoveEmptyTags(TagsCollectionBase tags)
+        private void RemoveEmptyTagsAndWhiteSpaces(TagsCollectionBase tags)
         {
             for (int i = tags.Count - 1; i >= 0; i--)
             {
                 var currentTag = tags.ElementAt(i);
-                if (string.IsNullOrWhiteSpace(currentTag.Value))
+                var valueWithOutExtraSpaces = Regex.Replace(currentTag.Value, @"\s+", " ", RegexOptions.Multiline).Trim();
+                if (string.IsNullOrWhiteSpace(valueWithOutExtraSpaces))
                 {
                     tags.RemoveKeyValue(currentTag);
+                }
+                else
+                {
+                    currentTag.Value = valueWithOutExtraSpaces;
+                    tags.AddOrReplace(currentTag);
                 }
             }
         }
@@ -339,7 +345,7 @@ namespace IsraelHiking.API.Services.Poi
             SetTagByLanguage(node.Tags, FeatureAttributes.NAME, feature.GetTitle(language), language);
             SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, feature.GetDescription(language), language);
             AddTagsByIcon(node.Tags, feature.Attributes[FeatureAttributes.POI_ICON].ToString());
-            RemoveEmptyTags(node.Tags);
+            RemoveEmptyTagsAndWhiteSpaces(node.Tags);
             await osmGateway.UploadToOsmWithRetries(
                 $"Added {feature.GetTitle(language)} using IsraelHiking.osm.org.il",
                 async changeSetId =>
@@ -386,7 +392,7 @@ namespace IsraelHiking.API.Services.Poi
 
             await UpdateLists(partialFeature, completeOsmGeo, osmGateway, language);
 
-            RemoveEmptyTags(completeOsmGeo.Tags);
+            RemoveEmptyTagsAndWhiteSpaces(completeOsmGeo.Tags);
             if (oldTags.SequenceEqual(completeOsmGeo.Tags.ToArray()) &&
                 !locationWasUpdated)
             {
