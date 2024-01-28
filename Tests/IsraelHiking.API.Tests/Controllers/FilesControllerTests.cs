@@ -171,7 +171,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.SetupIdentity();
             _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(false);
 
-            var results = _controller.GetOfflineFiles(DateTime.Now).Result as ForbidResult;
+            var results = _controller.GetOfflineFiles(DateTime.Now, false).Result as ForbidResult;
             
             Assert.IsNotNull(results);
         }
@@ -182,7 +182,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.SetupIdentity();
             _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Throws(new Exception("some text"));
 
-            Assert.ThrowsException<AggregateException>(() => _controller.GetOfflineFiles(DateTime.Now).Result);
+            Assert.ThrowsException<AggregateException>(() => _controller.GetOfflineFiles(DateTime.Now, false).Result);
         }
         
         [TestMethod]
@@ -190,11 +190,11 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             _controller.SetupIdentity();
             var dict = new Dictionary<string, DateTime>(); 
-            _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>())
+            _offlineFilesService.GetUpdatedFilesList(Arg.Any<DateTime>(), true)
                 .Returns(dict);
             _receiptValidationGateway.IsEntitled(Arg.Any<string>()).Returns(true);
             
-            var results = _controller.GetOfflineFiles(DateTime.Now).Result as OkObjectResult;
+            var results = _controller.GetOfflineFiles(DateTime.Now, true).Result as OkObjectResult;
             
             Assert.IsNotNull(results);
             var resultDict = results.Value as Dictionary<string, DateTime>;
