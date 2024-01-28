@@ -377,4 +377,8 @@ export class FileService {
         }
         return filesExist;
     }
+
+    public async moveDownloadedDatabaseFile(fileName: string): Promise<void> {
+        await this.fileSystemWrapper.moveFile(this.fileSystemWrapper.cacheDirectory, fileName, this.fileSystemWrapper.dataDirectory, fileName);
+    }
 }

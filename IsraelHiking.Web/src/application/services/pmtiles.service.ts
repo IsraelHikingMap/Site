@@ -52,7 +52,7 @@ export class PmTilesService {
         if (this.sourcesCache.has(filePath)) {
             return this.sourcesCache.get(filePath);
         }
-        const dir = await this.fileStsyemWrapper.resolveDirectoryUrl(this.fileStsyemWrapper.cacheDirectory);
+        const dir = await this.fileStsyemWrapper.resolveDirectoryUrl(this.fileStsyemWrapper.dataDirectory);
         const file = await this.fileStsyemWrapper.getFile(dir, filePath, {});
         return new Promise((resolve, reject) => {
             file.file((file) => {

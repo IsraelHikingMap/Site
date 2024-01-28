@@ -112,7 +112,12 @@ export class OfflineFilesDownloadService {
                     await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}`, dbFileName, token,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
                     await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
-                } else {
+                } else if (fileName.endsWith(".pmtiles")) {
+                    await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}`, fileName, token,
+                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
+                    await this.fileService.moveDownloadedDatabaseFile(fileName);
+                }
+                else {
                     const fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
                     await this.fileService.writeStyles(fileContent as Blob);
@@ -135,7 +140,10 @@ export class OfflineFilesDownloadService {
         const lastModified = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate;
         const lastModifiedString = lastModified ? lastModified.toISOString() : null;
         const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
-            params: { lastModified: lastModifiedString }
+            params: { 
+                lastModified: lastModifiedString,
+                pmtiles: true
+            }
         }).pipe(timeout(5000)));
         this.loggingService.info(
             `[Offline Download] Got ${Object.keys(fileNames).length} files that needs to be downloaded ${lastModifiedString}`);
