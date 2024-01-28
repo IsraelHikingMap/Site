@@ -273,7 +273,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.componentSubscriptions.push(interval(1000).subscribe(() => {
             const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
             if (recordedRouteState.isRecording) {
-                const recordingStartTime = recordedRouteState.route.latlngs[0].timestamp.getTime();
+                const recordingStartTime = new Date(recordedRouteState.route.latlngs[0].timestamp).getTime();
                 this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
             }
         }));

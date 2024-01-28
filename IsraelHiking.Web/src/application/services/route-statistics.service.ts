@@ -229,17 +229,16 @@ export class RouteStatisticsService {
                 continue;
             }
             const ratio = (x - previousPoint.coordinate[0]) / (currentPoint.coordinate[0] - previousPoint.coordinate[0]);
-            const point = { coordinate: [x, 0] } as RouteStatisticsPoint;
-            point.coordinate[1] = this.getInterpolatedValue(previousPoint.coordinate[1], currentPoint.coordinate[1], ratio);
-            point.slope = this.getInterpolatedValue(previousPoint.slope, currentPoint.slope, ratio);
-            point.latlng = SpatialService.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio, point.coordinate[1]);
+            const alt = SpatialService.getInterpolatedValue(previousPoint.coordinate[1], currentPoint.coordinate[1], ratio);
+            const point: RouteStatisticsPoint = { 
+                coordinate: [x, alt],
+                slope: SpatialService.getInterpolatedValue(previousPoint.slope, currentPoint.slope, ratio),
+                latlng: SpatialService.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio)
+            };
+            point.latlng.alt = alt;
             return point;
         }
         return previousPoint;
-    }
-
-    private getInterpolatedValue(value1: number, value2: number, ratio: number) {
-        return (value2 - value1) * ratio + value1;
     }
 
     public findDistanceForLatLngInKM(statistics: RouteStatistics, latLng: LatLngAlt, heading: number): number {

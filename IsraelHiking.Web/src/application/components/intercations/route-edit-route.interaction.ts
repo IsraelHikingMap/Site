@@ -371,7 +371,7 @@ export class RouteEditRouteInteraction {
         const routeData = this.selectedRouteService.getSelectedRoute();
         const segment = structuredClone(routeData.segments[index]) as RouteSegmentData;
         const newLatlngs = SpatialService.splitLine(latlng, segment.latlngs);
-        segment.latlngs = newLatlngs.end as LatLngAltTime[];
+        segment.latlngs = newLatlngs.end;
         const middleSegment = this.createRouteSegment(latlng, newLatlngs.start);
         this.store.dispatch(new UpdateSegmentsAction(routeData.id, [index], [middleSegment, segment]));
     }

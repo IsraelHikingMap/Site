@@ -22,7 +22,7 @@ Write-Host "npm ci"
 npm ci
 
 Write-Host "run lint - send warnings to appveyor"
-npm run lint | Select-String -Pattern 'ERROR:' | ForEach-Object { Add-AppveyorCompilationMessage -Message $_.line -Category Warning; }
+npx ng lint | Select-String -Pattern 'error ' | ForEach-Object { Add-AppveyorCompilationMessage -Message $_.line -Category Warning; }
 
 Write-Host "npm run test-ci"
 npm run test-ci

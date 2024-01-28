@@ -14,7 +14,7 @@ import lineIntersect from "@turf/line-intersect";
 import booleanWithin from "@turf/boolean-within";
 import type { Immutable } from "immer";
 
-import type { LatLngAlt, Bounds } from "../models/models";
+import type { LatLngAlt, Bounds, LatLngAltTime } from "../models/models";
 
 @Injectable()
 export class SpatialService {
@@ -159,66 +159,53 @@ export class SpatialService {
         }
     }
 
-    public static splitLine(newLatlng: LatLngAlt, line: LatLngAlt[]): { start: LatLngAlt[]; end: LatLngAlt[] } {
+    public static splitLine(newLatlng: LatLngAlt, line: LatLngAltTime[]): { start: LatLngAltTime[]; end: LatLngAltTime[] } {
         if (line.length < 2 ) {
             throw new Error("Line length should be at least 2");
         }
-        let closestPointOnSegment = line[0];
-        for (const currentLatLng of line) {
-            if (SpatialService.getDistance(currentLatLng, newLatlng) <
-                SpatialService.getDistance(closestPointOnSegment, newLatlng)) {
-                closestPointOnSegment = currentLatLng;
-            }
+        const closestSegmentIndex = SpatialService.getClosestSegmentIndex(newLatlng, line);
+        const projected = SpatialService.project(newLatlng, line[closestSegmentIndex], line[closestSegmentIndex + 1]);
+        if (projected.projectionFactor === 0.0 && closestSegmentIndex === 0) {
+            const firstLngLat = line[0];
+            return { start: [firstLngLat, firstLngLat], end: [...line] };
         }
-        const indexOfClosestPoint = line.indexOf(closestPointOnSegment);
-        const indexToInsert = SpatialService.getIndexToInsertForSplit(indexOfClosestPoint, line, newLatlng);
-        if (indexToInsert >= line.length) {
-            return { start: [...line, newLatlng], end: [newLatlng, newLatlng] };
+        if (projected.projectionFactor === 1.0 && closestSegmentIndex === line.length - 2) {
+            const lastLngLat = line[line.length - 1];
+            return { start: [...line], end: [lastLngLat, lastLngLat] };
         }
-        if (indexToInsert === 0) {
-            return { start: [newLatlng, newLatlng], end: [newLatlng, ...line] };
-        }
-        const start = line.slice(0, indexToInsert);
-        const end = line.slice(indexToInsert);
-        const projected = SpatialService.project(newLatlng, line[indexToInsert - 1], line[indexToInsert]);
-        if (projected.projectionFactor === 0.0) {
-            // no need to add a point that already exists, adding a point only to end segment
-            return { start, end: [projected.latlng, ...end] };
+        const start = line.slice(0, closestSegmentIndex + 1);
+        const end = line.slice(closestSegmentIndex + 1);
+
+        if (projected.projectionFactor === 1.0) {
+            // No need to add a point that already exists, 
+            // Adding the fist point of 'end' segment to 'start' segment
+            return { start: [...start, end[0]], end };
         }
         return { start: [...start, projected.latlng], end: [projected.latlng, ...end] };
     }
 
-    private static getIndexToInsertForSplit(indexOfClosestPoint: number, line: LatLngAlt[], newLatlng: LatLngAlt): number {
-        // Default location is before the closest node
-        let indexToInsert = indexOfClosestPoint;
-
-        if (indexOfClosestPoint === 0) {
-            const firstSegment = [line[0], line[1]];
-            if (SpatialService.getDistanceFromPointToLine(newLatlng, firstSegment) <
-                SpatialService.getDistanceInMeters(newLatlng, line[0])) {
-                indexToInsert = 1;
-            }
-        } else if (indexOfClosestPoint === line.length - 1) {
-            const lastSegment = [line[indexOfClosestPoint - 1], line[indexOfClosestPoint]];
-            if (SpatialService.getDistanceFromPointToLine(newLatlng, lastSegment) >=
-                SpatialService.getDistanceInMeters(newLatlng, line[indexOfClosestPoint])) {
-                indexToInsert += 1;
-            }
-        } else {
-            // add in between two points:
-            const segmentBefore = [line[indexOfClosestPoint - 1], line[indexOfClosestPoint]];
-            const segmentAfter = [line[indexOfClosestPoint], line[indexOfClosestPoint + 1]];
-            if (SpatialService.getDistanceFromPointToLine(newLatlng, segmentBefore) >=
-                SpatialService.getDistanceFromPointToLine(newLatlng, segmentAfter)) {
-                indexToInsert += 1;
+    private static getClosestSegmentIndex(newLatlng: LatLngAlt, line: LatLngAlt[]): number {
+        let closestSegmentIndex = 0;
+        let minimalDistance = Infinity;
+        for (let segmentIndex = 0; segmentIndex <= line.length - 2; segmentIndex++) {
+            const segment = [line[segmentIndex], line[segmentIndex + 1]];
+            const distance = SpatialService.getDistanceFromPointToLine(newLatlng, segment);
+            if (distance < minimalDistance) {
+                closestSegmentIndex = segmentIndex;
+                minimalDistance = distance;
             }
         }
-        return indexToInsert;
+        return closestSegmentIndex;
     }
 
-    private static project(p: LatLngAlt, a: LatLngAlt, b: LatLngAlt): { latlng: LatLngAlt; projectionFactor: number } {
+    private static project(p: LatLngAlt, a: LatLngAltTime, b: LatLngAltTime): { latlng: LatLngAltTime; projectionFactor: number } {
 
-        const atob = { x: b.lng - a.lng, y: b.lat - a.lat, z: (a.alt != null && b.alt != null) ? b.alt - a.alt : null };
+        const atob = { 
+            x: b.lng - a.lng, 
+            y: b.lat - a.lat, 
+            z: (a.alt != null && b.alt != null) ? b.alt - a.alt : null,
+            t: (a.timestamp != null && b.timestamp != null) ? new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime() : null
+        };
         const atop = { x: p.lng - a.lng, y: p.lat - a.lat };
         const len = atob.x * atob.x + atob.y * atob.y;
         const dot = atop.x * atob.x + atop.y * atob.y;
@@ -228,17 +215,21 @@ export class SpatialService {
             latlng: {
                 lng: a.lng + atob.x * projectionFactor,
                 lat: a.lat + atob.y * projectionFactor,
-                alt: a.alt != null ? a.alt + atob.z * projectionFactor : null
+                alt: atob.z != null ? a.alt + atob.z * projectionFactor : null,
+                timestamp: atob.t != null ? new Date(new Date(a.timestamp).getTime() + atob.t * projectionFactor) : null
             },
             projectionFactor
         };
     }
 
-    public static getLatlngInterpolatedValue(latlng1: LatLngAlt, latlng2: LatLngAlt, ratio: number, alt?: number): LatLngAlt {
+    public static getInterpolatedValue(value1: number, value2: number, ratio: number) {
+        return (value2 - value1) * ratio + value1;
+    }
+
+    public static getLatlngInterpolatedValue(latlng1: LatLngAlt, latlng2: LatLngAlt, ratio: number): LatLngAlt {
         return {
-            lat: (latlng2.lat - latlng1.lat) * ratio + latlng1.lat,
-            lng: (latlng2.lng - latlng1.lng) * ratio + latlng1.lng,
-            alt
+            lat: SpatialService.getInterpolatedValue(latlng1.lat, latlng2.lat, ratio),
+            lng: SpatialService.getInterpolatedValue(latlng1.lng, latlng2.lng, ratio)
         };
     }
 

@@ -5,5 +5,5 @@
 };
 
 export type LatLngAltTime = LatLngAlt & {
-    timestamp: Date;
+    timestamp: Date | string;
 };

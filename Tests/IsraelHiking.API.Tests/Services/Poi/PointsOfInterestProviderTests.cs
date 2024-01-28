@@ -268,6 +268,32 @@ namespace IsraelHiking.API.Tests.Services.Poi
             gateway.Received().CreateChangeset(Arg.Any<TagsCollectionBase>());
             gateway.Received().CloseChangeset(Arg.Any<long>());
         }
+        
+        [TestMethod]
+        public void AddFeature_WithExtraSpaces_ShouldRemoveExtraSpaces()
+        {
+            var user = new User { DisplayName = "DisplayName" };
+            var gateway = SetupHttpFactory();
+            gateway.GetUserDetails().Returns(user);
+            var language = "he";
+            gateway.CreateElement(Arg.Any<long>(), Arg.Any<Node>()).Returns(42);
+            var feature = GetValidFeature("42", Sources.OSM);
+            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_ICON, _tagsHelper.GetCategoriesByGroup(Categories.POINTS_OF_INTEREST).First().Icon);
+            feature.Attributes.AddOrUpdate(FeatureAttributes.NAME, " a   b  c ");
+            feature.Attributes.AddOrUpdate(FeatureAttributes.DESCRIPTION, "  ");
+            _imagesUrlsStorageExecutor.GetImageUrlIfExists(Arg.Any<MD5>(), Arg.Any<byte[]>()).Returns((string)null);
+            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(null as IFeature);
+            
+            var results = _adapter.AddFeature(feature, gateway, language).Result;
+
+            Assert.IsNotNull(results);
+            _pointsOfInterestRepository.Received(1).UpdatePointsOfInterestData(Arg.Any<List<IFeature>>());
+            gateway.Received().CreateElement(Arg.Any<long>(), Arg.Is<OsmGeo>(x => 
+                x.Tags[FeatureAttributes.NAME + ":" + language].Equals("a b c") && 
+                x.Tags.All(t => t.Key != FeatureAttributes.DESCRIPTION)));
+            gateway.Received().CreateChangeset(Arg.Any<TagsCollectionBase>());
+            gateway.Received().CloseChangeset(Arg.Any<long>());
+        }
 
         [TestMethod]
         public void AddFeature_WikipediaMobileLink_ShouldUpdateOsmAndElasticSearch()
@@ -362,6 +388,35 @@ namespace IsraelHiking.API.Tests.Services.Poi
             });
             
             _adapter.UpdateFeature(feature, gateway, "en").Wait();
+
+            gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
+        }
+        
+        [TestMethod]
+        public void UpdateFeature_OnlyChangeExtraSpaces_ShouldNotUpdate()
+        {
+            var gateway = SetupHttpFactory();
+            var featureBeforeUpdate = GetValidFeature("Node_1", Sources.OSM);
+            var featureUpdate = new Feature(featureBeforeUpdate.Geometry, new AttributesTable
+            {
+                { FeatureAttributes.POI_ID, featureBeforeUpdate.GetId()},
+                { FeatureAttributes.ID, featureBeforeUpdate.Attributes[FeatureAttributes.ID]},
+                { FeatureAttributes.NAME, "name " }
+            });
+            _pointsOfInterestRepository.GetPointOfInterestById(Arg.Any<string>(), Arg.Any<string>()).Returns(GetValidFeature("Node_1", Sources.OSM));
+            gateway.GetNode(1).Returns(new Node
+            {
+                Id = 1,
+                Tags = new TagsCollection
+                {
+                    {FeatureAttributes.NAME, "name"},
+                    {FeatureAttributes.NAME + ":en", "name"}
+                },
+                Latitude = 1,
+                Longitude = 1
+            });
+            
+            _adapter.UpdateFeature(featureUpdate, gateway, "en").Wait();
 
             gateway.DidNotReceive().UpdateElement(Arg.Any<long>(), Arg.Any<ICompleteOsmGeo>());
         }
