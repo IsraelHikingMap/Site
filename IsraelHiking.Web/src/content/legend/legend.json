@@ -180,10 +180,10 @@
       {
         "key": "legendChallengingWithDirection",
         "latlng": {
-          "lat": 30.539,
-          "lng": 34.951
+          "lat": 31.7503,
+          "lng": 35.10555
         },
-        "zoom": 16,
+        "zoom": 18,
         "type": "Way",
         "osmTags": [ "mtb:scale=4 or mtb:scale=5" ],
         "link": "osm-key-link"
@@ -415,7 +415,7 @@
       {
         "key": "legendPavedRoad",
         "latlng": {
-          "lat": 332.407,
+          "lat": 32.407,
           "lng": 34.967
         },
         "zoom": 13,
