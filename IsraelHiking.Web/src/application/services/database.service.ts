@@ -9,6 +9,7 @@ import maplibregl from "maplibre-gl";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
+import { PmTilesService } from "./pmtiles.service";
 import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction, SetSidebarAction } from "../reducers/poi.reducer";
@@ -47,6 +48,7 @@ export class DatabaseService {
 
     constructor(private readonly loggingService: LoggingService,
                 private readonly runningContext: RunningContextService,
+                private readonly pmTilesService: PmTilesService,
                 private readonly store: Store) {
         this.updating = false;
         this.sourceDatabases = new Map<string, Promise<SQLiteDBConnection>>();
@@ -79,11 +81,11 @@ export class DatabaseService {
         this.tracesDatabase.version(1).stores({
             traces: "id",
         });
-        this.initCustomTileLoadFunction();
         if (this.runningContext.isIFrame) {
             this.store.reset(initialState);
             return;
         }
+        this.initCustomTileLoadFunction();
         let storedState = initialState;
         const dbState = await this.stateDatabase.table(DatabaseService.STATE_TABLE_NAME).get(DatabaseService.STATE_DOC_ID);
         if (dbState != null) {
@@ -168,6 +170,11 @@ export class DatabaseService {
     }
 
     public async getTile(url: string): Promise<ArrayBuffer> {
+        try {
+            return await this.pmTilesService.getTile(url);
+        } catch (ex) {
+            this.loggingService.error(`[Database] Failed to get tile from pmtiles: ${(ex as Error).message}`);
+        }
         const splitUrl = url.split("/");
         const dbName = this.getSourceNameFromUrl(url);
         const z = +splitUrl[splitUrl.length - 3];

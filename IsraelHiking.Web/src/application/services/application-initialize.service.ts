@@ -45,7 +45,6 @@ export class ApplicationInitializeService {
                 private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
                 private readonly geoLocationService: GeoLocationService,
                 private readonly overpassTurboService: OverpassTurboService,
-                private readonly pmTilesService: PmTilesService,
                 private readonly store: Store
     ) {
     }
@@ -82,7 +81,6 @@ export class ApplicationInitializeService {
             this.tracesService.initialize(); // no need to wait for it to complete
             this.shareUrlsService.initialize(); // no need to wait for it to complete
             this.offlineFilesDownloadService.initialize(); // no need to wait for it to complete
-            this.pmTilesService.initialize();
             await this.loggingService.info("Finished IHM Application Initialization");
         } catch (ex) {
             if (this.runningContextService.isIFrame) {

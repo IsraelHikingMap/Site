@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
 import { File as FileSystemWrapper, IFile } from "@awesome-cordova-plugins/file/ngx";
-import maplibregl from "maplibre-gl";
 import * as pmtiles from "pmtiles";
 
 class CapacitorSource implements pmtiles.Source {
@@ -34,20 +33,6 @@ export class PmTilesService {
         this.sourcesCache = new Map();
     }
 
-    public initialize() {
-        maplibregl.addProtocol("pmtiles", (params, callback) => {
-            this.getTile(params.url).then((tileBuffer) => {
-                if (tileBuffer) {
-                    callback(null, tileBuffer, null, null);
-                } else {
-                    const message = `Problem getting a tile: ${params.url}`;
-                    callback(new Error(message));
-                }
-            });
-            return { cancel: () => { } };
-        });
-    }
-
     private async getSource(filePath: string): Promise<pmtiles.Source> {
         if (this.sourcesCache.has(filePath)) {
             return this.sourcesCache.get(filePath);
@@ -68,10 +53,10 @@ export class PmTilesService {
      * @param url - should be something like pmtiles://filename.pmtiles/{z}/{x}/{y}.png
      * @returns 
      */
-    private async getTile(url: string): Promise<ArrayBuffer> {
+    public async getTile(url: string): Promise<ArrayBuffer> {
         try {
             const splitUrl = url.split("/");
-            const fileName = splitUrl[2];
+            const fileName = splitUrl[2] + ".pmtiles";
             const z = +splitUrl[splitUrl.length - 3];
             const x = +splitUrl[splitUrl.length - 2];
             const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
