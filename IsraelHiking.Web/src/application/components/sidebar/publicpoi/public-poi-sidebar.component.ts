@@ -206,7 +206,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
                 } else if (url.includes("inature.info")) {
                     imageUrl = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
                 } else if (url.includes("ibt.org.il")) {
-                    imageUrl = "https://www.ibt.org.il/images/logo.png";
+                    imageUrl = "https://ibt.org.il/images/logo.png";
                 } else {
                     const domain = new URL(url).hostname;
                     imageUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
