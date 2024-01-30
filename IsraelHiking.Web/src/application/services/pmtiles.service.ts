@@ -38,7 +38,7 @@ export class PmTilesService {
             return this.sourcesCache.get(filePath);
         }
         const dir = await this.fileStsyemWrapper.resolveDirectoryUrl(this.fileStsyemWrapper.dataDirectory);
-        const file = await this.fileStsyemWrapper.getFile(dir, filePath, {});
+        const file = await this.fileStsyemWrapper.getFile(dir, filePath, {create: false});
         return new Promise((resolve, reject) => {
             file.file((file) => {
                 const source = new CapacitorSource(file);
@@ -54,18 +54,14 @@ export class PmTilesService {
      * @returns 
      */
     public async getTile(url: string): Promise<ArrayBuffer> {
-        try {
-            const splitUrl = url.split("/");
-            const fileName = splitUrl[2] + ".pmtiles";
-            const z = +splitUrl[splitUrl.length - 3];
-            const x = +splitUrl[splitUrl.length - 2];
-            const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
-            const source = await this.getSource(fileName);
-            const pmTilesProvider = new pmtiles.PMTiles(source);
-            const response = await pmTilesProvider.getZxy(z, x, y);
-            return response.data;
-        } catch (ex) {
-            return null;
-        }
+        const splitUrl = url.split("/");
+        const fileName = splitUrl[2] + ".pmtiles";
+        const z = +splitUrl[splitUrl.length - 3];
+        const x = +splitUrl[splitUrl.length - 2];
+        const y = +(splitUrl[splitUrl.length - 1].split(".")[0]);
+        const source = await this.getSource(fileName);
+        const pmTilesProvider = new pmtiles.PMTiles(source);
+        const response = await pmTilesProvider.getZxy(z, x, y);
+        return response.data;
     }
 }

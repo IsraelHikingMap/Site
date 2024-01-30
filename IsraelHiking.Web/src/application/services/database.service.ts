@@ -113,6 +113,8 @@ export class DatabaseService {
                     const message = `Tile is not in DB: ${params.url}`;
                     callback(new Error(message));
                 }
+            }).catch((err) => {
+                callback(err);
             });
             return { cancel: () => { } };
         });
