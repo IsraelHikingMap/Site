@@ -159,7 +159,8 @@ export const initialState =
             lastModifiedDate: null,
             poisLastModifiedDate: null,
             shareUrlsLastModifiedDate: null,
-            uploadPoiQueue: []
+            uploadPoiQueue: [],
+            isPmtilesDownloaded: false
         },
         uiComponentsState: {
             drawingVisible: false,

@@ -33,15 +33,17 @@ export class OfflineFilesDownloadService {
         const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
         const userState = this.store.selectSnapshot((s: ApplicationState) => s.userState);
         if (offlineState.isOfflineAvailable === true &&
-            offlineState.lastModifiedDate == null &&
+            (offlineState.lastModifiedDate == null || offlineState.isPmtilesDownloaded === false) &&
             userState.userInfo != null) {
             // In case the user has purchased the map and never downloaded them, and now starts the app
             return await this.downloadOfflineMaps(false);
         }
         if (offlineState.isOfflineAvailable === true &&
             offlineState.lastModifiedDate != null &&
+            offlineState.isPmtilesDownloaded === false &&
             userState.userInfo != null) {
             // Check and migrate old databases if needed
+            // HM TODO: remove this code in 6.2024
             try {
                 const needToMigrate = await this.fileService.renameOldDatabases();
                 if (needToMigrate) {
@@ -137,8 +139,12 @@ export class OfflineFilesDownloadService {
     }
 
     private async getFilesToDownloadDictionary(): Promise<Record<string, string>> {
-        const lastModified = this.store.selectSnapshot((s: ApplicationState) => s.offlineState).lastModifiedDate;
-        const lastModifiedString = lastModified ? lastModified.toISOString() : null;
+        const offlineState = this.store.selectSnapshot((s: ApplicationState) => s.offlineState);
+        let lastModifiedString = offlineState.lastModifiedDate ? offlineState.lastModifiedDate.toISOString() : null;
+        if (!offlineState.isPmtilesDownloaded) {
+            this.loggingService.info(`[Offline Download] This is the first time downloading pmtiles, downloading all files`);
+            lastModifiedString = null;
+        }
         const fileNames = await firstValueFrom(this.httpClient.get(Urls.offlineFiles, {
             params: { 
                 lastModified: lastModifiedString,

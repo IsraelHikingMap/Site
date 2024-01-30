@@ -22,7 +22,6 @@ import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
-import { PmTilesService } from "./pmtiles.service";
 import type { ApplicationState } from "../models/models";
 
 @Injectable()

@@ -120,7 +120,7 @@ namespace IsraelHiking.API.Controllers
         /// Get a list of files that need to be downloaded since they are out dated
         /// </summary>
         /// <param name="lastModified"></param>
-        /// <param name="pmtiles"></param>
+        /// <param name="pmtiles">This parameter was added in 1.2024</param>
         /// <returns></returns>
         [HttpGet]
         [Route("offline")]
