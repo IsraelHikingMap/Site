@@ -15,6 +15,7 @@ import { DatabaseService } from "./database.service";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { SpatialService } from "./spatial.service";
+import { PmTilesService } from "./pmtiles.service";
 
 const createTileFromFeatureCollection = (featureCollection: GeoJSON.FeatureCollection): ArrayBuffer => {
     const tileindex = geojsonVt(featureCollection);
@@ -46,8 +47,9 @@ describe("RoutingProvider", () => {
                 { provide: DatabaseService, usevalue: {} },
                 { provide: LoggingService, useValue: { error: () => {} } },
                 { provide: RunningContextService, useValue: {} },
+                { provide: PmTilesService, useValue: {} },
                 GeoJsonParser,
-                RoutingProvider
+                RoutingProvider,
             ]
         });
     });
