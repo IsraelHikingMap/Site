@@ -120,19 +120,20 @@ namespace IsraelHiking.API.Controllers
         /// Get a list of files that need to be downloaded since they are out dated
         /// </summary>
         /// <param name="lastModified"></param>
+        /// <param name="pmtiles">This parameter was added in 1.2024</param>
         /// <returns></returns>
         [HttpGet]
         [Route("offline")]
         [Authorize]
-        public async Task<IActionResult> GetOfflineFiles([FromQuery] DateTime lastModified)
+        public async Task<IActionResult> GetOfflineFiles([FromQuery] DateTime lastModified, [FromQuery] bool pmtiles)
         {
             if (!await _receiptValidationGateway.IsEntitled(User.Identity?.Name))
             {
                 _logger.LogInformation($"Unable to get the list of offline files for user: {User.Identity?.Name} since the user is not entitled, date: {lastModified}");
                 return Forbid();
             }
-            _logger.LogInformation($"Getting the list of offline files for user: {User.Identity?.Name}, date: {lastModified}");
-            return Ok(_offlineFilesService.GetUpdatedFilesList(lastModified));
+            _logger.LogInformation($"Getting the list of offline files for user: {User.Identity?.Name}, date: {lastModified}, pmtiles: {pmtiles}");
+            return Ok(_offlineFilesService.GetUpdatedFilesList(lastModified, pmtiles));
         }
 
         /// <summary>
