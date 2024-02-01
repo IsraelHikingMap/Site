@@ -54,6 +54,7 @@ export class OfflineReducer {
     public setOfflineMpasLastModifiedDate(ctx: StateContext<OfflineState>, action: SetOfflineMapsLastModifiedDateAction) {
         ctx.setState(produce(ctx.getState(), lastState => {
             lastState.lastModifiedDate = action.lastModifiedDate;
+            lastState.isPmtilesDownloaded = true;
             return lastState;
         }));
     }

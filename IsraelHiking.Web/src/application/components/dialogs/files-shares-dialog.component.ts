@@ -57,13 +57,18 @@ export class FilesSharesDialogComponent extends BaseMapComponent {
             }
             return;
         }
-        if (file.name.endsWith(".mbtiles") && offlineState.isOfflineAvailable) {
+        if (file.name.endsWith(".pmtiles")) {
             this.toastService.info(this.resources.openingAFilePleaseWait);
-            const dbFileName = file.name.replace(".mbtiles", ".db");
-            await this.fileService.storeFileToCache(dbFileName, file);
-            await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
+            await this.fileService.storeFileToCache(file.name, file);
+            await this.fileService.moveFileFromCacheToDataDirectory(file.name);
             this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             this.store.dispatch(new SetOfflineMapsLastModifiedDateAction(new Date(file.lastModified)));
+            return;
+        }
+        if (file.name.endsWith(".json")) {
+            this.toastService.info(this.resources.openingAFilePleaseWait);
+            await this.fileService.writeStyle(file.name, await this.fileService.getFileContent(file));
+            this.toastService.confirm({ type: "Ok", message: this.resources.finishedOpeningTheFile });
             return;
         }
         try {
