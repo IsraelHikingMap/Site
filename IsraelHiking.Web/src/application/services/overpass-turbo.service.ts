@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { firstValueFrom } from "rxjs";
-import maplibregl from "maplibre-gl";
+import { addProtocol } from "maplibre-gl";
 import osmtogeojson from "osmtogeojson";
 
 @Injectable()
@@ -9,11 +9,9 @@ export class OverpassTurboService {
     constructor(private readonly httpClient: HttpClient) {}
 
     public initialize() {
-        maplibregl.addProtocol("overpass", (params, callback) => {
-            this.getGeoJson(params.url.replace("overpass://Q/", "").replace("overpass://", "")).then(geojson => {
-                callback(null, geojson, null, null);
-            }).catch(error => callback(error));
-            return { cancel: () => { } };
+        addProtocol("overpass", async (params, _abortController) => {
+            const geojson = await this.getGeoJson(params.url.replace("overpass://Q/", "").replace("overpass://", ""));
+            return {data: geojson};
         });
     }
 

@@ -1,7 +1,7 @@
 import { Component, ViewChild, ViewEncapsulation, ViewChildren, QueryList, ElementRef } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
 import { MapComponent, CustomControl } from "@maplibre/ngx-maplibre-gl";
-import mapliregl, { StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike } from "maplibre-gl";
+import { setRTLTextPlugin, StyleSpecification, ScaleControl, Unit, RasterDEMSourceSpecification, PointLike } from "maplibre-gl";
 import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -110,7 +110,7 @@ export class MainMapComponent extends BaseMapComponent {
     }
 
     public mapLoaded() {
-        mapliregl.setRTLTextPlugin("./mapbox-gl-rtl-text.js", () => {});
+        setRTLTextPlugin("./mapbox-gl-rtl-text.js", false);
 
         this.mapService.setMap(this.mapComponent.mapInstance);
 

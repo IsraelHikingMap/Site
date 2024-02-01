@@ -43,7 +43,7 @@ export class MapService {
             this.store.dispatch(new SetPannedAction(new Date()));
         });
 
-        this.map.on("styleimagemissing", (e: {id: string}) => {
+        this.map.on("styleimagemissing", async (e: {id: string}) => {
             if (!/^http/.test(e.id)) {
                 return;
             }
@@ -51,9 +51,8 @@ export class MapService {
                 return;
             }
             this.missingImagesArray.push(e.id);
-            this.map.loadImage(e.id, (_: Error, image: HTMLImageElement | ImageBitmap) => {
-                this.map.addImage(e.id, image);
-            });
+            const image = await this.map.loadImage(e.id);
+            this.map.addImage(e.id, image.data);
         });
     }
 }
