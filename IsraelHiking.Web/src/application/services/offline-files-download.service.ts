@@ -38,23 +38,6 @@ export class OfflineFilesDownloadService {
             // In case the user has purchased the map and never downloaded them, and now starts the app
             return await this.downloadOfflineMaps(false);
         }
-        if (offlineState.isOfflineAvailable === true &&
-            offlineState.lastModifiedDate != null &&
-            offlineState.isPmtilesDownloaded === false &&
-            userState.userInfo != null) {
-            // Check and migrate old databases if needed
-            // HM TODO: remove this code in 6.2024
-            try {
-                const needToMigrate = await this.fileService.renameOldDatabases();
-                if (needToMigrate) {
-                    await this.databaseService.migrateDatabasesIfNeeded();
-                }
-            } catch (ex) {
-                this.loggingService.error("[Offline Download] Failed to migrate: " + (ex as Error).message);
-            }
-
-        }
-
     }
 
     public async downloadOfflineMaps(showMessage = true): Promise<void> {
@@ -109,17 +92,11 @@ export class OfflineFilesDownloadService {
                 const fileDate = new Date(fileNames[fileName]);
                 newestFileDate = fileDate > newestFileDate ? fileDate : newestFileDate;
                 const token = this.store.selectSnapshot((s: ApplicationState) => s.userState).token;
-                if (fileName.endsWith(".mbtiles")) {
-                    const dbFileName = fileName.replace(".mbtiles", ".db");
-                    await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}`, dbFileName, token,
-                        (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
-                    await this.databaseService.moveDownloadedDatabaseFile(dbFileName);
-                } else if (fileName.endsWith(".pmtiles")) {
+                if (fileName.endsWith(".pmtiles")) {
                     await this.fileService.downloadFileToCacheAuthenticated(`${Urls.offlineFiles}/${fileName}`, fileName, token,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
-                    await this.fileService.moveDownloadedDatabaseFile(fileName);
-                }
-                else {
+                    await this.fileService.moveFileFromCacheToDataDirectory(fileName);
+                } else {
                     const fileContent = await this.fileService.getFileContentWithProgress(`${Urls.offlineFiles}/${fileName}`,
                         (value) => reportProgress((value + fileNameIndex) * 100.0 / length));
                     await this.fileService.writeStyles(fileContent as Blob);
