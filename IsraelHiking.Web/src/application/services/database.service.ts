@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
 import { Store } from "@ngxs/store";
 import { debounceTime } from "rxjs/operators";
+import { addProtocol } from "maplibre-gl";
 import Dexie from "dexie";
 import deepmerge from "deepmerge";
-import maplibregl from "maplibre-gl";
 
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
@@ -100,18 +100,9 @@ export class DatabaseService {
     }
 
     private initCustomTileLoadFunction() {
-        maplibregl.addProtocol("custom", (params, callback) => {
-            this.getTile(params.url).then((tileBuffer) => {
-                if (tileBuffer) {
-                    callback(null, tileBuffer, null, null);
-                } else {
-                    const message = `Tile is not in DB: ${params.url}`;
-                    callback(new Error(message));
-                }
-            }).catch((err) => {
-                callback(err);
-            });
-            return { cancel: () => { } };
+        addProtocol("custom", async (params, _abortController) => {
+            const data = await this.getTile(params.url);
+            return {data};
         });
     }
 
