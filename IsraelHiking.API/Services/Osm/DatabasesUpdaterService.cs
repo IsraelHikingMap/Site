@@ -146,9 +146,29 @@ namespace IsraelHiking.API.Services.Osm
             var features = _featuresMergeExecutor.Merge(osmFeaturesTask.Result, externalFeatures);
             _unauthorizedImageUrlsRemover.RemoveImages(features);
             var exitingFeatures = await _pointsOfInterestRepository.GetAllPointsOfInterest(true);
-            _logger.LogInformation($"Adding deleted features to new ones, total merged features: {features.Count} total existing features including deleted: {exitingFeatures.Count} of them: {exitingFeatures.Count(f => f.Attributes.Exists(FeatureAttributes.POI_DELETED))}");
+            var existingDeletedFeatures = exitingFeatures.Where(f => f.Attributes.Exists(FeatureAttributes.POI_DELETED)).ToArray();
+            _logger.LogInformation($"Adding deleted features to new ones, total merged features: {features.Count} total existing POIs including deleted: {exitingFeatures.Count}, of them deleted: {existingDeletedFeatures.Length}");
             var newFeaturesDictionary = features.ToDictionary(f => f.GetId(), f => f);
             var deletedFeatures = exitingFeatures.Where(f => f.GetLastModified() <= rebuildContext.StartTime && !newFeaturesDictionary.ContainsKey(f.GetId())).ToArray();
+            if (existingDeletedFeatures.Length > deletedFeatures.Length)
+            {
+                var deletedFeaturesIds = deletedFeatures.ToDictionary(f => f.GetId(), f => f);
+                var existingDeletedFeaturesIds = existingDeletedFeatures.ToDictionary(f => f.GetId(), f => f);
+                foreach(var kvp in deletedFeaturesIds)
+                {
+                    if (!existingDeletedFeaturesIds.ContainsKey(kvp.Key))
+                    {
+                        _logger.LogInformation($"Existing deleted feature with id: {kvp.Key} was not found in the new deleted features");
+                    }
+                }
+                foreach(var kvp in existingDeletedFeaturesIds)
+                {
+                    if (!deletedFeaturesIds.ContainsKey(kvp.Key))
+                    {
+                        _logger.LogInformation($"New deleted feature with id: {kvp.Key} was not found in the new deleted features");
+                    }
+                }
+            }
             foreach (var deletedFeatureToMark in deletedFeatures)
             {
                 if (!deletedFeatureToMark.Attributes.Exists(FeatureAttributes.POI_DELETED))
