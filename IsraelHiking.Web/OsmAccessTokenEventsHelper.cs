@@ -56,7 +56,7 @@ namespace IsraelHiking.Web
                     }
                 }
 
-                var userIdFromCache = await _appCache.GetOrAdd(context.Token, async () =>
+                var userIdFromCache = await _appCache.GetOrAddAsync(context.Token, async () =>
                 {
                     var osmGateway = OsmAuthFactoryWrapper.ClientFromToken(context.Token, _clientsFactory, _options);
                     var user = await osmGateway.GetUserDetails();
@@ -64,7 +64,6 @@ namespace IsraelHiking.Web
                     _logger.LogInformation($"User {userId} had just logged in");
                     return userId;
                 }, TimeSpan.FromMinutes(30));
-                
                 var identity = new ClaimsIdentity("Osm");
                 identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userIdFromCache));
                 identity.AddClaim(new Claim(ClaimTypes.Name, userIdFromCache));
