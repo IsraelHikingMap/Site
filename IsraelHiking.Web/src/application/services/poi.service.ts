@@ -120,7 +120,7 @@ export class PoiService {
         // HM TODO: offline needs special handling here
         this.mapService.map.addSource("points-of-interest", {
             type: "vector",
-            url: "https://israelhiking.osm.org.il/vector/data/IHM.json",
+            url: "https://israelhiking.osm.org.il/vector/data/pois.json",
         });
         // HM TODO: check if there's a need to add more layers to support more source layers.
         this.mapService.map.addLayer({
@@ -206,8 +206,10 @@ export class PoiService {
     }
 
     private setIconColorCategory(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Point>) {
-        switch (feature.properties.subclass) {
+        switch (feature.properties.sub_class) {
             case "spring":
+            case "pond":
+            case "reservoir":
                 poi.properties.poiIconColor = "blue";
                 poi.properties.poiIcon = "icon-tint";
                 poi.properties.poiCategory = "Water";
@@ -254,6 +256,8 @@ export class PoiService {
                 poi.properties.poiCategory = "Viewpoint";
                 break;
             case "picnic_site":
+            case "picnic_table":
+            case "picnic":
                 poi.properties.poiIconColor = "#734a08";
                 poi.properties.poiIcon = "icon-picnic";
                 poi.properties.poiCategory = "Camping";
@@ -264,6 +268,7 @@ export class PoiService {
                 poi.properties.poiCategory = "Camping";
                 break;
             case "cave_entrance":
+            case "tomb":
                 poi.properties.poiIconColor = "black";
                 poi.properties.poiIcon = "icon-cave";
                 poi.properties.poiCategory = "Natural";
@@ -281,6 +286,18 @@ export class PoiService {
             case "attraction":
                 poi.properties.poiIconColor = "#ffb800";
                 poi.properties.poiIcon = "icon-star";
+                poi.properties.poiCategory = "Other";
+                break;
+            case "protected_area":
+            case "nature_reserve":
+            case "national_park":
+                poi.properties.poiIconColor = "#008000";
+                poi.properties.poiIcon = "icon-nature-reserve";
+                poi.properties.poiCategory = "Other";
+                break;
+            case "peak":
+                poi.properties.poiIconColor = "black";
+                poi.properties.poiIcon = "icon-peak";
                 poi.properties.poiCategory = "Other";
                 break;
             default:
@@ -304,12 +321,8 @@ export class PoiService {
                 geometry: feature.geometry as GeoJSON.Point,
                 properties: JSON.parse(JSON.stringify(feature.properties)) || {}
             };
-            poi.properties.identifier = 
-                feature.id as number < 0 ?
-                "relation_" + feature.id :
-                feature.id.toString().endsWith("1") ?
-                    "way_" + (feature.id as number / 10) :
-                    "node_" + (feature.id as number/ 10);
+            let osmType = feature.id.toString().endsWith("1") ? "node_" : feature.id.toString().endsWith("2") ? "way_" : "relation_";
+            poi.properties.identifier = osmType + Math.floor((Number(feature.id)/ 10));
             poi.properties.poiSource = "OSM";
             poi.properties.poiId = "OSM_" + poi.properties.identifier;
             //feature.properties.poiGeolocation = JSON.parse(feature.properties.poiGeolocation);
