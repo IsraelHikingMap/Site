@@ -309,30 +309,59 @@ export class PoiService {
         }
     }
 
+    private setGeometry(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Point>) {
+        switch (feature.geometry.type) {
+            case "Point":
+                poi.properties.poiGeolocation = {
+                    lat: feature.geometry.coordinates[1],
+                    lng: feature.geometry.coordinates[0],
+                };
+                break;
+            case "LineString":
+                poi.properties.poiGeolocation = {
+                    lat: feature.geometry.coordinates[0][1],
+                    lng: feature.geometry.coordinates[0][0],
+                };
+                break;
+            case "Polygon":
+                poi.properties.poiGeolocation = {
+                    lat: feature.geometry.coordinates[0][0][1],
+                    lng: feature.geometry.coordinates[0][0][0],
+                };
+                break;
+        }
+        poi.geometry.coordinates = [poi.properties.poiGeolocation.lng, poi.properties.poiGeolocation.lat];
+    }
+
+    private setLanguage(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Point>) {
+        const hasHebrew = feature.properties["name:he"];
+        const hasEnglish = feature.properties["name:en"];
+        if (hasHebrew || hasEnglish) {
+            poi.properties.poiLanguage = hasHebrew && hasEnglish ? "all" : hasHebrew ? "he" : "en";
+        }
+    }
+
     private async getPoisFromTiles(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
         if (this.mapService.map.getZoom() <= 10) {
             return [];
         }
         const features = this.mapService.map.querySourceFeatures("points-of-interest", {sourceLayer: "poi"});
         const pois = features.map(feature => {
-            // HM TODO: handle other geometries?
             let poi: GeoJSON.Feature<GeoJSON.Point> = {
                 type: "Feature",
-                geometry: feature.geometry as GeoJSON.Point,
+                geometry: {
+                    type: "Point",
+                    coordinates: [0, 0]
+                },
                 properties: JSON.parse(JSON.stringify(feature.properties)) || {}
             };
             let osmType = feature.id.toString().endsWith("1") ? "node_" : feature.id.toString().endsWith("2") ? "way_" : "relation_";
             poi.properties.identifier = osmType + Math.floor((Number(feature.id)/ 10));
             poi.properties.poiSource = "OSM";
             poi.properties.poiId = "OSM_" + poi.properties.identifier;
-            //feature.properties.poiGeolocation = JSON.parse(feature.properties.poiGeolocation);
-            //feature.properties.poiNames = JSON.parse(feature.properties.poiNames);
             this.setIconColorCategory(feature, poi);
-            poi.properties.poiLanguage = "all";
-            poi.properties.poiGeolocation = {
-                lat: poi.geometry.coordinates[1],
-                lng: poi.geometry.coordinates[0],
-            };
+            this.setLanguage(feature, poi);
+            this.setGeometry(feature, poi);
             return poi;
         });
         return this.filterFeatures(pois);
