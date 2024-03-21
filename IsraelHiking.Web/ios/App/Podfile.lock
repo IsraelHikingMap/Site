@@ -1,26 +1,26 @@
 PODS:
-  - Capacitor (5.4.2):
+  - Capacitor (5.7.1):
     - CapacitorCordova
-  - CapacitorApp (5.0.6):
+  - CapacitorApp (5.0.7):
     - Capacitor
-  - CapacitorCamera (5.0.7):
+  - CapacitorCamera (5.0.9):
     - Capacitor
   - CapacitorCommunityKeepAwake (4.0.0):
     - Capacitor
   - CapacitorCommunityScreenBrightness (5.0.0):
     - Capacitor
-  - CapacitorCommunitySqlite (5.4.0):
+  - CapacitorCommunitySqlite (5.6.1):
     - Capacitor
     - SQLCipher
     - ZIPFoundation
-  - CapacitorCordova (5.4.2)
-  - CapacitorDevice (5.0.6):
+  - CapacitorCordova (5.7.1)
+  - CapacitorDevice (5.0.7):
     - Capacitor
-  - CapacitorTextZoom (5.0.6):
+  - CapacitorTextZoom (5.0.7):
     - Capacitor
-  - CapgoNativeAudio (6.0.21):
+  - CapgoNativeAudio (6.2.7):
     - Capacitor
-  - CordovaPlugins (5.4.2):
+  - CordovaPlugins (5.7.1):
     - CapacitorCordova
   - SQLCipher (4.5.3):
     - SQLCipher/standard (= 4.5.3)
@@ -72,17 +72,17 @@ EXTERNAL SOURCES:
     :path: "../capacitor-cordova-ios-plugins"
 
 SPEC CHECKSUMS:
-  Capacitor: 8a9db42d105f55843cd8ed2a3cb54e2b78e7f102
-  CapacitorApp: 024e1b1bea5f883d79f6330d309bc441c88ad04a
-  CapacitorCamera: 084b0b228bba7d00587910337b1c89e93b1d32ab
+  Capacitor: 6bd16626bc7a4a382eff16f6aed0072fe9776951
+  CapacitorApp: 17fecd0e6cb23feafac7eb0939417389038b0979
+  CapacitorCamera: 4892c5c392f60039d853dde78bc50ba19fbd113e
   CapacitorCommunityKeepAwake: f3442e3e9b666dd0162522fbd053da1fe81ede20
   CapacitorCommunityScreenBrightness: b2d9c6fffee6b684994cd69f727f2090e2f05c6d
-  CapacitorCommunitySqlite: b1436663feae8354cfa29720428bc9d9029f3a8c
-  CapacitorCordova: cfcc06b698481da655415985eeb2b8da363f8451
-  CapacitorDevice: 2c968f98a1ec4d22357418c1521e7ddc46c675e6
-  CapacitorTextZoom: bd623313a291bc1f38cdc01bd94c39b2b48d794a
-  CapgoNativeAudio: a16cca262ee9c5ad11c752e14942ba54812ec0c1
-  CordovaPlugins: ff237a5fad1b7d53d42f6b2e125b767e0350ed9e
+  CapacitorCommunitySqlite: 47474c9717db7d998eeba2c3147e1c055a726d5f
+  CapacitorCordova: b49f3372270c88fd9c633a4fc8c7ef00e47dd2d6
+  CapacitorDevice: fc91bdb484dc0e70755e9b621cd557afe642613a
+  CapacitorTextZoom: 69814a62b1d0f23a899cca06ea9838c38de187ff
+  CapgoNativeAudio: 9c9d2ee1683c5e7091d59c3aa7ff5c30c66b9598
+  CordovaPlugins: 94be884d77b1c68b78e24952738ae5d27899c561
   SQLCipher: 57fa9f863fa4a3ed9dd3c90ace52315db8c0fdca
   ZIPFoundation: d170fa8e270b2a32bef9dcdcabff5b8f1a5deced
 

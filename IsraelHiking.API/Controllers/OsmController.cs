@@ -25,6 +25,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller is responsible for all OSM related requests
     /// </summary>
     [Route("api/[controller]")]
+    [Authorize]
     public class OsmController : ControllerBase
     {
         private readonly IClientsFactory _clientsFactory;
@@ -81,7 +82,6 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="feature"></param>
         /// <returns></returns>
-        [Authorize]
         [HttpPut]
         public async Task PutAddUnmappedPartIntoOsm([FromBody]IFeature feature)
         {

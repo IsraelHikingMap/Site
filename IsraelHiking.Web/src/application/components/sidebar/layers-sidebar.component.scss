@@ -12,4 +12,8 @@
     min-width: unset;
     line-height: unset !important;
     padding: 0;
+
+    & .mat-mdc-button-touch-target {
+        height: unset !important;
+    }
 }

@@ -70,7 +70,7 @@ describe("MapService", () => {
     
     it("Should not call twice on the same missing", inject([MapService], 
         async (service: MapService) => {
-            const spy = jasmine.createSpy().and.returnValue(Promise.resolve({ data: "123" }));;
+            const spy = jasmine.createSpy().and.returnValue(Promise.resolve({ data: "123" }));
             const addImageSpy = jasmine.createSpy();
             let storedCallback = (_e: any) => {};
             const mapMock = {

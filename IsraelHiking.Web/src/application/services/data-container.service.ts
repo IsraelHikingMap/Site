@@ -40,14 +40,15 @@ export class DataContainerService {
             const routeToAdd = this.routesFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
             routesData.push(routeToAdd);
         }
+        let selectedRouteId = routesData.length > 0 ? routesData[0].id : null; // the default is the first newly added route
         if (keepCurrentRoutes) {
             const currentRoutes = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.routes).present) as RouteData[];
             routesData = [...currentRoutes, ...routesData];
         }
         this.routesFactory.regenerateDuplicateIds(routesData);
         this.store.dispatch(new BulkReplaceRoutesAction(routesData));
-        if (routesData.length > 0 && this.selectedRouteService.getSelectedRoute() == null) {
-            this.store.dispatch(new SetSelectedRouteAction(routesData[0].id));
+        if (selectedRouteId) {
+            this.store.dispatch(new SetSelectedRouteAction(selectedRouteId));
         }
         this.layersService.addExternalOverlays(dataContainer.overlays);
         this.layersService.addExternalBaseLayer(dataContainer.baseLayer);

@@ -34,7 +34,7 @@ import { NgProgressHttpModule } from "ngx-progressbar/http";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgxMapLibreGLModule } from "@maplibre/ngx-maplibre-gl";
 import { NgIdleModule } from "@ng-idle/core";
-import { LottieModule } from "ngx-lottie";
+import { provideLottieOptions, LottieComponent } from "ngx-lottie";
 import { NgxsModule } from "@ngxs/store";
 import { saveAs } from "file-saver-es";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
@@ -252,7 +252,7 @@ const initializeApplication = (injector: Injector) => async () => {
             NgxMapLibreGLModule,
             NgIdleModule.forRoot(),
             HammerModule,
-            LottieModule.forRoot({ player: () => player })
+            LottieComponent,
         ],
         providers: [
             AuthorizationService,
@@ -260,6 +260,7 @@ const initializeApplication = (injector: Injector) => async () => {
             { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [Injector], multi: true },
             { provide: ErrorHandler, useClass: GlobalErrorHandler },
             { provide: SaveAsFactory, useFactory: () => saveAs },
+            provideLottieOptions({ player: () => player}),
             GetTextCatalogService,
             MapService,
             ResourcesService,
@@ -318,7 +319,8 @@ const initializeApplication = (injector: Injector) => async () => {
             RouteEditPoiInteraction,
             RouteEditRouteInteraction
         ],
-        declarations: [MainMapComponent,
+        declarations: [
+            MainMapComponent,
             SidebarComponent,
             LayersSidebarComponent,
             ZoomComponent,
