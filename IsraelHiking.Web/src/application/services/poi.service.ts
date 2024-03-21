@@ -206,6 +206,12 @@ export class PoiService {
     }
 
     private setIconColorCategory(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Point>) {
+        if (feature.properties.class === "place") {
+            poi.properties.poiIconColor = "black";
+            poi.properties.poiIcon = "icon-home";
+            poi.properties.poiCategory = "Wikipedia";
+            return;
+        }
         switch (feature.properties.sub_class) {
             case "spring":
             case "pond":
