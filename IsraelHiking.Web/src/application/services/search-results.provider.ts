@@ -33,15 +33,12 @@ export class SearchResultsProvider {
                 description: "",
             }];
         }
-        try {
-            const language = isHebrew ? "he" : "en";
-            const params = new HttpParams().set("language", language);
-            const response = await firstValueFrom(this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
-                params
-            }).pipe(timeout(3000)));
-            return response as SearchResultsPointOfInterest[];
-        } catch {
-            return await this.poiService.getSerchResults(searchWithoutBadCharacters);
-        }
+        const language = isHebrew ? "he" : "en";
+        const params = new HttpParams().set("language", language);
+        const response = await firstValueFrom(this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
+            params
+        }).pipe(timeout(3000)));
+        return response as SearchResultsPointOfInterest[];
+        // HM TODO: think if there's a way to have offline search results
     }
 }

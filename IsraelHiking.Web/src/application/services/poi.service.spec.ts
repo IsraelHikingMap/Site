@@ -1,8 +1,7 @@
-import { TestBed, inject, fakeAsync, tick, discardPeriodicTasks } from "@angular/core/testing";
+import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule, HttpRequest } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { NgxsModule, Store } from "@ngxs/store";
-import JSZip from "jszip";
 
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
@@ -44,13 +43,16 @@ describe("Poi Service", () => {
             storePois: jasmine.createSpy().and.returnValue(Promise.resolve()),
             storeImages: jasmine.createSpy().and.returnValue(Promise.resolve())
         } as any;
-        const mapServiceMosk = {
+        const mapServiceMock = {
             map: {
-                on: () => { },
+                on: () => {},
                 off: () => { },
                 getCenter: () => ({ lat: 0, lng: 0}),
                 getZoom: () => 11,
-                getBounds: () => new LngLatBounds([1,1,2,2])
+                getBounds: () => new LngLatBounds([1,1,2,2]),
+                addSource: () => {},
+                addLayer: () => {},
+                querySourceFeatures: () => [] as any[]
             },
             initializationPromise: Promise.resolve()
         };
@@ -71,7 +73,7 @@ describe("Poi Service", () => {
                 { provide: ToastService, useValue: toastMock.toastService },
                 { provide: FileService, useValue: fileServiceMock },
                 { provide: DatabaseService, useValue: databaseServiceMock },
-                { provide: MapService, useValue: mapServiceMosk },
+                { provide: MapService, useValue: mapServiceMock },
                 { provide: LoggingService, useValue: loggingService },
                 ConnectionService,
                 GeoJsonParser,
@@ -106,8 +108,8 @@ describe("Poi Service", () => {
         }
     )));
 
-    it("Should initialize and show pois from server and then from memory after filtering", (inject([PoiService, HttpTestingController, Store, RunningContextService],
-        async (poiService: PoiService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService) => {
+    it("Should initialize and show pois tiles", (inject([PoiService, HttpTestingController, Store, RunningContextService, MapService],
+        async (poiService: PoiService, mockBackend: HttpTestingController, store: Store, runningContextService: RunningContextService, mapServiceMock: MapService) => {
 
             store.reset({
                 layersState: {
@@ -115,45 +117,82 @@ describe("Poi Service", () => {
                         type: "type",
                         categories: [{
                             icon: "icon",
-                            name: "category",
+                            name: "Water",
                             visible: true
                         }] as any[], 
                         visible: true }]
                 },
                 configuration: {},
                 offlineState: {
-                    poisLastModifiedDate: new Date(),
                     uploadPoiQueue: []
                 }
             });
 
             (runningContextService as any).isIFrame = false;
-            const promise = poiService.initialize();
-
-            mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            mockBackend.expectOne(r => r.url.startsWith(Urls.poi)).flush([{
+            mapServiceMock.map.on = ((type: string, f: () => void) => { if (type === "moveend") f(); }) as any;
+            mapServiceMock.map.querySourceFeatures = () => [
+                {
+                    id: "1",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [0, 0]
+                    },
                     properties: {
-                        poiLanguage: "all",
-                        poiCategory: "category",
-                        name: "name"
+                        sub_class: "spring",
+                        "name:he": "name",
+                        "name:en": "name"
                     }
                 }, {
+                    id: "2",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [0, 0]
+                    },
                     properties: {
-                        poiLanguage: "en-US",
-                        poiCategory: "category",
-                        name: "name"
+                        sub_class: "spring",
+                        "name:en": "name"
                     }
                 }
-            ]);
+            ] as any;
+            const promise = poiService.initialize();
+
+            mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "Water" }]));
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            expect(poiService.poiGeojsonFiltered.features.length).toBe(2);
+            
+            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
+            expect(poiService.poiGeojsonFiltered.features.length).toBe(1);
+
+            mapServiceMock.map.querySourceFeatures = () => [
+                {
+                    id: "1",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [0, 0]
+                    },
+                    properties: {
+                        sub_class: "spring",
+                        "name:he": "name",
+                        "name:en": "name"
+                    }
+                },
+                {
+                    id: "2",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [0, 0]
+                    },
+                    properties: {
+                        sub_class: "spring",
+                        "name:he": "name"
+                    }
+                }
+            ] as any;
 
             store.dispatch(new SetLanguageAction({ code: "he", rtl: false }));
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            expect(poiService.poiGeojsonFiltered.features.length).toBe(1);
+            expect(poiService.poiGeojsonFiltered.features.length).toBe(2);
 
             return promise;
         }
@@ -168,7 +207,6 @@ describe("Poi Service", () => {
                 },
                 configuration: {},
                 offlineState: {
-                    poisLastModifiedDate: new Date(),
                     uploadPoiQueue: ["1"]
                 }
             });
@@ -192,7 +230,6 @@ describe("Poi Service", () => {
                 },
                 configuration: {},
                 offlineState: {
-                    poisLastModifiedDate: new Date(),
                     uploadPoiQueue: ["1"]
                 }
             });
@@ -211,83 +248,6 @@ describe("Poi Service", () => {
             return promise;
         }
     )));
-
-    it("Should initialize and download offline pois file",
-        inject([PoiService, HttpTestingController, RunningContextService, FileService, DatabaseService, Store],
-            async (poiService: PoiService, mockBackend: HttpTestingController, runningContextService: RunningContextService,
-                fileService: FileService, databaseService: DatabaseService, store: Store) => {
-
-                store.reset({
-                    layersState: {
-                        categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
-                    },
-                    offlineState: {
-                        poisLastModifiedDate: null,
-                        uploadPoiQueue: []
-                    }
-                });
-                store.dispatch = jasmine.createSpy();
-                (runningContextService as any).isCapacitor = true;
-                const zip = new JSZip();
-                zip.folder("pois");
-                zip.file("pois/001.geojson", JSON.stringify({ features: [{
-                    type: "Feature",
-                    properties: { poiLastModified: new Date("2022-02-22") }
-                }] }));
-                zip.folder("images");
-                zip.file("images/001.json", JSON.stringify([{imageUrls: [{imageUrl: "img", thumbnail: "some-data"}]}]));
-                const zipOutputPromise = zip.generateAsync({type: "blob"});
-                const getFileFromcacheSpy = spyOn(fileService, "getFileFromCache").and.returnValues(Promise.resolve(null), zipOutputPromise);
-
-                const promise = poiService.initialize().then(() => {
-                    expect(poiService.poiGeojsonFiltered.features.length).toBe(0);
-                    expect(getFileFromcacheSpy).toHaveBeenCalledTimes(2);
-                    expect(databaseService.storePois).toHaveBeenCalled();
-                    expect(databaseService.storeImages).toHaveBeenCalled();
-                    expect(store.dispatch).toHaveBeenCalled();
-                });
-                mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
-
-                return promise;
-            }
-        )
-    );
-
-    it("Should initialize and update pois by pagination",
-        fakeAsync(inject([PoiService, HttpTestingController, RunningContextService, DatabaseService, Store],
-            (poiService: PoiService, mockBackend: HttpTestingController,
-                runningContextService: RunningContextService, databaseService: DatabaseService, store: Store) => {
-
-                store.reset({
-                    layersState: {
-                        categoriesGroups: [{ type: "type", categories: [] as any[], visible: true }]
-                    },
-                    offlineState: {
-                        poisLastModifiedDate: Date.now(),
-                        uploadPoiQueue: []
-                    }
-                });
-                (runningContextService as any).isCapacitor = true;
-                poiService.initialize().then(() => {
-                    expect(poiService.poiGeojsonFiltered.features.length).toBe(0);
-                    expect(databaseService.storePois).toHaveBeenCalled();
-                    expect(databaseService.storeImages).toHaveBeenCalled();
-                    expect(databaseService.deletePois).toHaveBeenCalled();
-                });
-                mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "category" }]));
-                tick();
-                mockBackend.expectOne(r => r.url.startsWith(Urls.poiUpdates)).flush({
-                    features: [{
-                        type: "Feature",
-                        properties: { poiDeleted: true, poiId: "1"}
-                    }],
-                    images: [],
-                    lastModified: Date.now()
-                });
-                discardPeriodicTasks();
-            }
-        ))
-    );
 
     it("Should get selectable categories", inject([PoiService, Store],
         (poiService: PoiService, store: Store) => {
@@ -327,13 +287,13 @@ describe("Poi Service", () => {
         }
     )));
 
-    it("Should get a point by id and source from the database in case the server is not available",
-        (inject([PoiService, HttpTestingController, DatabaseService],
-            async (poiService: PoiService, mockBackend: HttpTestingController, dbMock: DatabaseService) => {
+    it("Should get a point by id and source from the tiles in case the server is not available",
+        (inject([PoiService, HttpTestingController, MapService],
+            async (poiService: PoiService, mockBackend: HttpTestingController, mapServiceMock: MapService) => {
 
-                const id = "42";
+                const id = "node_42";
                 const source = "source";
-                const spy = spyOn(dbMock, "getPoiById").and.returnValue(Promise.resolve({} as any));
+                const spy = spyOn(mapServiceMock.map, "querySourceFeatures").and.returnValue([{ id: "421", properties: {}, geometry: { type: "Point", coordinates: [0,0]}} as any]);
 
                 const promise = poiService.getPoint(id, source).then((res) => {
                     expect(res).not.toBeNull();
@@ -347,13 +307,13 @@ describe("Poi Service", () => {
         )
     ));
 
-    it("Should throw when trying to get a point by id and source and it is not available in the server and in the database",
-        (inject([PoiService, HttpTestingController, DatabaseService],
-            async (poiService: PoiService, mockBackend: HttpTestingController, dbMock: DatabaseService) => {
+    it("Should throw when trying to get a point by id and source and it is not available in the server and in the tiles",
+        (inject([PoiService, HttpTestingController, MapService],
+            async (poiService: PoiService, mockBackend: HttpTestingController, mapServiceMock: MapService) => {
 
                 const id = "42";
                 const source = "source";
-                const spy = spyOn(dbMock, "getPoiById");
+                const spy = spyOn(mapServiceMock.map, "querySourceFeatures").and.returnValue([]);
 
                 const promise = new Promise((resolve, reject) => {
                     poiService.getPoint(id, source).then(reject, (err) => {
