@@ -51,7 +51,8 @@ describe("Poi Service", () => {
                 getZoom: () => 11,
                 getBounds: () => new LngLatBounds([1,1,2,2]),
                 addSource: () => {},
-                addLayer: () => {}
+                addLayer: () => {},
+                querySourceFeatures: () => [] as any[]
             },
             initializationPromise: Promise.resolve()
         };
@@ -206,7 +207,6 @@ describe("Poi Service", () => {
                 },
                 configuration: {},
                 offlineState: {
-                    poisLastModifiedDate: new Date(),
                     uploadPoiQueue: ["1"]
                 }
             });
@@ -230,7 +230,6 @@ describe("Poi Service", () => {
                 },
                 configuration: {},
                 offlineState: {
-                    poisLastModifiedDate: new Date(),
                     uploadPoiQueue: ["1"]
                 }
             });
@@ -288,17 +287,17 @@ describe("Poi Service", () => {
         }
     )));
 
-    it("Should get a point by id and source from the database in case the server is not available",
-        (inject([PoiService, HttpTestingController, DatabaseService],
-            async (poiService: PoiService, mockBackend: HttpTestingController) => {
+    it("Should get a point by id and source from the tiles in case the server is not available",
+        (inject([PoiService, HttpTestingController, MapService],
+            async (poiService: PoiService, mockBackend: HttpTestingController, mapServiceMock: MapService) => {
 
-                const id = "42";
+                const id = "node_42";
                 const source = "source";
-                //const spy = spyOn(dbMock, "getPoiById").and.returnValue(Promise.resolve({} as any));
+                const spy = spyOn(mapServiceMock.map, "querySourceFeatures").and.returnValue([{ id: "421", properties: {}, geometry: { type: "Point", coordinates: [0,0]}} as any]);
 
                 const promise = poiService.getPoint(id, source).then((res) => {
                     expect(res).not.toBeNull();
-                    //expect(spy).toHaveBeenCalled();
+                    expect(spy).toHaveBeenCalled();
                 });
 
                 mockBackend.expectOne((request: HttpRequest<any>) => request.url.includes(id) &&
@@ -308,17 +307,17 @@ describe("Poi Service", () => {
         )
     ));
 
-    it("Should throw when trying to get a point by id and source and it is not available in the server and in the database",
-        (inject([PoiService, HttpTestingController, DatabaseService],
-            async (poiService: PoiService, mockBackend: HttpTestingController) => {
+    it("Should throw when trying to get a point by id and source and it is not available in the server and in the tiles",
+        (inject([PoiService, HttpTestingController, MapService],
+            async (poiService: PoiService, mockBackend: HttpTestingController, mapServiceMock: MapService) => {
 
                 const id = "42";
                 const source = "source";
-                //const spy = spyOn(dbMock, "getPoiById");
+                const spy = spyOn(mapServiceMock.map, "querySourceFeatures").and.returnValue([]);
 
                 const promise = new Promise((resolve, reject) => {
                     poiService.getPoint(id, source).then(reject, (err) => {
-                        //expect(spy).toHaveBeenCalled();
+                        expect(spy).toHaveBeenCalled();
                         expect(err).not.toBeNull();
                         resolve(null);
                     });

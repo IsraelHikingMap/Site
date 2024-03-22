@@ -379,6 +379,15 @@ export class PoiService {
         return this.filterFeatures(pois);
     }
 
+    private featureToPoiIdentifier(feature: GeoJSON.Feature): string {
+        const osmType = feature.id.toString().endsWith("1") ? "node_" : feature.id.toString().endsWith("2") ? "way_" : "relation_";
+        return osmType + Math.floor((Number(feature.id)/ 10));
+    }
+
+    private featureToPoiId(feature: GeoJSON.Feature, source: string): string {
+        return source + "_" + this.featureToPoiIdentifier(feature);
+    }
+
     private convertFeatureToPoi(feature: GeoJSON.Feature): GeoJSON.Feature<GeoJSON.Point> {
         const poi: GeoJSON.Feature<GeoJSON.Point> = {
             type: "Feature",
@@ -388,10 +397,9 @@ export class PoiService {
             },
             properties: JSON.parse(JSON.stringify(feature.properties)) || {}
         };
-        const osmType = feature.id.toString().endsWith("1") ? "node_" : feature.id.toString().endsWith("2") ? "way_" : "relation_";
-        poi.properties.identifier = osmType + Math.floor((Number(feature.id)/ 10));
+        poi.properties.identifier = this.featureToPoiIdentifier(feature);
         poi.properties.poiSource = "OSM";
-        poi.properties.poiId = "OSM_" + poi.properties.identifier;
+        poi.properties.poiId = this.featureToPoiId(feature, poi.properties.poiSource);
         this.setIconColorCategory(feature, poi);
         this.setLanguage(feature, poi);
         this.setGeometry(feature, poi);
@@ -515,7 +523,8 @@ export class PoiService {
             return cloneDeep(poi);
         } catch {
             const features = this.mapService.map.querySourceFeatures("points-of-interest-offline", {sourceLayer: "poi"});
-            const feature = features.find(f => this.getFeatureId(f) === id);
+            // HM TODO: use source here?
+            const feature = features.find(f => this.featureToPoiIdentifier(f) === id);
             if (feature == null) {
                 throw new Error("Failed to load POI from offline database.");
             }
