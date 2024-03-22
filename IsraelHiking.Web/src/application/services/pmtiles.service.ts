@@ -50,7 +50,7 @@ export class PmTilesService {
 
     /**
      * Get's a tile from the stored pmtiles file
-     * @param url - should be something like pmtiles://filename.pmtiles/{z}/{x}/{y}.png
+     * @param url - should be something like custom://filename-without-pmtiles-extention/{z}/{x}/{y}.png
      * @returns 
      */
     public async getTile(url: string): Promise<ArrayBuffer> {

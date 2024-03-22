@@ -138,7 +138,7 @@ export class PoiService {
         if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.lastModifiedDate) != null) {
             this.mapService.map.addSource("points-of-interest-offline", {
                 type: "vector",
-                tiles: ["pmtiles://pois/{z}/{x}/{y}.pbf"],
+                tiles: ["custom://pois/{z}/{x}/{y}.pbf"],
                 minzoom: 12,
                 maxzoom: 12
             });
