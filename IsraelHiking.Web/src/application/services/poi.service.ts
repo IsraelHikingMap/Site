@@ -135,7 +135,7 @@ export class PoiService {
                 "circle-color": "transparent",
             }
         }, this.resources.endOfBaseLayer);
-        if (this.store.selectSnapshot((s: ApplicationState) => s.offlineState.lastModifiedDate) != null) {
+        if (this.runningContextService.isCapacitor) {// this.store.selectSnapshot((s: ApplicationState) => s.offlineState.lastModifiedDate) != null) {
             this.mapService.map.addSource("points-of-interest-offline", {
                 type: "vector",
                 tiles: ["custom://pois/{z}/{x}/{y}.pbf"],
@@ -340,23 +340,23 @@ export class PoiService {
             case "Point":
                 poi.properties.poiGeolocation = {
                     lat: feature.geometry.coordinates[1],
-                    lng: feature.geometry.coordinates[0],
+                    lon: feature.geometry.coordinates[0],
                 };
                 break;
             case "LineString":
                 poi.properties.poiGeolocation = {
                     lat: feature.geometry.coordinates[0][1],
-                    lng: feature.geometry.coordinates[0][0],
+                    lon: feature.geometry.coordinates[0][0],
                 };
                 break;
             case "Polygon":
                 poi.properties.poiGeolocation = {
                     lat: feature.geometry.coordinates[0][0][1],
-                    lng: feature.geometry.coordinates[0][0][0],
+                    lon: feature.geometry.coordinates[0][0][0],
                 };
                 break;
         }
-        poi.geometry.coordinates = [poi.properties.poiGeolocation.lng, poi.properties.poiGeolocation.lat];
+        poi.geometry.coordinates = [poi.properties.poiGeolocation.lon, poi.properties.poiGeolocation.lat];
     }
 
     private setLanguage(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Point>) {
