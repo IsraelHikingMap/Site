@@ -128,7 +128,7 @@ describe("Poi Service", () => {
             });
 
             (runningContextService as any).isIFrame = false;
-            mapServiceMock.map.on = ((type: string, f: Function) => { if (type === "moveend") f(); }) as any;
+            mapServiceMock.map.on = ((type: string, f: () => void) => { if (type === "moveend") f(); }) as any;
             mapServiceMock.map.querySourceFeatures = () => [
                 {
                     id: "1",
@@ -290,7 +290,7 @@ describe("Poi Service", () => {
 
     it("Should get a point by id and source from the database in case the server is not available",
         (inject([PoiService, HttpTestingController, DatabaseService],
-            async (poiService: PoiService, mockBackend: HttpTestingController, dbMock: DatabaseService) => {
+            async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
                 const id = "42";
                 const source = "source";
@@ -310,7 +310,7 @@ describe("Poi Service", () => {
 
     it("Should throw when trying to get a point by id and source and it is not available in the server and in the database",
         (inject([PoiService, HttpTestingController, DatabaseService],
-            async (poiService: PoiService, mockBackend: HttpTestingController, dbMock: DatabaseService) => {
+            async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
                 const id = "42";
                 const source = "source";
