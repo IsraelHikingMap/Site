@@ -55,6 +55,22 @@ export interface ISelectableCategory extends Category {
     label: string;
 }
 
+type PoiProperties = {
+    poiSource: string;
+    poiId: string;
+    identifier: string;
+    poiGeolocation: {
+        lat: number;
+        lon: number;
+    };
+    poiLanguage: string;
+    poiIconColor: string;
+    poiIcon: string;
+    poiCategory: string;
+    "name:he"?: string;
+    "name:en"?: string;
+}
+
 @Injectable()
 export class PoiService {
     private poisCache: GeoJSON.Feature[];
@@ -225,7 +241,7 @@ export class PoiService {
         }
     }
 
-    private setIconColorCategory(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Point>) {
+    private setIconColorCategory(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
         if (feature.properties.class === "place") {
             poi.properties.poiIconColor = "black";
             poi.properties.poiIcon = "icon-home";
@@ -335,7 +351,7 @@ export class PoiService {
         }
     }
 
-    private setGeometry(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Point>) {
+    private setGeometry(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
         switch (feature.geometry.type) {
             case "Point":
                 poi.properties.poiGeolocation = {
@@ -359,7 +375,7 @@ export class PoiService {
         poi.geometry.coordinates = [poi.properties.poiGeolocation.lon, poi.properties.poiGeolocation.lat];
     }
 
-    private setLanguage(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Point>) {
+    private setLanguage(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Point, PoiProperties>) {
         const hasHebrew = feature.properties["name:he"];
         const hasEnglish = feature.properties["name:en"];
         if (hasHebrew || hasEnglish) {
@@ -367,7 +383,7 @@ export class PoiService {
         }
     }
 
-    private async getPoisFromTiles(): Promise<GeoJSON.Feature<GeoJSON.Point>[]> {
+    private async getPoisFromTiles(): Promise<GeoJSON.Feature<GeoJSON.Point, PoiProperties>[]> {
         if (this.mapService.map.getZoom() <= 10) {
             return [];
         }
@@ -388,8 +404,8 @@ export class PoiService {
         return source + "_" + this.featureToPoiIdentifier(feature);
     }
 
-    private convertFeatureToPoi(feature: GeoJSON.Feature): GeoJSON.Feature<GeoJSON.Point> {
-        const poi: GeoJSON.Feature<GeoJSON.Point> = {
+    private convertFeatureToPoi(feature: GeoJSON.Feature): GeoJSON.Feature<GeoJSON.Point, PoiProperties> {
+        const poi: GeoJSON.Feature<GeoJSON.Point, PoiProperties> = {
             type: "Feature",
             geometry: {
                 type: "Point",
@@ -406,7 +422,7 @@ export class PoiService {
         return poi;
     }
 
-    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point>[]): GeoJSON.Feature<GeoJSON.Point>[] {
+    private filterFeatures(features: GeoJSON.Feature<GeoJSON.Point, PoiProperties>[]): GeoJSON.Feature<GeoJSON.Point, PoiProperties>[] {
         const visibleFeatures = [];
         const visibleCategories = this.getVisibleCategories();
         const language = this.resources.getCurrentLanguageCodeSimplified();
