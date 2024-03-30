@@ -45,7 +45,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
-            _controller = new OsmTracesController(_clientsFactory, _dataContainerConverterService, _imageCreationGateway, _searchRepository, _distributedCache, optionsProvider, Substitute.For<ILogger>());
+            _controller = new OsmTracesController(_clientsFactory, _dataContainerConverterService, _imageCreationGateway, _searchRepository, _distributedCache, Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -267,7 +267,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IAuthClient SetupOAuthClient()
         {
             var osmGateWay = Substitute.For<IAuthClient>();
-            _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(osmGateWay);
+            _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(osmGateWay);
             return osmGateWay;
         }
     }

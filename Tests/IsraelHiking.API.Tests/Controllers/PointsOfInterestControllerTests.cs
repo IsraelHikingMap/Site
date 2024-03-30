@@ -44,15 +44,14 @@ namespace IsraelHiking.API.Tests.Controllers
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
             var factory = Substitute.For<IClientsFactory>();
-            factory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(_osmGateway);
+            factory.CreateOAuth2Client(Arg.Any<string>()).Returns(_osmGateway);
             _controller = new PointsOfInterestController(factory, 
                 _tagHelper, 
                 _pointsOfInterestProvider, 
                 _imagesUrlsStorageExecutor,
                 _simplePointAdderExecutor,
                 _persistentCache,
-                Substitute.For<ILogger>(),
-                optionsProvider);
+                Substitute.For<ILogger>());
         }
 
         [TestMethod]

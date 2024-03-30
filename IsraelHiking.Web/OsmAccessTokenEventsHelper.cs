@@ -1,6 +1,4 @@
-﻿using IsraelHiking.Common.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
 using OsmSharp.IO.API;
 using System;
 using System.Security.Claims;
@@ -8,6 +6,8 @@ using System.Threading.Tasks;
 using IsraelHiking.API.Services.Osm;
 using LazyCache;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace IsraelHiking.Web
 {
@@ -15,15 +15,12 @@ namespace IsraelHiking.Web
     {
         private readonly ILogger _logger;
         private readonly IClientsFactory _clientsFactory;
-        private readonly ConfigurationData _options;
         private readonly IAppCache _appCache;
         public OsmAccessTokenEventsHelper(IClientsFactory clientsFactory,
-            IOptions<ConfigurationData> options,
             IAppCache appCache,
             ILogger logger)
         {
             _clientsFactory = clientsFactory;
-            _options = options.Value;
             _logger = logger;
             _appCache = appCache;
         }
@@ -32,6 +29,10 @@ namespace IsraelHiking.Web
         {
             try
             {
+                if (context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAuthorizeData>() == null) {
+                    context.Success();
+                    return;
+                }
                 if (string.IsNullOrEmpty(context.Token))
                 {
                     string authorization = context.Request.Headers["Authorization"];
@@ -58,7 +59,7 @@ namespace IsraelHiking.Web
 
                 var userIdFromCache = await _appCache.GetOrAddAsync(context.Token, async () =>
                 {
-                    var osmGateway = OsmAuthFactoryWrapper.ClientFromToken(context.Token, _clientsFactory, _options);
+                    var osmGateway = _clientsFactory.CreateOAuth2Client(context.Token);
                     var user = await osmGateway.GetUserDetails();
                     var userId = user.Id.ToString();
                     _logger.LogInformation($"User {userId} had just logged in");

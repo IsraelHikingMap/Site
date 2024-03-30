@@ -5,7 +5,6 @@ using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common.Configuration;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -43,7 +42,7 @@ namespace IsraelHiking.API.Tests.Controllers
             fetcher.GetTraceData(traceId).Returns(fileResponse);
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>())
                 .Returns(gpx.ToBytes());
-            _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(fetcher);
+            _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(fetcher);
             _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
                 addibleLines ?? new List <LineString>
                 {
@@ -61,10 +60,8 @@ namespace IsraelHiking.API.Tests.Controllers
             _addibleGpxLinesFinderService = Substitute.For<IAddibleGpxLinesFinderService>();
             _osmLineAdderService = Substitute.For<IOsmLineAdderService>();
             _options = new ConfigurationData();
-            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
-            optionsProvider.Value.Returns(_options);
             _controller = new OsmController(_clientsFactory, _dataContainerConverterService, new ItmWgs84MathTransformFactory(), 
-                _addibleGpxLinesFinderService, _osmLineAdderService, optionsProvider, new GeometryFactory());
+                _addibleGpxLinesFinderService, _osmLineAdderService, new GeometryFactory());
         }
 
         [TestMethod]
@@ -84,7 +81,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.SetupIdentity();
             var fetcher = Substitute.For<IAuthClient>();
             fetcher.GetTraceData(Arg.Any<long>()).Throws(new OsmApiException(null, "something", HttpStatusCode.NotFound));
-            _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(fetcher);
+            _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(fetcher);
 
             var results = _controller.PostFindUnmappedPartsFromGpsTrace(-1).Result as BadRequestObjectResult;
 

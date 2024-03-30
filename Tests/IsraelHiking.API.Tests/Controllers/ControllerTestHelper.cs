@@ -11,7 +11,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[] {
                 new Claim(ClaimTypes.Name, osmUserId),
-                new Claim(OsmAuthFactoryWrapper.CLAIM_KEY, "a;b")
+                new Claim(OsmAuthFactoryWrapper.CLAIM_KEY, "a")
             }));
             controller.ControllerContext = new ControllerContext
             {
