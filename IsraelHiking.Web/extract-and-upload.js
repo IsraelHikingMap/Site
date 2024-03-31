@@ -54,7 +54,7 @@ const req = https.request("https://translate.zanata.org/rest/file/source/IsraelH
 }, (res) => {
     res.on("data", () => {});
     res.on("end", () => {
-        console.log("Upload successful! opening browser so you can start translating :-)");
+        console.log("Upload successful! opening browser so you can start translating 😊");
         open("https://translate.zanata.org/webtrans/translate?project=IsraelHiking&iteration=Main&localeId=en-US&locale=en-US#view:doc;doc:IsraelHiking;untranslated:show;fuzzy:show;rejected:show");
     });
 });
