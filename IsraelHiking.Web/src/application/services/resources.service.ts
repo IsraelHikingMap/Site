@@ -307,6 +307,7 @@ export class ResourcesService {
     public tracesAreOnlySavedLocally: string;
     public unexpectedErrorPleaseTryAgainLater: string;
     public editingRouteWhileTracking: string;
+    public loginTokenExpiredPleaseLoginAgain: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -482,7 +483,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1690445722284");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1711893498147");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -793,6 +794,7 @@ export class ResourcesService {
         this.unexpectedErrorPleaseTryAgainLater = this.gettextCatalog.getString("Oops, something went wrong. Please try again later");
         this.editingRouteWhileTracking = this.gettextCatalog.getString("GPS tracking is enabled while editing, " +
             "in order to avoid map centering to current location please click the cross icon on the top left corner");
+        this.loginTokenExpiredPleaseLoginAgain = this.gettextCatalog.getString("Login token expired, please login again");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog
