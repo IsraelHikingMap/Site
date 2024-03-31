@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using IsraelHiking.API.Services.Osm;
 using LazyCache;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace IsraelHiking.Web
 {
@@ -32,6 +34,10 @@ namespace IsraelHiking.Web
         {
             try
             {
+                if (context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAuthorizeData>() == null) {
+                    context.Success();
+                    return;
+                }
                 if (string.IsNullOrEmpty(context.Token))
                 {
                     string authorization = context.Request.Headers["Authorization"];
