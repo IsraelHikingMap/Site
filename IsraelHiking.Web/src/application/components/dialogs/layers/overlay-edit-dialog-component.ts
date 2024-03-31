@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, ViewEncapsulation } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import type { Immutable } from "immer";
 
@@ -11,7 +11,8 @@ import type { LayerData, Overlay } from "../../../models/models";
 
 @Component({
     selector: "overlay-edit-dialog",
-    templateUrl: "./layer-properties-dialog.component.html"
+    templateUrl: "./layer-properties-dialog.component.html",
+    styleUrls: ["./layer-properties-dialog.component.scss"]
 })
 export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
     private backupOverlay: Immutable<Overlay>;
