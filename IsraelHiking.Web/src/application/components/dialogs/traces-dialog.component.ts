@@ -258,4 +258,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                 throw new Error(`invalid visibility value: ${visibility}`);
         }
     }
+
+    public trackById(_: number, trace: Trace) {
+        return trace.id;
+    }
 }

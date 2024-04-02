@@ -207,4 +207,8 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     public getShareSocialLinks() {
         return this.shareUrlsService.getShareSocialLinks(this.getSelectedShareUrl());
     }
+
+    public trackById(_: number, shareUrl: ShareUrl) {
+        return shareUrl.id;
+    }
 }
