@@ -41,10 +41,10 @@ jobs:
         env:
           CODECOV_TOKEN: fc1bea1d-f43a-437e-84d3-baef07be7454
       - name: Test Summary
+        if: always()
         uses: test-summary/action@v2
         with:
           paths: |
-            "./Tests/IsraelHiking.API.Tests/test-result.xml"
-            "./TESTS-*.xml"
-        if: always()
+            ./**/test-result.xml
+            ./TESTS-*.xml
           
