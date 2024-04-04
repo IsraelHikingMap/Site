@@ -70,6 +70,7 @@ jobs:
           npm run build:mobile -- --no-progress
           npx cap sync android
       - name: Build Android
+        run: |
           cd IsraelHiking.Web/android
           ./gradlew :app:bundleRelease "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
           #./gradlew --no-daemon bundleRelease    
