@@ -84,8 +84,6 @@ In order to be able to build this site you'll need some tools:
   {
     "wikiMediaUserName": "your wikimedia user",
     "wikiMediaPassword": "your wikimedia password"
-    "zanataUserName": "your zanata user",
-    "zanataApiKey": "your zanata api key",
     "imgurClientId": "your imgur client ID"
   }
   ```
