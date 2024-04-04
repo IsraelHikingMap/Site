@@ -8,6 +8,48 @@ on:
   pull_request:
 
 jobs:
+  android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.12'
+        uses: bbonkr/get-version-action@v1
+        id: version
+        with:
+          project: 'IsraelHiking.Web/package.json'
+      - name: Set versoion code
+        id: version-code
+        env:
+          MAJOR: ${{ steps.version.outputs.major }}
+          MINOR: ${{ steps.version.outputs.minor }}
+          PATCH: ${{ github.run_number }}
+        run: |
+          echo "version_code=$(($MAJOR * 10000 + $MINOR * 100 + $PATCH % 100))" >> $GITHUB_OUPUT
+      - name: Bump version code in gradle
+        uses: chkfung/android-version-actions@v1.2.2
+        with:
+          gradlePath: app/build.gradle # or app/build.gradle.kts 
+          versionCode: ${{ steps.version-code.outputs.version_code }}
+          versionName: ${{ steps.version.oputputs.major }}.${{ steps.version.oputputs.minor }}.${{ github.run_number }}
+      - name: Build npm
+        run: |
+          cd IsraelHiking.Web
+          npm ci
+          npm run build:mobile -- --no-progress
+          npx cap sync android
+          ./gradlew bundleRelease    
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android.aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+
   tests:
     runs-on: ubuntu-latest
 
