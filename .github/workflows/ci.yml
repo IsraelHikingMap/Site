@@ -25,32 +25,26 @@ jobs:
         with:
           dotnet-version: '7.0'
 
-      - name: Run tests
+      - name: Run backend tests
+        run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude="[IsraelHiking.Common]*" --logger "junit;LogFilePath=test-result.xml"
+      - name: Run frontend tests
         run: |
-          dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude="[IsraelHiking.Common]*" --logger trx
           cd IsraelHiking.Web
           npm ci
           npx ng lint
           npm run test-ci
       - name: Codecov upload
-        if: success() || failure()
+        if: always()
         uses: codecov/codecov-action@v2
         with:
-          files: ./Tests/IsraelHiking.API.Tests/coverage.info, ./IsraelHiking.Web/coverage/lcov.info
+          files: ./Tests/IsraelHiking.API.Tests/coverage.info,./IsraelHiking.Web/coverage/lcov.info
         env:
           CODECOV_TOKEN: fc1bea1d-f43a-437e-84d3-baef07be7454
-      - name: Test Report Frontend
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
+      - name: Test Summary
+        uses: test-summary/action@v2
         with:
-          name: Karma Tests
-          path: TESTS-*.xml
-          reporter: jest-junit
-      - name: Test Report Backend
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
-        with:
-          name: dotnet Tests
-          path: ./Tests/IsraelHiking.API.Tests/*.trx
-          reporter: jest-junit
+          paths: |
+            "./Tests/IsraelHiking.API.Tests/test-result.xml"
+            "./TESTS-*.xml"
+        if: always()
           
