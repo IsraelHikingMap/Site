@@ -35,10 +35,10 @@ jobs:
       - name: Bump version code in gradle
         uses: chkfung/android-version-actions@v1.2.2
         with:
-          gradlePath: app/build.gradle # or app/build.gradle.kts 
+          gradlePath: IsraelHiking.Web/android/app/build.gradle
           versionCode: ${{ steps.version-code.outputs.version_code }}
           versionName: ${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}.${{ github.run_number }}
-      - name: Build npm
+      - name: Build
         run: |
           cd IsraelHiking.Web
           npm ci
