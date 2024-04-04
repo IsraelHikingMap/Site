@@ -35,8 +35,8 @@ jobs:
           echo "version_code=$(($MAJOR * 10000 + $MINOR * 100 + $PATCH % 100))" >> $GITHUB_OUTPUT
           echo "version_string=$MAJOR.$MINOR.$(($PATCH % 100))" >> $GITHUB_OUTPUT
     outputs:
-      version_code: ${{ steps.version.outputs.version_code }}
-      version_string: ${{ steps.version.outputs.version_string }}
+      version_code: ${{ steps.version-code.outputs.version_code }}
+      version_string: ${{ steps.version-code.outputs.version_string }}
 
   android:
     runs-on: ubuntu-latest
@@ -61,8 +61,8 @@ jobs:
         uses: chkfung/android-version-actions@v1.2.2
         with:
           gradlePath: IsraelHiking.Web/android/app/build.gradle
-          versionCode: ${{ needs.version.output.version_code }}
-          versionName: ${{ needs.version.output.version_string }}
+          versionCode: ${{ needs.version.outputs.version_code }}
+          versionName: ${{ needs.version.outputs.version_string }}
       - name: Build
         run: |
           cd IsraelHiking.Web
