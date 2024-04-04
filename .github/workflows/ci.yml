@@ -149,7 +149,7 @@ jobs:
       - name: Build iOS
         run: |
           cd IsraelHiking.Web/ios
-          xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet
+          xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive
           echo "Exporting archive"
           xcodebuild -exportArchive -archivePath $PWD/build/App.xcarchive -exportOptionsPlist exportOptions.plist -exportPath $PWD/build
 
