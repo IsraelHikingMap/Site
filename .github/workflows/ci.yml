@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,7 +26,24 @@ jobs:
           dotnet-version: '7.0'
 
       - name: Run tests
-        shell: pwsh
-        run: ./Scripts/RunTests.ps1
+        run: |
+          dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude=`"[IsraelHiking.Common]*`" --logger trx
+          cd IsraelHiking.Web
+          npm ci
+          npx ng lint
+          npm run test-ci
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()    # run this step even if previous step failed
+        with:
+          name: JEST Tests            # Name of the check run which will be created
+          path: TESTS-*.xml
+          reporter: jest-junit
+
+      - name: Codecov report
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./Tests/IsraelHiking.API.Tests/coverage.info, ./IsraelHiking.Web/coverage/lcov.info
         env:
-          APPVEYOR_BUILD_FOLDER: ${{ github.workspace }}
+          CODECOV_TOKEN: fc1bea1d-f43a-437e-84d3-baef07be7454
+          
