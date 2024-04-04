@@ -44,6 +44,7 @@ jobs:
           npm ci
           npm run build:mobile -- --no-progress
           npx cap sync android
+          cd android
           ./gradlew bundleRelease    
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
