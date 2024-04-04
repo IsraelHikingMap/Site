@@ -37,7 +37,7 @@ jobs:
         with:
           gradlePath: app/build.gradle # or app/build.gradle.kts 
           versionCode: ${{ steps.version-code.outputs.version_code }}
-          versionName: ${{ steps.version.oputputs.major }}.${{ steps.version.oputputs.minor }}.${{ github.run_number }}
+          versionName: ${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}.${{ github.run_number }}
       - name: Build npm
         run: |
           cd IsraelHiking.Web
