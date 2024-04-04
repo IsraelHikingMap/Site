@@ -100,6 +100,7 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [ResponseCache(Duration = 31536000)]
         [HttpGet("{id}/picture")]
         public async Task<IActionResult> GetTraceByIdImage(int id)
         {
