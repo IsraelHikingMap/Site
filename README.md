@@ -5,6 +5,8 @@ This repository holds the main server side module the web and mobile clients int
 [![AppVeyor tests](https://img.shields.io/appveyor/tests/IsraelHikingHost/site/main.svg)](https://ci.appveyor.com/project/IsraelHikingHost/site/build/tests)
 [![Codecov](https://img.shields.io/codecov/c/github/israelhikingmap/site/main.svg)](https://codecov.io/gh/IsraelHikingMap/Site/)
 
+[Site's uptime](https://aee25113-fdfb-461a-aa2f-f79fd9bcdce4.site.hbuptime.com/)
+
 ## Architecture Diagram
 ![image](https://github.com/IsraelHikingMap/Site/assets/3269297/1c110959-05b2-49eb-bb1d-9b5eb3c9b412)
 
@@ -62,7 +64,7 @@ The architecture is based on layers:
 * DataAccess - database, file system and network request are processed in this layer
 * Common - Mainly for POCOs
 
-# Setting Up the Project for site Development (To setup iOS and Android follow the cordova guide)
+# Setting Up the Project for site Development (To setup iOS and Android follow the capacitor guides)
 In order to be able to build this site you'll need some tools:
 * Install [Docker](https://www.docker.com/products/docker-desktop)
 * Install [.Net core SDK 7.0 ](https://www.microsoft.com/net/download/core)
