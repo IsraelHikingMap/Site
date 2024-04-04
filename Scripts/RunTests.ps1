@@ -38,15 +38,15 @@ $DataAccessResultsFile = Get-ChildItem *.trx -recurse | select-object -first 1 |
 # Upload test results
 
 $wc = New-Object 'System.Net.WebClient'
-$wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $APIResultsFile)
+#$wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $APIResultsFile)
 if ($LastExitCode) {
 	$anyFailures = $TRUE
 }
-$wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $DataAccessResultsFile)
+#$wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $DataAccessResultsFile)
 if ($LastExitCode) {
 	$anyFailures = $TRUE
 }
-$wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $WebResultsFile)
+#$wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $WebResultsFile)
 if ($LastExitCode) {
 	$anyFailures = $TRUE
 }
