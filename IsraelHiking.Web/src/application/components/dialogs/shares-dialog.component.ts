@@ -63,14 +63,17 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         }));
         this.searchTerm.setValue(this.sessionSearchTerm);
         this.subscriptions.push(this.shareUrls$.subscribe(() => {
-            this.updateFilteredLists(this.searchTerm.value);
+            if (!this.loadingShareUrls) {
+                this.updateFilteredLists(this.searchTerm.value);
+            }
         }));
     }
 
     public async ngOnInit() {
-        this.loadingShareUrls = this.store.selectSnapshot((s: ApplicationState) => s.shareUrlsState).shareUrls.length === 0;
+        this.loadingShareUrls = true;
         this.shareUrlsService.syncShareUrls();
         this.loadingShareUrls = false;
+        this.updateFilteredLists(this.searchTerm.value);
     }
 
     public ngOnDestroy() {
@@ -206,6 +209,10 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
 
     public getShareSocialLinks() {
         return this.shareUrlsService.getShareSocialLinks(this.getSelectedShareUrl());
+    }
+
+    public hasNoShares(): boolean {
+        return !this.loadingShareUrls && this.filteredShareUrls.length === 0;
     }
 
     public trackById(_: number, shareUrl: ShareUrl) {

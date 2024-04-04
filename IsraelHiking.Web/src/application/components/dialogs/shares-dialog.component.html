@@ -45,7 +45,7 @@
             </div>
         </div>
         <mat-spinner *ngIf="loadingShareUrls"></mat-spinner>
-        <p *ngIf="filteredShareUrls.length === 0 && !loadingShareUrls">{{resources.noShares}}</p>
+        <p *ngIf="hasNoShares()">{{resources.noShares}}</p>
     </div>
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">
