@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.12'
+      - name: Get version
         uses: bbonkr/get-version-action@v1
         id: version
         with:
