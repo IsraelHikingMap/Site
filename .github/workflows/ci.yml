@@ -27,7 +27,7 @@ jobs:
 
       - name: Run tests
         run: |
-          dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude=`"[IsraelHiking.Common]*`" --logger trx
+          dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude="[IsraelHiking.Common]*" --logger trx
           cd IsraelHiking.Web
           npm ci
           npx ng lint
