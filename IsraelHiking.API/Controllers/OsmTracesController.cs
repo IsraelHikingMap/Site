@@ -29,6 +29,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller is responsible for managing OSM traces
     /// </summary>
     [Route("api/osm/trace")]
+    [Authorize]
     public class OsmTracesController : ControllerBase
     {
         private readonly IClientsFactory _clientsFactory;
@@ -70,7 +71,6 @@ namespace IsraelHiking.API.Controllers
         /// Get OSM user traces
         /// </summary>
         /// <returns>A list of traces</returns>
-        [Authorize]
         [HttpGet]
         public async Task<Trace[]> GetTraces()
         {
@@ -84,7 +84,6 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="id">The trace id</param>
         /// <returns>A trace converted to data container</returns>
-        [Authorize]
         [HttpGet("{id}")]
         public async Task<DataContainerPoco> GetTraceById(int id)
         {
@@ -101,7 +100,6 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("{id}/picture")]
         public async Task<IActionResult> GetTraceByIdImage(int id)
         {
@@ -116,7 +114,6 @@ namespace IsraelHiking.API.Controllers
         /// Allows upload of traces to OSM
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostUploadGpsTrace(IFormFile file)
         {
@@ -142,7 +139,6 @@ namespace IsraelHiking.API.Controllers
         /// Allows upload of traces to OSM
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpPost]
         [Route("route")]
         public async Task<IActionResult> PostUploadRouteData([FromBody] RouteData routeData, [FromQuery]string language)
@@ -205,7 +201,6 @@ namespace IsraelHiking.API.Controllers
         /// <param name="id">The Id of the trace</param>
         /// <param name="trace">The trace data</param>
         /// <returns></returns>
-        [Authorize]
         [Route("{id}")]
         [HttpPut]
         public async Task<IActionResult> PutGpsTrace(string id, [FromBody]Trace trace)
@@ -224,7 +219,6 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="id">The Id of the trace</param>
         /// <returns></returns>
-        [Authorize]
         [Route("{id}")]
         [HttpDelete]
         public async Task<IActionResult> DeleteGpsTrace(long id)
