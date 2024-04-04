@@ -121,6 +121,7 @@ jobs:
           security import ./signing/ihm-dist.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
           security import ./signing/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain -P $STORE_PASSWORD -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k appveyor ~/Library/Keychains/ios-build.keychain > /dev/null
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp ./signing/appveyor.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
         env:
           PASSWORD: ${{ secrets.PASSWORD }}
