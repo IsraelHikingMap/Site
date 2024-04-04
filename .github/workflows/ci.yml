@@ -31,7 +31,7 @@ jobs:
           MINOR: ${{ steps.version.outputs.minor }}
           PATCH: ${{ github.run_number }}
         run: |
-          echo "version_code=$(($MAJOR * 10000 + $MINOR * 100 + $PATCH % 100))" >> $GITHUB_OUPUT
+          echo "version_code=$(($MAJOR * 10000 + $MINOR * 100 + $PATCH % 100))" >> $GITHUB_OUTPUT
       - name: Bump version code in gradle
         uses: chkfung/android-version-actions@v1.2.2
         with:
