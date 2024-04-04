@@ -15,23 +15,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up PowerShell
-        uses: actions/setup-powershell@v1
-        with:
-          pwsh-version: '7.1'
-
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '18.16'
 
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '7.0'
 
       - name: Run tests
-        run: |
-          pwsh -File RunTests.ps1
+        shell: pwsh
+        run: ./Scripts/RunTests.ps1
         env:
           APPVEYOR_BUILD_FOLDER: ${{ github.workspace }}
