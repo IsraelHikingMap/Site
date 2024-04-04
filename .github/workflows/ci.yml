@@ -45,6 +45,6 @@ jobs:
         uses: test-summary/action@v2
         with:
           paths: |
-            ./**/test-result.xml
+            ./**/IsraelHiking.API.Tests/test-result.xml
             ./**/TESTS-*.xml
           
