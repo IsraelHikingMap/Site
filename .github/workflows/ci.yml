@@ -20,6 +20,7 @@ jobs:
         with:
           node-version: '20.12'
 
+      - name: Setup Java
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -38,7 +39,7 @@ jobs:
           PATCH: ${{ github.run_number }}
         run: |
           echo "version_code=$(($MAJOR * 10000 + $MINOR * 100 + $PATCH % 100))" >> $GITHUB_OUTPUT
-      - name: Bump version code in gradle
+      - name: Bump versions in gradle
         uses: chkfung/android-version-actions@v1.2.2
         with:
           gradlePath: IsraelHiking.Web/android/app/build.gradle
@@ -51,12 +52,12 @@ jobs:
           npm run build:mobile -- --no-progress
           npx cap sync android
           cd android
-          ./gradlew bundleRelease    
+          ./gradlew --no-daemon bundleRelease    
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: android.aab
-          path: android/app/build/outputs/bundle/release/app-release.aab
+          path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
 
   tests:
     runs-on: ubuntu-latest
