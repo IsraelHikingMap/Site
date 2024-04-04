@@ -128,17 +128,18 @@ jobs:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
       - name: Build UI
         run: |
+          cd IsraelHiking.Web
           npm ci
           npm run build:mobile -- --no-progress
           npx cap sync ios
-          cd ios
       - name: Bump version
         shell: pwsh
-        run: ../../Scripts/SetPlistFileVersion.ps1
+        run: ./Scripts/SetPlistFileVersion.ps1
         env:
           VERSION: ${{ needs.version.outputs.version_string }}
       - name: Build
         run: |
+          cd IsraelHiking.Web/ios
           xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet
           xcodebuild -exportArchive -archivePath $PWD/build/App.xcarchive -exportOptionsPlist exportOptions.plist -exportPath $PWD/build
 

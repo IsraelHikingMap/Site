@@ -1,4 +1,4 @@
-$filePath = get-ChildItem Info.plist -Path App/App | Select-Object -first 1 | select -expand FullName
+$filePath = get-ChildItem Info.plist -Path IsraelHiking.Web/ios/App/App | Select-Object -first 1 | select -expand FullName
 $fileXml = [xml](Get-Content $filePath)
 Select-Xml -xml $fileXml -XPath "//dict/key[. = 'CFBundleShortVersionString']/following-sibling::string[1]" |
 %{ 	
