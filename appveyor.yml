@@ -47,7 +47,7 @@ for:
       only:
         - PRODUCT: android
     install:
-      - ps: Install-Product node 18.16
+      - ps: Install-Product node 20.12
     build_script:
     - pwsh: >-
         $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER/Scripts/BuildAndPublishAndroid.ps1"
@@ -60,7 +60,7 @@ for:
         - PRODUCT: ios
       fast_finish: true
     install:
-      - sh: nvm install 18.16
+      - sh: nvm install 20.12
     build_script: 
     - pwsh: >-
         $BuildAndPublishIOS = "$env:APPVEYOR_BUILD_FOLDER/Scripts/BuildAndPublishIOS.ps1"
