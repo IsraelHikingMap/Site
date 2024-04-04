@@ -757,9 +757,8 @@ export class ResourcesService {
         this.wouldYouLikeToUpdateThePointWithoutTheTitle = this.gettextCatalog
             .getString("Would you like to update the point without the title?");
         this.lastRecordingDidNotEndWell = this.gettextCatalog.getString("Last recording did not end well. Feel free to start a new one.");
-        this.makeSureBatteryOptimizationIsOff = this.gettextCatalog.getString(
-            "Please make sure the battery optimization is turned off for this application. Go to application setting to do so."
-        );
+        this.makeSureBatteryOptimizationIsOff = this.gettextCatalog
+            .getString("Please make sure the battery optimization is turned off for this application. Go to application setting to do so.");
         this.dontShowThisMessageAgain = this.gettextCatalog.getString("Don't show this message again");
         this.areYouSureYouWantToDeleteAllRoutes = this.gettextCatalog.getString("Are you sure you want to delete all routes?");
         this.clickBackAgainToCloseTheApp = this.gettextCatalog.getString("Click back again to close the app");
