@@ -63,14 +63,21 @@ jobs:
           gradlePath: IsraelHiking.Web/android/app/build.gradle
           versionCode: ${{ needs.version.outputs.version_code }}
           versionName: ${{ needs.version.outputs.version_string }}
-      - name: Build
+      - name: Build UI
         run: |
           cd IsraelHiking.Web
           npm ci
           npm run build:mobile -- --no-progress
           npx cap sync android
-          cd android
-          ./gradlew --no-daemon bundleRelease    
+      - name: Build Android
+          cd IsraelHiking.Web/android
+          ./gradlew :app:bundleRelease "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
+          #./gradlew --no-daemon bundleRelease    
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          WORKSPACE: ${{ github.workspace }}
+          
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -134,13 +141,15 @@ jobs:
           npx cap sync ios
       - name: Bump version
         shell: pwsh
-        run: ./Scripts/SetPlistFileVersion.ps1
+        run: |
+          ./Scripts/SetPlistFileVersion.ps1
         env:
           VERSION: ${{ needs.version.outputs.version_string }}
-      - name: Build
+      - name: Build iOS
         run: |
           cd IsraelHiking.Web/ios
           xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet
+          echo "Exporting archive"
           xcodebuild -exportArchive -archivePath $PWD/build/App.xcarchive -exportOptionsPlist exportOptions.plist -exportPath $PWD/build
 
 
