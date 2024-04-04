@@ -1,0 +1,50 @@
+# a github action workflow file that runs the Runtests.ps1 file
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.16'
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0'
+
+      - name: Run backend tests
+        run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:Exclude="[IsraelHiking.Common]*" --logger "junit;LogFilePath=test-result.xml"
+      - name: Run frontend tests
+        run: |
+          cd IsraelHiking.Web
+          npm ci
+          npx ng lint
+          npm run test-ci
+      - name: Codecov upload
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./Tests/IsraelHiking.API.Tests/coverage.info,./IsraelHiking.Web/coverage/lcov.info
+        env:
+          CODECOV_TOKEN: fc1bea1d-f43a-437e-84d3-baef07be7454
+      - name: Test Summary
+        if: always()
+        uses: test-summary/action@v2
+        with:
+          paths: |
+            ./**/test-result.xml
+            ./**/TESTS-*.xml
+          
