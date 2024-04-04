@@ -110,9 +110,9 @@ jobs:
       - name: Keychain setup
         run: |
           cd IsraelHiking.Web
-          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/appveyor.mobileprovision.enc -d -a -out ./signing/appveyor.mobileprovision"
-          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer"
-          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.p12.enc -d -a -out ./signing/ihm-dist.p12"
+          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/appveyor.mobileprovision.enc -d -a -out ./signing/appveyor.mobileprovision
+          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer
+          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.p12.enc -d -a -out ./signing/ihm-dist.p12
           security create-keychain -p appveyor ios-build.keychain
           security default-keychain -s ios-build.keychain
           security unlock-keychain -p appveyor ios-build.keychain
