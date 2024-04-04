@@ -21,15 +21,15 @@ jobs:
 
       - name: Get version
         uses: bbonkr/get-version-action@v1
-        id: version
+        id: get-version
         with:
           project: 'IsraelHiking.Web/package.json'
 
       - name: Set version code and string
         id: version-code
         env:
-          MAJOR: ${{ steps.version.outputs.major }}
-          MINOR: ${{ steps.version.outputs.minor }}
+          MAJOR: ${{ steps.get-version.outputs.major }}
+          MINOR: ${{ steps.get-version.outputs.minor }}
           PATCH: ${{ github.run_number }}
         run: |
           echo "version_code=$(($MAJOR * 10000 + $MINOR * 100 + $PATCH % 100))" >> $GITHUB_OUTPUT
@@ -61,8 +61,8 @@ jobs:
         uses: chkfung/android-version-actions@v1.2.2
         with:
           gradlePath: IsraelHiking.Web/android/app/build.gradle
-          versionCode: ${{ needs.version.outputs.version_code }}
-          versionName: ${{ needs.version.outputs.version_string }}
+          versionCode: ${{ needs.version.output.version_code }}
+          versionName: ${{ needs.version.output.version_string }}
       - name: Build
         run: |
           cd IsraelHiking.Web
@@ -84,14 +84,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.12'
-
-      - name: Setup Docker
-        uses: actions/setup-docker@v4
 
       - name: Build and push Docker image
         run: docker build . -t israelhikingmap/website:$VERSION --build-arg VERSION=$VERSION
