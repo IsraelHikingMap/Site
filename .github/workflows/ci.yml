@@ -24,6 +24,13 @@ jobs:
         id: version
         with:
           project: 'IsraelHiking.Web/package.json'
+
+      - name: Set version code and string
+        id: version-code
+        env:
+          MAJOR: ${{ steps.version.outputs.major }}
+          MINOR: ${{ steps.version.outputs.minor }}
+          PATCH: ${{ github.run_number }}
         run: |
           echo "version_code=$(($MAJOR * 10000 + $MINOR * 100 + $PATCH % 100))" >> $GITHUB_OUTPUT
           echo "version_string=$MAJOR.$MINOR.$(($PATCH % 100))" >> $GITHUB_OUTPUT
