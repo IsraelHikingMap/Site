@@ -35,7 +35,7 @@ jobs:
           npm run test-ci
       - name: Codecov upload
         if: always()
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4
         with:
           files: ./Tests/IsraelHiking.API.Tests/coverage.info,./IsraelHiking.Web/coverage/lcov.info
         env:
@@ -46,5 +46,5 @@ jobs:
         with:
           paths: |
             ./**/test-result.xml
-            ./TESTS-*.xml
+            ./**/TESTS-*.xml
           
