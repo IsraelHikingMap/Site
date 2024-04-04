@@ -27,9 +27,9 @@ jobs:
         run: |
           echo "version_code=$(($MAJOR * 10000 + $MINOR * 100 + $PATCH % 100))" >> $GITHUB_OUTPUT
           echo "version_string=$MAJOR.$MINOR.$(($PATCH % 100))" >> $GITHUB_OUTPUT
-      outputs:
-        version_code: ${{ steps.version.outputs.version_code }}
-        version_string: ${{ steps.version.outputs.version_string }}
+    outputs:
+      version_code: ${{ steps.version.outputs.version_code }}
+      version_string: ${{ steps.version.outputs.version_string }}
 
   android:
     runs-on: ubuntu-latest
