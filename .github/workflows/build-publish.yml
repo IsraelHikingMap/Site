@@ -1,0 +1,241 @@
+name: Build and Publish
+
+# This workflow is triggered on pushes to the main branch, pull requests and manual triggers
+# 1. version - An initial step to be used by other steps - bumps the version code and string based on the run number and package.json
+# 2. android - Builds the Android app and uploads it to Google Play (if requested)
+# 3. docker - Builds the Docker image and pushes it to GitHub Container Registry
+# 4. ios - Builds the iOS app and uploads it to App Store (if requested)
+# 5. github-release - Tags the commit and creates a Github release with the apps' binaries (if requested)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish to Appstore and Google play'
+        required: false
+        default: 'false'
+      tag:
+        description: 'Tags and create a Github release'
+        required: false
+        default: 'false'
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.12'
+
+      - name: Get version
+        uses: bbonkr/get-version-action@v1
+        id: get-version
+        with:
+          project: 'IsraelHiking.Web/package.json'
+
+      - name: Set version code and string
+        id: version-code
+        env:
+          MAJOR: ${{ steps.get-version.outputs.major }}
+          MINOR: ${{ steps.get-version.outputs.minor }}
+          PATCH: ${{ github.run_number }}
+        run: |
+          echo "version_code=$(($MAJOR * 10000 + $MINOR * 100 + $PATCH % 100))" >> $GITHUB_OUTPUT
+          echo "version_string=$MAJOR.$MINOR.$(($PATCH % 100))" >> $GITHUB_OUTPUT
+    outputs:
+      version_code: ${{ steps.version-code.outputs.version_code }}
+      version_string: ${{ steps.version-code.outputs.version_string }}
+
+  android:
+    runs-on: ubuntu-latest
+    needs: version
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.12'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Bump versions in gradle
+        uses: chkfung/android-version-actions@v1.2.2
+        with:
+          gradlePath: IsraelHiking.Web/android/app/build.gradle
+          versionCode: ${{ needs.version.outputs.version_code }}
+          versionName: ${{ needs.version.outputs.version_string }}
+      - name: Build UI
+        run: |
+          cd IsraelHiking.Web
+          npm ci
+          npm run build:mobile -- --no-progress
+          npx cap sync android
+      - name: Build Android
+        run: |
+          cd IsraelHiking.Web/android
+          ./gradlew :app:bundleRelease "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
+          #./gradlew --no-daemon bundleRelease    
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          WORKSPACE: ${{ github.workspace }}
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: IHM_signed_${{ needs.version.outputs.version_string }}.aab
+          path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
+      
+      - name: Publish to Google Play
+        if: ${{ github.event.inputs.publish == 'true' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: il.org.osm.israelhiking
+          releaseFiles: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          debugSymbols: IsraelHiking.Web/android/app/build/intermediates/merged_native_libs/release/out/lib
+
+  docker: 
+    runs-on: ubuntu-latest
+    needs: version
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          docker build . -t ghcr.io/israelhikingmap/website:$VERSION --build-arg VERSION=$VERSION
+          docker push ghcr.io/israelhikingmap/website:$VERSION
+        env:
+          VERSION: ${{ needs.version.outputs.version_string }}
+
+  ios:
+    runs-on: macos-14
+    needs: version
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.12'
+
+      - name: Setup xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: 15.2
+
+      - name: setup-cocoapods
+        uses: maxim-lobanov/setup-cocoapods@v1
+        with:
+          podfile-path: IsraelHiking.Web/ios/App/Podfile.lock
+
+      - name: Keychain setup
+        run: |
+          cd IsraelHiking.Web
+          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/appveyor.mobileprovision.enc -d -a -out ./signing/appveyor.mobileprovision
+          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.cer.enc -d -a -out ./signing/ihm-dist.cer
+          openssl aes-256-cbc -pbkdf2 -k $PASSWORD -in ./signing/ihm-dist.p12.enc -d -a -out ./signing/ihm-dist.p12
+          security create-keychain -p appveyor ios-build.keychain
+          security default-keychain -s ios-build.keychain
+          security unlock-keychain -p appveyor ios-build.keychain
+          security set-keychain-settings -t 3600 -l ~/Library/Keychains/ios-build.keychain
+          security import ./signing/apple.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
+          security import ./signing/ihm-dist.cer -k ~/Library/Keychains/ios-build.keychain -T /usr/bin/codesign
+          security import ./signing/ihm-dist.p12 -k ~/Library/Keychains/ios-build.keychain -P $STORE_PASSWORD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k appveyor ~/Library/Keychains/ios-build.keychain > /dev/null
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp ./signing/appveyor.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+        env:
+          PASSWORD: ${{ secrets.PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+      - name: Build UI
+        run: |
+          cd IsraelHiking.Web
+          npm ci
+          npm run build:mobile -- --no-progress
+          npx cap sync ios
+      - name: Bump version
+        shell: pwsh
+        run: |
+          ./Scripts/SetPlistFileVersion.ps1
+        env:
+          VERSION: ${{ needs.version.outputs.version_string }}
+      - name: Build iOS
+        run: |
+          cd IsraelHiking.Web/ios
+          xcodebuild -workspace App/App.xcworkspace -scheme App -archivePath App.xcarchive -configuration Release -destination generic/platform=iOS archive -quiet
+          echo "Exporting archive"
+          xcodebuild -exportArchive -archivePath App.xcarchive -exportPath ./ -exportOptionsPlist exportOptions.plist
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: IHM_signed_${{ needs.version.outputs.version_string }}.ipa
+          path: IsraelHiking.Web/ios/App.ipa
+
+      - name: Publish to App Store
+        if: ${{ github.event.inputs.publish == 'true' }}
+        run: |
+          cd IsraelHiking.Web/ios
+          xcrun altool --upload-app --type ios --file ./App.ipa --username $APPLE_APPSTORE_USER --password $APPLE_APPSTORE_PASSWORD
+        env:
+          APPLE_APPSTORE_USER: ${{ secrets.APPLE_APPSTORE_USER }}
+          APPLE_APPSTORE_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
+
+  github-release:
+    if: ${{ github.event.inputs.tag == 'true' }}
+    runs-on: ubuntu-latest
+    needs: [version, ios, android]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Tag commit and push
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ needs.version.outputs.version_string }}
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ github.workspace }}/artifacts
+          merge-multiple: true
+      - name: Rename artifacts
+        run: |
+          mv ${{ github.workspace }}/artifacts/*.ipa ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.ipa
+          mv ${{ github.workspace }}/artifacts/*.aab ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.aab
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          tag_name: v${{ needs.version.outputs.version_string }}
+          name: v${{ needs.version.outputs.version_string }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            IHM_signed_${{ needs.version.outputs.version_string }}.ipa
+            IHM_signed_${{ needs.version.outputs.version_string }}.aab
