@@ -11,7 +11,7 @@ on:
       publish:
         description: 'Publish to dockerhub, app store and google play'
         required: false
-        default: 'true'
+        default: 'false'
 jobs:
   version:
     runs-on: ubuntu-latest
@@ -91,7 +91,7 @@ jobs:
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
       
       - name: Publish to Google Play
-        if: ${{ github.event.inputs.publish == 'true' }}
+        if: ${{ github.event.inputs.publish != 'false' }}
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
@@ -175,7 +175,7 @@ jobs:
           path: IsraelHiking.Web/ios/App.ipa
 
       - name: Publish to App Store
-        if: ${{ github.event.inputs.publish == 'true' }}
+        if: ${{ github.event.inputs.publish != 'false' }}
         run: |
           cd IsraelHiking.Web/ios
           xcrun altool --upload-app --type ios --file ./App.ipa --username $APPLE_APPSTORE_USER --password $APPLE_APPSTORE_PASSWORD
