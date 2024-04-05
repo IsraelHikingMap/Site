@@ -121,8 +121,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build . -t ghcr.io/israelhikingmap/website:$VERSION --build-arg VERSION=$VERSION
-          docker push ghcr.io/ghcr.io/israelhikingmap/website:$VERSION
+          docker build . -t israelhikingmap/website:$VERSION --build-arg VERSION=$VERSION
+          docker push israelhikingmap/website:$VERSION
         env:
           VERSION: ${{ needs.version.outputs.version_string }}
 
