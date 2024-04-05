@@ -6,7 +6,12 @@ on:
     branches:
       - main
   pull_request:
-
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish to dockerhub, app store and google play'
+        required: false
+        default: 'true'
 jobs:
   version:
     runs-on: ubuntu-latest
@@ -82,8 +87,19 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: IHM_signed_${{ steps.version-code.outputs.version_string }}.aab
+          name: IHM_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
+      
+      - name: Publish to Google Play
+        if: ${{ github.event.inputs.publish == 'true' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: il.org.osm.israelhiking
+          releaseFiles: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          mappingFile: IsraelHiking.Web/android/app/build/outputs/mapping/release/mapping.txt
+          debugSymbols: IsraelHiking.Web/android/app/intermediates/merged_native_libs/release/out/lib
 
   docker: 
     runs-on: ubuntu-latest
@@ -155,8 +171,17 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: IHM_signed_${{ steps.version-code.outputs.version_string }}.ipa
+          name: IHM_signed_${{ needs.version.outputs.version_string }}.ipa
           path: IsraelHiking.Web/ios/App.ipa
+
+      - name: Publish to App Store
+        if: ${{ github.event.inputs.publish == 'true' }}
+        run: |
+          cd IsraelHiking.Web/ios
+          xcrun altool --upload-app --type ios --file ./App.ipa --username $APPLE_APPSTORE_USER --password $APPLE_APPSTORE_PASSWORD
+        env:
+          APPLE_APPSTORE_USER: ${{ secrets.APPLE_APPSTORE_USER }}
+          APPLE_APPSTORE_PASSWORD: ${{ secrets.APPLE_APPSTORE_PASSWORD }}
 
   tests:
     runs-on: ubuntu-latest
