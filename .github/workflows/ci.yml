@@ -118,8 +118,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - run: docker build -t ghcr.io/maplibre/maputnik:main .
-      - run: docker push ghcr.io/maplibre/maputnik:main
 
       - name: Build and push Docker image
         run: |
