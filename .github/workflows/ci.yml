@@ -108,8 +108,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: docker build -t ghcr.io/maplibre/maputnik:main .
+      - run: docker push ghcr.io/maplibre/maputnik:main
+
       - name: Build and push Docker image
-        run: docker build . -t israelhikingmap/website:$VERSION --build-arg VERSION=$VERSION
+        run: |
+          docker build . -t ghcr.io/israelhikingmap/website:$VERSION --build-arg VERSION=$VERSION
+          docker push ghcr.io/ghcr.io/israelhikingmap/website:$VERSION
         env:
           VERSION: ${{ needs.version.outputs.version_string }}
 
@@ -128,7 +139,7 @@ jobs:
       - name: Setup xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          xcode-version: 15.2
 
       - name: setup-cocoapods
         uses: maxim-lobanov/setup-cocoapods@v1
