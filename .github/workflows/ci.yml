@@ -213,9 +213,16 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          custom_tag: v${{ needs.version.outputs.version_string }}
+          custom_tag: ${{ needs.version.outputs.version_string }}
       - name: Download artifacts
         uses: actions/download-artifact@v4
+        with:
+          path: ${{ github.workspace }}/artifacts
+          merge-multiple: true
+      - name: Rename artifacts
+        run: |
+          mv ${{ github.workspace }}/artifacts/*.ipa ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.ipa
+          mv ${{ github.workspace }}/artifacts/*.aab ${{ github.workspace }}/IHM_signed_${{ needs.version.outputs.version_string }}.aab
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
