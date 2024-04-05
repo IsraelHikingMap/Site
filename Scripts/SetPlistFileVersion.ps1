@@ -1,3 +1,5 @@
+# This script is used to set the version in the Info.plist file for the iOS app
+
 $filePath = get-ChildItem Info.plist -Path IsraelHiking.Web/ios/App/App | Select-Object -first 1 | select -expand FullName
 $fileXml = [xml](Get-Content $filePath)
 Select-Xml -xml $fileXml -XPath "//dict/key[. = 'CFBundleShortVersionString']/following-sibling::string[1]" |
