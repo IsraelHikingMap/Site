@@ -50,7 +50,7 @@ jobs:
           version_string=$MAJOR.$MINOR.$(($PATCH % 1000))
           echo "version_code=$(($MAJOR * 100000 + $MINOR * 1000 + $PATCH % 1000))" >> $GITHUB_OUTPUT
           echo "version_string=$version_string" >> $GITHUB_OUTPUT
-          echo "Version: $varsion_string" >> $GITHUB_STEP_SUMMARY
+          echo "Version: $version_string" >> $GITHUB_STEP_SUMMARY
     outputs:
       version_code: ${{ steps.version-code.outputs.version_code }}
       version_string: ${{ steps.version-code.outputs.version_string }}
