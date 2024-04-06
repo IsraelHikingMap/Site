@@ -47,7 +47,7 @@ jobs:
           MINOR: ${{ steps.get-version.outputs.minor }}
           PATCH: ${{ github.run_number }}
         run: |
-          varsion_string=$MAJOR.$MINOR.$(($PATCH % 1000))
+          version_string=$MAJOR.$MINOR.$(($PATCH % 1000))
           echo "version_code=$(($MAJOR * 100000 + $MINOR * 1000 + $PATCH % 1000))" >> $GITHUB_OUTPUT
           echo "version_string=$version_string" >> $GITHUB_OUTPUT
           echo "Version: $varsion_string" >> $GITHUB_STEP_SUMMARY
