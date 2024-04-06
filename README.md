@@ -1,8 +1,6 @@
 # Intro
 This repository holds the main server side module the web and mobile clients interact with, it also hold the web and mobile related code.
 
-[![AppVeyor](https://img.shields.io/appveyor/ci/IsraelHikingHost/site/main.svg)](https://ci.appveyor.com/project/IsraelHikingHost/site)
-[![AppVeyor tests](https://img.shields.io/appveyor/tests/IsraelHikingHost/site/main.svg)](https://ci.appveyor.com/project/IsraelHikingHost/site/build/tests)
 [![Codecov](https://img.shields.io/codecov/c/github/israelhikingmap/site/main.svg)](https://codecov.io/gh/IsraelHikingMap/Site/)
 
 [Site's uptime](https://aee25113-fdfb-461a-aa2f-f79fd9bcdce4.site.hbuptime.com/)
