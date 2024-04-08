@@ -109,7 +109,7 @@ export class DataContainerService {
             }
         } catch (ex) {
             this.shareUrlsService.setShareUrl(null);
-            this.toastService.warning(this.resources.unableToLoadFromUrl);
+            this.toastService.error(ex, this.resources.unableToLoadFromUrl);
         }
     }
 
