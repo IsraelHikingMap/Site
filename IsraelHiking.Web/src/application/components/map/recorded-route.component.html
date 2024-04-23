@@ -76,7 +76,7 @@
     <div *ngFor="let marker of (recordedRoute$ | async).markers; let idx = index">
         <mgl-marker anchor="bottom"
             [draggable]="isAddingPoi$ | async"
-            [lngLat]="[marker.latlng.lng, marker.latlng.lat]"
+            [lngLat]="marker.latlng"
             (markerDragEnd)="markerDragEnd(idx, $event)">
             <private-poi-overlay [marker]="marker" [index]="idx" [color]="resources.recordedRouteColor"></private-poi-overlay>
         </mgl-marker>
