@@ -77,7 +77,7 @@ namespace IsraelHiking.API.Tests.Executors
             
             _executor.CreateOfflinePoisFile(new List<IFeature> {feature});
             
-            _fileSystemHelper.Received(1).WriteAllBytes(Arg.Any<string>(), Arg.Any<byte[]>());
+            _fileSystemHelper.Received(2).WriteAllBytes(Arg.Any<string>(), Arg.Any<byte[]>());
         }
     }
 }
