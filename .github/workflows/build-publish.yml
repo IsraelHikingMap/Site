@@ -182,7 +182,7 @@ jobs:
           npm run build:mobile -- --no-progress
           npx cap sync ios
       - name: Update Info.plist with build version
-        uses: damienaicheh/update-ios-version-info-plist-action@v1
+        uses: damienaicheh/update-ios-version-info-plist-action@v1.2.0
         with:
           info-plist-path: "./IsraelHiking.Web/ios/App/App/Info.plist"
           bundle-short-version-string: ${{ needs.version.outputs.version_string }}
