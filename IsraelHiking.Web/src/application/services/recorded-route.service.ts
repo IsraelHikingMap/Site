@@ -181,7 +181,8 @@ export class RecordedRouteService {
     }
 
     private isValid(test: LatLngAltTime, position: GeolocationPosition): string {
-        const distance = SpatialService.getDistanceInMeters(test, GeoLocationService.positionToLatLngTime(position));
+        const positionLatLng = GeoLocationService.positionToLatLngTime(position);
+        const distance = SpatialService.getDistanceInMeters(test, positionLatLng);
         const timeDifference = Math.abs(position.timestamp - new Date(test.timestamp).getTime()) / 1000;
         if (timeDifference === 0) {
             return "Time difference is 0";
@@ -194,6 +195,9 @@ export class RecordedRouteService {
         }
         if (position.coords.accuracy > RecordedRouteService.MIN_ACCURACY) {
             return "Accuracy too low: " + position.coords.accuracy;
+        }
+        if (SpatialService.isJammingTarget(positionLatLng)) {
+            return "Position is inside a jamming target";
         }
         return "";
     }
