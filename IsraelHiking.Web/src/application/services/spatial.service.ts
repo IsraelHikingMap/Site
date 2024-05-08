@@ -303,9 +303,13 @@ export class SpatialService {
         };
     }
 
-    private static getLineString(latlngs: LatLngAlt[]): GeoJSON.Feature<GeoJSON.LineString> {
+    public static getLineString(latlngs: LatLngAlt[]): GeoJSON.Feature<GeoJSON.LineString> {
         const coordinates = latlngs.map(l => SpatialService.toCoordinate(l));
         return lineString(coordinates);
+    }
+
+    public static getPointFeature(latlng: LatLngAlt): GeoJSON.Feature<GeoJSON.Point> {
+        return point(SpatialService.toCoordinate(latlng));
     }
 
     public static getMapBounds(map: Map): Bounds {

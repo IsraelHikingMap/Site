@@ -59,8 +59,9 @@
             'icon-color': 'black'
         }">
     </mgl-layer>
-    <mgl-geojson-source id="recorded-route-start-geojson" [data]="startPointGeoJson"></mgl-geojson-source>
-    <mgl-layer id="recorded-route-start-point"
+    <mgl-geojson-source *ngIf="startPointGeoJson" id="recorded-route-start-geojson" [data]="startPointGeoJson"></mgl-geojson-source>
+    <mgl-layer *ngIf="startPointGeoJson"
+        id="recorded-route-start-point"
         type="circle"
         source="recorded-route-start-geojson"
         [paint]="{
