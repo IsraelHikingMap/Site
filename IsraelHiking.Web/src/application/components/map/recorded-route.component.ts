@@ -7,7 +7,6 @@ import { BaseMapComponent } from "../base-map.component";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
-import { GeoLocationService } from "../../services/geo-location.service";
 import { ApplicationState, LatLngAltTime, RecordedRoute } from "../../models/models";
 
 @Component({
