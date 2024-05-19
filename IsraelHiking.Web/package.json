@@ -71,7 +71,7 @@
     "linear-interpolator": "^1.0.2",
     "lodash-es": "^4.17.21",
     "lottie-web": "^5.12.2",
-    "maplibre-gl": "^4.3.1",
+    "maplibre-gl": "^4.3.2",
     "minisearch": "^6.3.0",
     "ngx-infinite-scroll": "^17.0.0",
     "ngx-lottie": "^11.0.1",
