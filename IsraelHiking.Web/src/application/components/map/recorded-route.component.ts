@@ -82,25 +82,18 @@ export class RecordedRouteComponent extends BaseMapComponent {
         latlngs.splice(0, this.lastSplit);
         if (recording.latlngs.length - this.lastSplit <= RecordedRouteComponent.NUMBER_OF_POINTS_IN_ROUTE_SPLIT) {
             // Refresh the last segment with current data
-            this.lastRouteSegment = this.getFeatureFromLatLngs(latlngs, true);
+            this.lastRouteSegment = this.getFeatureFromLatLngs(latlngs);
         } else {
             // In case the segment is too long, update last split point, move the current segment to the list and create a segment with last position and current position
             this.lastSplit = recording.latlngs.length - 1;
-            this.recordedRouteSegments.push(this.getFeatureFromLatLngs(latlngs, false));
-            this.lastRouteSegment = this.getFeatureFromLatLngs([latlngs[latlngs.length - 1]], true);
+            this.recordedRouteSegments.push(this.getFeatureFromLatLngs(latlngs));
+            this.lastRouteSegment = this.getFeatureFromLatLngs([latlngs[latlngs.length - 1]]);
         }
     }
 
-    private getFeatureFromLatLngs(latlngs: LatLngAltTime[], withCurrentPosition: boolean): GeoJSON.Feature<GeoJSON.LineString> {
-        if (withCurrentPosition) {
-            const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;    
-            if (currentPosition) {
-                // Adding current position to the end of the presented recorded line
-                latlngs.push(GeoLocationService.positionToLatLngTime(currentPosition));
-            } else {
-                // In case the current position is not available, the last point is the end of the line
-                latlngs.push(latlngs[latlngs.length - 1]);
-            }
+    private getFeatureFromLatLngs(latlngs: LatLngAltTime[]): GeoJSON.Feature<GeoJSON.LineString> {
+        if (latlngs.length === 1) {
+            return SpatialService.getLineString([latlngs[0], latlngs[0]]);
         }
         return SpatialService.getLineString(latlngs);
     }
