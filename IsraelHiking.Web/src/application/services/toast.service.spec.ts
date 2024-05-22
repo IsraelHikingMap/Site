@@ -4,7 +4,7 @@ import { IConfirmOptions, ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { LoggingService } from "./logging.service";
 import { GetTextCatalogMockCreator } from "./resources.service.spec";
-import { ConfirmDialogComponent } from "application/components/dialogs/confirm-dialog.component";
+import { ConfirmDialogComponent } from "../components/dialogs/confirm-dialog.component";
 
 export class ToastServiceMockCreator {
     public toastService: ToastService;

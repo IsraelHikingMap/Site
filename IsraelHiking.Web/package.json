@@ -47,7 +47,7 @@
     "angulartics2": "^13.0.0",
     "base64-arraybuffer": "^1.0.2",
     "broadcast-channel": "^7.0.0",
-    "cordova-background-geolocation-plugin": "^2.0.10",
+    "cordova-background-geolocation-plugin": "^2.1.0",
     "cordova-plugin-device-orientation": "^3.0.0",
     "cordova-plugin-file": "^8.0.1",
     "cordova-plugin-file-transfer": "github:apache/cordova-plugin-file-transfer#ec11d2fd0e87d7d9e0ba94b1989ffb71af1c3c96",
