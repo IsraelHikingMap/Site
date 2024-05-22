@@ -19,7 +19,6 @@ import type { TraceVisibility, DataContainer, ApplicationState, RouteData, LatLn
 
 @Injectable()
 export class RecordedRouteService {
-    private static readonly MAX_TIME_DIFFERENCE = 120; // seconds
     private static readonly MAX_SPPED = 55; // meters / seconds =~ 200 Km/hs
     private static readonly MIN_ACCURACY = 100; // meters
 
@@ -183,21 +182,15 @@ export class RecordedRouteService {
     private isValid(test: LatLngAltTime, position: GeolocationPosition): string {
         const positionLatLng = GeoLocationService.positionToLatLngTime(position);
         const distance = SpatialService.getDistanceInMeters(test, positionLatLng);
-        const timeDifference = Math.abs(position.timestamp - new Date(test.timestamp).getTime()) / 1000;
-        if (timeDifference === 0) {
-            return "Time difference is 0";
+        const timeDifference = (position.timestamp - new Date(test.timestamp).getTime()) / 1000;
+        if (timeDifference <= 0) {
+            return `Time difference below or zero: ${timeDifference}`;
         }
         if (distance / timeDifference > RecordedRouteService.MAX_SPPED) {
-            return "Speed too high: " + distance / timeDifference;
-        }
-        if (timeDifference > RecordedRouteService.MAX_TIME_DIFFERENCE) {
-            return "Time difference too high: " + timeDifference;
+            return `Speed too high: ${distance / timeDifference}`;
         }
         if (position.coords.accuracy > RecordedRouteService.MIN_ACCURACY) {
-            return "Accuracy too low: " + position.coords.accuracy;
-        }
-        if (SpatialService.isJammingTarget(positionLatLng)) {
-            return "Position is inside a jamming target";
+            return `Accuracy too low: ${position.coords.accuracy}`;
         }
         return "";
     }

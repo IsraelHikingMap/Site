@@ -267,31 +267,31 @@ describe("Recorded Route Service", () => {
             geoService.bulkPositionChanged.next([
                 {
                     coords: { latitude: 1, longitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(1).getTime()
-                },
-                {
-                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
                     timestamp: new Date(150000).getTime()
                 },
                 {
                     coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(151000).getTime()
+                    timestamp: new Date(1000).getTime()
                 },
                 {
                     coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(152000).getTime()
+                    timestamp: new Date(2000).getTime()
                 },
                 {
                     coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(152000).getTime()
+                    timestamp: new Date(3000).getTime()
+                },
+                {
+                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
+                    timestamp: new Date(3000).getTime()
                 },
                 {
                     coords: { longitude: 1, latitude: 2, accuracy: 1000 } as GeolocationCoordinates,
-                    timestamp: new Date(153000).getTime()
+                    timestamp: new Date(4000).getTime()
                 },
                 {
-                    coords: { longitude: 1, latitude: 2 } as GeolocationCoordinates,
-                    timestamp: new Date(10000000).getTime()
+                    coords: { longitude: 1.1, latitude: 2 } as GeolocationCoordinates,
+                    timestamp: new Date(5000).getTime()
                 }
             ]);
             expect(spy.calls.all()[0].args[0].startsWith("[Record] Valid position")).toBeTruthy();

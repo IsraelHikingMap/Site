@@ -9,6 +9,7 @@ import { LoggingService } from "./logging.service";
 import { ToastService } from "./toast.service";
 import { SetCurrentPositionAction, SetTrackingStateAction } from "../reducers/gps.reducer";
 import type { ApplicationState, LatLngAltTime } from "../models/models";
+import { SpatialService } from "./spatial.service";
 
 declare let BackgroundGeolocation: BackgroundGeolocationPlugin;
 
@@ -210,11 +211,11 @@ export class GeoLocationService {
         this.gettingLocations = true;
         const locations = await BackgroundGeolocation.getValidLocationsAndDelete();
         this.gettingLocations = false;
-        const positions = locations.map((l) => this.locationToPosition(l));
+        const positions = locations.map(l => this.locationToPosition(l)).filter(p => !SpatialService.isJammingTarget(GeoLocationService.positionToLatLngTime(p)));
         if (positions.length === 0) {
             this.loggingService.debug("[GeoLocation] There's nothing to send - valid locations array is empty");
         } else if (positions.length === 1) {
-            this.handlePositionChange(positions[positions.length - 1]);
+            this.handlePositionChange(positions[0]);
         } else {
             this.loggingService.debug(`[GeoLocation] Sending bulk location update: ${positions.length}`);
             this.bulkPositionChanged.next(positions.splice(0, positions.length - 1));
@@ -243,7 +244,12 @@ export class GeoLocationService {
     }
 
     private handlePositionChange(position: GeolocationPosition): void {
-        this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(GeoLocationService.positionToLatLngTime(position)));
+        const latLng = GeoLocationService.positionToLatLngTime(position);
+        this.loggingService.debug("[GeoLocation] Received position: " + JSON.stringify(latLng));
+        if (SpatialService.isJammingTarget(latLng)) {
+            this.toastService.info(this.resources.jammedPositionReceived);
+            return;
+        }
         if (this.store.selectSnapshot((s: ApplicationState) => s.gpsState).tracking === "searching") {
             this.store.dispatch(new SetTrackingStateAction("tracking"));
         }
