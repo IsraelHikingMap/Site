@@ -77,6 +77,7 @@
     "ngx-lottie": "^11.0.2",
     "ngx-progressbar": "^11.1.0",
     "osmtogeojson": "^3.0.0-beta.5",
+    "patch-package": "^8.0.0",
     "pbf": "^3.2.1",
     "photoswipe": "^5.4.4",
     "piexifjs": "1.0.6",
@@ -147,7 +148,8 @@
     "test": "ng test",
     "test-ci": "ng test --code-coverage --watch=false",
     "lint": "ng lint --fix",
-    "extract": "node extract-strings.js"
+    "extract": "node extract-strings.js",
+    "postinstall": "patch-package"
   },
   "type": "module",
   "version": "9.20.0"
