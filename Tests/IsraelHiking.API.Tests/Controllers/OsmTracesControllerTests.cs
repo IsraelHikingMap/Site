@@ -42,9 +42,6 @@ namespace IsraelHiking.API.Tests.Controllers
             _imageCreationGateway = Substitute.For<IImageCreationGateway>();
             _searchRepository = Substitute.For<ISearchRepository>();
             _distributedCache = Substitute.For<IDistributedCache>();
-            var options = new ConfigurationData();
-            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
-            optionsProvider.Value.Returns(options);
             _controller = new OsmTracesController(_clientsFactory, _dataContainerConverterService, _imageCreationGateway, _searchRepository, _distributedCache, Substitute.For<ILogger>());
         }
 

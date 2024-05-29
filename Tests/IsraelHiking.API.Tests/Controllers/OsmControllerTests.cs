@@ -28,7 +28,6 @@ namespace IsraelHiking.API.Tests.Controllers
         private IClientsFactory _clientsFactory;
         private IDataContainerConverterService _dataContainerConverterService;
         private IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
-        private ConfigurationData _options;
 
         private int SetupGpxUrl(GpxFile gpx, List<LineString> addibleLines = null)
         {
@@ -59,7 +58,6 @@ namespace IsraelHiking.API.Tests.Controllers
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
             _addibleGpxLinesFinderService = Substitute.For<IAddibleGpxLinesFinderService>();
             _osmLineAdderService = Substitute.For<IOsmLineAdderService>();
-            _options = new ConfigurationData();
             _controller = new OsmController(_clientsFactory, _dataContainerConverterService, new ItmWgs84MathTransformFactory(), 
                 _addibleGpxLinesFinderService, _osmLineAdderService, new GeometryFactory());
         }
