@@ -5,7 +5,7 @@ import { NgxsModule, Store } from "@ngxs/store";
 
 import { ElevationProvider } from "./elevation.provider";
 import { LoggingService } from "./logging.service";
-import { DatabaseService } from "./database.service";
+import { PmTilesService } from "./pmtiles.service";
 
 describe("ElevationProvider", () => {
 
@@ -18,7 +18,7 @@ describe("ElevationProvider", () => {
             ],
             providers: [
                 { provide: LoggingService, useValue: { warning: () => { } } },
-                { provide: DatabaseService, useValue: {} },
+                { provide: PmTilesService, useValue: {} },
                 ElevationProvider
             ]
         });
@@ -80,8 +80,8 @@ describe("ElevationProvider", () => {
     ));
 
     it("Should update elevation when getting an error from server and offline is available",
-        inject([ElevationProvider, HttpTestingController, DatabaseService, Store],
-        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, db: DatabaseService, store: Store) => {
+        inject([ElevationProvider, HttpTestingController, PmTilesService, Store],
+        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, db: PmTilesService, store: Store) => {
             const latlngs = [{ lat: 32, lng: 35, alt: 0 }];
 
             store.reset({
