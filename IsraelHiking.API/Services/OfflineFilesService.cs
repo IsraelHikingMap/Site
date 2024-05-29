@@ -37,7 +37,7 @@ namespace IsraelHiking.API.Services
         }
 
         /// <inheritdoc/>
-        public Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate, bool pmtiles)
+        public Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate)
         {
             var filesDictionary = new Dictionary<string, DateTime>();
             var contents = _fileProvider.GetDirectoryContents(string.Empty);
@@ -51,7 +51,7 @@ namespace IsraelHiking.API.Services
                 {
                     continue;
                 }
-                if (content.Name.EndsWith(pmtiles ? ".pmtiles" : ".mbtiles") || content.Name.StartsWith("style"))
+                if (content.Name.EndsWith(".pmtiles") || content.Name.StartsWith("style"))
                 {
                     filesDictionary[content.Name] = content.LastModified.DateTime;
                 }
