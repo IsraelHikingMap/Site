@@ -127,9 +127,9 @@ namespace IsraelHiking.Common.Configuration
         /// </summary>
         public string OfflineFilesFolder { get; set; }
         /// <summary>
-        /// An object that describe how to connect to OSM
+        /// OSM server base address
         /// </summary>
-        public OsmConfiguraionData OsmConfiguration { get; set; }
+        public string OsmBaseAddress { get; set; }
         /// <summary>
         /// A list of allowed image sites
         /// </summary>
@@ -172,12 +172,7 @@ namespace IsraelHiking.Common.Configuration
             ImageCreatorServerAddress = "http://localhost:11311/";
             OsmFileAddress = "https://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf";
             OfflineFilesFolder = "./";
-            OsmConfiguration = new OsmConfiguraionData
-            {
-                ConsumerKey = "E8p0RX0rnQPxDaj3IijgpMNeK8lRTyy6rlKxQ8IF",
-                ConsumerSecret = "Hro40NSObALdx8Dm7Xv1mKvxjwlGITqetXUBYUwv",
-                BaseAddress = "https://www.openstreetmap.org"
-            };
+            OsmBaseAddress = "https://www.openstreetmap.org";
             ImageUrlsAllowList = new List<string> { 
                 "wikimedia.org", 
                 "inature.info",

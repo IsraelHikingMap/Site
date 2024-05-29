@@ -1,6 +1,4 @@
-﻿using IsraelHiking.Common.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
 using OsmSharp.IO.API;
 using System;
 using System.Security.Claims;
@@ -18,15 +16,12 @@ namespace IsraelHiking.Web
     {
         private readonly ILogger _logger;
         private readonly IClientsFactory _clientsFactory;
-        private readonly ConfigurationData _options;
         private readonly IAppCache _appCache;
         public OsmAccessTokenEventsHelper(IClientsFactory clientsFactory,
-            IOptions<ConfigurationData> options,
             IAppCache appCache,
             ILogger logger)
         {
             _clientsFactory = clientsFactory;
-            _options = options.Value;
             _logger = logger;
             _appCache = appCache;
         }
@@ -67,7 +62,7 @@ namespace IsraelHiking.Web
                 
                 var userIdFromCache = await _appCache.GetOrAddAsync(token, async () =>
                 {
-                    var osmGateway = OsmAuthFactoryWrapper.ClientFromToken(token, _clientsFactory, _options);
+                    var osmGateway = _clientsFactory.CreateOAuth2Client(context.Token);
                     var user = await osmGateway.GetUserDetails();
                     var userId = user.Id.ToString();
                     _logger.LogInformation($"User {userId} had just logged in");

@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Configuration;

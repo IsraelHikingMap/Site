@@ -2,10 +2,8 @@
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
-using IsraelHiking.Common.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
@@ -33,7 +31,6 @@ namespace IsraelHiking.API.Controllers
         private readonly IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
         private readonly IOsmLineAdderService _osmLineAdderService;
         private readonly GeometryFactory _geometryFactory;
-        private readonly ConfigurationData _options;
         private readonly MathTransform _itmWgs84MathTransform;
         private readonly MathTransform _wgs84ItmMathTransform;
 
@@ -45,14 +42,12 @@ namespace IsraelHiking.API.Controllers
         /// <param name="itmWgs84MathTransformFactory"></param>
         /// <param name="addibleGpxLinesFinderService"></param>
         /// <param name="osmLineAdderService"></param>
-        /// <param name="options"></param>
         /// <param name="geometryFactory"></param>
         public OsmController(IClientsFactory clientsFactory,
             IDataContainerConverterService dataContainerConverterService,
             IItmWgs84MathTransformFactory itmWgs84MathTransformFactory,
             IAddibleGpxLinesFinderService addibleGpxLinesFinderService,
             IOsmLineAdderService osmLineAdderService,
-            IOptions<ConfigurationData> options,
             GeometryFactory geometryFactory)
         {
             _clientsFactory = clientsFactory;
@@ -61,7 +56,6 @@ namespace IsraelHiking.API.Controllers
             _wgs84ItmMathTransform = itmWgs84MathTransformFactory.CreateInverse();
             _addibleGpxLinesFinderService = addibleGpxLinesFinderService;
             _osmLineAdderService = osmLineAdderService;
-            _options = options.Value;
             _geometryFactory = geometryFactory;
         }
 
@@ -73,7 +67,7 @@ namespace IsraelHiking.API.Controllers
         [Route("details")]
         public Task<User> GetUserDetails()
         {
-            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             return gateway.GetUserDetails();
         }
 
@@ -86,7 +80,7 @@ namespace IsraelHiking.API.Controllers
         public async Task PutAddUnmappedPartIntoOsm([FromBody]IFeature feature)
         {
             var tags = feature.Attributes.GetNames().ToDictionary(n => n, n => feature.Attributes[n].ToString());
-            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             await _osmLineAdderService.Add(feature.Geometry as LineString, tags, gateway);
         }
 
@@ -102,7 +96,7 @@ namespace IsraelHiking.API.Controllers
             TypedStream file = null;
             try
             {
-                file = await OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options)
+                file = await OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory)
                     .GetTraceData(traceId);
             }
             catch

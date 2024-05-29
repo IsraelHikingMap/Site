@@ -1,14 +1,12 @@
 ﻿using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Configuration;
 using IsraelHiking.Common.DataContainer;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using NetTopologySuite.Geometries;
 using OsmSharp.API;
@@ -37,7 +35,6 @@ namespace IsraelHiking.API.Controllers
         private readonly IImageCreationGateway _imageCreationGateway;
         private readonly ISearchRepository _searchRepository;
         private readonly IDistributedCache _persistentCache;
-        private readonly ConfigurationData _options;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -48,14 +45,12 @@ namespace IsraelHiking.API.Controllers
         /// <param name="imageCreationGateway"></param>
         /// <param name="searchRepository"></param>
         /// <param name="persistentCache"></param>
-        /// <param name="options"></param>
         /// <param name="logger"></param>
         public OsmTracesController(IClientsFactory clientsFactory,
             IDataContainerConverterService dataContainerConverterService,
             IImageCreationGateway imageCreationGateway,
             ISearchRepository searchRepository,
-            IDistributedCache persistentCache,
-            IOptions<ConfigurationData> options, 
+            IDistributedCache persistentCache, 
             ILogger logger)
         {
             _clientsFactory = clientsFactory;
@@ -64,7 +59,6 @@ namespace IsraelHiking.API.Controllers
             _searchRepository = searchRepository;
             _persistentCache = persistentCache;
             _logger = logger;
-            _options = options.Value;
         }
 
         /// <summary>
@@ -74,7 +68,7 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public async Task<Trace[]> GetTraces()
         {
-            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             var gpxFiles = await gateway.GetTraces();
             return gpxFiles.Select(GpxFileToTrace).ToArray();
         }
@@ -87,7 +81,7 @@ namespace IsraelHiking.API.Controllers
         [HttpGet("{id}")]
         public async Task<DataContainerPoco> GetTraceById(int id)
         {
-            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             var file = await gateway.GetTraceData(id);
             await using var memoryStream = new MemoryStream();
             await file.Stream.CopyToAsync(memoryStream);
@@ -125,7 +119,7 @@ namespace IsraelHiking.API.Controllers
 
             await using var memoryStream = new MemoryStream();
             await file.CopyToAsync(memoryStream);
-            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             memoryStream.Seek(0, SeekOrigin.Begin);
             await gateway.CreateTrace(new GpxFile
             {
@@ -159,7 +153,7 @@ namespace IsraelHiking.API.Controllers
             _persistentCache.SetString(routeData.Id, "Uploading a trace", new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(10) });
             var bytes = await  _dataContainerConverterService.ToAnyFormat(new DataContainerPoco { Routes = new List<RouteData> { routeData } }, FlowFormats.GPX_SINGLE_TRACK);
             await using var memoryStream = new MemoryStream(bytes);
-            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             var description = await GetDescriptionByArea(language, allPoints, routeData.Name);
             await gateway.CreateTrace(new GpxFile
             {
@@ -210,7 +204,7 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest("trace id and url id do not match");
             }
-            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             await gateway.UpdateTrace(TraceToGpxFile(trace));
             return Ok(trace);
         }
@@ -224,7 +218,7 @@ namespace IsraelHiking.API.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteGpsTrace(long id)
         {
-            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory, _options);
+            var gateway = OsmAuthFactoryWrapper.ClientFromUser(User, _clientsFactory);
             await gateway.DeleteTrace(id);
             return Ok();
         }
@@ -251,7 +245,7 @@ namespace IsraelHiking.API.Controllers
                 Id = int.Parse(trace.Id),
                 Name = trace.Name,
                 Description = trace.Description,
-                Tags = trace.TagsString?.Split(",", StringSplitOptions.RemoveEmptyEntries).ToArray() ?? new string[0],
+                Tags = trace.TagsString?.Split(",", StringSplitOptions.RemoveEmptyEntries).ToArray() ?? Array.Empty<string>(),
                 TimeStamp = trace.TimeStamp,
                 Visibility = Enum.Parse<Visibility>(trace.Visibility, true)
             };
