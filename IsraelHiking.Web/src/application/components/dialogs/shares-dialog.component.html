@@ -16,7 +16,7 @@
         <div class="flex flex-row">
             <button class="w-full" mat-raised-button color="primary" matDialogClose (click)="createShare()" angulartics2On="click" angularticsCategory="Share" angularticsAction="Create share from shares dialog"><i class="fa icon-plus fa-lg"></i> {{resources.createShare}}</button>
         </div>
-        <div *ngFor="let shareUrl of filteredShareUrls" class="item">
+        <div *ngFor="let shareUrl of filteredShareUrls; trackBy:trackById" class="item">
             <div [ngClass]="{'active': selectedShareUrlId === shareUrl.id}" (click)="toggleSelectedShareUrl(shareUrl)">
                 <div class="flex flex-row" *ngIf="!isShareUrlInEditMode(shareUrl.id)">
                     <div class="item-image">
@@ -45,7 +45,7 @@
             </div>
         </div>
         <mat-spinner *ngIf="loadingShareUrls"></mat-spinner>
-        <p *ngIf="filteredShareUrls.length === 0 && !loadingShareUrls">{{resources.noShares}}</p>
+        <p *ngIf="hasNoShares()">{{resources.noShares}}</p>
     </div>
     <div mat-dialog-actions>
         <div class="flex flex-row w-full">

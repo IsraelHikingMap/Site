@@ -1,9 +1,9 @@
 # Intro
 This repository holds the main server side module the web and mobile clients interact with, it also hold the web and mobile related code.
 
-[![AppVeyor](https://img.shields.io/appveyor/ci/IsraelHikingHost/site/main.svg)](https://ci.appveyor.com/project/IsraelHikingHost/site)
-[![AppVeyor tests](https://img.shields.io/appveyor/tests/IsraelHikingHost/site/main.svg)](https://ci.appveyor.com/project/IsraelHikingHost/site/build/tests)
 [![Codecov](https://img.shields.io/codecov/c/github/israelhikingmap/site/main.svg)](https://codecov.io/gh/IsraelHikingMap/Site/)
+
+[Site's uptime](https://aee25113-fdfb-461a-aa2f-f79fd9bcdce4.site.hbuptime.com/)
 
 ## Architecture Diagram
 ![image](https://github.com/IsraelHikingMap/Site/assets/3269297/1c110959-05b2-49eb-bb1d-9b5eb3c9b412)
@@ -62,11 +62,11 @@ The architecture is based on layers:
 * DataAccess - database, file system and network request are processed in this layer
 * Common - Mainly for POCOs
 
-# Setting Up the Project for site Development (To setup iOS and Android follow the cordova guide)
+# Setting Up the Project for site Development (To setup iOS and Android follow the capacitor guides)
 In order to be able to build this site you'll need some tools:
 * Install [Docker](https://www.docker.com/products/docker-desktop)
 * Install [.Net core SDK 7.0 ](https://www.microsoft.com/net/download/core)
-* Install [node.js](https://nodejs.org/en/) (18.16+).
+* Install [node.js](https://nodejs.org/en/) (20+).
 * Run from command line `dotnet restore` and after that `dotnet build`
 * Go to `IsraelHiking.Web` and run from command line: 
   * `npm install` to install all npm packages for the client side code
@@ -82,8 +82,6 @@ In order to be able to build this site you'll need some tools:
   {
     "wikiMediaUserName": "your wikimedia user",
     "wikiMediaPassword": "your wikimedia password"
-    "zanataUserName": "your zanata user",
-    "zanataApiKey": "your zanata api key",
     "imgurClientId": "your imgur client ID"
   }
   ```

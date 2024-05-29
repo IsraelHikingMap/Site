@@ -2,6 +2,7 @@ import { Component } from "@angular/core";
 import { Observable } from "rxjs";
 import { Store, Select } from "@ngxs/store";
 import type { Immutable } from "immer";
+import type { LngLatLike } from "maplibre-gl";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -10,7 +11,7 @@ import { RoutesFactory } from "../../services/routes.factory";
 import { TracesService } from "../../services/traces.service";
 import { AddRouteAction } from "../../reducers/routes.reducer";
 import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducers/traces.reducer";
-import type { ApplicationState, LatLngAlt } from "../../models/models";
+import type { ApplicationState } from "../../models/models";
 
 @Component({
     selector: "traces",
@@ -20,9 +21,9 @@ export class TracesComponent extends BaseMapComponent {
 
     public visibleTraceName: string;
     public selectedTrace: GeoJSON.FeatureCollection<GeoJSON.Geometry>;
-    public selectedTraceStart: LatLngAlt;
+    public selectedTraceStart: LngLatLike;
     public selectedFeature: GeoJSON.Feature<GeoJSON.LineString>;
-    public missingCoordinates: LatLngAlt;
+    public missingCoordinates: LngLatLike;
     public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public selectedFeatureSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public isConfigOpen: boolean;
@@ -91,7 +92,7 @@ export class TracesComponent extends BaseMapComponent {
                 }, ...points]
             };
 
-            this.selectedTraceStart = { lat: traceCoordinates[0][1], lng: traceCoordinates[0][0] };
+            this.selectedTraceStart = traceCoordinates[0];
         });
         this.missingParts$.subscribe(m => {
             if (m != null) {
@@ -145,13 +146,13 @@ export class TracesComponent extends BaseMapComponent {
         this.clearTrace();
     }
 
-    public getLatLngForFeature(feautre: GeoJSON.Feature<GeoJSON.LineString>) {
-        return SpatialService.toLatLng(feautre.geometry.coordinates[0] as [number, number]);
+    public getLatLngLikeForFeature(feautre: GeoJSON.Feature<GeoJSON.LineString>): LngLatLike {
+        return feautre.geometry.coordinates[0] as LngLatLike;
     }
 
     public setSelectedFeature(feature: GeoJSON.Feature<GeoJSON.LineString>, event: Event) {
         this.selectedFeature = feature;
-        this.missingCoordinates = this.getLatLngForFeature(this.selectedFeature);
+        this.missingCoordinates = this.getLatLngLikeForFeature(this.selectedFeature);
         this.selectedFeatureSource = {
             type: "FeatureCollection",
             features: [this.selectedFeature]

@@ -7,8 +7,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { ResourcesService } from "../../services/resources.service";
 import { SpatialService } from "../../services/spatial.service";
-import { GeoLocationService } from "../../services/geo-location.service";
-import { ApplicationState, RecordedRoute } from "../../models/models";
+import { ApplicationState, LatLngAltTime, RecordedRoute } from "../../models/models";
 
 @Component({
     selector: "recorded-route",
@@ -27,8 +26,8 @@ export class RecordedRouteComponent extends BaseMapComponent {
     @Select((state: ApplicationState) => state.gpsState.currentPosition)
     public currentPosition$: Observable<Immutable<GeolocationPosition>>;
 
-    public recordedRouteSegments: GeoJSON.FeatureCollection<GeoJSON.LineString>[];
-    public lastRouteSegment: GeoJSON.FeatureCollection<GeoJSON.LineString>;
+    public recordedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[];
+    public lastRouteSegment: GeoJSON.Feature<GeoJSON.LineString>;
     public startPointGeoJson: GeoJSON.Feature<GeoJSON.Point>;
 
     private lastSplit: number;
@@ -71,63 +70,30 @@ export class RecordedRouteComponent extends BaseMapComponent {
         if (recording == null || recording.latlngs.length === 0) {
             this.recordedRouteSegments = [];
             this.lastSplit = 0;
-            this.startPointGeoJson = {
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: []
-                },
-                properties: {}
-            };
+            this.startPointGeoJson = null;
             return;
         }
         const latlngs = [...recording.latlngs];
-        const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
-        if (currentPosition) {
-            // Adding current position to the end of the presented recorded line
-            latlngs.push(GeoLocationService.positionToLatLngTime(currentPosition));
-        }
-        if (this.startPointGeoJson.geometry.coordinates.length <= 0) {
-            this.startPointGeoJson = {
-                type: "Feature",
-                geometry: {
-                    type: "Point",
-                    coordinates: SpatialService.toCoordinate(latlngs[0])
-                },
-                properties: {}
-            };
+        if (!this.startPointGeoJson) {
+            this.startPointGeoJson = SpatialService.getPointFeature(latlngs[0]);
         }
 
-        // Refresh the last segment with current data
         latlngs.splice(0, this.lastSplit);
-        const currentSegment = {
-            type: "FeatureCollection",
-            features: [{
-                type: "Feature",
-                geometry: {
-                    type: "LineString",
-                    coordinates: latlngs.map(l => SpatialService.toCoordinate(l))
-                },
-                properties: {}
-            }]
-        } as GeoJSON.FeatureCollection<GeoJSON.LineString>;
         if (recording.latlngs.length - this.lastSplit <= RecordedRouteComponent.NUMBER_OF_POINTS_IN_ROUTE_SPLIT) {
-            this.lastRouteSegment = currentSegment;
+            // Refresh the last segment with current data
+            this.lastRouteSegment = this.getFeatureFromLatLngs(latlngs);
         } else {
-            // In case the segment is too long, update last split point, move the current segment to the list and create an empty segment
+            // In case the segment is too long, update last split point, move the current segment to the list and create a segment with last position and current position
             this.lastSplit = recording.latlngs.length - 1;
-            this.recordedRouteSegments.push(currentSegment);
-            this.lastRouteSegment = {
-                type: "FeatureCollection",
-                features: [{
-                    type: "Feature",
-                    geometry: {
-                        type: "LineString",
-                        coordinates: []
-                    },
-                    properties: {}
-                }]
-            };
+            this.recordedRouteSegments.push(this.getFeatureFromLatLngs(latlngs));
+            this.lastRouteSegment = this.getFeatureFromLatLngs([latlngs[latlngs.length - 1]]);
         }
+    }
+
+    private getFeatureFromLatLngs(latlngs: LatLngAltTime[]): GeoJSON.Feature<GeoJSON.LineString> {
+        if (latlngs.length === 1) {
+            return SpatialService.getLineString([latlngs[0], latlngs[0]]);
+        }
+        return SpatialService.getLineString(latlngs);
     }
 }

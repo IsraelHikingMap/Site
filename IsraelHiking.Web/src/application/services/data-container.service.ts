@@ -40,7 +40,7 @@ export class DataContainerService {
             const routeToAdd = this.routesFactory.createRouteDataAddMissingFields(route, this.selectedRouteService.getLeastUsedColor());
             routesData.push(routeToAdd);
         }
-        let selectedRouteId = routesData.length > 0 ? routesData[0].id : null; // the default is the first newly added route
+        const selectedRouteId = routesData.length > 0 ? routesData[0].id : null; // the default is the first newly added route
         if (keepCurrentRoutes) {
             const currentRoutes = structuredClone(this.store.selectSnapshot((s: ApplicationState) => s.routes).present) as RouteData[];
             routesData = [...currentRoutes, ...routesData];
@@ -109,7 +109,7 @@ export class DataContainerService {
             }
         } catch (ex) {
             this.shareUrlsService.setShareUrl(null);
-            this.toastService.warning(this.resources.unableToLoadFromUrl);
+            this.toastService.error(ex, this.resources.unableToLoadFromUrl);
         }
     }
 

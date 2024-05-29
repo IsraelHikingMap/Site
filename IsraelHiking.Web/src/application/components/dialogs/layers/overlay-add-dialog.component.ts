@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation } from "@angular/core";
+import { Component } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 
 import { ResourcesService } from "../../../services/resources.service";

@@ -13,6 +13,7 @@ namespace IsraelHiking.API.Controllers
     /// This controller handles the user custom layers
     /// </summary>
     [Route("api/[controller]")]
+    [Authorize]
     public class UserLayersController : ControllerBase
     {
         private readonly IUserLayersRepository _repository;
@@ -30,7 +31,6 @@ namespace IsraelHiking.API.Controllers
         /// Gets the user's custom layers
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<MapLayerData>), 200)]
         public async Task<IActionResult> GetUserLayers()
@@ -44,7 +44,6 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="mapLayer">The map layer to add</param>
         /// <returns></returns>
-        [Authorize]
         [HttpPost]
         [ProducesResponseType(typeof(MapLayerData), 200)]
         public async Task<IActionResult> PostUserLayer([FromBody]MapLayerData mapLayer)
@@ -65,7 +64,6 @@ namespace IsraelHiking.API.Controllers
         /// <param name="id"></param>
         /// <param name="mapLayer"></param>
         /// <returns></returns>
-        [Authorize]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> PutUserLayer(string id, [FromBody]MapLayerData mapLayer)
@@ -84,7 +82,6 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [Authorize]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteUserLayer(string id)
