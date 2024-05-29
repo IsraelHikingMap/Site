@@ -17,5 +17,20 @@
 	},
 	"ios": {
 		"preferredContentMode": "mobile"
-	}
+	},
+	"packageClassList": [
+		"KeepAwakePlugin",
+		"KeepAwakePlugin",
+		"ScreenBrightnessPlugin",
+		"ScreenBrightnessPlugin",
+		"CapacitorSQLitePlugin",
+		"CapacitorSQLitePlugin",
+		"AppPlugin",
+		"CAPCameraPlugin",
+		"DevicePlugin",
+		"TextZoomPlugin",
+		"NativeAudio",
+		"NativeAudio",
+		"CDVPlugin"
+	]
 }

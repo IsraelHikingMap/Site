@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "il.org.osm.israelhiking"
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
     packagingOptions {
         exclude 'build-data.properties'
     }
