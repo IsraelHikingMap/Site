@@ -51,7 +51,6 @@ export class ImageCaptureDirective implements OnDestroy {
     private async getPictureFromCamera() {
         const data = await Camera.getPhoto({
             correctOrientation: true,
-            saveToGallery: true,
             resultType: CameraResultType.DataUrl,
             source: CameraSource.Camera
         });

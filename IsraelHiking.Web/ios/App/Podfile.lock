@@ -1,33 +1,23 @@
 PODS:
-  - Capacitor (5.7.1):
+  - Capacitor (6.0.0):
     - CapacitorCordova
-  - CapacitorApp (5.0.7):
+  - CapacitorApp (6.0.0):
     - Capacitor
-  - CapacitorCamera (5.0.9):
+  - CapacitorCamera (6.0.0):
     - Capacitor
-  - CapacitorCommunityKeepAwake (4.0.0):
+  - CapacitorCommunityKeepAwake (5.0.0):
     - Capacitor
-  - CapacitorCommunityScreenBrightness (5.0.0):
+  - CapacitorCommunityScreenBrightness (6.0.0):
     - Capacitor
-  - CapacitorCommunitySqlite (5.6.1):
+  - CapacitorCordova (6.0.0)
+  - CapacitorDevice (6.0.0):
     - Capacitor
-    - SQLCipher
-    - ZIPFoundation
-  - CapacitorCordova (5.7.1)
-  - CapacitorDevice (5.0.7):
+  - CapacitorTextZoom (6.0.0):
     - Capacitor
-  - CapacitorTextZoom (5.0.7):
+  - CapgoNativeAudio (6.3.4):
     - Capacitor
-  - CapgoNativeAudio (6.2.7):
-    - Capacitor
-  - CordovaPlugins (5.7.1):
+  - CordovaPlugins (6.0.0):
     - CapacitorCordova
-  - SQLCipher (4.5.3):
-    - SQLCipher/standard (= 4.5.3)
-  - SQLCipher/common (4.5.3)
-  - SQLCipher/standard (4.5.3):
-    - SQLCipher/common
-  - ZIPFoundation (0.9.16)
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
@@ -35,17 +25,11 @@ DEPENDENCIES:
   - "CapacitorCamera (from `../../node_modules/@capacitor/camera`)"
   - "CapacitorCommunityKeepAwake (from `../../node_modules/@capacitor-community/keep-awake`)"
   - "CapacitorCommunityScreenBrightness (from `../../node_modules/@capacitor-community/screen-brightness`)"
-  - "CapacitorCommunitySqlite (from `../../node_modules/@capacitor-community/sqlite`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
   - "CapacitorTextZoom (from `../../node_modules/@capacitor/text-zoom`)"
   - "CapgoNativeAudio (from `../../node_modules/@capgo/native-audio`)"
   - CordovaPlugins (from `../capacitor-cordova-ios-plugins`)
-
-SPEC REPOS:
-  trunk:
-    - SQLCipher
-    - ZIPFoundation
 
 EXTERNAL SOURCES:
   Capacitor:
@@ -58,8 +42,6 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor-community/keep-awake"
   CapacitorCommunityScreenBrightness:
     :path: "../../node_modules/@capacitor-community/screen-brightness"
-  CapacitorCommunitySqlite:
-    :path: "../../node_modules/@capacitor-community/sqlite"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorDevice:
@@ -72,20 +54,17 @@ EXTERNAL SOURCES:
     :path: "../capacitor-cordova-ios-plugins"
 
 SPEC CHECKSUMS:
-  Capacitor: 6bd16626bc7a4a382eff16f6aed0072fe9776951
-  CapacitorApp: 17fecd0e6cb23feafac7eb0939417389038b0979
-  CapacitorCamera: 4892c5c392f60039d853dde78bc50ba19fbd113e
-  CapacitorCommunityKeepAwake: f3442e3e9b666dd0162522fbd053da1fe81ede20
-  CapacitorCommunityScreenBrightness: b2d9c6fffee6b684994cd69f727f2090e2f05c6d
-  CapacitorCommunitySqlite: 47474c9717db7d998eeba2c3147e1c055a726d5f
-  CapacitorCordova: b49f3372270c88fd9c633a4fc8c7ef00e47dd2d6
-  CapacitorDevice: fc91bdb484dc0e70755e9b621cd557afe642613a
-  CapacitorTextZoom: 69814a62b1d0f23a899cca06ea9838c38de187ff
-  CapgoNativeAudio: 9c9d2ee1683c5e7091d59c3aa7ff5c30c66b9598
-  CordovaPlugins: 94be884d77b1c68b78e24952738ae5d27899c561
-  SQLCipher: 57fa9f863fa4a3ed9dd3c90ace52315db8c0fdca
-  ZIPFoundation: d170fa8e270b2a32bef9dcdcabff5b8f1a5deced
+  Capacitor: 559d073c4ca6c27f8e7002c807eea94c3ba435a9
+  CapacitorApp: 9d53aec7101f7b030a950c5bdc4df8612576b279
+  CapacitorCamera: b61f125d92a0ef75d7becb7956fed7dd13187ee0
+  CapacitorCommunityKeepAwake: c820e5394a74ab73635107f0544378b026562243
+  CapacitorCommunityScreenBrightness: 250184917bd0738a681c026a9513e18ddb0cb49b
+  CapacitorCordova: 8c4bfdf69368512e85b1d8b724dd7546abeb30af
+  CapacitorDevice: f8fd88f9edd1261c55a109f32015b09bbbfdc4a0
+  CapacitorTextZoom: 696722e5c479b364f2429584f11ad386d609bd1a
+  CapgoNativeAudio: b67fc13d2873df62f6a279567536382c1da5a252
+  CordovaPlugins: 1f2794134a8c57f6b5112e89cc7afd07dc0f7bef
 
-PODFILE CHECKSUM: f8fe3c7aa16c121687650f82200b0b0ef73cc16c
+PODFILE CHECKSUM: 0c32ad6bc2ae562b3fa0cf7a399eddd792459d18
 
 COCOAPODS: 1.12.1

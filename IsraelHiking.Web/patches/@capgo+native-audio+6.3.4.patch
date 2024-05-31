@@ -1,0 +1,13 @@
+diff --git a/node_modules/@capgo/native-audio/android/src/main/java/ee/forgr/audio/NativeAudio.java b/node_modules/@capgo/native-audio/android/src/main/java/ee/forgr/audio/NativeAudio.java
+index 1f45a30..5cd7788 100644
+--- a/node_modules/@capgo/native-audio/android/src/main/java/ee/forgr/audio/NativeAudio.java
++++ b/node_modules/@capgo/native-audio/android/src/main/java/ee/forgr/audio/NativeAudio.java
+@@ -59,6 +59,8 @@ public class NativeAudio
+ 
+     this.audioManager = (AudioManager) this.getActivity()
+       .getSystemService(Context.AUDIO_SERVICE);
++
++    audioAssetList = new HashMap<>();
+   }
+ 
+   @Override

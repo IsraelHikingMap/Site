@@ -20,8 +20,7 @@ namespace IsraelHiking.API.Services
         /// Get a list of files that have been updated since a given date
         /// </summary>
         /// <param name="lastModifiedDate">The date to check against</param>
-        /// <param name="pmtiles"></param>
         /// <returns>A list of file names</returns>
-        Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate, bool pmtiles);
+        Dictionary<string, DateTime> GetUpdatedFilesList(DateTime lastModifiedDate);
     }
 }

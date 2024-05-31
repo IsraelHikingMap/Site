@@ -110,7 +110,6 @@ jobs:
           packageName: il.org.osm.israelhiking
           releaseFiles: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
           track: internal
-          debugSymbols: IsraelHiking.Web/android/app/build/intermediates/merged_native_libs/release/out/lib
 
   docker: 
     runs-on: ubuntu-latest
