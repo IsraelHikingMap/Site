@@ -307,6 +307,8 @@ export class ResourcesService {
     public tracesAreOnlySavedLocally: string;
     public unexpectedErrorPleaseTryAgainLater: string;
     public editingRouteWhileTracking: string;
+    public loginTokenExpiredPleaseLoginAgain: string;
+    public jammedPositionReceived: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -482,7 +484,7 @@ export class ResourcesService {
     }
 
     private async setLanguageInternal(language: Language): Promise<void> {
-        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1690445722284");
+        await this.gettextCatalog.loadRemote(Urls.translations + language.code + ".json?sign=1716145116367");
         this.about = this.gettextCatalog.getString("About");
         this.legend = this.gettextCatalog.getString("Legend");
         this.clear = this.gettextCatalog.getString("Clear");
@@ -756,9 +758,8 @@ export class ResourcesService {
         this.wouldYouLikeToUpdateThePointWithoutTheTitle = this.gettextCatalog
             .getString("Would you like to update the point without the title?");
         this.lastRecordingDidNotEndWell = this.gettextCatalog.getString("Last recording did not end well. Feel free to start a new one.");
-        this.makeSureBatteryOptimizationIsOff = this.gettextCatalog.getString(
-            "Please make sure the battery optimization is turned off for this application. Go to application setting to do so."
-        );
+        this.makeSureBatteryOptimizationIsOff = this.gettextCatalog
+            .getString("Please make sure the battery optimization is turned off for this application. Go to application setting to do so.");
         this.dontShowThisMessageAgain = this.gettextCatalog.getString("Don't show this message again");
         this.areYouSureYouWantToDeleteAllRoutes = this.gettextCatalog.getString("Are you sure you want to delete all routes?");
         this.clickBackAgainToCloseTheApp = this.gettextCatalog.getString("Click back again to close the app");
@@ -793,6 +794,8 @@ export class ResourcesService {
         this.unexpectedErrorPleaseTryAgainLater = this.gettextCatalog.getString("Oops, something went wrong. Please try again later");
         this.editingRouteWhileTracking = this.gettextCatalog.getString("GPS tracking is enabled while editing, " +
             "in order to avoid map centering to current location please click the cross icon on the top left corner");
+        this.loginTokenExpiredPleaseLoginAgain = this.gettextCatalog.getString("Login token expired, please login again");
+        this.jammedPositionReceived = this.gettextCatalog.getString("Jammed position received...");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

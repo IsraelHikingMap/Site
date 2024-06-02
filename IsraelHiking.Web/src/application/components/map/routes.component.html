@@ -121,7 +121,7 @@
         <div *ngFor="let marker of route.markers; let idx = index">
             <mgl-marker anchor="bottom"
                         [draggable]="isRouteInEditPoiMode(route)"
-                        [lngLat]="[marker.latlng.lng, marker.latlng.lat]"
+                        [lngLat]="marker.latlng"
                         (markerDragEnd)="markerDragEnd(idx, $event)">
                 <private-poi-overlay [marker]="marker" [routeId]="route.id" [index]="idx" [color]="route.color"></private-poi-overlay>
             </mgl-marker>

@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Map, LngLatBounds, LngLatLike } from "maplibre-gl";
-import { lineString, featureCollection, point, Units } from "@turf/helpers";
+import { lineString, featureCollection, point, Units, BBox } from "@turf/helpers";
 import simplify from "@turf/simplify";
 import distance from "@turf/distance";
 import center from "@turf/center";
@@ -139,16 +139,14 @@ export class SpatialService {
                 if (!lineToCheck.bbox) {
                     lineToCheck.bbox = bbox(lineToCheck);
                 }
-                if (start[0] >= lineToCheck.bbox[0] && start[0] <= lineToCheck.bbox[2] &&
-                    start[1] >= lineToCheck.bbox[1] && start[1] <= lineToCheck.bbox[3]) {
+                if (SpatialService.insideBbox(start, lineToCheck.bbox)) {
                     const nearestPoint = nearestPointOnLine(lineToCheck, start);
                     if (nearestPoint.properties.dist < 1e-5) {
                         lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
                         continue;
                     }
                 }
-                if (end[0] >= lineToCheck.bbox[0] && end[0] <= lineToCheck.bbox[2] &&
-                    end[1] >= lineToCheck.bbox[1] && end[1] <= lineToCheck.bbox[3]) {
+                if (SpatialService.insideBbox(end, lineToCheck.bbox)) {
                     const nearestPoint = nearestPointOnLine(lineToCheck, end);
                     if (nearestPoint.properties.dist < 1e-5) {
                         lineToCheck.geometry.coordinates.splice(nearestPoint.properties.index + 1, 0, nearestPoint.geometry.coordinates);
@@ -305,9 +303,13 @@ export class SpatialService {
         };
     }
 
-    private static getLineString(latlngs: LatLngAlt[]): GeoJSON.Feature<GeoJSON.LineString> {
+    public static getLineString(latlngs: LatLngAlt[]): GeoJSON.Feature<GeoJSON.LineString> {
         const coordinates = latlngs.map(l => SpatialService.toCoordinate(l));
         return lineString(coordinates);
+    }
+
+    public static getPointFeature(latlng: LatLngAlt): GeoJSON.Feature<GeoJSON.Point> {
+        return point(SpatialService.toCoordinate(latlng));
     }
 
     public static getMapBounds(map: Map): Bounds {
@@ -355,8 +357,19 @@ export class SpatialService {
         };
     }
 
+    public static insideBbox(position: GeoJSON.Position, bbox: BBox): boolean {
+        return position[0] >= bbox[0] && position[0] <= bbox[2] &&
+            position[1] >= bbox[1] && position[1] <= bbox[3];
+    }
+
     public static isInIsrael(latlng: LatLngAlt): boolean {
-        return latlng.lat > 29.37711 && latlng.lat < 33.35091 &&
-                latlng.lng > 34.07929 && latlng.lng < 35.91531;
+        const position = SpatialService.toCoordinate(latlng);
+        return SpatialService.insideBbox(position, [34.07929, 29.37711, 35.91531, 33.35091]);
+    }
+
+    public static isJammingTarget(latlng: LatLngAlt): boolean {
+        const position = SpatialService.toCoordinate(latlng);
+        return SpatialService.insideBbox(position, [35.48, 33.811, 35.50, 33.823]) ||
+            SpatialService.insideBbox(position, [31.350, 30.0817, 31.355, 30.0860]);
     }
 }

@@ -46,7 +46,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         {
             var osmGateway = Substitute.For<IAuthClient>();
             osmGateway.CreateChangeset(Arg.Any<TagsCollection>()).Returns(changesetId);
-            _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(osmGateway);
+            _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(osmGateway);
             return osmGateway;
         }
 

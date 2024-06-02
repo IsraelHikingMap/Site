@@ -17,6 +17,14 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
+    /// <summary>
+    /// Does not require authorization, but authorization can be used,
+    /// this is a special case for creating a share url without a user.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    public class OptionalAuthorizationAttribute : Attribute { }
+    
+    
     /// <inheritdoc />
     /// <summary>
     /// This controller handles the shared routes
@@ -126,6 +134,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>Whether the operation succeeded or not</returns>
         // POST api/urls
         [HttpPost]
+        [OptionalAuthorization]
         [ProducesResponseType(typeof(ShareUrl), 200)]
         public async Task<IActionResult> PostShareUrl([FromBody]ShareUrl shareUrl)
         {

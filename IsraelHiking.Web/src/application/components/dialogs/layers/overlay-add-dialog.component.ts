@@ -10,7 +10,8 @@ import type { LayerData } from "../../../models/models";
 
 @Component({
     selector: "overlay-add-dialog",
-    templateUrl: "./layer-properties-dialog.component.html"
+    templateUrl: "./layer-properties-dialog.component.html",
+    styleUrls: ["./layer-properties-dialog.component.scss"]
 })
 export class OverlayAddDialogComponent extends LayerBaseDialogComponent {
     constructor(resources: ResourcesService,

@@ -8,7 +8,6 @@ import deepmerge from "deepmerge";
 import { LoggingService } from "./logging.service";
 import { RunningContextService } from "./running-context.service";
 import { PmTilesService } from "./pmtiles.service";
-import { MBTilesService } from "./mbtiles.service";
 import { POPULARITY_HEATMAP, initialState } from "../reducers/initial-state";
 import { ClearHistoryAction } from "../reducers/routes.reducer";
 import { SetSelectedPoiAction, SetSidebarAction } from "../reducers/poi.reducer";
@@ -44,13 +43,11 @@ export class DatabaseService {
     constructor(private readonly loggingService: LoggingService,
                 private readonly runningContext: RunningContextService,
                 private readonly pmTilesService: PmTilesService,
-                private readonly mbtilesService: MBTilesService,
                 private readonly store: Store) {
         this.updating = false;
     }
 
     public async initialize() {
-        this.mbtilesService.initialize();
         this.stateDatabase = new Dexie(DatabaseService.STATE_DB_NAME);
         this.stateDatabase.version(1).stores({
             state: "id"
@@ -96,7 +93,7 @@ export class DatabaseService {
 
     private initCustomTileLoadFunction() {
         addProtocol("custom", async (params, _abortController) => {
-            const data = await this.getTile(params.url);
+            const data = await this.pmTilesService.getTile(params.url);
             return {data};
         });
     }
@@ -108,7 +105,6 @@ export class DatabaseService {
         this.store.dispatch(new SetSidebarAction(false));
         const finalState = this.store.snapshot() as ApplicationState;
         await this.updateState(finalState);
-        await this.mbtilesService.uninitialize();
     }
 
     private async updateState(state: ApplicationState) {
@@ -126,15 +122,6 @@ export class DatabaseService {
         } finally {
             this.updating = false;
         }
-    }
-
-    public async getTile(url: string): Promise<ArrayBuffer> {
-        try {
-            return await this.pmTilesService.getTile(url);
-        } catch (ex) {
-            this.loggingService.error(`[Database] Failed to get tile from pmtiles: ${(ex as Error).message}`);
-        }
-        return this.mbtilesService.getTile(url);
     }
 
     public addPoiToUploadQueue(feature: GeoJSON.Feature): Promise<any> {

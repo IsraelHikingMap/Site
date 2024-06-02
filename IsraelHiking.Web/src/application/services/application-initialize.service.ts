@@ -22,6 +22,8 @@ import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { GeoLocationService } from "./geo-location.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
+import { AuthorizationService } from "./authorization.service";
+import { ToastService } from "./toast.service";
 import type { ApplicationState } from "../models/models";
 
 @Injectable()
@@ -44,6 +46,8 @@ export class ApplicationInitializeService {
                 private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
                 private readonly geoLocationService: GeoLocationService,
                 private readonly overpassTurboService: OverpassTurboService,
+                private readonly authorizationService: AuthorizationService,
+                private readonly toastService: ToastService,
                 private readonly store: Store
     ) {
     }
@@ -73,6 +77,18 @@ export class ApplicationInitializeService {
             } else if (!this.runningContextService.isIFrame
                 && this.store.selectSnapshot((s: ApplicationState) => s.configuration).isShowIntro) {
                     IntroDialogComponent.openDialog(this.dialog, this.runningContextService);
+            }
+            // HM TODO: remove this at 01.2025
+            if (this.store.selectSnapshot((s: ApplicationState) => s.userState).token?.includes(";")) {
+                this.toastService.confirm({
+                    type: "OkCancel",
+                    message: this.resources.loginTokenExpiredPleaseLoginAgain,
+                    confirmAction: () => {
+                        this.authorizationService.logout();
+                        this.authorizationService.login();
+                    },
+                    declineAction: () => { }
+                });
             }
             this.poiService.initialize(); // do not wait for it to complete
             this.recordedRouteService.initialize();

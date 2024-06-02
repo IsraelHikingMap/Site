@@ -1,13 +1,14 @@
-﻿using IsraelHiking.Common.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
 using OsmSharp.IO.API;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services.Osm;
 using LazyCache;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace IsraelHiking.Web
 {
@@ -15,15 +16,12 @@ namespace IsraelHiking.Web
     {
         private readonly ILogger _logger;
         private readonly IClientsFactory _clientsFactory;
-        private readonly ConfigurationData _options;
         private readonly IAppCache _appCache;
         public OsmAccessTokenEventsHelper(IClientsFactory clientsFactory,
-            IOptions<ConfigurationData> options,
             IAppCache appCache,
             ILogger logger)
         {
             _clientsFactory = clientsFactory;
-            _options = options.Value;
             _logger = logger;
             _appCache = appCache;
         }
@@ -32,33 +30,39 @@ namespace IsraelHiking.Web
         {
             try
             {
-                if (string.IsNullOrEmpty(context.Token))
+                var token = context.Token;
+                if (string.IsNullOrEmpty(token))
                 {
                     string authorization = context.Request.Headers["Authorization"];
-
-                    // If no authorization header found, nothing to process further
-                    if (string.IsNullOrEmpty(authorization))
+                    if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                     {
-                        context.Fail(new Exception("Can't find access token - missing Authorization header"));
-                        return;
-                    }
-
-                    if (authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                    {
-                        context.Token = authorization.Substring("Bearer ".Length).Trim();
-                    }
-
-                    // If no token found, no further work possible
-                    if (string.IsNullOrEmpty(context.Token))
-                    {
-                        context.Fail(new Exception("Can't find access token - Bearer is missing"));
-                        return;
+                        token = authorization.Substring("Bearer ".Length).Trim();
                     }
                 }
-
-                var userIdFromCache = await _appCache.GetOrAddAsync(context.Token, async () =>
+                var optionalAuthorization = context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<OptionalAuthorizationAttribute>() != null;
+                if (optionalAuthorization && string.IsNullOrEmpty(token)) 
                 {
-                    var osmGateway = OsmAuthFactoryWrapper.ClientFromToken(context.Token, _clientsFactory, _options);
+                    context.Success();
+                    return;
+                }
+
+                var needToCheckToken = context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAuthorizeData>() != null ||
+                                       optionalAuthorization;
+                if (!needToCheckToken) 
+                {
+                    context.Success();
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    context.Fail("Token is missing for authorized route");
+                    return;
+                }
+                
+                var userIdFromCache = await _appCache.GetOrAddAsync(token, async () =>
+                {
+                    var osmGateway = _clientsFactory.CreateOAuth2Client(context.Token);
                     var user = await osmGateway.GetUserDetails();
                     var userId = user.Id.ToString();
                     _logger.LogInformation($"User {userId} had just logged in");
@@ -67,7 +71,7 @@ namespace IsraelHiking.Web
                 var identity = new ClaimsIdentity("Osm");
                 identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userIdFromCache));
                 identity.AddClaim(new Claim(ClaimTypes.Name, userIdFromCache));
-                identity.AddClaim(new Claim(OsmAuthFactoryWrapper.CLAIM_KEY, context.Token));
+                identity.AddClaim(new Claim(OsmAuthFactoryWrapper.CLAIM_KEY, token));
                 context.Principal = new ClaimsPrincipal(identity);
                 context.Success();
             }

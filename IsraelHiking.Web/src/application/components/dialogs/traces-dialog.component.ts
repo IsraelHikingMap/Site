@@ -73,14 +73,17 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         });
         this.searchTerm.setValue(this.sessionSearchTerm);
         this.tracesChangedSubscription = this.traces$.subscribe(() => {
-            this.updateFilteredLists(this.searchTerm.value);
+            if (!this.loadingTraces) {
+                this.updateFilteredLists(this.searchTerm.value);
+            }
         });
     }
 
     public async ngOnInit() {
-        this.loadingTraces = this.store.selectSnapshot((s: ApplicationState) => s.tracesState).traces.length === 0;
+        this.loadingTraces = true;
         await this.tracesService.syncTraces();
         this.loadingTraces = false;
+        this.updateFilteredLists(this.searchTerm.value);
     }
 
     public ngOnDestroy() {
@@ -257,5 +260,9 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             default:
                 throw new Error(`invalid visibility value: ${visibility}`);
         }
+    }
+
+    public trackById(_: number, trace: Trace) {
+        return trace.id;
     }
 }

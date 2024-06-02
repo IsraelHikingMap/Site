@@ -3,7 +3,8 @@
 	"appName": "Israel Hiking Map",
 	"webDir": "www",
 	"server": {
-		"iosScheme": "ionic"
+		"iosScheme": "ionic",
+		"androidScheme": "http"
 	},
 	"cordova": {
 		"preferences": {
@@ -17,5 +18,18 @@
 	},
 	"ios": {
 		"preferredContentMode": "mobile"
-	}
+	},
+	"packageClassList": [
+		"KeepAwakePlugin",
+		"KeepAwakePlugin",
+		"ScreenBrightnessPlugin",
+		"ScreenBrightnessPlugin",
+		"AppPlugin",
+		"CAPCameraPlugin",
+		"DevicePlugin",
+		"TextZoomPlugin",
+		"NativeAudio",
+		"NativeAudio",
+		"CDVPlugin"
+	]
 }

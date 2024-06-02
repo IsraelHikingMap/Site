@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
-using IsraelHiking.Common.Configuration;
 using IsraelHiking.DataAccessInterfaces.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using OsmSharp.API;
@@ -42,10 +40,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _imageCreationGateway = Substitute.For<IImageCreationGateway>();
             _searchRepository = Substitute.For<ISearchRepository>();
             _distributedCache = Substitute.For<IDistributedCache>();
-            var options = new ConfigurationData();
-            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
-            optionsProvider.Value.Returns(options);
-            _controller = new OsmTracesController(_clientsFactory, _dataContainerConverterService, _imageCreationGateway, _searchRepository, _distributedCache, optionsProvider, Substitute.For<ILogger>());
+            _controller = new OsmTracesController(_clientsFactory, _dataContainerConverterService, _imageCreationGateway, _searchRepository, _distributedCache, Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -267,7 +262,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IAuthClient SetupOAuthClient()
         {
             var osmGateWay = Substitute.For<IAuthClient>();
-            _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(osmGateWay);
+            _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(osmGateWay);
             return osmGateWay;
         }
     }

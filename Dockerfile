@@ -1,4 +1,4 @@
-FROM node:18.16 as build-node
+FROM node:20.12 as build-node
 
 WORKDIR /angular
 COPY ./IsraelHiking.Web/ ./
@@ -7,7 +7,7 @@ RUN npm ci
 RUN npm run build:prod -- --no-progress
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 as build-net
-ARG VERSION=9.19.0
+ARG VERSION=9.20.0
 WORKDIR /net
 COPY . .
 

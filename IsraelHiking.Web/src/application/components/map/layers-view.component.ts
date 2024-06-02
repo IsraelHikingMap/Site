@@ -12,6 +12,7 @@ import { RouteStrings } from "../../services/hash.service";
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/selected-route.service";
 import { SpatialService } from "../../services/spatial.service";
+import { NavigateHereService } from "../../services/navigate-here.service";
 import { SetSelectedPoiAction } from "../../reducers/poi.reducer";
 import { AddPrivatePoiAction } from "../../reducers/routes.reducer";
 import type { ApplicationState, LatLngAlt, LinkData, Overlay } from "../../models/models";
@@ -43,6 +44,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
                 private readonly layersService: LayersService,
                 private readonly poiService: PoiService,
                 private readonly selectedRouteService: SelectedRouteService,
+                private readonly navigateHereService: NavigateHereService,
                 private readonly store: Store
     ) {
         super(resources);
@@ -170,5 +172,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
 
     public getSelectedFeatureLatlng(): LatLngAlt {
         return SpatialService.toLatLng(this.selectedPoiFeature.geometry.coordinates as [number, number]);
+    }
+
+    public navigateHere() {
+        this.navigateHereService.addNavigationSegment(this.getSelectedFeatureLatlng());
+        this.clearSelected();
     }
 }

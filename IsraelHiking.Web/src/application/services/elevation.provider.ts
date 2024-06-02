@@ -6,7 +6,7 @@ import { firstValueFrom } from "rxjs";
 
 import { LoggingService } from "./logging.service";
 import { SpatialService } from "./spatial.service";
-import { DatabaseService } from "./database.service";
+import { PmTilesService } from "./pmtiles.service";
 import { Urls } from "../urls";
 import type { ApplicationState, LatLngAlt } from "../models/models";
 
@@ -20,7 +20,7 @@ export class ElevationProvider {
 
     constructor(private readonly httpClient: HttpClient,
                 private readonly loggingService: LoggingService,
-                private readonly databaseService: DatabaseService,
+                private readonly pmTilesService: PmTilesService,
                 private readonly store: Store) {
         this.elevationCache = new Map<string, Uint8ClampedArray>();
     }
@@ -95,7 +95,7 @@ export class ElevationProvider {
                     continue;
                 }
 
-                const arrayBuffer = await this.databaseService.getTile(`custom://TerrainRGB/${zoom}/${tileX}/${tileY}.png`);
+                const arrayBuffer = await this.pmTilesService.getTile(`custom://TerrainRGB/${zoom}/${tileX}/${tileY}.png`);
                 const data = await this.getImageData(arrayBuffer);
                 this.elevationCache.set(key, data);
         }

@@ -50,7 +50,7 @@ namespace IsraelHiking.API.Tests.Services
             _fileProvider.GetDirectoryContents(Arg.Any<string>()).Returns(directory);
             _fileSystemHelper.IsHidden(Arg.Any<string>()).Returns(true);
             
-            var results = _service.GetUpdatedFilesList(new DateTime(0), false);
+            var results = _service.GetUpdatedFilesList(new DateTime(0));
             
             Assert.AreEqual(0, results.Count);
         }
@@ -67,7 +67,7 @@ namespace IsraelHiking.API.Tests.Services
             _fileProvider.GetDirectoryContents(Arg.Any<string>()).Returns(directory);
             _fileSystemHelper.IsHidden(Arg.Any<string>()).Returns(false);
             
-            var results = _service.GetUpdatedFilesList(lastModified, false);
+            var results = _service.GetUpdatedFilesList(lastModified);
             
             Assert.AreEqual(0, results.Count);
         }
@@ -85,7 +85,7 @@ namespace IsraelHiking.API.Tests.Services
             _fileProvider.GetDirectoryContents(Arg.Any<string>()).Returns(directory);
             _fileSystemHelper.IsHidden(Arg.Any<string>()).Returns(false);
             
-            var results = _service.GetUpdatedFilesList(lastModified, true);
+            var results = _service.GetUpdatedFilesList(lastModified);
             
             Assert.AreEqual(1, results.Count);
         }

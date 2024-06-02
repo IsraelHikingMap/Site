@@ -69,7 +69,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IAuthClient SetupHttpFactory()
         {
             var gateway = Substitute.For<IAuthClient>();
-            _clientsFactory.CreateOAuthClient(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(gateway);
+            _clientsFactory.CreateOAuth2Client(Arg.Any<string>()).Returns(gateway);
             return gateway;
         }
 

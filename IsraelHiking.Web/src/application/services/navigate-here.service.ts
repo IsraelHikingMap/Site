@@ -20,7 +20,7 @@ export class NavigateHereService {
                 private readonly routesFactory: RoutesFactory,
                 private readonly store: Store) { }
 
-    public async addNavigationSegment(latlng: LatLngAlt, title: string) {
+    public async addNavigationSegment(latlng: LatLngAlt, title?: string) {
         const currentPosition = this.store.selectSnapshot((s: ApplicationState) => s.gpsState).currentPosition;
         if (currentPosition == null) {
             this.toastService.warning(this.resources.unableToFindYourLocation);
@@ -37,8 +37,6 @@ export class NavigateHereService {
         data.segments = GpxDataContainerConverterService.getSegmentsFromLatlngs(latlngs as LatLngAltTime[], routingType);
         this.store.dispatch(new AddRouteAction(data));
 
-        if (this.selectedRouteService.getSelectedRoute() == null) {
-            this.selectedRouteService.setSelectedRoute(data.id);
-        }
+        this.selectedRouteService.setSelectedRoute(data.id);
     }
 }

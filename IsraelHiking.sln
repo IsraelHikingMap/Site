@@ -31,7 +31,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsraelHiking.DataAccess.Tes
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{3585675D-C9A0-4E48-A11D-4B9E789A0B0A}"
 	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
 		Scripts\BuildAndPublishAndroid.ps1 = Scripts\BuildAndPublishAndroid.ps1
 		Scripts\BuildAndPublishIOS.ps1 = Scripts\BuildAndPublishIOS.ps1
 		Scripts\generate-legend.py = Scripts\generate-legend.py

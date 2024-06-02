@@ -96,7 +96,6 @@ import { GlobalErrorHandler } from "./services/global-error.handler";
 import { OverpassTurboService } from "./services/overpass-turbo.service";
 import { ImageAttributionService } from "./services/image-attribution.service";
 import { PmTilesService } from "./services/pmtiles.service";
-import { MBTilesService } from "./services/mbtiles.service";
 // interactions
 import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
@@ -310,7 +309,6 @@ const initializeApplication = (injector: Injector) => async () => {
             OverpassTurboService,
             ImageAttributionService,
             PmTilesService,
-            MBTilesService,
             AudioPlayerFactory,
             FileSystemWrapper,
             // eslint-disable-next-line
