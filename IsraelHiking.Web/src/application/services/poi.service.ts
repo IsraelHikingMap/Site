@@ -5,6 +5,7 @@ import { Observable, firstValueFrom } from "rxjs";
 import { timeout, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
 import { Store, Select } from "@ngxs/store";
+import osmtogeojson from "osmtogeojson";
 import type { Immutable } from "immer";
 
 import { ResourcesService } from "./resources.service";
@@ -139,7 +140,7 @@ export class PoiService {
     private initializePois() {
         this.mapService.map.addSource("points-of-interest", {
             type: "vector",
-            url: "https://israelhiking.osm.org.il/vector/data/pois.json",
+            url: "https://israelhiking.osm.org.il/vector/data/IHM.json",
         });
         // HM TODO: check if there's a need to add more layers to support more source layers.
         this.mapService.map.addLayer({
@@ -400,6 +401,14 @@ export class PoiService {
         return osmType + Math.floor((Number(feature.id)/ 10));
     }
 
+    private poiIdentifierToTypeAndId(id: string): {type: string, osmId: string} {
+        const osmTypeAndId = id.split("_");
+        return {
+            type: osmTypeAndId[0],
+            osmId: osmTypeAndId[1]
+        };
+    }
+
     private featureToPoiId(feature: GeoJSON.Feature, source: string): string {
         return source + "_" + this.featureToPoiIdentifier(feature);
     }
@@ -532,11 +541,48 @@ export class PoiService {
             return this.getFeatureFromCoordinatesId(id, language);
         }
         try {
-            const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-            const poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
-            const poi = await firstValueFrom(poi$) as GeoJSON.Feature;
-            this.poisCache.splice(0, 0, poi);
-            return cloneDeep(poi);
+            if (source === "OSM") {
+                const { osmId, type } = this.poiIdentifierToTypeAndId(id);
+                const osmPoi$ = this.httpClient.get(`https://www.openstreetmap.org/api/0.6/${type}/${osmId}`).pipe(timeout(6000));
+                const osmPoi = await firstValueFrom(osmPoi$);
+                const geojson = osmtogeojson(osmPoi);
+                const feature = geojson.features[0];
+                if (feature.properties.wikidata) {
+                    const url = `https://www.wikidata.org/w/rest.php/wikibase/v0/entities/items/${feature.properties.wikidata}`;
+                    const wikidata = await firstValueFrom(this.httpClient.get(url).pipe(timeout(3000))) as any;
+                    const languageShort = language || this.resources.getCurrentLanguageCodeSimplified();
+                    const title = wikidata.sitelinks[`${languageShort}wiki`]?.title;
+                    if (wikidata.statements.P18 && wikidata.statements.P18.length > 0) {
+                        // HM TODO: make images addition more robust
+                        if (!feature.properties.image) {
+                            feature.properties.image = `File:${wikidata.statements.P18[0].value.content}`;
+                        } else {
+                            feature.properties.image1 = `File:${wikidata.statements.P18[0].value.content}`;
+                        }
+                    }
+                    if (title) {
+                        // HM TODO: Make website more robust
+                        feature.properties.website = `https://${languageShort}.wikipedia.org/wiki/${title}`;
+                        feature.properties.poiSourceImageUrl = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
+                    }
+                    const wikipediaPage = await firstValueFrom(this.httpClient.get(`http://${languageShort}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${title}&origin=*`)) as any;
+                    const pagesIds = Object.keys(wikipediaPage.query.pages);
+                    if (pagesIds.length > 0) {
+                        feature.properties.poiExternalDescription = wikipediaPage.query.pages[pagesIds[0]].extract;
+                    }
+                }
+                const poi = this.convertFeatureToPoi(feature);
+                poi.properties.identifier = id;
+                console.log(poi);
+                this.poisCache.splice(0, 0, poi);
+                return cloneDeep(poi);
+            } else {
+                const params = new HttpParams().set("language", language || this.resources.getCurrentLanguageCodeSimplified());
+                const poi$ = this.httpClient.get(Urls.poi + source + "/" + id, { params }).pipe(timeout(6000));
+                const poi = await firstValueFrom(poi$) as GeoJSON.Feature;
+                this.poisCache.splice(0, 0, poi);
+                return cloneDeep(poi);
+            }
         } catch {
             const features = this.mapService.map.querySourceFeatures("points-of-interest-offline", {sourceLayer: "poi"});
             // HM TODO: use source here?
