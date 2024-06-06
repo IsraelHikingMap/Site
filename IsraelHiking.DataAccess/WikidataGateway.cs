@@ -122,6 +122,7 @@ public class WikidataGateway : IWikidataGateway
                 feature.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":" + languagesTitlesAndLinks[index].Language,
                     languagesTitlesAndLinks[index].Title);
                 var posix = index > 0 ? index.ToString() : string.Empty;
+                // HM TODO: website is with "_" instead of space.
                 feature.Attributes.AddOrUpdate(FeatureAttributes.WEBSITE + posix, languagesTitlesAndLinks[index].Link);
                 feature.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE_IMAGE_URL + posix, WIKIDATA_LOGO);
             }
