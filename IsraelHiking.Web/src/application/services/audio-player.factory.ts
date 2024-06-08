@@ -21,13 +21,16 @@ export class AudioPlayerFactory {
         this.loggingService.info("[Audio] Initializing audio file");
 
         await NativeAudio.configure({focus: false});
-
-        await NativeAudio.preload({
+        const options = {
             assetId: "uh-oh",
             assetPath: "public/content/uh-oh.mp3",
             audioChannelNum: 1,
             isUrl: false
-        });
+        };
+        if (!await NativeAudio.isPreloaded(options)) {
+            await NativeAudio.preload(options);
+        }
+        
         return {
             play: () => {
                 NativeAudio.play({
