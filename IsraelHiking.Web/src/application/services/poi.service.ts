@@ -84,7 +84,7 @@ type SourceLayerAndJson = {
 export class PoiService {
 
     private static readonly POIS_MAP: Record<string, SourceLayerAndJson> = {
-        "points-of-interest": { sourceLayer: "public_poi", json: "public_pois.json"}, 
+        "points-of-interest": { sourceLayer: "public_pois", json: "public_pois.json"}, 
         "external-points-of-interest": { sourceLayer: "external", json: "external.json"}
     }
 
