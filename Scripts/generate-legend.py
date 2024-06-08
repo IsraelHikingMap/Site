@@ -10,9 +10,11 @@ Usage:
 
 Workflow:
 1. `make refresh-styles start-tileserver-legend` in the vector tile server directory
-2. `cd IsraelHiking.Web/src/content/legend` in this repository
+2. `cd IsraelHiking.Web/src/content/legend` in the Site repository
 3. Optional: `rm *.png` to clean unused legend entries
 4. `../../../../Scripts/generate-legend.py`
+5. Review the changes, preferably with Docker Desktop's image comparison
+6. Commit the changes
 '''
 
 import json
