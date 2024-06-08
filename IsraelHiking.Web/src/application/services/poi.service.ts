@@ -152,7 +152,7 @@ export class PoiService {
     }
 
     private initializePois() {
-        for (let source of Object.keys(PoiService.POIS_MAP)) {
+        for (const source of Object.keys(PoiService.POIS_MAP)) {
             const sourceLayer = PoiService.POIS_MAP[source];
             this.mapService.map.addSource(source, {
                 type: "vector",
@@ -388,13 +388,14 @@ export class PoiService {
                     lat: feature.geometry.coordinates[0][1],
                     lon: feature.geometry.coordinates[0][0],
                 };
-            case "Polygon":
-                // HM TODO: this is a very rough approximation
-                const bounds = SpatialService.getBoundsForFeature(feature);
-                return {
-                    lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
-                    lon: (bounds.northEast.lng + bounds.southWest.lng) / 2,
-                };
+            case "Polygon": {
+                    // HM TODO: this is a very rough approximation
+                    const bounds = SpatialService.getBoundsForFeature(feature);
+                    return {
+                        lat: (bounds.northEast.lat + bounds.southWest.lat) / 2,
+                        lon: (bounds.northEast.lng + bounds.southWest.lng) / 2,
+                    };
+                }
             default:
                 throw new Error("Unsupported geometry type: " + feature.geometry.type);
         }
@@ -413,11 +414,11 @@ export class PoiService {
             return [];
         }
         let features: MapGeoJSONFeature[] = [];
-        for (let source of Object.keys(PoiService.POIS_MAP)) {
+        for (const source of Object.keys(PoiService.POIS_MAP)) {
             features = features.concat(this.mapService.map.querySourceFeatures(source, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
         }
         if (features.length === 0) {
-            for (let source of Object.keys(PoiService.POIS_MAP)) {
+            for (const source of Object.keys(PoiService.POIS_MAP)) {
                 features = features.concat(this.mapService.map.querySourceFeatures(`${source}-offline`, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
             }
         }
@@ -612,7 +613,7 @@ export class PoiService {
             }
         } catch {
             let features: MapGeoJSONFeature[] = [];
-            for (let source of Object.keys(PoiService.POIS_MAP)) {
+            for (const source of Object.keys(PoiService.POIS_MAP)) {
                 features = features.concat(this.mapService.map.querySourceFeatures(`${source}-offline`, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
             }
             const feature = features.find(f => this.featureToPoiIdentifier(f) === id);
