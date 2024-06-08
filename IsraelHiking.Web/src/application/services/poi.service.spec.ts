@@ -138,7 +138,7 @@ describe("Poi Service", () => {
                         coordinates: [0, 0]
                     },
                     properties: {
-                        sub_class: "spring",
+                        subclass: "spring",
                         "name:he": "name",
                         "name:en": "name"
                     }
@@ -149,7 +149,7 @@ describe("Poi Service", () => {
                         coordinates: [0, 0]
                     },
                     properties: {
-                        sub_class: "spring",
+                        subclass: "spring",
                         "name:en": "name"
                     }
                 }
@@ -159,8 +159,7 @@ describe("Poi Service", () => {
             mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "Water" }]));
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
             
-            await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
-            expect(poiService.poiGeojsonFiltered.features.length).toBe(1);
+            expect(poiService.poiGeojsonFiltered.features.length).toBe(2);
 
             mapServiceMock.map.querySourceFeatures = () => [
                 {
@@ -170,7 +169,7 @@ describe("Poi Service", () => {
                         coordinates: [0, 0]
                     },
                     properties: {
-                        sub_class: "spring",
+                        subclass: "spring",
                         "name:he": "name",
                         "name:en": "name"
                     }
@@ -182,7 +181,7 @@ describe("Poi Service", () => {
                         coordinates: [0, 0]
                     },
                     properties: {
-                        sub_class: "spring",
+                        subclass: "spring",
                         "name:he": "name"
                     }
                 }
@@ -192,7 +191,7 @@ describe("Poi Service", () => {
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            expect(poiService.poiGeojsonFiltered.features.length).toBe(2);
+            expect(poiService.poiGeojsonFiltered.features.length).toBe(4);
 
             return promise;
         }
