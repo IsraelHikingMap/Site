@@ -1,7 +1,6 @@
 import { Injectable, EventEmitter } from "@angular/core";
-import { Observable } from "rxjs";
 import { some } from "lodash-es";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { RoutesFactory } from "./routes.factory";
@@ -38,12 +37,6 @@ export class SelectedRouteService {
     private routes: Immutable<RouteData[]>;
     private selectedRouteId: string;
 
-    @Select((state: ApplicationState) => state.routes.present)
-    private routes$: Observable<Immutable<RouteData[]>>;
-
-    @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
-    private selectedRouteId$: Observable<string>;
-
     public selectedRouteHover: EventEmitter<LatLngAlt>;
 
     constructor(private readonly resources: ResourcesService,
@@ -52,10 +45,10 @@ export class SelectedRouteService {
                 private readonly store: Store) {
         this.routes = [];
         this.selectedRouteHover = new EventEmitter();
-        this.routes$.subscribe((r) => {
+        this.store.select((state: ApplicationState) => state.routes.present).subscribe((r) => {
             this.routes = r;
         });
-        this.selectedRouteId$.subscribe((id) => {
+        this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).subscribe((id) => {
             this.selectedRouteId = id;
         });
     }

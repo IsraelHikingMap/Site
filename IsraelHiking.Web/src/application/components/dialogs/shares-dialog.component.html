@@ -22,7 +22,7 @@
                     <div class="item-image">
                         <img [src]="getImageFromShareId(shareUrl, 128, 128)" class="w-full" />
                     </div>
-                    <div class="break-lines ms-2" [class.selected]="(shownShareUrl$ | async)?.id === shareUrl.id">
+                    <div class="break-lines ms-2" [class.selected]="shownShareUrl?.id === shareUrl.id">
                         {{shareUrl.title}}<br />
                         {{shareUrl.description}}<br />
                         {{shareUrl.creationDate | date:'dd/MM/yyyy'}}

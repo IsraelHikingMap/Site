@@ -14,10 +14,6 @@ const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 
 @Injectable()
 export class PurchaseService {
-
-    @Select((state: ApplicationState) => state.userState.userInfo)
-    private userInfo$: Observable<Immutable<UserInfo>>;
-
     constructor(private readonly runningContextService: RunningContextService,
                 private readonly loggingService: LoggingService,
                 private readonly offlineFilesDownloadService: OfflineFilesDownloadService,
@@ -29,7 +25,7 @@ export class PurchaseService {
             return;
         }
 
-        this.userInfo$.subscribe(userInfo => {
+        this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(userInfo => {
             if (userInfo == null) {
                 return;
             }

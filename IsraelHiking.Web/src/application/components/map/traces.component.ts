@@ -1,7 +1,5 @@
 import { Component } from "@angular/core";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { Store } from "@ngxs/store";
 import type { LngLatLike } from "maplibre-gl";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -28,12 +26,6 @@ export class TracesComponent extends BaseMapComponent {
     public selectedFeatureSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public isConfigOpen: boolean;
 
-    @Select((state: ApplicationState) => state.tracesState.visibleTraceId)
-    private visibleTraceId$: Observable<string>;
-
-    @Select((state: ApplicationState) => state.tracesState.missingParts)
-    private missingParts$: Observable<Immutable<GeoJSON.FeatureCollection<GeoJSON.LineString>>>;
-
     constructor(resources: ResourcesService,
                 private readonly routesFactory: RoutesFactory,
                 private readonly tracesService: TracesService,
@@ -48,7 +40,7 @@ export class TracesComponent extends BaseMapComponent {
             type: "FeatureCollection",
             features: []
         };
-        this.visibleTraceId$.subscribe(async (id) => {
+        this.store.select((state: ApplicationState) => state.tracesState.visibleTraceId).subscribe(async (id) => {
             if (id == null)
             {
                 this.clearTraceSource();
@@ -94,7 +86,7 @@ export class TracesComponent extends BaseMapComponent {
 
             this.selectedTraceStart = traceCoordinates[0];
         });
-        this.missingParts$.subscribe(m => {
+        this.store.select((state: ApplicationState) => state.tracesState.missingParts).subscribe(m => {
             if (m != null) {
                 this.missingParts = structuredClone(m) as GeoJSON.FeatureCollection<GeoJSON.LineString>;
             } else {

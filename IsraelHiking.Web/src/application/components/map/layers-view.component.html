@@ -4,7 +4,7 @@
             [isBaselayer]="true"
             [isMainMap]="true">
 </auto-layer>
-<div *ngFor="let overlay of (overlays | async); trackBy:trackByKey">
+<div *ngFor="let overlay of overlays; trackBy:trackByKey">
     <auto-layer [layerData]="overlay"
                 [visible]="overlay.visible"
                 [before]="resources.endOfOverlays"

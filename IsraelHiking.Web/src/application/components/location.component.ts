@@ -1,8 +1,7 @@
 import { Component } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -26,14 +25,7 @@ import type { LatLngAlt, ApplicationState } from "../models/models";
 })
 export class LocationComponent extends BaseMapComponent {
 
-    @Select((state: ApplicationState) => state.inMemoryState.distance)
     public distance$: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
-    public pannedTimestamp$: Observable<Date>;
-
-    @Select((state: ApplicationState) => state.gpsState.currentPosition)
-    private currentPosition$: Observable<Immutable<GeolocationPosition>>;
 
     private lastSpeed: number;
     private lastSpeedTime: number;
@@ -62,12 +54,13 @@ export class LocationComponent extends BaseMapComponent {
         this.lastSpeedTime = null;
         this.clearLocationFeatureCollection();
 
+        this.distance$ = this.store.select((state: ApplicationState) => state.inMemoryState.distance);
         this.distance$.subscribe(distance => {
             this.showDistance = distance;
             this.updateDistanceFeatureCollection();
         });
 
-        this.pannedTimestamp$.subscribe(pannedTimestamp => {
+        this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.isPanned = pannedTimestamp != null;
             if (this.isPanned) {
                 return;
@@ -98,7 +91,7 @@ export class LocationComponent extends BaseMapComponent {
                 }
             });
 
-            this.currentPosition$.subscribe((position: GeolocationPosition) => {
+            this.store.select((state: ApplicationState) => state.gpsState.currentPosition).subscribe(position => {
                 if (position != null) {
                     this.handlePositionChange(position);
                 }

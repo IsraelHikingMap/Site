@@ -2,9 +2,7 @@ import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
-import { Observable } from "rxjs";
-import { Select } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
@@ -33,22 +31,20 @@ export class InfoSidebarComponent extends BaseMapComponent {
     public selectedTabIndex: number;
     private selectedSection: LegendSection;
 
-    @Select((state: ApplicationState) => state.configuration.language)
-    private language$: Observable<Immutable<Language>>;
-
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
                 private readonly angulartics: Angulartics2GoogleGlobalSiteTag,
                 private readonly sidebarService: SidebarService,
                 private readonly layersService: LayersService,
-                private readonly runningContext: RunningContextService) {
+                private readonly runningContext: RunningContextService,
+                private readonly store: Store) {
         super(resources);
 
         this.selectedTabIndex = 0;
         this.selectedSection = null;
         this.legendSections = [];
 
-        this.language$.subscribe(() => {
+        this.store.select((state: ApplicationState) => state.configuration.language).subscribe(() => {
             this.initalizeLegendSections();
         });
     }

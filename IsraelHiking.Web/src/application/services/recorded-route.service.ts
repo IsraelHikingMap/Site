@@ -25,9 +25,6 @@ export class RecordedRouteService {
     private rejectedPosition: LatLngAltTime;
     private lastValidLocation: LatLngAltTime;
 
-    @Select((state: ApplicationState) => state.gpsState.currentPosition)
-    private currentPosition$: Observable<Immutable<GeolocationPosition>>;
-
     constructor(private readonly resources: ResourcesService,
                 private readonly geoLocationService: GeoLocationService,
                 private readonly routesFactory: RoutesFactory,
@@ -46,12 +43,11 @@ export class RecordedRouteService {
             this.toastService.warning(this.resources.lastRecordingDidNotEndWell);
         }
 
-        this.currentPosition$.subscribe(
-            (position: GeolocationPosition) => {
-                if (position != null) {
-                    this.updateRecordingRoute([position]);
-                }
-            });
+        this.store.select((state: ApplicationState) => state.gpsState.currentPosition).subscribe(position => {
+            if (position != null) {
+                this.updateRecordingRoute([position]);
+            }
+        });
         this.geoLocationService.bulkPositionChanged.subscribe(
             (positions: GeolocationPosition[]) => {
                 this.updateRecordingRoute(positions);

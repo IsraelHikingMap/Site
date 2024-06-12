@@ -4,7 +4,7 @@
             <button mat-button class="w-full" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Convert location to point"><i class="fa icon-plus"></i></button>
         </div>
         <div class="w-1/2">
-            <button mat-button class="w-full" type="button" (click)="toggleDistance()" [class.active]="distance$ | async" matTooltip="{{resources.measureDistanceFromCurrentLocation}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Measure distance"><i class="fa icon-measure"></i></button>
+            <button mat-button class="w-full" type="button" (click)="toggleDistance()" [class.active]="distance" matTooltip="{{resources.measureDistanceFromCurrentLocation}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Measure distance"><i class="fa icon-measure"></i></button>
         </div>
     </div>
     <div class="flex flex-row">

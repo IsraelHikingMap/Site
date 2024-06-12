@@ -1,7 +1,7 @@
-import { Component } from "@angular/core";
+import { Component, OnDestroy } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Subscription } from "rxjs";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -20,16 +20,13 @@ import type { ApplicationState, BatteryOptimizationType } from "../../models/mod
     selector: "configuration-dialog",
     templateUrl: "./configuration-dialog.component.html"
 })
-export class ConfigurationDialogComponent extends BaseMapComponent {
+export class ConfigurationDialogComponent extends BaseMapComponent implements OnDestroy {
 
-    @Select((state: ApplicationState) => state.configuration.batteryOptimizationType)
-    public batteryOptimizationType: Observable<BatteryOptimizationType>;
+    private subscriptions: Subscription[];
 
-    @Select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload)
-    public isAutomaticRecordingUpload: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.configuration.isGotLostWarnings)
-    public isGotLostWarnings: Observable<boolean>;
+    public batteryOptimizationType: BatteryOptimizationType;
+    public isAutomaticRecordingUpload: boolean;
+    public isGotLostWarnings: boolean;
 
     constructor(resources: ResourcesService,
         private readonly dialogRef: MatDialogRef<ConfigurationDialogComponent>,
@@ -38,6 +35,22 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
         private readonly logginService: LoggingService,
         private readonly store: Store) {
         super(resources);
+        this.subscriptions = [];
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType).subscribe((batteryOptimizationType) => {
+            this.batteryOptimizationType = batteryOptimizationType;
+        }));
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload).subscribe((isAutomaticRecordingUpload) => {
+            this.isAutomaticRecordingUpload = isAutomaticRecordingUpload;
+        }));
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.isGotLostWarnings).subscribe((isGotLostWarnings) => {
+            this.isGotLostWarnings = isGotLostWarnings;
+        }));
+    }
+
+    public ngOnDestroy() {
+        for (const subscription of this.subscriptions) {
+            subscription.unsubscribe();
+        }
     }
 
     public isApp() {

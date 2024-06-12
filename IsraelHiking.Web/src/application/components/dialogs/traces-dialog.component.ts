@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation, Inject } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { Subscription, Observable } from "rxjs";
+import { Subscription } from "rxjs";
 import { orderBy, take } from "lodash-es";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -34,9 +34,6 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public file: File;
     public loadingTraces: boolean;
     public searchTerm: FormControl<string>;
-
-    @Select((state: ApplicationState) => state.tracesState.traces)
-    public traces$: Observable<Immutable<Trace[]>>;
 
     private sessionSearchTerm = "";
     private page: number;
@@ -72,7 +69,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             this.updateFilteredLists(searchTerm);
         });
         this.searchTerm.setValue(this.sessionSearchTerm);
-        this.tracesChangedSubscription = this.traces$.subscribe(() => {
+        this.tracesChangedSubscription = this.store.select((state: ApplicationState) => state.tracesState.traces).subscribe(() => {
             if (!this.loadingTraces) {
                 this.updateFilteredLists(this.searchTerm.value);
             }

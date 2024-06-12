@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { Observable, combineLatest, throttleTime } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -17,19 +17,13 @@ export class RecordedRouteComponent extends BaseMapComponent {
 
     static readonly NUMBER_OF_POINTS_IN_ROUTE_SPLIT = 4000;
 
-    @Select((state: ApplicationState) => state.recordedRouteState.isAddingPoi)
-    public isAddingPoi$: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.recordedRouteState.route)
-    public recordedRoute$: Observable<Immutable<RecordedRoute>>;
-
-    @Select((state: ApplicationState) => state.gpsState.currentPosition)
-    public currentPosition$: Observable<Immutable<GeolocationPosition>>;
-
+    public isAddingPoi: boolean;
     public recordedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[];
     public lastRouteSegment: GeoJSON.Feature<GeoJSON.LineString>;
     public startPointGeoJson: GeoJSON.Feature<GeoJSON.Point>;
-
+    public recordedRoute$: Observable<Immutable<RecordedRoute>>;
+    
+    private currentPosition$: Observable<Immutable<GeolocationPosition>>;
     private lastSplit: number;
 
     constructor(resources: ResourcesService,
@@ -47,10 +41,16 @@ export class RecordedRouteComponent extends BaseMapComponent {
             },
             properties: {}
         };
+        this.recordedRoute$ = this.store.select((state: ApplicationState) => state.recordedRouteState.route);
+        this.currentPosition$ = this.store.select((state: ApplicationState) => state.gpsState.currentPosition);
 
         // Combine streams to work when both current location and recorded route changes, added throttle to avoid a double update of the UI
         combineLatest([this.recordedRoute$, this.currentPosition$]).pipe(throttleTime(50, undefined, { trailing: true }))
             .subscribe(() => this.handleRecordingChanges());
+
+        this.store.select((state: ApplicationState) => state.recordedRouteState.isAddingPoi).subscribe((isAddingPoi) => {
+            this.isAddingPoi = isAddingPoi;
+        });
     }
 
     public isRecording() {

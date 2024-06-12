@@ -1,9 +1,9 @@
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute, ParamMap } from "@angular/router";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
-import { Subscription, Observable } from "rxjs";
+import { Subscription } from "rxjs";
 import { cloneDeep } from "lodash-es";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -56,9 +56,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public latlng: LatLngAlt;
     public shareLinks: PoiSocialLinks;
     public contribution: Contribution;
-
-    @Select((state: ApplicationState) => state.poiState.isSidebarOpen)
-    public isOpen: Observable<boolean>;
+    public isOpen: boolean;
 
     private editMode: boolean;
     private fullFeature: GeoJSON.Feature;
@@ -90,6 +88,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.contribution = {} as Contribution;
         this.info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
         this.subscriptions = [];
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.poiState.isSidebarOpen).subscribe(isOpen => {
+            this.isOpen = isOpen;
+        }));
         this.subscriptions.push(this.route.paramMap.subscribe(async (_) => {
             if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
                 return;

@@ -1,9 +1,9 @@
 import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
-import { Subscription, Observable, interval } from "rxjs";
+import { Subscription, interval } from "rxjs";
 import { regressionLoess } from "d3-regression";
 import { LineLayerSpecification } from "maplibre-gl";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import * as d3 from "d3";
 import type { Selection, ScaleContinuousNumeric } from "d3";
 import type { Immutable } from "immer";
@@ -18,7 +18,7 @@ import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
 import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
-import type { LatLngAlt, RouteData, ApplicationState, Language, LatLngAltTime } from "../models/models";
+import type { LatLngAlt, ApplicationState, LatLngAltTime } from "../models/models";
 
 declare type DragState = "start" | "drag" | "none";
 
@@ -97,33 +97,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public slopeRouteSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public subRouteRange: IChartSubRouteRange;
     public slopeRoutePaint: LineLayerSpecification["paint"];
+    public statisticsVisible: boolean;
 
     @ViewChild("lineChartContainer")
     public lineChartContainer: ElementRef;
-
-    @Select((state: ApplicationState) => state.routes.present)
-    private routes$: Observable<Immutable<RouteData[]>>;
-
-    @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
-    private selectedRouteId$: Observable<string>;
-
-    @Select((state: ApplicationState) => state.locationState.zoom)
-    private zoom$: Observable<number>;
-
-    @Select((state: ApplicationState) => state.gpsState.currentPosition)
-    private currentPosition$: Observable<Immutable<GeolocationPosition>>;
-
-    @Select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
-    public statisticsVisible$: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.configuration.language)
-    public language$: Observable<Immutable<Language>>;
-
-    @Select((state: ApplicationState) => state.configuration.isShowSlope)
-    public isShowSlope$: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.configuration.isShowKmMarker)
-    public isShowKmMarkers$: Observable<boolean>;
 
     private statistics: RouteStatistics;
     private chartElements: IChartElements;
@@ -147,6 +124,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.isOpen = false;
         this.isTable = false;
         this.isFollowing = false;
+        this.statisticsVisible = false;
         this.statistics = null;
         this.subRouteRange = null;
         this.heading = null;
@@ -169,7 +147,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             margin: { top: 10, right: 10, bottom: 40, left: 40 },
         } as IChartElements;
         this.zoom = 7;
-        this.zoom$.subscribe((zoom) => {
+        this.store.select((state: ApplicationState) => state.locationState.zoom).subscribe((zoom) => {
             this.zoom = zoom;
             this.updateKmMarkers();
         });
@@ -248,26 +226,29 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public async ngOnInit() {
-        this.componentSubscriptions.push(this.routes$.subscribe(() => {
+        this.componentSubscriptions.push(this.store.select((state: ApplicationState) => state.routes.present).subscribe(() => {
             this.routeChanged();
         }));
-        this.componentSubscriptions.push(this.selectedRouteId$.subscribe(() => {
+        this.componentSubscriptions.push(this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).subscribe(() => {
             this.routeChanged();
         }));
-        this.componentSubscriptions.push(this.language$.subscribe(() => {
+        this.componentSubscriptions.push(this.store.select((state: ApplicationState) => state.configuration.language).subscribe(() => {
             this.redrawChart();
         }));
-        this.componentSubscriptions.push(this.currentPosition$.subscribe(p => {
+        this.componentSubscriptions.push(this.store.select((state: ApplicationState) => state.gpsState.currentPosition).subscribe(p => {
             this.onGeolocationChanged(p);
         }));
-        this.componentSubscriptions.push(this.isShowSlope$.subscribe(showSlope => {
+        this.componentSubscriptions.push(this.store.select((state: ApplicationState) => state.configuration.isShowSlope).subscribe(showSlope => {
             this.isSlopeOn = showSlope;
             this.redrawChart();
             this.updateSlopeRoute();
         }));
-        this.componentSubscriptions.push(this.isShowKmMarkers$.subscribe(showKmMarkers => {
+        this.componentSubscriptions.push(this.store.select((state: ApplicationState) => state.configuration.isShowKmMarker).subscribe(showKmMarkers => {
             this.isKmMarkersOn = showKmMarkers;
             this.updateKmMarkers();
+        }));
+        this.componentSubscriptions.push(this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible).subscribe(visible => {
+            this.statisticsVisible = visible;
         }));
         this.routeChanged();
         this.componentSubscriptions.push(interval(1000).subscribe(() => {

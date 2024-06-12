@@ -1,13 +1,12 @@
 import { Component, OnDestroy } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
-import { Subscription, Observable, timer } from "rxjs";
+import { Subscription, timer } from "rxjs";
 import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { encode } from "base64-arraybuffer";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import platform from "platform";
-import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -46,15 +45,6 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     public statisticsVisible: boolean;
     public isShowMore: boolean;
 
-    @Select((state: ApplicationState) => state.userState.userInfo)
-    public userInfo$: Observable<Immutable<UserInfo>>;
-
-    @Select((state: ApplicationState) => state.uiComponentsState.drawingVisible)
-    public drawingVisible$: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
-    public statisticsVisible$: Observable<boolean>;
-
     constructor(resources: ResourcesService,
                 private readonly socialSharing: SocialSharing,
                 private readonly authorizationService: AuthorizationService,
@@ -73,9 +63,9 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         this.isShowMore = false;
         this.userInfo = null;
         this.subscriptions = [];
-        this.subscriptions.push(this.userInfo$.subscribe(userInfo => this.userInfo = userInfo));
-        this.subscriptions.push(this.drawingVisible$.subscribe(v => this.drawingVisible = v));
-        this.subscriptions.push(this.statisticsVisible$.subscribe(v => this.statisticsVisible = v));
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(userInfo => this.userInfo = userInfo));
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.uiComponentsState.drawingVisible).subscribe(v => this.drawingVisible = v));
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible).subscribe(v => this.statisticsVisible = v));
         if (this.runningContextService.isCapacitor) {
             App.getInfo().then((info) => {
                 this.loggingService.info(`App version: ${info.version}`);

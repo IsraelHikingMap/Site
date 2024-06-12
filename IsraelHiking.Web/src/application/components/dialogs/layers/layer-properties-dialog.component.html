@@ -39,7 +39,7 @@
         <div class="flex flex-row">
             <div class="w-full" style="height: 138px">
                 <mgl-map [zoom]="[(layerData.minZoom + layerData.maxZoom) / 2]"
-                            [center]="[(location | async)?.longitude, (location | async)?.latitude]"
+                            [center]="[location?.longitude, location?.latitude]"
                             [style]='{"version": 8, "sources": {}, "layers": [] }'
                             [attributionControl]="false">
                     <auto-layer [layerData]="layerData"

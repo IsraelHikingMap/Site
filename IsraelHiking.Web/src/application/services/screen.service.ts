@@ -4,8 +4,7 @@ import { TextZoom } from "@capacitor/text-zoom";
 import { KeepAwake } from "@capacitor-community/keep-awake";
 import { ScreenBrightness } from "@capacitor-community/screen-brightness";
 import { App } from "@capacitor/app";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -14,10 +13,6 @@ import type { ApplicationState, BatteryOptimizationType } from "../models/models
 
 @Injectable()
 export class ScreenService {
-
-    @Select((state: ApplicationState) => state.configuration.batteryOptimizationType)
-    public batteryOptimizationType$: Observable<BatteryOptimizationType>;
-
     private originalBrightness: number;
 
     constructor(private readonly runningContextService: RunningContextService,
@@ -65,7 +60,7 @@ export class ScreenService {
         });
         this.userIdleService.watch();
 
-        this.batteryOptimizationType$.subscribe(() => this.setKeepScreenOn());
+        this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType).subscribe(() => this.setKeepScreenOn());
     }
 
     private setKeepScreenOn() {

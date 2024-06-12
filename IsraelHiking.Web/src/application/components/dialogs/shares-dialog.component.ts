@@ -3,8 +3,8 @@ import { MatDialog } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
-import { Observable, Subscription } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Subscription } from "rxjs";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -30,12 +30,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     public selectedShareUrlId: string;
     public loadingShareUrls: boolean;
     public searchTerm: FormControl<string>;
-
-    @Select((state: ApplicationState) => state.shareUrlsState.shareUrls)
-    public shareUrls$: Observable<Immutable<ShareUrl[]>>;
-
-    @Select((state: ApplicationState) => state.inMemoryState.shareUrl)
-    public shownShareUrl$: Observable<Immutable<ShareUrl>>;
+    public shownShareUrl: Immutable<ShareUrl>;
 
     private sessionSearchTerm = "";
     private page: number;
@@ -62,10 +57,13 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
             this.updateFilteredLists(searchTerm);
         }));
         this.searchTerm.setValue(this.sessionSearchTerm);
-        this.subscriptions.push(this.shareUrls$.subscribe(() => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.shareUrlsState.shareUrls).subscribe(() => {
             if (!this.loadingShareUrls) {
                 this.updateFilteredLists(this.searchTerm.value);
             }
+        }));
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.inMemoryState.shareUrl).subscribe((shareUrl) => {
+            this.shownShareUrl = shareUrl;
         }));
     }
 
