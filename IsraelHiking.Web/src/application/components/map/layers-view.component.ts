@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, DestroyRef, OnInit } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
@@ -41,7 +41,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
                 private readonly poiService: PoiService,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly navigateHereService: NavigateHereService,
-                private readonly store: Store
+                private readonly store: Store,
+                private readonly destroyRef: DestroyRef
     ) {
         super(resources);
         this.selectedCluster = null;
@@ -61,10 +62,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
 
     public ngOnInit() {
         this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
-        this.poiService.poisChanged.pipe(takeUntilDestroyed()).subscribe(() => {
+        this.poiService.poisChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
         });
-        this.store.select((state: ApplicationState) => state.poiState.selectedPointOfInterest).pipe(takeUntilDestroyed()).subscribe(poi => this.onSelectedPoiChanged(poi));
+        this.store.select((state: ApplicationState) => state.poiState.selectedPointOfInterest).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(poi => this.onSelectedPoiChanged(poi));
     }
 
     private onSelectedPoiChanged(poi: Immutable<GeoJSON.Feature>) {

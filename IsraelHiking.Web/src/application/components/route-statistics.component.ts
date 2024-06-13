@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, ViewChild, ElementRef, ChangeDetectorRef } from "@angular/core";
+import { Component, ViewEncapsulation, OnInit, ViewChild, ElementRef, ChangeDetectorRef, DestroyRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { trigger, style, transition, animate } from "@angular/animations";
 import { Observable, interval } from "rxjs";
@@ -117,7 +117,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 private readonly cancelableTimeoutService: CancelableTimeoutService,
                 private readonly sidebarService: SidebarService,
                 private readonly audioPlayerFactory: AudioPlayerFactory,
-                private readonly store: Store
+                private readonly store: Store,
+                private readonly destroyRef: DestroyRef,
     ) {
         super(resources);
         this.isExpanded = false;
@@ -225,29 +226,29 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public async ngOnInit() {
-        this.store.select((state: ApplicationState) => state.routes.present).pipe(takeUntilDestroyed()).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.routes.present).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.routeChanged();
         });
-        this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).pipe(takeUntilDestroyed()).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.routeChanged();
         });
-        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.redrawChart();
         });
-        this.store.select((state: ApplicationState) => state.gpsState.currentPosition).pipe(takeUntilDestroyed()).subscribe(p => {
+        this.store.select((state: ApplicationState) => state.gpsState.currentPosition).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
             this.onGeolocationChanged(p);
         });
-        this.store.select((state: ApplicationState) => state.configuration.isShowSlope).pipe(takeUntilDestroyed()).subscribe(showSlope => {
+        this.store.select((state: ApplicationState) => state.configuration.isShowSlope).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(showSlope => {
             this.isSlopeOn = showSlope;
             this.redrawChart();
             this.updateSlopeRoute();
         });
-        this.store.select((state: ApplicationState) => state.configuration.isShowKmMarker).pipe(takeUntilDestroyed()).subscribe(showKmMarkers => {
+        this.store.select((state: ApplicationState) => state.configuration.isShowKmMarker).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(showKmMarkers => {
             this.isKmMarkersOn = showKmMarkers;
             this.updateKmMarkers();
         });
         this.routeChanged();
-        interval(1000).pipe(takeUntilDestroyed()).subscribe(() => {
+        interval(1000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
             if (recordedRouteState.isRecording) {
                 const recordingStartTime = new Date(recordedRouteState.route.latlngs[0].timestamp).getTime();

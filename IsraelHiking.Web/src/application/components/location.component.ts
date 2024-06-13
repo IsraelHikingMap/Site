@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, DestroyRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
@@ -43,6 +43,7 @@ export class LocationComponent extends BaseMapComponent {
                 private readonly fitBoundsService: FitBoundsService,
                 private readonly deviceOrientationService: DeviceOrientationService,
                 private readonly store: Store,
+                private readonly destroyRef: DestroyRef,
                 private readonly mapComponent: MapComponent) {
         super(resources);
 
@@ -88,13 +89,13 @@ export class LocationComponent extends BaseMapComponent {
                 }
             });
 
-            this.store.select((state: ApplicationState) => state.gpsState.currentPosition).pipe(takeUntilDestroyed()).subscribe(position => {
+            this.store.select((state: ApplicationState) => state.gpsState.currentPosition).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(position => {
                 if (position != null) {
                     this.handlePositionChange(position);
                 }
             });
 
-            this.deviceOrientationService.orientationChanged.subscribe((bearing: number) => {
+            this.deviceOrientationService.orientationChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((bearing: number) => {
                 if (!this.isActive() || this.locationFeatures.features.length === 0) {
                     return;
                 }

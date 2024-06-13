@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, DestroyRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import {
@@ -53,7 +53,8 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 private readonly fileService: FileService,
                 private readonly connectionSerive: ConnectionService,
                 private readonly mapService: MapService,
-                private readonly store: Store) {
+                private readonly store: Store,
+                private readonly destroyRef: DestroyRef) {
         super(resources);
         const layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
@@ -65,7 +66,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         this.jsonLayersIds = [];
         this.recreateQueue.pipe(mergeMap((action: () => Promise<void>) => action(), 1)).subscribe();
         this.mapLoadedPromise = new Promise((resolve, _) => {
-            this.mapComponent.mapLoad.pipe(takeUntilDestroyed()).subscribe(() => {
+            this.mapComponent.mapLoad.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
                 resolve();
             });
         });
@@ -74,13 +75,13 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     public ngOnInit() {
         this.addLayerRecreationQuqueItem(null, this.layerData);
         this.currentLanguageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
-        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe((language) => {
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((language) => {
             if (this.currentLanguageCode !== language.code) {
                 this.addLayerRecreationQuqueItem(this.layerData, this.layerData);
             }
             this.currentLanguageCode = language.code;
         });
-        this.connectionSerive.stateChanged.pipe(takeUntilDestroyed()).subscribe((online) => {
+        this.connectionSerive.stateChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((online) => {
             if (online === this.hasInternetAccess) {
                 return;
             }
