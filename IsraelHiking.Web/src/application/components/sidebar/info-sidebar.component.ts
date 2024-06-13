@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatDialog } from "@angular/material/dialog";
 import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
@@ -12,7 +13,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducers/initial-state";
-import type { ApplicationState, Language } from "../../models/models";
+import type { ApplicationState } from "../../models/models";
 import legendSectionsJson from "../../../content/legend/legend.json";
 
 export type LegendSection = {
@@ -44,7 +45,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.selectedSection = null;
         this.legendSections = [];
 
-        this.store.select((state: ApplicationState) => state.configuration.language).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => {
             this.initalizeLegendSections();
         });
     }
