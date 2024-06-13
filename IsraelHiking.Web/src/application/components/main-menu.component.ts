@@ -1,6 +1,6 @@
-import { Component, OnDestroy } from "@angular/core";
+import { Component } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material/dialog";
-import { Subscription, timer } from "rxjs";
+import { timer } from "rxjs";
 import { Device } from "@capacitor/device";
 import { App } from "@capacitor/app";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
@@ -30,15 +30,14 @@ import { SendReportDialogComponent } from "./dialogs/send-report-dialog.componen
 import { SetUIComponentVisibilityAction } from "../reducers/ui-components.reducer";
 import { SetAgreeToTermsAction } from "../reducers/user.reducer";
 import type { UserInfo, ApplicationState } from "../models/models";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
     selector: "main-menu",
     templateUrl: "./main-menu.component.html",
     styleUrls: ["./main-menu.component.scss"]
 })
-export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
-
-    private subscriptions: Subscription[];
+export class MainMenuComponent extends BaseMapComponent {
 
     public userInfo: UserInfo;
     public drawingVisible: boolean;
@@ -62,20 +61,13 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
         super(resources);
         this.isShowMore = false;
         this.userInfo = null;
-        this.subscriptions = [];
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(userInfo => this.userInfo = userInfo));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.uiComponentsState.drawingVisible).subscribe(v => this.drawingVisible = v));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible).subscribe(v => this.statisticsVisible = v));
+        this.store.select((state: ApplicationState) => state.userState.userInfo).pipe(takeUntilDestroyed()).subscribe(userInfo => this.userInfo = userInfo);
+        this.store.select((state: ApplicationState) => state.uiComponentsState.drawingVisible).pipe(takeUntilDestroyed()).subscribe(v => this.drawingVisible = v);
+        this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible).pipe(takeUntilDestroyed()).subscribe(v => this.statisticsVisible = v);
         if (this.runningContextService.isCapacitor) {
             App.getInfo().then((info) => {
                 this.loggingService.info(`App version: ${info.version}`);
             });
-        }
-    }
-
-    public ngOnDestroy(): void {
-        for (const subscription of this.subscriptions) {
-            subscription.unsubscribe();
         }
     }
 
@@ -131,14 +123,14 @@ export class MainMenuComponent extends BaseMapComponent implements OnDestroy {
     public selectDrawing() {
         this.store.dispatch(new SetUIComponentVisibilityAction(
             "drawing",
-            !this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).drawingVisible
+            !this.drawingVisible
         ));
     }
 
     public selectStatistics() {
         this.store.dispatch(new SetUIComponentVisibilityAction(
             "statistics",
-            !this.store.selectSnapshot((s: ApplicationState) => s.uiComponentsState).statisticsVisible
+            !this.statisticsVisible
         ));
     }
 
