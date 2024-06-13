@@ -1,6 +1,8 @@
 import { Component, OnInit } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
 import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
+import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
@@ -31,7 +33,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     public clusterFeatures: GeoJSON.Feature<GeoJSON.Point>[];
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point>;
     public isShowCoordinatesPopup: boolean;
-    public overlays: Immutable<Overlay[]>;
+    public overlays$: Observable<Immutable<Overlay[]>>;	
 
     constructor(resources: ResourcesService,
                 private readonly router: Router,
@@ -61,8 +63,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
         this.poiService.poisChanged.subscribe(() => {
             this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
         });
-        this.store.select((state: ApplicationState) => state.poiState.selectedPointOfInterest).subscribe(poi => this.onSelectedPoiChanged(poi));
-        this.store.select((state: ApplicationState) => state.layersState.overlays).subscribe(overlays => this.overlays = overlays);
+        this.store.select((state: ApplicationState) => state.poiState.selectedPointOfInterest).pipe(takeUntilDestroyed()).subscribe(poi => this.onSelectedPoiChanged(poi));
+        this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
     }
 
     private onSelectedPoiChanged(poi: Immutable<GeoJSON.Feature>) {
