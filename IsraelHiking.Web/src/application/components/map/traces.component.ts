@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
 import type { LngLatLike } from "maplibre-gl";
 
@@ -40,7 +41,7 @@ export class TracesComponent extends BaseMapComponent {
             type: "FeatureCollection",
             features: []
         };
-        this.store.select((state: ApplicationState) => state.tracesState.visibleTraceId).subscribe(async (id) => {
+        this.store.select((state: ApplicationState) => state.tracesState.visibleTraceId).pipe(takeUntilDestroyed()).subscribe(async (id) => {
             if (id == null)
             {
                 this.clearTraceSource();
@@ -86,7 +87,7 @@ export class TracesComponent extends BaseMapComponent {
 
             this.selectedTraceStart = traceCoordinates[0];
         });
-        this.store.select((state: ApplicationState) => state.tracesState.missingParts).subscribe(m => {
+        this.store.select((state: ApplicationState) => state.tracesState.missingParts).pipe(takeUntilDestroyed()).subscribe(m => {
             if (m != null) {
                 this.missingParts = structuredClone(m) as GeoJSON.FeatureCollection<GeoJSON.LineString>;
             } else {
