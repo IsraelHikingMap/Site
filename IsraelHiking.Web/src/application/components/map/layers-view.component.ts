@@ -60,7 +60,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
 
     public ngOnInit() {
         this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
-        this.poiService.poisChanged.subscribe(() => {
+        this.poiService.poisChanged.pipe(takeUntilDestroyed()).subscribe(() => {
             this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
         });
         this.store.select((state: ApplicationState) => state.poiState.selectedPointOfInterest).pipe(takeUntilDestroyed()).subscribe(poi => this.onSelectedPoiChanged(poi));
