@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { firstValueFrom } from "rxjs";
+import { Observable, firstValueFrom } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../../base-map.component";
@@ -14,10 +14,8 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     public title: string;
     public isNew: boolean;
     public isOverlay: boolean;
-
     public layerData: EditableLayer;
-
-    public location: Immutable<LocationState>;
+    public location$: Observable<Immutable<LocationState>>;
 
     protected constructor(resources: ResourcesService,
                           protected readonly mapService: MapService,
@@ -36,10 +34,8 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
             isOfflineAvailable: false,
             isOfflineOn: true
         } as EditableLayer;
-        // HM TODO: unsubscribe
-        this.store.select((state: ApplicationState) => state.locationState).subscribe(locationState => {
-            this.location = locationState;
-        });
+        
+        this.location$ = this.store.select((state: ApplicationState) => state.locationState);
     }
 
     public onAddressChanged(address: string) {
