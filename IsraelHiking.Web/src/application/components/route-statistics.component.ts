@@ -145,7 +145,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             margin: { top: 10, right: 10, bottom: 40, left: 40 },
         } as IChartElements;
         this.zoom = 7;
-        this.store.select((state: ApplicationState) => state.locationState.zoom).subscribe((zoom) => {
+        this.store.select((state: ApplicationState) => state.locationState.zoom).pipe(takeUntilDestroyed()).subscribe((zoom) => {
             this.zoom = zoom;
             this.updateKmMarkers();
         });
