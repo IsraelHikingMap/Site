@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Observable, combineLatest, throttleTime } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
@@ -17,7 +18,7 @@ export class RecordedRouteComponent extends BaseMapComponent {
 
     static readonly NUMBER_OF_POINTS_IN_ROUTE_SPLIT = 4000;
 
-    public isAddingPoi: boolean;
+    public isAddingPoi$: Observable<boolean>;
     public recordedRouteSegments: GeoJSON.Feature<GeoJSON.LineString>[];
     public lastRouteSegment: GeoJSON.Feature<GeoJSON.LineString>;
     public startPointGeoJson: GeoJSON.Feature<GeoJSON.Point>;
@@ -45,12 +46,10 @@ export class RecordedRouteComponent extends BaseMapComponent {
         this.currentPosition$ = this.store.select((state: ApplicationState) => state.gpsState.currentPosition);
 
         // Combine streams to work when both current location and recorded route changes, added throttle to avoid a double update of the UI
-        combineLatest([this.recordedRoute$, this.currentPosition$]).pipe(throttleTime(50, undefined, { trailing: true }))
+        combineLatest([this.recordedRoute$, this.currentPosition$]).pipe(throttleTime(50, undefined, { trailing: true }), takeUntilDestroyed())
             .subscribe(() => this.handleRecordingChanges());
 
-        this.store.select((state: ApplicationState) => state.recordedRouteState.isAddingPoi).subscribe((isAddingPoi) => {
-            this.isAddingPoi = isAddingPoi;
-        });
+        this.isAddingPoi$ = this.store.select((state: ApplicationState) => state.recordedRouteState.isAddingPoi);
     }
 
     public isRecording() {
