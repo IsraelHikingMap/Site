@@ -1,5 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy, DestroyRef } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import {
     StyleSpecification,
@@ -8,7 +7,7 @@ import {
     SourceSpecification,
     LayerSpecification
 } from "maplibre-gl";
-import { Subject, mergeMap } from "rxjs";
+import { Subject, Subscription, mergeMap } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -41,6 +40,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
 
     private rasterSourceId: string;
     private rasterLayerId: string;
+    private subscriptions: Subscription[];
     private jsonSourcesIds: string[];
     private jsonLayersIds: string[];
     private hasInternetAccess: boolean;
@@ -53,8 +53,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 private readonly fileService: FileService,
                 private readonly connectionSerive: ConnectionService,
                 private readonly mapService: MapService,
-                private readonly store: Store,
-                private readonly destroyRef: DestroyRef) {
+                private readonly store: Store) {
         super(resources);
         const layerIndex = AutomaticLayerPresentationComponent.indexNumber++;
         this.rasterLayerId = `raster-layer-${layerIndex}`;
@@ -64,24 +63,25 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         this.hasInternetAccess = true;
         this.jsonSourcesIds = [];
         this.jsonLayersIds = [];
-        this.recreateQueue.pipe(mergeMap((action: () => Promise<void>) => action(), 1)).subscribe();
+        this.subscriptions = [];
+        this.subscriptions.push(this.recreateQueue.pipe(mergeMap((action: () => Promise<void>) => action(), 1)).subscribe());
         this.mapLoadedPromise = new Promise((resolve, _) => {
-            this.mapComponent.mapLoad.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            this.subscriptions.push(this.mapComponent.mapLoad.subscribe(() => {
                 resolve();
-            });
+            }));
         });
     }
 
     public ngOnInit() {
         this.addLayerRecreationQuqueItem(null, this.layerData);
         this.currentLanguageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
-        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((language) => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.language).subscribe((language) => {
             if (this.currentLanguageCode !== language.code) {
                 this.addLayerRecreationQuqueItem(this.layerData, this.layerData);
             }
             this.currentLanguageCode = language.code;
-        });
-        this.connectionSerive.stateChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((online) => {
+        }));
+        this.subscriptions.push(this.connectionSerive.stateChanged.subscribe((online) => {
             if (online === this.hasInternetAccess) {
                 return;
             }
@@ -94,12 +94,15 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 return;
             }
             this.addLayerRecreationQuqueItem(this.layerData, this.layerData);
-        });
+        }));
     }
 
     public ngOnDestroy() {
         this.addLayerRecreationQuqueItem(this.layerData, null);
         this.recreateQueue.complete();
+        for (const subscription of this.subscriptions) {
+            subscription.unsubscribe();
+        }
     }
 
     public ngOnChanges(changes: SimpleChanges) {

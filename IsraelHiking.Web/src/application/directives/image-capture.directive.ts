@@ -19,7 +19,7 @@ export class ImageCaptureDirective implements OnDestroy {
     @Output()
     public changed: EventEmitter<HTMLElementInputChangeEvent>;
 
-    private listenFunction: () => void;
+    private unsbscribeFn: () => void;
 
     constructor(elementRef: ElementRef,
                 private readonly renderer: Renderer2,
@@ -29,7 +29,7 @@ export class ImageCaptureDirective implements OnDestroy {
                 private readonly fileService: FileService) {
 
         this.changed = new EventEmitter();
-        this.listenFunction = this.renderer.listen(elementRef.nativeElement, "click", (event) => {
+        this.unsbscribeFn = this.renderer.listen(elementRef.nativeElement, "click", (event) => {
             if (!environment.isCapacitor) {
                 return;
             }
@@ -78,6 +78,6 @@ export class ImageCaptureDirective implements OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.listenFunction();
+        this.unsbscribeFn();
     }
 }
