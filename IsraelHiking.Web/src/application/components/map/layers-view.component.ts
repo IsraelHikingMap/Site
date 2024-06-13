@@ -1,8 +1,8 @@
 import { Component, OnInit } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
-import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
 import { Observable } from "rxjs";
+import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
