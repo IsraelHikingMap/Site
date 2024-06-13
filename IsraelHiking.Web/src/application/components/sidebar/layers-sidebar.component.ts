@@ -1,7 +1,7 @@
-import { Component, ViewEncapsulation, OnDestroy } from "@angular/core";
+import { Component, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
-import { Subscription } from "rxjs";
+import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
@@ -31,17 +31,15 @@ import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGro
     styleUrls: ["./layers-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class LayersSidebarComponent extends BaseMapComponent implements OnDestroy {
+export class LayersSidebarComponent extends BaseMapComponent {
 
-    public baseLayers: Immutable<EditableLayer[]>;
-    public overlays: Immutable<Overlay[]>;
-    public categoriesGroups: Immutable<CategoriesGroup[]>;
-    public routes: Immutable<RouteData[]>;
-
-    public lastModified: Date;
+    public baseLayers$: Observable<Immutable<EditableLayer[]>>;
+    public overlays$: Observable<Immutable<Overlay[]>>;
+    public categoriesGroups$: Observable<Immutable<CategoriesGroup[]>>;
+    public routes$: Observable<Immutable<RouteData[]>>;
+    public lastModified$: Observable<Date>;
 
     public manageSubscriptions: string;
-    private subscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
@@ -57,28 +55,11 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
             : "https://play.google.com/store/account/subscriptions";
-        this.subscriptions = [];
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.offlineState.lastModifiedDate).subscribe((lastModifiedDate) => {
-            this.lastModified = lastModifiedDate;
-        }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.layersState.baseLayers).subscribe((baseLayers) => {
-            this.baseLayers = baseLayers;
-        }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.layersState.overlays).subscribe((overlays) => {
-            this.overlays = overlays;
-        }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.layersState.categoriesGroups).subscribe((categoriesGroups) => {
-            this.categoriesGroups = categoriesGroups;
-        }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.routes.present).subscribe((routes) => {
-            this.routes = routes;
-        }));
-    }
-
-    public ngOnDestroy() {
-        for (const subscription of this.subscriptions) {
-            subscription.unsubscribe();
-        }
+        this.lastModified$ = this.store.select((state: ApplicationState) => state.offlineState.lastModifiedDate);
+        this.baseLayers$ = this.store.select((state: ApplicationState) => state.layersState.baseLayers);
+        this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
+        this.categoriesGroups$ = this.store.select((state: ApplicationState) => state.layersState.categoriesGroups);
+        this.routes$ = this.store.select((state: ApplicationState) => state.routes.present);
     }
 
     public closeSidebar() {
