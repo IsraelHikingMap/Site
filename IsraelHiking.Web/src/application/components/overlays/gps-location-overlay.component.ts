@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
+import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -28,7 +29,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
     @Output()
     public closed = new EventEmitter();
 
-    public distance: boolean;
+    public distance$: Observable<boolean>;
     public hideCoordinates: boolean;
 
     constructor(resources: ResourcesService,
@@ -41,9 +42,7 @@ export class GpsLocationOverlayComponent extends BaseMapComponent {
                 private readonly store: Store) {
         super(resources);
         this.hideCoordinates = true;
-        this.store.select((state: ApplicationState) => state.inMemoryState.distance).subscribe((distance) => {
-            this.distance = distance;
-        });
+        this.distance$ = this.store.select((state: ApplicationState) => state.inMemoryState.distance);
     }
 
     public addPointToRoute() {
