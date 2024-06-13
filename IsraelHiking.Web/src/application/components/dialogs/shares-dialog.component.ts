@@ -1,9 +1,10 @@
-import { Component, OnInit, ViewEncapsulation, OnDestroy } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatDialog } from "@angular/material/dialog";
 import { FormControl } from "@angular/forms";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
 import { take, orderBy } from "lodash-es";
-import { Subscription } from "rxjs";
+import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
@@ -23,18 +24,17 @@ import type { ApplicationState, ShareUrl } from "../../models/models";
     styleUrls: ["shares-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class SharesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
+export class SharesDialogComponent extends BaseMapComponent implements OnInit {
 
     public filteredShareUrls: Immutable<ShareUrl[]>;
     public shareUrlInEditMode: ShareUrl;
     public selectedShareUrlId: string;
     public loadingShareUrls: boolean;
     public searchTerm: FormControl<string>;
-    public shownShareUrl: Immutable<ShareUrl>;
+    public shownShareUrl$: Observable<Immutable<ShareUrl>>;
 
     private sessionSearchTerm = "";
     private page: number;
-    private subscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
@@ -51,20 +51,17 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         this.shareUrlInEditMode = null;
         this.selectedShareUrlId = null;
         this.page = 1;
-        this.subscriptions = [];
         this.searchTerm = new FormControl<string>("");
-        this.subscriptions.push(this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
+        this.searchTerm.valueChanges.pipe(takeUntilDestroyed()).subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
-        }));
+        });
         this.searchTerm.setValue(this.sessionSearchTerm);
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.shareUrlsState.shareUrls).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.shareUrlsState.shareUrls).pipe(takeUntilDestroyed()).subscribe(() => {
             if (!this.loadingShareUrls) {
                 this.updateFilteredLists(this.searchTerm.value);
             }
-        }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.inMemoryState.shareUrl).subscribe((shareUrl) => {
-            this.shownShareUrl = shareUrl;
-        }));
+        });
+        this.shownShareUrl$ = this.store.select((state: ApplicationState) => state.inMemoryState.shareUrl).pipe(takeUntilDestroyed());
     }
 
     public async ngOnInit() {
@@ -72,12 +69,6 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         this.shareUrlsService.syncShareUrls();
         this.loadingShareUrls = false;
         this.updateFilteredLists(this.searchTerm.value);
-    }
-
-    public ngOnDestroy() {
-        for (const subscription of this.subscriptions) {
-            subscription.unsubscribe();
-        }
     }
 
     public isApp(): boolean {
