@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
-import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "./base-map.component";
@@ -24,8 +24,6 @@ import type { LatLngAlt, ApplicationState } from "../models/models";
     styleUrls: ["./location.component.scss"]
 })
 export class LocationComponent extends BaseMapComponent {
-
-    public distance$: Observable<boolean>;
 
     private lastSpeed: number;
     private lastSpeedTime: number;
@@ -54,13 +52,12 @@ export class LocationComponent extends BaseMapComponent {
         this.lastSpeedTime = null;
         this.clearLocationFeatureCollection();
 
-        this.distance$ = this.store.select((state: ApplicationState) => state.inMemoryState.distance);
-        this.distance$.subscribe(distance => {
+        this.store.select((state: ApplicationState) => state.inMemoryState.distance).pipe(takeUntilDestroyed()).subscribe(distance => {;
             this.showDistance = distance;
             this.updateDistanceFeatureCollection();
         });
 
-        this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
+        this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).pipe(takeUntilDestroyed()).subscribe(pannedTimestamp => {
             this.isPanned = pannedTimestamp != null;
             if (this.isPanned) {
                 return;
@@ -91,7 +88,7 @@ export class LocationComponent extends BaseMapComponent {
                 }
             });
 
-            this.store.select((state: ApplicationState) => state.gpsState.currentPosition).subscribe(position => {
+            this.store.select((state: ApplicationState) => state.gpsState.currentPosition).pipe(takeUntilDestroyed()).subscribe(position => {
                 if (position != null) {
                     this.handlePositionChange(position);
                 }
