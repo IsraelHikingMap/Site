@@ -1,6 +1,6 @@
-import { Component, OnDestroy } from "@angular/core";
+import { Component } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
-import { Subscription } from "rxjs";
+import { Observable } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -20,13 +20,11 @@ import type { ApplicationState, BatteryOptimizationType } from "../../models/mod
     selector: "configuration-dialog",
     templateUrl: "./configuration-dialog.component.html"
 })
-export class ConfigurationDialogComponent extends BaseMapComponent implements OnDestroy {
+export class ConfigurationDialogComponent extends BaseMapComponent {
 
-    private subscriptions: Subscription[];
-
-    public batteryOptimizationType: BatteryOptimizationType;
-    public isAutomaticRecordingUpload: boolean;
-    public isGotLostWarnings: boolean;
+    public batteryOptimizationType$: Observable<BatteryOptimizationType>;
+    public isAutomaticRecordingUpload$: Observable<boolean>;
+    public isGotLostWarnings$: Observable<boolean>;
 
     constructor(resources: ResourcesService,
         private readonly dialogRef: MatDialogRef<ConfigurationDialogComponent>,
@@ -35,22 +33,9 @@ export class ConfigurationDialogComponent extends BaseMapComponent implements On
         private readonly logginService: LoggingService,
         private readonly store: Store) {
         super(resources);
-        this.subscriptions = [];
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType).subscribe((batteryOptimizationType) => {
-            this.batteryOptimizationType = batteryOptimizationType;
-        }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload).subscribe((isAutomaticRecordingUpload) => {
-            this.isAutomaticRecordingUpload = isAutomaticRecordingUpload;
-        }));
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.isGotLostWarnings).subscribe((isGotLostWarnings) => {
-            this.isGotLostWarnings = isGotLostWarnings;
-        }));
-    }
-
-    public ngOnDestroy() {
-        for (const subscription of this.subscriptions) {
-            subscription.unsubscribe();
-        }
+        this.batteryOptimizationType$ = this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType);
+        this.isAutomaticRecordingUpload$ = this.store.select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload);
+        this.isGotLostWarnings$ = this.store.select((state: ApplicationState) => state.configuration.isGotLostWarnings);
     }
 
     public isApp() {

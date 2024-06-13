@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "./base-map.component";
@@ -19,9 +20,9 @@ export class BackgroundTextComponent extends BaseMapComponent {
         super(resources);
 
         this.text = "";
-        this.store.select((state: ApplicationState) => state.offlineState.isOfflineAvailable).subscribe(() => this.updateText());
-        this.store.select((state: ApplicationState) => state.offlineState.lastModifiedDate).subscribe(() => this.updateText());
-        this.store.select((state: ApplicationState) => state.configuration.language).subscribe(() => this.updateText());
+        this.store.select((state: ApplicationState) => state.offlineState.isOfflineAvailable).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
+        this.store.select((state: ApplicationState) => state.offlineState.lastModifiedDate).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
     }
 
     private updateText() {
