@@ -1,14 +1,12 @@
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import "cordova-plugin-purchase";
-import type { Immutable } from "immer";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { OfflineFilesDownloadService } from "./offline-files-download.service";
 import { SetOfflineAvailableAction } from "../reducers/offline.reducer";
-import type { ApplicationState, UserInfo } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 const OFFLINE_MAPS_SUBSCRIPTION = "offline_map";
 

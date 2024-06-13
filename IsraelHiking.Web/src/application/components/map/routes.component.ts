@@ -76,7 +76,7 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         this.routes = routes;
         this.setInteractionAccordingToState();
         this.buildFeatureCollections();
-    };
+    }
 
     private buildFeatureCollections() {
         let features = [] as GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>[];

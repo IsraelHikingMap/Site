@@ -52,7 +52,7 @@ export class LocationComponent extends BaseMapComponent {
         this.lastSpeedTime = null;
         this.clearLocationFeatureCollection();
 
-        this.store.select((state: ApplicationState) => state.inMemoryState.distance).pipe(takeUntilDestroyed()).subscribe(distance => {;
+        this.store.select((state: ApplicationState) => state.inMemoryState.distance).pipe(takeUntilDestroyed()).subscribe(distance => {
             this.showDistance = distance;
             this.updateDistanceFeatureCollection();
         });

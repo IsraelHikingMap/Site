@@ -9,7 +9,7 @@ import { Store } from "@ngxs/store";
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
 import { ToggleAddRecordingPoiAction } from "../reducers/recorded-route.reducer";
-import type { ApplicationState, BatteryOptimizationType } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 @Injectable()
 export class ScreenService {
