@@ -1,4 +1,5 @@
 import { Component, ViewEncapsulation, OnInit, ViewChild, ElementRef, ChangeDetectorRef } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { trigger, style, transition, animate } from "@angular/animations";
 import { Observable, interval } from "rxjs";
 import { regressionLoess } from "d3-regression";
@@ -19,7 +20,6 @@ import { GeoLocationService } from "../services/geo-location.service";
 import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
 import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
 import type { LatLngAlt, ApplicationState, LatLngAltTime } from "../models/models";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 declare type DragState = "start" | "drag" | "none";
 
