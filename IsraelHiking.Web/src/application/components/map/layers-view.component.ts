@@ -52,6 +52,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
             type: "FeatureCollection",
             features: []
         };
+        this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
     }
 
     public getBaseLayer() {
@@ -64,7 +65,6 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
             this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
         });
         this.store.select((state: ApplicationState) => state.poiState.selectedPointOfInterest).pipe(takeUntilDestroyed()).subscribe(poi => this.onSelectedPoiChanged(poi));
-        this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
     }
 
     private onSelectedPoiChanged(poi: Immutable<GeoJSON.Feature>) {
