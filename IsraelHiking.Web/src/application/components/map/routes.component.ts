@@ -1,4 +1,5 @@
 import { Component, AfterViewInit, ViewEncapsulation } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import { MapLayerMouseEvent } from "maplibre-gl";
 import { Store } from "@ngxs/store";
@@ -43,10 +44,8 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
 
     public routePointPopupData: RoutePointViewData;
     public nonEditRoutePointPopupData: { latlng: LatLngAlt; wazeAddress: string; routeId: string};
-
     public editingRouteGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
     public routesGeoJson: GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.Point>;
-
     public routes: Immutable<RouteData[]>;
 
     constructor(resources: ResourcesService,
@@ -67,10 +66,10 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
             features: []
         };
         this.routes = [];
-        this.routeEditRouteInteraction.onRoutePointClick.subscribe(this.handleRoutePointClick);
-        this.store.select((state: ApplicationState) => state.routes.present).subscribe(routes => this.handleRoutesChanges(routes));
-        this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).subscribe(() => this.handleRoutesChanges(this.routes));
-        this.store.select((state: ApplicationState) => state.recordedRouteState.isAddingPoi).subscribe(() => this.setInteractionAccordingToState());
+        this.routeEditRouteInteraction.onRoutePointClick.pipe(takeUntilDestroyed()).subscribe(this.handleRoutePointClick);
+        this.store.select((state: ApplicationState) => state.routes.present).pipe(takeUntilDestroyed()).subscribe(routes => this.handleRoutesChanges(routes));
+        this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).pipe(takeUntilDestroyed()).subscribe(() => this.handleRoutesChanges(this.routes));
+        this.store.select((state: ApplicationState) => state.recordedRouteState.isAddingPoi).pipe(takeUntilDestroyed()).subscribe(() => this.setInteractionAccordingToState());
     }
 
     private handleRoutesChanges(routes: Immutable<RouteData[]>) {
