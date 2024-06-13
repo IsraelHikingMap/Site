@@ -1,7 +1,8 @@
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router, ActivatedRoute, ParamMap } from "@angular/router";
 import { SocialSharing } from "@awesome-cordova-plugins/social-sharing/ngx";
-import { Subscription } from "rxjs";
+import { Observable } from "rxjs";
 import { cloneDeep } from "lodash-es";
 import { Store } from "@ngxs/store";
 
@@ -56,11 +57,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public latlng: LatLngAlt;
     public shareLinks: PoiSocialLinks;
     public contribution: Contribution;
-    public isOpen: boolean;
+    public isOpen$: Observable<boolean>;
 
     private editMode: boolean;
     private fullFeature: GeoJSON.Feature;
-    private subscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
                 private readonly titleService: IHMTitleService,
@@ -87,11 +87,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.shareLinks = {} as PoiSocialLinks;
         this.contribution = {} as Contribution;
         this.info = { imagesUrls: [], urls: [] } as EditablePublicPointData;
-        this.subscriptions = [];
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.poiState.isSidebarOpen).subscribe(isOpen => {
-            this.isOpen = isOpen;
-        }));
-        this.subscriptions.push(this.route.paramMap.subscribe(async (_) => {
+        this.isOpen$ = this.store.select((state: ApplicationState) => state.poiState.isSidebarOpen);
+        this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(async (_) => {
             if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
                 return;
             }
@@ -100,8 +97,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             if (snapshot.queryParamMap.get(RouteStrings.EDIT) !== "true" || poiSourceAndId.source === "new") {
                 await this.fillUiWithData(poiSourceAndId);
             }
-        }));
-        this.subscriptions.push(this.route.queryParams.subscribe(async (params) => {
+        });
+        this.route.queryParams.pipe(takeUntilDestroyed()).subscribe(async (params) => {
             if (!this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
                 return;
             }
@@ -114,7 +111,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             // change this only after we get the full data
             // so that the edit dialog will have all the necessary data to decide
             this.editMode = editMode;
-        }));
+        });
     }
 
     private getDataFromRoute(params: ParamMap, queryParams: ParamMap) {
@@ -127,10 +124,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     public ngOnDestroy() {
         this.titleService.clear();
-
-        for (const subscription of this.subscriptions) {
-            subscription.unsubscribe();
-        }
     }
 
     public isApp(): boolean {
