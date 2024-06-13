@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 import {
     StyleSpecification,
@@ -7,7 +8,7 @@ import {
     SourceSpecification,
     LayerSpecification
 } from "maplibre-gl";
-import { Subject, Subscription, mergeMap } from "rxjs";
+import { Subject, mergeMap } from "rxjs";
 import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -40,7 +41,6 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
 
     private rasterSourceId: string;
     private rasterLayerId: string;
-    private subscriptions: Subscription[];
     private jsonSourcesIds: string[];
     private jsonLayersIds: string[];
     private hasInternetAccess: boolean;
@@ -63,25 +63,24 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
         this.hasInternetAccess = true;
         this.jsonSourcesIds = [];
         this.jsonLayersIds = [];
-        this.subscriptions = [];
-        this.subscriptions.push(this.recreateQueue.pipe(mergeMap((action: () => Promise<void>) => action(), 1)).subscribe());
+        this.recreateQueue.pipe(mergeMap((action: () => Promise<void>) => action(), 1)).subscribe();
         this.mapLoadedPromise = new Promise((resolve, _) => {
-            this.subscriptions.push(this.mapComponent.mapLoad.subscribe(() => {
+            this.mapComponent.mapLoad.pipe(takeUntilDestroyed()).subscribe(() => {
                 resolve();
-            }));
+            });
         });
     }
 
     public ngOnInit() {
         this.addLayerRecreationQuqueItem(null, this.layerData);
         this.currentLanguageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
-        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.language).subscribe((language) => {
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe((language) => {
             if (this.currentLanguageCode !== language.code) {
                 this.addLayerRecreationQuqueItem(this.layerData, this.layerData);
             }
             this.currentLanguageCode = language.code;
-        }));
-        this.subscriptions.push(this.connectionSerive.stateChanged.subscribe((online) => {
+        });
+        this.connectionSerive.stateChanged.pipe(takeUntilDestroyed()).subscribe((online) => {
             if (online === this.hasInternetAccess) {
                 return;
             }
@@ -94,15 +93,12 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
                 return;
             }
             this.addLayerRecreationQuqueItem(this.layerData, this.layerData);
-        }));
+        });
     }
 
     public ngOnDestroy() {
         this.addLayerRecreationQuqueItem(this.layerData, null);
         this.recreateQueue.complete();
-        for (const subscription of this.subscriptions) {
-            subscription.unsubscribe();
-        }
     }
 
     public ngOnChanges(changes: SimpleChanges) {
