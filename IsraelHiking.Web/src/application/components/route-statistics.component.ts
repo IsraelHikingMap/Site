@@ -153,7 +153,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.redrawChart();
         });
         this.selectedRouteService.selectedRouteHover.pipe(takeUntilDestroyed()).subscribe(this.onSelectedRouteHover);
-        this.statisticsVisible$ =this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible);
+        this.statisticsVisible$ = this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible);
     }
 
     private setViewStatisticsValues(statistics: RouteStatistics): void {
