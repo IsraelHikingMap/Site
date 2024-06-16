@@ -1,10 +1,10 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { cloneDeep, isEqualWith } from "lodash-es";
-import { Observable, firstValueFrom } from "rxjs";
+import { firstValueFrom } from "rxjs";
 import { timeout, skip } from "rxjs/operators";
 import { v4 as uuidv4 } from "uuid";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import osmtogeojson from "osmtogeojson";
 import type { Immutable } from "immer";
 import type { MapGeoJSONFeature, SourceSpecification } from "maplibre-gl";
@@ -33,10 +33,8 @@ import type {
     ApplicationState,
     Category,
     IconColorLabel,
-    CategoriesGroup,
     Contribution,
     NorthEast,
-    Language,
     EditablePublicPointData,
     OfflineState
 } from "../models/models";
@@ -103,15 +101,6 @@ export class PoiService {
     public poiGeojsonFiltered: GeoJSON.FeatureCollection<GeoJSON.Geometry, PoiProperties>;
     public poisChanged: EventEmitter<void>;
 
-    @Select((state: ApplicationState) => state.layersState.categoriesGroups)
-    private categoriesGroups: Observable<Immutable<CategoriesGroup[]>>;
-
-    @Select((state: ApplicationState) => state.configuration.language)
-    private language$: Observable<Immutable<Language>>;
-
-    @Select((state: ApplicationState) => state.offlineState.uploadPoiQueue)
-    private uploadPoiQueue$: Observable<Immutable<string[]>>;
-
     constructor(private readonly resources: ResourcesService,
                 private readonly httpClient: HttpClient,
                 private readonly ngZone: NgZone,
@@ -138,18 +127,18 @@ export class PoiService {
     }
 
     public async initialize() {
-        this.language$.pipe(skip(1)).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(skip(1)).subscribe(() => {
             this.poisCache = [];
             this.loggingService.info("[POIs] Language changed, updating pois");
             this.updatePois();
         });
-        this.categoriesGroups.pipe(skip(1)).subscribe(() => {
+        this.store.select((state: ApplicationState) => state.layersState.categoriesGroups).pipe(skip(1)).subscribe(() => {
             this.loggingService.info("[POIs] Categories changed, updating pois");
             this.updatePois();
         });
         await this.syncCategories();
         await this.mapService.initializationPromise;
-        this.uploadPoiQueue$.subscribe((items: Immutable<string[]>) => this.handleUploadQueueChanges(items));
+        this.store.select((state: ApplicationState) => state.offlineState.uploadPoiQueue).subscribe((items: Immutable<string[]>) => this.handleUploadQueueChanges(items));
         this.connectionService.stateChanged.subscribe(online => {
             this.loggingService.info(`[POIs] Connection status changed to: ${online}`);
             if (online && this.offlineState.uploadPoiQueue.length > 0) {

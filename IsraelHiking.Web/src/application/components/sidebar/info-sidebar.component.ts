@@ -1,10 +1,9 @@
 import { Component } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { MatDialog } from "@angular/material/dialog";
 import { remove } from "lodash-es";
 import { Angulartics2GoogleGlobalSiteTag } from "angulartics2";
-import { Observable } from "rxjs";
-import { Select } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
@@ -14,7 +13,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers.service";
 import { RunningContextService } from "../../services/running-context.service";
 import { ISRAEL_MTB_MAP, ISRAEL_HIKING_MAP } from "../../reducers/initial-state";
-import type { ApplicationState, Language } from "../../models/models";
+import type { ApplicationState } from "../../models/models";
 import legendSectionsJson from "../../../content/legend/legend.json";
 
 export type LegendSection = {
@@ -33,22 +32,20 @@ export class InfoSidebarComponent extends BaseMapComponent {
     public selectedTabIndex: number;
     private selectedSection: LegendSection;
 
-    @Select((state: ApplicationState) => state.configuration.language)
-    private language$: Observable<Immutable<Language>>;
-
     constructor(resources: ResourcesService,
                 private readonly dialog: MatDialog,
                 private readonly angulartics: Angulartics2GoogleGlobalSiteTag,
                 private readonly sidebarService: SidebarService,
                 private readonly layersService: LayersService,
-                private readonly runningContext: RunningContextService) {
+                private readonly runningContext: RunningContextService,
+                private readonly store: Store) {
         super(resources);
 
         this.selectedTabIndex = 0;
         this.selectedSection = null;
         this.legendSections = [];
 
-        this.language$.subscribe(() => {
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => {
             this.initalizeLegendSections();
         });
     }

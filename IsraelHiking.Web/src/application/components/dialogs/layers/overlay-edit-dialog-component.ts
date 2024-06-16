@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { ResourcesService } from "../../../services/resources.service";
@@ -21,8 +22,9 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
                 mapService: MapService,
                 layersService: LayersService,
                 toastService: ToastService,
-                http: HttpClient) {
-        super(resources, mapService, layersService, toastService, http);
+                http: HttpClient,
+                store: Store) {
+        super(resources, mapService, layersService, toastService, http, store);
         this.title = this.resources.overlayProperties;
         this.isNew = false;
         this.isOverlay = true;

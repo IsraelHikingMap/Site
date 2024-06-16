@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation } from "@angular/core";
 import { MatDialog } from "@angular/material/dialog";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -33,20 +33,11 @@ import type { ApplicationState, RouteData, EditableLayer, Overlay, CategoriesGro
 })
 export class LayersSidebarComponent extends BaseMapComponent {
 
-    @Select((state: ApplicationState) => state.layersState.baseLayers)
-    public baseLayers: Observable<Immutable<EditableLayer[]>>;
-
-    @Select((state: ApplicationState) => state.layersState.overlays)
-    public overlays: Observable<Immutable<Overlay[]>>;
-
-    @Select((state: ApplicationState) => state.layersState.categoriesGroups)
-    public categoriesGroups: Observable<Immutable<CategoriesGroup>>;
-
-    @Select((state: ApplicationState) => state.routes.present)
-    public routes: Observable<Immutable<RouteData[]>>;
-
-    @Select((state: ApplicationState) => state.offlineState.lastModifiedDate)
-    public lastModified: Observable<Date>;
+    public baseLayers$: Observable<Immutable<EditableLayer[]>>;
+    public overlays$: Observable<Immutable<Overlay[]>>;
+    public categoriesGroups$: Observable<Immutable<CategoriesGroup[]>>;
+    public routes$: Observable<Immutable<RouteData[]>>;
+    public lastModified$: Observable<Date>;
 
     public manageSubscriptions: string;
 
@@ -64,6 +55,11 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.manageSubscriptions = this.runningContextService.isIos
             ? "https://apps.apple.com/account/subscriptions"
             : "https://play.google.com/store/account/subscriptions";
+        this.lastModified$ = this.store.select((state: ApplicationState) => state.offlineState.lastModifiedDate);
+        this.baseLayers$ = this.store.select((state: ApplicationState) => state.layersState.baseLayers);
+        this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
+        this.categoriesGroups$ = this.store.select((state: ApplicationState) => state.layersState.categoriesGroups);
+        this.routes$ = this.store.select((state: ApplicationState) => state.routes.present);
     }
 
     public closeSidebar() {

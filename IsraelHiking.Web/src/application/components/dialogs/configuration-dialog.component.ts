@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { MatDialogRef } from "@angular/material/dialog";
 import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -22,14 +22,9 @@ import type { ApplicationState, BatteryOptimizationType } from "../../models/mod
 })
 export class ConfigurationDialogComponent extends BaseMapComponent {
 
-    @Select((state: ApplicationState) => state.configuration.batteryOptimizationType)
-    public batteryOptimizationType: Observable<BatteryOptimizationType>;
-
-    @Select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload)
-    public isAutomaticRecordingUpload: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.configuration.isGotLostWarnings)
-    public isGotLostWarnings: Observable<boolean>;
+    public batteryOptimizationType$: Observable<BatteryOptimizationType>;
+    public isAutomaticRecordingUpload$: Observable<boolean>;
+    public isGotLostWarnings$: Observable<boolean>;
 
     constructor(resources: ResourcesService,
         private readonly dialogRef: MatDialogRef<ConfigurationDialogComponent>,
@@ -38,6 +33,9 @@ export class ConfigurationDialogComponent extends BaseMapComponent {
         private readonly logginService: LoggingService,
         private readonly store: Store) {
         super(resources);
+        this.batteryOptimizationType$ = this.store.select((state: ApplicationState) => state.configuration.batteryOptimizationType);
+        this.isAutomaticRecordingUpload$ = this.store.select((state: ApplicationState) => state.configuration.isAutomaticRecordingUpload);
+        this.isGotLostWarnings$ = this.store.select((state: ApplicationState) => state.configuration.isGotLostWarnings);
     }
 
     public isApp() {

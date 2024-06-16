@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy, ViewEncapsulation, Inject } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation, Inject } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl } from "@angular/forms";
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog";
-import { Subscription, Observable } from "rxjs";
 import { orderBy, take } from "lodash-es";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -26,7 +26,7 @@ import type { ApplicationState, Trace, TraceVisibility } from "../../models/mode
     styleUrls: ["./traces-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class TracesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
+export class TracesDialogComponent extends BaseMapComponent implements OnInit {
 
     public filteredTraces: Immutable<Trace[]>;
     public selectedTraceId: string;
@@ -35,12 +35,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public loadingTraces: boolean;
     public searchTerm: FormControl<string>;
 
-    @Select((state: ApplicationState) => state.tracesState.traces)
-    public traces$: Observable<Immutable<Trace[]>>;
-
     private sessionSearchTerm = "";
     private page: number;
-    private tracesChangedSubscription: Subscription;
     private specificIds: string[];
 
     constructor(resources: ResourcesService,
@@ -68,11 +64,11 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             this.specificIds = [];
         }
 
-        this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
+        this.searchTerm.valueChanges.pipe(takeUntilDestroyed()).subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
         });
         this.searchTerm.setValue(this.sessionSearchTerm);
-        this.tracesChangedSubscription = this.traces$.subscribe(() => {
+        this.store.select((state: ApplicationState) => state.tracesState.traces).pipe(takeUntilDestroyed()).subscribe(() => {
             if (!this.loadingTraces) {
                 this.updateFilteredLists(this.searchTerm.value);
             }
@@ -84,10 +80,6 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         await this.tracesService.syncTraces();
         this.loadingTraces = false;
         this.updateFilteredLists(this.searchTerm.value);
-    }
-
-    public ngOnDestroy() {
-        this.tracesChangedSubscription.unsubscribe();
     }
 
     public async addTraceToRoutes() {

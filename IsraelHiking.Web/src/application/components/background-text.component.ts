@@ -1,11 +1,10 @@
 import { Component } from "@angular/core";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
-import type { ApplicationState, Language } from "../models/models";
+import type { ApplicationState } from "../models/models";
 
 @Component({
     selector: "background-text",
@@ -14,15 +13,6 @@ import type { ApplicationState, Language } from "../models/models";
 })
 export class BackgroundTextComponent extends BaseMapComponent {
 
-    @Select((state: ApplicationState) => state.offlineState.isOfflineAvailable)
-    public isOfflineAvailable$: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.offlineState.lastModifiedDate)
-    public lastModifiedDate$: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.configuration.language)
-    public language$: Observable<Immutable<Language>>;
-
     public text: string;
 
     constructor(resources: ResourcesService,
@@ -30,9 +20,9 @@ export class BackgroundTextComponent extends BaseMapComponent {
         super(resources);
 
         this.text = "";
-        this.isOfflineAvailable$.subscribe(() => this.updateText());
-        this.lastModifiedDate$.subscribe(() => this.updateText());
-        this.language$.subscribe(() => this.updateText());
+        this.store.select((state: ApplicationState) => state.offlineState.isOfflineAvailable).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
+        this.store.select((state: ApplicationState) => state.offlineState.lastModifiedDate).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed()).subscribe(() => this.updateText());
     }
 
     private updateText() {

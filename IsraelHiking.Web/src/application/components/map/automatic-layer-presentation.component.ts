@@ -7,16 +7,15 @@ import {
     SourceSpecification,
     LayerSpecification
 } from "maplibre-gl";
-import { Observable, Subject, Subscription, mergeMap } from "rxjs";
-import { Store, Select } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { Subject, Subscription, mergeMap } from "rxjs";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ConnectionService } from "../../services/connection.service";
 import { MapService } from "../../services/map.service";
-import type { ApplicationState, EditableLayer, Language, LanguageCode, LayerData } from "../../models/models";
+import type { ApplicationState, EditableLayer, LanguageCode, LayerData } from "../../models/models";
 
 @Component({
     selector: "auto-layer",
@@ -49,9 +48,6 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     private currentLanguageCode: LanguageCode;
     private recreateQueue: Subject<() => Promise<void>>;
 
-    @Select((state: ApplicationState) => state.configuration.language)
-    private language$: Observable<Immutable<Language>>;
-
     constructor(resources: ResourcesService,
                 private readonly mapComponent: MapComponent,
                 private readonly fileService: FileService,
@@ -79,7 +75,7 @@ export class AutomaticLayerPresentationComponent extends BaseMapComponent implem
     public ngOnInit() {
         this.addLayerRecreationQuqueItem(null, this.layerData);
         this.currentLanguageCode = this.store.selectSnapshot((s: ApplicationState) => s.configuration).language.code;
-        this.subscriptions.push(this.language$.subscribe((language) => {
+        this.subscriptions.push(this.store.select((state: ApplicationState) => state.configuration.language).subscribe((language) => {
             if (this.currentLanguageCode !== language.code) {
                 this.addLayerRecreationQuqueItem(this.layerData, this.layerData);
             }
