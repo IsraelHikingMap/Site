@@ -138,7 +138,7 @@ describe("Poi Service", () => {
                         coordinates: [0, 0]
                     },
                     properties: {
-                        subclass: "spring",
+                        natural: "spring",
                         "name:he": "name",
                         "name:en": "name"
                     }
@@ -149,7 +149,7 @@ describe("Poi Service", () => {
                         coordinates: [0, 0]
                     },
                     properties: {
-                        subclass: "spring",
+                        natural: "spring",
                         "name:en": "name"
                     }
                 }
@@ -169,7 +169,7 @@ describe("Poi Service", () => {
                         coordinates: [0, 0]
                     },
                     properties: {
-                        subclass: "spring",
+                        natural: "spring",
                         "name:he": "name",
                         "name:en": "name"
                     }
@@ -181,7 +181,7 @@ describe("Poi Service", () => {
                         coordinates: [0, 0]
                     },
                     properties: {
-                        subclass: "spring",
+                        natural: "spring",
                         "name:he": "name"
                     }
                 }
