@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { Store } from "@ngxs/store";
 
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -17,9 +18,9 @@ export class BaseLayerAddDialogComponent extends LayerBaseDialogComponent {
                 layersService: LayersService,
                 mapService: MapService,
                 toastService: ToastService,
-                http: HttpClient
-        ) {
-        super(resources, mapService, layersService, toastService, http);
+                http: HttpClient,
+                store: Store) {
+        super(resources, mapService, layersService, toastService, http, store);
         this.title = this.resources.addBaseLayer;
         this.isNew = true;
         this.isOverlay = false;

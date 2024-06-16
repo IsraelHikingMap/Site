@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Map } from "maplibre-gl";
-import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 
 import { CancelableTimeoutService } from "./cancelable-timeout.service";
 import { SetPannedAction } from "../reducers/in-memory.reducer";
@@ -18,9 +17,6 @@ export class MapService {
 
     private missingImagesArray: string[];
 
-    @Select((state: ApplicationState) => state.inMemoryState.pannedTimestamp)
-    public pannedTimestamp$: Observable<Date>;
-
     constructor(private readonly cancelableTimeoutService: CancelableTimeoutService,
         private readonly store: Store) {
         this.initializationPromise = new Promise((resolve) => { this.resolve = resolve; });
@@ -30,7 +26,7 @@ export class MapService {
     public setMap(map: Map) {
         this.map = map;
         this.resolve();
-        this.pannedTimestamp$.subscribe(pannedTimestamp => {
+        this.store.select((state: ApplicationState) => state.inMemoryState.pannedTimestamp).subscribe(pannedTimestamp => {
             this.cancelableTimeoutService.clearTimeoutByGroup("panned");
             if (pannedTimestamp) {
                 this.cancelableTimeoutService.setTimeoutByGroup(() => {

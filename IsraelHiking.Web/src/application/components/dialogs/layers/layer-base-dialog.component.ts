@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
-import { firstValueFrom, Observable } from "rxjs";
-import { Select } from "@ngxs/store";
+import { Observable, firstValueFrom } from "rxjs";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -14,18 +14,15 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     public title: string;
     public isNew: boolean;
     public isOverlay: boolean;
-
     public layerData: EditableLayer;
-
-    @Select((state: ApplicationState) => state.locationState)
-    public location: Observable<Immutable<LocationState>>;
+    public location$: Observable<Immutable<LocationState>>;
 
     protected constructor(resources: ResourcesService,
                           protected readonly mapService: MapService,
                           protected readonly layersService: LayersService,
                           protected readonly toastService: ToastService,
-                          private readonly http: HttpClient
-    ) {
+                          private readonly http: HttpClient,
+                          private readonly store: Store) {
         super(resources);
         this.layerData = {
             minZoom: LayersService.MIN_ZOOM,
@@ -37,6 +34,8 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
             isOfflineAvailable: false,
             isOfflineOn: true
         } as EditableLayer;
+        
+        this.location$ = this.store.select((state: ApplicationState) => state.locationState);
     }
 
     public onAddressChanged(address: string) {

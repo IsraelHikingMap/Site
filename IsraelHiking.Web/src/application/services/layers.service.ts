@@ -1,8 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { firstValueFrom, Observable } from "rxjs";
+import { firstValueFrom } from "rxjs";
 import { timeout } from "rxjs/operators";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { ResourcesService } from "./resources.service";
@@ -32,7 +32,6 @@ import type {
     EditableLayer,
     Overlay,
     ApplicationState,
-    UserInfo
 } from "../models/models";
 import { Urls } from "../urls";
 import { LoggingService } from "./logging.service";
@@ -54,18 +53,6 @@ export class LayersService {
     private overlays: Immutable<Overlay[]>;
     private selectedBaseLayerKey: string;
 
-    @Select((state: ApplicationState) => state.layersState.baseLayers)
-    public baseLayers$: Observable<Immutable<EditableLayer[]>>;
-
-    @Select((state: ApplicationState) => state.layersState.overlays)
-    public overlays$: Observable<Immutable<Overlay[]>>;
-
-    @Select((state: ApplicationState) => state.layersState.selectedBaseLayerKey)
-    public selectedBaseLayerKey$: Observable<string>;
-
-    @Select((state: ApplicationState) => state.userState.userInfo)
-    public userInfo$: Observable<Immutable<UserInfo>>;
-
     constructor(private readonly resources: ResourcesService,
                 private readonly authorizationService: AuthorizationService,
                 private readonly httpClient: HttpClient,
@@ -76,11 +63,10 @@ export class LayersService {
         this.baseLayers = [];
         this.overlays = [];
 
-        this.baseLayers$.subscribe(b => this.baseLayers = b);
-        this.overlays$.subscribe(o => this.overlays = o);
-        this.selectedBaseLayerKey$.subscribe(k => this.selectedBaseLayerKey = k);
-
-        this.userInfo$.subscribe(() => this.syncUserLayers());
+        this.store.select((state: ApplicationState) => state.layersState.baseLayers).subscribe(b => this.baseLayers = b);
+        this.store.select((state: ApplicationState) => state.layersState.overlays).subscribe(o => this.overlays = o);
+        this.store.select((state: ApplicationState) => state.layersState.selectedBaseLayerKey).subscribe(k => this.selectedBaseLayerKey = k);
+        this.store.select((state: ApplicationState) => state.userState.userInfo).subscribe(() => this.syncUserLayers());
     }
 
     public isBaseLayerSelected(layer: EditableLayer): boolean {

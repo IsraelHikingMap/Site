@@ -1,6 +1,6 @@
 import { Component, HostListener } from "@angular/core";
 import { Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -25,14 +25,14 @@ import type { RoutingType, ApplicationState } from "../models/models";
 })
 export class DrawingComponent extends BaseMapComponent {
 
-    @Select((state: ApplicationState) => state.routes.past.length)
-    public undoQueueLength: Observable<number>;
+    public undoQueueLength$: Observable<number>;
 
     constructor(resources: ResourcesService,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly toastService: ToastService,
                 private readonly store: Store) {
         super(resources);
+        this.undoQueueLength$ = this.store.select((state: ApplicationState) => state.routes.past.length);
     }
 
     @HostListener("window:keydown", ["$event"])

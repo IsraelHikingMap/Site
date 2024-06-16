@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { firstValueFrom, Observable } from "rxjs";
-import { Store, Select } from "@ngxs/store";
-import type { Immutable } from "immer";
+import { firstValueFrom } from "rxjs";
+import { Store } from "@ngxs/store";
 
 import { RunningContextService } from "./running-context.service";
 import { LoggingService } from "./logging.service";
@@ -17,9 +16,6 @@ export class AuthorizationService {
 
     private readonly redirectUrl: string;
 
-    @Select((state: ApplicationState) => state.userState)
-    private userState$: Observable<Immutable<UserState>>;
-
     private userState: UserState;
 
     constructor(private readonly httpClient: HttpClient,
@@ -27,7 +23,7 @@ export class AuthorizationService {
                 private readonly loggingService: LoggingService,
                 private readonly store: Store) {
         this.redirectUrl = this.runningContextService.isCapacitor ? "ihm://oauth_callback/" : Urls.emptyAuthHtml;
-        this.userState$.subscribe(us => this.userState = us);
+        this.store.select((state: ApplicationState) => state.userState).subscribe(us => this.userState = us);
     }
 
     public isLoggedIn(): boolean {

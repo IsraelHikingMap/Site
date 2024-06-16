@@ -1,9 +1,10 @@
-import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from "@angular/core";
+import { Component, ViewEncapsulation, OnInit, ViewChild, ElementRef, ChangeDetectorRef, DestroyRef } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { trigger, style, transition, animate } from "@angular/animations";
-import { Subscription, Observable, interval } from "rxjs";
+import { Observable, interval } from "rxjs";
 import { regressionLoess } from "d3-regression";
 import { LineLayerSpecification } from "maplibre-gl";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import * as d3 from "d3";
 import type { Selection, ScaleContinuousNumeric } from "d3";
 import type { Immutable } from "immer";
@@ -18,7 +19,7 @@ import { SpatialService } from "../services/spatial.service";
 import { GeoLocationService } from "../services/geo-location.service";
 import { AudioPlayerFactory, IAudioPlayer } from "../services/audio-player.factory";
 import { ToggleIsShowKmMarkersAction, ToggleIsShowSlopeAction } from "../reducers/configuration.reducer";
-import type { LatLngAlt, RouteData, ApplicationState, Language, LatLngAltTime } from "../models/models";
+import type { LatLngAlt, ApplicationState, LatLngAltTime } from "../models/models";
 
 declare type DragState = "start" | "drag" | "none";
 
@@ -72,7 +73,7 @@ interface IChartElements {
         )
     ],
 })
-export class RouteStatisticsComponent extends BaseMapComponent implements OnInit, OnDestroy {
+export class RouteStatisticsComponent extends BaseMapComponent implements OnInit {
     private static readonly HOVER_BOX_WIDTH = 160;
     private static readonly MAX_SLOPE = 20;
 
@@ -97,37 +98,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public slopeRouteSource: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public subRouteRange: IChartSubRouteRange;
     public slopeRoutePaint: LineLayerSpecification["paint"];
+    public statisticsVisible$: Observable<boolean>;
 
     @ViewChild("lineChartContainer")
     public lineChartContainer: ElementRef;
 
-    @Select((state: ApplicationState) => state.routes.present)
-    private routes$: Observable<Immutable<RouteData[]>>;
-
-    @Select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
-    private selectedRouteId$: Observable<string>;
-
-    @Select((state: ApplicationState) => state.locationState.zoom)
-    private zoom$: Observable<number>;
-
-    @Select((state: ApplicationState) => state.gpsState.currentPosition)
-    private currentPosition$: Observable<Immutable<GeolocationPosition>>;
-
-    @Select((state: ApplicationState) => state.uiComponentsState.statisticsVisible)
-    public statisticsVisible$: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.configuration.language)
-    public language$: Observable<Immutable<Language>>;
-
-    @Select((state: ApplicationState) => state.configuration.isShowSlope)
-    public isShowSlope$: Observable<boolean>;
-
-    @Select((state: ApplicationState) => state.configuration.isShowKmMarker)
-    public isShowKmMarkers$: Observable<boolean>;
-
     private statistics: RouteStatistics;
     private chartElements: IChartElements;
-    private componentSubscriptions: Subscription[];
     private zoom: number;
     private routeColor: string;
     private audioPlayer: IAudioPlayer;
@@ -140,7 +117,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 private readonly cancelableTimeoutService: CancelableTimeoutService,
                 private readonly sidebarService: SidebarService,
                 private readonly audioPlayerFactory: AudioPlayerFactory,
-                private readonly store: Store
+                private readonly store: Store,
+                private readonly destroyRef: DestroyRef,
     ) {
         super(resources);
         this.isExpanded = false;
@@ -151,7 +129,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.subRouteRange = null;
         this.heading = null;
         this.setViewStatisticsValues(null);
-        this.componentSubscriptions = [];
         this.kmMarkersSource = {
             type: "FeatureCollection",
             features: []
@@ -169,14 +146,15 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             margin: { top: 10, right: 10, bottom: 40, left: 40 },
         } as IChartElements;
         this.zoom = 7;
-        this.zoom$.subscribe((zoom) => {
+        this.store.select((state: ApplicationState) => state.locationState.zoom).pipe(takeUntilDestroyed()).subscribe((zoom) => {
             this.zoom = zoom;
             this.updateKmMarkers();
         });
-        this.componentSubscriptions.push(this.sidebarService.sideBarStateChanged.subscribe(() => {
+        this.sidebarService.sideBarStateChanged.pipe(takeUntilDestroyed()).subscribe(() => {
             this.redrawChart();
-        }));
-        this.componentSubscriptions.push(this.selectedRouteService.selectedRouteHover.subscribe(this.onSelectedRouteHover));
+        });
+        this.selectedRouteService.selectedRouteHover.pipe(takeUntilDestroyed()).subscribe(this.onSelectedRouteHover);
+        this.statisticsVisible$ = this.store.select((state: ApplicationState) => state.uiComponentsState.statisticsVisible);
     }
 
     private setViewStatisticsValues(statistics: RouteStatistics): void {
@@ -248,42 +226,36 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public async ngOnInit() {
-        this.componentSubscriptions.push(this.routes$.subscribe(() => {
+        this.store.select((state: ApplicationState) => state.routes.present).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.routeChanged();
-        }));
-        this.componentSubscriptions.push(this.selectedRouteId$.subscribe(() => {
+        });
+        this.store.select((state: ApplicationState) => state.routeEditingState.selectedRouteId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.routeChanged();
-        }));
-        this.componentSubscriptions.push(this.language$.subscribe(() => {
+        });
+        this.store.select((state: ApplicationState) => state.configuration.language).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.redrawChart();
-        }));
-        this.componentSubscriptions.push(this.currentPosition$.subscribe(p => {
+        });
+        this.store.select((state: ApplicationState) => state.gpsState.currentPosition).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
             this.onGeolocationChanged(p);
-        }));
-        this.componentSubscriptions.push(this.isShowSlope$.subscribe(showSlope => {
+        });
+        this.store.select((state: ApplicationState) => state.configuration.isShowSlope).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(showSlope => {
             this.isSlopeOn = showSlope;
             this.redrawChart();
             this.updateSlopeRoute();
-        }));
-        this.componentSubscriptions.push(this.isShowKmMarkers$.subscribe(showKmMarkers => {
+        });
+        this.store.select((state: ApplicationState) => state.configuration.isShowKmMarker).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(showKmMarkers => {
             this.isKmMarkersOn = showKmMarkers;
             this.updateKmMarkers();
-        }));
+        });
         this.routeChanged();
-        this.componentSubscriptions.push(interval(1000).subscribe(() => {
+        interval(1000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             const recordedRouteState = this.store.selectSnapshot((s: ApplicationState) => s.recordedRouteState);
             if (recordedRouteState.isRecording) {
                 const recordingStartTime = new Date(recordedRouteState.route.latlngs[0].timestamp).getTime();
                 this.updateDurationString((new Date().getTime() - recordingStartTime) / 1000);
             }
-        }));
+        });
         this.audioPlayer = await this.audioPlayerFactory.create();
-    }
-
-    public ngOnDestroy() {
-        for (const subscription of this.componentSubscriptions) {
-            subscription.unsubscribe();
-        }
     }
 
     public changeState(state: string) {

@@ -1,8 +1,9 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, DestroyRef, OnInit } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { GeoJSONSourceComponent } from "@maplibre/ngx-maplibre-gl";
-import { Store, Select } from "@ngxs/store";
+import { Store } from "@ngxs/store";
 import type { Immutable } from "immer";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -32,12 +33,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
     public clusterFeatures: GeoJSON.Feature<GeoJSON.Point>[];
     public hoverFeature: GeoJSON.Feature<GeoJSON.Point>;
     public isShowCoordinatesPopup: boolean;
-
-    @Select((state: ApplicationState) => state.layersState.overlays)
-    public overlays: Observable<Immutable<Overlay[]>>;
-
-    @Select((state: ApplicationState) => state.poiState.selectedPointOfInterest)
-    public selectedPoi$: Observable<Immutable<GeoJSON.Feature>>;
+    public overlays$: Observable<Immutable<Overlay[]>>;	
 
     constructor(resources: ResourcesService,
                 private readonly router: Router,
@@ -45,7 +41,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
                 private readonly poiService: PoiService,
                 private readonly selectedRouteService: SelectedRouteService,
                 private readonly navigateHereService: NavigateHereService,
-                private readonly store: Store
+                private readonly store: Store,
+                private readonly destroyRef: DestroyRef
     ) {
         super(resources);
         this.selectedCluster = null;
@@ -56,6 +53,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
             type: "FeatureCollection",
             features: []
         };
+        this.overlays$ = this.store.select((state: ApplicationState) => state.layersState.overlays);
     }
 
     public getBaseLayer() {
@@ -64,10 +62,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit {
 
     public ngOnInit() {
         this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
-        this.poiService.poisChanged.subscribe(() => {
+        this.poiService.poisChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.poiGeoJsonData = this.poiService.poiGeojsonFiltered;
         });
-        this.selectedPoi$.subscribe((poi) => this.onSelectedPoiChanged(poi));
+        this.store.select((state: ApplicationState) => state.poiState.selectedPointOfInterest).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(poi => this.onSelectedPoiChanged(poi));
     }
 
     private onSelectedPoiChanged(poi: Immutable<GeoJSON.Feature>) {
