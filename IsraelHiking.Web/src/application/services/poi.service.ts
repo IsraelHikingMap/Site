@@ -88,7 +88,7 @@ export class PoiService {
             type: "vector",
             maxzoom: 14,
 	        minzoom: 0,
-            tiles: ["https://production.pmtiles-serve.israelhikingmap.workers.dev/public_pois/{z}/{x}/{y}.mvt"]
+            tiles: ["https://production.pois.israelhikingmap.workers.dev/public_pois/{z}/{x}/{y}.mvt"]
         } },
         "external-points-of-interest": { sourceLayer: "external", source: {
             type: "vector",
@@ -415,111 +415,6 @@ export class PoiService {
         poi.properties.poiIcon = "icon-search";
         poi.properties.poiCategory = "Other";
 
-        switch (feature.properties.subclass) {
-            case "spring":
-            case "pond":
-            case "reservoir":
-                poi.properties.poiIconColor = "blue";
-                poi.properties.poiIcon = "icon-tint";
-                poi.properties.poiCategory = "Water";
-                break;
-            case "waterfall":
-                poi.properties.poiIconColor = "blue";
-                poi.properties.poiIcon = "icon-waterfall";
-                poi.properties.poiCategory = "Water";
-                break;
-            case "waterhole":
-                poi.properties.poiIconColor = "blue";
-                poi.properties.poiIcon = "icon-waterhole";
-                poi.properties.poiCategory = "Water";
-                break;
-            case "water_well":
-                poi.properties.poiIconColor = "blue";
-                poi.properties.poiIcon = "icon-water-well";
-                poi.properties.poiCategory = "Water";
-                break;
-            case "cistern":
-                poi.properties.poiIconColor = "blue";
-                poi.properties.poiIcon = "icon-cistern";
-                poi.properties.poiCategory = "Water";
-                break;
-            case "ruins":
-                poi.properties.poiIconColor = "#666666";
-                poi.properties.poiIcon = "icon-ruins";
-                poi.properties.poiCategory = "Historic";
-                break;
-            case "archaeological_site":
-                poi.properties.poiIconColor = "#666666";
-                poi.properties.poiIcon = "icon-archaeological";
-                poi.properties.poiCategory = "Historic";
-                break;
-            case "memorial": 
-            case "monument":
-                poi.properties.poiIconColor = "#666666";
-                poi.properties.poiIcon = "icon-memorial";
-                poi.properties.poiCategory = "Historic";
-                break;
-            case "viewpoint":
-                poi.properties.poiIconColor = "#008000";
-                poi.properties.poiIcon = "icon-viewpoint";
-                poi.properties.poiCategory = "Viewpoint";
-                break;
-            case "picnic_site":
-            case "picnic_table":
-            case "picnic":
-                poi.properties.poiIconColor = "#734a08";
-                poi.properties.poiIcon = "icon-picnic";
-                poi.properties.poiCategory = "Camping";
-                break;
-            case "camp_site":
-                poi.properties.poiIconColor = "#734a08";
-                poi.properties.poiIcon = "icon-campsite";
-                poi.properties.poiCategory = "Camping";
-                break;
-            case "cave_entrance":
-            case "tomb":
-                poi.properties.poiIconColor = "black";
-                poi.properties.poiIcon = "icon-cave";
-                poi.properties.poiCategory = "Natural";
-                break;
-            case "tree":
-                poi.properties.poiIconColor = "#008000";
-                poi.properties.poiIcon = "icon-tree";
-                poi.properties.poiCategory = "Natural";
-                break;
-            case "flowers":
-                poi.properties.poiIconColor = "#008000";
-                poi.properties.poiIcon = "icon-flowers";
-                poi.properties.poiCategory = "Natural";
-                break;
-            case "attraction":
-                poi.properties.poiIconColor = "#ffb800";
-                poi.properties.poiIcon = "icon-star";
-                poi.properties.poiCategory = "Other";
-                break;
-            case "protected_area":
-            case "nature_reserve":
-            case "national_park":
-                poi.properties.poiIconColor = "#008000";
-                poi.properties.poiIcon = "icon-nature-reserve";
-                poi.properties.poiCategory = "Other";
-                break;
-            case "peak":
-                poi.properties.poiIconColor = "black";
-                poi.properties.poiIcon = "icon-peak";
-                poi.properties.poiCategory = "Other";
-                break;
-            default:
-                // HM TODO: decide what to do with these points
-                // HM TODO: check if there are more categories that need to be handled
-                poi.properties.poiIconColor = "black";
-                poi.properties.poiIcon = "icon-search";
-                poi.properties.poiCategory = "Other";
-        }
-        if (poi.properties.poiIcon === "icon-search" && (Object.keys(feature.properties).some(p => p.startsWith("wikipedia") || p === "wikidata"))) {
-            poi.properties.poiIcon = "icon-wikipedia-w";
-            poi.properties.poiCategory = "Wikipedia";
-        }
     }
 
     private getGeolocation(feature: GeoJSON.Feature): Geolocation {
@@ -581,11 +476,14 @@ export class PoiService {
                 features = features.concat(this.mapService.map.querySourceFeatures(`${source}-offline`, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
             }
         }
-        const pois = features.map(feature => this.convertFeatureToPoi(feature));
+        const pois = features.map(feature => this.convertFeatureToPoi(feature, this.osmTileFeatureToPoiIdentifier(feature)));
         return this.filterFeatures(pois);
     }
 
-    private featureToPoiIdentifier(feature: GeoJSON.Feature): string {
+    private osmTileFeatureToPoiIdentifier(feature: GeoJSON.Feature): string {
+        if (feature.properties.identifier) {
+            return feature.properties.identifier;
+        }
         const osmType = feature.id.toString().endsWith("1") ? "node_" : feature.id.toString().endsWith("2") ? "way_" : "relation_";
         return osmType + Math.floor((Number(feature.id)/ 10));
     }
@@ -598,23 +496,18 @@ export class PoiService {
         };
     }
 
-    private featureToPoiId(feature: GeoJSON.Feature, source: string): string {
-        return source + "_" + this.featureToPoiIdentifier(feature);
-    }
-
-    private convertFeatureToPoi(feature: GeoJSON.Feature): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties> {
+    private convertFeatureToPoi(feature: GeoJSON.Feature, id: string): GeoJSON.Feature<GeoJSON.Geometry, PoiProperties> {
         const poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties> = {
             type: "Feature",
             geometry: feature.geometry,
             properties: JSON.parse(JSON.stringify(feature.properties)) || {}
         };
-        poi.properties.identifier = poi.properties.identifier || this.featureToPoiIdentifier(feature);
+        poi.properties.identifier = poi.properties.identifier || id;
         poi.properties.poiSource = poi.properties.poiSource || "OSM";
-        poi.properties.poiId = poi.properties.poiId || this.featureToPoiId(feature, poi.properties.poiSource);
+        poi.properties.poiId = poi.properties.poiId || poi.properties.poiSource + "_" + poi.properties.identifier;
         poi.properties.poiGeolocation = poi.properties.poiGeolocation || this.getGeolocation(feature);
         this.setIconColorCategory(feature, poi);
         this.setLanguage(feature, poi);
-        
         return poi;
     }
 
@@ -758,9 +651,7 @@ export class PoiService {
                         feature.properties.poiExternalDescription = wikipediaPage.query.pages[pagesIds[0]].extract;
                     }
                 }
-                const poi = this.convertFeatureToPoi(feature);
-                poi.geometry = feature.geometry;
-                poi.properties.identifier = id;
+                const poi = this.convertFeatureToPoi(feature, id);
                 this.poisCache.splice(0, 0, poi);
                 return cloneDeep(poi);
             } else {
@@ -775,11 +666,11 @@ export class PoiService {
             for (const source of Object.keys(PoiService.POIS_MAP)) {
                 features = features.concat(this.mapService.map.querySourceFeatures(`${source}-offline`, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer}));
             }
-            const feature = features.find(f => this.featureToPoiIdentifier(f) === id);
+            const feature = features.find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
             if (feature == null) {
                 throw new Error("Failed to load POI from offline database.");
             }
-            const poi = this.convertFeatureToPoi(feature);
+            const poi = this.convertFeatureToPoi(feature, id);
             this.poisCache.splice(0, 0, poi);
             return poi;
         }
