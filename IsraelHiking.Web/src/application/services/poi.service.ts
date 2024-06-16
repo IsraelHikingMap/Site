@@ -87,7 +87,7 @@ export class PoiService {
         "points-of-interest": { sourceLayer: "public_pois", source: {
             type: "vector",
             maxzoom: 14,
-	        minzoom: 0,
+            minzoom: 0,
             tiles: ["https://production.pois.israelhikingmap.workers.dev/public_pois/{z}/{x}/{y}.mvt"]
         } },
         "external-points-of-interest": { sourceLayer: "external", source: {
