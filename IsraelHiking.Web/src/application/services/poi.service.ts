@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Store, Select } from "@ngxs/store";
 import osmtogeojson from "osmtogeojson";
 import type { Immutable } from "immer";
-import type { MapGeoJSONFeature } from "maplibre-gl";
+import type { MapGeoJSONFeature, SourceSpecification } from "maplibre-gl";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, PoiRouterData, RouteStrings } from "./hash.service";
@@ -77,15 +77,23 @@ type PoiProperties = {
 
 type SourceLayerAndJson = {
     sourceLayer: string;
-    json: string;
+    source: SourceSpecification;
 }
 
 @Injectable()
 export class PoiService {
 
     private static readonly POIS_MAP: Record<string, SourceLayerAndJson> = {
-        "points-of-interest": { sourceLayer: "public_pois", json: "public_pois.json"}, 
-        "external-points-of-interest": { sourceLayer: "external", json: "external.json"}
+        "points-of-interest": { sourceLayer: "public_pois", source: {
+            type: "vector",
+            maxzoom: 14,
+	        minzoom: 0,
+            tiles: ["https://production.pmtiles-serve.israelhikingmap.workers.dev/public_pois/{z}/{x}/{y}.mvt"]
+        } },
+        "external-points-of-interest": { sourceLayer: "external", source: {
+            type: "vector",
+            url: "https://israelhiking.osm.org.il/vector/data/external.json"
+        } }
     }
 
     private poisCache: GeoJSON.Feature[];
@@ -154,10 +162,7 @@ export class PoiService {
     private initializePois() {
         for (const source of Object.keys(PoiService.POIS_MAP)) {
             const sourceLayer = PoiService.POIS_MAP[source];
-            this.mapService.map.addSource(source, {
-                type: "vector",
-                url: `https://israelhiking.osm.org.il/vector/data/${sourceLayer.json}`
-            });
+            this.mapService.map.addSource(source, sourceLayer.source);
             this.mapService.map.addLayer({
                 id: `${source}-layer`,
                 type: "circle",
@@ -285,6 +290,11 @@ export class PoiService {
                 case "monument":
                     poi.properties.poiIcon = "icon-memorial";
                     return;
+                case "tomb":
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiIcon = "icon-cave";
+                    poi.properties.poiCategory = "Natural";
+                    return;
             }
         }
         if (feature.properties.leisure === "picnic_table" || 
@@ -293,6 +303,7 @@ export class PoiService {
             poi.properties.poiIconColor = "#734a08";
             poi.properties.poiIcon = "icon-picnic";
             poi.properties.poiCategory = "Camping";
+            return;
         }
 
         if (feature.properties.natural) {
