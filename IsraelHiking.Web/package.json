@@ -128,7 +128,7 @@
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
     "karma-junit-reporter": "^2.0.1",
-    "puppeteer": "^22.10.0",
+    "puppeteer": "^22.12.1",
     "typescript": "^5.4.5",
     "vt-pbf": "^3.1.3"
   },
