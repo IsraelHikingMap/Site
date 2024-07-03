@@ -6,6 +6,8 @@ import osmtogeojson from "osmtogeojson";
 
 @Injectable()
 export class OverpassTurboService {
+    private static readonly OVERPASS_API_URL = "https://overpass-api.de/api/interpreter";
+
     constructor(private readonly httpClient: HttpClient) {}
 
     public initialize() {
@@ -18,10 +20,23 @@ export class OverpassTurboService {
     private async getGeoJson(url: string): Promise<GeoJSON.FeatureCollection> {
         const body = decodeURIComponent(url);
         const text = await firstValueFrom(this.httpClient
-            .post("https://overpass-api.de/api/interpreter", body, {responseType: "text"})
+            .post(OverpassTurboService.OVERPASS_API_URL, body, {responseType: "text"})
         ) as string;
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(text, "text/xml");
         return osmtogeojson(xmlDoc);
+    }
+
+    public async getLongWay(id: string, title: string, isWaterway: boolean, isMtbRoute: boolean): Promise<GeoJSON.FeatureCollection> {
+        const query = `
+        way(${id});
+        complete
+        {
+          way(around:0)
+            [${isWaterway ? 'waterway' : 'highway'}]
+            ["${isMtbRoute ? 'mtb:name' : 'name'}"="${title}"];
+        }
+        out geom;`;
+        return await this.getGeoJson(encodeURIComponent(query));
     }
 }

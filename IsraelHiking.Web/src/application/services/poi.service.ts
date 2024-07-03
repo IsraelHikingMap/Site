@@ -19,6 +19,7 @@ import { LoggingService } from "./logging.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { MapService } from "./map.service";
 import { ConnectionService } from "./connection.service";
+import { OverpassTurboService } from "./overpass-turbo.service";
 import { AddToPoiQueueAction, RemoveFromPoiQueueAction } from "../reducers/offline.reducer";
 import {
     SetCategoriesGroupVisibilityAction,
@@ -112,6 +113,7 @@ export class PoiService {
                 private readonly loggingService: LoggingService,
                 private readonly mapService: MapService,
                 private readonly connectionService: ConnectionService,
+                private readonly overpassTurboService: OverpassTurboService,
                 private readonly store: Store
     ) {
         this.poisCache = [];
@@ -601,6 +603,31 @@ export class PoiService {
         return selectableCategories;
     }
 
+    private async enritchFeatureFromWikimedia(feature: GeoJSON.Feature, language: string): Promise<void> {
+        const url = `https://www.wikidata.org/w/rest.php/wikibase/v0/entities/items/${feature.properties.wikidata}`;
+        const wikidata = await firstValueFrom(this.httpClient.get(url).pipe(timeout(3000))) as any;
+        const languageShort = language || this.resources.getCurrentLanguageCodeSimplified();
+        const title = wikidata.sitelinks[`${languageShort}wiki`]?.title;
+        if (wikidata.statements.P18 && wikidata.statements.P18.length > 0) {
+            // HM TODO: make images addition more robust
+            if (!feature.properties.image) {
+                feature.properties.image = `File:${wikidata.statements.P18[0].value.content}`;
+            } else {
+                feature.properties.image1 = `File:${wikidata.statements.P18[0].value.content}`;
+            }
+        }
+        if (title) {
+            // HM TODO: Make website more robust
+            feature.properties.website = `https://${languageShort}.wikipedia.org/wiki/${title}`;
+            feature.properties.poiSourceImageUrl = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
+        }
+        const wikipediaPage = await firstValueFrom(this.httpClient.get(`http://${languageShort}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${title}&origin=*`)) as any;
+        const pagesIds = Object.keys(wikipediaPage.query.pages);
+        if (pagesIds.length > 0) {
+            feature.properties.poiExternalDescription = wikipediaPage.query.pages[pagesIds[0]].extract;
+        }
+    }
+
     public async getPoint(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
         const itemInCache = this.poisCache.find(f => this.getFeatureId(f) === id && f.properties.source === source);
         if (itemInCache) {
@@ -617,27 +644,19 @@ export class PoiService {
                 const geojson = osmtogeojson(osmPoi);
                 const feature = geojson.features[0];
                 if (feature.properties.wikidata) {
-                    const url = `https://www.wikidata.org/w/rest.php/wikibase/v0/entities/items/${feature.properties.wikidata}`;
-                    const wikidata = await firstValueFrom(this.httpClient.get(url).pipe(timeout(3000))) as any;
-                    const languageShort = language || this.resources.getCurrentLanguageCodeSimplified();
-                    const title = wikidata.sitelinks[`${languageShort}wiki`]?.title;
-                    if (wikidata.statements.P18 && wikidata.statements.P18.length > 0) {
-                        // HM TODO: make images addition more robust
-                        if (!feature.properties.image) {
-                            feature.properties.image = `File:${wikidata.statements.P18[0].value.content}`;
-                        } else {
-                            feature.properties.image1 = `File:${wikidata.statements.P18[0].value.content}`;
+                    this.enritchFeatureFromWikimedia(feature, language);
+                }
+                if (type === "way" && (feature.properties.highway || feature.properties.waterway)) {
+                    const longGeojson = await this.overpassTurboService.getLongWay(osmId, 
+                        feature.properties.name || feature.properties["mtb:name"], 
+                        feature.properties.waterway != null,
+                        feature.properties["mtb:name"] != null);
+                    if (longGeojson.features.length > 1) {
+                        // HM TODO: merge while including direction?
+                        feature.geometry = {
+                            type: "MultiLineString",
+                            coordinates: longGeojson.features.map(f => (f.geometry as GeoJSON.LineString).coordinates)
                         }
-                    }
-                    if (title) {
-                        // HM TODO: Make website more robust
-                        feature.properties.website = `https://${languageShort}.wikipedia.org/wiki/${title}`;
-                        feature.properties.poiSourceImageUrl = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
-                    }
-                    const wikipediaPage = await firstValueFrom(this.httpClient.get(`http://${languageShort}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${title}&origin=*`)) as any;
-                    const pagesIds = Object.keys(wikipediaPage.query.pages);
-                    if (pagesIds.length > 0) {
-                        feature.properties.poiExternalDescription = wikipediaPage.query.pages[pagesIds[0]].extract;
                     }
                 }
                 const poi = this.convertFeatureToPoi(feature, id);
