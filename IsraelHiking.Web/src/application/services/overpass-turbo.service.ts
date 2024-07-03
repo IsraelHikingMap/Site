@@ -32,7 +32,7 @@ export class OverpassTurboService {
         way(${id});
         complete
         {
-          way(around:0)
+          way(around:30)
             [${isWaterway ? 'waterway' : 'highway'}]
             ["${isMtbRoute ? 'mtb:name' : 'name'}"="${title}"];
         }
