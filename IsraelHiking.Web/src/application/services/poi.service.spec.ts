@@ -161,7 +161,7 @@ describe("Poi Service", () => {
             mockBackend.match(r => r.url.startsWith(Urls.poiCategories)).forEach(t => t.flush([{ icon: "icon", name: "Water" }]));
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
             
-            expect(poiService.poiGeojsonFiltered.features.length).toBe(2);
+            expect(poiService.poiGeojsonFiltered.features.length).toBe(3);
 
             mapServiceMock.map.querySourceFeatures = () => [
                 {
@@ -193,7 +193,7 @@ describe("Poi Service", () => {
 
             await new Promise((resolve) => setTimeout(resolve, 100)); // this is in order to let the code continue to run to the next await
 
-            expect(poiService.poiGeojsonFiltered.features.length).toBe(4);
+            expect(poiService.poiGeojsonFiltered.features.length).toBe(6);
 
             return promise;
         }
