@@ -646,6 +646,12 @@ export class PoiService {
                 if (feature.properties.wikidata) {
                     this.enritchFeatureFromWikimedia(feature, language);
                 }
+                if (type === "node" && feature.properties.place) {
+                    const placeGeojson = await this.overpassTurboService.getPlaceGeometry(osmId);
+                    if (placeGeojson.features.length > 0) {
+                        feature.geometry = placeGeojson.features[0].geometry;
+                    }
+                }
                 if (type === "way" && (feature.properties.highway || feature.properties.waterway)) {
                     const longGeojson = await this.overpassTurboService.getLongWay(osmId, 
                         feature.properties.name || feature.properties["mtb:name"], 
