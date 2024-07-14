@@ -114,15 +114,16 @@ export class RouteEditRouteInteraction {
             map.on("touchmove", this.handleMove);
             map.on("mouseup", this.handleUp);
             map.on("touchend", this.handleUp);
+            map.on("click", this.handleClick);
             map.getCanvas().addEventListener("keydown", this.cancelInteraction);
         } else {
             map.off("mousedown", this.handleDown);
             map.off("touchstart", this.handleDown);
             map.off("mousemove", this.handleMove);
             map.off("touchmove", this.handleMove);
-            map.off("drag", this.handleMove);
             map.off("mouseup", this.handleUp);
             map.off("touchend", this.handleUp);
+            map.off("click", this.handleClick);
             map.getCanvas().removeEventListener("keydown", this.cancelInteraction);
         }
     }
@@ -173,10 +174,8 @@ export class RouteEditRouteInteraction {
             this.raiseRoutePointClick(null);
         }
         if (this.isUpdating()) {
+            // Avoid map panning when dragging
             event.preventDefault();
-        } else {
-            this.map.off("mousemove", this.handleMove);
-            this.map.on("drag", this.handleMove);
         }
     };
 
@@ -191,13 +190,14 @@ export class RouteEditRouteInteraction {
         if (this.state === "down") {
             this.state = "dragging";
         }
-        if (this.state === "dragging") {
-            this.raiseRoutePointClick(null);
-            if (this.selectedRoutePoint != null) {
-                this.handleRoutePointDrag(event);
-            } else if (this.selectedRouteSegments.length > 0) {
-                this.handleRouteMiddleSegmentDrag(event);
-            }
+        if (this.state !== "dragging") {
+            return;
+        }
+        this.raiseRoutePointClick(null);
+        if (this.selectedRoutePoint != null) {
+            this.handleRoutePointDrag(event);
+        } else if (this.selectedRouteSegments.length > 0) {
+            this.handleRouteMiddleSegmentDrag(event);
         }
     };
 
@@ -240,8 +240,6 @@ export class RouteEditRouteInteraction {
 
     private handleUp = (event: MapMouseEvent) => {
         this.mouseDownPoint = null;
-        // this is used here to support touch screen and prevent additional mouse events
-        event.originalEvent.preventDefault();
         if (this.isTouchesBiggerThan(event.originalEvent, 0)) {
             // more than zero touches - no need to do any thing.
             return;
@@ -251,41 +249,35 @@ export class RouteEditRouteInteraction {
             return;
         }
         const isUpdating = this.isUpdating();
-        if (!isUpdating) {
-            this.map.on("mousemove", this.handleMove);
-            this.map.off("drag", this.handleMove);
-        }
         const isDragging = this.state === "dragging";
         this.state = "none";
 
-        if (!isUpdating && isDragging) {
-            // regular map pan
-            return;
-        }
         const latlng = event.lngLat;
-        if (!isUpdating && !isDragging) {
+        if (isDragging && isUpdating) {
+            if (this.selectedRoutePoint != null) {
+                // drag exiting route point
+                this.updateRoutePoint(latlng);
+            } else {
+                // drag middle of segment
+                this.updateRouteSegment(latlng);
+            }
+        }
+    };
+
+    private handleClick = (event: MapMouseEvent) => {
+        const latlng = event.lngLat;
+        if (!this.isUpdating()) {
             // new point
             this.addPointToEndOfRoute(latlng);
             return;
         }
-        if (!isDragging) {
-            if (this.selectedRoutePoint != null) {
-                // click on exiting point
-                this.raiseRoutePointClick(this.getPointIndex());
-            } else {
-                // click on the middle of a segment
-                this.splitRouteSegment(latlng);
-            }
-            return;
-        }
-        // drag exiting route point
         if (this.selectedRoutePoint != null) {
-            this.updateRoutePoint(latlng);
+            // click on exiting point
+            this.raiseRoutePointClick(this.getPointIndex());
         } else {
-            this.updateRouteSegment(latlng);
+            // click on the middle of a segment
+            this.splitRouteSegment(latlng);
         }
-
-        return;
     };
 
     private addPointToEndOfRoute = async (latlng: LatLngAlt) => {
