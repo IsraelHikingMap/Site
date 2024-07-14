@@ -89,6 +89,12 @@ export class PoiService {
             minzoom: 0,
             tiles: ["https://production.pois.israelhikingmap.workers.dev/public_pois/{z}/{x}/{y}.mvt"]
         } },
+        "trail-points-of-interest": { sourceLayer: "trail_pois", source: {
+            type: "vector",
+            maxzoom: 14,
+            minzoom: 0,
+            tiles: ["https://production.pois.israelhikingmap.workers.dev/trail_pois/{z}/{x}/{y}.mvt"]
+        } },
         "external-points-of-interest": { sourceLayer: "external", source: {
             type: "vector",
             url: "https://israelhiking.osm.org.il/vector/data/external.json"
@@ -266,6 +272,22 @@ export class PoiService {
             poi.properties.poiIcon = "icon-nature-reserve";
             poi.properties.poiCategory = "Other";
             return;
+        }
+        if (feature.properties.network) {
+            switch (feature.properties.network) {
+                case "lcn":
+                case "rcn":
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiIcon = "icon-bike";
+                    poi.properties.poiCategory = "Bicycle";
+                    return;
+                case "lwn":
+                case "rwn":
+                    poi.properties.poiIconColor = "black";
+                    poi.properties.poiIcon = "icon-hike";
+                    poi.properties.poiCategory = "Hiking";
+                    return;
+            }
         }
         if (feature.properties.historic) {
             poi.properties.poiIconColor = "#666666";
