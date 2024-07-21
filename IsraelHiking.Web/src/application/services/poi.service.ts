@@ -476,6 +476,28 @@ export class PoiService {
         }
     }
 
+    /**
+     * This will adjust the locaiton accorting to the location in the tile 
+     * instead of clalculating a different location based on the geometry.
+     * This is somewhat of a hack to solve a difference of calculation between 
+     * the tile generation and client side calculation.
+     * @param id - the id of the poi, for example OSM_way_1234
+     * @param poi - the point of interest to adjust
+     */
+    private adjustGeolocationBasedOnTileDate(id: string, poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>) {
+        if (poi.geometry.type === "Point") {
+            return;
+        }
+        for (const source of Object.keys(PoiService.POIS_MAP)) {
+            const features = this.mapService.map.querySourceFeatures(source, {sourceLayer: PoiService.POIS_MAP[source].sourceLayer});
+            const feature = features.find(f => this.osmTileFeatureToPoiIdentifier(f) === id);
+            if (feature == null) {
+                continue;
+            }
+            poi.properties.poiGeolocation = this.getGeolocation(feature);
+        }
+    }
+
     private async getPoisFromTiles(): Promise<GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>[]> {
         if (this.mapService.map.getZoom() <= 10) {
             return [];
@@ -631,17 +653,11 @@ export class PoiService {
         const languageShort = language || this.resources.getCurrentLanguageCodeSimplified();
         const title = wikidata.sitelinks[`${languageShort}wiki`]?.title;
         if (wikidata.statements.P18 && wikidata.statements.P18.length > 0) {
-            // HM TODO: make images addition more robust
-            if (!feature.properties.image) {
-                feature.properties.image = `File:${wikidata.statements.P18[0].value.content}`;
-            } else {
-                feature.properties.image1 = `File:${wikidata.statements.P18[0].value.content}`;
-            }
+            this.setProperty(feature, "image", `File:${wikidata.statements.P18[0].value.content}`);
         }
         if (title) {
-            // HM TODO: Make website more robust
-            feature.properties.website = `https://${languageShort}.wikipedia.org/wiki/${title}`;
-            feature.properties.poiSourceImageUrl = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
+            const indexString = this.setProperty(feature, "website", `https://${languageShort}.wikipedia.org/wiki/${title}`);
+            feature.properties["poiSourceImageUrl" + indexString] = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
         }
         const wikipediaPage = await firstValueFrom(this.httpClient.get(`http://${languageShort}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=${title}&origin=*`)) as any;
         const pagesIds = Object.keys(wikipediaPage.query.pages);
@@ -688,6 +704,7 @@ export class PoiService {
                     }
                 }
                 const poi = this.convertFeatureToPoi(feature, id);
+                this.adjustGeolocationBasedOnTileDate(id, poi);
                 this.poisCache.splice(0, 0, poi);
                 return cloneDeep(poi);
             } else {
@@ -1028,5 +1045,18 @@ export class PoiService {
             return feature.id.toString();
         }
         return feature.id ?? feature.properties.poiId;
+    }
+
+    private setProperty(feature: GeoJSON.Feature, key: string, value: string): string {
+        if (!feature.properties[key]) {
+            feature.properties[key] = value;
+            return "";
+        }
+        let index = 1;
+        while (feature.properties[key + index]) {
+            index++;
+        }
+        feature.properties[key + index] = value;
+        return `${index}`;
     }
 }
