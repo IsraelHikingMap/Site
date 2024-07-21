@@ -24,6 +24,10 @@
 		"classpath": "com.capacitorjs.plugins.textzoom.TextZoomPlugin"
 	},
 	{
+		"pkg": "@capawesome/capacitor-app-update",
+		"classpath": "io.capawesome.capacitorjs.plugins.appupdate.AppUpdatePlugin"
+	},
+	{
 		"pkg": "@capgo/native-audio",
 		"classpath": "ee.forgr.audio.NativeAudio"
 	}
