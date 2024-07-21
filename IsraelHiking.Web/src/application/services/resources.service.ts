@@ -309,6 +309,7 @@ export class ResourcesService {
     public editingRouteWhileTracking: string;
     public loginTokenExpiredPleaseLoginAgain: string;
     public jammedPositionReceived: string;
+    public newVersionAvailable: string;
     // Info
     public infoSubheader: string;
     public infoHelpfulLinks: string;
@@ -796,6 +797,7 @@ export class ResourcesService {
             "in order to avoid map centering to current location please click the cross icon on the top left corner");
         this.loginTokenExpiredPleaseLoginAgain = this.gettextCatalog.getString("Login token expired, please login again");
         this.jammedPositionReceived = this.gettextCatalog.getString("Jammed position received...");
+        this.newVersionAvailable = this.gettextCatalog.getString("New version available, do you want to update?");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
         this.infoSubheader = this.gettextCatalog

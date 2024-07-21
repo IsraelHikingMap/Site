@@ -24,6 +24,7 @@ import { GeoLocationService } from "./geo-location.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
 import { AuthorizationService } from "./authorization.service";
 import { ToastService } from "./toast.service";
+import { ApplicationUpdateService } from "./application-update.service";
 import type { ApplicationState } from "../models/models";
 
 @Injectable()
@@ -47,6 +48,7 @@ export class ApplicationInitializeService {
                 private readonly geoLocationService: GeoLocationService,
                 private readonly overpassTurboService: OverpassTurboService,
                 private readonly authorizationService: AuthorizationService,
+                private readonly applicationUpdateService: ApplicationUpdateService,
                 private readonly toastService: ToastService,
                 private readonly store: Store
     ) {
@@ -57,6 +59,7 @@ export class ApplicationInitializeService {
             await this.loggingService.initialize();
             await this.loggingService.info("---------------------------------------");
             await this.loggingService.info("Starting IHM Application Initialization");
+            await this.applicationUpdateService.initialize();
             await this.databaseService.initialize();
             this.overpassTurboService.initialize();
             this.screenService.initialize();
