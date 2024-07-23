@@ -30,9 +30,12 @@ export class PurchaseService {
             this.loggingService.info("[Store] Logged in: " + userInfo.id);
             this.initializeCdvStore(userInfo.id);
             this.offlineFilesDownloadService.isExpired().then((isExpired) => {
-                if (isExpired) {
+                if (isExpired === true) {
                     this.loggingService.debug("[Store] Product is expired from server");
                     this.store.dispatch(new SetOfflineAvailableAction(false));
+                } else if (isExpired === false) {
+                    this.loggingService.debug("[Store] Product is valid from server");
+                    this.store.dispatch(new SetOfflineAvailableAction(true));
                 }
             });
         });
