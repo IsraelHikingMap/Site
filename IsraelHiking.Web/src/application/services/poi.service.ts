@@ -424,6 +424,13 @@ export class PoiService {
             return;
         }
 
+        if (feature.properties.mtb_name || feature.properties["mtb:name"]) {
+            poi.properties.poiIconColor = "gray";
+            poi.properties.poiIcon = "icon-bike";
+            poi.properties.poiCategory = "Bicycle";
+            return;
+        }
+
         poi.properties.poiIconColor = "black";
         poi.properties.poiIcon = "icon-search";
         poi.properties.poiCategory = "Other";
@@ -469,8 +476,8 @@ export class PoiService {
     }
 
     private setLanguage(feature: GeoJSON.Feature, poi: GeoJSON.Feature<GeoJSON.Geometry, PoiProperties>) {
-        const hasHebrew = feature.properties["name:he"];
-        const hasEnglish = feature.properties["name:en"];
+        const hasHebrew = feature.properties["name:he"] || feature.properties["name_he"] || feature.properties["mtb_name"];
+        const hasEnglish = feature.properties["name:en"] || feature.properties["name_en"] || feature.properties["mtb_name:en"];
         if (hasHebrew || hasEnglish) {
             poi.properties.poiLanguage = hasHebrew && hasEnglish ? "all" : hasHebrew ? "he" : "en";
         }
@@ -692,7 +699,7 @@ export class PoiService {
                 }
                 if (type === "way" && (feature.properties.highway || feature.properties.waterway)) {
                     const longGeojson = await this.overpassTurboService.getLongWay(osmId, 
-                        feature.properties.name || feature.properties["mtb:name"], 
+                        feature.properties["mtb:name"] || feature.properties.name,
                         feature.properties.waterway != null,
                         feature.properties["mtb:name"] != null);
                     if (longGeojson.features.length > 1) {
