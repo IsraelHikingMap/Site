@@ -59,12 +59,12 @@ export class ApplicationInitializeService {
             await this.loggingService.initialize();
             await this.loggingService.info("---------------------------------------");
             await this.loggingService.info("Starting IHM Application Initialization");
-            await this.applicationUpdateService.initialize();
             await this.databaseService.initialize();
             this.overpassTurboService.initialize();
             this.screenService.initialize();
             await this.resources.initialize();
             this.applicationExitService.initialize();
+            await this.applicationUpdateService.initialize();
             this.openWithService.initialize();
             await this.purchaseService.initialize();
             this.geoLocationService.initialize();
