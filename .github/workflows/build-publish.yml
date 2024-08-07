@@ -93,18 +93,24 @@ jobs:
       - name: Build Android
         run: |
           cd IsraelHiking.Web/android
-          ./gradlew :app:bundleRelease "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
-          #./gradlew --no-daemon bundleRelease    
+          ./gradlew :app:assembleRelease --no-daemon "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
+          ./gradlew :app:bundleRelease --no-daemon "-Pandroid.injected.signing.store.file=$WORKSPACE/IsraelHiking.Web/signing/IHM.jks" "-Pandroid.injected.signing.store.password=$STORE_PASSWORD" "-Pandroid.injected.signing.key.alias=ihmkey" "-Pandroid.injected.signing.key.password=$PASSWORD"
         env:
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           PASSWORD: ${{ secrets.PASSWORD }}
           WORKSPACE: ${{ github.workspace }}
-          
-      - name: Upload artifacts
+
+      - name: Upload aab artifacts
         uses: actions/upload-artifact@v4
         with:
           name: IHM_signed_${{ needs.version.outputs.version_string }}.aab
           path: IsraelHiking.Web/android/app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload apk artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: IHM_signed_${{ needs.version.outputs.version_string }}.apk
+          path: IsraelHiking.Web/android/app/build/outputs/apk/release/app-release.apk
       
       - name: Publish to Google Play
         if: ${{ github.event.inputs.publishandroid == 'true' }}
