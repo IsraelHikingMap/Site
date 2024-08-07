@@ -23,6 +23,7 @@
     "@capacitor/device": "^6.0.0",
     "@capacitor/ios": "^6.0.0",
     "@capacitor/text-zoom": "^6.0.0",
+    "@capawesome/capacitor-app-update": "^6.0.0",
     "@capgo/native-audio": "^6.4.3",
     "@mapbox/mapbox-gl-rtl-text": "0.2.3",
     "@mapbox/polyline": "^1.2.1",

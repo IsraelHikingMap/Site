@@ -24,6 +24,7 @@ import { GeoLocationService } from "./geo-location.service";
 import { OverpassTurboService } from "./overpass-turbo.service";
 import { AuthorizationService } from "./authorization.service";
 import { ToastService } from "./toast.service";
+import { ApplicationUpdateService } from "./application-update.service";
 import type { ApplicationState } from "../models/models";
 
 @Injectable()
@@ -47,6 +48,7 @@ export class ApplicationInitializeService {
                 private readonly geoLocationService: GeoLocationService,
                 private readonly overpassTurboService: OverpassTurboService,
                 private readonly authorizationService: AuthorizationService,
+                private readonly applicationUpdateService: ApplicationUpdateService,
                 private readonly toastService: ToastService,
                 private readonly store: Store
     ) {
@@ -62,6 +64,7 @@ export class ApplicationInitializeService {
             this.screenService.initialize();
             await this.resources.initialize();
             this.applicationExitService.initialize();
+            await this.applicationUpdateService.initialize();
             this.openWithService.initialize();
             await this.purchaseService.initialize();
             this.geoLocationService.initialize();
