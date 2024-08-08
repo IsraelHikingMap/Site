@@ -673,6 +673,19 @@ export class PoiService {
         }
     }
 
+    private async enritchFeatureFromINature(feature: GeoJSON.Feature): Promise<void> {
+        const iNatureRef = feature.properties["inature:website"];
+        const address = `https://inature.info/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=${iNatureRef}&origin=*`;
+        const iNatureJson = await firstValueFrom(this.httpClient.get(address).pipe(timeout(3000))) as any;
+        const content = iNatureJson.query.pages[Object.keys(iNatureJson.query.pages)[0]].revisions[0]["*"];
+        feature.properties.poiExternalDescription = content.match(/סקירה=(.*)/)[1];
+        const indexString = this.setProperty(feature, "website", `https://inature.info/wiki/${iNatureRef}`);
+        feature.properties["poiSourceImageUrl" + indexString] = "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png";
+        const image = content.match(/תמונה=(.*)/)[1];
+        const imageSrc = `https://inature.info/w/index.php?title=Special:Redirect/file/${image}`;
+        this.setProperty(feature, "image", imageSrc);        
+    }
+
     public async getPoint(id: string, source: string, language?: string): Promise<GeoJSON.Feature> {
         const itemInCache = this.poisCache.find(f => this.getFeatureId(f) === id && f.properties.source === source);
         if (itemInCache) {
@@ -688,26 +701,36 @@ export class PoiService {
                 const osmPoi = await firstValueFrom(osmPoi$);
                 const geojson = osmtogeojson(osmPoi);
                 const feature = geojson.features[0];
+                let wikidataPromise = Promise.resolve();
+                let inaturePromise = Promise.resolve();
+                let placePromise = Promise.resolve({features: []});
+                let wayPromise = Promise.resolve({features: []});
                 if (feature.properties.wikidata) {
-                    this.enritchFeatureFromWikimedia(feature, language);
+                    wikidataPromise = this.enritchFeatureFromWikimedia(feature, language);
+                }
+                if (feature.properties["inature:website"] && language === "he") {
+                    inaturePromise = this.enritchFeatureFromINature(feature);
                 }
                 if (type === "node" && feature.properties.place) {
-                    const placeGeojson = await this.overpassTurboService.getPlaceGeometry(osmId);
-                    if (placeGeojson.features.length > 0) {
-                        feature.geometry = placeGeojson.features[0].geometry;
-                    }
+                    placePromise = this.overpassTurboService.getPlaceGeometry(osmId);
                 }
                 if (type === "way" && (feature.properties.highway || feature.properties.waterway)) {
-                    const longGeojson = await this.overpassTurboService.getLongWay(osmId, 
+                    wayPromise = this.overpassTurboService.getLongWay(osmId, 
                         feature.properties["mtb:name"] || feature.properties.name,
                         feature.properties.waterway != null,
                         feature.properties["mtb:name"] != null);
-                    if (longGeojson.features.length > 1) {
-                        // HM TODO: merge while including direction?
-                        feature.geometry = {
-                            type: "MultiLineString",
-                            coordinates: longGeojson.features.map(f => (f.geometry as GeoJSON.LineString).coordinates)
-                        }
+                }
+                await Promise.all([wikidataPromise, inaturePromise, placePromise, wayPromise]);
+                const placeGeojson = await placePromise;
+                if (placeGeojson.features.length > 0) {
+                    feature.geometry = placeGeojson.features[0].geometry;
+                }
+                const longGeojson = await wayPromise;
+                if (longGeojson.features.length > 1) {
+                    // HM TODO: merge while including direction?
+                    feature.geometry = {
+                        type: "MultiLineString",
+                        coordinates: longGeojson.features.map(f => (f.geometry as GeoJSON.LineString).coordinates)
                     }
                 }
                 const poi = this.convertFeatureToPoi(feature, id);
